@@ -13,6 +13,7 @@ import { dirname, resolve } from "node:path";
 
 const require = createRequire(import.meta.url);
 const anchorCjs = resolve(dirname(require.resolve("@coral-xyz/anchor/package.json")), "dist/cjs/index.js");
+const browserEvents = require.resolve("events/");
 
 export default defineConfig({
   vite: {
@@ -25,6 +26,11 @@ export default defineConfig({
       // These pure-JS Solana dependencies export browser/node, but not worker.
       // Use their Web-compatible implementation; never externalize them.
       configEnvironment(name, config) {
+        // WalletConnect imports Node's events. Vite otherwise emits an empty
+        // browser stub, making its EventEmitter constructor fail at startup.
+        if (name === "client") return { resolve: {
+          alias: [{ find: /^(node:)?events$/, replacement: browserEvents }],
+        } };
         if (name !== "nitro") return;
         const conditions = config.resolve?.conditions ?? ["workerd", "worker", "production", "wasm", "unwasm"];
         return { resolve: {

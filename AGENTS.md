@@ -42,3 +42,4 @@ use the editor.
 - Real position discovery uses the official Meteora SDK and wallet-owned position NFTs filtered by exact pools and mints; integer token amounts stay distinct from USD, and unvalidated Token-2022 estimates remain unavailable.
 - Devnet transaction validation stays in a local-only harness, verifies genesis before signing or sending, and uses fresh test mints/pools; compose fee, swap and deposit in one message and reject oversized messages rather than splitting the fee.
 - Alias Anchor to its explicit CommonJS entry before SSR chunking and in Nitro, with ANCHOR_BROWSER defined true to omit Node-only branches; its browser/ESM entries embed unwrapped CommonJS. Preserve Nitro browser conditions for Solana exports and fully bundle dependencies.
+- Resolve WalletConnect's events import to the browser-compatible events package in the client environment so Vite cannot replace its EventEmitter with an empty Node stub.
