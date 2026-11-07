@@ -6,9 +6,11 @@ import { VAULTS, type Vault } from "@/lib/vaults";
 import { getRealWallet } from "@/lib/solana.functions";
 import { useState } from "react";
 import { DepositSimulation } from "@/components/deposit-simulation";
+import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
 
 export function RealOverview({ walletAddress, onDetails }: { walletAddress: string | null; onDetails: (vault: Vault) => void }) {
   const [simulationVault, setSimulationVault] = useState<Vault | null>(null);
+  const [withdrawal, setWithdrawal] = useState<{ position?: string; vaultId: "sol" | "met" } | null>(null);
   const readWallet = useServerFn(getRealWallet);
   const query = useQuery({
     queryKey: ["real-solana", walletAddress],
@@ -39,13 +41,16 @@ export function RealOverview({ walletAddress, onDetails }: { walletAddress: stri
     </section>
     {data && data.positions.length > 0 && <section aria-label="Posiciones reales" className="border-b border-border py-8"><h2 className="font-display text-lg font-semibold">Mis posiciones en Solana</h2><p className="mt-2 text-xs leading-5 text-muted-foreground">Estimaciones en tokens, no valor total en USD ni mínimos de liquidación. Bloqueos, precios y costes pueden alterar el resultado.</p><div className="mt-4 space-y-4">{data.positions.map((position) => <article key={position.address} className="rounded-lg border border-border bg-card p-5"><h3 className="font-display font-semibold">{VAULTS.find((vault) => vault.id === position.vaultId)?.name ?? `${position.symbol}/USDC`}</h3><p className="mt-2 break-all font-mono text-xs text-muted-foreground">{position.address}</p><p className="mt-3 break-all text-sm">Liquidez estimada: {position.tokenAmount === null ? "No disponible" : `${position.tokenAmount} ${position.symbol} + ${position.usdcAmount} USDC`}</p><p className="mt-2 break-all text-sm text-muted-foreground">Comisiones acumuladas: {position.feeTokenAmount === null ? "No disponibles" : `${position.feeTokenAmount} ${position.symbol} + ${position.feeUsdcAmount} USDC`}</p>{position.locked && <p className="mt-2 text-xs text-muted-foreground">Incluye liquidez bloqueada; no toda la posición es retirable.</p>}<p className="mt-3 text-xs text-muted-foreground">Cosecha y liquidación aún no habilitadas</p></article>)}</div></section>}
     <h2 className="mb-4 mt-10 font-display text-lg font-semibold">Pools de Meteora</h2>
+    {data?.positions.filter((p) => (p.vaultId === "sol" || p.vaultId === "met") && !p.locked).map((p) => <Button key={p.address} variant="outline" className="mb-4 mr-2" onClick={() => setWithdrawal({ position: p.address, vaultId: p.vaultId === "sol" ? "sol" : "met" })}>Simular retiro · {p.symbol}</Button>)}
     <div className="grid gap-4 md:grid-cols-3">{VAULTS.map((vault) => <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
       <p className="text-xs text-muted-foreground">Meteora DAMM v2</p><h3 className="mt-4 font-display text-xl font-semibold">{vault.name}</h3><p className="mt-1 text-sm text-muted-foreground">{vault.pair}</p>
       <p className="mt-5 flex-1 text-sm leading-6 text-muted-foreground">{vault.blurb}</p>
       <p className="mt-4 text-xs text-muted-foreground">Depósitos no habilitados · sin APY verificado</p>
       <Button variant="outline" className="mt-4 w-full" onClick={() => onDetails(vault)}>Detalles del pool</Button>
       <Button variant="secondary" className="mt-2 w-full" onClick={() => setSimulationVault(vault)}>Simular depósito USDC</Button>
+      {(vault.id === "sol" || vault.id === "met") && <Button variant="outline" className="mt-2 w-full" onClick={() => setWithdrawal({ vaultId: vault.id === "sol" ? "sol" : "met" })}>Simular retiro a USDC</Button>}
     </article>)}</div>
     {simulationVault && <DepositSimulation key={simulationVault.id} vault={simulationVault} wallet={walletAddress} onClose={() => setSimulationVault(null)} />}
+    {withdrawal && <WithdrawalSimulation wallet={walletAddress} {...withdrawal} onClose={() => setWithdrawal(null)} />}
   </>;
 }
