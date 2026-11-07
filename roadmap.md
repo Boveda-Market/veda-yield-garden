@@ -1,4 +1,6 @@
 # Tasks
+- [ ] Connect Helius privately and verify live Solana balance / pool reads; never expose RPC credentials in browser bundles or logs.
+- [ ] Prepare SDK-backed real pool operations and chain verification; keep execution closed until wallet-authorized end-to-end tests pass.
 - [x] Add isolated Real and Prueba modes; Prueba starts with 1,000 fictitious credits. Verify mode guards, public selector and unavailable Real state; authenticated trial flow remains unverified pending Privy authorization below.
 - [ ] Implement and verify real Solana USDC / Meteora deposits, harvests, liquidation and 1% fee transfers before enabling money actions — waiting for configured Solana / conversion service access and an explicitly authorized wallet test; the SDK transaction integration remains unimplemented and Real is unavailable.
 - [x] Update all website documentation, terms, privacy and FAQs for both modes without misrepresenting availability; verify public routes and mobile layout.
