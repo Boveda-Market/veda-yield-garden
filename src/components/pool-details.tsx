@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { fetchPoolStats } from "@/lib/pool-stats";
 import type { Vault } from "@/lib/vaults";
+import { PoolYield } from "@/components/pool-yield";
 
 const number = (value: number | null | undefined, digits = 2) => value == null ? "—" : value.toLocaleString("es-MX", { maximumFractionDigits: digits });
 const usd = (value: number | null | undefined, digits = 2) => value == null ? "—" : `$${value.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: digits })}`;
@@ -46,6 +47,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
           </Button>
         </div>
 
+        <PoolYield address={vault.pool} />
         <dl className="grid grid-cols-2 gap-x-5 gap-y-6 py-2">
           <Metric label={`Precio ${stats?.baseSymbol ?? vault.pair.split("/")[0]} · USD`} value={usd(stats?.price, 6)} />
           <Metric label="Volumen · 24 h · USD" value={usd(stats?.volume24h)} />
