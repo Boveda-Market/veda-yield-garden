@@ -1,36 +1,42 @@
 import { z } from "zod";
 
 const poolSchema = z.object({
-  address: z.string(),
-  token_x: z.object({ symbol: z.string() }),
-  token_y: z.object({ symbol: z.string() }),
-  current_price: z.number().positive().nullish(),
-  volume: z.object({ "24h": z.number().nonnegative().nullish() }).nullish(),
-  tvl: z.number().nonnegative().nullish(),
-  token_x_amount: z.number().nonnegative().nullish(),
-  token_y_amount: z.number().nonnegative().nullish(),
+  chainId: z.string(),
+  pairAddress: z.string(),
+  baseToken: z.object({ symbol: z.string() }),
+  quoteToken: z.object({ symbol: z.string() }),
+  priceUsd: z.string().nullish(),
+  volume: z.object({ h24: z.number().nonnegative().nullish() }).nullish(),
+  liquidity: z.object({ usd: z.number().nonnegative().nullish(), base: z.number().nonnegative().nullish(), quote: z.number().nonnegative().nullish() }).nullish(),
+  priceChange: z.object({ h24: z.number().nullish() }).nullish(),
+  txns: z.object({ h24: z.object({ buys: z.number().nonnegative(), sells: z.number().nonnegative() }).nullish() }).nullish(),
 });
 
 export function parsePoolStats(data: unknown, address: string) {
-  const parsed = poolSchema.safeParse(data);
-  if (!parsed.success || parsed.data.address !== address) return null;
-  const p = parsed.data;
-  return {
-    baseSymbol: p.token_x.symbol,
-    quoteSymbol: p.token_y.symbol,
-    price: p.current_price ?? null,
-    volume24h: p.volume?.["24h"] ?? null,
-    liquidityUsd: p.tvl ?? null,
-    baseLocked: p.token_x_amount ?? null,
-    quoteLocked: p.token_y_amount ?? null,
-    // These metrics are not returned by the official single-pool endpoint.
-    change24h: null,
-    transactions24h: null,
-  };
+  const response = z.object({ pairs: z.array(z.unknown()).nullish() }).safeParse(data);
+  if (!response.success) return null;
+  for (const candidate of response.data.pairs ?? []) {
+    const parsed = poolSchema.safeParse(candidate);
+    if (!parsed.success || parsed.data.chainId !== "solana" || parsed.data.pairAddress !== address) continue;
+    const p = parsed.data;
+    const price = p.priceUsd == null ? NaN : Number(p.priceUsd);
+    return {
+      baseSymbol: p.baseToken.symbol,
+      quoteSymbol: p.quoteToken.symbol,
+      price: Number.isFinite(price) && price > 0 ? price : null,
+      volume24h: p.volume?.h24 ?? null,
+      liquidityUsd: p.liquidity?.usd ?? null,
+      baseLocked: p.liquidity?.base ?? null,
+      quoteLocked: p.liquidity?.quote ?? null,
+      change24h: p.priceChange?.h24 ?? null,
+      transactions24h: p.txns?.h24 ? p.txns.h24.buys + p.txns.h24.sells : null,
+    };
+  }
+  return null;
 }
 
 export async function fetchPoolStats(address: string, signal?: AbortSignal) {
-  const response = await fetch(`https://damm-v2.datapi.meteora.ag/pools/${encodeURIComponent(address)}`, { signal: signal ?? null });
+  const response = await fetch(`https://api.dexscreener.com/latest/dex/pairs/solana/${encodeURIComponent(address)}`, { signal: signal ?? null });
   if (response.status === 404) return null;
   if (!response.ok) throw new Error("No se pudieron consultar las estadísticas del pool.");
   return parsePoolStats(await response.json(), address);
