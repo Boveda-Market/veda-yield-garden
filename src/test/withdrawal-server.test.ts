@@ -67,4 +67,46 @@ describe("full-close withdrawal simulation", () => {
     expect(result.success).toBe(false);
     expect(result.checks?.rent).toBe(false);
   });
+  it("reports actual final USDC and rejects a fixed fee when proceeds vary", async () => {
+    let call = 0;
+    mocks.simulate.mockImplementation(async () => {
+      const final = ++call === 3;
+      return { value: { err: null, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 1_010_000n : 1_000_000n, owner).toString("base64"), "base64"], lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 10_000n : 0n, new PublicKey(FEE_WALLET)).toString("base64"), "base64"], lamports: 2_000_000 }, null, null, null, { lamports: 27_000_000 }] } };
+    });
+    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" });
+    expect(result.success).toBe(false);
+    expect(result.checks?.fee).toBe(false);
+    expect(result.net).toBe("1.01");
+    expect(result.gross).toBe("1.02");
+    expect(result.fee).toBe("0.01");
+    expect(result.expectedFee).toBe("0.0102");
+    expect(result).not.toHaveProperty("transaction");
+    expect(mocks.send).not.toHaveBeenCalled();
+  });
+  it("preserves Jupiter route labels and percentages when rebuilding withdrawal instructions", async () => {
+    const token = new PublicKey(CHAIN_POOLS[1].mint);
+    const tokenAccount = (value: bigint) => {
+      const data = tokenData(value, owner);
+      token.toBuffer().copy(data, 0);
+      return { owner: TOKEN_PROGRAM_ID.toBase58(), data: [data.toString("base64"), "base64"], lamports: 2_000_000 };
+    };
+    const original = mocks.simulate.getMockImplementation();
+    let count = 0;
+    mocks.simulate.mockImplementation(async () => {
+      const response = await original?.();
+      if (!response) throw new Error("Missing fixture");
+      response.value.accounts[1] = tokenAccount(++count === 1 ? 100n : 0n);
+      response.value.accounts[6].lamports -= 2_000_000;
+      return response;
+    });
+    const route = { swapInfo: { ammKey: CHAIN_POOLS[2].pool, label: "Raydium", inputMint: token.toBase58(), outputMint: USDC_MINT, inAmount: "100", outAmount: "500000", feeAmount: "1", feeMint: token.toBase58() }, percent: 100, bps: 10000 };
+    const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ inputMint: token.toBase58(), outputMint: USDC_MINT, inAmount: "100", otherAmountThreshold: "490000", swapMode: "ExactIn", routePlan: [route] }))).mockResolvedValueOnce(new Response(JSON.stringify({ setupInstructions: [], swapInstruction: { programId: CHAIN_POOLS[2].pool, accounts: [], data: "AQ==" }, addressLookupTableAddresses: [] })));
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      await simulateWithdrawal("test", { wallet, position, vaultId: "met" });
+      const body = JSON.parse(fetchMock.mock.calls[1]?.[1]?.body ?? "{}");
+      expect(body.quoteResponse.routePlan).toEqual([route]);
+      expect(mocks.send).not.toHaveBeenCalled();
+    } finally { vi.unstubAllGlobals(); }
+  });
 });

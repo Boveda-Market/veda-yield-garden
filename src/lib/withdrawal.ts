@@ -12,6 +12,8 @@ export type WithdrawalResult = {
   fee?: string;
   net?: string;
   rentSol?: string;
+  remainingTokenRaw?: string;
+  expectedFee?: string;
   checks?: { closed: boolean; usdc: boolean; fee: boolean; rent: boolean };
 };
 

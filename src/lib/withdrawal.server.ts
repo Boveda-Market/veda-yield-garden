@@ -12,10 +12,11 @@ import { withdrawalAmounts, type WithdrawalInput, type WithdrawalResult } from "
 
 const ixSchema = z.object({ programId: solanaAddressSchema, accounts: z.array(z.object({ pubkey: solanaAddressSchema, isSigner: z.boolean(), isWritable: z.boolean() })), data: z.string().max(20_000) });
 const swapSchema = z.object({ setupInstructions: z.array(ixSchema), otherInstructions: z.array(ixSchema).optional(), swapInstruction: ixSchema, cleanupInstruction: ixSchema.nullable().optional(), addressLookupTableAddresses: z.array(solanaAddressSchema).max(16) });
-const quoteSchema = z.object({ inputMint: z.string(), outputMint: z.string(), inAmount: z.string().regex(/^\d+$/), otherAmountThreshold: z.string().regex(/^\d+$/), swapMode: z.literal("ExactIn"), routePlan: z.array(z.object({ swapInfo: z.object({ ammKey: z.string() }) })) }).passthrough();
+const quoteSchema = z.object({ inputMint: z.string(), outputMint: z.string(), inAmount: z.string().regex(/^\d+$/), otherAmountThreshold: z.string().regex(/^\d+$/), swapMode: z.literal("ExactIn"), routePlan: z.array(z.object({ swapInfo: z.object({ ammKey: z.string() }).passthrough() }).passthrough()) }).passthrough();
 
 /** Diagnostic only. Unknown realized swap proceeds cannot be charged by a fixed SPL transfer safely. */
 export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput): Promise<WithdrawalResult> {
+  let stage = "Lectura de posición";
   const fail = (message: string, bytes?: number): WithdrawalResult => ({ success: false, sent: false, message, ...(bytes === undefined ? {} : { bytes }) });
   try {
     const connection = heliusConnection(apiKey);
@@ -44,6 +45,7 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput)
     };
     const asSim = (a: (typeof before)[number]) => a ? { owner: a.owner.toBase58(), data: [Buffer.from(a.data).toString("base64"), "base64"] as [string, string] } : null;
     const usdcBefore = amount(asSim(before[0] ?? null), usdc, owner), aBefore = amount(asSim(before[1] ?? null), pool.tokenAMint, owner), feeBefore = amount(asSim(before[2] ?? null), usdc, feeOwner);
+    stage = "Preparación del cierre Meteora";
     const quote = cp.getWithdrawQuote({ liquidityDelta: state.unlockedLiquidity, sqrtPrice: pool.sqrtPrice, minSqrtPrice: pool.sqrtMinPrice, maxSqrtPrice: pool.sqrtMaxPrice, collectFeeMode: pool.collectFeeMode, tokenAAmount: pool.tokenAAmount, tokenBAmount: pool.tokenBAmount, liquidity: pool.liquidity });
     const removal = await cp.removeAllLiquidityAndClosePosition({ owner, position, positionNftAccount: owned.positionNftAccount, positionState: state, poolState: pool, vestings: [], currentPoint: new BN(0), tokenAAmountThreshold: quote.outAmountA.muln(995).divn(1000), tokenBAmountThreshold: quote.outAmountB.muln(995).divn(1000), isSkipReward: false });
     // Hold withdrawn wrapped SOL for Jupiter. Never unwrap or close preexisting token accounts.
@@ -60,19 +62,25 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput)
       if (response.value.err || !response.value.accounts) throw new Error("Simulación rechazada");
       return { accounts: response.value.accounts, bytes, networkFee: BigInt(fee.value) };
     };
+    stage = "Simulación del cierre Meteora";
     const removed = await simulate(removalIxs);
     const aReceived = amount(removed.accounts[1], pool.tokenAMint, owner) - aBefore;
     if (aReceived < 0n) return fail("El retiro consumió tokens ajenos a la posición.");
     const instructions = [...removalIxs];
     if (aReceived > 0n) {
+      stage = "Cotización Jupiter";
       const request = async (path: string, body?: unknown) => {
-        const response = await fetch(`https://api.jup.ag/swap/v1/${path}`, { method: body ? "POST" : "GET", headers: { "Content-Type": "application/json" }, ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(20_000) });
-        if (!response.ok) throw new Error("Jupiter no disponible");
-        return response.json();
+        for (let attempt = 0; ; attempt++) {
+          const response = await fetch(`https://api.jup.ag/swap/v1/${path}`, { method: body ? "POST" : "GET", headers: { "Content-Type": "application/json" }, ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(20_000) });
+          if (response.status === 429 && attempt < 5) { await new Promise((resolve) => setTimeout(resolve, 1_200 * (attempt + 1))); continue; }
+          if (!response.ok) throw new Error("Jupiter no disponible");
+          return response.json();
+        }
       };
       const params = new URLSearchParams({ inputMint: config.mint, outputMint: USDC_MINT, amount: aReceived.toString(), slippageBps: "50", maxAccounts: "24", onlyDirectRoutes: "true", excludeDexes: "Meteora,Meteora DLMM,Meteora DAMM v2" });
       const jQuote = quoteSchema.parse(await request(`quote?${params}`));
       if (jQuote.inputMint !== config.mint || jQuote.outputMint !== USDC_MINT || jQuote.inAmount !== aReceived.toString() || jQuote.routePlan.some((r) => r.swapInfo.ammKey === config.pool)) return fail("La conversión no coincide con los fondos retirados.");
+      stage = "Preparación Jupiter";
       const swap = swapSchema.parse(await request("swap-instructions", { quoteResponse: jQuote, userPublicKey: input.wallet, wrapAndUnwrapSol: false, dynamicComputeUnitLimit: false }));
       const decode = (ix: z.infer<typeof ixSchema>) => new TransactionInstruction({ programId: new PublicKey(ix.programId), keys: ix.accounts.map((a) => ({ ...a, pubkey: new PublicKey(a.pubkey) })), data: Buffer.from(ix.data, "base64") });
       if (swap.cleanupInstruction) return fail("La ruta necesita un cierre de cuenta adicional que todavía no está validado.");
@@ -83,24 +91,30 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput)
         tables.push(table.value);
       }
     }
+    stage = "Simulación de conversión a USDC";
     const converted = await simulate(instructions);
     const gross = amount(converted.accounts[0], usdc, owner) - usdcBefore;
     if (gross <= 0n) return fail("No hay devolución positiva de USDC.");
     const breakdown = withdrawalAmounts(gross);
     if (!before[2]) instructions.push(createAssociatedTokenAccountIdempotentInstruction(owner, recipient, feeOwner, usdc));
     instructions.push(createTransferCheckedInstruction(source, usdc, recipient, owner, breakdown.fee, 6));
+    stage = "Simulación de comisión y renta";
     const final = await simulate(instructions);
     const feeDelta = amount(final.accounts[2], usdc, feeOwner) - feeBefore;
     const netDelta = amount(final.accounts[0], usdc, owner) - usdcBefore;
+    const realizedGross = netDelta + feeDelta;
+    if (netDelta < 0n || feeDelta < 0n || realizedGross <= 0n) return fail("La liquidación no conserva los saldos de USDC anteriores; no se autoriza ninguna firma.");
+    const remainingToken = amount(final.accounts[1], pool.tokenAMint, owner) - aBefore;
     const closed = [3, 4, 5].every((i) => !final.accounts[i] || final.accounts[i]?.lamports === 0);
     const rentLamports = [3, 4, 5].reduce((sum, i) => sum + BigInt(before[i]?.lamports ?? 0), 0n);
     // Account for simulated network fees. Compare the complete wallet lamport delta,
     // allowing only rent for newly created token accounts, not token principal.
     const newAccountRent = [0, 1, 2].reduce((sum, i) => sum + BigInt(before[i] ? 0 : final.accounts[i]?.lamports ?? 0), 0n);
     const solDelta = BigInt(final.accounts[6]?.lamports ?? 0) - BigInt(before[6]?.lamports ?? 0);
-    const checks = { closed, usdc: netDelta === breakdown.net && amount(final.accounts[1], pool.tokenAMint, owner) === aBefore, fee: feeDelta === breakdown.fee && feeDelta === (netDelta + feeDelta) / 100n, rent: closed && rentLamports > 0n && solDelta + newAccountRent + final.networkFee === rentLamports };
-    return { success: Object.values(checks).every(Boolean), sent: false, bytes: final.bytes, checks, gross: tokenAmount(gross.toString(), 6), fee: tokenAmount(breakdown.fee.toString(), 6), net: tokenAmount(breakdown.net.toString(), 6), rentSol: tokenAmount(rentLamports.toString(), 9), message: "Solo simulación: se comprueban USDC, comisión y cierre de posición, mint y cuenta NFT. La firma sigue bloqueada: un swap puede variar los fondos realizados y una transferencia SPL fija no calcula dinámicamente el 1%. No se ha retirado dinero." };
+    const checks = { closed, usdc: remainingToken === 0n && netDelta > 0n, fee: feeDelta === breakdown.fee && feeDelta === realizedGross / 100n, rent: closed && rentLamports > 0n && solDelta + newAccountRent + final.networkFee === rentLamports };
+    const success = Object.values(checks).every(Boolean);
+    return { success, sent: false, bytes: final.bytes, checks, gross: tokenAmount(realizedGross.toString(), 6), fee: tokenAmount(feeDelta.toString(), 6), net: tokenAmount(netDelta.toString(), 6), expectedFee: tokenAmount((realizedGross / 100n).toString(), 6), remainingTokenRaw: remainingToken.toString(), rentSol: tokenAmount(rentLamports.toString(), 9), message: !checks.usdc ? "La conversión no coincide con el retiro completo o deja tokens pendientes. No se autoriza la firma: podría quedar SOL envuelto sin convertir o consumirse un saldo previo. La posición sigue intacta." : !checks.fee ? "La comisión fija no coincide con el 1% de los USDC realizados en esta simulación. La firma sigue bloqueada y la posición sigue intacta." : !success ? "El cierre o la recuperación de renta no superó todas las comprobaciones. No se firmó ni envió nada." : "Las comprobaciones pasan en esta simulación. La firma sigue bloqueada hasta validar el 1% sobre los fondos realizados durante la ejecución, que pueden variar. No se ha retirado dinero." };
   } catch {
-    return fail("No se pudo validar el retiro completo, la conversión o la devolución de renta. No se firmó ni envió nada; la posición permanece intacta.");
+    return fail(`No se pudo validar el retiro. Etapa: ${stage}. No se firmó ni envió nada; la posición permanece intacta.`);
   }
 }
