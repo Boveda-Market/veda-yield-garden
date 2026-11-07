@@ -7,5 +7,6 @@
 - [x] Add 1% fee accounting and confirmation to demo deposits, harvests and exits.
 - [x] Add terms and privacy pages covering operation, fees, risk and data handling.
 - [x] Store consented email submissions privately and verify a real form submission.
-- [ ] Activate actual fee transfers — blocked by missing real wallet / Meteora transaction integration and Privy App ID.
+- [ ] Connect Privy email, Google and Solana wallets using the supplied App ID; verify the login entry point.
+- [ ] Activate actual fee transfers — blocked by missing Solana / Meteora transaction integration; Privy App ID is now supplied.
 - [ ] Finalize legal contact and jurisdiction — waiting for the operator's legal address, privacy email and applicable jurisdiction.

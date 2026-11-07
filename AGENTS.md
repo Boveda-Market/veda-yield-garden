@@ -33,3 +33,4 @@ use the editor.
 - All demo financial actions use a shared integer-micro-USDC fee breakdown, deduct fees from gross proceeds and require review; no demo state may be represented as an on-chain transfer.
 - Email interest submissions use a public validated insert-only server function, a private RLS-locked Cloud table and explicit versioned consent; never expose leads through the demonstration login.
 - Legal content has dedicated public routes and must distinguish current demo capabilities from future wallet integrations; do not invent operator contact details or legal jurisdiction.
+- Privy authentication is loaded lazily behind a client-only boundary; use its verified session for UI access and isolate fictitious balances by Privy user ID, never treating local storage as authentication or granting Cloud data access through it.

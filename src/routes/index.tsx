@@ -1,6 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, X } from "lucide-react";
+import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
+import { lazy, Suspense, useEffect, useState } from "react";
+import { ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet } from "lucide-react";
+import { useBovedaSession } from "@/hooks/use-boveda-session";
+import { demoSessionKey, readDemoSession } from "@/lib/demo-session";
 import { VAULTS, accrued, type Position, type Vault } from "@/lib/vaults";
 import { Button } from "@/components/ui/button";
 import { PoolDetails } from "@/components/pool-details";
@@ -13,7 +15,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "BÓVEDA — Rendimiento en USDC sobre Solana" },
-      { name: "description", content: "Deposita USDC en bóvedas Meteora DAMM v2 y cosecha ganancias. Interfaz no custodia." },
+      { name: "description", content: "Accede con Privy y wallets de Solana a BÓVEDA. Explora pools Meteora y prueba depósitos de USDC en demostración, sin movimientos reales." },
       { property: "og:title", content: "BÓVEDA — Rendimiento en USDC" },
       { property: "og:description", content: "Bóvedas SOL, MET y RWA sobre Meteora DAMM v2 en Solana." },
       { property: "og:type", content: "website" },
@@ -24,12 +26,27 @@ export const Route = createFileRoute("/")({
 });
 
 const fmt = (n: number, d = 2) => n.toLocaleString("es-MX", { minimumFractionDigits: d, maximumFractionDigits: d });
-const KEY = "boveda-state-v1";
+const PrivyAccess = lazy(() => import("@/components/privy-access"));
+
+function AccessLoading() {
+  return <div className="grid min-h-screen place-items-center bg-background text-foreground"><p role="status" className="font-display">BÓVEDA · Conectando acceso…</p></div>;
+}
 
 function Index() {
-  const [user, setUser] = useState<string | null>(null);
+  return <ClientOnly fallback={<AccessLoading />}><Suspense fallback={<AccessLoading />}><PrivyAccess><SessionPage /></PrivyAccess></Suspense></ClientOnly>;
+}
+
+function SessionPage() {
+  const { userId } = useBovedaSession();
+  return <Dashboard key={userId ?? "signed-out"} />;
+}
+
+function Dashboard() {
+  const session = useBovedaSession();
+  const user = session.authenticated && session.userId ? session.label : null;
   const [wallet, setWallet] = useState(0);
   const [positions, setPositions] = useState<Position[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [now, setNow] = useState(0);
   const [depositFor, setDepositFor] = useState<Vault | null>(null);
   const [detailsFor, setDetailsFor] = useState<Vault | null>(null);
@@ -37,13 +54,21 @@ function Index() {
   const [review, setReview] = useState<{ kind: "harvest" | "exit"; position: Position; amount: number } | null>(null);
 
   useEffect(() => {
-    const s = localStorage.getItem(KEY);
-    if (s) { const d = JSON.parse(s); setUser(d.user); setWallet(d.wallet); setPositions(d.positions); }
+    if (session.userId) {
+      let raw: string | null = null;
+      try { raw = localStorage.getItem(demoSessionKey(session.userId)); } catch { /* Storage may be disabled. */ }
+      const data = readDemoSession(raw);
+      setWallet(data.wallet); setPositions(data.positions);
+    }
+    setLoaded(true);
     setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
-  }, []);
-  useEffect(() => { if (now) localStorage.setItem(KEY, JSON.stringify({ user, wallet, positions })); }, [user, wallet, positions, now]);
+  }, [session.userId]);
+  useEffect(() => {
+    if (!loaded || !session.userId) return;
+    try { localStorage.setItem(demoSessionKey(session.userId), JSON.stringify({ wallet, positions })); } catch { /* Continue without persistence. */ }
+  }, [loaded, session.userId, wallet, positions]);
 
   const notify = (m: string) => { setToast(m); setTimeout(() => setToast(null), 2800); };
   const vault = (id: string) => VAULTS.find((v) => v.id === id);
@@ -51,7 +76,6 @@ function Index() {
   const earned = positions.reduce((s, p) => s + accrued(p, vault(p.vaultId)?.apy ?? 0, now), 0);
   const yearly = positions.reduce((s, p) => s + p.principal * (vault(p.vaultId)?.apy ?? 0) / 100, 0);
 
-  const login = (method: string) => { setUser(method); if (!wallet && !positions.length) setWallet(1000); };
   const confirmWithdrawal = () => {
     if (!review || !positions.some((p) => p.id === review.position.id)) return;
     const values = transactionAmounts(review.amount);
@@ -80,16 +104,18 @@ function Index() {
           BÓVEDA
         </div>
         {user && (
-          <button onClick={() => setUser(null)} className="flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm text-muted-foreground hover:text-foreground">
-            <Wallet size={14} /> {user} <LogOut size={14} />
-          </button>
+          <Button variant="secondary" onClick={() => void session.logout()} className="min-w-0 max-w-[65%]" aria-label="Cerrar sesión">
+            <Wallet size={14} /><span className="truncate">{user}</span><LogOut size={14} />
+          </Button>
         )}
       </header>
 
       <main className="mx-auto max-w-5xl px-5 pb-16">
-        {!user ? <Login onLogin={login} /> : (
+        {session.error && <p role="alert" className="mb-4 text-sm text-destructive">{session.error}</p>}
+        {!user ? <Login /> : (
           <>
             <p className="mb-4 text-xs text-muted-foreground">Demostración · saldos y cargos ficticios · 1% por depósito, cosecha y liquidación</p>
+            {session.walletAddress && <p className="mb-4 break-all text-xs text-muted-foreground">Wallet Solana conectada: {session.walletAddress}</p>}
             <section className="rounded-3xl p-7 md:p-10" style={{ background: "var(--gradient-hero)" }}>
               <p className="text-sm text-muted-foreground">Balance total</p>
               <p className="mt-1 font-display text-5xl font-bold tracking-tight md:text-6xl">{fmt(wallet + invested + earned)} <span className="text-2xl text-muted-foreground">USDC</span></p>
@@ -165,22 +191,18 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   return <div><p className="text-muted-foreground">{label}</p><p className={`mt-1 font-display text-lg font-semibold ${accent ? "text-primary" : ""}`}>{value}</p></div>;
 }
 
-function Login({ onLogin }: { onLogin: (m: string) => void }) {
-  const [email, setEmail] = useState("");
+function Login() {
+  const { ready, login } = useBovedaSession();
   return (
     <section className="mx-auto mt-10 max-w-md rounded-3xl p-8" style={{ background: "var(--gradient-hero)" }}>
       <h1 className="font-display text-4xl font-bold leading-tight tracking-tight">Tu dinero, trabajando en Solana.</h1>
-      <p className="mt-3 text-muted-foreground">Deposita USDC en bóvedas de rendimiento. Sin custodia, sin complicaciones.</p>
-      <form onSubmit={(e) => { e.preventDefault(); if (email) onLogin(email); }} className="mt-8 space-y-3">
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" className="w-full rounded-xl border border-input bg-background/60 px-4 py-3 outline-none focus:border-ring" />
-        <button className="w-full rounded-xl bg-primary py-3 font-semibold text-primary-foreground">Continuar con email</button>
-      </form>
-      <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
-        {["Google", "Phantom", "Solflare"].map((m) => (
-          <button key={m} onClick={() => onLogin(m)} className="rounded-xl bg-secondary py-3 font-medium hover:bg-muted">{m}</button>
-        ))}
+      <p className="mt-3 text-muted-foreground">Explora bóvedas de rendimiento en USDC sobre Solana.</p>
+      <div className="mt-8 space-y-3">
+        <Button disabled={!ready} onClick={() => login("email")} className="h-12 w-full">Continuar con email</Button>
+        <Button disabled={!ready} variant="secondary" onClick={() => login("google")} className="h-12 w-full">Continuar con Google</Button>
+        <Button disabled={!ready} variant="outline" onClick={() => login("wallet")} className="h-12 w-full"><Wallet size={16} /> Phantom / Solflare</Button>
       </div>
-      <p className="mt-4 text-xs text-muted-foreground">Modo demostración: se acreditan 1,000 USDC de prueba.</p>
+      <p className="mt-4 text-xs text-muted-foreground">Acceso con Privy · 1,000 USDC ficticios para probar. Sin depósitos ni transferencias reales.</p>
     </section>
   );
 }
