@@ -1,9 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, X } from "lucide-react";
 import { VAULTS, accrued, type Position, type Vault } from "@/lib/vaults";
 import { Button } from "@/components/ui/button";
 import { PoolDetails } from "@/components/pool-details";
+import { transactionAmounts, validDeposit } from "@/lib/fees";
+import { FeeBreakdown } from "@/components/fee-breakdown";
+import { EmailSignup } from "@/components/email-signup";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -30,6 +34,7 @@ function Index() {
   const [depositFor, setDepositFor] = useState<Vault | null>(null);
   const [detailsFor, setDetailsFor] = useState<Vault | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [review, setReview] = useState<{ kind: "harvest" | "exit"; position: Position; amount: number } | null>(null);
 
   useEffect(() => {
     const s = localStorage.getItem(KEY);
@@ -41,25 +46,30 @@ function Index() {
   useEffect(() => { if (now) localStorage.setItem(KEY, JSON.stringify({ user, wallet, positions })); }, [user, wallet, positions, now]);
 
   const notify = (m: string) => { setToast(m); setTimeout(() => setToast(null), 2800); };
-  const vault = (id: string) => VAULTS.find((v) => v.id === id)!;
+  const vault = (id: string) => VAULTS.find((v) => v.id === id);
   const invested = positions.reduce((s, p) => s + p.principal, 0);
-  const earned = positions.reduce((s, p) => s + accrued(p, vault(p.vaultId).apy, now), 0);
-  const yearly = positions.reduce((s, p) => s + p.principal * vault(p.vaultId).apy / 100, 0);
+  const earned = positions.reduce((s, p) => s + accrued(p, vault(p.vaultId)?.apy ?? 0, now), 0);
+  const yearly = positions.reduce((s, p) => s + p.principal * (vault(p.vaultId)?.apy ?? 0) / 100, 0);
 
   const login = (method: string) => { setUser(method); if (!wallet && !positions.length) setWallet(1000); };
-  const harvest = (p: Position) => {
-    const a = accrued(p, vault(p.vaultId).apy, now);
-    setPositions((ps) => ps.map((x) => x.id === p.id ? { ...x, claimed: x.claimed + a } : x));
-    setWallet((w) => w + a); notify(`Cosechaste ${fmt(a, 4)} USDC`);
-  };
-  const exit = (p: Position) => {
-    const total = p.principal + accrued(p, vault(p.vaultId).apy, now);
-    setPositions((ps) => ps.filter((x) => x.id !== p.id));
-    setWallet((w) => w + total); notify(`Posición liquidada: ${fmt(total)} USDC`);
+  const confirmWithdrawal = () => {
+    if (!review || !positions.some((p) => p.id === review.position.id)) return;
+    const values = transactionAmounts(review.amount);
+    if (values.gross <= 0) return;
+    if (review.kind === "harvest") {
+      setPositions((ps) => ps.map((x) => x.id === review.position.id ? { ...x, claimed: x.claimed + values.gross } : x));
+    } else {
+      setPositions((ps) => ps.filter((x) => x.id !== review.position.id));
+    }
+    setWallet((w) => w + values.net);
+    setReview(null);
+    notify(`${review.kind === "harvest" ? "Cosecha" : "Liquidación"} simulada: ${fmt(values.net, 6)} USDC netos · cargo ${fmt(values.fee, 6)} USDC`);
   };
   const deposit = (v: Vault, amt: number) => {
-    setPositions((ps) => [...ps, { id: crypto.randomUUID(), vaultId: v.id, principal: amt, openedAt: Date.now(), claimed: 0 }]);
-    setWallet((w) => w - amt); setDepositFor(null); notify(`Depositaste ${fmt(amt)} USDC en ${v.name}`);
+    if (!user || !Number.isFinite(amt) || !validDeposit(String(amt), wallet)) return;
+    const values = transactionAmounts(amt);
+    setPositions((ps) => [...ps, { id: crypto.randomUUID(), vaultId: v.id, principal: values.net, openedAt: Date.now(), claimed: 0 }]);
+    setWallet((w) => w - values.gross); setDepositFor(null); notify(`Depósito simulado: ${fmt(values.net, 6)} USDC invertidos · cargo ${fmt(values.fee, 6)} USDC`);
   };
 
   return (
@@ -79,6 +89,7 @@ function Index() {
       <main className="mx-auto max-w-5xl px-5 pb-16">
         {!user ? <Login onLogin={login} /> : (
           <>
+            <p className="mb-4 text-xs text-muted-foreground">Demostración · saldos y cargos ficticios · 1% por depósito, cosecha y liquidación</p>
             <section className="rounded-3xl p-7 md:p-10" style={{ background: "var(--gradient-hero)" }}>
               <p className="text-sm text-muted-foreground">Balance total</p>
               <p className="mt-1 font-display text-5xl font-bold tracking-tight md:text-6xl">{fmt(wallet + invested + earned)} <span className="text-2xl text-muted-foreground">USDC</span></p>
@@ -95,16 +106,18 @@ function Index() {
             ) : (
               <div className="space-y-3">
                 {positions.map((p) => {
-                  const v = vault(p.vaultId); const a = accrued(p, v.apy, now);
+                  const v = vault(p.vaultId);
+                  if (!v) return null;
+                  const a = accrued(p, v.apy, now);
                   return (
                     <div key={p.id} className="flex flex-col gap-4 rounded-2xl bg-card p-5 md:flex-row md:items-center">
                       <div className="flex-1">
                         <p className="font-display font-semibold">{v.name} <span className="ml-2 text-xs text-muted-foreground">{v.pair}</span></p>
                         <p className="text-sm text-muted-foreground">Capital {fmt(p.principal)} USDC · <span className="text-primary">+{fmt(a, 6)} USDC</span></p>
                       </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => harvest(p)} className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-accent-foreground hover:opacity-90"><Sprout size={16} /> Cosechar Ganancias</button>
-                        <button onClick={() => exit(p)} className="flex items-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-sm font-semibold hover:bg-muted"><ArrowDownToLine size={16} /> Cerrar y Liquidar</button>
+                      <div className="flex flex-wrap gap-2">
+                        <Button disabled={transactionAmounts(a).gross <= 0} onClick={() => setReview({ kind: "harvest", position: p, amount: a })} variant="secondary"><Sprout size={16} /> Cosechar Ganancias</Button>
+                        <Button onClick={() => setReview({ kind: "exit", position: p, amount: p.principal + a })} variant="secondary"><ArrowDownToLine size={16} /> Cerrar y Liquidar</Button>
                       </div>
                     </div>
                   );
@@ -122,23 +135,27 @@ function Index() {
                   <p className="mt-5 font-display text-4xl font-bold text-primary">{v.apy}%<span className="ml-1 text-sm font-normal text-muted-foreground">APY est.</span></p>
                   <p className="mt-3 flex-1 text-sm text-muted-foreground">{v.blurb}</p>
                    <Button variant="outline" className="mt-4 w-full" onClick={() => setDetailsFor(v)}>Detalles del pool</Button>
-                  <button onClick={() => setDepositFor(v)} className="mt-5 rounded-xl bg-primary py-3 font-semibold text-primary-foreground hover:opacity-90">Depositar USDC</button>
+                  <Button onClick={() => setDepositFor(v)} className="mt-5 h-12">Depositar USDC</Button>
                 </div>
               ))}
             </div>
           </>
         )}
+        <EmailSignup />
       </main>
 
       <footer className="border-t border-border">
         <div className="mx-auto max-w-5xl px-5 py-8 text-xs leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">© {new Date().getFullYear()} Boveda Technologies LLC</p>
           <p className="mt-2">Bóveda es una interfaz de software no custodia que facilita la interacción con contratos inteligentes desplegados en la red Solana y en los protocolos de Meteora. Boveda Technologies LLC no custodia, controla ni tiene acceso a los fondos de los usuarios; las claves privadas permanecen bajo control exclusivo del usuario. Los rendimientos mostrados son estimaciones, no están garantizados y pueden variar. Proveer liquidez implica riesgos, incluidos pérdida impermanente, volatilidad, fallos de contratos inteligentes y pérdida total del capital. Nada en esta interfaz constituye asesoría financiera, legal o fiscal.</p>
+          <p className="mt-3">Versión de demostración: no hay movimientos reales de fondos. Cargo operativo: 1% en USDC por depósito, cosecha y liquidación.</p>
+          <nav className="mt-4 flex flex-wrap gap-5 text-primary"><Link to="/terminos">Términos y condiciones</Link><Link to="/privacidad">Política de privacidad</Link></nav>
         </div>
       </footer>
 
       {depositFor && <DepositSheet vault={depositFor} max={wallet} onClose={() => setDepositFor(null)} onConfirm={deposit} />}
       {detailsFor && <PoolDetails key={detailsFor.id} vault={detailsFor} onClose={() => setDetailsFor(null)} />}
+      {review && <WithdrawalReview key={`${review.kind}-${review.position.id}`} kind={review.kind} amount={review.amount} onClose={() => setReview(null)} onConfirm={confirmWithdrawal} />}
       {toast && <div className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg">{toast}</div>}
     </div>
   );
@@ -170,20 +187,37 @@ function Login({ onLogin }: { onLogin: (m: string) => void }) {
 
 function DepositSheet({ vault, max, onClose, onConfirm }: { vault: Vault; max: number; onClose: () => void; onConfirm: (v: Vault, a: number) => void }) {
   const [amt, setAmt] = useState("");
+  const [accepted, setAccepted] = useState(false);
   const n = Number(amt);
-  const ok = n > 0 && n <= max;
+  const ok = validDeposit(amt, max);
+  const preview = Number.isFinite(n) && n >= 0 && n <= Number.MAX_SAFE_INTEGER / 1_000_000 ? n : 0;
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/70 backdrop-blur-sm md:items-center" onClick={onClose}>
-      <div className="w-full max-w-md rounded-t-3xl bg-card p-7 md:rounded-3xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between"><p className="font-display text-xl font-semibold">Depositar en {vault.name}</p><button onClick={onClose} aria-label="Cerrar"><X size={20} /></button></div>
+    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-lg bg-card">
+        <DialogTitle className="pr-4 font-display text-xl">Depositar en {vault.name}</DialogTitle>
+        <DialogDescription>Depósito de demostración con cargo operativo del 1%.</DialogDescription>
         <p className="mt-1 text-sm text-muted-foreground">Disponible: {fmt(max)} USDC</p>
         <div className="mt-6 flex items-center rounded-2xl bg-background px-5 py-4">
-          <input autoFocus inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="0.00" className="w-full bg-transparent font-display text-4xl font-bold outline-none" />
-          <button onClick={() => setAmt(String(max))} className="text-sm font-semibold text-primary">MÁX</button>
+          <input aria-label="Importe del depósito" autoFocus inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="0.00" className="min-w-0 w-full bg-transparent font-display text-4xl font-bold outline-none" />
+          <Button variant="ghost" size="sm" onClick={() => setAmt(String(transactionAmounts(max).gross))}>MÁX</Button>
         </div>
-        <p className="mt-3 text-sm text-muted-foreground">Ganancia estimada anual: <span className="text-primary">{fmt((n || 0) * vault.apy / 100)} USDC</span></p>
-        <button disabled={!ok} onClick={() => onConfirm(vault, n)} className="mt-6 w-full rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground disabled:opacity-40">Confirmar depósito</button>
-      </div>
-    </div>
+        <FeeBreakdown amount={preview} deposit />
+        <p className="text-xs text-muted-foreground">Ganancia ilustrativa anual antes de cargos de salida: {fmt(transactionAmounts(preview).net * vault.apy / 100)} USDC</p>
+        <AcceptTerms accepted={accepted} onChange={setAccepted} />
+        <Button disabled={!ok || !accepted} onClick={() => onConfirm(vault, n)} className="mt-2 w-full">Confirmar depósito</Button>
+    </DialogContent></Dialog>
   );
+}
+
+function AcceptTerms({ accepted, onChange }: { accepted: boolean; onChange: (value: boolean) => void }) {
+  return <label className="flex items-start gap-3 text-xs leading-5 text-muted-foreground"><input type="checkbox" checked={accepted} onChange={(e) => onChange(e.target.checked)} className="mt-1" /><span>Acepto el cargo del 1% y los <Link to="/terminos" className="text-primary underline">términos y condiciones</Link>.</span></label>;
+}
+
+function WithdrawalReview({ kind, amount, onClose, onConfirm }: { kind: "harvest" | "exit"; amount: number; onClose: () => void; onConfirm: () => void }) {
+  const [accepted, setAccepted] = useState(false);
+  return <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-lg bg-card">
+    <DialogTitle>{kind === "harvest" ? "Cosechar ganancias" : "Cerrar y liquidar"}</DialogTitle>
+    <DialogDescription>{kind === "harvest" ? "El principal permanece invertido. El cargo se descuenta solo de las ganancias cosechadas." : "Se cerrará la posición. El cargo se descuenta del principal y las ganancias sin cosechar."}</DialogDescription>
+    <FeeBreakdown amount={amount} /><AcceptTerms accepted={accepted} onChange={setAccepted} />
+    <Button disabled={!accepted} onClick={onConfirm}>{kind === "harvest" ? "Confirmar cosecha" : "Confirmar liquidación"}</Button>
+  </DialogContent></Dialog>;
 }

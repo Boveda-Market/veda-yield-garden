@@ -4,3 +4,8 @@
 - [x] Verify pool details and copying on desktop and mobile.
 - [x] Replace DexScreener statistics with official Meteora data and verify all three pools.
 - [x] Restore DexScreener for all three vaults and verify 24h change, volume and liquidity.
+- [x] Add 1% fee accounting and confirmation to demo deposits, harvests and exits.
+- [x] Add terms and privacy pages covering operation, fees, risk and data handling.
+- [x] Store consented email submissions privately and verify a real form submission.
+- [ ] Activate actual fee transfers — blocked by missing real wallet / Meteora transaction integration and Privy App ID.
+- [ ] Finalize legal contact and jurisdiction — waiting for the operator's legal address, privacy email and applicable jurisdiction.

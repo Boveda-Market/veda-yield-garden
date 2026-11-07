@@ -30,3 +30,6 @@ use the editor.
 <!-- LOVABLE:END -->
 
 - Pool details live in a shared dialog backed by browser-side public DexScreener queries; validate exact Solana pool addresses, distinguish USD metrics from token amounts, and leave missing statistics unavailable to avoid misleading financial data.
+- All demo financial actions use a shared integer-micro-USDC fee breakdown, deduct fees from gross proceeds and require review; no demo state may be represented as an on-chain transfer.
+- Email interest submissions use a public validated insert-only server function, a private RLS-locked Cloud table and explicit versioned consent; never expose leads through the demonstration login.
+- Legal content has dedicated public routes and must distinguish current demo capabilities from future wallet integrations; do not invent operator contact details or legal jurisdiction.
