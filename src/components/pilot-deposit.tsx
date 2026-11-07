@@ -1,0 +1,61 @@
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { LoaderCircle, PenLine } from "lucide-react";
+import { Buffer } from "buffer";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useBovedaSession } from "@/hooks/use-boveda-session";
+import { pilotDepositStatus, preparePilotDeposit } from "@/lib/pilot-deposit.functions";
+import { PILOT_VAULTS, type PilotStatus } from "@/lib/pilot-deposit";
+
+type Step = "idle" | "preparing" | "signing" | "confirming" | "done" | "error";
+const labels: Record<Step, string> = { idle: "", preparing: "Re-simulando y preparando la transacción…", signing: "Esperando tu firma en la wallet…", confirming: "Enviada. Esperando confirmación en Solana…", done: "", error: "" };
+
+/** Owner-authorized mainnet pilot: fixed 1 USDC deposit; withdrawals unverified. */
+export function PilotDeposit({ vaultId }: { vaultId: string }) {
+  const { walletAddress, signAndSend } = useBovedaSession();
+  const prepare = useServerFn(preparePilotDeposit);
+  const readStatus = useServerFn(pilotDepositStatus);
+  const [accepted, setAccepted] = useState(false);
+  const [step, setStep] = useState<Step>("idle");
+  const [message, setMessage] = useState<string | null>(null);
+  const [signature, setSignature] = useState<string | null>(null);
+  const [status, setStatus] = useState<PilotStatus | null>(null);
+  const eligible = (PILOT_VAULTS as readonly string[]).includes(vaultId);
+  const busy = step === "preparing" || step === "signing" || step === "confirming";
+
+  async function run() {
+    if (!walletAddress || !accepted || busy || !eligible) return;
+    setMessage(null); setSignature(null); setStatus(null); setStep("preparing");
+    try {
+      const prepared = await prepare({ data: { wallet: walletAddress, vaultId: vaultId as (typeof PILOT_VAULTS)[number] } });
+      if (!prepared.success || !prepared.prepared) { setStep("error"); setMessage(`${prepared.message} No se pidió ninguna firma.`); return; }
+      setStep("signing");
+      let sig: string;
+      try { sig = await signAndSend(new Uint8Array(Buffer.from(prepared.prepared.transaction, "base64"))); }
+      catch { setStep("error"); setMessage("La firma se canceló o la wallet rechazó la transacción. No se envió nada desde BÓVEDA."); return; }
+      setSignature(sig); setStep("confirming");
+      for (let attempt = 0; attempt < 30; attempt++) {
+        const { status: next } = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as PilotStatus }));
+        setStatus(next);
+        if (next === "failed") { setStep("error"); setMessage("Solana rechazó la transacción; al ser atómica, no se aplicaron ni la comisión ni el depósito (solo el coste de red)."); return; }
+        if (next !== "pending") { setStep("done"); return; }
+        await new Promise((resolve) => setTimeout(resolve, 2_000));
+      }
+      setStep("error"); setMessage("La confirmación tarda más de lo habitual. Revisa el estado en Solscan antes de reintentar.");
+    } catch { setStep("error"); setMessage("No se pudo preparar el depósito piloto. No se pidió ninguna firma."); }
+  }
+
+  if (!eligible) return <p className="border-t border-border pt-4 text-xs text-muted-foreground">El depósito piloto no está disponible para esta bóveda.</p>;
+  return <section aria-labelledby="pilot-title" className="grid gap-3 border-t border-border pt-4 text-sm">
+    <h3 id="pilot-title" className="font-semibold">Depósito piloto real · 1 USDC</h3>
+    <p role="note" className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs leading-5">Prueba piloto en Solana Mainnet con dinero real. Importe fijo de 1 USDC (0.01 USDC de comisión). <strong>Los retiros desde BÓVEDA («Cosechar Ganancias» y «Cerrar y Liquidar») aún no están verificados.</strong> La posición queda en tu wallet como NFT de Meteora.</p>
+    {!walletAddress ? <p className="text-xs text-muted-foreground">Inicia sesión con una wallet de Solana para firmar.</p> : <>
+      <label className="flex items-start gap-3 text-xs leading-5"><Checkbox checked={accepted} disabled={busy} onCheckedChange={(value) => setAccepted(value === true)} aria-label="Acepto el riesgo del piloto" /><span>Entiendo que es dinero real, que la transacción no se puede revertir y que los retiros desde BÓVEDA no están verificados.</span></label>
+      <Button disabled={!accepted || busy} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? labels[step] : "Firmar depósito piloto de 1 USDC"}</Button>
+    </>}
+    {step === "done" && <p role="status" className="font-semibold">Depósito confirmado en Solana ({status === "finalized" ? "finalizado" : "confirmado"}).</p>}
+    {message && <p role="alert" className="text-destructive">{message}</p>}
+    {signature && <p className="break-all text-xs">Transacción: <a className="underline" href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer">ver en Solscan</a></p>}
+  </section>;
+}

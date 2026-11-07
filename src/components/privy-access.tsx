@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { PrivyProvider, useLogin, usePrivy } from "@privy-io/react-auth";
-import { toSolanaWalletConnectors, useWallets } from "@privy-io/react-auth/solana";
+import { toSolanaWalletConnectors, useSignAndSendTransaction, useWallets } from "@privy-io/react-auth/solana";
+import bs58 from "bs58";
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
 
 const solanaConnectors = toSolanaWalletConnectors({ shouldAutoConnect: true });
@@ -8,6 +9,7 @@ const solanaConnectors = toSolanaWalletConnectors({ shouldAutoConnect: true });
 function SessionBridge({ children }: { children: ReactNode }) {
   const { ready, authenticated, user, logout } = usePrivy();
   const { wallets } = useWallets();
+  const { signAndSendTransaction } = useSignAndSendTransaction();
   const [error, setError] = useState<string | null>(null);
   const { login } = useLogin({
     onComplete: () => setError(null),
@@ -19,6 +21,12 @@ function SessionBridge({ children }: { children: ReactNode }) {
     label: user?.email?.address ?? user?.google?.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : "Mi cuenta"),
     walletAddress, error,
     login: (method) => { setError(null); login({ loginMethods: [method] }); },
+    signAndSend: async (transaction) => {
+      const wallet = wallets[0];
+      if (!authenticated || !wallet) throw new Error("Conecta una wallet de Solana");
+      const { signature } = await signAndSendTransaction({ transaction, wallet, chain: "solana:mainnet" });
+      return bs58.encode(signature);
+    },
     logout: async () => { try { await logout(); setError(null); } catch { setError("No se pudo cerrar sesión. Inténtalo de nuevo."); } },
   }}>{children}</BovedaSessionContext.Provider>;
 }

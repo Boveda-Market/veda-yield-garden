@@ -8,6 +8,7 @@ import { simulateRealDeposit } from "@/lib/deposit-simulation.functions";
 import { simulationInput, simulationDisplay, type SimulationResult } from "@/lib/deposit-simulation";
 import { FEE_WALLET } from "@/lib/fees";
 import type { Vault } from "@/lib/vaults";
+import { PilotDeposit } from "@/components/pilot-deposit";
 
 export function DepositSimulation({ vault, wallet, onClose }: { vault: Vault; wallet: string | null; onClose: () => void }) {
   const simulate = useServerFn(simulateRealDeposit);
@@ -38,6 +39,7 @@ export function DepositSimulation({ vault, wallet, onClose }: { vault: Vault; wa
     <p className="break-all text-xs text-muted-foreground">Recaudo simulado: {FEE_WALLET}</p>
     <Button disabled={!validated.success || pending} onClick={() => void run()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <FlaskConical className="mr-2 h-4 w-4" />}{pending ? "Cotizando y simulando…" : "Simular conversión y depósito"}</Button>
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-    {result && <div role="status" className="border-t border-border pt-4 text-sm"><p className="font-semibold">{result.success ? "Simulación verificada" : "Simulación no validada"}</p><p className="mt-2 leading-6">{result.message}</p><p className="mt-2 text-xs text-muted-foreground">Etapa: {({ pool: "Pool y saldos", jupiter: "Conversión Jupiter", composition: "Composición atómica", simulation: "Simulación Solana" })[result.stage]}</p>{result.bytes !== undefined && <p className="mt-1 text-xs text-muted-foreground">Tamaño: {result.bytes} bytes</p>}{result.units !== undefined && <p className="mt-1 text-xs text-muted-foreground">Unidades de cómputo: {result.units}</p>}{result.slot !== undefined && <p className="mt-1 text-xs text-muted-foreground">Slot simulado: {result.slot}</p>}<p className="mt-3 text-xs text-muted-foreground">No hay una transacción en Solscan porque no se envía nada. Un resultado satisfactorio no habilita operaciones reales ni valida los retiros.</p></div>}
+    {result && <div role="status" className="border-t border-border pt-4 text-sm"><p className="font-semibold">{result.success ? "Simulación verificada" : "Simulación no validada"}</p><p className="mt-2 leading-6">{result.message}</p><p className="mt-2 text-xs text-muted-foreground">Etapa: {({ pool: "Pool y saldos", jupiter: "Conversión Jupiter", composition: "Composición atómica", simulation: "Simulación Solana" })[result.stage]}</p>{result.bytes !== undefined && <p className="mt-1 text-xs text-muted-foreground">Tamaño: {result.bytes} bytes</p>}{result.units !== undefined && <p className="mt-1 text-xs text-muted-foreground">Unidades de cómputo: {result.units}</p>}{result.slot !== undefined && <p className="mt-1 text-xs text-muted-foreground">Slot simulado: {result.slot}</p>}<p className="mt-3 text-xs text-muted-foreground">No hay una transacción en Solscan porque no se envía nada. Un resultado satisfactorio no valida los retiros.</p></div>}
+    {wallet && <PilotDeposit vaultId={vault.id} />}
   </DialogContent></Dialog>;
 }

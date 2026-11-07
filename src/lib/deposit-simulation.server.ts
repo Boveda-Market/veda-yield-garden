@@ -9,6 +9,7 @@ import { CHAIN_POOLS, USDC_MINT, solanaAddressSchema } from "@/lib/solana-data";
 import { FEE_WALLET } from "@/lib/fees";
 import { simulationAmounts, simulationDisplay, type SimulationInput, type SimulationResult, type SimulationStage } from "@/lib/deposit-simulation";
 import { compactDepositInstructions } from "@/lib/compact-deposit";
+import { PILOT_AMOUNT, type PreparedPilot } from "@/lib/pilot-deposit";
 
 const ixSchema = z.object({ programId: solanaAddressSchema, accounts: z.array(z.object({ pubkey: solanaAddressSchema, isSigner: z.boolean(), isWritable: z.boolean() })).max(128), data: z.string().max(20_000) });
 const swapSchema = z.object({ setupInstructions: z.array(ixSchema), swapInstruction: ixSchema, cleanupInstruction: ixSchema.nullable().optional(), otherInstructions: z.array(ixSchema).optional(), addressLookupTableAddresses: z.array(solanaAddressSchema).max(16) });
@@ -28,7 +29,9 @@ async function jupiter(path: string, body?: unknown) {
 }
 
 /** Read-only: no signatures, transaction bytes returned, broadcasting or funding overrides. */
-export async function simulateDeposit(apiKey: string, input: SimulationInput): Promise<SimulationResult> {
+export async function simulateDeposit(apiKey: string, input: SimulationInput, options: { preparePilot?: boolean } = {}): Promise<SimulationResult & { prepared?: PreparedPilot }> {
+  // A pilot transaction is only ever prepared for the fixed pilot amount.
+  if (options.preparePilot && input.amount !== PILOT_AMOUNT) throw new Error("Importe piloto inválido");
   const amounts = simulationAmounts(input.amount);
   const display = simulationDisplay(input.amount);
   let stage: SimulationStage = "pool";
@@ -121,7 +124,11 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput): P
       // The raw IDL coder keeps on-chain snake_case field names.
       positionVerified = state.pool.equals(poolAddress) && state.nft_mint.equals(nft.publicKey) && state.unlocked_liquidity.gt(new BN(0));
     }
-    return { ...result(feeVerified && positionVerified, feeVerified && positionVerified ? "Simulación satisfactoria: la comisión y la posición aparecen juntas en el estado simulado. No se ha movido dinero. Esto no habilita depósitos reales ni verifica retiros." : "Solana no rechazó la simulación, pero no se pudieron verificar ambos resultados; no se considera validada."), slot: simulated.context.slot, units: simulated.value.unitsConsumed, checks: { fee: feeVerified, position: positionVerified } };
+    const verified = feeVerified && positionVerified;
+    // Pilot only: return the exact simulated message, partially signed by the
+    // ephemeral position NFT key. The wallet owner still has to sign it.
+    const prepared = verified && options.preparePilot ? (() => { transaction.sign([nft]); return { transaction: Buffer.from(transaction.serialize()).toString("base64"), lastValidBlockHeight: block.lastValidBlockHeight, position: positionAddress.toBase58() }; })() : undefined;
+    return { ...(prepared ? { prepared } : {}), ...result(feeVerified && positionVerified, feeVerified && positionVerified ? "Simulación satisfactoria: la comisión y la posición aparecen juntas en el estado simulado. No se ha movido dinero. Esto no habilita depósitos reales ni verifica retiros." : "Solana no rechazó la simulación, pero no se pudieron verificar ambos resultados; no se considera validada."), slot: simulated.context.slot, units: simulated.value.unitsConsumed, checks: { fee: feeVerified, position: positionVerified } };
   } catch (error) {
     // Server-only diagnostics; strip any credential before logging.
     console.error("[deposit-simulation]", stage, String(error instanceof Error ? error.message : error).replace(/api-key=[^&\s"]+/gi, "api-key=***").slice(0, 500));

@@ -37,7 +37,7 @@ describe("unsigned composed deposit simulation", () => {
         if (name !== "Position") throw new Error(`Account not found: ${name}`);
         return { pool: params.pool, nft_mint: params.positionNft, unlocked_liquidity: new BN(995) };
       });
-      return new Transaction().add(new TransactionInstruction({ programId: new PublicKey(CHAIN_POOLS[1].pool), keys: [], data: Buffer.from([7]) }));
+      return new Transaction().add(new TransactionInstruction({ programId: new PublicKey(CHAIN_POOLS[1].pool), keys: [{ pubkey: params.positionNft, isSigner: true, isWritable: true }], data: Buffer.from([7]) }));
     });
     const data = Buffer.alloc(AccountLayout.span);
     AccountLayout.encode({ mint: usdc, owner: new PublicKey(FEE_WALLET), amount: 10_000n, delegateOption: 0, delegate: PublicKey.default, state: 1, isNativeOption: 0, isNative: 0n, delegatedAmount: 0n, closeAuthorityOption: 0, closeAuthority: PublicKey.default }, data);
@@ -80,6 +80,24 @@ describe("unsigned composed deposit simulation", () => {
     const transfer = tx.message.compiledInstructions[1];
     expect(Array.from(transfer.data)).toEqual([12, 16, 39, 0, 0, 0, 0, 0, 0, 6]);
     expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
+  });
+  it("plain simulations never return transaction bytes", async () => {
+    const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" });
+    expect(result.prepared).toBeUndefined();
+  });
+  it("pilot returns the verified message without sending it", async () => {
+    const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" }, { preparePilot: true });
+    expect(result.success).toBe(true);
+    expect(VersionedTransaction.deserialize(Buffer.from(result.prepared!.transaction, "base64")).message.compiledInstructions).toHaveLength(5);
+    expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
+  });
+  it("pilot refuses any amount other than 1 USDC", async () => {
+    await expect(simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "2" }, { preparePilot: true })).rejects.toThrow();
+  });
+  it("pilot returns nothing when Solana rejects the simulation", async () => {
+    mocks.connection.simulateTransaction.mockResolvedValue({ context: { slot: 123 }, value: { err: { InstructionError: [4, "Custom"] } } });
+    const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" }, { preparePilot: true });
+    expect(result.prepared).toBeUndefined();
   });
   it("does not report success when Solana rejects the atomic transaction", async () => {
     mocks.connection.simulateTransaction.mockResolvedValue({ context: { slot: 123 }, value: { err: { InstructionError: [4, "Custom"] } } });
