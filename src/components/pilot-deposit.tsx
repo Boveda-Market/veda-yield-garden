@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { LoaderCircle, PenLine } from "lucide-react";
-import { Buffer } from "buffer";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
@@ -32,7 +31,7 @@ export function PilotDeposit({ vaultId }: { vaultId: string }) {
       if (!prepared.success || !prepared.prepared) { setStep("error"); setMessage(`${prepared.message} No se pidió ninguna firma.`); return; }
       setStep("signing");
       let sig: string;
-      try { sig = await signAndSend(new Uint8Array(Buffer.from(prepared.prepared.transaction, "base64"))); }
+      try { sig = await signAndSend(Uint8Array.from(atob(prepared.prepared.transaction), (c) => c.charCodeAt(0))); }
       catch (error) {
         const detail = error instanceof Error ? error.message.slice(0, 160) : "";
         console.error("[pilot-deposit] wallet", detail);

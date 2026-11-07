@@ -21,7 +21,7 @@ export default defineConfig({
     resolve: { alias: [{ find: /^@coral-xyz\/anchor$/, replacement: anchorCjs }] },
     // Pre-bundle lazily imported wallet deps at startup so a mid-session
     // re-optimization cannot load two React copies (null hook dispatcher).
-    optimizeDeps: { include: ["bs58", "@solana/kit", "@privy-io/react-auth", "@privy-io/react-auth/solana"] },
+    optimizeDeps: { include: ["buffer", "bs58", "@solana/kit", "@privy-io/react-auth", "@privy-io/react-auth/solana"] },
     define: { "process.env.ANCHOR_BROWSER": "true" },
     plugins: [{
       name: "solana-worker-browser-exports",

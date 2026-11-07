@@ -1,3 +1,4 @@
+import "@/lib/buffer-polyfill";
 import { useState, type ReactNode } from "react";
 import { PrivyProvider, useLogin, usePrivy } from "@privy-io/react-auth";
 import { toSolanaWalletConnectors, useSignAndSendTransaction, useWallets } from "@privy-io/react-auth/solana";
