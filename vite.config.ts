@@ -16,6 +16,9 @@ const anchorCjs = resolve(dirname(require.resolve("@coral-xyz/anchor/package.jso
 
 export default defineConfig({
   vite: {
+    // Apply before SSR creates shared dependency chunks, not only in Nitro.
+    resolve: { alias: [{ find: /^@coral-xyz\/anchor$/, replacement: anchorCjs }] },
+    define: { "process.env.ANCHOR_BROWSER": "true" },
     plugins: [{
       name: "solana-worker-browser-exports",
       // The final Nitro Worker bundle resolves packages separately from SSR.
