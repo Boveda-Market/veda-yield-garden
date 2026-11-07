@@ -29,4 +29,4 @@ use the editor.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
 
-- Pool details live in a shared dialog backed by browser-side public DexScreener queries; validate exact pool addresses and leave missing statistics unavailable to avoid misleading financial data.
+- Pool details live in a shared dialog backed by browser-side official Meteora DAMM v2 Data API queries; validate exact pool addresses, distinguish pair prices from USD TVL, preserve already-decimalized token amounts, and leave unsupported statistics unavailable to avoid misleading financial data.
