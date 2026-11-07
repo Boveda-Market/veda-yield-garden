@@ -26,7 +26,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
 export default function PrivyAccess({ children }: { children: ReactNode }) {
   return <PrivyProvider appId="cmw6ftcf900ge0hl0jyw3rc75" config={{
     loginMethods: ["email", "google", "wallet"],
-    appearance: { theme: "dark", walletChainType: "solana-only", logo: "/icon-512.png" },
+    appearance: { theme: "dark", walletChainType: "solana-only", walletList: ["phantom", "solflare"], logo: "/icon-512.png" },
     externalWallets: { solana: { connectors: solanaConnectors } },
     embeddedWallets: { solana: { createOnLogin: "users-without-wallets" } },
   }}><SessionBridge>{children}</SessionBridge></PrivyProvider>;
