@@ -2,11 +2,10 @@ import BN from "bn.js";
 import { Buffer } from "buffer";
 import { z } from "zod";
 import { ComputeBudgetProgram, Keypair, PublicKey, SystemProgram, SystemInstruction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
-import { createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, getAssociatedTokenAddressSync, getAccount, TOKEN_PROGRAM_ID, AccountLayout, NATIVE_MINT } from "@solana/spl-token";
+import { getAssociatedTokenAddressSync, getAccount, TOKEN_PROGRAM_ID, AccountLayout, NATIVE_MINT } from "@solana/spl-token";
 import { CpAmm, derivePositionAddress, cpAmmCoder } from "@meteora-ag/cp-amm-sdk";
 import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, solanaAddressSchema } from "@/lib/solana-data";
-import { FEE_WALLET } from "@/lib/fees";
 import { simulationAmounts, simulationDisplay, type SimulationInput, type SimulationResult, type SimulationStage } from "@/lib/deposit-simulation";
 import { compactDepositInstructions } from "@/lib/compact-deposit";
 import { PILOT_AMOUNT, type PreparedPilot } from "@/lib/pilot-deposit";
@@ -90,10 +89,6 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
     const depositLiquidity = liquidity.muln(995).divn(1000);
     const nft = Keypair.generate(); // Ephemeral public identity only; never sign.
     const deposit = await cp.createPositionAndAddLiquidity({ owner, pool: poolAddress, positionNft: nft.publicKey, liquidityDelta: depositLiquidity, maxAmountTokenA: selected.minimum, maxAmountTokenB: selected.remaining, tokenAAmountThreshold: selected.minimum, tokenBAmountThreshold: selected.remaining, tokenAMint: pool.tokenAMint, tokenBMint: pool.tokenBMint, tokenAProgram: TOKEN_PROGRAM_ID, tokenBProgram: TOKEN_PROGRAM_ID });
-    const feeOwner = new PublicKey(FEE_WALLET);
-    const recipient = getAssociatedTokenAddressSync(usdc, feeOwner);
-    const feeBefore = await getAccount(connection, recipient).catch(() => null);
-    if (feeBefore && (!feeBefore.mint.equals(usdc) || !feeBefore.owner.equals(feeOwner))) return result(false, "La cuenta de recaudo no coincide con USDC y su destinatario.");
     const swapIxs = [...swap.setupInstructions, ...(swap.otherInstructions ?? []), swap.swapInstruction].map(decodeIx);
     // Jupiter supplies wrapped SOL already. Do not wrap additional wallet SOL.
     const depositIxs = deposit.instructions.filter((ix) => {
@@ -102,9 +97,8 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
       const transfer = SystemInstruction.decodeTransfer(ix);
       return !transfer.toPubkey.equals(getAssociatedTokenAddressSync(NATIVE_MINT, owner));
     });
-    // A confirmed, validated existing fee ATA needs no creation instruction.
-    // Jupiter and Meteora can also repeat the same idempotent ATA setup.
-    const instructions = compactDepositInstructions([ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 }), ...(feeBefore ? [] : [createAssociatedTokenAccountIdempotentInstruction(owner, recipient, feeOwner, usdc)]), createTransferCheckedInstruction(source, usdc, recipient, owner, amounts.fee, 6), ...swapIxs, ...depositIxs, ...(swap.cleanupInstruction ? [decodeIx(swap.cleanupInstruction)] : [])].filter((ix, index) => index === 0 || !ix.programId.equals(ComputeBudgetProgram.programId)));
+    // Entry is free: no fee transfer (including zero-value transfers) or fee ATA creation.
+    const instructions = compactDepositInstructions([ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 }), ...swapIxs, ...depositIxs, ...(swap.cleanupInstruction ? [decodeIx(swap.cleanupInstruction)] : [])].filter((ix, index) => index === 0 || !ix.programId.equals(ComputeBudgetProgram.programId)));
     const tables = await Promise.all(swap.addressLookupTableAddresses.map(async (address) => {
       const table = await connection.getAddressLookupTable(new PublicKey(address));
       if (!table.value) throw new Error("Tabla de direcciones no disponible");
@@ -116,13 +110,13 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
     if (bytes > 1232) return result(false, "La transacción supera 1232 bytes. No se divide ni se cobra la comisión por separado.");
     stage = "simulation";
     const positionAddress = derivePositionAddress(nft.publicKey);
-    const simulated = await connection.simulateTransaction(transaction, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: [recipient.toBase58(), positionAddress.toBase58()] } });
+    const simulated = await connection.simulateTransaction(transaction, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: [source.toBase58(), positionAddress.toBase58()] } });
     if (simulated.value.err) return { ...result(false, "La simulación de Solana rechazó la transacción compuesta. No se firmó ni envió; no se cobró comisión."), slot: simulated.context.slot, units: simulated.value.unitsConsumed };
-    const [feeAccount, positionAccount] = simulated.value.accounts ?? [];
+    const [sourceAccount, positionAccount] = simulated.value.accounts ?? [];
     let feeVerified = false, positionVerified = false;
-    if (feeAccount?.owner === TOKEN_PROGRAM_ID.toBase58() && feeAccount.data[0]) {
-      const decoded = AccountLayout.decode(Buffer.from(feeAccount.data[0], "base64"));
-      feeVerified = decoded.mint.equals(usdc) && decoded.owner.equals(feeOwner) && decoded.amount === (feeBefore?.amount ?? 0n) + amounts.fee;
+    if (sourceAccount?.owner === TOKEN_PROGRAM_ID.toBase58() && sourceAccount.data[0]) {
+      const decoded = AccountLayout.decode(Buffer.from(sourceAccount.data[0], "base64"));
+      feeVerified = amounts.fee === 0n && decoded.mint.equals(usdc) && decoded.owner.equals(owner) && decoded.amount >= balance.amount - amounts.gross && decoded.amount <= balance.amount;
     }
     if (positionAccount?.data[0]) {
       const state = cpAmmCoder.accounts.decode("Position", Buffer.from(positionAccount.data[0], "base64"));
@@ -133,7 +127,7 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
     // Pilot only: return the exact simulated message, partially signed by the
     // ephemeral position NFT key. The wallet owner still has to sign it.
     const prepared = verified && options.preparePilot ? (() => { transaction.sign([nft]); return { transaction: Buffer.from(transaction.serialize()).toString("base64"), lastValidBlockHeight: block.lastValidBlockHeight, position: positionAddress.toBase58() }; })() : undefined;
-    return { ...(prepared ? { prepared } : {}), ...result(feeVerified && positionVerified, feeVerified && positionVerified ? "Simulación satisfactoria: la comisión y la posición aparecen juntas en el estado simulado. No se ha movido dinero. Esto no habilita depósitos reales ni verifica retiros." : "Solana no rechazó la simulación, pero no se pudieron verificar ambos resultados; no se considera validada."), slot: simulated.context.slot, units: simulated.value.unitsConsumed, checks: { fee: feeVerified, position: positionVerified } };
+    return { ...(prepared ? { prepared } : {}), ...result(feeVerified && positionVerified, feeVerified && positionVerified ? "Simulación satisfactoria: entrada sin comisión operativa, gasto dentro del presupuesto y posición verificada. No se ha movido dinero ni se han verificado retiros." : "Solana no rechazó la simulación, pero no se pudieron verificar el presupuesto y la posición; no se considera validada."), slot: simulated.context.slot, units: simulated.value.unitsConsumed, checks: { fee: feeVerified, position: positionVerified } };
   } catch (error) {
     // Server-only diagnostics; strip any credential before logging.
     console.error("[deposit-simulation]", stage, String(error instanceof Error ? error.message : error).replace(/api-key=[^&\s"]+/gi, "api-key=***").slice(0, 500));

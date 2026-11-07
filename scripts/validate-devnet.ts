@@ -123,11 +123,10 @@ async function main() {
   const signature = await connection.sendRawTransaction(built.transaction.serialize(), { skipPreflight: false });
   const confirmed = await connection.confirmTransaction({ signature, ...block }, "confirmed");
   if (confirmed.value.err) throw new Error("Composed transaction failed");
-  const fee = await getAccount(connection, built.recipientAta);
   const position = await cp.fetchPositionState(derivePositionAddress(nft.publicKey));
-  if (fee.amount !== budget.fee || !position.pool.equals(depositPool) || position.unlockedLiquidity.isZero()) throw new Error("La lectura final no demuestra depósito y fee");
+  if (budget.fee !== 0n || !position.pool.equals(depositPool) || position.unlockedLiquidity.isZero()) throw new Error("La lectura final no demuestra depósito sin comisión de entrada");
   console.log(JSON.stringify({ network: "devnet", signature, testUsdcMint: testUsdc.toBase58(), swapPool: swapPool.toBase58(), depositPool: depositPool.toBase58(),
-    feeRaw: fee.amount.toString(), position: derivePositionAddress(nft.publicKey).toBase58(), bytes: built.transaction.serialize().length, units: simulation.value.unitsConsumed,
+    feeRaw: budget.fee.toString(), position: derivePositionAddress(nft.publicKey).toBase58(), bytes: built.transaction.serialize().length, units: simulation.value.unitsConsumed,
     mainnetEnabled: false, rollbackValidated: false }, null, 2));
 }
 main().catch(() => { console.error("Devnet validation stopped; no mainnet fallback. Inspect the current stage before retrying."); process.exitCode = 1; });

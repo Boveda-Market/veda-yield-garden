@@ -1,5 +1,5 @@
 import { ComputeBudgetProgram, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
-import { createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { FEE_WALLET } from "@/lib/fees";
 
 export const DEVNET_GENESIS = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG";
@@ -11,7 +11,7 @@ export function requireDevnet(genesis: string) {
 
 export function testDepositAmounts(gross: bigint) {
   if (gross <= 0n || gross > 18_446_744_073_709_551_615n) throw new Error("Importe de prueba inválido");
-  const fee = gross / 100n;
+  const fee = 0n;
   return { gross, fee, net: gross - fee };
 }
 
@@ -24,11 +24,8 @@ export function composeDevnetDeposit(input: {
   const amounts = testDepositAmounts(input.gross);
   const recipient = new PublicKey(FEE_WALLET);
   const recipientAta = getAssociatedTokenAddressSync(input.testUsdcMint, recipient);
-  const source = getAssociatedTokenAddressSync(input.testUsdcMint, input.owner);
   const instructions = [
     ComputeBudgetProgram.setComputeUnitLimit({ units: 1_200_000 }),
-    createAssociatedTokenAccountIdempotentInstruction(input.owner, recipientAta, recipient, input.testUsdcMint),
-    createTransferCheckedInstruction(source, input.testUsdcMint, recipientAta, input.owner, amounts.fee, 6),
     ...input.swap.filter((ix) => !ix.programId.equals(ComputeBudgetProgram.programId)),
     ...input.deposit.filter((ix) => !ix.programId.equals(ComputeBudgetProgram.programId)),
   ];

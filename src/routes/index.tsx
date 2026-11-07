@@ -96,7 +96,7 @@ function Dashboard({ mode, onModeChange }: { mode: AppMode; onModeChange: (mode:
   };
   const deposit = (v: Vault, amt: number) => {
     if (!canRunTrial(mode, session.authenticated, session.userId) || !user || !Number.isFinite(amt) || !validDeposit(String(amt), wallet)) return;
-    const values = transactionAmounts(amt);
+    const values = transactionAmounts(amt, "deposit");
     setPositions((ps) => [...ps, { id: crypto.randomUUID(), vaultId: v.id, principal: values.net, openedAt: Date.now(), claimed: 0 }]);
     setWallet((w) => w - values.gross); setDepositFor(null); notify(`Depósito de Prueba: ${fmt(values.net, 6)} créditos invertidos · cargo ficticio ${fmt(values.fee, 6)}`);
   };
@@ -121,7 +121,7 @@ function Dashboard({ mode, onModeChange }: { mode: AppMode; onModeChange: (mode:
         {!user && <Login mode={mode} />}
         {mode === "real" ? <RealOverview walletAddress={session.walletAddress} onDetails={setDetailsFor} /> : user ? (
           <>
-            <p className="mb-4 text-xs leading-5 text-muted-foreground">Prueba · créditos sin valor monetario · 1% ficticio por depósito, cosecha y liquidación. Un crédito simula un USDC; no se puede retirar ni convertir en dinero.</p>
+            <p className="mb-4 text-xs leading-5 text-muted-foreground">Prueba · créditos sin valor monetario · 0% de entrada y 1% ficticio de salida, en cosechas y liquidaciones. Un crédito simula un USDC; no se puede retirar ni convertir en dinero.</p>
             {session.walletAddress && <p className="mb-4 break-all text-xs text-muted-foreground">Wallet Solana conectada: {session.walletAddress}</p>}
             <section className="rounded-3xl p-7 md:p-10" style={{ background: "var(--gradient-hero)" }}>
               <p className="text-sm text-muted-foreground">Balance de Prueba · ficticio</p>
@@ -184,7 +184,7 @@ function Dashboard({ mode, onModeChange }: { mode: AppMode; onModeChange: (mode:
           <p className="font-semibold text-foreground">© {new Date().getFullYear()} Boveda Technologies LLC</p>
           <p className="mt-2">BÓVEDA es una interfaz concebida como no custodia para pools Meteora en Solana, con modos Real y Prueba independientes. El acceso utiliza Privy con email, Google, Phantom o Jupiter Wallet, según disponibilidad. Prueba utiliza 1,000 créditos iniciales sin valor monetario. Real aún no permite depósitos, cosechas, liquidaciones ni transferencias de cargos. No envíes fondos para operar en esta versión.</p>
           <p className="mt-3">Las estadísticas públicas provienen de DexScreener. Los APY y ganancias de Prueba son ilustrativos; no representan rendimientos reales ni garantizados. Proveer liquidez implica volatilidad, pérdida impermanente, fallos de contratos y posible pérdida total del capital. SPCX no implica afiliación con SpaceX ni acciones directas. Nada aquí constituye asesoría financiera, legal o fiscal. Boveda Technologies LLC no solicita claves privadas ni frases semilla.</p>
-          <p className="mt-3">Cargo operativo previsto para Real: 1% en USDC por depósito, cosecha y liquidación, descontado del importe bruto para operación y mantenimiento. Los costes de red y conversión son independientes. En Prueba el cargo es ficticio y no se transfiere a ninguna wallet.</p>
+          <p className="mt-3">Comisión operativa: 0% de entrada y 1% de salida, en cosechas y liquidaciones. En la liquidación SOL del piloto, el 1% se calcula sobre el mínimo bruto USDC protegido por slippage, excluyendo la renta SOL. Los costes de red y conversión son independientes. En Prueba el cargo es ficticio.</p>
           <nav className="mt-4 flex flex-wrap gap-5 text-primary"><Link to="/faq">Preguntas frecuentes</Link><Link to="/terminos">Términos y condiciones</Link><Link to="/privacidad">Política de privacidad</Link></nav>
         </div>
       </footer>
@@ -227,22 +227,22 @@ function DepositSheet({ vault, max, onClose, onConfirm }: { vault: Vault; max: n
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-lg bg-card">
         <DialogTitle className="pr-4 font-display text-xl">Prueba · Depositar en {vault.name}</DialogTitle>
-        <DialogDescription>Depósito con créditos ficticios y cargo simulado del 1%. No mueve dinero.</DialogDescription>
+        <DialogDescription>Depósito con créditos ficticios y comisión de entrada del 0%. No mueve dinero.</DialogDescription>
         <p className="mt-1 text-sm text-muted-foreground">Disponible: {fmt(max)} créditos</p>
         <div className="mt-6 flex items-center rounded-2xl bg-background px-5 py-4">
           <input aria-label="Importe del depósito" autoFocus inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="0.00" className="min-w-0 w-full bg-transparent font-display text-4xl font-bold outline-none" />
           <Button variant="ghost" size="sm" onClick={() => setAmt(String(transactionAmounts(max).gross))}>MÁX</Button>
         </div>
         <FeeBreakdown amount={preview} deposit />
-        <p className="text-xs text-muted-foreground">Ganancia ilustrativa anual antes de cargos de salida: {fmt(transactionAmounts(preview).net * vault.apy / 100)} créditos</p>
-        <AcceptTerms accepted={accepted} onChange={setAccepted} />
+        <p className="text-xs text-muted-foreground">Ganancia ilustrativa anual antes de cargos de salida: {fmt(transactionAmounts(preview, "deposit").net * vault.apy / 100)} créditos</p>
+        <AcceptTerms accepted={accepted} onChange={setAccepted} deposit />
         <Button disabled={!ok || !accepted} onClick={() => onConfirm(vault, n)} className="mt-2 w-full">Confirmar depósito de Prueba</Button>
     </DialogContent></Dialog>
   );
 }
 
-function AcceptTerms({ accepted, onChange }: { accepted: boolean; onChange: (value: boolean) => void }) {
-  return <label className="flex items-start gap-3 text-xs leading-5 text-muted-foreground"><input type="checkbox" checked={accepted} onChange={(e) => onChange(e.target.checked)} className="mt-1" /><span>Acepto el cargo del 1% y los <Link to="/terminos" className="text-primary underline">términos y condiciones</Link>.</span></label>;
+function AcceptTerms({ accepted, onChange, deposit = false }: { accepted: boolean; onChange: (value: boolean) => void; deposit?: boolean }) {
+  return <label className="flex items-start gap-3 text-xs leading-5 text-muted-foreground"><input type="checkbox" checked={accepted} onChange={(e) => onChange(e.target.checked)} className="mt-1" /><span>Acepto {deposit ? "la entrada sin comisión, la salida al 1%" : "el cargo de salida del 1%"} y los <Link to="/terminos" className="text-primary underline">términos y condiciones</Link>.</span></label>;
 }
 
 function WithdrawalReview({ kind, amount, onClose, onConfirm }: { kind: "harvest" | "exit"; amount: number; onClose: () => void; onConfirm: () => void }) {

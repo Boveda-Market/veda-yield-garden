@@ -41,7 +41,7 @@ describe("unsigned composed deposit simulation", () => {
       return new Transaction().add(new TransactionInstruction({ programId: new PublicKey(CHAIN_POOLS[1].pool), keys: [{ pubkey: params.positionNft, isSigner: true, isWritable: true }], data: Buffer.from([7]) }));
     });
     const data = Buffer.alloc(AccountLayout.span);
-    AccountLayout.encode({ mint: usdc, owner: new PublicKey(FEE_WALLET), amount: 10_000n, delegateOption: 0, delegate: PublicKey.default, state: 1, isNativeOption: 0, isNative: 0n, delegatedAmount: 0n, closeAuthorityOption: 0, closeAuthority: PublicKey.default }, data);
+    AccountLayout.encode({ mint: usdc, owner: new PublicKey(wallet), amount: 1_000_000n, delegateOption: 0, delegate: PublicKey.default, state: 1, isNativeOption: 0, isNative: 0n, delegatedAmount: 0n, closeAuthorityOption: 0, closeAuthority: PublicKey.default }, data);
     mocks.connection.simulateTransaction.mockResolvedValue({ context: { slot: 123 }, value: { err: null, unitsConsumed: 500_000, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [data.toString("base64"), "base64"] }, { data: ["AA==", "base64"] }] } });
     vi.stubGlobal("fetch", vi.fn(async (url, options) => {
       if (String(url).includes("quote?")) {
@@ -52,17 +52,20 @@ describe("unsigned composed deposit simulation", () => {
       return Response.json({ setupInstructions: [], swapInstruction: { programId: CHAIN_POOLS[0].pool, accounts: [], data: "AQ==" }, addressLookupTableAddresses: [] });
     }));
   });
-  it("simulates fee, Jupiter and Meteora in one message without sending", async () => {
+  it("simulates Jupiter and Meteora with 0% entry fee and no fee instructions", async () => {
     const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" });
     expect(result.success).toBe(true);
     expect(result.sent).toBe(false);
     expect(result.checks).toEqual({ fee: true, position: true });
-    expect(result.fee).toBe("0.01");
+    expect(result.fee).toBe("0");
+    expect(result.net).toBe("1");
     const [tx, options] = mocks.connection.simulateTransaction.mock.calls[0] ?? [];
     expect(tx).toBeInstanceOf(VersionedTransaction);
     expect(options.sigVerify).toBe(false);
     expect(options.replaceRecentBlockhash).toBe(true);
-    expect(tx.message.compiledInstructions).toHaveLength(5);
+    expect(tx.message.compiledInstructions).toHaveLength(3);
+    expect(mocks.getAccount).toHaveBeenCalledTimes(1);
+    expect(tx.message.compiledInstructions.some((ix: { programIdIndex: number }) => tx.message.staticAccountKeys[ix.programIdIndex].equals(TOKEN_PROGRAM_ID))).toBe(false);
     expect(options.accounts.addresses[0]).toBe(getAssociatedTokenAddressSync(usdc, new PublicKey(FEE_WALLET)).toBase58());
     expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
   });
@@ -71,15 +74,14 @@ describe("unsigned composed deposit simulation", () => {
     expect((await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" })).success).toBe(false);
     expect(mocks.connection.simulateTransaction).not.toHaveBeenCalled();
   });
-  it("omits only fee ATA setup when the existing account is validated", async () => {
+  it("does not read or create the fee ATA even when it already exists", async () => {
     mocks.getAccount.mockReset();
     mocks.getAccount.mockResolvedValueOnce({ amount: 2_000_000n }).mockResolvedValueOnce({ mint: usdc, owner: new PublicKey(FEE_WALLET), amount: 0n });
     const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" });
     expect(result.success).toBe(true);
     const [tx] = mocks.connection.simulateTransaction.mock.calls[0] ?? [];
-    expect(tx.message.compiledInstructions).toHaveLength(4);
-    const transfer = tx.message.compiledInstructions[1];
-    expect(Array.from(transfer.data)).toEqual([12, 16, 39, 0, 0, 0, 0, 0, 0, 6]);
+    expect(tx.message.compiledInstructions).toHaveLength(3);
+    expect(mocks.getAccount).toHaveBeenCalledTimes(1);
     expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
   });
   it("stops before Jupiter when the wallet has under 0.015 SOL", async () => {
@@ -96,7 +98,8 @@ describe("unsigned composed deposit simulation", () => {
   it("pilot returns the verified message without sending it", async () => {
     const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" }, { preparePilot: true });
     expect(result.success).toBe(true);
-    expect(VersionedTransaction.deserialize(Buffer.from(result.prepared!.transaction, "base64")).message.compiledInstructions).toHaveLength(5);
+    if (!result.prepared) throw new Error("Missing prepared transaction");
+    expect(VersionedTransaction.deserialize(Buffer.from(result.prepared.transaction, "base64")).message.compiledInstructions).toHaveLength(3);
     expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
   });
   it("pilot refuses any amount other than 1 USDC", async () => {

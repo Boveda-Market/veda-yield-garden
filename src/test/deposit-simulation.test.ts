@@ -3,9 +3,9 @@ import { simulationAmounts, simulationInput } from "@/lib/deposit-simulation";
 import { FEE_WALLET } from "@/lib/fees";
 
 describe("read-only deposit simulation", () => {
-  it("allocates exactly 1 percent in USDC and 99 percent net", () => {
-    expect(simulationAmounts("1")).toEqual({ gross: 1_000_000n, fee: 10_000n, net: 990_000n });
-    expect(simulationAmounts("2")).toEqual({ gross: 2_000_000n, fee: 20_000n, net: 1_980_000n });
+  it("allocates 0 percent entry fee and the full amount to conversion and deposit", () => {
+    expect(simulationAmounts("1")).toEqual({ gross: 1_000_000n, fee: 0n, net: 1_000_000n });
+    expect(simulationAmounts("2")).toEqual({ gross: 2_000_000n, fee: 0n, net: 2_000_000n });
   });
   it("keeps the specified fee recipient", () => {
     expect(FEE_WALLET).toBe("93bF1K1dWMJseMuf15WLaNt1diVGACQ9gUFA7szsSbs7");

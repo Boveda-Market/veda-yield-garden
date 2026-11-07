@@ -28,7 +28,7 @@ export function simulationAmounts(amount: string) {
   if (!whole) throw new Error("Importe inválido");
   const gross = BigInt(whole) * 1_000_000n + BigInt(fraction.padEnd(6, "0"));
   if (gross < 1_000_000n || gross > 2_000_000n) throw new Error("Simula entre 1 y 2 USDC");
-  const fee = gross / 100n;
+  const fee = 0n;
   return { gross, fee, net: gross - fee };
 }
 

@@ -8,7 +8,7 @@ Solana pool interface with independent **Real** and **Prueba** modes.
 - Prueba starts a new user with 1,000 fictitious credits. One credit simulates one USDC and has no monetary value. Local positions are isolated by Privy user ID.
 - Real reads live SOL, canonical USDC and wallet-owned Meteora position NFTs through a server-only Helius connection. Failed or incomplete queries stay unavailable rather than becoming zero. Unvalidated Token-2022 amount estimates are omitted. Financial operations remain disabled: it does not sign or transfer funds or fees. Never fund the app to use this version.
 - Pool details use exact-address DexScreener queries. Meteora URLs are copy-only.
-- The shared 1% calculation is simulated in Prueba. Mainnet transfers require validated pool operations, conversion quotes, user authorization, fee instructions and chain verification.
+- Entry/deposits have a 0% operational fee; exit/harvest and liquidation retain 1%. Prueba uses the same structure on fictitious credits. The authorized SOL liquidation pilot calculates 1% on the protected USDC minimum, excluding refunded SOL rent.
 - Email interest is stored privately with versioned explicit consent, independently of Privy.
 
 ## Real release prerequisites
@@ -23,7 +23,7 @@ Operator legal address, privacy contact and jurisdiction are still required for 
 
 ## Devnet validation
 
-Run `bun scripts/validate-devnet.ts` locally. The isolated harness checks devnet genesis, requires devnet SOL, creates six-decimal test mints and two Meteora pools, then composes a direct Meteora swap, a new-position deposit and the 1% test-USDC transfer into one v0 message. Two pools avoid quoting a deposit against a pool changed by the preceding swap. Jupiter is mainnet-only; this test does not validate Jupiter routing or the three production pools. Private test-wallet files live only under `/tmp`, never in the repository.
+Run `bun scripts/validate-devnet.ts` locally. The isolated harness checks devnet genesis, requires devnet SOL, creates six-decimal test mints and two Meteora pools, then composes a direct Meteora swap and a new-position deposit into one v0 message with no operational entry fee or fee account setup. Two pools avoid quoting a deposit against a pool changed by the preceding swap. Jupiter is mainnet-only; this test does not validate Jupiter routing or the three production pools. Private test-wallet files live only under `/tmp`, never in the repository.
 
 The first execution stopped before mint/pool creation because both devnet faucets failed and the test wallet had no SOL. Composition unit tests do not prove chain execution. Devnet simulation, confirmation, final balance/position assertions and a forced-failure rollback test must all pass before considering this flow validated. Mainnet remains disabled.
 
