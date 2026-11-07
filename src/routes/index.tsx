@@ -9,15 +9,16 @@ import { PoolDetails } from "@/components/pool-details";
 import { transactionAmounts, validDeposit } from "@/lib/fees";
 import { FeeBreakdown } from "@/components/fee-breakdown";
 import { EmailSignup } from "@/components/email-signup";
+import { Faq } from "@/components/faq";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BÓVEDA — Rendimiento en USDC sobre Solana" },
-      { name: "description", content: "Accede con Privy y wallets de Solana a BÓVEDA. Explora pools Meteora y prueba depósitos de USDC en demostración, sin movimientos reales." },
-      { property: "og:title", content: "BÓVEDA — Rendimiento en USDC" },
-      { property: "og:description", content: "Bóvedas SOL, MET y RWA sobre Meteora DAMM v2 en Solana." },
+      { title: "BÓVEDA — Bóvedas en Solana · Demostración" },
+      { name: "description", content: "Accede con Privy, Phantom o Jupiter Wallet. Consulta pools Meteora con estadísticas de DexScreener y prueba operaciones ficticias con cargo del 1%." },
+      { property: "og:title", content: "BÓVEDA — Bóvedas en Solana · Demostración" },
+      { property: "og:description", content: "Acceso con Privy, estadísticas públicas de pools y operaciones simuladas en USDC, sin transferencias reales." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -117,12 +118,12 @@ function Dashboard() {
             <p className="mb-4 text-xs text-muted-foreground">Demostración · saldos y cargos ficticios · 1% por depósito, cosecha y liquidación</p>
             {session.walletAddress && <p className="mb-4 break-all text-xs text-muted-foreground">Wallet Solana conectada: {session.walletAddress}</p>}
             <section className="rounded-3xl p-7 md:p-10" style={{ background: "var(--gradient-hero)" }}>
-              <p className="text-sm text-muted-foreground">Balance total</p>
+              <p className="text-sm text-muted-foreground">Balance total · ficticio</p>
               <p className="mt-1 font-display text-5xl font-bold tracking-tight md:text-6xl">{fmt(wallet + invested + earned)} <span className="text-2xl text-muted-foreground">USDC</span></p>
               <div className="mt-8 grid grid-cols-3 gap-4 text-sm">
                 <Stat label="Disponible" value={fmt(wallet)} />
                 <Stat label="Ganancias acumuladas" value={`+${fmt(earned, 4)}`} accent />
-                <Stat label="Rendimiento est. anual" value={`${fmt(yearly)}`} />
+                <Stat label="Ganancia anual ilustrativa" value={`${fmt(yearly)}`} />
               </div>
             </section>
 
@@ -158,7 +159,8 @@ function Dashboard() {
                   <div className="flex items-center justify-between text-xs text-muted-foreground"><span>Meteora DAMM v2</span><span>Riesgo {v.risk}</span></div>
                   <p className="mt-4 font-display text-xl font-semibold">{v.name}</p>
                   <p className="text-sm text-muted-foreground">{v.pair}</p>
-                  <p className="mt-5 font-display text-4xl font-bold text-primary">{v.apy}%<span className="ml-1 text-sm font-normal text-muted-foreground">APY est.</span></p>
+                  <p className="mt-5 font-display text-4xl font-bold text-primary">{v.apy}%<span className="ml-1 text-sm font-normal text-muted-foreground">APY ilustrativo</span></p>
+                  <p className="mt-2 text-xs text-muted-foreground">Ejemplo de simulación · no es una tasa verificada del pool.</p>
                   <p className="mt-3 flex-1 text-sm text-muted-foreground">{v.blurb}</p>
                    <Button variant="outline" className="mt-4 w-full" onClick={() => setDetailsFor(v)}>Detalles del pool</Button>
                   <Button onClick={() => setDepositFor(v)} className="mt-5 h-12">Depositar USDC</Button>
@@ -167,15 +169,17 @@ function Dashboard() {
             </div>
           </>
         )}
+        <Faq preview />
         <EmailSignup />
       </main>
 
       <footer className="border-t border-border">
         <div className="mx-auto max-w-5xl px-5 py-8 text-xs leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">© {new Date().getFullYear()} Boveda Technologies LLC</p>
-          <p className="mt-2">Bóveda es una interfaz de software no custodia que facilita la interacción con contratos inteligentes desplegados en la red Solana y en los protocolos de Meteora. Boveda Technologies LLC no custodia, controla ni tiene acceso a los fondos de los usuarios; las claves privadas permanecen bajo control exclusivo del usuario. Los rendimientos mostrados son estimaciones, no están garantizados y pueden variar. Proveer liquidez implica riesgos, incluidos pérdida impermanente, volatilidad, fallos de contratos inteligentes y pérdida total del capital. Nada en esta interfaz constituye asesoría financiera, legal o fiscal.</p>
-          <p className="mt-3">Versión de demostración: no hay movimientos reales de fondos. Cargo operativo: 1% en USDC por depósito, cosecha y liquidación.</p>
-          <nav className="mt-4 flex flex-wrap gap-5 text-primary"><Link to="/terminos">Términos y condiciones</Link><Link to="/privacidad">Política de privacidad</Link></nav>
+          <p className="mt-2">BÓVEDA es una demostración de una interfaz concebida como no custodia para pools Meteora en Solana. El acceso utiliza Privy con email, Google, Phantom o Jupiter Wallet, según disponibilidad. Conectar una wallet no habilita movimientos de fondos ni convierte los saldos ficticios en activos reales. Boveda Technologies LLC no solicita claves privadas ni frases semilla; las wallets se rigen por la configuración y los términos de sus proveedores.</p>
+          <p className="mt-3">Las estadísticas públicas provienen de DexScreener; los APY y las ganancias son ilustrativos, no garantizados. Una futura operación real implicaría volatilidad, pérdida impermanente, fallos de contratos y posible pérdida total del capital. SPCX no implica afiliación con SpaceX ni acciones directas. Nada aquí constituye asesoría financiera, legal o fiscal.</p>
+          <p className="mt-3">Cargo operativo simulado: 1% en USDC por depósito, cosecha y liquidación para operación y mantenimiento, descontado del importe bruto tras revisión. No se transfieren fondos ni cargos a la wallet del operador.</p>
+          <nav className="mt-4 flex flex-wrap gap-5 text-primary"><Link to="/faq">Preguntas frecuentes</Link><Link to="/terminos">Términos y condiciones</Link><Link to="/privacidad">Política de privacidad</Link></nav>
         </div>
       </footer>
 
@@ -195,14 +199,15 @@ function Login() {
   const { ready, login } = useBovedaSession();
   return (
     <section className="mx-auto mt-10 max-w-md rounded-3xl p-8" style={{ background: "var(--gradient-hero)" }}>
-      <h1 className="font-display text-4xl font-bold leading-tight tracking-tight">Tu dinero, trabajando en Solana.</h1>
-      <p className="mt-3 text-muted-foreground">Explora bóvedas de rendimiento en USDC sobre Solana.</p>
+      <h1 className="font-display text-4xl font-bold leading-tight">BÓVEDA</h1>
+      <p className="mt-3 text-muted-foreground">Explora pools de Solana y prueba bóvedas en USDC con un saldo ficticio.</p>
       <div className="mt-8 space-y-3">
         <Button disabled={!ready} onClick={() => login("email")} className="h-12 w-full">Continuar con email</Button>
         <Button disabled={!ready} variant="secondary" onClick={() => login("google")} className="h-12 w-full">Continuar con Google</Button>
-        <Button disabled={!ready} variant="outline" onClick={() => login("wallet")} className="h-12 w-full"><Wallet size={16} /> Phantom / Jupiter</Button>
+        <Button disabled={!ready} variant="outline" onClick={() => login("wallet")} className="h-12 w-full"><Wallet size={16} /> Phantom / Jupiter Wallet</Button>
       </div>
       <p className="mt-4 text-xs text-muted-foreground">Acceso con Privy · 1,000 USDC ficticios para probar. Sin depósitos ni transferencias reales.</p>
+      <p className="mt-3 text-xs leading-5 text-muted-foreground">Consulta los <Link to="/terminos" className="text-primary underline">términos</Link> y la <Link to="/privacidad" className="text-primary underline">privacidad</Link> antes de acceder.</p>
     </section>
   );
 }

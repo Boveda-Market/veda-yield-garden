@@ -1,7 +1,7 @@
 {
   "name": "BÓVEDA",
   "short_name": "Bóveda",
-  "description": "Bóvedas de rendimiento en USDC sobre Solana y Meteora.",
+  "description": "BÓVEDA: acceso con Privy y bóvedas de demostración en USDC sobre Solana, sin transferencias reales.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0b0d0c",

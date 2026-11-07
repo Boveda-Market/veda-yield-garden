@@ -1,4 +1,6 @@
 # Tasks
+- [x] Give all public copy a launch-ready tone while keeping accurate disclosures about simulated financial actions.
+- [x] Update website, terms and privacy for Privy, Phantom and Jupiter Wallet; add and verify public FAQs.
 - [x] Fix Phantom login options and verify Phantom and Solflare appear directly in the wallet selection; full authorization remains blocked by the Privy origin restriction and requires a real wallet.
 - [x] Replace external pool links with an internal pool details view.
 - [x] Display public price, volume and liquidity with honest unavailable states and copy-only URL.
