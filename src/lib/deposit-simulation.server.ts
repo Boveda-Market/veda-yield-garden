@@ -8,6 +8,7 @@ import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, solanaAddressSchema } from "@/lib/solana-data";
 import { FEE_WALLET } from "@/lib/fees";
 import { simulationAmounts, simulationDisplay, type SimulationInput, type SimulationResult, type SimulationStage } from "@/lib/deposit-simulation";
+import { compactDepositInstructions } from "@/lib/compact-deposit";
 
 const ixSchema = z.object({ programId: solanaAddressSchema, accounts: z.array(z.object({ pubkey: solanaAddressSchema, isSigner: z.boolean(), isWritable: z.boolean() })).max(128), data: z.string().max(20_000) });
 const swapSchema = z.object({ setupInstructions: z.array(ixSchema), swapInstruction: ixSchema, cleanupInstruction: ixSchema.nullable().optional(), otherInstructions: z.array(ixSchema).optional(), addressLookupTableAddresses: z.array(solanaAddressSchema).max(16) });
@@ -80,6 +81,7 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput): P
     const feeOwner = new PublicKey(FEE_WALLET);
     const recipient = getAssociatedTokenAddressSync(usdc, feeOwner);
     const feeBefore = await getAccount(connection, recipient).catch(() => null);
+    if (feeBefore && (!feeBefore.mint.equals(usdc) || !feeBefore.owner.equals(feeOwner))) return result(false, "La cuenta de recaudo no coincide con USDC y su destinatario.");
     const swapIxs = [...swap.setupInstructions, ...(swap.otherInstructions ?? []), swap.swapInstruction].map(decodeIx);
     // Jupiter supplies wrapped SOL already. Do not wrap additional wallet SOL.
     const depositIxs = deposit.instructions.filter((ix) => {
@@ -88,7 +90,9 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput): P
       const transfer = SystemInstruction.decodeTransfer(ix);
       return !transfer.toPubkey.equals(getAssociatedTokenAddressSync(NATIVE_MINT, owner));
     });
-    const instructions = [ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 }), createAssociatedTokenAccountIdempotentInstruction(owner, recipient, feeOwner, usdc), createTransferCheckedInstruction(source, usdc, recipient, owner, amounts.fee, 6), ...swapIxs, ...depositIxs, ...(swap.cleanupInstruction ? [decodeIx(swap.cleanupInstruction)] : [])].filter((ix, index) => index === 0 || !ix.programId.equals(ComputeBudgetProgram.programId));
+    // A confirmed, validated existing fee ATA needs no creation instruction.
+    // Jupiter and Meteora can also repeat the same idempotent ATA setup.
+    const instructions = compactDepositInstructions([ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 }), ...(feeBefore ? [] : [createAssociatedTokenAccountIdempotentInstruction(owner, recipient, feeOwner, usdc)]), createTransferCheckedInstruction(source, usdc, recipient, owner, amounts.fee, 6), ...swapIxs, ...depositIxs, ...(swap.cleanupInstruction ? [decodeIx(swap.cleanupInstruction)] : [])].filter((ix, index) => index === 0 || !ix.programId.equals(ComputeBudgetProgram.programId)));
     const tables = await Promise.all(swap.addressLookupTableAddresses.map(async (address) => {
       const table = await connection.getAddressLookupTable(new PublicKey(address));
       if (!table.value) throw new Error("Tabla de direcciones no disponible");

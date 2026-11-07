@@ -66,6 +66,17 @@ describe("unsigned composed deposit simulation", () => {
     expect((await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" })).success).toBe(false);
     expect(mocks.connection.simulateTransaction).not.toHaveBeenCalled();
   });
+  it("omits only fee ATA setup when the existing account is validated", async () => {
+    mocks.getAccount.mockReset();
+    mocks.getAccount.mockResolvedValueOnce({ amount: 2_000_000n }).mockResolvedValueOnce({ mint: usdc, owner: new PublicKey(FEE_WALLET), amount: 0n });
+    const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" });
+    expect(result.success).toBe(true);
+    const [tx] = mocks.connection.simulateTransaction.mock.calls[0] ?? [];
+    expect(tx.message.compiledInstructions).toHaveLength(4);
+    const transfer = tx.message.compiledInstructions[1];
+    expect(Array.from(transfer.data)).toEqual([12, 16, 39, 0, 0, 0, 0, 0, 0, 6]);
+    expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
+  });
   it("does not report success when Solana rejects the atomic transaction", async () => {
     mocks.connection.simulateTransaction.mockResolvedValue({ context: { slot: 123 }, value: { err: { InstructionError: [4, "Custom"] } } });
     const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" });

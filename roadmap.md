@@ -1,4 +1,5 @@
 # Tasks
+- [x] Compact oversized atomic simulations by removing only redundant idempotent ATA setup and validated existing fee ATA creation; regression reproduces 1237 bytes and fits below 1232 preserving fee and deposit. Exact funded-wallet simulation remains pending above; size guard is unchanged.
 - [x] Implement read-only mainnet simulation dialogue and atomic Jupiter + Meteora + 1% fee composition; tests verify result checks and no send. Jupiter quote and instructions return HTTP 200. Desktop and mobile pool/saldo checks pass without console errors; no signing or sending.
 - [ ] Verify successful complete simulation against a supplied funded public wallet — fee wallet has insufficient associated USDC, so live check stops before Jupiter/deposit. Need a public wallet address with existing USDC/SOL (no keys or signatures). SPCX remains blocked until Token-2022 extension accounting is verified.
 - [ ] Enable wallet-signed mainnet deposit, harvest and liquidation with atomic 1% USDC fee only after devnet composition, confirmation and rollback checks pass; also validate Jupiter conversions and Token-2022 behavior before release.
