@@ -15,6 +15,8 @@ const ixSchema = z.object({ programId: solanaAddressSchema, accounts: z.array(z.
 const swapSchema = z.object({ setupInstructions: z.array(ixSchema), swapInstruction: ixSchema, cleanupInstruction: ixSchema.nullable().optional(), otherInstructions: z.array(ixSchema).optional(), addressLookupTableAddresses: z.array(solanaAddressSchema).max(16) });
 const quoteSchema = z.object({ inputMint: z.string(), outputMint: z.string(), inAmount: z.string().regex(/^\d+$/), outAmount: z.string().regex(/^\d+$/), otherAmountThreshold: z.string().regex(/^\d+$/), swapMode: z.literal("ExactIn") }).passthrough();
 
+export const MIN_SOL_LAMPORTS = 15_000_000;
+
 async function jupiter(path: string, body?: unknown) {
   // The keyless Jupiter API rate-limits bursts; back off on 429 only.
   for (let attempt = 0; ; attempt++) {
@@ -54,6 +56,9 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
     const balance = await getAccount(connection, source).catch(() => null);
     if (!balance || balance.amount < amounts.gross) return result(false, "La cuenta USDC asociada de esta wallet no tiene el importe necesario. No se inventan saldos para simular.");
 
+    // Meteora opens a position account, NFT mint and NFT account (~0.0099 SOL
+    // refundable rent) plus temporary token accounts and network fees.
+    if (await connection.getBalance(owner) < MIN_SOL_LAMPORTS) return result(false, "Se necesitan al menos 0.015 SOL en la wallet para las cuentas de Meteora (reembolsables al cerrar) y los costes de red.");
     stage = "jupiter";
     // Quote against the pool's actual ratio rather than assuming a 50/50 pool.
     // Binary search balances remaining USDC against the other token required.

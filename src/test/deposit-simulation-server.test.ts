@@ -7,7 +7,7 @@ import { AccountLayout, getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "
 import { FEE_WALLET } from "@/lib/fees";
 import { CHAIN_POOLS, USDC_MINT } from "@/lib/solana-data";
 
-const mocks = vi.hoisted(() => ({ connection: { getGenesisHash: vi.fn(), getLatestBlockhash: vi.fn(), getAddressLookupTable: vi.fn(), simulateTransaction: vi.fn(), sendRawTransaction: vi.fn() }, getAccount: vi.fn(), pool: vi.fn(), deposit: vi.fn(), decode: vi.fn() }));
+const mocks = vi.hoisted(() => ({ connection: { getGenesisHash: vi.fn(), getBalance: vi.fn(), getLatestBlockhash: vi.fn(), getAddressLookupTable: vi.fn(), simulateTransaction: vi.fn(), sendRawTransaction: vi.fn() }, getAccount: vi.fn(), pool: vi.fn(), deposit: vi.fn(), decode: vi.fn() }));
 vi.mock("@/lib/solana-read.server", () => ({ heliusConnection: () => mocks.connection }));
 vi.mock("@solana/spl-token", async (original) => ({ ...await original<typeof import("@solana/spl-token")>(), getAccount: mocks.getAccount }));
 vi.mock("@meteora-ag/cp-amm-sdk", async (original) => {
@@ -27,6 +27,7 @@ describe("unsigned composed deposit simulation", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mocks.connection.getGenesisHash.mockResolvedValue("5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d");
+    mocks.connection.getBalance.mockResolvedValue(20_000_000);
     mocks.connection.getLatestBlockhash.mockResolvedValue({ blockhash: USDC_MINT });
     mocks.pool.mockResolvedValue({ tokenAMint: new PublicKey(CHAIN_POOLS[1].mint), tokenBMint: usdc, tokenAFlag: 0, tokenBFlag: 0, sqrtPrice: new BN(1), sqrtMinPrice: new BN(1), sqrtMaxPrice: new BN(2), collectFeeMode: 0, tokenAAmount: new BN(1), tokenBAmount: new BN(1), liquidity: new BN(1) });
     let reads = 0;
@@ -80,6 +81,13 @@ describe("unsigned composed deposit simulation", () => {
     const transfer = tx.message.compiledInstructions[1];
     expect(Array.from(transfer.data)).toEqual([12, 16, 39, 0, 0, 0, 0, 0, 0, 6]);
     expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
+  });
+  it("stops before Jupiter when the wallet has under 0.015 SOL", async () => {
+    mocks.connection.getBalance.mockResolvedValue(14_999_999);
+    const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" }, { preparePilot: true });
+    expect(result.success).toBe(false);
+    expect(result.prepared).toBeUndefined();
+    expect(mocks.connection.simulateTransaction).not.toHaveBeenCalled();
   });
   it("plain simulations never return transaction bytes", async () => {
     const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" });

@@ -33,7 +33,11 @@ export function PilotDeposit({ vaultId }: { vaultId: string }) {
       setStep("signing");
       let sig: string;
       try { sig = await signAndSend(new Uint8Array(Buffer.from(prepared.prepared.transaction, "base64"))); }
-      catch { setStep("error"); setMessage("La firma se canceló o la wallet rechazó la transacción. No se envió nada desde BÓVEDA."); return; }
+      catch (error) {
+        const detail = error instanceof Error ? error.message.slice(0, 160) : "";
+        console.error("[pilot-deposit] wallet", detail);
+        setStep("error"); setMessage(`La firma se canceló o la wallet rechazó la transacción. No se envió nada desde BÓVEDA.${detail ? ` Detalle: ${detail}` : ""}`); return;
+      }
       setSignature(sig); setStep("confirming");
       for (let attempt = 0; attempt < 30; attempt++) {
         const { status: next } = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as PilotStatus }));
@@ -49,7 +53,7 @@ export function PilotDeposit({ vaultId }: { vaultId: string }) {
   if (!eligible) return <p className="border-t border-border pt-4 text-xs text-muted-foreground">El depósito piloto no está disponible para esta bóveda.</p>;
   return <section aria-labelledby="pilot-title" className="grid gap-3 border-t border-border pt-4 text-sm">
     <h3 id="pilot-title" className="font-semibold">Depósito piloto real · 1 USDC</h3>
-    <p role="note" className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs leading-5">Prueba piloto en Solana Mainnet con dinero real. Importe fijo de 1 USDC (0.01 USDC de comisión). <strong>Los retiros desde BÓVEDA («Cosechar Ganancias» y «Cerrar y Liquidar») aún no están verificados.</strong> La posición queda en tu wallet como NFT de Meteora.</p>
+    <p role="note" className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs leading-5">Prueba piloto en Solana Mainnet con dinero real. Importe fijo de 1 USDC (0.01 USDC de comisión). <strong>Los retiros desde BÓVEDA («Cosechar Ganancias» y «Cerrar y Liquidar») aún no están verificados.</strong> La posición queda en tu wallet como NFT de Meteora. Necesitas unos 0.015 SOL: ~0.01 SOL de depósito reembolsable de cuentas de Meteora más costes de red.</p>
     {!walletAddress ? <p className="text-xs text-muted-foreground">Inicia sesión con una wallet de Solana para firmar.</p> : <>
       <label className="flex items-start gap-3 text-xs leading-5"><Checkbox checked={accepted} disabled={busy} onCheckedChange={(value) => setAccepted(value === true)} aria-label="Acepto el riesgo del piloto" /><span>Entiendo que es dinero real, que la transacción no se puede revertir y que los retiros desde BÓVEDA no están verificados.</span></label>
       <Button disabled={!accepted || busy} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? labels[step] : "Firmar depósito piloto de 1 USDC"}</Button>
