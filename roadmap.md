@@ -1,4 +1,6 @@
 # Tasks
+- [x] Implement read-only mainnet simulation dialogue and atomic Jupiter + Meteora + 1% fee composition; tests verify result checks and no send. Jupiter quote and instructions return HTTP 200. Desktop and mobile pool/saldo checks pass without console errors; no signing or sending.
+- [ ] Verify successful complete simulation against a supplied funded public wallet — fee wallet has insufficient associated USDC, so live check stops before Jupiter/deposit. Need a public wallet address with existing USDC/SOL (no keys or signatures). SPCX remains blocked until Token-2022 extension accounting is verified.
 - [ ] Enable wallet-signed mainnet deposit, harvest and liquidation with atomic 1% USDC fee only after devnet composition, confirmation and rollback checks pass; also validate Jupiter conversions and Token-2022 behavior before release.
 - [x] Fix published HTTP 500 initialization — Anchor correction deployed; all four public pages respond HTTP 200. Financial execution stays disabled.
 - [ ] Fix published WalletConnect initialization error — browser events alias added; verify a new published client has no constructor error.

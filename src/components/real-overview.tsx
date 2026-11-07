@@ -4,8 +4,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { VAULTS, type Vault } from "@/lib/vaults";
 import { getRealWallet } from "@/lib/solana.functions";
+import { useState } from "react";
+import { DepositSimulation } from "@/components/deposit-simulation";
 
 export function RealOverview({ walletAddress, onDetails }: { walletAddress: string | null; onDetails: (vault: Vault) => void }) {
+  const [simulationVault, setSimulationVault] = useState<Vault | null>(null);
   const readWallet = useServerFn(getRealWallet);
   const query = useQuery({
     queryKey: ["real-solana", walletAddress],
@@ -41,6 +44,8 @@ export function RealOverview({ walletAddress, onDetails }: { walletAddress: stri
       <p className="mt-5 flex-1 text-sm leading-6 text-muted-foreground">{vault.blurb}</p>
       <p className="mt-4 text-xs text-muted-foreground">Depósitos no habilitados · sin APY verificado</p>
       <Button variant="outline" className="mt-4 w-full" onClick={() => onDetails(vault)}>Detalles del pool</Button>
+      <Button variant="secondary" className="mt-2 w-full" onClick={() => setSimulationVault(vault)}>Simular depósito USDC</Button>
     </article>)}</div>
+    {simulationVault && <DepositSimulation key={simulationVault.id} vault={simulationVault} wallet={walletAddress} onClose={() => setSimulationVault(null)} />}
   </>;
 }
