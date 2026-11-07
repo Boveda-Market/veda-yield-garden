@@ -38,3 +38,5 @@ use the editor.
 
 - Real and Prueba use separate mounted views; trial storage and mutation guards require verified Privy identity and trial mode so mode switching cannot treat credits as chain assets.
 - Mainnet execution remains unavailable until official SDK pool lifecycle, conversions, the USDC fee and chain confirmation pass end-to-end verification; never open this boundary with a UI or local-storage flag.
+- Helius reads run only inside server functions with a private credential and sanitized failures; expose narrowly validated public-chain queries, never arbitrary RPC forwarding or Cloud data access.
+- Real position discovery uses the official Meteora SDK and wallet-owned position NFTs filtered by exact pools and mints; integer token amounts stay distinct from USD, and unvalidated Token-2022 estimates remain unavailable.

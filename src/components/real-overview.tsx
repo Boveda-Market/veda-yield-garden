@@ -1,21 +1,40 @@
-import { ShieldAlert } from "lucide-react";
+import { RefreshCw, ShieldAlert } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { VAULTS, type Vault } from "@/lib/vaults";
+import { getRealWallet } from "@/lib/solana.functions";
 
 export function RealOverview({ walletAddress, onDetails }: { walletAddress: string | null; onDetails: (vault: Vault) => void }) {
+  const readWallet = useServerFn(getRealWallet);
+  const query = useQuery({
+    queryKey: ["real-solana", walletAddress],
+    queryFn: () => {
+      if (!walletAddress) throw new Error("Selecciona una wallet");
+      return readWallet({ data: { wallet: walletAddress } });
+    },
+    enabled: Boolean(walletAddress), staleTime: 30_000, retry: false,
+  });
+  const data = query.data?.success ? query.data.data : null;
+  const unavailable = query.isFetching ? "Consultando…" : "No disponible";
   return <>
     <section aria-label="Estado del modo Real" className="border-y border-border py-8">
       <div className="flex items-center gap-3"><ShieldAlert className="shrink-0 text-primary" size={24} /><h1 className="font-display text-2xl font-semibold">BÓVEDA · Real</h1></div>
       <p role="status" className="mt-4 font-semibold">Operaciones aún no disponibles</p>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Los depósitos, cosechas, liquidaciones y cargos en Solana todavía no están habilitados. No envíes fondos para operar en BÓVEDA.</p>
-      {walletAddress && <p className="mt-4 break-all text-xs text-muted-foreground">Wallet conectada: {walletAddress}</p>}
+      {walletAddress && <div className="mt-4 flex flex-wrap items-center gap-3"><p className="min-w-0 break-all text-xs text-muted-foreground">Wallet conectada: {walletAddress}</p><Button variant="outline" size="icon" title="Actualizar saldo y posiciones" aria-label="Actualizar saldo y posiciones" disabled={query.isFetching} onClick={() => void query.refetch()}><RefreshCw size={16} className={query.isFetching ? "animate-spin motion-reduce:animate-none" : ""} /></Button></div>}
+      {query.data && !query.data.success && <p role="alert" className="mt-3 text-sm text-destructive">{query.data.error}</p>}
+      {query.isError && <p role="alert" className="mt-3 text-sm text-destructive">No se pudo consultar Solana. Inténtalo de nuevo.</p>}
       <dl className="mt-6 grid gap-5 sm:grid-cols-3">
-        <div><dt className="text-sm text-muted-foreground">Saldo USDC en Solana</dt><dd className="mt-1 font-display text-xl">No consultado</dd></div>
-        <div><dt className="text-sm text-muted-foreground">Posiciones en Solana</dt><dd className="mt-1 font-display text-xl">No consultadas</dd></div>
-        <div><dt className="text-sm text-muted-foreground">Ganancias disponibles</dt><dd className="mt-1 font-display text-xl">No consultadas</dd></div>
+        <div><dt className="text-sm text-muted-foreground">Saldo USDC en Solana</dt><dd className="mt-1 break-all font-display text-xl">{data ? `${data.usdc} USDC` : walletAddress ? unavailable : "Conecta tu wallet"}</dd></div>
+        <div><dt className="text-sm text-muted-foreground">SOL para costes de red</dt><dd className="mt-1 break-all font-display text-xl">{data ? `${data.sol} SOL` : walletAddress ? unavailable : "Conecta tu wallet"}</dd></div>
+        <div><dt className="text-sm text-muted-foreground">Posiciones en estos pools</dt><dd className="mt-1 font-display text-xl">{data?.positionsComplete ? data.positions.length : walletAddress ? unavailable : "Conecta tu wallet"}</dd></div>
       </dl>
+      {data && <p className="mt-4 text-xs text-muted-foreground">Lectura confirmada en Solana · {new Date(data.checkedAt).toLocaleTimeString("es-MX")} · no autoriza movimientos</p>}
+      {data && !data.positionsComplete && <p role="status" className="mt-3 text-sm text-muted-foreground">La consulta de posiciones está incompleta. No se puede concluir que no tengas posiciones.</p>}
       <p className="mt-5 text-xs leading-5 text-muted-foreground">Los créditos y las posiciones de Prueba no aparecen en Real y no se pueden convertir en dinero.</p>
     </section>
+    {data && data.positions.length > 0 && <section aria-label="Posiciones reales" className="border-b border-border py-8"><h2 className="font-display text-lg font-semibold">Mis posiciones en Solana</h2><p className="mt-2 text-xs leading-5 text-muted-foreground">Estimaciones en tokens, no valor total en USD ni mínimos de liquidación. Bloqueos, precios y costes pueden alterar el resultado.</p><div className="mt-4 space-y-4">{data.positions.map((position) => <article key={position.address} className="rounded-lg border border-border bg-card p-5"><h3 className="font-display font-semibold">{VAULTS.find((vault) => vault.id === position.vaultId)?.name ?? `${position.symbol}/USDC`}</h3><p className="mt-2 break-all font-mono text-xs text-muted-foreground">{position.address}</p><p className="mt-3 break-all text-sm">Liquidez estimada: {position.tokenAmount === null ? "No disponible" : `${position.tokenAmount} ${position.symbol} + ${position.usdcAmount} USDC`}</p><p className="mt-2 break-all text-sm text-muted-foreground">Comisiones acumuladas: {position.feeTokenAmount === null ? "No disponibles" : `${position.feeTokenAmount} ${position.symbol} + ${position.feeUsdcAmount} USDC`}</p>{position.locked && <p className="mt-2 text-xs text-muted-foreground">Incluye liquidez bloqueada; no toda la posición es retirable.</p>}<p className="mt-3 text-xs text-muted-foreground">Cosecha y liquidación aún no habilitadas</p></article>)}</div></section>}
     <h2 className="mb-4 mt-10 font-display text-lg font-semibold">Pools de Meteora</h2>
     <div className="grid gap-4 md:grid-cols-3">{VAULTS.map((vault) => <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
       <p className="text-xs text-muted-foreground">Meteora DAMM v2</p><h3 className="mt-4 font-display text-xl font-semibold">{vault.name}</h3><p className="mt-1 text-sm text-muted-foreground">{vault.pair}</p>
