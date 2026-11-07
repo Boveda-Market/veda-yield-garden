@@ -1,4 +1,7 @@
 # Tasks
+- [ ] Add isolated Real and Prueba modes; Prueba starts with 1,000 fictitious credits.
+- [ ] Implement and verify real Solana USDC / Meteora deposits, harvests, liquidation and 1% fee transfers before enabling money actions.
+- [ ] Update all website documentation, terms, privacy and FAQs for both modes without misrepresenting availability.
 - [x] Investigate FAQ runtime crash and remove its third-party accordion dependency; verify native disclosures on desktop and mobile.
 - [x] Give all public copy a launch-ready tone while keeping accurate disclosures about simulated financial actions.
 - [x] Update website, terms and privacy for Privy, Phantom and Jupiter Wallet; add and verify public FAQs.
