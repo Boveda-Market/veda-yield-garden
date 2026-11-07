@@ -200,7 +200,7 @@ function Login() {
       <div className="mt-8 space-y-3">
         <Button disabled={!ready} onClick={() => login("email")} className="h-12 w-full">Continuar con email</Button>
         <Button disabled={!ready} variant="secondary" onClick={() => login("google")} className="h-12 w-full">Continuar con Google</Button>
-        <Button disabled={!ready} variant="outline" onClick={() => login("wallet")} className="h-12 w-full"><Wallet size={16} /> Phantom / Solflare</Button>
+        <Button disabled={!ready} variant="outline" onClick={() => login("wallet")} className="h-12 w-full"><Wallet size={16} /> Phantom / Jupiter</Button>
       </div>
       <p className="mt-4 text-xs text-muted-foreground">Acceso con Privy · 1,000 USDC ficticios para probar. Sin depósitos ni transferencias reales.</p>
     </section>
