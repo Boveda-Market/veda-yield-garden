@@ -15,12 +15,16 @@ const swapSchema = z.object({ setupInstructions: z.array(ixSchema), swapInstruct
 const quoteSchema = z.object({ inputMint: z.string(), outputMint: z.string(), inAmount: z.string().regex(/^\d+$/), outAmount: z.string().regex(/^\d+$/), otherAmountThreshold: z.string().regex(/^\d+$/), swapMode: z.literal("ExactIn") }).passthrough();
 
 async function jupiter(path: string, body?: unknown) {
-  const response = await fetch(`https://api.jup.ag/swap/v1/${path}`, {
-    method: body ? "POST" : "GET", headers: { "Content-Type": "application/json" },
-    ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(20_000),
-  });
-  if (!response.ok) throw new Error("Jupiter no está disponible para esta simulación");
-  return response.json();
+  // The keyless Jupiter API rate-limits bursts; back off on 429 only.
+  for (let attempt = 0; ; attempt++) {
+    const response = await fetch(`https://api.jup.ag/swap/v1/${path}`, {
+      method: body ? "POST" : "GET", headers: { "Content-Type": "application/json" },
+      ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(20_000),
+    });
+    if (response.status === 429 && attempt < 5) { await new Promise((resolve) => setTimeout(resolve, 1_200 * (attempt + 1))); continue; }
+    if (!response.ok) throw new Error(`Jupiter no está disponible para esta simulación (${response.status})`);
+    return response.json();
+  }
 }
 
 /** Read-only: no signatures, transaction bytes returned, broadcasting or funding overrides. */
@@ -113,11 +117,14 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput): P
       feeVerified = decoded.mint.equals(usdc) && decoded.owner.equals(feeOwner) && decoded.amount === (feeBefore?.amount ?? 0n) + amounts.fee;
     }
     if (positionAccount?.data[0]) {
-      const state = cpAmmCoder.accounts.decode("position", Buffer.from(positionAccount.data[0], "base64"));
-      positionVerified = state.pool.equals(poolAddress) && state.nftMint.equals(nft.publicKey) && state.unlockedLiquidity.gt(new BN(0));
+      const state = cpAmmCoder.accounts.decode("Position", Buffer.from(positionAccount.data[0], "base64"));
+      // The raw IDL coder keeps on-chain snake_case field names.
+      positionVerified = state.pool.equals(poolAddress) && state.nft_mint.equals(nft.publicKey) && state.unlocked_liquidity.gt(new BN(0));
     }
     return { ...result(feeVerified && positionVerified, feeVerified && positionVerified ? "Simulación satisfactoria: la comisión y la posición aparecen juntas en el estado simulado. No se ha movido dinero. Esto no habilita depósitos reales ni verifica retiros." : "Solana no rechazó la simulación, pero no se pudieron verificar ambos resultados; no se considera validada."), slot: simulated.context.slot, units: simulated.value.unitsConsumed, checks: { fee: feeVerified, position: positionVerified } };
-  } catch {
+  } catch (error) {
+    // Server-only diagnostics; strip any credential before logging.
+    console.error("[deposit-simulation]", stage, String(error instanceof Error ? error.message : error).replace(/api-key=[^&\s"]+/gi, "api-key=***").slice(0, 500));
     return result(false, stage === "jupiter" ? "Jupiter no pudo cotizar o preparar esta ruta. La simulación no se completó y no se ha movido dinero." : "No se pudo completar esta etapa de la simulación. No se firmó ni envió ninguna transacción.");
   }
 }

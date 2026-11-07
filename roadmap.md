@@ -1,7 +1,8 @@
 # Tasks
 - [x] Compact oversized atomic simulations by removing only redundant idempotent ATA setup and validated existing fee ATA creation; regression reproduces 1237 bytes and fits below 1232 preserving fee and deposit. Exact funded-wallet simulation remains pending above; size guard is unchanged.
 - [x] Implement read-only mainnet simulation dialogue and atomic Jupiter + Meteora + 1% fee composition; tests verify result checks and no send. Jupiter quote and instructions return HTTP 200. Desktop and mobile pool/saldo checks pass without console errors; no signing or sending.
-- [ ] Verify successful complete simulation against a supplied funded public wallet — fee wallet has insufficient associated USDC, so live check stops before Jupiter/deposit. Need a public wallet address with existing USDC/SOL (no keys or signatures). SPCX remains blocked until Token-2022 extension accounting is verified.
+- [x] Verify successful complete simulation against a funded public wallet — SOL (1158 bytes) and MET (1146 bytes) pass with fee and position both confirmed in simulated state after fixing the position readback decode and Jupiter 429 backoff. SPCX remains blocked until Token-2022 extension accounting is verified.
+- [ ] Before any real deposit: signing/sending path, confirmation, and verified Harvest/Close withdrawals remain unbuilt and unverified.
 - [ ] Enable wallet-signed mainnet deposit, harvest and liquidation with atomic 1% USDC fee only after devnet composition, confirmation and rollback checks pass; also validate Jupiter conversions and Token-2022 behavior before release.
 - [x] Fix published HTTP 500 initialization — Anchor correction deployed; all four public pages respond HTTP 200. Financial execution stays disabled.
 - [ ] Fix published WalletConnect initialization error — browser events alias added; verify a new published client has no constructor error.

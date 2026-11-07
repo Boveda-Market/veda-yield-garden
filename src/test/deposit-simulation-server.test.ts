@@ -32,7 +32,11 @@ describe("unsigned composed deposit simulation", () => {
     let reads = 0;
     mocks.getAccount.mockImplementation(async () => { if (reads++ === 0) return { amount: 2_000_000n }; throw new Error("Absent fee account"); });
     mocks.deposit.mockImplementation(async (params) => {
-      mocks.decode.mockReturnValue({ pool: params.pool, nftMint: params.positionNft, unlockedLiquidity: new BN(995) });
+      mocks.decode.mockImplementation((name: string) => {
+        // Mirror the raw IDL coder: PascalCase account name, snake_case fields.
+        if (name !== "Position") throw new Error(`Account not found: ${name}`);
+        return { pool: params.pool, nft_mint: params.positionNft, unlocked_liquidity: new BN(995) };
+      });
       return new Transaction().add(new TransactionInstruction({ programId: new PublicKey(CHAIN_POOLS[1].pool), keys: [], data: Buffer.from([7]) }));
     });
     const data = Buffer.alloc(AccountLayout.span);
