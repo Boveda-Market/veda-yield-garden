@@ -10,6 +10,19 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  vite: {
+    plugins: [{
+      name: "solana-worker-browser-exports",
+      // The final Nitro Worker bundle resolves packages separately from SSR.
+      // These pure-JS Solana dependencies export browser/node, but not worker.
+      // Use their Web-compatible implementation; never externalize them.
+      configEnvironment(name, config) {
+        if (name !== "nitro") return;
+        const conditions = config.resolve?.conditions ?? ["workerd", "worker", "production", "wasm", "unwasm"];
+        return { resolve: { conditions: [...new Set([...conditions, "browser"])] } };
+      },
+    }],
+  },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this

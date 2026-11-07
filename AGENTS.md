@@ -41,3 +41,4 @@ use the editor.
 - Helius reads run only inside server functions with a private credential and sanitized failures; expose narrowly validated public-chain queries, never arbitrary RPC forwarding or Cloud data access.
 - Real position discovery uses the official Meteora SDK and wallet-owned position NFTs filtered by exact pools and mints; integer token amounts stay distinct from USD, and unvalidated Token-2022 estimates remain unavailable.
 - Devnet transaction validation stays in a local-only harness, verifies genesis before signing or sending, and uses fresh test mints/pools; compose fee, swap and deposit in one message and reject oversized messages rather than splitting the fee.
+- The final Nitro Worker environment includes the browser export condition for Solana packages that have no worker/default export; preserve existing conditions and fully bundle dependencies rather than externalizing Node entries.

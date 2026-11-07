@@ -1,4 +1,5 @@
 # Tasks
+- [x] Fix missing Worker export conditions for rpc-websockets and nested Solana codecs; watched build is OK and 15 targeted tests pass. Request republish and confirm deployment separately; mainnet stays disabled.
 - [ ] Validate devnet-only composed swap + Meteora deposit + 1% test-USDC fee — composition and isolated harness implemented; blocked before setup because public and Helius devnet faucets failed. Fund test wallet 9oYjewM9HDHk9yPj8vJy11njvJjxD1Q1YYhJiq9pX8Kn with at least 0.5 devnet SOL (no real funds). Then finish simulation, confirmation, balance/position verification and forced-failure rollback. Mainnet stays disabled.
 - [x] Connect Helius privately; verify getSlot, all three pool mints, and a public wallet read through the app. Thirty tests pass; mobile and desktop public views verified. Connected-wallet UI and nonempty positions remain unverified without the user's Privy wallet authorization.
 - [x] Add isolated Real and Prueba modes; Prueba starts with 1,000 fictitious credits. Verify mode guards, public selector and unavailable Real state; authenticated trial flow remains unverified pending Privy authorization below.
