@@ -6,10 +6,11 @@ import { Keypair, PublicKey, Transaction, TransactionInstruction } from "@solana
 import { AccountLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { CHAIN_POOLS, USDC_MINT } from "@/lib/solana-data";
 import { FEE_WALLET } from "@/lib/fees";
+import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
 
 const mocks = vi.hoisted(() => ({ genesis: vi.fn(), owned: vi.fn(), pool: vi.fn(), before: vi.fn(), simulate: vi.fn(), remove: vi.fn(), send: vi.fn() }));
 vi.mock("@/lib/solana-read.server", () => ({ heliusConnection: () => ({ getGenesisHash: mocks.genesis, getMultipleAccountsInfo: mocks.before, getLatestBlockhash: async () => ({ blockhash: USDC_MINT }), getFeeForMessage: async () => ({ value: 0 }), simulateTransaction: mocks.simulate, sendRawTransaction: mocks.send }) }));
-vi.mock("@meteora-ag/cp-amm-sdk", () => ({ CpAmm: class { getPositionsByUser = mocks.owned; fetchPoolState = mocks.pool; removeAllLiquidityAndClosePosition = mocks.remove; getWithdrawQuote = () => ({ outAmountA: new BN(0), outAmountB: new BN(1_000_000) }); } }));
+vi.mock("@meteora-ag/cp-amm-sdk", () => ({ getCurrentPoint: async () => new BN(1), CpAmm: class { getPositionsByUser = mocks.owned; fetchPoolState = mocks.pool; removeAllLiquidityAndClosePosition = mocks.remove; getWithdrawQuote = () => ({ outAmountA: new BN(100), outAmountB: new BN(1_000_000) }); } }));
 import { simulateWithdrawal } from "@/lib/withdrawal.server";
 
 describe("full-close withdrawal simulation", () => {
@@ -30,14 +31,16 @@ describe("full-close withdrawal simulation", () => {
     let call = 0;
     mocks.simulate.mockImplementation(async () => {
       const final = ++call === 3;
-      return { value: { err: null, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 990_000n : 1_000_000n, owner).toString("base64"), "base64"], lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 10_000n : 0n, new PublicKey(FEE_WALLET)).toString("base64"), "base64"], lamports: 2_000_000 }, null, null, null, { lamports: 27_000_000 }] } };
+      return { value: { err: null, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 990_050n : 1_000_000n, owner).toString("base64"), "base64"], lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 9_950n : 0n, new PublicKey(FEE_WALLET)).toString("base64"), "base64"], lamports: 2_000_000 }, null, null, null, { lamports: 27_000_000 }] } };
     });
   });
   it("checks net USDC, 1% fee and all three NFT rent closures without signing or sending", async () => {
     const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" });
     expect(result.success).toBe(true);
     expect(result.checks).toEqual({ closed: true, usdc: true, fee: true, rent: true });
-    expect(result.net).toBe("0.99");
+    expect(result.net).toBe("0.99005");
+    expect(result.minimumGross).toBe("0.995");
+    expect(result.fee).toBe("0.00995");
     expect(result.rentSol).toBe("0.007");
     expect(result).not.toHaveProperty("transaction");
     expect(mocks.send).not.toHaveBeenCalled();
@@ -67,19 +70,19 @@ describe("full-close withdrawal simulation", () => {
     expect(result.success).toBe(false);
     expect(result.checks?.rent).toBe(false);
   });
-  it("reports actual final USDC and rejects a fixed fee when proceeds vary", async () => {
+  it("returns upside to the user without changing the fee on the protected minimum", async () => {
     let call = 0;
     mocks.simulate.mockImplementation(async () => {
       const final = ++call === 3;
-      return { value: { err: null, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 1_010_000n : 1_000_000n, owner).toString("base64"), "base64"], lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 10_000n : 0n, new PublicKey(FEE_WALLET)).toString("base64"), "base64"], lamports: 2_000_000 }, null, null, null, { lamports: 27_000_000 }] } };
+      return { value: { err: null, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 1_010_050n : 1_000_000n, owner).toString("base64"), "base64"], lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 9_950n : 0n, new PublicKey(FEE_WALLET)).toString("base64"), "base64"], lamports: 2_000_000 }, null, null, null, { lamports: 27_000_000 }] } };
     });
     const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" });
-    expect(result.success).toBe(false);
-    expect(result.checks?.fee).toBe(false);
-    expect(result.net).toBe("1.01");
+    expect(result.success).toBe(true);
+    expect(result.checks?.fee).toBe(true);
+    expect(result.net).toBe("1.01005");
     expect(result.gross).toBe("1.02");
-    expect(result.fee).toBe("0.01");
-    expect(result.expectedFee).toBe("0.0102");
+    expect(result.fee).toBe("0.00995");
+    expect(result.expectedFee).toBe("0.00995");
     expect(result).not.toHaveProperty("transaction");
     expect(mocks.send).not.toHaveBeenCalled();
   });
@@ -100,7 +103,7 @@ describe("full-close withdrawal simulation", () => {
       return response;
     });
     const route = { swapInfo: { ammKey: CHAIN_POOLS[2].pool, label: "Raydium", inputMint: token.toBase58(), outputMint: USDC_MINT, inAmount: "100", outAmount: "500000", feeAmount: "1", feeMint: token.toBase58() }, percent: 100, bps: 10000 };
-    const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ inputMint: token.toBase58(), outputMint: USDC_MINT, inAmount: "100", otherAmountThreshold: "490000", swapMode: "ExactIn", routePlan: [route] }))).mockResolvedValueOnce(new Response(JSON.stringify({ setupInstructions: [], swapInstruction: { programId: CHAIN_POOLS[2].pool, accounts: [], data: "AQ==" }, addressLookupTableAddresses: [] })));
+    const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ inputMint: token.toBase58(), outputMint: USDC_MINT, inAmount: "99", otherAmountThreshold: "490000", swapMode: "ExactIn", routePlan: [route] }))).mockResolvedValueOnce(new Response(JSON.stringify({ setupInstructions: [], swapInstruction: { programId: CHAIN_POOLS[2].pool, accounts: [], data: "AQ==" }, addressLookupTableAddresses: [] })));
     vi.stubGlobal("fetch", fetchMock);
     try {
       await simulateWithdrawal("test", { wallet, position, vaultId: "met" });
@@ -108,5 +111,33 @@ describe("full-close withdrawal simulation", () => {
       expect(body.quoteResponse.routePlan).toEqual([route]);
       expect(mocks.send).not.toHaveBeenCalled();
     } finally { vi.unstubAllGlobals(); }
+  });
+  it("never prepares bytes for another owner or position", async () => {
+    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "10000", minimumNetRaw: "980000" });
+    expect(result.success).toBe(false);
+    expect(result.prepared).toBeUndefined();
+    expect(mocks.remove).not.toHaveBeenCalled();
+    expect(mocks.send).not.toHaveBeenCalled();
+  });
+  it("returns only the simulated unsigned message for the exact pilot owner and NFT", async () => {
+    const pilotOwner = new PublicKey(WITHDRAWAL_PILOT.wallet);
+    mocks.owned.mockResolvedValue([{ position: new PublicKey(WITHDRAWAL_PILOT.position), positionNftAccount: new PublicKey(CHAIN_POOLS[2].pool), positionState: { pool: new PublicKey(CHAIN_POOLS[0].pool), nftMint: new PublicKey(WITHDRAWAL_PILOT.nft), unlockedLiquidity: new BN(100), vestedLiquidity: new BN(0), permanentLockedLiquidity: new BN(0) } }]);
+    const pool = await mocks.pool();
+    mocks.pool.mockResolvedValue({ ...pool, tokenAMint: new PublicKey(CHAIN_POOLS[0].mint) });
+    mocks.before.mockResolvedValue([{ owner: TOKEN_PROGRAM_ID, data: tokenData(0n, pilotOwner), lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID, data: tokenData(0n, new PublicKey(FEE_WALLET)), lamports: 2_000_000 }, { lamports: 3_000_000 }, { lamports: 2_000_000 }, { lamports: 2_000_000 }, { lamports: 20_000_000 }]);
+    let count = 0;
+    mocks.simulate.mockImplementation(async (transaction) => {
+      expect(transaction.signatures.every((sig: Uint8Array) => sig.every((byte) => byte === 0))).toBe(true);
+      const final = ++count === 3;
+      return { value: { err: null, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 990_050n : 1_000_000n, pilotOwner).toString("base64"), "base64"], lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 9_950n : 0n, new PublicKey(FEE_WALLET)).toString("base64"), "base64"], lamports: 2_000_000 }, null, null, null, { lamports: 27_000_000 }] } };
+    });
+    const result = await simulateWithdrawal("test", WITHDRAWAL_PILOT, { prepare: true, maximumFeeRaw: "9950", minimumNetRaw: "985050" });
+    expect(result.success).toBe(true);
+    expect(result.prepared?.wallet).toBe(WITHDRAWAL_PILOT.wallet);
+    expect(result.prepared?.transaction).toBeTruthy();
+    expect(mocks.send).not.toHaveBeenCalled();
+    const worse = await simulateWithdrawal("test", WITHDRAWAL_PILOT, { prepare: true, maximumFeeRaw: "9949", minimumNetRaw: "985050" });
+    expect(worse.success).toBe(false);
+    expect(worse.prepared).toBeUndefined();
   });
 });
