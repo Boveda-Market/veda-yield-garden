@@ -1,7 +1,7 @@
 # Tasks
-- [ ] Add isolated Real and Prueba modes; Prueba starts with 1,000 fictitious credits.
-- [ ] Implement and verify real Solana USDC / Meteora deposits, harvests, liquidation and 1% fee transfers before enabling money actions.
-- [ ] Update all website documentation, terms, privacy and FAQs for both modes without misrepresenting availability.
+- [x] Add isolated Real and Prueba modes; Prueba starts with 1,000 fictitious credits. Verify mode guards, public selector and unavailable Real state; authenticated trial flow remains unverified pending Privy authorization below.
+- [ ] Implement and verify real Solana USDC / Meteora deposits, harvests, liquidation and 1% fee transfers before enabling money actions — waiting for configured Solana / conversion service access and an explicitly authorized wallet test; the SDK transaction integration remains unimplemented and Real is unavailable.
+- [x] Update all website documentation, terms, privacy and FAQs for both modes without misrepresenting availability; verify public routes and mobile layout.
 - [x] Investigate FAQ runtime crash and remove its third-party accordion dependency; verify native disclosures on desktop and mobile.
 - [x] Give all public copy a launch-ready tone while keeping accurate disclosures about simulated financial actions.
 - [x] Update website, terms and privacy for Privy, Phantom and Jupiter Wallet; add and verify public FAQs.
@@ -16,5 +16,4 @@
 - [x] Store consented email submissions privately and verify a real form submission.
 - [x] Connect Privy email, Google and Solana wallets using the supplied App ID; verify the email login dialog on desktop and mobile.
 - [ ] Verify complete Privy login and embedded wallet creation — blocked by Privy's allowed domains excluding localhost and the preview, and by needing the user's email verification or wallet authorization.
-- [ ] Activate actual fee transfers — blocked by missing Solana / Meteora transaction integration; Privy App ID is now supplied.
 - [ ] Finalize legal contact and jurisdiction — waiting for the operator's legal address, privacy email and applicable jurisdiction.

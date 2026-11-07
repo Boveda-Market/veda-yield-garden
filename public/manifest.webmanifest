@@ -1,7 +1,7 @@
 {
   "name": "BÓVEDA",
   "short_name": "Bóveda",
-  "description": "BÓVEDA: acceso con Privy y bóvedas de demostración en USDC sobre Solana, sin transferencias reales.",
+  "description": "BÓVEDA: pools de Solana y modos Real y Prueba. 1,000 créditos ficticios para probar; operaciones Real aún no habilitadas.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0b0d0c",

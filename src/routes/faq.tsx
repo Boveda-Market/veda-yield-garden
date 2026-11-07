@@ -5,9 +5,9 @@ import { LegalLayout } from "@/components/legal-layout";
 export const Route = createFileRoute("/faq")({
   head: () => ({ meta: [
     { title: "Preguntas frecuentes — BÓVEDA" },
-    { name: "description", content: "Respuestas sobre Privy, Phantom, Jupiter Wallet, bóvedas, estadísticas, cargos del 1% y la demostración de BÓVEDA." },
+    { name: "description", content: "Respuestas sobre Real y Prueba, 1,000 créditos, wallets, USDC, cargo del 1%, conversiones y disponibilidad en BÓVEDA." },
     { property: "og:title", content: "Preguntas frecuentes — BÓVEDA" },
-    { property: "og:description", content: "Acceso con wallets, privacidad y operaciones simuladas de BÓVEDA: resuelve tus dudas." },
+    { property: "og:description", content: "Real y Prueba en BÓVEDA: créditos ficticios, acceso con wallets, cargos y operaciones en Solana." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),

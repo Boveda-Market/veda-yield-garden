@@ -32,6 +32,9 @@ use the editor.
 - Pool details live in a shared dialog backed by browser-side public DexScreener queries; validate exact Solana pool addresses, distinguish USD metrics from token amounts, and leave missing statistics unavailable to avoid misleading financial data.
 - All demo financial actions use a shared integer-micro-USDC fee breakdown, deduct fees from gross proceeds and require review; no demo state may be represented as an on-chain transfer.
 - Email interest submissions use a public validated insert-only server function, a private RLS-locked Cloud table and explicit versioned consent; never expose leads through the demonstration login.
-- Legal content has dedicated public routes and must distinguish current demo capabilities from future wallet integrations; do not invent operator contact details or legal jurisdiction.
+- Legal content has dedicated public routes and must distinguish current Real availability from fictitious Prueba capabilities; do not invent operator contact details or legal jurisdiction.
 - FAQs use shared native details/summary disclosures on the home page and a dedicated public route to remain accessible without a Privy session or third-party accordion hook dependency.
 - Privy authentication is loaded lazily behind a client-only boundary; use its verified session for UI access and isolate fictitious balances by Privy user ID, never treating local storage as authentication or granting Cloud data access through it.
+
+- Real and Prueba use separate mounted views; trial storage and mutation guards require verified Privy identity and trial mode so mode switching cannot treat credits as chain assets.
+- Mainnet execution remains unavailable until official SDK pool lifecycle, conversions, the USDC fee and chain confirmation pass end-to-end verification; never open this boundary with a UI or local-storage flag.

@@ -82,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "BÓVEDA" },
-      { name: "description", content: "BÓVEDA: acceso con Privy, pools de Solana y operaciones de demostración en USDC, sin transferencias reales." },
+      { name: "description", content: "BÓVEDA: pools de Solana, modos Real y Prueba y acceso con Privy. Prueba con 1,000 créditos; operaciones reales aún no habilitadas." },
       { name: "theme-color", content: "#0b0d0c" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
