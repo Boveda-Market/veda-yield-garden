@@ -28,3 +28,5 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- Pool details live in a shared dialog backed by browser-side public DexScreener queries; validate exact pool addresses and leave missing statistics unavailable to avoid misleading financial data.

@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, X } from "lucide-react";
 import { VAULTS, accrued, type Position, type Vault } from "@/lib/vaults";
+import { Button } from "@/components/ui/button";
+import { PoolDetails } from "@/components/pool-details";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -10,6 +12,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Deposita USDC en bóvedas Meteora DAMM v2 y cosecha ganancias. Interfaz no custodia." },
       { property: "og:title", content: "BÓVEDA — Rendimiento en USDC" },
       { property: "og:description", content: "Bóvedas SOL, MET y RWA sobre Meteora DAMM v2 en Solana." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Index,
@@ -24,6 +28,7 @@ function Index() {
   const [positions, setPositions] = useState<Position[]>([]);
   const [now, setNow] = useState(0);
   const [depositFor, setDepositFor] = useState<Vault | null>(null);
+  const [detailsFor, setDetailsFor] = useState<Vault | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -116,7 +121,7 @@ function Index() {
                   <p className="text-sm text-muted-foreground">{v.pair}</p>
                   <p className="mt-5 font-display text-4xl font-bold text-primary">{v.apy}%<span className="ml-1 text-sm font-normal text-muted-foreground">APY est.</span></p>
                   <p className="mt-3 flex-1 text-sm text-muted-foreground">{v.blurb}</p>
-                  <a href={`https://app.meteora.ag/dammv2/${v.pool}`} target="_blank" rel="noreferrer" className="mt-3 truncate font-mono text-xs text-muted-foreground underline-offset-2 hover:underline">{v.pool}</a>
+                   <Button variant="outline" className="mt-4 w-full" onClick={() => setDetailsFor(v)}>Detalles del pool</Button>
                   <button onClick={() => setDepositFor(v)} className="mt-5 rounded-xl bg-primary py-3 font-semibold text-primary-foreground hover:opacity-90">Depositar USDC</button>
                 </div>
               ))}
@@ -133,6 +138,7 @@ function Index() {
       </footer>
 
       {depositFor && <DepositSheet vault={depositFor} max={wallet} onClose={() => setDepositFor(null)} onConfirm={deposit} />}
+      {detailsFor && <PoolDetails key={detailsFor.id} vault={detailsFor} onClose={() => setDetailsFor(null)} />}
       {toast && <div className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg">{toast}</div>}
     </div>
   );
