@@ -21,4 +21,10 @@ Operator legal address, privacy contact and jurisdiction are still required for 
 
 ## Development
 
+## Devnet validation
+
+Run `bun scripts/validate-devnet.ts` locally. The isolated harness checks devnet genesis, requires devnet SOL, creates six-decimal test mints and two Meteora pools, then composes a direct Meteora swap, a new-position deposit and the 1% test-USDC transfer into one v0 message. Two pools avoid quoting a deposit against a pool changed by the preceding swap. Jupiter is mainnet-only; this test does not validate Jupiter routing or the three production pools. Private test-wallet files live only under `/tmp`, never in the repository.
+
+The first execution stopped before mint/pool creation because both devnet faucets failed and the test wallet had no SOL. Composition unit tests do not prove chain execution. Devnet simulation, confirmation, final balance/position assertions and a forced-failure rollback test must all pass before considering this flow validated. Mainnet remains disabled.
+
 TanStack Start, React, TypeScript and Tailwind CSS. Use `bun install`, `bun run dev` and `bun run test` for local development.
