@@ -1,5 +1,5 @@
 # Tasks
-- [ ] Replace annualized Real yield with a daily fee percentage and add DexScreener 24h volume to every Real card and shared pool details.
+- [x] Restore annualized estimated APR per the revised request; retain DexScreener 24h volume in Real cards and shared details without inflating rates. Three live pools verified on desktop/mobile; 12 tests pass.
 - [x] Show live Meteora 24h-fee annualized estimated APR in Real cards and pool details, distinguish it from APY and trial rates; all three real queries verified on desktop/mobile, 12 targeted tests pass.
 - [x] Change entry/deposits to 0% and retain exit/harvest/liquidation at 1%; remove deposit fee transfer and recipient ATA creation, align trial accounting, reviews, FAQ and terms. Live SOL deposit simulation passes at 940 bytes with full 1 USDC budget and no broadcast.
 - [x] Prepare owner-signed SOL pilot liquidation with 1% on enforced minimum gross USDC, ledger-based delta-only Jupiter swap and fresh simulation; exact owner/pilot NFT, review caps, 1232-byte guard, USDC/fee/NFT rent verified. Live prepared message 936 bytes; 0.00722376 SOL rent simulated. No broadcasting; owner-wallet flow tested with a mocked signer and confirmation.

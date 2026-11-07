@@ -6,14 +6,14 @@ const schema = z.object({
   fees: z.object({ "24h": z.number().finite().nonnegative().nullish() }).nullish(),
 });
 
-/** Observed daily fee percentage: reported 24h fees / current TVL, no compounding. */
+/** Simple annualization of reported 24h fees / current TVL; no compounding. */
 export function parsePoolYield(data: unknown, address: string) {
   const parsed = schema.safeParse(data);
   if (!parsed.success || parsed.data.address !== address) return null;
   const { tvl, fees } = parsed.data;
   const fees24h = fees?.["24h"] ?? null;
-  const dailyPercent = tvl != null && tvl > 0 && fees24h != null ? fees24h / tvl * 100 : null;
-  return { dailyPercent: dailyPercent != null && Number.isFinite(dailyPercent) ? dailyPercent : null, fees24h, tvl: tvl ?? null };
+  const apr = tvl != null && tvl > 0 && fees24h != null ? fees24h / tvl * 365 * 100 : null;
+  return { apr: apr != null && Number.isFinite(apr) ? apr : null, fees24h, tvl: tvl ?? null };
 }
 
 export async function fetchPoolYield(address: string, signal?: AbortSignal) {
