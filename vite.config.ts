@@ -8,6 +8,11 @@
 // hosting already compresses at the edge.
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { createRequire } from "node:module";
+import { dirname, resolve } from "node:path";
+
+const require = createRequire(import.meta.url);
+const anchorCjs = resolve(dirname(require.resolve("@coral-xyz/anchor/package.json")), "dist/cjs/index.js");
 
 export default defineConfig({
   vite: {
@@ -19,7 +24,12 @@ export default defineConfig({
       configEnvironment(name, config) {
         if (name !== "nitro") return;
         const conditions = config.resolve?.conditions ?? ["workerd", "worker", "production", "wasm", "unwasm"];
-        return { resolve: { conditions: [...new Set([...conditions, "browser"])] } };
+        return { resolve: {
+          conditions: [...new Set([...conditions, "browser"])],
+          // Anchor's browser and esm entries contain unwrapped CommonJS.
+          // Its explicitly CommonJS source is transformed by the bundler.
+          alias: [{ find: /^@coral-xyz\/anchor$/, replacement: anchorCjs }],
+        } };
       },
     }],
   },
