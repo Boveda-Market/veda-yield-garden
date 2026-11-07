@@ -1,4 +1,5 @@
 # Tasks
+- [x] Investigate FAQ runtime crash and remove its third-party accordion dependency; verify native disclosures on desktop and mobile.
 - [x] Give all public copy a launch-ready tone while keeping accurate disclosures about simulated financial actions.
 - [x] Update website, terms and privacy for Privy, Phantom and Jupiter Wallet; add and verify public FAQs.
 - [x] Fix Phantom login options and verify Phantom and Solflare appear directly in the wallet selection; full authorization remains blocked by the Privy origin restriction and requires a real wallet.

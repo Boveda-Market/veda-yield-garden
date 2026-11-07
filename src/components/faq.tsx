@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ChevronDown } from "lucide-react";
 import { FEE_WALLET } from "@/lib/fees";
 
 const questions = [
@@ -18,12 +18,14 @@ const questions = [
 export function Faq({ preview = false }: { preview?: boolean }) {
   return <section aria-label="Preguntas frecuentes" className={preview ? "mt-12 border-t border-border pt-8" : ""}>
     {preview && <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><h2 className="font-display text-xl font-semibold">Preguntas frecuentes</h2><Link to="/faq" className="text-sm text-primary underline">Ver todas</Link></div>}
-    <Accordion type="multiple" className="w-full">
-      {(preview ? questions.slice(0, 7) : questions).map(({ question, answer }, index) => <AccordionItem key={question} value={`faq-${index}`}>
-        <AccordionTrigger className="gap-4 font-display text-foreground">{question}</AccordionTrigger>
-        <AccordionContent className="max-w-2xl text-sm leading-7 text-muted-foreground">{answer}</AccordionContent>
-      </AccordionItem>)}
-    </Accordion>
+    <div className="w-full">
+      {(preview ? questions.slice(0, 7) : questions).map(({ question, answer }) => <details key={question} className="group border-b border-border">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-display text-sm font-medium text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
+          <span>{question}</span><ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none" />
+        </summary>
+        <div className="max-w-2xl pb-4 text-sm leading-7 text-muted-foreground">{answer}</div>
+      </details>)}
+    </div>
     {!preview && <p className="mt-8 break-all text-xs leading-6 text-muted-foreground">Wallet prevista para futuros cargos operativos (sin transferencias habilitadas): <span className="font-mono">{FEE_WALLET}</span></p>}
   </section>;
 }
