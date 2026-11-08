@@ -11,12 +11,23 @@ import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
 import { PoolYield } from "@/components/pool-yield";
 import { HarvestDialog } from "@/components/harvest-dialog";
 import { BuyUsdc } from "@/components/buy-usdc";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 const RealPortfolioPanel = lazy(() => import("./real-portfolio-panel").then((module) => ({ default: module.RealPortfolioPanel })));
 
 export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }: { walletAddress: string | null; onDetails: (vault: Vault) => void; portfolioOnly?: boolean }) {
   const [simulationVault, setSimulationVault] = useState<Vault | null>(null);
   const [withdrawal, setWithdrawal] = useState<{ position?: string; vaultId: "sol" | "met" } | null>(null);
   const [harvest, setHarvest] = useState<{ position: string; vaultId: "sol" | "met" } | null>(null);
+  const [unavailableAction, setUnavailableAction] = useState<"harvest" | "exit" | null>(null);
+  function openPositionAction(position: import("@/lib/solana-data").ChainPosition, action: "harvest" | "exit") {
+    const authorized = walletAddress === WITHDRAWAL_PILOT.wallet && position.address === WITHDRAWAL_PILOT.position && position.vaultId === "sol";
+    if (!authorized || (action === "exit" && position.locked)) {
+      setUnavailableAction(action);
+      return;
+    }
+    if (action === "harvest") setHarvest({ position: position.address, vaultId: "sol" });
+    else setWithdrawal({ position: position.address, vaultId: "sol" });
+  }
   const readWallet = useServerFn(getRealWallet);
   const query = useQuery({
     queryKey: ["real-solana", walletAddress],
@@ -46,7 +57,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       {data && !data.positionsComplete && <p role="status" className="mt-3 text-sm text-muted-foreground">La consulta de posiciones está incompleta. No se puede concluir que no tengas posiciones.</p>}
       <p className="mt-5 text-xs leading-5 text-muted-foreground">Los créditos y las posiciones de Prueba no aparecen en Real y no se pueden convertir en dinero.</p>
     </section>
-    {data && data.positions.length > 0 && <section aria-label="Posiciones reales" className="border-b border-border py-8"><h2 className="font-display text-lg font-semibold">Mis posiciones</h2><p className="mt-2 text-xs leading-5 text-muted-foreground">Estimaciones en tokens, no valor total en USD ni mínimos de liquidación. Bloqueos, precios y costes pueden alterar el resultado.</p><div className="mt-4 space-y-4">{data.positions.map((position) => <article key={position.address} className="rounded-lg border border-border bg-card p-5"><h3 className="font-display font-semibold">{VAULTS.find((vault) => vault.id === position.vaultId)?.name ?? `${position.symbol}/USDC`}</h3><p className="mt-2 break-all font-mono text-xs text-muted-foreground">{position.address}</p><p className="mt-3 break-all text-sm">Liquidez estimada: {position.tokenAmount === null ? "No disponible" : `${position.tokenAmount} ${position.symbol} + ${position.usdcAmount} USDC`}</p><p className="mt-2 break-all text-sm text-muted-foreground">Comisiones acumuladas: {position.feeTokenAmount === null ? "No disponibles" : `${position.feeTokenAmount} ${position.symbol} + ${position.feeUsdcAmount} USDC`}</p>{position.locked && <p className="mt-2 text-xs text-muted-foreground">Incluye liquidez bloqueada; no toda la posición es retirable.</p>}<div className="mt-4 flex flex-wrap gap-2"><Button variant="secondary" disabled={walletAddress !== WITHDRAWAL_PILOT.wallet || position.address !== WITHDRAWAL_PILOT.position || position.vaultId !== "sol"} onClick={() => setHarvest({ position: position.address, vaultId: position.vaultId === "sol" ? "sol" : "met" })}><Sprout size={16} />Cosechar Ganancias</Button><Button variant="outline" disabled={position.locked || walletAddress !== WITHDRAWAL_PILOT.wallet || position.address !== WITHDRAWAL_PILOT.position || position.vaultId !== "sol"} onClick={() => setWithdrawal({ position: position.address, vaultId: position.vaultId === "sol" ? "sol" : "met" })}><ArrowDownToLine size={16} />Cerrar y Liquidar</Button></div><p className="mt-3 text-xs leading-5 text-muted-foreground">{walletAddress === WITHDRAWAL_PILOT.wallet && position.address === WITHDRAWAL_PILOT.position ? "Revisa los importes y la comisión antes de firmar." : "Cosechas y retiros todavía no disponibles para esta posición."}</p></article>)}</div></section>}
+    {data && data.positions.length > 0 && <section aria-label="Posiciones reales" className="border-b border-border py-8"><h2 className="font-display text-lg font-semibold">Mis posiciones</h2><p className="mt-2 text-xs leading-5 text-muted-foreground">Estimaciones en tokens, no valor total en USD ni mínimos de liquidación. Bloqueos, precios y costes pueden alterar el resultado.</p><div className="mt-4 space-y-4">{data.positions.map((position) => <article key={position.address} className="rounded-lg border border-border bg-card p-5"><h3 className="font-display font-semibold">{VAULTS.find((vault) => vault.id === position.vaultId)?.name ?? `${position.symbol}/USDC`}</h3><p className="mt-2 break-all font-mono text-xs text-muted-foreground">{position.address}</p><p className="mt-3 break-all text-sm">Liquidez estimada: {position.tokenAmount === null ? "No disponible" : `${position.tokenAmount} ${position.symbol} + ${position.usdcAmount} USDC`}</p><p className="mt-2 break-all text-sm text-muted-foreground">Comisiones acumuladas: {position.feeTokenAmount === null ? "No disponibles" : `${position.feeTokenAmount} ${position.symbol} + ${position.feeUsdcAmount} USDC`}</p>{position.locked && <p className="mt-2 text-xs text-muted-foreground">Incluye liquidez bloqueada; no toda la posición es retirable.</p>}<div className="mt-4 flex flex-wrap gap-2"><Button variant="secondary" onClick={() => openPositionAction(position, "harvest")}><Sprout size={16} />Cosechar Ganancias</Button><Button variant="outline" onClick={() => openPositionAction(position, "exit")}><ArrowDownToLine size={16} />Cerrar y Liquidar</Button></div><p className="mt-3 text-xs leading-5 text-muted-foreground">{walletAddress === WITHDRAWAL_PILOT.wallet && position.address === WITHDRAWAL_PILOT.position ? "Revisa los importes y la comisión antes de firmar." : "Cosechas y retiros todavía no disponibles para esta posición."}</p></article>)}</div></section>}
     {portfolioOnly && <Suspense fallback={<p role="status">Cargando portafolio…</p>}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
     {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && <p className="border-b border-border py-8 text-muted-foreground">No tienes posiciones activas en estas bóvedas. Las posiciones cerradas no aparecen aquí; puedes consultar sus comprobantes en Movimientos de bóvedas.</p>}
     {!portfolioOnly && <><h2 className="mb-4 mt-10 font-display text-lg font-semibold">Bóvedas disponibles</h2>
@@ -61,5 +72,13 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
     {simulationVault && <DepositSimulation key={simulationVault.id} vault={simulationVault} wallet={walletAddress} onClose={() => setSimulationVault(null)} />}
     {harvest && walletAddress && <HarvestDialog wallet={walletAddress} {...harvest} onClose={() => setHarvest(null)} />}
     {withdrawal && <WithdrawalSimulation wallet={walletAddress} {...withdrawal} onClose={() => setWithdrawal(null)} />}
+    <Dialog open={unavailableAction !== null} onOpenChange={(open) => { if (!open) setUnavailableAction(null); }}>
+      <DialogContent>
+        <DialogTitle>{unavailableAction === "harvest" ? "Cosechar Ganancias" : "Cerrar y Liquidar"}</DialogTitle>
+        <DialogDescription>Esta operación todavía no está habilitada para esta posición.</DialogDescription>
+        <p className="text-sm leading-6 text-muted-foreground">Por ahora solo se puede operar la posición autorizada del piloto con su wallet propietaria. Las nuevas posiciones aún no permiten cosechas ni retiros desde BÓVEDA. No se ha solicitado ninguna firma ni se ha movido dinero.</p>
+        <Button variant="outline" onClick={() => setUnavailableAction(null)}>Volver a mis posiciones</Button>
+      </DialogContent>
+    </Dialog>
   </>;
 }

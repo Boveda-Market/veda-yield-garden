@@ -1,4 +1,5 @@
 # Tasks
+- [x] Make Real harvest/close controls clickable: authorized pilot positions open existing reviews; unsupported or locked positions show an explicit availability notice without expanding signing permissions.
 - [x] Remove optional Real simulation controls; retain automatic pre-sign checks, reviewed limits and exact pilot authorization. Deposit/withdrawal flow tests pass; no new wallet signature was performed.
 - [x] Simplify FAQ answers and align them with current Real availability and portfolio metrics; desktop/mobile FAQ verified without runtime errors or overflow.
 - [x] Use official Meteora finalized event-CPI records for Real portfolio gross harvested fees, per-token liquidity flows and receipts. Deduplicate integer amounts, owner/exact SOL/MET pool filtering, portfolio-only 25-row pages capped at 200; disclose partial coverage and keep PNL unavailable without complete basis/valuation. 21 targeted tests pass; public pilot-wallet records verified server-side and through the component on desktop/mobile (0.000031 USDC harvested; 0.661573 USDC contributed to pools).
