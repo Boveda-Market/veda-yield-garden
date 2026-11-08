@@ -1,4 +1,7 @@
 # Tasks
+- [x] Keep supported Real deposits and withdrawals available to any connected owner with plain-language informed review; preserve consent, wallet signature and safety validation.
+- [x] Enable owner-verified SOL/MET Real harvest and liquidation beyond the original pilot; fresh simulation, NFT ownership, fees and reviewed limits retained. Public notices verified desktop/mobile, 132 tests pass, build OK.
+- [ ] Verify newly enabled harvest and liquidation using a real Privy owner session and on-chain receipts — requires the owner's connected wallet, funds/active position and explicit signature; no new funds were moved. SPCX/Token-2022 assets, locked full exits and unvalidated rewards remain unsupported.
 - [x] Make Real harvest/close controls clickable: authorized pilot positions open existing reviews; unsupported or locked positions show an explicit availability notice without expanding signing permissions.
 - [x] Remove optional Real simulation controls; retain automatic pre-sign checks, reviewed limits and exact pilot authorization. Deposit/withdrawal flow tests pass; no new wallet signature was performed.
 - [x] Simplify FAQ answers and align them with current Real availability and portfolio metrics; desktop/mobile FAQ verified without runtime errors or overflow.

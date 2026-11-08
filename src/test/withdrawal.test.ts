@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { withdrawalAmounts, withdrawalInput, isWithdrawalPilot, WITHDRAWAL_PILOT } from "@/lib/withdrawal";
+import { withdrawalAmounts, withdrawalInput, prepareWithdrawalInput } from "@/lib/withdrawal";
 import { FEE_WALLET } from "@/lib/fees";
 
 describe("withdrawal rules", () => {
@@ -7,11 +7,10 @@ describe("withdrawal rules", () => {
     expect(withdrawalAmounts(1_000_000n)).toEqual({ gross: 1_000_000n, fee: 10_000n, net: 990_000n });
     expect(withdrawalAmounts(1_234_567n)).toEqual({ gross: 1_234_567n, fee: 12_345n, net: 1_222_222n });
   });
-  it("limits signable liquidation to the authorized owner's SOL pilot position", () => {
-    expect(isWithdrawalPilot(WITHDRAWAL_PILOT)).toBe(true);
-    expect(isWithdrawalPilot({ ...WITHDRAWAL_PILOT, wallet: FEE_WALLET })).toBe(false);
-    expect(isWithdrawalPilot({ ...WITHDRAWAL_PILOT, position: FEE_WALLET })).toBe(false);
-    expect(isWithdrawalPilot({ ...WITHDRAWAL_PILOT, vaultId: "met" })).toBe(false);
+  it("accepts supported wallets without a pilot allowlist and bounds reviewed integer amounts", () => {
+    const input = { wallet: FEE_WALLET, position: FEE_WALLET, vaultId: "met", maximumFeeRaw: "10000", minimumNetRaw: "990000" };
+    expect(prepareWithdrawalInput.safeParse(input).success).toBe(true);
+    expect(prepareWithdrawalInput.safeParse({ ...input, maximumFeeRaw: "1".repeat(21) }).success).toBe(false);
   });
   it("does not accept negative proceeds", () => { expect(() => withdrawalAmounts(-1n)).toThrow(); });
   it("does not accept unvalidated Token-2022 vaults or execution overrides", () => {

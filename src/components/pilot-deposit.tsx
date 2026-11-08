@@ -10,7 +10,7 @@ import { PILOT_VAULTS, pilotInput, type PilotStatus } from "@/lib/pilot-deposit"
 type Step = "idle" | "preparing" | "signing" | "confirming" | "done" | "error";
 const labels: Record<Step, string> = { idle: "", preparing: "Preparando tu depósito…", signing: "Esperando tu firma en la wallet…", confirming: "Enviada. Esperando confirmación en la red…", done: "", error: "" };
 
-/** Selected real deposit; signing does not widen authorized withdrawals. */
+/** Selected real deposit with fresh simulation and owner signature. */
 export function PilotDeposit({ vaultId, amount, onBusyChange }: { vaultId: string; amount: string; onBusyChange: (busy: boolean) => void }) {
   const { walletAddress, signAndSend } = useBovedaSession();
   const prepare = useServerFn(preparePilotDeposit);
@@ -55,9 +55,9 @@ export function PilotDeposit({ vaultId, amount, onBusyChange }: { vaultId: strin
   if (!eligible) return <p className="border-t border-border pt-4 text-xs text-muted-foreground">Los depósitos no están disponibles para esta bóveda.</p>;
   return <section aria-labelledby="pilot-title" className="grid gap-3 border-t border-border pt-4 text-sm">
     <h3 id="pilot-title" className="font-semibold">Depósito real · hasta 10,000 USDC</h3>
-    <p role="note" className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs leading-5">Red principal con dinero real. Entre 1 y 10,000 USDC por depósito, comisión de entrada 0%; comisión de salida 1%. <strong>Las cosechas y liquidaciones firmadas siguen limitadas a la posición SOL autorizada del primer piloto. No podrás retirar nuevas posiciones desde BÓVEDA.</strong> La posición queda en tu wallet como NFT de posición. Necesitas unos 0.015 SOL para las cuentas del pool y los costes de red y creación de cuentas, independientes de la comisión operativa.</p>
+    <p role="note" className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs leading-5">Red principal con dinero real. Entre 1 y 10,000 USDC por depósito, comisión de entrada 0%; comisión de salida 1%. <strong>Puedes cosechar y liquidar tus posiciones compatibles de SOL y MET. La liquidez bloqueada no se puede liquidar.</strong> La posición queda en tu wallet como NFT de posición. Necesitas unos 0.015 SOL para las cuentas del pool y los costes de red y creación de cuentas, independientes de la comisión operativa.</p>
     {!walletAddress ? <p className="text-xs text-muted-foreground">Inicia sesión con una wallet para firmar.</p> : <>
-      <label className="flex items-start gap-3 text-xs leading-5"><Checkbox checked={accepted} disabled={busy || !valid.success} onCheckedChange={(value) => setAccepted(value === true)} aria-label="Acepto el depósito real" /><span>Acepto depositar {valid.success ? valid.data.amount : "el importe indicado"} USDC reales, la entrada al 0% y la salida al 1%. Entiendo que la transacción no se puede revertir y que no podré retirar esta nueva posición desde BÓVEDA.</span></label>
+      <label className="flex items-start gap-3 text-xs leading-5"><Checkbox checked={accepted} disabled={busy || !valid.success} onCheckedChange={(value) => setAccepted(value === true)} aria-label="Acepto el depósito real" /><span>Acepto depositar {valid.success ? valid.data.amount : "el importe indicado"} USDC reales, la entrada al 0% y la salida al 1%. Entiendo que la transacción no se puede revertir y que cada cosecha o liquidación requiere una nueva revisión y mi firma.</span></label>
       <Button disabled={!accepted || busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? labels[step] : "Firmar depósito real"}</Button>
     </>}
     {step === "done" && <p role="status" className="font-semibold">Depósito confirmado en la red ({status === "finalized" ? "finalizado" : "confirmado"}).</p>}

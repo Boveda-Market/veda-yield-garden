@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { simulateRealWithdrawal, prepareRealWithdrawal } from "@/lib/withdrawal.functions";
-import { withdrawalInput, isWithdrawalPilot, type WithdrawalResult } from "@/lib/withdrawal";
+import { withdrawalInput, type WithdrawalResult } from "@/lib/withdrawal";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { Checkbox } from "@/components/ui/checkbox";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
@@ -34,7 +34,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
     catch { setResult({ success: false, sent: false, message: "No se pudo consultar el retiro. No se firmó ni envió nada." }); }
     finally { setPending(false); }
   }
-  const canSign = input.success && isWithdrawalPilot(input.data) && session.authenticated && session.walletAddress === address && wallet === address;
+  const canSign = input.success && session.authenticated && session.walletAddress === address && wallet === address;
   async function signWithdrawal() {
     if (!input.success || !canSign || !accepted || pending || !result?.success || !result.feeRaw || !result.minimumNetRaw || finished || signature) return;
     setPending(true); setMessage(null); setStep("Preparando tu retiro…");
@@ -51,7 +51,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
       for (let attempt = 0; attempt < 30; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage("La red rechazó la transacción atómica: no se aplicaron el retiro ni la comisión; puede cobrarse el coste de red."); return; }
-        if (status.status !== "pending") { setFinished(true); setMessage("Liquidación confirmada en la red. Consulta los importes finales y la renta devuelta en Solscan."); await queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); return; }
+        if (status.status !== "pending") { setFinished(true); setMessage("Liquidación confirmada en la red. Consulta los importes finales y la renta devuelta en Solscan."); await queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", address] }); return; }
         await new Promise((resolve) => setTimeout(resolve, 2_000));
       }
       setMessage("Confirmación pendiente. Revisa Solscan antes de reintentar; no envíes una segunda liquidación.");
@@ -68,8 +68,8 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
     {result && <div role="status" className="border-t border-border pt-4 text-sm"><p className="font-semibold">{result.success ? "Resumen de tu retiro" : "Retiro no disponible"}</p>{!result.success && <p className="mt-2 leading-6">{result.message}</p>}{result.gross && <dl className="mt-4 grid gap-2"><div className="flex justify-between gap-3"><dt>USDC antes de comisión</dt><dd>{result.gross}</dd></div><div className="flex justify-between gap-3"><dt>Comisión · 1%</dt><dd>{result.fee} USDC</dd></div><div className="flex justify-between gap-3"><dt>USDC estimados a recibir</dt><dd>{result.net} USDC</dd></div><div className="flex justify-between gap-3"><dt>Renta de posición y NFT</dt><dd>{result.rentSol} SOL</dd></div></dl>}{result.checks && <ul className="mt-4 space-y-1">{Object.entries(result.checks).map(([key, valid]) => <li key={key}>{({ closed: "Cierre de posición y NFT", usdc: "Devolución de USDC", fee: "Comisión exacta", rent: "Devolución de renta en SOL" } as Record<string, string>)[key]}: {valid ? "Comprobado antes de firmar" : "No verificado"}</li>)}</ul>}</div>}
     {result?.remainingTokenRaw && result.remainingTokenRaw !== "0" && <p role="alert" className="text-xs leading-5 text-destructive">Diferencia de tokens tras la conversión: {result.remainingTokenRaw} unidades mínimas. No es un importe en USD; la liquidación no está validada.</p>}
     {result?.minimumGross && <dl className="grid gap-2 border-t border-border pt-3 text-sm"><div className="flex justify-between gap-3"><dt>Mínimo bruto protegido</dt><dd>{result.minimumGross} USDC</dd></div><div className="flex justify-between gap-3"><dt>Mínimo neto tras comisión</dt><dd>{result.minimumNet} USDC</dd></div></dl>}
-    {canSign && result?.success && !signature && !finished && <><label className="flex items-start gap-3 text-xs leading-5"><Checkbox checked={accepted} disabled={pending} onCheckedChange={(value) => setAccepted(value === true)} aria-label="Acepto la liquidación piloto" /><span>Acepto cerrar esta posición con dinero real, la comisión sobre el mínimo protegido y los costes de red. La operación no se puede revertir.</span></label><Button disabled={!accepted || pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : "Firmar liquidación a USDC"}</Button></>}
-    {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">La firma está limitada a la posición SOL del piloto autorizado y requiere conectar su wallet propietaria. No hay movimientos hasta que firmes.</p>}
+    {canSign && result?.success && !signature && !finished && <><label className="flex items-start gap-3 text-xs leading-5"><Checkbox checked={accepted} disabled={pending} onCheckedChange={(value) => setAccepted(value === true)} aria-label="Acepto la liquidación real" /><span>Acepto cerrar esta posición con dinero real, la comisión sobre el mínimo protegido y los costes de red. La operación no se puede revertir.</span></label><Button disabled={!accepted || pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : "Firmar liquidación a USDC"}</Button></>}
+    {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">Conecta la wallet propietaria para firmar esta liquidación. No hay movimientos hasta que firmes.</p>}
     {message && <p role={finished ? "status" : "alert"} className="text-sm">{message}</p>}
     {signature && <a href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer" className="break-all text-xs underline">Ver liquidación en Solscan</a>}
   </DialogContent></Dialog>;

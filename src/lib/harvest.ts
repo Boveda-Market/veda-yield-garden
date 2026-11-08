@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { withdrawalInput } from "@/lib/withdrawal";
 
-export const prepareHarvestInput = withdrawalInput.extend({ maximumFeeRaw: z.string().regex(/^\d+$/) }).strict();
+export const prepareHarvestInput = withdrawalInput.extend({ maximumFeeRaw: z.string().max(20).regex(/^\d+$/) }).strict();
 export type HarvestResult = {
   success: boolean;
   message: string;

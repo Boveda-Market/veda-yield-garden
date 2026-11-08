@@ -1,8 +1,8 @@
 export type AppMode = "real" | "trial";
 
-// General mainnet execution stays closed; validated SOL/MET deposits up to
-// 10,000 USDC and separately authorized pilot exits may sign.
-export const REAL_OPERATIONS_AVAILABLE = false;
+// Compatible SOL/MET operations require fresh server validation and owner signatures.
+// This flag never bypasses asset, ownership, simulation or trial boundaries.
+export const REAL_OPERATIONS_AVAILABLE = true;
 
 export function canRunTrial(mode: AppMode, authenticated: boolean, userId: string | null) {
   return mode === "trial" && authenticated && Boolean(userId);

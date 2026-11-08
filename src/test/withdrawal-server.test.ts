@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import BN from "bn.js";
 import { Buffer } from "buffer";
 import { Keypair, PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
-import { AccountLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { AccountLayout, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import { CHAIN_POOLS, USDC_MINT } from "@/lib/solana-data";
 import { FEE_WALLET } from "@/lib/fees";
 import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
@@ -21,13 +21,18 @@ describe("full-close withdrawal simulation", () => {
     AccountLayout.encode({ mint: usdc, owner: accountOwner, amount, delegateOption: 0, delegate: PublicKey.default, state: 1, isNativeOption: 0, isNative: 0n, delegatedAmount: 0n, closeAuthorityOption: 0, closeAuthority: PublicKey.default }, data);
     return data;
   };
+  const nftAccount = (nft: string, accountOwner: PublicKey) => {
+    const data = tokenData(1n, accountOwner);
+    new PublicKey(nft).toBuffer().copy(data, 0);
+    return { owner: TOKEN_2022_PROGRAM_ID, data, lamports: 2_000_000 };
+  };
   beforeEach(() => {
     vi.resetAllMocks();
     mocks.genesis.mockResolvedValue("5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d");
     mocks.owned.mockResolvedValue([{ position: new PublicKey(position), positionNftAccount: new PublicKey(CHAIN_POOLS[2].pool), positionState: { pool: new PublicKey(CHAIN_POOLS[1].pool), nftMint: new PublicKey(CHAIN_POOLS[2].mint), unlockedLiquidity: new BN(100), vestedLiquidity: new BN(0), permanentLockedLiquidity: new BN(0) } }]);
     mocks.pool.mockResolvedValue({ tokenAMint: new PublicKey(CHAIN_POOLS[1].mint), tokenBMint: usdc, tokenAFlag: 0, tokenBFlag: 0, rewardInfos: [], sqrtPrice: new BN(1), sqrtMinPrice: new BN(1), sqrtMaxPrice: new BN(2), collectFeeMode: 0, tokenAAmount: new BN(0), tokenBAmount: new BN(1_000_000), liquidity: new BN(100) });
     mocks.remove.mockResolvedValue(new Transaction().add(new TransactionInstruction({ programId: new PublicKey(CHAIN_POOLS[1].pool), keys: [{ pubkey: owner, isSigner: true, isWritable: true }], data: Buffer.from([1]) })));
-    mocks.before.mockResolvedValue([{ owner: TOKEN_PROGRAM_ID, data: tokenData(0n, owner), lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID, data: tokenData(0n, new PublicKey(FEE_WALLET)), lamports: 2_000_000 }, { lamports: 3_000_000 }, { lamports: 2_000_000 }, { lamports: 2_000_000 }, { lamports: 20_000_000 }]);
+    mocks.before.mockResolvedValue([{ owner: TOKEN_PROGRAM_ID, data: tokenData(0n, owner), lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID, data: tokenData(0n, new PublicKey(FEE_WALLET)), lamports: 2_000_000 }, { lamports: 3_000_000 }, { owner: TOKEN_2022_PROGRAM_ID, lamports: 2_000_000 }, nftAccount(CHAIN_POOLS[2].mint, owner), { lamports: 20_000_000 }]);
     let call = 0;
     mocks.simulate.mockImplementation(async () => {
       const final = ++call === 3;
@@ -50,6 +55,14 @@ describe("full-close withdrawal simulation", () => {
     expect((await simulateWithdrawal("test", { wallet, position, vaultId: "met" })).success).toBe(false);
     expect(mocks.remove).not.toHaveBeenCalled();
   });
+  it("rejects a mismatched position NFT owner before preparation", async () => {
+    const accounts = await mocks.before();
+    accounts[5] = nftAccount(CHAIN_POOLS[2].mint, new PublicKey(FEE_WALLET));
+    mocks.before.mockResolvedValue(accounts);
+    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "9950", minimumNetRaw: "985050" });
+    expect(result.prepared).toBeUndefined();
+    expect(mocks.remove).not.toHaveBeenCalled();
+  });
   it("rejects locked liquidity before constructing any removal", async () => {
     const rows = await mocks.owned();
     rows[0].positionState.permanentLockedLiquidity = new BN(1);
@@ -65,7 +78,7 @@ describe("full-close withdrawal simulation", () => {
     expect(mocks.send).not.toHaveBeenCalled();
   });
   it("does not claim rent recovery when the wallet did not receive it", async () => {
-    mocks.before.mockResolvedValueOnce([{ owner: TOKEN_PROGRAM_ID, data: tokenData(0n, owner), lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID, data: tokenData(0n, new PublicKey(FEE_WALLET)), lamports: 2_000_000 }, { lamports: 4_000_000 }, { lamports: 2_000_000 }, { lamports: 2_000_000 }, { lamports: 20_000_000 }]);
+    mocks.before.mockResolvedValueOnce([{ owner: TOKEN_PROGRAM_ID, data: tokenData(0n, owner), lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID, data: tokenData(0n, new PublicKey(FEE_WALLET)), lamports: 2_000_000 }, { lamports: 4_000_000 }, { owner: TOKEN_2022_PROGRAM_ID, lamports: 2_000_000 }, nftAccount(CHAIN_POOLS[2].mint, owner), { lamports: 20_000_000 }]);
     const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" });
     expect(result.success).toBe(false);
     expect(result.checks?.rent).toBe(false);
@@ -112,19 +125,33 @@ describe("full-close withdrawal simulation", () => {
       expect(mocks.send).not.toHaveBeenCalled();
     } finally { vi.unstubAllGlobals(); }
   });
-  it("never prepares bytes for another owner or position", async () => {
+  it("never prepares bytes for an unowned position", async () => {
+    mocks.owned.mockResolvedValue([]);
     const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "10000", minimumNetRaw: "980000" });
     expect(result.success).toBe(false);
     expect(result.prepared).toBeUndefined();
     expect(mocks.remove).not.toHaveBeenCalled();
     expect(mocks.send).not.toHaveBeenCalled();
   });
+  it("prepares new owned MET positions beyond the original pilot", async () => {
+    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "9950", minimumNetRaw: "985050" });
+    expect(result.success).toBe(true);
+    expect(result.prepared?.wallet).toBe(wallet);
+    expect(result.prepared?.position).toBe(position);
+    expect(result.prepared?.transaction).toBeTruthy();
+    expect(mocks.send).not.toHaveBeenCalled();
+  });
+  it("rejects a worse reviewed minimum for new positions", async () => {
+    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "9950", minimumNetRaw: "985051" });
+    expect(result.success).toBe(false);
+    expect(result.prepared).toBeUndefined();
+  });
   it("returns only the simulated unsigned message for the exact pilot owner and NFT", async () => {
     const pilotOwner = new PublicKey(WITHDRAWAL_PILOT.wallet);
     mocks.owned.mockResolvedValue([{ position: new PublicKey(WITHDRAWAL_PILOT.position), positionNftAccount: new PublicKey(CHAIN_POOLS[2].pool), positionState: { pool: new PublicKey(CHAIN_POOLS[0].pool), nftMint: new PublicKey(WITHDRAWAL_PILOT.nft), unlockedLiquidity: new BN(100), vestedLiquidity: new BN(0), permanentLockedLiquidity: new BN(0) } }]);
     const pool = await mocks.pool();
     mocks.pool.mockResolvedValue({ ...pool, tokenAMint: new PublicKey(CHAIN_POOLS[0].mint) });
-    mocks.before.mockResolvedValue([{ owner: TOKEN_PROGRAM_ID, data: tokenData(0n, pilotOwner), lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID, data: tokenData(0n, new PublicKey(FEE_WALLET)), lamports: 2_000_000 }, { lamports: 3_000_000 }, { lamports: 2_000_000 }, { lamports: 2_000_000 }, { lamports: 20_000_000 }]);
+    mocks.before.mockResolvedValue([{ owner: TOKEN_PROGRAM_ID, data: tokenData(0n, pilotOwner), lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID, data: tokenData(0n, new PublicKey(FEE_WALLET)), lamports: 2_000_000 }, { lamports: 3_000_000 }, { owner: TOKEN_2022_PROGRAM_ID, lamports: 2_000_000 }, nftAccount(WITHDRAWAL_PILOT.nft, pilotOwner), { lamports: 20_000_000 }]);
     let count = 0;
     mocks.simulate.mockImplementation(async (transaction) => {
       expect(transaction.signatures.every((sig: Uint8Array) => sig.every((byte) => byte === 0))).toBe(true);

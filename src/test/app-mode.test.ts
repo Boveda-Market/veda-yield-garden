@@ -25,7 +25,8 @@ describe("Real and Prueba boundaries", () => {
   it("keeps each user's trial separate", () => {
     expect(demoSessionKey("did:privy:alice")).not.toBe(demoSessionKey("did:privy:bob"));
   });
-  it("does not enable mainnet execution before verification", () => {
-    expect(REAL_OPERATIONS_AVAILABLE).toBe(false);
+  it("enables compatible Real operations without granting guests Real access", () => {
+    expect(REAL_OPERATIONS_AVAILABLE).toBe(true);
+    expect(canUseTrial("real", false, null, true)).toBe(false);
   });
 });

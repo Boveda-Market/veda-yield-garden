@@ -16,8 +16,8 @@ const questions = [
   { question: "¿Cuánto cuesta operar?", answer: "Depositar tiene una comisión del 0%. Cosechar cobra el 1% de los USDC cobrados. Liquidar cobra el 1% del mínimo protegido en USDC; cualquier importe adicional es tuyo. Los costes de red y conversión se pagan aparte." },
   { question: "¿Qué bóvedas puedo consultar?", answer: "SOL, MET y SPCX. En Detalles del pool puedes ver precio, volumen de 24 horas y liquidez. Si un dato no está disponible, lo indicamos." },
   { question: "¿Las ganancias están garantizadas?", answer: "No. Las tasas de Real son estimaciones y cambian. En Prueba son ejemplos ficticios. Puedes perder parte o todo tu dinero. SPCX no equivale a tener acciones de SpaceX." },
-  { question: "¿Cuál es la diferencia entre cosechar y liquidar?", answer: "Cosechar cobra las comisiones sin cerrar la posición. Liquidar cierra la posición y convierte los activos admitidos a USDC. Actualmente ambas acciones solo están disponibles para la posición SOL autorizada del piloto." },
-  { question: "¿Cuánto puedo depositar en Real?", answer: "Entre 1 y 10,000 USDC por depósito en SOL o MET. Importante: las nuevas posiciones todavía no se pueden cosechar ni retirar desde BÓVEDA." },
+  { question: "¿Cuál es la diferencia entre cosechar y liquidar?", answer: "Cosechar cobra las comisiones sin cerrar la posición. Liquidar cierra la posición y convierte los activos admitidos a USDC. Ambas están disponibles para tus posiciones compatibles de SOL y MET, con revisión y firma de tu wallet. La liquidez bloqueada no se puede liquidar; SPCX aún no admite operaciones." },
+  { question: "¿Cuánto puedo depositar en Real?", answer: "Entre 1 y 10,000 USDC por depósito en SOL o MET. Después puedes cosechar o liquidar posiciones compatibles con la misma wallet. Cada operación se comprueba antes de firmar." },
   { question: "¿Qué necesito para operar en Real?", answer: "Una wallet con USDC y SOL para los costes de red. Revisa el importe y los costes antes de firmar. Nunca envíes monedas de una red distinta." },
   { question: "¿Por qué se convierte parte de mis USDC?", answer: "Cada bóveda combina USDC con otro token. Parte del depósito puede convertirse a ese token. Al retirar, el importe puede ser distinto al que depositaste." },
   { question: "¿Qué hago si una operación queda pendiente?", answer: "Consulta su comprobante antes de volver a intentarlo. Una operación solo está completada cuando la red la confirma. Si falla, puede cobrar costes de red." },
@@ -37,6 +37,6 @@ export function Faq({ preview = false }: { preview?: boolean }) {
         <div className="max-w-2xl pb-4 text-sm leading-7 text-muted-foreground">{answer}</div>
       </details>)}
     </div>
-    {!preview && <p className="mt-8 break-all text-xs leading-6 text-muted-foreground">Wallet destinataria de cargos del piloto Real: <span className="font-mono">{FEE_WALLET}</span></p>}
+    {!preview && <p className="mt-8 break-all text-xs leading-6 text-muted-foreground">Wallet destinataria de cargos de Real: <span className="font-mono">{FEE_WALLET}</span></p>}
   </section>;
 }

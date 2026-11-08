@@ -29,13 +29,11 @@ it("opens close review for the exact unlocked authorized pilot", () => {
   fireEvent.click(screen.getByRole("button", { name: "Cerrar y Liquidar" }));
   expect(screen.getByText("Revisión de cierre autorizada")).toBeInTheDocument();
 });
-it.each(["Cosechar Ganancias", "Cerrar y Liquidar"])("keeps %s clickable but does not authorize a new position", (name) => {
+it.each(["Cosechar Ganancias", "Cerrar y Liquidar"])("opens %s review for new owner positions", (name) => {
   show("new-position");
   expect(screen.getByRole("button", { name })).toBeEnabled();
   fireEvent.click(screen.getByRole("button", { name }));
-  expect(screen.getByRole("dialog")).toBeInTheDocument();
-  expect(screen.queryByText("Revisión de cosecha autorizada")).not.toBeInTheDocument();
-  expect(screen.queryByText("Revisión de cierre autorizada")).not.toBeInTheDocument();
+  expect(screen.getByText(name === "Cosechar Ganancias" ? "Revisión de cosecha autorizada" : "Revisión de cierre autorizada")).toBeInTheDocument();
 });
 it("does not authorize closing locked pilot liquidity", () => {
   show(WITHDRAWAL_PILOT.position, true);

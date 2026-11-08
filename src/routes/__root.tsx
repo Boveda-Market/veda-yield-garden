@@ -82,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "BÓVEDA" },
-      { name: "description", content: "BÓVEDA: acceso rápido, prueba sin registro con 1,000 créditos ficticios y piloto limitado en la red." },
+      { name: "description", content: "BÓVEDA: acceso rápido, prueba sin registro con 1,000 créditos ficticios y operaciones reales con tu wallet." },
       { name: "theme-color", content: "#0b0d0c" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
