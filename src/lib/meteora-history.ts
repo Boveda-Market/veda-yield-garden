@@ -16,3 +16,17 @@ export function meteoraMetrics(records: MeteoraRecord[]) {
   const harvested = totals.reduce((sum, row) => sum + row.harvestUsdc, 0n);
   return { totals, deposited: tokenAmount(deposited.toString(), 6), harvested: tokenAmount(harvested.toString(), 6), usdcHarvestPercent: deposited > 0n ? Number(harvested * 100_000_000n / deposited) / 1_000_000 : null, count: unique.length };
 }
+
+/** Option A PNL: gross harvested USDC plus harvested SOL/MET valued at current price. Null when any needed price is missing. */
+export function harvestedUsdValue(totals: { id: string; harvestToken: bigint; harvestUsdc: bigint }[], prices: Record<string, number | null | undefined>) {
+  let micro = 0n;
+  for (const row of totals) {
+    micro += row.harvestUsdc;
+    if (row.harvestToken === 0n) continue;
+    const price = prices[row.id];
+    if (price == null || !Number.isFinite(price) || price <= 0) return null;
+    const decimals = row.id === "sol" ? 9n : 6n;
+    micro += (row.harvestToken * BigInt(Math.round(price * 1_000_000))) / 10n ** decimals;
+  }
+  return tokenAmount(micro.toString(), 6);
+}

@@ -26,3 +26,12 @@ describe("Meteora recorded portfolio metrics", () => {
     expect(meteoraHistoryInput.safeParse({ wallet: CHAIN_POOLS[0].pool, before: "invalid" }).success).toBe(false);
   });
 });
+import { harvestedUsdValue } from "@/lib/meteora-history";
+describe("harvestedUsdValue (PNL option A)", () => {
+  it("adds USDC fees and SOL fees valued at current price", () => {
+    expect(harvestedUsdValue([{ id: "sol", harvestToken: 1_000_000_000n, harvestUsdc: 500_000n }, { id: "met", harvestToken: 0n, harvestUsdc: 0n }], { sol: 150 })).toBe("150.5");
+  });
+  it("returns null when a harvested token has no price", () => {
+    expect(harvestedUsdValue([{ id: "met", harvestToken: 2_000_000n, harvestUsdc: 0n }], { met: null })).toBeNull();
+  });
+});

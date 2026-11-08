@@ -1,8 +1,9 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
+import { fetchPoolStats } from "@/lib/pool-stats";
 import { useServerFn } from "@tanstack/react-start";
 import { ExternalLink, RefreshCw } from "lucide-react";
 import { getMeteoraHistory } from "@/lib/meteora-history.functions";
-import { meteoraMetrics } from "@/lib/meteora-history";
+import { harvestedUsdValue, meteoraMetrics } from "@/lib/meteora-history";
 import { tokenAmount, type ChainPosition } from "@/lib/solana-data";
 import { Button } from "./ui/button";
 
@@ -18,16 +19,20 @@ export function MeteoraPortfolio({ wallet, positions }: { wallet: string | null;
   const metrics = meteoraMetrics(records);
   const missing = pages.reduce((sum, page) => sum + page.missing, 0);
   const format = (value: string) => `${value} USDC`;
+  const priced = metrics.totals.filter((p) => p.id !== "rwa");
+  const priceQueries = useQueries({ queries: priced.map((p) => ({ queryKey: ["dexscreener-pool-stats", p.pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(p.pool, signal), staleTime: 60_000, retry: 1 })) });
+  const prices = Object.fromEntries(priced.map((p, i) => { const s = priceQueries[i]?.data; return [p.id, s && s.baseSymbol.toUpperCase().includes(p.symbol) ? s.price : null]; }));
+  const pnl = pages.length > 0 ? harvestedUsdValue(metrics.totals, prices) : null;
   const ready = pages.length > 0;
   return <div>
     <div className="flex items-center justify-between gap-3"><h2 className="font-display text-lg font-semibold">Tus resultados en Meteora</h2><Button size="icon" variant="outline" title="Actualizar registros de Meteora" aria-label="Actualizar registros de Meteora" disabled={!wallet || query.isFetching} onClick={() => void query.refetch()}><RefreshCw size={16} /></Button></div>
     <div className="mt-6 grid grid-cols-2 gap-6 lg:grid-cols-4">{[
-      ["Ganancias / pérdidas (PNL)", "No disponible"],
+      ["Ganancias generadas (PNL) · USD", pnl ? `$${pnl}` : "No disponible"],
       ["USDC aportados al pool", ready ? format(metrics.deposited) : "No disponible"],
       ["Comisiones USDC cosechadas · brutas", ready ? format(metrics.harvested) : "No disponible"],
       ["Porcentaje cosechado · parte USDC", ready && metrics.usdcHarvestPercent !== null ? `${metrics.usdcHarvestPercent}%` : "No disponible"],
     ].map(([label, value]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="mt-2 break-words font-display text-xl">{value}</p></div>)}</div>
-    <p className="mt-5 text-xs leading-5 text-muted-foreground">Importes de los eventos oficiales de Meteora confirmados definitivamente en Solana, para SOL/MET. Los USDC aportados no incluyen el valor del otro token ni el coste total de tu depósito. El porcentaje compara solo comisiones USDC brutas con USDC aportados; no es la rentabilidad total. No descuenta el cargo de BÓVEDA, red ni conversiones. PNL no disponible sin coste completo y valoración de ambos tokens.</p>
+    <p className="mt-5 text-xs leading-5 text-muted-foreground">Importes de los eventos oficiales de Meteora confirmados definitivamente en Solana, para SOL/MET. Los USDC aportados no incluyen el valor del otro token ni el coste total de tu depósito. El porcentaje compara solo comisiones USDC brutas con USDC aportados; no es la rentabilidad total. No descuenta el cargo de BÓVEDA, red ni conversiones. El PNL suma las comisiones USDC cosechadas más SOL/MET cosechados valorados al precio actual de DexScreener; cambia con el precio y no incluye la variación del capital depositado.</p>
     {!wallet && <p className="mt-4 text-muted-foreground">Conecta tu wallet para consultar tus registros.</p>}
     {query.isFetching && <p role="status" className="mt-4 text-sm">Consultando registros de Meteora…</p>}
     {query.isError && <p role="alert" className="mt-4 text-sm text-destructive">No pudimos cargar todos los registros. Los resultados anteriores se conservan; intenta actualizar.</p>}
