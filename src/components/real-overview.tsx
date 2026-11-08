@@ -10,6 +10,7 @@ import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
 import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
 import { PoolYield } from "@/components/pool-yield";
 import { HarvestDialog } from "@/components/harvest-dialog";
+import { BuyUsdc } from "@/components/buy-usdc";
 const RealPortfolioPanel = lazy(() => import("./real-portfolio-panel").then((module) => ({ default: module.RealPortfolioPanel })));
 
 export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }: { walletAddress: string | null; onDetails: (vault: Vault) => void; portfolioOnly?: boolean }) {
@@ -33,6 +34,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <p role="status" className="mt-4 font-semibold">Piloto limitado en Mainnet</p>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Depósitos entre 1 y 10,000 USDC en SOL/MET. Las nuevas posiciones no se pueden cosechar ni retirar desde BÓVEDA. La liquidación a USDC está limitada a la posición SOL autorizada del piloto, tras verificar mínimos, comisión y renta. Cosechar Ganancias está en piloto para la misma posición; las demás operaciones siguen en simulación.</p>
       {walletAddress && <div className="mt-4 flex flex-wrap items-center gap-3"><p className="min-w-0 break-all text-xs text-muted-foreground">Wallet conectada: {walletAddress}</p><Button variant="outline" size="icon" title="Actualizar saldo y posiciones" aria-label="Actualizar saldo y posiciones" disabled={query.isFetching} onClick={() => void query.refetch()}><RefreshCw size={16} className={query.isFetching ? "animate-spin motion-reduce:animate-none" : ""} /></Button></div>}
+      <BuyUsdc className="mt-4" />
       {query.data && !query.data.success && <p role="alert" className="mt-3 text-sm text-destructive">{query.data.error}</p>}
       {query.isError && <p role="alert" className="mt-3 text-sm text-destructive">No se pudo consultar la red. Inténtalo de nuevo.</p>}
       <dl className="mt-6 grid gap-5 sm:grid-cols-3">

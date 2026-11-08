@@ -11,6 +11,8 @@ export type BovedaSession = {
   logout: () => Promise<void>;
   /** Asks the connected wallet to sign and send; resolves to the base58 signature. */
   signAndSend: (transaction: Uint8Array) => Promise<string>;
+  /** Opens the card/exchange purchase flow to receive USDC in the user's wallet. */
+  buyUsdc?: () => Promise<void>;
   getAccessToken?: () => Promise<string | null>;
 };
 

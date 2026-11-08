@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 import { defaultProfile, profileSchema, type AccountProfile } from "@/lib/account-profile";
 import { getAccountProfile, saveAccountProfile } from "@/lib/account-profile.functions";
 import { EmailSignup } from "./email-signup";
+import { BuyUsdc } from "./buy-usdc";
 
 const avatars = [{ id: "leaf", label: "Hoja", Icon: Leaf }, { id: "sun", label: "Sol", Icon: Sun }, { id: "gem", label: "Gema", Icon: Gem }, { id: "waves", label: "Olas", Icon: Waves }] as const;
 export function AccountSettings() {
@@ -49,6 +50,7 @@ export function AccountSettings() {
       <Button type="submit" disabled={busy}><Check size={16} />{busy ? "Un momento…" : "Guardar cambios"}</Button>
       {message && <p role="status" className="text-sm text-muted-foreground">{message}</p>}
     </form><p className="mt-8 text-xs leading-5 text-muted-foreground">Tu avatar no verifica tu identidad ni autoriza movimientos. Nunca te pediremos tu frase semilla.</p>
+    <BuyUsdc className="mt-8" />
     <EmailSignup />
     <Button variant="outline" className="mt-8 w-full" onClick={() => void (async () => { await session.logout(); window.location.assign("/"); })()}><LogOut size={16} />Cerrar sesión</Button>
   </section>;

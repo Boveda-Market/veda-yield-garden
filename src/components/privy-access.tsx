@@ -1,7 +1,7 @@
 import "@/lib/buffer-polyfill";
 import { useState, type ReactNode } from "react";
 import { PrivyProvider, useLogin, usePrivy } from "@privy-io/react-auth";
-import { toSolanaWalletConnectors, useSignAndSendTransaction, useWallets } from "@privy-io/react-auth/solana";
+import { toSolanaWalletConnectors, useFundWallet, useSignAndSendTransaction, useWallets } from "@privy-io/react-auth/solana";
 import bs58 from "bs58";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const { wallets } = useWallets();
   const { signAndSendTransaction } = useSignAndSendTransaction();
+  const { fundWallet } = useFundWallet();
   const [error, setError] = useState<string | null>(null);
   const { login } = useLogin({
     onComplete: () => setError(null),
@@ -34,6 +35,10 @@ function SessionBridge({ children }: { children: ReactNode }) {
       const { signature } = await signAndSendTransaction({ transaction, wallet, chain: "solana:mainnet" });
       return bs58.encode(signature);
     },
+    buyUsdc: async () => {
+      if (!authenticated || !walletAddress) throw new Error("Primero entra a tu cuenta");
+      await fundWallet({ address: walletAddress, options: { chain: "solana:mainnet", asset: "USDC", amount: "50" } });
+    },
     logout: async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError("No se pudo cerrar sesión. Inténtalo de nuevo."); } },
   }}>{children}</BovedaSessionContext.Provider>;
 }
@@ -43,7 +48,7 @@ export default function PrivyAccess({ children }: { children: ReactNode }) {
     loginMethods: ["email", "google", "wallet"],
     appearance: { theme: "dark", walletChainType: "solana-only", walletList: ["phantom", "jupiter"], logo: "/icon-512.png" },
     externalWallets: { solana: { connectors: solanaConnectors } },
-    embeddedWallets: { solana: { createOnLogin: "users-without-wallets" } },
+    embeddedWallets: { solana: { createOnLogin: "users-without-wallets" }, ethereum: { createOnLogin: "off" } },
     solana: { rpcs: solanaRpcs },
   }}><SessionBridge>{children}</SessionBridge></PrivyProvider>;
 }
