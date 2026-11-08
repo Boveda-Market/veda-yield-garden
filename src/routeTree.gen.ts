@@ -14,6 +14,7 @@ import { Route as ActividadRouteImport } from './routes/actividad'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as CuentaRouteImport } from './routes/cuenta'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as ObservadorRouteImport } from './routes/observador'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as PruebaRouteImport } from './routes/prueba'
@@ -44,6 +45,11 @@ const FaqRoute = FaqRouteImport.update({
   path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ObservadorRoute = ObservadorRouteImport.update({
+  id: '/observador',
+  path: '/observador',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortfolioRoute = PortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRoute
   '/cuenta': typeof CuentaRoute
   '/faq': typeof FaqRoute
+  '/observador': typeof ObservadorRoute
   '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppRoute
   '/cuenta': typeof CuentaRoute
   '/faq': typeof FaqRoute
+  '/observador': typeof ObservadorRoute
   '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/app': typeof AppRoute
   '/cuenta': typeof CuentaRoute
   '/faq': typeof FaqRoute
+  '/observador': typeof ObservadorRoute
   '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/cuenta'
     | '/faq'
+    | '/observador'
     | '/portfolio'
     | '/privacidad'
     | '/prueba'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/cuenta'
     | '/faq'
+    | '/observador'
     | '/portfolio'
     | '/privacidad'
     | '/prueba'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/cuenta'
     | '/faq'
+    | '/observador'
     | '/portfolio'
     | '/privacidad'
     | '/prueba'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRoute
   CuentaRoute: typeof CuentaRoute
   FaqRoute: typeof FaqRoute
+  ObservadorRoute: typeof ObservadorRoute
   PortfolioRoute: typeof PortfolioRoute
   PrivacidadRoute: typeof PrivacidadRoute
   PruebaRoute: typeof PruebaRoute
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/observador': {
+      id: '/observador'
+      path: '/observador'
+      fullPath: '/observador'
+      preLoaderRoute: typeof ObservadorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/portfolio': {
       id: '/portfolio'
       path: '/portfolio'
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRoute,
   CuentaRoute: CuentaRoute,
   FaqRoute: FaqRoute,
+  ObservadorRoute: ObservadorRoute,
   PortfolioRoute: PortfolioRoute,
   PrivacidadRoute: PrivacidadRoute,
   PruebaRoute: PruebaRoute,
