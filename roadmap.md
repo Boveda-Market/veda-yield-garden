@@ -13,7 +13,7 @@
 - [x] Verify successful complete simulation against a funded public wallet — SOL (1158 bytes) and MET (1146 bytes) pass with fee and position both confirmed in simulated state after fixing the position readback decode and Jupiter 429 backoff. SPCX remains blocked until Token-2022 extension accounting is verified.
 - [x] Owner-authorized 1 USDC deposit pilot (SOL/MET): fresh simulation, wallet signature via Privy, confirmation polling and Solscan link. Prepared live mainnet message verified (not sent).
 - [x] First real pilot signature confirmed from the owner's supplied transaction; chain data verifies NFT ownership and fee.
-- [ ] Build and verify Harvest and Close & Settle withdrawals before widening the pilot.
+- [ ] Owner signs pilot harvest on mainnet, then verify Close & Settle before widening the pilot.
 - [ ] Enable wallet-signed mainnet deposit, harvest and liquidation with atomic 1% USDC fee only after devnet composition, confirmation and rollback checks pass; also validate Jupiter conversions and Token-2022 behavior before release.
 - [x] Fix published HTTP 500 initialization — Anchor correction deployed; all four public pages respond HTTP 200. Financial execution stays disabled.
 - [ ] Fix published WalletConnect initialization error — browser events alias added; verify a new published client has no constructor error.
