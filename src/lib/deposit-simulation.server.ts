@@ -8,7 +8,7 @@ import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, solanaAddressSchema } from "@/lib/solana-data";
 import { simulationAmounts, simulationDisplay, type SimulationInput, type SimulationResult, type SimulationStage } from "@/lib/deposit-simulation";
 import { compactDepositInstructions } from "@/lib/compact-deposit";
-import { PILOT_AMOUNT, type PreparedPilot } from "@/lib/pilot-deposit";
+import { pilotInput, type PreparedPilot } from "@/lib/pilot-deposit";
 
 const ixSchema = z.object({ programId: solanaAddressSchema, accounts: z.array(z.object({ pubkey: solanaAddressSchema, isSigner: z.boolean(), isWritable: z.boolean() })).max(128), data: z.string().max(20_000) });
 const swapSchema = z.object({ setupInstructions: z.array(ixSchema), swapInstruction: ixSchema, cleanupInstruction: ixSchema.nullable().optional(), otherInstructions: z.array(ixSchema).optional(), addressLookupTableAddresses: z.array(solanaAddressSchema).max(16) });
@@ -31,8 +31,8 @@ async function jupiter(path: string, body?: unknown) {
 
 /** Read-only: no signatures, transaction bytes returned, broadcasting or funding overrides. */
 export async function simulateDeposit(apiKey: string, input: SimulationInput, options: { preparePilot?: boolean } = {}): Promise<SimulationResult & { prepared?: PreparedPilot }> {
-  // A pilot transaction is only ever prepared for the fixed pilot amount.
-  if (options.preparePilot && input.amount !== PILOT_AMOUNT) throw new Error("Importe piloto inválido");
+  // Validate the amount and eligible vaults again at the signing boundary.
+  if (options.preparePilot) pilotInput.parse(input);
   const amounts = simulationAmounts(input.amount);
   const display = simulationDisplay(input.amount);
   let stage: SimulationStage = "pool";

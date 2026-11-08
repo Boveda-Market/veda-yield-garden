@@ -1,10 +1,14 @@
 import { z } from "zod";
 import { solanaAddressSchema, tokenAmount } from "@/lib/solana-data";
 
+export const MIN_DEPOSIT_USDC = 1;
+export const MAX_DEPOSIT_USDC = 10_000;
+export const depositAmountSchema = z.string().regex(/^\d{1,5}(\.\d{1,6})?$/).refine((value) => Number(value) >= MIN_DEPOSIT_USDC && Number(value) <= MAX_DEPOSIT_USDC, "Introduce entre 1 y 10,000 USDC");
+
 export const simulationInput = z.object({
   wallet: solanaAddressSchema,
   vaultId: z.enum(["sol", "met", "rwa"]),
-  amount: z.string().regex(/^\d{1,3}(\.\d{1,6})?$/).refine((value) => Number(value) >= 1 && Number(value) <= 2, "Simula entre 1 y 2 USDC"),
+  amount: depositAmountSchema,
 }).strict();
 export type SimulationInput = z.infer<typeof simulationInput>;
 export type SimulationStage = "pool" | "jupiter" | "composition" | "simulation";
@@ -23,11 +27,11 @@ export type SimulationResult = {
 };
 
 export function simulationAmounts(amount: string) {
-  if (!/^\d{1,3}(\.\d{1,6})?$/.test(amount)) throw new Error("Importe inválido");
+  depositAmountSchema.parse(amount);
   const [whole, fraction = ""] = amount.split(".");
   if (!whole) throw new Error("Importe inválido");
   const gross = BigInt(whole) * 1_000_000n + BigInt(fraction.padEnd(6, "0"));
-  if (gross < 1_000_000n || gross > 2_000_000n) throw new Error("Simula entre 1 y 2 USDC");
+  if (gross < 1_000_000n || gross > 10_000_000_000n) throw new Error("Introduce entre 1 y 10,000 USDC");
   const fee = 0n;
   return { gross, fee, net: gross - fee };
 }

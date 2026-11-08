@@ -102,8 +102,28 @@ describe("unsigned composed deposit simulation", () => {
     expect(VersionedTransaction.deserialize(Buffer.from(result.prepared.transaction, "base64")).message.compiledInstructions).toHaveLength(3);
     expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
   });
-  it("pilot refuses any amount other than 1 USDC", async () => {
-    await expect(simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "2" }, { preparePilot: true })).rejects.toThrow();
+  it("pilot refuses deposits over 10,000 USDC", async () => {
+    await expect(simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "10000.000001" }, { preparePilot: true })).rejects.toThrow();
+    expect(mocks.connection.simulateTransaction).not.toHaveBeenCalled();
+  });
+  it("accepts a verified 10,000 USDC budget without charging entry fees or sending", async () => {
+    mocks.getAccount.mockReset();
+    mocks.getAccount.mockResolvedValue({ amount: 10_000_000_000n });
+    const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "10000" }, { preparePilot: true });
+    expect(result.success).toBe(true);
+    expect(result.prepared).toBeDefined();
+    expect(result.net).toBe("10000");
+    expect(result.fee).toBe("0");
+    expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
+  });
+  it("does not prepare 10,000 USDC when the wallet only has 2 USDC", async () => {
+    const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "10000" }, { preparePilot: true });
+    expect(result.success).toBe(false);
+    expect(result.prepared).toBeUndefined();
+    expect(mocks.connection.simulateTransaction).not.toHaveBeenCalled();
+  });
+  it("does not widen signable vaults to Token-2022", async () => {
+    await expect(simulateDeposit("test-credential", { wallet, vaultId: "rwa", amount: "10000" }, { preparePilot: true })).rejects.toThrow();
   });
   it("pilot returns nothing when Solana rejects the simulation", async () => {
     mocks.connection.simulateTransaction.mockResolvedValue({ context: { slot: 123 }, value: { err: { InstructionError: [4, "Custom"] } } });

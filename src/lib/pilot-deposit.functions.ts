@@ -1,14 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
-import { PILOT_AMOUNT, pilotInput, signatureInput, type PilotStatus } from "@/lib/pilot-deposit";
+import { pilotInput, signatureInput, type PilotStatus } from "@/lib/pilot-deposit";
 
-/** Re-simulates the fixed pilot deposit and returns it only when fee and position verify. */
+/** Re-simulates the chosen deposit and returns it only when budget and position verify. */
 export const preparePilotDeposit = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => pilotInput.parse(input))
   .handler(async ({ data }) => {
     const key = process.env["HELIUS_API_KEY"];
     if (!key) throw new Error("La conexión de Solana no está configurada.");
     const { simulateDeposit } = await import("@/lib/deposit-simulation.server");
-    return simulateDeposit(key, { ...data, amount: PILOT_AMOUNT }, { preparePilot: true });
+    return simulateDeposit(key, data, { preparePilot: true });
   });
 
 export const pilotDepositStatus = createServerFn({ method: "POST" })
