@@ -1,6 +1,6 @@
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, LayoutDashboard, PieChart, History, UserRound } from "lucide-react";
+import { ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, LayoutDashboard, PieChart, History, UserRound, Home } from "lucide-react";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { demoSessionKey, readDemoSession } from "@/lib/demo-session";
 import { VAULTS, accrued, type Position, type Vault } from "@/lib/vaults";
@@ -105,11 +105,11 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
-        <div className="flex items-center gap-2 font-display text-xl font-bold tracking-tight">
+      <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-5 py-5">
+        <Link to="/" aria-label="BÓVEDA · Ir al inicio" className="flex items-center gap-2 font-display text-xl font-bold">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground"><VaultIcon size={18} /></span>
           BÓVEDA
-        </div>
+        </Link>
         {user && !guest && (
           <Button variant="secondary" onClick={() => void (async () => { await session.logout(); await navigate({ to: "/", replace: true }); })()} className="min-w-0 max-w-[65%]" aria-label="Cerrar sesión">
             <Wallet size={14} /><span className="truncate">{user}</span><LogOut size={14} />
@@ -118,6 +118,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
       </header>
 
       <main className="mx-auto max-w-5xl px-5 pb-16">
+        <Button asChild variant="ghost" size="sm" className="mb-4"><Link to="/"><Home size={16} />Volver al inicio</Link></Button>
         {session.error && <p role="alert" className="mb-4 text-sm text-destructive">{session.error}</p>}
         {guest ? <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-y border-border py-4"><p className="text-sm"><strong>Invitado · Prueba</strong> · Sin dinero real</p><Button asChild variant="outline" size="sm"><Link to="/">Crear cuenta o entrar</Link></Button></div> : <ModeSelector mode={mode} onChange={onModeChange} />}
         <nav aria-label="Secciones de BÓVEDA" className="mb-6 flex flex-wrap gap-2 border-b border-border pb-4">{guest ? <>{[["vaults", "Bóvedas"], ["portfolio", "Portafolio"], ["activity", "Actividad"]].map(([key, label]) => <Button key={key} variant={activeView === key ? "secondary" : "ghost"} onClick={() => setGuestView(key as "vaults" | "portfolio" | "activity")}>{label}</Button>)}</> : <><Button asChild variant={view === "vaults" ? "secondary" : "ghost"}><Link to="/app"><LayoutDashboard size={16} />Bóvedas</Link></Button><Button asChild variant={view === "portfolio" ? "secondary" : "ghost"}><Link to="/portfolio"><PieChart size={16} />Portafolio</Link></Button><Button asChild variant={view === "activity" ? "secondary" : "ghost"}><Link to="/actividad"><History size={16} />Actividad</Link></Button><Button asChild variant={view === "account" ? "secondary" : "ghost"}><Link to="/cuenta"><UserRound size={16} />Mi cuenta</Link></Button></>}</nav>

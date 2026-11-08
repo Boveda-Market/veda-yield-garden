@@ -9,7 +9,13 @@ function EntryButtons() {
   const session = useBovedaSession();
   const navigate = useNavigate();
   const [signup, setSignup] = useState(false);
-  useEffect(() => { if (session.ready && session.authenticated) void navigate({ to: "/app", replace: true }); }, [session.ready, session.authenticated]);
+  const [startedSignedOut, setStartedSignedOut] = useState(false);
+  useEffect(() => {
+    if (!session.ready) return;
+    if (!session.authenticated) setStartedSignedOut(true);
+    else if (startedSignedOut) void navigate({ to: "/app", replace: true });
+  }, [session.ready, session.authenticated, startedSignedOut]);
+  if (session.ready && session.authenticated) return <div className="mt-8 w-full max-w-sm"><p className="mb-4 text-sm text-muted-foreground">Tu sesión está abierta.</p><Button asChild className="h-12 w-full"><Link to="/app">Entrar a mi cuenta<ArrowRight size={16} /></Link></Button></div>;
   return <div className="mt-8 w-full max-w-sm space-y-3">
     <h2 className="mb-4 font-display text-lg font-semibold">{signup ? "Crea tu cuenta" : "Entra a tu cuenta"}</h2>
     <Button disabled={!session.ready} className="h-12 w-full" onClick={() => session.login("email")}>{signup ? "Registrarme con email" : "Entrar con email"}<ArrowRight size={16} /></Button>

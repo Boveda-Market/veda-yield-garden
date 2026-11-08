@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 
 export function LegalLayout({ title, children, legal = true }: { title: string; children: ReactNode; legal?: boolean }) {
   return <main className="mx-auto min-h-screen max-w-3xl px-5 py-8 text-foreground">
-    <Button asChild variant="ghost"><Link to="/"><ArrowLeft />Volver a BÓVEDA</Link></Button>
-    <p className="mt-10 font-display text-lg font-bold">BÓVEDA · Boveda Technologies LLC</p>
+    <Button asChild variant="ghost"><Link to="/"><ArrowLeft />Volver al inicio</Link></Button>
+    <Link to="/" aria-label="BÓVEDA · Ir al inicio" className="mt-10 flex items-center gap-3 font-display text-lg font-bold"><img src="/icon-512.png" alt="" className="h-9 w-9 rounded-lg" />BÓVEDA</Link>
+    <p className="mt-2 text-xs text-muted-foreground">Boveda Technologies LLC</p>
     <h1 className="mt-3 font-display text-3xl font-bold">{title}</h1>
     <p className="mt-3 text-sm text-muted-foreground">{legal ? "Vigente desde el" : "Actualizado el"} 8 de noviembre de 2026</p>
     <article className="mt-8 space-y-8 text-sm leading-7 text-muted-foreground">{children}</article>
