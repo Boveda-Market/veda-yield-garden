@@ -5,6 +5,7 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { Button } from "./ui/button";
 import { defaultProfile, profileSchema, type AccountProfile } from "@/lib/account-profile";
 import { getAccountProfile, saveAccountProfile } from "@/lib/account-profile.functions";
+import { EmailSignup } from "./email-signup";
 
 const avatars = [{ id: "leaf", label: "Hoja", Icon: Leaf }, { id: "sun", label: "Sol", Icon: Sun }, { id: "gem", label: "Gema", Icon: Gem }, { id: "waves", label: "Olas", Icon: Waves }] as const;
 export function AccountSettings() {
@@ -47,5 +48,7 @@ export function AccountSettings() {
       <p className="break-all text-xs text-muted-foreground">Acceso: {session.label}</p>
       <Button type="submit" disabled={busy}><Check size={16} />{busy ? "Un momento…" : "Guardar cambios"}</Button>
       {message && <p role="status" className="text-sm text-muted-foreground">{message}</p>}
-    </form><p className="mt-8 text-xs leading-5 text-muted-foreground">Tu avatar no verifica tu identidad ni autoriza movimientos. Nunca te pediremos tu frase semilla.</p></section>;
+    </form><p className="mt-8 text-xs leading-5 text-muted-foreground">Tu avatar no verifica tu identidad ni autoriza movimientos. Nunca te pediremos tu frase semilla.</p>
+    <EmailSignup />
+  </section>;
 }

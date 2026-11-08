@@ -1,4 +1,5 @@
 # Tasks
+- [x] Add the existing optional consent-based email signup to Tu Cuenta, reusing private insert-only collection without changing Privy login or profile storage.
 - [x] Expand portfolio with trial PNL, observed balance graphs, recorded deposited volume, allocation, filtered history and CSV export. Lazy modules and dependency-free graphs keep entry lightweight; capped minute observations avoid continuous storage writes. Guest deposit → portfolio → graph → filters → export verified on desktop/mobile; 23 tests pass. Real shows observed USDC balances and public history, not invented PNL.
 - [x] Reorganize entry with quick Privy login, registration and guest-only Prueba; add portfolio, recent public Solana activity, local fictitious activity and optional private name/icon-avatar personalization. Guest deposit, liquidation, history persistence and desktop/mobile verified; 24 targeted tests pass.
 - [ ] Verify saved personalization and complete returning-user access with a real Privy session — requires the user's email verification or wallet authorization; guest flow is verified without registration.
