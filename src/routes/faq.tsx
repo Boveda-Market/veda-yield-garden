@@ -1,3 +1,4 @@
+import { useT } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { Faq } from "@/components/faq";
 import { LegalLayout } from "@/components/legal-layout";
@@ -15,5 +16,6 @@ export const Route = createFileRoute("/faq")({
 });
 
 function FaqPage() {
-  return <LegalLayout title="Preguntas frecuentes" legal={false}><Faq /></LegalLayout>;
+  const t = useT();
+  return <LegalLayout title={t("Preguntas frecuentes")} legal={false}><Faq /></LegalLayout>;
 }

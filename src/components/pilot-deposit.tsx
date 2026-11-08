@@ -1,3 +1,4 @@
+import { useT } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { LoaderCircle, PenLine } from "lucide-react";
@@ -12,6 +13,7 @@ const labels: Record<Step, string> = { idle: "", preparing: "Preparando tu depó
 
 /** Selected real deposit with fresh simulation and owner signature. */
 export function PilotDeposit({ vaultId, amount, onBusyChange }: { vaultId: string; amount: string; onBusyChange: (busy: boolean) => void }) {
+  const t = useT();
   const { walletAddress, signAndSend } = useBovedaSession();
   const prepare = useServerFn(preparePilotDeposit);
   const readStatus = useServerFn(pilotDepositStatus);
@@ -44,24 +46,24 @@ export function PilotDeposit({ vaultId, amount, onBusyChange }: { vaultId: strin
       for (let attempt = 0; attempt < 30; attempt++) {
         const { status: next } = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as PilotStatus }));
         setStatus(next);
-        if (next === "failed") { setStep("error"); setMessage("La red rechazó la transacción; al ser atómica, no se aplicaron ni la comisión ni el depósito (solo el coste de red)."); return; }
+        if (next === "failed") { setStep("error"); setMessage(t("La red rechazó la transacción; al ser atómica, no se aplicaron ni la comisión ni el depósito (solo el coste de red).")); return; }
         if (next !== "pending") { setStep("done"); return; }
         await new Promise((resolve) => setTimeout(resolve, 2_000));
       }
-      setStep("error"); setMessage("La confirmación tarda más de lo habitual. Revisa el estado en Solscan antes de reintentar.");
-    } catch { setStep("error"); setMessage("No se pudo preparar el depósito. No se pidió ninguna firma."); }
+      setStep("error"); setMessage(t("La confirmación tarda más de lo habitual. Revisa el estado en Solscan antes de reintentar."));
+    } catch { setStep("error"); setMessage(t("No se pudo preparar el depósito. No se pidió ninguna firma.")); }
   }
 
-  if (!eligible) return <p className="border-t border-border pt-4 text-xs text-muted-foreground">Los depósitos no están disponibles para esta bóveda.</p>;
+  if (!eligible) return <p className="border-t border-border pt-4 text-xs text-muted-foreground">{t("Los depósitos no están disponibles para esta bóveda.")}</p>;
   return <section aria-labelledby="pilot-title" className="grid gap-3 border-t border-border pt-4 text-sm">
-    <h3 id="pilot-title" className="font-semibold">Depósito real · hasta 10,000 USDC</h3>
-    <p role="note" className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs leading-5">Red principal con dinero real. Entre 1 y 10,000 USDC por depósito, comisión de entrada 0%; comisión de salida 1%. <strong>Puedes cosechar y liquidar tus posiciones compatibles de SOL y MET. La liquidez bloqueada no se puede liquidar.</strong> La posición queda en tu wallet como NFT de posición. Necesitas unos 0.015 SOL para las cuentas del pool y los costes de red y creación de cuentas, independientes de la comisión operativa.</p>
-    {!walletAddress ? <p className="text-xs text-muted-foreground">Inicia sesión con una wallet para firmar.</p> : <>
-      <label className="flex items-start gap-3 text-xs leading-5"><Checkbox checked={accepted} disabled={busy || !valid.success} onCheckedChange={(value) => setAccepted(value === true)} aria-label="Acepto el depósito real" /><span>Acepto depositar {valid.success ? valid.data.amount : "el importe indicado"} USDC reales, la entrada al 0% y la salida al 1%. Entiendo que la transacción no se puede revertir y que cada cosecha o liquidación requiere una nueva revisión y mi firma.</span></label>
-      <Button disabled={!accepted || busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? labels[step] : "Firmar depósito real"}</Button>
+    <h3 id="pilot-title" className="font-semibold">{t("Depósito real · hasta 10,000 USDC")}</h3>
+    <p role="note" className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs leading-5">{t("Red principal con dinero real. Entre 1 y 10,000 USDC por depósito, comisión de entrada 0%; comisión de salida 1%.")}{" "}<strong>{t("Puedes cosechar y liquidar tus posiciones compatibles de SOL y MET. La liquidez bloqueada no se puede liquidar.")}</strong> {t("La posición queda en tu wallet como NFT de posición. Necesitas unos 0.015 SOL para las cuentas del pool y los costes de red y creación de cuentas, independientes de la comisión operativa.")}</p>
+    {!walletAddress ? <p className="text-xs text-muted-foreground">{t("Inicia sesión con una wallet para firmar.")}</p> : <>
+      <label className="flex items-start gap-3 text-xs leading-5"><Checkbox checked={accepted} disabled={busy || !valid.success} onCheckedChange={(value) => setAccepted(value === true)} aria-label={t("Acepto el depósito real")} /><span>{t("Acepto depositar")}{" "}{valid.success ? valid.data.amount : t("el importe indicado")} {t("USDC reales, la entrada al 0% y la salida al 1%. Entiendo que la transacción no se puede revertir y que cada cosecha o liquidación requiere una nueva revisión y mi firma.")}</span></label>
+      <Button disabled={!accepted || busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? labels[step] : t("Firmar depósito real")}</Button>
     </>}
-    {step === "done" && <p role="status" className="font-semibold">Depósito confirmado en la red ({status === "finalized" ? "finalizado" : "confirmado"}).</p>}
+    {step === "done" && <p role="status" className="font-semibold">{t("Depósito confirmado en la red (")}{status === "finalized" ? "finalizado" : "confirmado"}).</p>}
     {message && <p role="alert" className="text-destructive">{message}</p>}
-    {signature && <p className="break-all text-xs">Transacción: <a className="underline" href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer">ver en Solscan</a></p>}
+    {signature && <p className="break-all text-xs">{t("Transacción:")}{" "}<a className="underline" href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("ver en Solscan")}</a></p>}
   </section>;
 }
