@@ -1,6 +1,6 @@
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, LayoutDashboard, PieChart, History, UserRound, Home } from "lucide-react";
+import { ShieldAlert, ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, LayoutDashboard, PieChart, History, UserRound, Home } from "lucide-react";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { demoSessionKey, readDemoSession } from "@/lib/demo-session";
 import { VAULTS, accrued, type Position, type Vault } from "@/lib/vaults";
@@ -125,60 +125,33 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
         <nav aria-label="Secciones de BÓVEDA" className="mb-6 flex flex-wrap gap-2 border-b border-border pb-4">{guest ? <>{[["vaults", "Bóvedas"], ["portfolio", "Portafolio"], ["activity", "Actividad"]].map(([key, label]) => <Button key={key} variant={activeView === key ? "secondary" : "ghost"} onClick={() => setGuestView(key as "vaults" | "portfolio" | "activity")}>{label}</Button>)}<Button asChild variant="ghost"><Link to="/cuenta"><UserRound size={16} />Mi cuenta</Link></Button><Button asChild variant="ghost"><Link to="/faq">FAQ</Link></Button></> : <><Button asChild variant={view === "vaults" ? "secondary" : "ghost"}><Link to="/app"><LayoutDashboard size={16} />Bóvedas</Link></Button><Button asChild variant={view === "portfolio" ? "secondary" : "ghost"}><Link to="/portfolio"><PieChart size={16} />Portafolio</Link></Button><Button asChild variant={view === "activity" ? "secondary" : "ghost"}><Link to="/actividad"><History size={16} />Actividad</Link></Button><Button asChild variant={view === "account" ? "secondary" : "ghost"}><Link to="/cuenta"><UserRound size={16} />Mi cuenta</Link></Button></>}</nav>
         {activeView === "account" && !guest ? <AccountSettings /> : activeView === "activity" ? <ActivityView trial={mode === "trial"} wallet={session.walletAddress} rows={activities} /> : mode === "real" && !guest ? <RealOverview portfolioOnly={activeView === "portfolio"} walletAddress={session.walletAddress} onDetails={setDetailsFor} /> : user ? (
           <>
-            <h1 className="mb-4 font-display text-2xl font-semibold">{activeView === "portfolio" ? "Tu portafolio · Prueba" : "Tus bóvedas · Prueba"}</h1><p className="mb-4 text-xs leading-5 text-muted-foreground">Prueba · créditos sin valor monetario · 0% de entrada y 1% ficticio de salida, en cosechas y liquidaciones. Un crédito simula un USDC; no se puede retirar ni convertir en dinero.</p>
-            {session.walletAddress && <p className="mb-4 break-all text-xs text-muted-foreground">Wallet Solana conectada: {session.walletAddress}</p>}
-            {activeView === "portfolio" && identity && loaded ? <Suspense fallback={<p role="status">Cargando portafolio…</p>}><PortfolioPanel identity={identity} wallet={wallet} invested={invested} pending={earned} positions={positions} rows={activities} now={now} /></Suspense> : <section className="rounded-3xl p-7 md:p-10" style={{ background: "var(--gradient-hero)" }}>
-              <p className="text-sm text-muted-foreground">Balance de Prueba · ficticio</p>
-              <p className="mt-1 flex flex-wrap items-baseline gap-2 font-display text-5xl font-bold md:text-6xl">{fmt(wallet + invested + earned)} <span className="text-2xl text-muted-foreground">créditos</span></p>
-              <div className="mt-8 grid grid-cols-2 gap-5 text-sm sm:grid-cols-4">
-                <Stat label="Disponible" value={fmt(wallet)} />
-                <Stat label="Ganancias pendientes" value={`+${fmt(earned, 4)}`} accent />
-                <Stat label="Ganancias cosechadas · netas" value={`${fmt(harvestSummary.harvested, 6)}`} accent />
-                <Stat label="Porcentaje cosechado" value={harvestSummary.percent === null ? "—" : harvestSummary.percent > 0 && harvestSummary.percent < 0.0001 ? "<0.0001%" : `${fmt(harvestSummary.percent, 4)}%`} accent />
-              </div>
-              <p className="mt-5 text-xs leading-5 text-muted-foreground">Cosechado después del cargo ficticio del 1%. Porcentaje sobre los depósitos registrados en el historial de Prueba de este navegador; no es una tasa anual. No incluye capital devuelto al cerrar posiciones ni movimientos anteriores al historial.</p>
-            </section>}
-
-            <h2 className="mt-12 mb-4 font-display text-lg font-semibold">Mis posiciones · {positions.length} activas</h2>
-            {positions.length === 0 ? (
-              <p className="rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground">Aún no tienes posiciones. Elige una bóveda abajo para empezar.</p>
-            ) : (
-              <div className="space-y-3">
-                {positions.map((p) => {
-                  const v = vault(p.vaultId);
-                  if (!v) return null;
-                  const a = accrued(p, v.apy, now);
-                  return (
-                    <div key={p.id} className="flex flex-col gap-4 rounded-2xl bg-card p-5 md:flex-row md:items-center">
-                      <div className="flex-1">
-                        <p className="font-display font-semibold">{v.name} <span className="ml-2 text-xs text-muted-foreground">{v.pair}</span></p>
-                        <p className="text-sm text-muted-foreground">Capital {fmt(p.principal)} créditos · <span className="text-primary">+{fmt(a, 6)} créditos</span></p>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <Button disabled={transactionAmounts(a).gross <= 0} onClick={() => setReview({ kind: "harvest", position: p, amount: a })} variant="secondary"><Sprout size={16} /> Cosechar Ganancias</Button>
-                        <Button onClick={() => setReview({ kind: "exit", position: p, amount: p.principal + a })} variant="secondary"><ArrowDownToLine size={16} /> Cerrar y Liquidar</Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {activeView === "vaults" && <><h2 className="mt-12 mb-4 font-display text-lg font-semibold">Catálogo de bóvedas</h2>
-            <div className="grid gap-4 md:grid-cols-3">
-              {VAULTS.map((v) => (
-                <div key={v.id} className="flex flex-col rounded-2xl border border-border bg-card p-6">
-                  <div className="flex items-center justify-between text-xs text-muted-foreground"><span>Meteora DAMM v2</span><span>Riesgo {v.risk}</span></div>
-                  <p className="mt-4 font-display text-xl font-semibold">{v.name}</p>
-                  <p className="text-sm text-muted-foreground">{v.pair}</p>
-                  <p className="mt-5 font-display text-4xl font-bold text-primary">{v.apy}%<span className="ml-1 text-sm font-normal text-muted-foreground">APY ilustrativo</span></p>
-                  <p className="mt-2 text-xs text-muted-foreground">Ejemplo de simulación · no es una tasa verificada del pool.</p>
-                  <p className="mt-3 flex-1 text-sm text-muted-foreground">{v.blurb}</p>
-                   <Button variant="outline" className="mt-4 w-full" onClick={() => setDetailsFor(v)}>Detalles del pool</Button>
-                  <Button onClick={() => setDepositFor(v)} className="mt-5 h-12">Depositar créditos</Button>
-                </div>
-              ))}
-            </div></>}
+            <section aria-label="Estado del modo Prueba" className="border-y border-border py-8">
+              <div className="flex items-center gap-3"><ShieldAlert className="shrink-0 text-primary" size={24} /><h1 className="font-display text-2xl font-semibold">{activeView === "portfolio" ? "Tu portafolio · Prueba" : "BÓVEDA · Prueba"}</h1></div>
+              <p role="status" className="mt-4 font-semibold">Créditos ficticios · sin dinero real</p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">0% de entrada y 1% ficticio de salida, en cosechas y liquidaciones. Un crédito simula un USDC; no se puede retirar ni convertir en dinero.</p>
+              {session.walletAddress && <p className="mt-4 break-all text-xs text-muted-foreground">Wallet conectada: {session.walletAddress}</p>}
+              <dl className="mt-6 grid gap-5 sm:grid-cols-3">
+                <div><dt className="text-sm text-muted-foreground">Balance total · ficticio</dt><dd className="mt-1 break-all font-display text-xl">{fmt(wallet + invested + earned)} créditos</dd></div>
+                <div><dt className="text-sm text-muted-foreground">Disponible</dt><dd className="mt-1 break-all font-display text-xl">{fmt(wallet)} créditos</dd></div>
+                <div><dt className="text-sm text-muted-foreground">Posiciones en estos pools</dt><dd className="mt-1 font-display text-xl">{positions.length}</dd></div>
+                <div><dt className="text-sm text-muted-foreground">Ganancias pendientes</dt><dd className="mt-1 break-all font-display text-xl text-primary">+{fmt(earned, 4)}</dd></div>
+                <div><dt className="text-sm text-muted-foreground">Ganancias cosechadas · netas</dt><dd className="mt-1 break-all font-display text-xl text-primary">{fmt(harvestSummary.harvested, 6)}</dd></div>
+                <div><dt className="text-sm text-muted-foreground">Porcentaje cosechado</dt><dd className="mt-1 font-display text-xl text-primary">{harvestSummary.percent === null ? "—" : harvestSummary.percent > 0 && harvestSummary.percent < 0.0001 ? "<0.0001%" : `${fmt(harvestSummary.percent, 4)}%`}</dd></div>
+              </dl>
+              <p className="mt-5 text-xs leading-5 text-muted-foreground">Cosechado después del cargo ficticio del 1%, sobre los depósitos del historial de Prueba de este navegador; no es una tasa anual. Las posiciones de Prueba no aparecen en Real.</p>
+            </section>
+            {positions.length > 0 && <section aria-label="Posiciones de Prueba" className="border-b border-border py-8"><h2 className="font-display text-lg font-semibold">Mis posiciones · Prueba</h2><div className="mt-4 space-y-4">{positions.map((p) => { const v = vault(p.vaultId); if (!v) return null; const a = accrued(p, v.apy, now); return <article key={p.id} className="rounded-lg border border-border bg-card p-5"><h3 className="font-display font-semibold">{v.name}</h3><p className="mt-1 text-xs text-muted-foreground">{v.pair}</p><p className="mt-3 break-all text-sm">Capital: {fmt(p.principal)} créditos</p><p className="mt-2 break-all text-sm text-muted-foreground">Ganancias acumuladas: <span className="text-primary">+{fmt(a, 6)} créditos</span></p><div className="mt-4 flex flex-wrap gap-2"><Button variant="secondary" disabled={transactionAmounts(a).gross <= 0} onClick={() => setReview({ kind: "harvest", position: p, amount: a })}><Sprout size={16} />Cosechar Ganancias</Button><Button variant="outline" onClick={() => setReview({ kind: "exit", position: p, amount: p.principal + a })}><ArrowDownToLine size={16} />Cerrar y Liquidar</Button></div></article>; })}</div></section>}
+            {activeView === "portfolio" && identity && loaded && <div className="py-8"><Suspense fallback={<p role="status">Cargando portafolio…</p>}><PortfolioPanel identity={identity} wallet={wallet} invested={invested} pending={earned} positions={positions} rows={activities} now={now} /></Suspense></div>}
+            {activeView === "vaults" && positions.length === 0 && <p className="border-b border-border py-8 text-muted-foreground">Aún no tienes posiciones. Elige una bóveda abajo para empezar.</p>}
+            {activeView === "vaults" && <><h2 className="mb-4 mt-10 font-display text-lg font-semibold">Pools de Meteora · Prueba</h2>
+            <div className="grid gap-4 md:grid-cols-3">{VAULTS.map((v) => <article key={v.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"><span>Meteora DAMM v2</span><span>Riesgo {v.risk}</span></div><h3 className="mt-4 font-display text-xl font-semibold">{v.name}</h3><p className="mt-1 text-sm text-muted-foreground">{v.pair}</p>
+              <p className="mt-5 font-display text-4xl font-bold text-primary">{v.apy}%<span className="ml-1 text-sm font-normal text-muted-foreground">APY ilustrativo</span></p>
+              <p className="mt-2 text-xs text-muted-foreground">Ejemplo de simulación · no es una tasa verificada del pool.</p>
+              <p className="mt-5 flex-1 text-sm leading-6 text-muted-foreground">{v.blurb}</p>
+              <Button variant="outline" className="mt-4 w-full" onClick={() => setDetailsFor(v)}>Detalles del pool</Button>
+              <Button variant="secondary" className="mt-2 w-full" onClick={() => setDepositFor(v)}>Depositar créditos</Button>
+            </article>)}</div></>}
           </>
         ) : null}
 
