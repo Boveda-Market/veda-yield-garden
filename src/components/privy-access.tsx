@@ -1,7 +1,7 @@
 import "@/lib/buffer-polyfill";
 import { useState, type ReactNode } from "react";
-import { PrivyProvider, useLogin, usePrivy } from "@privy-io/react-auth";
-import { toSolanaWalletConnectors, useFundWallet, useSignAndSendTransaction, useWallets } from "@privy-io/react-auth/solana";
+import { PrivyProvider, useAddFunds, useLogin, usePrivy } from "@privy-io/react-auth";
+import { toSolanaWalletConnectors, useSignAndSendTransaction, useWallets } from "@privy-io/react-auth/solana";
 import bs58 from "bs58";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,7 +17,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const { wallets } = useWallets();
   const { signAndSendTransaction } = useSignAndSendTransaction();
-  const { fundWallet } = useFundWallet();
+  const { addFunds } = useAddFunds();
   const [error, setError] = useState<string | null>(null);
   const { login } = useLogin({
     onComplete: () => setError(null),
@@ -37,7 +37,8 @@ function SessionBridge({ children }: { children: ReactNode }) {
     },
     buyUsdc: async () => {
       if (!authenticated || !walletAddress) throw new Error("Primero entra a tu cuenta");
-      await fundWallet({ address: walletAddress, options: { chain: "solana:mainnet", asset: "USDC", amount: "50" } });
+      // Solana mainnet CAIP-2 id and the official USDC mint.
+      await addFunds({ destination: { address: walletAddress, chain: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", asset: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" }, fiat: { defaultAmount: "50", source: { defaultAsset: "usd" } } });
     },
     logout: async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError("No se pudo cerrar sesión. Inténtalo de nuevo."); } },
   }}>{children}</BovedaSessionContext.Provider>;
