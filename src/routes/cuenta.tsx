@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { AppExperience } from "@/components/app-experience";
+export const Route = createFileRoute("/cuenta")({ head: () => ({ meta: [{ title: "Tu cuenta — BÓVEDA" }, { name: "description", content: "Personaliza tu cuenta BÓVEDA con nombre y avatar opcionales." }, { property: "og:title", content: "Tu cuenta — BÓVEDA" }, { property: "og:description", content: "Elige cómo quieres aparecer en tu cuenta." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: () => <AppExperience view="account" /> });

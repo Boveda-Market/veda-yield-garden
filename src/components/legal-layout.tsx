@@ -8,7 +8,7 @@ export function LegalLayout({ title, children, legal = true }: { title: string; 
     <Button asChild variant="ghost"><Link to="/"><ArrowLeft />Volver a BÓVEDA</Link></Button>
     <p className="mt-10 font-display text-lg font-bold">BÓVEDA · Boveda Technologies LLC</p>
     <h1 className="mt-3 font-display text-3xl font-bold">{title}</h1>
-    <p className="mt-3 text-sm text-muted-foreground">{legal ? "Vigente desde el" : "Actualizado el"} 7 de noviembre de 2026</p>
+    <p className="mt-3 text-sm text-muted-foreground">{legal ? "Vigente desde el" : "Actualizado el"} 8 de noviembre de 2026</p>
     <article className="mt-8 space-y-8 text-sm leading-7 text-muted-foreground">{children}</article>
     <nav className="mt-10 flex flex-wrap gap-5 border-t border-border pt-5 text-sm text-primary"><Link to="/faq">Preguntas frecuentes</Link><Link to="/terminos">Términos y condiciones</Link><Link to="/privacidad">Política de privacidad</Link></nav>
   </main>;

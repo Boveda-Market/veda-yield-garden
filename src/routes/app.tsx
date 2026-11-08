@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { AppExperience } from "@/components/app-experience";
+export const Route = createFileRoute("/app")({ head: () => ({ meta: [{ title: "Tus bóvedas — BÓVEDA" }, { name: "description", content: "Consulta tus bóvedas, revisa sus comisiones y cambia entre Real y Prueba." }, { property: "og:title", content: "Tus bóvedas — BÓVEDA" }, { property: "og:description", content: "Bóvedas de Solana con revisión de operaciones y Prueba independiente." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: () => <AppExperience /> });

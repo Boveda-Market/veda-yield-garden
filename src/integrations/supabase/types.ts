@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_profiles: {
+        Row: {
+          avatar: string
+          created_at: string
+          display_name: string
+          privy_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar?: string
+          created_at?: string
+          display_name?: string
+          privy_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar?: string
+          created_at?: string
+          display_name?: string
+          privy_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_submissions: {
         Row: {
           consent_version: string

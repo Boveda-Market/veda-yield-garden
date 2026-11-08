@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { AppExperience } from "@/components/app-experience";
+export const Route = createFileRoute("/prueba")({ head: () => ({ meta: [{ title: "Prueba sin cuenta — BÓVEDA" }, { name: "description", content: "Prueba BÓVEDA como invitado con 1,000 créditos ficticios, sin registro y sin mover dinero." }, { property: "og:title", content: "Prueba sin cuenta — BÓVEDA" }, { property: "og:description", content: "Explora depósitos, cosechas y tu portafolio con créditos ficticios." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: () => <AppExperience guest /> });

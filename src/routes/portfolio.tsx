@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { AppExperience } from "@/components/app-experience";
+export const Route = createFileRoute("/portfolio")({ head: () => ({ meta: [{ title: "Tu portafolio — BÓVEDA" }, { name: "description", content: "Revisa tu saldo y posiciones, con Real y Prueba claramente separados." }, { property: "og:title", content: "Tu portafolio — BÓVEDA" }, { property: "og:description", content: "Tus monedas y posiciones en un mismo lugar, sin rendimientos garantizados." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: () => <AppExperience view="portfolio" /> });

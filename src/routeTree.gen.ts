@@ -10,8 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ActividadRouteImport } from './routes/actividad'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as CuentaRouteImport } from './routes/cuenta'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as PrivacidadRouteImport } from './routes/privacidad'
+import { Route as PruebaRouteImport } from './routes/prueba'
 import { Route as TerminosRouteImport } from './routes/terminos'
 
 const IndexRoute = IndexRouteImport.update({
@@ -19,14 +24,39 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActividadRoute = ActividadRouteImport.update({
+  id: '/actividad',
+  path: '/actividad',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CuentaRoute = CuentaRouteImport.update({
+  id: '/cuenta',
+  path: '/cuenta',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortfolioRoute = PortfolioRouteImport.update({
+  id: '/portfolio',
+  path: '/portfolio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacidadRoute = PrivacidadRouteImport.update({
   id: '/privacidad',
   path: '/privacidad',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PruebaRoute = PruebaRouteImport.update({
+  id: '/prueba',
+  path: '/prueba',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TerminosRoute = TerminosRouteImport.update({
@@ -37,35 +67,83 @@ const TerminosRoute = TerminosRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/actividad': typeof ActividadRoute
+  '/app': typeof AppRoute
+  '/cuenta': typeof CuentaRoute
   '/faq': typeof FaqRoute
+  '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
+  '/prueba': typeof PruebaRoute
   '/terminos': typeof TerminosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/actividad': typeof ActividadRoute
+  '/app': typeof AppRoute
+  '/cuenta': typeof CuentaRoute
   '/faq': typeof FaqRoute
+  '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
+  '/prueba': typeof PruebaRoute
   '/terminos': typeof TerminosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/actividad': typeof ActividadRoute
+  '/app': typeof AppRoute
+  '/cuenta': typeof CuentaRoute
   '/faq': typeof FaqRoute
+  '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
+  '/prueba': typeof PruebaRoute
   '/terminos': typeof TerminosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/faq' | '/privacidad' | '/terminos'
+  fullPaths:
+    | '/'
+    | '/actividad'
+    | '/app'
+    | '/cuenta'
+    | '/faq'
+    | '/portfolio'
+    | '/privacidad'
+    | '/prueba'
+    | '/terminos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/faq' | '/privacidad' | '/terminos'
-  id: '__root__' | '/' | '/faq' | '/privacidad' | '/terminos'
+  to:
+    | '/'
+    | '/actividad'
+    | '/app'
+    | '/cuenta'
+    | '/faq'
+    | '/portfolio'
+    | '/privacidad'
+    | '/prueba'
+    | '/terminos'
+  id:
+    | '__root__'
+    | '/'
+    | '/actividad'
+    | '/app'
+    | '/cuenta'
+    | '/faq'
+    | '/portfolio'
+    | '/privacidad'
+    | '/prueba'
+    | '/terminos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ActividadRoute: typeof ActividadRoute
+  AppRoute: typeof AppRoute
+  CuentaRoute: typeof CuentaRoute
   FaqRoute: typeof FaqRoute
+  PortfolioRoute: typeof PortfolioRoute
   PrivacidadRoute: typeof PrivacidadRoute
+  PruebaRoute: typeof PruebaRoute
   TerminosRoute: typeof TerminosRoute
 }
 
@@ -78,6 +156,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/actividad': {
+      id: '/actividad'
+      path: '/actividad'
+      fullPath: '/actividad'
+      preLoaderRoute: typeof ActividadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cuenta': {
+      id: '/cuenta'
+      path: '/cuenta'
+      fullPath: '/cuenta'
+      preLoaderRoute: typeof CuentaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/faq': {
       id: '/faq'
       path: '/faq'
@@ -85,11 +184,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portfolio': {
+      id: '/portfolio'
+      path: '/portfolio'
+      fullPath: '/portfolio'
+      preLoaderRoute: typeof PortfolioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacidad': {
       id: '/privacidad'
       path: '/privacidad'
       fullPath: '/privacidad'
       preLoaderRoute: typeof PrivacidadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prueba': {
+      id: '/prueba'
+      path: '/prueba'
+      fullPath: '/prueba'
+      preLoaderRoute: typeof PruebaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terminos': {
@@ -104,8 +217,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ActividadRoute: ActividadRoute,
+  AppRoute: AppRoute,
+  CuentaRoute: CuentaRoute,
   FaqRoute: FaqRoute,
+  PortfolioRoute: PortfolioRoute,
   PrivacidadRoute: PrivacidadRoute,
+  PruebaRoute: PruebaRoute,
   TerminosRoute: TerminosRoute,
 }
 export const routeTree = rootRouteImport

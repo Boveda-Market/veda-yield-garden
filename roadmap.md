@@ -1,4 +1,6 @@
 # Tasks
+- [x] Reorganize entry with quick Privy login, registration and guest-only Prueba; add portfolio, recent public Solana activity, local fictitious activity and optional private name/icon-avatar personalization. Guest deposit, liquidation, history persistence and desktop/mobile verified; 24 targeted tests pass.
+- [ ] Verify saved personalization and complete returning-user access with a real Privy session — requires the user's email verification or wallet authorization; guest flow is verified without registration.
 - [x] Restore annualized estimated APR per the revised request; retain DexScreener 24h volume in Real cards and shared details without inflating rates. Three live pools verified on desktop/mobile; 12 tests pass.
 - [x] Show live Meteora 24h-fee annualized estimated APR in Real cards and pool details, distinguish it from APY and trial rates; all three real queries verified on desktop/mobile, 12 targeted tests pass.
 - [x] Change entry/deposits to 0% and retain exit/harvest/liquidation at 1%; remove deposit fee transfer and recipient ATA creation, align trial accounting, reviews, FAQ and terms. Live SOL deposit simulation passes at 940 bytes with full 1 USDC budget and no broadcast.

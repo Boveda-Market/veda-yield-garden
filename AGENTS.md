@@ -35,9 +35,11 @@ use the editor.
 - Email interest submissions use a public validated insert-only server function, a private RLS-locked Cloud table and explicit versioned consent; never expose leads through the demonstration login.
 - Legal content has dedicated public routes and must distinguish current Real availability from fictitious Prueba capabilities; do not invent operator contact details or legal jurisdiction.
 - FAQs use shared native details/summary disclosures on the home page and a dedicated public route to remain accessible without a Privy session or third-party accordion hook dependency.
-- Privy authentication is loaded lazily behind a client-only boundary; use its verified session for UI access and isolate fictitious balances by Privy user ID, never treating local storage as authentication or granting Cloud data access through it.
+- Privy is lazy and client-only; account UI trusts its session, never local storage. Guest /prueba has isolated fictitious storage and no Real view or signer.
 
-- Real and Prueba use separate mounted views; trial storage and mutation guards require verified Privy identity and trial mode so mode switching cannot treat credits as chain assets.
+- Real and Prueba mount separately; trial guards require trial mode plus verified Privy identity or explicit guest access. Guest credits never migrate into accounts or chain assets.
+- Private account profiles are keyed by Privy subject; verify ES256 JWT issuer, audience and expiry with Privy JWKS before owner-scoped admin access. Icon avatars never grant permissions.
+- Entry / offers login and guest trial; shared account views expose portfolio, optional profile and bounded recent Solana signatures, never claiming complete token history.
 - Mainnet execution is limited to the fixed deposit pilot and the exact owner-authorized SOL pilot position fee harvest and liquidation; fresh server simulation and connected-owner signatures are required. Harvest charges integer 1% of claimed USDC atomically, keeps liquidity untouched and leaves the other token unconverted; other closes remain unavailable and UI or storage flags cannot expand execution.
 - Helius reads run only inside server functions with a private credential and sanitized failures; expose narrowly validated public-chain queries, never arbitrary RPC forwarding or Cloud data access.
 - Real position discovery uses the official Meteora SDK and wallet-owned position NFTs filtered by exact pools and mints; integer token amounts stay distinct from USD, and unvalidated Token-2022 estimates remain unavailable.

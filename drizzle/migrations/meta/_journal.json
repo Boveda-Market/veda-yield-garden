@@ -8,6 +8,13 @@
       "when": 1794057209989,
       "tag": "0000_create_email_submissions",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794143004505,
+      "tag": "0001_create_privy_account_profiles",
+      "breakpoints": true
     }
   ]
 }
