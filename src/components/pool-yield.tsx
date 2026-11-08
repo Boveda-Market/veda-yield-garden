@@ -20,10 +20,10 @@ export function PoolYield({ address }: { address: string }) {
       <Button size="icon" variant="ghost" aria-label="Actualizar rendimiento" title="Actualizar rendimiento" disabled={query.isFetching || stats.isFetching} onClick={() => { void query.refetch(); void stats.refetch(); }}><RefreshCw size={14} className={query.isFetching || stats.isFetching ? "animate-spin motion-reduce:animate-none" : ""} /></Button>
     </div>
     <p className="mt-1 text-sm text-muted-foreground">APR estimado · comisiones 24 h</p>
-    <p role="status" className="mt-2 text-xs leading-5 text-muted-foreground">{query.isPending ? "Consultando Meteora…" : query.isError ? "No se pudo actualizar la tasa. Inténtalo de nuevo." : apr == null ? "Tasa no disponible; no se muestran cifras ilustrativas." : `Fuente: Meteora · actualizado ${new Date(query.dataUpdatedAt).toLocaleTimeString("es-MX")}`}</p>
+    <p role="status" className="mt-2 text-xs leading-5 text-muted-foreground">{query.isPending ? "Consultando el pool…" : query.isError ? "No se pudo actualizar la tasa. Inténtalo de nuevo." : apr == null ? "Tasa no disponible; no se muestran cifras ilustrativas." : `Fuente: datos del pool · actualizado ${new Date(query.dataUpdatedAt).toLocaleTimeString("es-MX")}`}</p>
     <dl className="mt-3 space-y-2 text-xs">
       <div className="flex flex-wrap justify-between gap-1"><dt className="text-muted-foreground">Comisiones del pool · 24 h</dt><dd>{money(query.data?.fees24h)}</dd></div>
-      <div className="flex flex-wrap justify-between gap-1"><dt className="text-muted-foreground">TVL · Meteora</dt><dd>{money(query.data?.tvl)}</dd></div>
+      <div className="flex flex-wrap justify-between gap-1"><dt className="text-muted-foreground">TVL</dt><dd>{money(query.data?.tvl)}</dd></div>
       <div className="flex flex-wrap justify-between gap-1"><dt className="text-muted-foreground">Volumen · 24 h · DexScreener</dt><dd>{stats.isPending ? "Consultando…" : money(stats.data?.volume24h)}</dd></div>
     </dl>
     {stats.isError && <p role="status" className="mt-2 text-xs text-muted-foreground">No se pudo actualizar el volumen de DexScreener.</p>}

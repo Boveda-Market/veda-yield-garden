@@ -45,11 +45,11 @@ export function HarvestDialog({ wallet, position, vaultId, onClose }: { wallet: 
       let sig: string;
       try { sig = await session.signAndSend(Uint8Array.from(atob(next.prepared.transaction), (c) => c.charCodeAt(0))); }
       catch { setMessage("La wallet canceló o rechazó la solicitud. Si pudo enviarse, revisa su historial antes de reintentar."); return; }
-      setSignature(sig); setStep("Esperando confirmación en Solana…");
+      setSignature(sig); setStep("Esperando confirmación en la red…");
       for (let attempt = 0; attempt < 30; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
-        if (status.status === "failed") { setMessage("Solana rechazó la transacción: no se aplicaron la cosecha ni la comisión; puede cobrarse el coste de red."); return; }
-        if (status.status !== "pending") { setFinished(true); setMessage("Cosecha confirmada en Solana. Tu posición sigue abierta."); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); return; }
+        if (status.status === "failed") { setMessage("La red rechazó la transacción: no se aplicaron la cosecha ni la comisión; puede cobrarse el coste de red."); return; }
+        if (status.status !== "pending") { setFinished(true); setMessage("Cosecha confirmada en la red. Tu posición sigue abierta."); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); return; }
         await new Promise((resolve) => setTimeout(resolve, 2_000));
       }
       setMessage("Confirmación pendiente. Revisa Solscan antes de reintentar.");
@@ -58,7 +58,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose }: { wallet: 
   }
   return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
     <DialogTitle>Cosechar Ganancias · {vaultId === "sol" ? "SOL" : "MET"}</DialogTitle>
-    <DialogDescription>Solana Mainnet · retira solo las comisiones acumuladas; la liquidez principal permanece en el pool.</DialogDescription>
+    <DialogDescription>Red principal · retira solo las comisiones acumuladas; la liquidez principal permanece en el pool.</DialogDescription>
     <p className="break-all font-mono text-xs text-muted-foreground">{position}</p>
     <p className="text-xs leading-5 text-muted-foreground">Comisión del 1% sobre los USDC cosechados, en la misma transacción. La parte en {vaultId === "sol" ? "SOL" : "MET"} se entrega a tu wallet sin convertir ni cobrar comisión durante este piloto.</p>
     <Button disabled={pending} onClick={() => void run()}>{pending && !step ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <FlaskConical className="mr-2 h-4 w-4" />}{pending && !step ? "Verificando cosecha…" : "Simular cosecha"}</Button>

@@ -15,7 +15,7 @@ describe("selectable Real deposit review", () => {
     render(<PilotDeposit vaultId="sol" amount="10000" onBusyChange={() => {}} />);
     fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByRole("button"));
-    await screen.findByText("Depósito confirmado en Solana (confirmado).");
+    await screen.findByText("Depósito confirmado en la red (confirmado).");
     expect(mocks.prepare).toHaveBeenCalledWith({ data: { wallet: FEE_WALLET, vaultId: "sol", amount: "10000" } });
     expect(mocks.sign).toHaveBeenCalledWith(new Uint8Array([1, 2, 3]));
   });

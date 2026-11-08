@@ -47,11 +47,11 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
       let sig: string;
       try { sig = await session.signAndSend(Uint8Array.from(atob(next.prepared.transaction), (c) => c.charCodeAt(0))); }
       catch { setMessage("La wallet canceló o rechazó la solicitud. Si pudo enviarse, revisa su historial antes de reintentar."); return; }
-      setSignature(sig); setStep("Esperando confirmación en Solana…");
+      setSignature(sig); setStep("Esperando confirmación en la red…");
       for (let attempt = 0; attempt < 30; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
-        if (status.status === "failed") { setMessage("Solana rechazó la transacción atómica: no se aplicaron el retiro ni la comisión; puede cobrarse el coste de red."); return; }
-        if (status.status !== "pending") { setFinished(true); setMessage("Liquidación confirmada en Solana. Consulta los importes finales y la renta devuelta en Solscan."); await queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); return; }
+        if (status.status === "failed") { setMessage("La red rechazó la transacción atómica: no se aplicaron el retiro ni la comisión; puede cobrarse el coste de red."); return; }
+        if (status.status !== "pending") { setFinished(true); setMessage("Liquidación confirmada en la red. Consulta los importes finales y la renta devuelta en Solscan."); await queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); return; }
         await new Promise((resolve) => setTimeout(resolve, 2_000));
       }
       setMessage("Confirmación pendiente. Revisa Solscan antes de reintentar; no envíes una segunda liquidación.");
@@ -60,7 +60,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
   }
   return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
     <DialogTitle>Retiro a USDC · {vaultId === "sol" ? "SOL" : "MET"}</DialogTitle>
-    <DialogDescription>Solana Mainnet · liquidación piloto con firma de la wallet propietaria.</DialogDescription>
+    <DialogDescription>Red principal · liquidación piloto con firma de la wallet propietaria.</DialogDescription>
     <label className="grid gap-2 text-sm">Wallet propietaria<Input aria-label="Wallet propietaria" value={address} disabled={pending || Boolean(wallet) || Boolean(signature)} maxLength={44} onChange={(e) => { setAddress(e.target.value.trim()); setResult(null); setAccepted(false); }} /></label>
     <label className="grid gap-2 text-sm">Dirección de la posición<Input aria-label="Dirección de la posición" value={positionAddress} disabled={pending || Boolean(position) || Boolean(signature)} maxLength={44} onChange={(e) => { setPositionAddress(e.target.value.trim()); setResult(null); setAccepted(false); }} /></label>
     <p className="text-xs leading-5 text-muted-foreground">Retiro completo de liquidez no bloqueada, conversión a USDC y cierre de la posición y su NFT. Comisión fija del 1% sobre el mínimo bruto protegido por slippage, no sobre el importe final: cualquier USDC adicional es tuyo. La renta se devuelve en SOL, sin esta comisión. No se admiten posiciones bloqueadas ni recompensas adicionales.</p>

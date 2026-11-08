@@ -37,7 +37,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
       <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-lg bg-card">
         <DialogHeader className="pr-5 text-left">
           <DialogTitle className="font-display text-xl tracking-normal">{vault.name}</DialogTitle>
-          <DialogDescription>{vault.pair} · Meteora DAMM v2 · Solana</DialogDescription>
+          <DialogDescription>{vault.pair} · Pool de liquidez</DialogDescription>
         </DialogHeader>
 
         <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
@@ -64,10 +64,10 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
         </p>
 
         <div className="border-t border-border pt-4">
-          <p className="mb-2 text-xs text-muted-foreground">Referencia de Meteora</p>
+          <p className="mb-2 text-xs text-muted-foreground">Referencia del pool</p>
           <div className="flex min-w-0 items-center gap-2">
-            <input aria-label="URL de Meteora para copiar" readOnly value={url} onFocus={(event) => event.currentTarget.select()} className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 font-mono text-xs text-muted-foreground" />
-            <Button variant="secondary" size="icon" aria-label={copied ? "Enlace copiado" : "Copiar URL de Meteora"} title="Copiar URL de Meteora" onClick={() => void copy()}>{copied ? <Check /> : <Copy />}</Button>
+            <input aria-label="enlace del pool para copiar" readOnly value={url} onFocus={(event) => event.currentTarget.select()} className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 font-mono text-xs text-muted-foreground" />
+            <Button variant="secondary" size="icon" aria-label={copied ? "Enlace copiado" : "Copiar enlace del pool"} title="Copiar enlace del pool" onClick={() => void copy()}>{copied ? <Check /> : <Copy />}</Button>
           </div>
           {copied && <p role="status" className="mt-2 text-xs text-primary">URL copiada</p>}
           {copyError && <p role="status" className="mt-2 text-xs text-muted-foreground">No se pudo copiar. Selecciona la URL para copiarla manualmente.</p>}

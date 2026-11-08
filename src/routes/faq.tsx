@@ -7,7 +7,7 @@ export const Route = createFileRoute("/faq")({
     { title: "Preguntas frecuentes — BÓVEDA" },
     { name: "description", content: "Respuestas sobre Real y Prueba, 1,000 créditos, wallets, USDC, cargo del 1%, conversiones y disponibilidad en BÓVEDA." },
     { property: "og:title", content: "Preguntas frecuentes — BÓVEDA" },
-    { property: "og:description", content: "Real y Prueba en BÓVEDA: créditos ficticios, acceso con wallets, cargos y operaciones en Solana." },
+    { property: "og:description", content: "Real y Prueba en BÓVEDA: créditos ficticios, acceso con wallets, cargos y operaciones en la red." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),
