@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Leaf, Sun, Gem, Waves, Check } from "lucide-react";
+import { Leaf, Sun, Gem, Waves, Check, LogOut } from "lucide-react";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { Button } from "./ui/button";
 import { defaultProfile, profileSchema, type AccountProfile } from "@/lib/account-profile";
@@ -50,5 +50,6 @@ export function AccountSettings() {
       {message && <p role="status" className="text-sm text-muted-foreground">{message}</p>}
     </form><p className="mt-8 text-xs leading-5 text-muted-foreground">Tu avatar no verifica tu identidad ni autoriza movimientos. Nunca te pediremos tu frase semilla.</p>
     <EmailSignup />
+    <Button variant="outline" className="mt-8 w-full" onClick={() => void (async () => { await session.logout(); window.location.assign("/"); })()}><LogOut size={16} />Cerrar sesión</Button>
   </section>;
 }

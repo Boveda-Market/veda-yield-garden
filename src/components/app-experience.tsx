@@ -113,7 +113,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
         </Link>
         {user && !guest && (
           <Button variant="secondary" onClick={() => void (async () => { await session.logout(); await navigate({ to: "/", replace: true }); })()} className="min-w-0 max-w-[65%]" aria-label="Cerrar sesión">
-            <Wallet size={14} /><span className="truncate">{user}</span><LogOut size={14} />
+            <Wallet size={14} /><span className="truncate">{user}</span><span className="shrink-0">· Cerrar sesión</span><LogOut size={14} />
           </Button>
         )}
       </header>
