@@ -16,6 +16,7 @@ import { ActivityView } from "@/components/activity-view";
 import { guestDemoKey, readTrialActivity, trialActivityKey, trialHarvestSummary, type TrialActivity } from "@/lib/trial-activity";
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+const PortfolioPanel = lazy(() => import("@/components/portfolio-panel").then((module) => ({ default: module.PortfolioPanel })));
 
 const fmt = (n: number, d = 2) => n.toLocaleString("es-MX", { minimumFractionDigits: d, maximumFractionDigits: d });
 const PrivyAccess = lazy(() => import("@/components/privy-access"));
@@ -126,7 +127,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
           <>
             <h1 className="mb-4 font-display text-2xl font-semibold">{activeView === "portfolio" ? "Tu portafolio · Prueba" : "Tus bóvedas · Prueba"}</h1><p className="mb-4 text-xs leading-5 text-muted-foreground">Prueba · créditos sin valor monetario · 0% de entrada y 1% ficticio de salida, en cosechas y liquidaciones. Un crédito simula un USDC; no se puede retirar ni convertir en dinero.</p>
             {session.walletAddress && <p className="mb-4 break-all text-xs text-muted-foreground">Wallet Solana conectada: {session.walletAddress}</p>}
-            <section className="rounded-3xl p-7 md:p-10" style={{ background: "var(--gradient-hero)" }}>
+            {activeView === "portfolio" && identity && loaded ? <Suspense fallback={<p role="status">Cargando portafolio…</p>}><PortfolioPanel identity={identity} wallet={wallet} invested={invested} pending={earned} positions={positions} rows={activities} now={now} /></Suspense> : <section className="rounded-3xl p-7 md:p-10" style={{ background: "var(--gradient-hero)" }}>
               <p className="text-sm text-muted-foreground">Balance de Prueba · ficticio</p>
               <p className="mt-1 flex flex-wrap items-baseline gap-2 font-display text-5xl font-bold md:text-6xl">{fmt(wallet + invested + earned)} <span className="text-2xl text-muted-foreground">créditos</span></p>
               <div className="mt-8 grid grid-cols-2 gap-5 text-sm sm:grid-cols-4">
@@ -136,7 +137,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
                 <Stat label="Porcentaje cosechado" value={harvestSummary.percent === null ? "—" : harvestSummary.percent > 0 && harvestSummary.percent < 0.0001 ? "<0.0001%" : `${fmt(harvestSummary.percent, 4)}%`} accent />
               </div>
               <p className="mt-5 text-xs leading-5 text-muted-foreground">Cosechado después del cargo ficticio del 1%. Porcentaje sobre los depósitos registrados en el historial de Prueba de este navegador; no es una tasa anual. No incluye capital devuelto al cerrar posiciones ni movimientos anteriores al historial.</p>
-            </section>
+            </section>}
 
             <h2 className="mt-12 mb-4 font-display text-lg font-semibold">Mis posiciones · {positions.length} activas</h2>
             {positions.length === 0 ? (

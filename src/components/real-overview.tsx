@@ -4,12 +4,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { VAULTS, type Vault } from "@/lib/vaults";
 import { getRealWallet } from "@/lib/solana.functions";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { DepositSimulation } from "@/components/deposit-simulation";
 import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
 import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
 import { PoolYield } from "@/components/pool-yield";
 import { HarvestDialog } from "@/components/harvest-dialog";
+const RealPortfolioPanel = lazy(() => import("./real-portfolio-panel").then((module) => ({ default: module.RealPortfolioPanel })));
 
 export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }: { walletAddress: string | null; onDetails: (vault: Vault) => void; portfolioOnly?: boolean }) {
   const [simulationVault, setSimulationVault] = useState<Vault | null>(null);
@@ -44,6 +45,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <p className="mt-5 text-xs leading-5 text-muted-foreground">Los créditos y las posiciones de Prueba no aparecen en Real y no se pueden convertir en dinero.</p>
     </section>
     {data && data.positions.length > 0 && <section aria-label="Posiciones reales" className="border-b border-border py-8"><h2 className="font-display text-lg font-semibold">Mis posiciones en Solana</h2><p className="mt-2 text-xs leading-5 text-muted-foreground">Estimaciones en tokens, no valor total en USD ni mínimos de liquidación. Bloqueos, precios y costes pueden alterar el resultado.</p><div className="mt-4 space-y-4">{data.positions.map((position) => <article key={position.address} className="rounded-lg border border-border bg-card p-5"><h3 className="font-display font-semibold">{VAULTS.find((vault) => vault.id === position.vaultId)?.name ?? `${position.symbol}/USDC`}</h3><p className="mt-2 break-all font-mono text-xs text-muted-foreground">{position.address}</p><p className="mt-3 break-all text-sm">Liquidez estimada: {position.tokenAmount === null ? "No disponible" : `${position.tokenAmount} ${position.symbol} + ${position.usdcAmount} USDC`}</p><p className="mt-2 break-all text-sm text-muted-foreground">Comisiones acumuladas: {position.feeTokenAmount === null ? "No disponibles" : `${position.feeTokenAmount} ${position.symbol} + ${position.feeUsdcAmount} USDC`}</p>{position.locked && <p className="mt-2 text-xs text-muted-foreground">Incluye liquidez bloqueada; no toda la posición es retirable.</p>}<div className="mt-4 flex flex-wrap gap-2"><Button variant="secondary" disabled={position.vaultId !== "sol" && position.vaultId !== "met"} onClick={() => setHarvest({ position: position.address, vaultId: position.vaultId === "sol" ? "sol" : "met" })}><Sprout size={16} />Cosechar Ganancias</Button><Button variant="outline" disabled={position.locked || (position.vaultId !== "sol" && position.vaultId !== "met")} onClick={() => setWithdrawal({ position: position.address, vaultId: position.vaultId === "sol" ? "sol" : "met" })}><ArrowDownToLine size={16} />Cerrar y Liquidar</Button></div><p className="mt-3 text-xs leading-5 text-muted-foreground">Cosecha: simula primero; firma limitada a la posición SOL del piloto. {walletAddress === WITHDRAWAL_PILOT.wallet && position.address === WITHDRAWAL_PILOT.position ? "Liquidación piloto: revisa el mínimo y la comisión antes de firmar." : "Liquidación: solo simulación; firma limitada a la posición SOL autorizada del piloto."}</p></article>)}</div></section>}
+    {portfolioOnly && <Suspense fallback={<p role="status">Cargando portafolio…</p>}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
     {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && <p className="border-b border-border py-8 text-muted-foreground">No tienes posiciones activas en estas bóvedas. Las posiciones cerradas no aparecen aquí; puedes consultar sus comprobantes en Actividad.</p>}
     {!portfolioOnly && <><h2 className="mb-4 mt-10 font-display text-lg font-semibold">Pools de Meteora</h2>
     <div className="grid gap-4 md:grid-cols-3">{VAULTS.map((vault) => <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
