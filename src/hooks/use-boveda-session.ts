@@ -14,7 +14,15 @@ export type BovedaSession = {
   getAccessToken?: () => Promise<string | null>;
 };
 
-export const BovedaSessionContext = createContext<BovedaSession | null>(null);
+// The preview can reload this module before the lazy Privy provider reloads.
+// Keep only the React context identity stable in development, never a session
+// value; authentication still comes exclusively from the mounted provider.
+const contextRegistry = globalThis as typeof globalThis & {
+  __bovedaSessionContext?: ReturnType<typeof createContext<BovedaSession | null>>;
+};
+export const BovedaSessionContext = import.meta.env.DEV
+  ? (contextRegistry.__bovedaSessionContext ??= createContext<BovedaSession | null>(null))
+  : createContext<BovedaSession | null>(null);
 
 export function useBovedaSession() {
   const session = useContext(BovedaSessionContext);
