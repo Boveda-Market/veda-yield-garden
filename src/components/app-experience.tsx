@@ -13,7 +13,7 @@ import { RealOverview } from "@/components/real-overview";
 import { canUseTrial, type AppMode } from "@/lib/app-mode";
 import { AccountSettings } from "@/components/account-settings";
 import { ActivityView } from "@/components/activity-view";
-import { guestDemoKey, readTrialActivity, trialActivityKey, type TrialActivity } from "@/lib/trial-activity";
+import { guestDemoKey, readTrialActivity, trialActivityKey, trialHarvestSummary, type TrialActivity } from "@/lib/trial-activity";
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
@@ -79,7 +79,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
   const vault = (id: string) => VAULTS.find((v) => v.id === id);
   const invested = positions.reduce((s, p) => s + p.principal, 0);
   const earned = positions.reduce((s, p) => s + accrued(p, vault(p.vaultId)?.apy ?? 0, now), 0);
-  const yearly = positions.reduce((s, p) => s + p.principal * (vault(p.vaultId)?.apy ?? 0) / 100, 0);
+  const harvestSummary = trialHarvestSummary(activities);
 
   const confirmWithdrawal = () => {
     if (!trialAllowed || !review || !positions.some((p) => p.id === review.position.id)) return;
@@ -128,11 +128,13 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
             <section className="rounded-3xl p-7 md:p-10" style={{ background: "var(--gradient-hero)" }}>
               <p className="text-sm text-muted-foreground">Balance de Prueba · ficticio</p>
               <p className="mt-1 flex flex-wrap items-baseline gap-2 font-display text-5xl font-bold md:text-6xl">{fmt(wallet + invested + earned)} <span className="text-2xl text-muted-foreground">créditos</span></p>
-              <div className="mt-8 grid grid-cols-3 gap-4 text-sm">
+              <div className="mt-8 grid grid-cols-2 gap-5 text-sm sm:grid-cols-4">
                 <Stat label="Disponible" value={fmt(wallet)} />
-                <Stat label="Ganancias acumuladas" value={`+${fmt(earned, 4)}`} accent />
-                <Stat label="Ganancia anual ilustrativa" value={`${fmt(yearly)}`} />
+                <Stat label="Ganancias pendientes" value={`+${fmt(earned, 4)}`} accent />
+                <Stat label="Ganancias cosechadas · netas" value={`${fmt(harvestSummary.harvested, 6)}`} accent />
+                <Stat label="Porcentaje cosechado" value={harvestSummary.percent === null ? "—" : harvestSummary.percent > 0 && harvestSummary.percent < 0.0001 ? "<0.0001%" : `${fmt(harvestSummary.percent, 4)}%`} accent />
               </div>
+              <p className="mt-5 text-xs leading-5 text-muted-foreground">Cosechado después del cargo ficticio del 1%. Porcentaje sobre los depósitos registrados en el historial de Prueba de este navegador; no es una tasa anual. No incluye capital devuelto al cerrar posiciones ni movimientos anteriores al historial.</p>
             </section>
 
             <h2 className="mt-12 mb-4 font-display text-lg font-semibold">Mis posiciones · {positions.length} activas</h2>
