@@ -1,4 +1,6 @@
 # Tasks
+- [x] Add Mi Cuenta verified email/passkey management and provider-backed authenticator/2FA with explicit embedded-wallet protection scope; 15 targeted tests pass and desktop/mobile passkey login dialog verified.
+- [ ] Verify security enrollment with the owner's Privy session/device; enable transaction MFA and desired authenticator methods in Privy if unavailable. Real email/passkey/TOTP enrollment cannot be completed without the owner's verification; external-wallet signatures are not protected by Privy MFA.
 - [x] Keep supported Real deposits and withdrawals available to any connected owner with plain-language informed review; preserve consent, wallet signature and safety validation.
 - [x] Enable owner-verified SOL/MET Real harvest and liquidation beyond the original pilot; fresh simulation, NFT ownership, fees and reviewed limits retained. Public notices verified desktop/mobile, 132 tests pass, build OK.
 - [ ] Verify newly enabled harvest and liquidation using a real Privy owner session and on-chain receipts — requires the owner's connected wallet, funds/active position and explicit signature; no new funds were moved. SPCX/Token-2022 assets, locked full exits and unvalidated rewards remain unsupported.

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
-import { Wallet, ArrowRight, LogOut } from "lucide-react";
+import { Wallet, ArrowRight, LogOut, Fingerprint } from "lucide-react";
 import { Button } from "./ui/button";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 const PrivyAccess = lazy(() => import("./privy-access"));
@@ -21,6 +21,7 @@ function EntryButtons() {
     <Button disabled={!session.ready} className="h-12 w-full" onClick={() => session.login("email")}>{signup ? "Registrarme con email" : "Entrar con email"}<ArrowRight size={16} /></Button>
     <Button disabled={!session.ready} variant="secondary" className="h-12 w-full" onClick={() => session.login("google")}>Continuar con Google</Button>
     <Button disabled={!session.ready} variant="outline" className="h-12 w-full" onClick={() => session.login("wallet")}><Wallet size={16} />Phantom / Jupiter Wallet</Button>
+    {!signup && <Button disabled={!session.ready} variant="outline" className="h-12 w-full" onClick={() => session.login("passkey")}><Fingerprint size={16} />Entrar con passkey</Button>}
     <Button variant="link" className="w-full" onClick={() => setSignup(!signup)}>{signup ? "Ya tengo cuenta · Iniciar sesión" : "¿Eres nuevo? Crear cuenta"}</Button>
     {signup && <p className="text-xs leading-5 text-muted-foreground">Tu primer acceso crea tu cuenta con Privy. Después puedes elegir tu nombre y avatar.</p>}
     {session.error && <p role="alert" className="text-sm text-destructive">{session.error}</p>}

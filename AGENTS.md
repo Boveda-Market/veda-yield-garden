@@ -36,6 +36,7 @@ use the editor.
 - Legal content has dedicated public routes and must distinguish current Real availability from fictitious Prueba capabilities; do not invent operator contact details or legal jurisdiction.
 - FAQs use shared native details/summary disclosures on the home page and a dedicated public route to remain accessible without a Privy session or third-party accordion hook dependency.
 - Privy is lazy and client-only; account UI trusts its session, never local storage. Guest /prueba has isolated fictitious storage and no Real view or signer.
+- Security uses the session bridge and Privy dialogs, not local flags; MFA protects embedded-wallet actions only.
 
 - Real and Prueba mount separately; trial guards require trial mode plus verified Privy identity or explicit guest access. Guest credits never migrate into accounts or chain assets.
 - Private account profiles are keyed by Privy subject; verify ES256 JWT issuer, audience and expiry with Privy JWKS before owner-scoped admin access. Icon avatars never grant permissions.

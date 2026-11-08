@@ -1,5 +1,18 @@
 import { createContext, useContext } from "react";
 
+export type AccountSecurity = {
+  email: string | null;
+  passkeyCount: number;
+  enrolledMfa: Array<"sms" | "totp" | "passkey">;
+  availableMfa: Array<"sms" | "totp" | "passkey">;
+  hasEmbeddedWallet: boolean;
+  message: string | null;
+  linkEmail: () => void;
+  updateEmail: () => void;
+  linkPasskey: () => void;
+  manageMfa: () => Promise<void>;
+};
+
 export type BovedaSession = {
   ready: boolean;
   authenticated: boolean;
@@ -7,13 +20,14 @@ export type BovedaSession = {
   label: string;
   walletAddress: string | null;
   error: string | null;
-  login: (method: "email" | "google" | "wallet") => void;
+  login: (method: "email" | "google" | "wallet" | "passkey") => void;
   logout: () => Promise<void>;
   /** Asks the connected wallet to sign and send; resolves to the base58 signature. */
   signAndSend: (transaction: Uint8Array) => Promise<string>;
   /** Opens the card/exchange purchase flow to receive USDC in the user's wallet. */
   buyUsdc?: () => Promise<void>;
   getAccessToken?: () => Promise<string | null>;
+  security?: AccountSecurity;
 };
 
 // The preview can reload this module before the lazy Privy provider reloads.
