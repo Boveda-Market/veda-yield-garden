@@ -11,12 +11,13 @@ vi.mock("@/components/withdrawal-simulation", () => ({ WithdrawalSimulation: () 
 vi.mock("@/components/harvest-dialog", () => ({ HarvestDialog: () => <p>Revisión de cosecha autorizada</p> }));
 vi.mock("@/components/pool-yield", () => ({ PoolYield: () => null }));
 vi.mock("@/components/buy-usdc", () => ({ BuyUsdc: () => null }));
+vi.mock("@/components/real-portfolio-panel", () => ({ RealPortfolioPanel: () => null }));
 import { RealOverview } from "@/components/real-overview";
 
 afterEach(cleanup);
 function show(address: string, locked = false) {
   mocks.positions = [{ address, vaultId: "sol", symbol: "SOL", tokenAmount: "1", usdcAmount: "1", feeTokenAmount: "0", feeUsdcAmount: "0", locked }];
-  render(<RealOverview walletAddress={WITHDRAWAL_PILOT.wallet} onDetails={vi.fn()} />);
+  render(<RealOverview portfolioOnly walletAddress={WITHDRAWAL_PILOT.wallet} onDetails={vi.fn()} />);
 }
 
 it("opens harvest review for the exact authorized pilot", () => {
