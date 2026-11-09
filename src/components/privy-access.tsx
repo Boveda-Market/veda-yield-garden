@@ -102,6 +102,6 @@ export default function PrivyAccess({ children }: { children: ReactNode }) {
     appearance: { theme: "dark", walletChainType: "solana-only", walletList: ["phantom", "jupiter"], logo: "/icon-512.png" },
     externalWallets: { solana: { connectors: solanaConnectors } },
     embeddedWallets: { solana: { createOnLogin: "users-without-wallets" }, ethereum: { createOnLogin: "off" } },
-    solanaRpcs,
+    solana: { rpcs: solanaRpcs },
   }}><SessionBridge>{children}</SessionBridge></PrivyProvider>;
 }
