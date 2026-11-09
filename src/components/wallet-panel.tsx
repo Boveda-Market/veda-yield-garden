@@ -62,7 +62,14 @@ export function WalletPanel() {
   async function swap(quote: SwapQuote) {
     if (!address) return;
     setBusy(true); setMessage(null);
-    try { done(await session.signAndSend(await buildSwap(address, quote))); setMessage(null); } catch (e) { fail(e); throw e; } finally { setBusy(false); }
+    try {
+      let bytes: Uint8Array;
+      try { bytes = await buildSwap(address, quote); } catch (e) {
+        console.error("[BÓVEDA] swap preparation failed", e);
+        throw new Error(`${t("No se pudo preparar el cambio")}: ${e instanceof Error ? e.message : String(e)}`);
+      }
+      done(await session.signAndSend(bytes)); setMessage(null);
+    } catch (e) { fail(e); throw e; } finally { setBusy(false); }
   }
 
   return <div className="mx-auto max-w-2xl space-y-5">
