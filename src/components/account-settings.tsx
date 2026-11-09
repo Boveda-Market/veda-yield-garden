@@ -7,7 +7,6 @@ import { Button } from "./ui/button";
 import { defaultProfile, profileSchema, type AccountProfile } from "@/lib/account-profile";
 import { getAccountProfile, saveAccountProfile } from "@/lib/account-profile.functions";
 import { EmailSignup } from "./email-signup";
-import { AffiliatePanel } from "./affiliate-panel";
 import { BuyUsdc } from "./buy-usdc";
 import { AccountSecuritySettings } from "./account-security";
 
@@ -55,7 +54,6 @@ export function AccountSettings() {
       {message && <p role="status" className="text-sm text-muted-foreground">{message}</p>}
     </form><p className="mt-8 text-xs leading-5 text-muted-foreground">{t("Tu avatar no verifica tu identidad ni autoriza movimientos. Nunca te pediremos tu frase semilla.")}</p>
     <AccountSecuritySettings />
-    <AffiliatePanel />
     <BuyUsdc className="mt-8" />
     <EmailSignup />
     <Button variant="outline" className="mt-8 w-full" onClick={() => void (async () => { await session.logout(); window.location.assign("/"); })()}><LogOut size={16} />{t("Cerrar sesión")}</Button>

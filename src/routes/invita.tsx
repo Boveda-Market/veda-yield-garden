@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { AppExperience } from "@/components/app-experience";
+export const Route = createFileRoute("/invita")({ head: () => ({ meta: [{ title: "Invita y gana — BÓVEDA" }, { name: "description", content: "Comparte tu código BÓVEDA y gana parte de la comisión de cada cosecha o cierre de tus invitados." }, { property: "og:title", content: "Invita y gana — BÓVEDA" }, { property: "og:description", content: "Tu código, tu nivel y tus comisiones de afiliado en un solo lugar." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: () => <AppExperience view="invite" /> });
