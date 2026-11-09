@@ -9,6 +9,15 @@ export function affiliateCommission(feeRaw: bigint, shareBps: number): bigint {
   return (feeRaw * BigInt(shareBps)) / 10_000n;
 }
 
+/** Minimum accumulated commission (micro-USDC) before a manual payout is processed. */
+export const PAYOUT_MIN_MICRO = 10_000_000n;
+
+/** Progress toward the next payout, 0–100, plus whether the threshold is reached. */
+export function payoutProgress(pendingRaw: bigint) {
+  const pct = pendingRaw <= 0n ? 0 : pendingRaw >= PAYOUT_MIN_MICRO ? 100 : Number((pendingRaw * 10_000n) / PAYOUT_MIN_MICRO) / 100;
+  return { pct, ready: pendingRaw >= PAYOUT_MIN_MICRO, missingRaw: pendingRaw >= PAYOUT_MIN_MICRO ? 0n : PAYOUT_MIN_MICRO - pendingRaw };
+}
+
 export const codeSchema = z.string().trim().toUpperCase().regex(/^[A-Z0-9]{4,16}$/);
 export function normalizeCode(value: string | null | undefined) {
   const parsed = codeSchema.safeParse(value ?? "");
