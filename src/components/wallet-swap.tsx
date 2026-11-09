@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpDown, CheckCircle2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLocale, useT } from "@/lib/i18n";
+import { useT } from "@/lib/i18n";
 import { quoteSwap, SWAP_TOKENS, swapSpendable, swapToken, toTokenUnits, type SwapQuote } from "@/lib/wallet-actions";
 
 const QUOTE_TTL = 30_000;
@@ -17,7 +17,6 @@ type Props = {
 /** Quote-only requests never sign; only the reviewed, current input can be confirmed. Every pair includes USDC. */
 export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: Props) {
   const t = useT();
-  const locale = useLocale();
   const [from, setFrom] = useState(initialFrom);
   const [to, setTo] = useState(initialFrom === "USDC" ? "SOL" : "USDC");
   const [amount, setAmount] = useState("");
@@ -29,9 +28,9 @@ export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: 
   const max = balance === undefined ? undefined : swapSpendable(balance, from);
   const format = (value: bigint | string, symbol: string) => {
     const d = swapToken(symbol).decimals;
-    return (Number(value) / 10 ** d).toLocaleString(locale, { maximumFractionDigits: symbol === "USDC" ? 2 : Math.min(d, 6) });
+    return (Number(value) / 10 ** d).toLocaleString("en-US", { useGrouping: false, maximumFractionDigits: symbol === "USDC" ? 2 : Math.min(d, 6) });
   };
-  const usd = (value: string) => (Number(value) / 1e6).toLocaleString(locale, { style: "currency", currency: "USD" });
+  const usd = (value: string) => `$${(Number(value) / 1e6).toLocaleString("en-US", { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(amount), 600);
@@ -130,7 +129,7 @@ export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: 
     {from === "SOL" && <p className="text-xs text-muted-foreground">{t("Guardamos 0.01 SOL para pagar los costos de red.")}</p>}
 
     {current && !loading && <>
-      <div className="flex items-center justify-between text-sm"><span>1 {from} ≈ {rate?.toLocaleString(locale, { maximumFractionDigits: 6 })} {to}</span>
+      <div className="flex items-center justify-between text-sm"><span>1 {from} ≈ {rate?.toLocaleString("en-US", { useGrouping: false, maximumFractionDigits: 6 })} {to}</span>
         <span className="text-xs text-muted-foreground">{expired ? t("Actualizando…") : t("Válida por {s}s", { s: String(secondsLeft) })}</span></div>
       <div className="h-1 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary transition-all duration-1000" style={{ width: `${(secondsLeft / 30) * 100}%` }} /></div>
       <details className="rounded-xl border border-border px-3 py-2 text-sm">
