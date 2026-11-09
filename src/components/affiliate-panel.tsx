@@ -24,12 +24,18 @@ export function AffiliatePanel() {
   const [customCode, setCustomCode] = useState("");
   const [payout, setPayout] = useState("");
   const [busy, setBusy] = useState(false);
+  const [editingPayout, setEditingPayout] = useState(false);
 
   async function token() { const value = await session.getAccessToken?.(); if (!value) throw new Error(); return value; }
   async function refresh() {
     try {
       const result = await load({ data: { token: await token() } });
-      if (result.success) { setDash(result.dashboard); setCustomCode(result.dashboard.code); setPayout(result.dashboard.payoutWallet ?? session.walletAddress ?? ""); } else setMessage(t(result.error));
+      if (result.success) {
+        // Default payout destination: the connected wallet, saved once so payouts have an address.
+        if (!result.dashboard.payoutWallet && session.walletAddress) {
+          try { const saved = await savePayout({ data: { token: await token(), wallet: session.walletAddress } }); if (saved.success) result.dashboard.payoutWallet = session.walletAddress; } catch { /* keep UI default */ }
+        }
+        setDash(result.dashboard); setCustomCode(result.dashboard.code); setPayout(result.dashboard.payoutWallet ?? session.walletAddress ?? ""); } else setMessage(t(result.error));
     } catch { setMessage(t("Inicia sesión para ver tu programa de afiliados.")); }
   }
   async function act(fn: () => Promise<{ success: boolean; error?: string }>, ok: string) {
@@ -88,10 +94,17 @@ export function AffiliatePanel() {
           <tbody>{[50, 200, 1000].map((g) => <tr key={g} className="border-t border-border"><td className="py-1.5">{g} USDC</td><td className="py-1.5 text-right font-semibold">{usdc(affiliateCommission(depositFee(BigInt(g) * 1_000_000n), AFFILIATE_SHARE_BPS).toString())}</td><td className="py-1.5 text-right font-semibold">{usdc(affiliateCommission(progressiveFee(BigInt(g) * 1_000_000n), AFFILIATE_SHARE_BPS).toString())}</td></tr>)}</tbody></table>
         <p className="mt-2 text-xs text-muted-foreground">{t("Envíos y cambios no generan comisión de afiliado.")}</p>
       </div>
-      <form className="mt-5" onSubmit={(e) => { e.preventDefault(); void act(async () => savePayout({ data: { token: await token(), wallet: payout.trim() } }), "Wallet de cobro guardada."); }}>
-        <label className="block text-sm">{t("Wallet donde recibes tus pagos (USDC)")}<input value={payout} maxLength={44} onChange={(e) => setPayout(e.target.value)} className={field} /></label>
-        <Button type="submit" size="sm" className="mt-2" disabled={busy}>{t("Guardar wallet de cobro")}</Button>
-      </form>
+      {(() => { const connected = session.walletAddress ?? null; const current = dash.payoutWallet ?? connected; const isConnected = !!current && current === connected; const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`; return <div className="mt-5 rounded-xl border border-border bg-card p-4">
+        <p className="text-sm font-semibold">{t("Destino de tus comisiones (USDC)")}</p>
+        {current ? <p className="mt-2 flex items-center gap-2 text-sm"><span className="h-2 w-2 rounded-full bg-primary" aria-hidden />{isConnected ? t("Tu wallet conectada") : t("Wallet personalizada")}<span className="font-mono text-xs text-muted-foreground">{short(current)}</span></p> : <p className="mt-2 text-xs text-muted-foreground">{t("Conecta una wallet o escribe una dirección para recibir tus pagos.")}</p>}
+        {!editingPayout ? <div className="mt-3 flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" onClick={() => { setPayout(current ?? ""); setEditingPayout(true); }}>{t("Cambiar wallet de destino")}</Button>
+          {!isConnected && connected && !preview && <Button size="sm" variant="ghost" disabled={busy} onClick={() => void act(async () => savePayout({ data: { token: await token(), wallet: connected } }), "Wallet de cobro guardada.")}>{t("Usar mi wallet conectada")}</Button>}
+        </div> : <form className="mt-3" onSubmit={(e) => { e.preventDefault(); if (preview) { setEditingPayout(false); return; } void act(async () => savePayout({ data: { token: await token(), wallet: payout.trim() } }), "Wallet de cobro guardada.").then(() => setEditingPayout(false)); }}>
+          <label className="block text-sm">{t("Wallet donde recibes tus pagos (USDC)")}<input value={payout} maxLength={44} onChange={(e) => setPayout(e.target.value)} className={field} /></label>
+          <div className="mt-2 flex gap-2"><Button type="submit" size="sm" disabled={busy}>{t("Guardar wallet de cobro")}</Button><Button type="button" size="sm" variant="ghost" onClick={() => setEditingPayout(false)}>{t("Cancelar")}</Button></div>
+        </form>}
+      </div>; })()}
       <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Las comisiones se registran solo cuando la red confirma la operación y se pagan periódicamente en USDC tras revisión, al acumular al menos 10 USDC.")}</p>
       {dash.earnings.length > 0 && <ul className="mt-5 divide-y divide-border text-sm">{dash.earnings.map((e) => <li key={e.signature} className="flex justify-between gap-3 py-2"><span>{e.kind === "harvest" ? t("Cosecha") : e.kind === "deposit" ? t("Depósito") : t("Cierre")} · {new Date(e.createdAt).toLocaleDateString()}</span><span>+{usdc(e.commissionRaw)} USDC · {t(e.status === "paid" ? "Pagado" : e.status === "rejected" ? "Rechazado" : "Por cobrar")}</span></li>)}</ul>}
       {!dash.joinedCode && <form className="mt-6" onSubmit={(e) => { e.preventDefault(); const c = normalizeCode(code); if (!c) { setMessage(t("Código no válido.")); return; } void act(async () => join({ data: { token: await token(), code: c } }), "Código aplicado. ¡Gracias!"); }}>
