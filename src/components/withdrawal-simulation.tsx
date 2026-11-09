@@ -1,6 +1,6 @@
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { ReceiptText, LoaderCircle, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,9 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
     catch { setResult({ success: false, sent: false, message: t("No se pudo consultar el retiro. No se firmó ni envió nada.") }); }
     finally { setPending(false); }
   }
+  // Review starts automatically once the owner wallet and position are known.
+  const autoKey = input.success ? `${address}:${positionAddress}` : "";
+  useEffect(() => { if (autoKey && !result && !signature) void run(); }, [autoKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const canSign = input.success && session.authenticated && session.walletAddress === address && wallet === address;
   async function signWithdrawal() {
     if (!input.success || !canSign || !accepted || pending || !result?.success || !result.feeRaw || !result.minimumNetRaw || finished || signature) return;
@@ -52,11 +55,11 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
       try { sig = await session.signAndSend(Uint8Array.from(atob(next.prepared.transaction), (c) => c.charCodeAt(0))); }
       catch { setMessage(t("La wallet canceló o rechazó la solicitud. Si pudo enviarse, revisa su historial antes de reintentar.")); return; }
       setSignature(sig); setStep(t("Esperando confirmación en la red…"));
-      for (let attempt = 0; attempt < 30; attempt++) {
+      for (let attempt = 0; attempt < 60; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó la transacción atómica: no se aplicaron el retiro ni la comisión; puede cobrarse el coste de red.")); return; }
         if (status.status !== "pending") { setFinished(true); setMessage(t("Liquidación confirmada en la red. Consulta los importes finales y la renta devuelta en Solscan.")); void reportAffiliate(sig, "exit"); await queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", address] }); return; }
-        await new Promise((resolve) => setTimeout(resolve, 2_000));
+        await new Promise((resolve) => setTimeout(resolve, attempt < 10 ? 800 : 2_000));
       }
       setMessage(t("Confirmación pendiente. Revisa Solscan antes de reintentar; no envíes una segunda liquidación."));
     } catch { setMessage(t("No se pudo preparar el retiro. No se pidió ninguna firma.")); }

@@ -112,8 +112,8 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput,
       if (setup.some((ix) => !ix.programId.equals(ataProgram) || ix.data.length !== 1 || ix.data[0] !== 1 || !ix.keys[0]?.pubkey.equals(owner))) return fail("La preparación Jupiter contiene movimientos adicionales no autorizados.");
       instructions.unshift(...setup, ledger);
       instructions.push(route);
-      for (const address of swap.addressLookupTableAddresses) {
-        const table = await connection.getAddressLookupTable(new PublicKey(address));
+      const loaded = await Promise.all(swap.addressLookupTableAddresses.map((address) => connection.getAddressLookupTable(new PublicKey(address))));
+      for (const table of loaded) {
         if (!table.value) return fail("Tabla de direcciones no disponible.");
         tables.push(table.value);
       }
