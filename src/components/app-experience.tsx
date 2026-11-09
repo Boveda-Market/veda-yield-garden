@@ -39,7 +39,7 @@ function SessionPage({ guest = false, view }: { guest?: boolean; view: "vaults" 
   const [modeReady, setModeReady] = useState(false);
   useEffect(() => { try { if (sessionStorage.getItem("boveda-mode") === "trial") setMode("trial"); } catch {} setModeReady(true); }, []);
   if (!guest && (!session.ready || !modeReady)) return <AccessLoading />;
-  if (!guest && !session.authenticated) return <div className="mx-auto max-w-md px-5 py-12"><h1 className="font-display text-3xl">{t("Entra a BÓVEDA")}</h1><p className="mt-3 text-muted-foreground">{t("Inicia sesión o prueba como invitado, sin usar dinero.")}</p><Button asChild className="mt-6"><Link to="/">{t("Ir al acceso")}</Link></Button><Button asChild variant="outline" className="ml-2 mt-6"><Link to="/prueba">{t("Probar sin cuenta")}</Link></Button></div>;
+  if (!guest && !session.authenticated) return <div className="mx-auto max-w-md px-5 py-12"><h1 className="font-display text-3xl">{t("Entra a BÓVEDA")}</h1><p className="mt-3 text-muted-foreground">{t("Inicia sesión o prueba como invitado, sin usar dinero.")}</p><Button asChild className="mt-6"><Link to="/">{t("Ir al acceso")}</Link></Button></div>;
   return <Dashboard key={`${session.userId ?? "guest"}:${guest ? "trial" : mode}`} mode={guest ? "trial" : mode} guest={guest} view={view} onModeChange={(value) => { if (guest) return; setMode(value); try { sessionStorage.setItem("boveda-mode", value); } catch {} }} />;
 }
 
