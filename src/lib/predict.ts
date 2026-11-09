@@ -2,7 +2,7 @@
 export const PREDICT_MIN_USDC = 5;
 export const PREDICT_MAX_USDC = 250;
 export const PREDICT_SERIES = ["btc"] as const;
-export const PREDICT_WINDOWS = ["5m", "15m", "1h", "4h", "1d"] as const;
+export const PREDICT_WINDOWS = ["5m", "15m"] as const;
 export type PredictWindow = (typeof PREDICT_WINDOWS)[number];
 export type PredictSide = "up" | "down";
 

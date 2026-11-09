@@ -96,7 +96,7 @@ export function PredictLive({ market, window, momentum = 50 }: { market: string;
   return (
     <div className="space-y-4">
       {!loaded ? <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin" size={16} />{t("Buscando la ronda en vivo…")}</p>
-        : !round ? <p className="flex items-center gap-2 rounded-xl bg-secondary p-3 text-sm"><Clock size={16} />{t("No hay ronda en vivo para {m} en {w} ahora mismo. Hoy están disponibles Bitcoin 5 min y 15 min; las demás siguen en Práctica.", { m: market, w: window })}</p>
+        : !round ? <p className="flex items-center gap-2 rounded-xl bg-secondary p-3 text-sm"><Clock size={16} />{t("No hay ronda en vivo para {m} en {w} ahora mismo. Hoy están disponibles Bitcoin 5 min y 15 min.", { m: market, w: window })}</p>
         : <>
           <div className="flex items-center justify-between rounded-xl bg-secondary p-3 text-sm"><span>{t("Ronda en vivo")}</span><strong className="font-display text-xl tabular-nums">{clock(round.closeTime - now)}</strong></div>
           <div>
