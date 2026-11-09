@@ -3,7 +3,7 @@ import { ArrowDownRight, ArrowUpRight, Clock, Lock, RotateCcw, Timer, Trophy, Za
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useT } from "@/lib/i18n";
-import { PerpsLive } from "@/components/perps-live";
+import { PredictLive } from "@/components/predict-live";
 import { ShareWin } from "@/components/share-win";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import {
@@ -167,16 +167,16 @@ export function MarketsPanel({ identity }: { identity: string }) {
       </div>
       <section className="overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex flex-wrap items-center justify-between gap-2 px-5 pt-5">
-          <div className="flex items-center gap-2"><Zap className="text-primary" size={20} /><h1 className="font-display text-2xl font-bold">{live ? t("Mercados en vivo") : t("Predicciones")}</h1>{!live && <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold">{t("Práctica")}</span>}</div>
+          <div className="flex items-center gap-2"><Zap className="text-primary" size={20} /><h1 className="font-display text-2xl font-bold">{t("Predicciones")}</h1><span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold">{live ? t("En vivo") : t("Práctica")}</span></div>
           {!live && <div className="text-right"><p className="text-xs text-muted-foreground">{t("Créditos de práctica")}</p><p className="font-display text-xl font-bold">{num(state.balance)}</p></div>}
         </div>
 
         <div className="flex gap-2 overflow-x-auto px-5 pt-4" role="tablist" aria-label={t("Mercado")}>
           {MARKETS.map((m) => <button key={m.id} role="tab" aria-selected={market === m.id} onClick={() => setMarket(m.id)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition ${market === m.id ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}>{m.name}</button>)}
         </div>
-        {!live && <div className="grid grid-cols-4 gap-2 px-5 pt-3" role="tablist" aria-label={t("Duración de la ronda")}>
+        <div className="grid grid-cols-5 gap-2 px-5 pt-3" role="tablist" aria-label={t("Duración de la ronda")}>
           {WINDOWS.map((w) => <button key={w.id} role="tab" aria-selected={win === w.id} onClick={() => setWin(w.id)} className={`rounded-xl border py-2 text-sm font-semibold transition ${win === w.id ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}>{w.label}</button>)}
-        </div>}
+        </div>
 
         <div className="px-5 pt-5">
           <div className="flex items-end justify-between gap-3">
@@ -202,7 +202,7 @@ export function MarketsPanel({ identity }: { identity: string }) {
           <p className="mt-1 text-[11px] text-muted-foreground">{t("Basado en los últimos movimientos del precio, no en apuestas de otros usuarios.")}</p>
         </div>
 
-        {live ? <div className="p-5"><PerpsLive asset={market} momentum={upShare} /></div> : <div className="space-y-4 p-5">
+        {live ? <div className="p-5"><PredictLive market={market} window={win} momentum={upShare} /></div> : <div className="space-y-4 p-5">
           <div>
             <label htmlFor="stake" className="text-sm font-semibold">{t("Tu predicción (créditos)")}</label>
             <input id="stake" inputMode="decimal" value={stake} onChange={(e) => setStake(e.target.value.replace(/[^0-9.]/g, ""))} className="mt-2 h-12 w-full rounded-xl border border-input bg-background px-4 font-display text-xl font-bold" />

@@ -76,6 +76,15 @@ function SessionBridge({ children }: { children: ReactNode }) {
         throw new Error(`${t("La red rechazó la operación")}: ${e instanceof Error ? e.message : String(e)}`);
       }
     },
+    signOnly: async (transaction) => {
+      const wallet = wallets[0];
+      if (!authenticated || !wallet) throw new Error(t("Conecta una wallet de Solana"));
+      try { return (await signTransaction({ transaction, wallet, chain: "solana:mainnet" })).signedTransaction; }
+      catch (e) {
+        if (e instanceof Error && /reject|cancel|exited/i.test(e.message)) throw new Error(t("Cancelaste la firma."));
+        throw new Error(`${t("La wallet no pudo firmar")}: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    },
     signMessage: async (message) => {
       const wallet = wallets[0];
       if (!authenticated || !wallet) throw new Error(t("Conecta una wallet de Solana"));

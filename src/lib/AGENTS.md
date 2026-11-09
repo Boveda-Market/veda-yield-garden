@@ -1,2 +1,2 @@
 - Compound adds harvested tokens to the same verified position: no swap/extra SOL wrap, capped by harvest, simulated.
-- Live perps: Jupiter Perps API, wallet sole signer, opening free; BÓVEDA USDC fee appended at close on position value.
+- Live predictions: Jupiter Prediction (Forecast) API, wallet sole signer, simulated before review, executed via /execute; BÓVEDA is never counterparty.

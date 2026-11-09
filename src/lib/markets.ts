@@ -13,6 +13,7 @@ export const WINDOWS = [
   { id: "15m", label: "15 min", ms: 15 * 60_000 },
   { id: "1h", label: "1 h", ms: 60 * 60_000 },
   { id: "4h", label: "4 h", ms: 4 * 60 * 60_000 },
+  { id: "1d", label: "24 h", ms: 24 * 60 * 60_000 },
 ] as const;
 export type WindowId = (typeof WINDOWS)[number]["id"];
 
