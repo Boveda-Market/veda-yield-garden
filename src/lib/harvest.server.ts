@@ -79,7 +79,7 @@ export async function simulateHarvest(apiKey: string, input: WithdrawalInput, op
     if (options.prepare && Date.now() - startedAt > 45_000) return fail("La preparación tardó demasiado. Repite la revisión.");
     return {
       success, sent: false, bytes: final.bytes, checks,
-      gross: tokenAmount(usdcClaimed.toString(), 6), fee: tokenAmount(feeDelta.toString(), 6), net: tokenAmount(netDelta.toString(), 6), feeRaw: breakdown.fee.toString(),
+      gross: tokenAmount(usdcClaimed.toString(), 6), fee: tokenAmount(feeDelta.toString(), 6), net: tokenAmount(netDelta.toString(), 6), feeRaw: breakdown.fee.toString(), netRaw: netDelta.toString(), tokenRaw: tokenClaimed.toString(),
       tokenSymbol: config.symbol, tokenAmount: tokenAmount(tokenClaimed.toString(), pool.tokenAMint.equals(NATIVE_MINT) ? 9 : 6),
       ...(success && options.prepare ? { prepared: { transaction: Buffer.from(final.tx.serialize()).toString("base64"), expiresAt: startedAt + 45_000, wallet: input.wallet, position: input.position } } : {}),
       message: success ? "Cosecha verificada en simulación. La liquidez principal no se retira. Comisión del 1% sobre los USDC cosechados; la parte en el otro token se entrega sin convertir en esta operación. Solo tu wallet puede firmar y enviar." : "La cosecha no superó todas las comprobaciones. No se autoriza ninguna firma.",

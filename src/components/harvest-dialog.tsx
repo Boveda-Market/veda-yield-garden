@@ -11,9 +11,10 @@ import { simulateRealHarvest, prepareRealHarvest } from "@/lib/harvest.functions
 import type { HarvestResult } from "@/lib/harvest";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { ActionSuccess, ReceiveCard } from "@/components/action-success";
+import { CompoundStep } from "@/components/compound-step";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 
-export function HarvestDialog({ wallet, position, vaultId, onClose, onReinvest }: { wallet: string; position: string; vaultId: "sol" | "met"; onClose: () => void; onReinvest?: ((netUsdc: string) => void) | undefined }) {
+export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: { wallet: string; position: string; vaultId: "sol" | "met"; onClose: () => void; compound?: boolean | undefined }) {
   const t = useT();
   const simulate = useServerFn(simulateRealHarvest);
   const prepare = useServerFn(prepareRealHarvest);
@@ -62,9 +63,9 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, onReinvest }
   }
   const coin = vaultId === "sol" ? "SOL" : "MET";
   return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
-    <DialogTitle>{onReinvest ? t("Reinvertir ganancias ·") : t("Cosechar Ganancias ·")}{" "}{coin}</DialogTitle>
-    <DialogDescription>{onReinvest ? t("Dos pasos: primero cosechas tus ganancias y luego depositas los USDC netos en esta misma bóveda. Firmas cada paso por separado.") : t("Recibe las ganancias acumuladas. Tu depósito sigue en la bóveda generando más.")}</DialogDescription>
-    {finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess title={t("¡Ganancias cosechadas!")} body={t("Las ganancias ya están en tu wallet y tu depósito sigue generando.")} signature={signature} onClose={onClose} />{onReinvest && result?.net && (Number(result.net) >= 1 ? <Button size="lg" onClick={() => onReinvest(result.net!)}><Repeat className="mr-2 h-4 w-4" />{t("Paso 2: reinvertir")}{" "}{result.net} USDC</Button> : <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Tus ganancias netas son menores a 1 USDC, el mínimo para depositar. Te sugerimos esperar a acumular más para que el costo de red no reduzca tu rendimiento.")}</p>)}</> : <>
+    <DialogTitle>{compound ? t("Reinvertir ganancias ·") : t("Cosechar Ganancias ·")}{" "}{coin}</DialogTitle>
+    <DialogDescription>{compound ? t("Dos pasos: primero cosechas tus ganancias y luego sumas los USDC y el otro token cosechados a esta misma posición. Firmas cada paso por separado.") : t("Recibe las ganancias acumuladas. Tu depósito sigue en la bóveda generando más.")}</DialogDescription>
+    {finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess title={t("¡Ganancias cosechadas!")} body={t("Las ganancias ya están en tu wallet y tu depósito sigue generando.")} signature={signature} onClose={onClose} />{compound && result?.netRaw && result.tokenRaw && <CompoundStep wallet={wallet} position={position} vaultId={vaultId} usdcRaw={result.netRaw} tokenRaw={result.tokenRaw} />}</> : <>
     {!result?.success && <Button variant={result ? "outline" : "default"} disabled={pending} onClick={() => void run()}>{pending && !step ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <ReceiptText className="mr-2 h-4 w-4" />}{pending && !step ? t("Calculando tus ganancias…") : t("Revisar cosecha")}</Button>}
     {result && <div role="status" className="grid gap-3 text-sm">
       {!result.success && <><p className="font-semibold">{t("Cosecha no disponible")}</p><p className="leading-6 text-muted-foreground">{result.message}</p></>}

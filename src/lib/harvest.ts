@@ -11,6 +11,8 @@ export type HarvestResult = {
   fee?: string;
   net?: string;
   feeRaw?: string;
+  netRaw?: string;
+  tokenRaw?: string;
   tokenSymbol?: string;
   tokenAmount?: string;
   prepared?: { transaction: string; expiresAt: number; wallet: string; position: string };

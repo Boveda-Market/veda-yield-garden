@@ -9,7 +9,7 @@ vi.mock("@tanstack/react-query", () => ({ useQuery: () => ({ data: { success: tr
 vi.mock("@/lib/solana.functions", () => ({ getRealWallet: vi.fn() }));
 vi.mock("@/components/deposit-simulation", () => ({ DepositSimulation: () => null }));
 vi.mock("@/components/withdrawal-simulation", () => ({ WithdrawalSimulation: () => <p>Revisión de cierre autorizada</p> }));
-vi.mock("@/components/harvest-dialog", () => ({ HarvestDialog: ({ onReinvest }: { onReinvest?: unknown }) => <p>{onReinvest ? "Revisión de reinversión autorizada" : "Revisión de cosecha autorizada"}</p> }));
+vi.mock("@/components/harvest-dialog", () => ({ HarvestDialog: ({ compound }: { compound?: boolean }) => <p>{compound ? "Revisión de reinversión autorizada" : "Revisión de cosecha autorizada"}</p> }));
 vi.mock("@/components/pool-yield", () => ({ PoolYield: () => null }));
 vi.mock("@/components/buy-usdc", () => ({ BuyUsdc: () => null }));
 vi.mock("@/components/real-portfolio-panel", () => ({ RealPortfolioPanel: () => null }));

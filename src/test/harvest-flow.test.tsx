@@ -6,6 +6,7 @@ vi.mock("@tanstack/react-router", () => ({ Link: ({ children }: { children: unkn
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@tanstack/react-query", () => ({ useQueryClient: () => ({ invalidateQueries: mocks.invalidate }) }));
 vi.mock("@/lib/harvest.functions", () => ({ simulateRealHarvest: mocks.review, prepareRealHarvest: mocks.prepare }));
+vi.mock("@/lib/compound.functions", () => ({ prepareRealCompound: async () => ({ success: false, message: "" }) }));
 vi.mock("@/hooks/use-affiliate-report", () => ({ useAffiliateReport: () => async () => undefined }));
 vi.mock("@/lib/pilot-deposit.functions", () => ({ pilotDepositStatus: mocks.status }));
 import { HarvestDialog } from "@/components/harvest-dialog";
