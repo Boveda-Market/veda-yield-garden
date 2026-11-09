@@ -78,6 +78,19 @@ export async function fetchPrices(): Promise<Partial<Record<MarketId, number>>> 
   return out;
 }
 
+export type Candle = { t: number; o: number; h: number; l: number; c: number };
+/** Recent real OHLC candles (oldest first). granularity in seconds: 60, 300 or 900. */
+export async function fetchCandles(id: MarketId, granularity: number, count = 36): Promise<Candle[]> {
+  try {
+    const res = await fetch(`https://api.exchange.coinbase.com/products/${id}-USD/candles?granularity=${granularity}`);
+    if (!res.ok) return [];
+    const rows = (await res.json()) as number[][];
+    return rows.slice(0, count).reverse()
+      .map((r) => ({ t: r[0]! * 1000, l: r[1]!, h: r[2]!, o: r[3]!, c: r[4]! }))
+      .filter((k) => k.o > 0 && k.c > 0 && k.h > 0 && k.l > 0);
+  } catch { return []; }
+}
+
 /** Historical price at a timestamp: open of the 1-minute candle starting then (for rounds that ended while away). */
 export async function fetchPriceAt(id: MarketId, ts: number): Promise<number | null> {
   const start = Math.floor(ts / 60_000) * 60_000;

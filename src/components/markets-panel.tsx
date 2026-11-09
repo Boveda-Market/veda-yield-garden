@@ -175,7 +175,7 @@ export function MarketsPanel({ identity }: { identity: string }) {
           {priceError && <p role="alert" className="mt-1 text-sm text-destructive">{t("Precio no disponible. Reintentando…")}</p>}
           {!live && <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary"><div className="h-full bg-primary transition-all" style={{ width: `${progress * 100}%` }} /></div>}
         </div>
-        <div className="mt-4"><PriceChart points={pts} reference={lock ?? roundOpen} referenceLabel={lock ? t("Tu precio") : t("Inicio")} /></div>
+        <div className="mt-4"><PriceChart market={market} price={price} reference={lock ?? roundOpen} referenceLabel={lock ? t("Tu precio") : t("Inicio")} /></div>
 
         <div className="px-5 pt-3" aria-label={t("Impulso reciente")}>
           <div className="flex justify-between text-xs font-semibold"><span className="text-primary">▲ {upShare}% {t("al alza")}</span><span className="text-muted-foreground">{t("Impulso reciente")}</span><span className="text-destructive">{100 - upShare}% {t("a la baja")} ▼</span></div>
