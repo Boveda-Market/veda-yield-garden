@@ -22,8 +22,7 @@ it("re-simulates with reviewed limits, signs only as the connected owner and ref
   const session: BovedaSession = { ready: true, authenticated: true, userId: "verified-owner", label: "Owner", walletAddress: WITHDRAWAL_PILOT.wallet, error: null, login: vi.fn(), logout: vi.fn(), signAndSend: mocks.send };
   render(<BovedaSessionContext.Provider value={session}><WithdrawalSimulation wallet={WITHDRAWAL_PILOT.wallet} position={"BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1"} vaultId="met" onClose={vi.fn()} /></BovedaSessionContext.Provider>);
   expect(mocks.preview).toHaveBeenCalledTimes(1);
-  await waitFor(() => expect(screen.getByRole("checkbox", { name: "Acepto la liquidación real" })).toBeInTheDocument());
-  fireEvent.click(screen.getByRole("checkbox", { name: "Acepto la liquidación real" }));
+  await waitFor(() => expect(screen.getByRole("button", { name: /Firmar liquidación/ })).toBeEnabled());
   await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Firmar liquidación a USDC" })); });
   await waitFor(() => expect(mocks.invalidate).toHaveBeenCalledWith({ queryKey: ["real-solana", WITHDRAWAL_PILOT.wallet] }));
   expect(mocks.prepare).toHaveBeenCalledWith({ data: { wallet: WITHDRAWAL_PILOT.wallet, position: "BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1", vaultId: "met", maximumFeeRaw: "9640", minimumNetRaw: "954400" } });

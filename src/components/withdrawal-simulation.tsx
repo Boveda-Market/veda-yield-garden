@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { simulateRealWithdrawal, prepareRealWithdrawal } from "@/lib/withdrawal.functions";
 import { withdrawalInput, type WithdrawalResult } from "@/lib/withdrawal";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
-import { Checkbox } from "@/components/ui/checkbox";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -43,7 +42,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
   useEffect(() => { if (autoKey && !result && !signature) void run(); }, [autoKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const canSign = input.success && session.authenticated && session.walletAddress === address && wallet === address;
   async function signWithdrawal() {
-    if (!input.success || !canSign || !accepted || pending || !result?.success || !result.feeRaw || !result.minimumNetRaw || finished || signature) return;
+    if (!input.success || !canSign || pending || !result?.success || !result.feeRaw || !result.minimumNetRaw || finished || signature) return;
     setPending(true); setMessage(null); setStep(t("Preparando tu retiro…"));
     try {
       const next = await prepare({ data: { ...input.data, maximumFeeRaw: result.feeRaw, minimumNetRaw: result.minimumNetRaw } });
@@ -75,7 +74,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
     {result && <div role="status" className="border-t border-border pt-4 text-sm"><p className="font-semibold">{result.success ? t("Resumen de tu retiro") : t("Retiro no disponible")}</p>{!result.success && <p className="mt-2 leading-6">{result.message}</p>}{result.gross && <dl className="mt-4 grid gap-2"><div className="flex justify-between gap-3"><dt>{t("USDC antes de comisión")}</dt><dd>{result.gross}</dd></div><div className="flex justify-between gap-3"><dt>{t("Comisión · 1%")}</dt><dd>{result.fee} USDC</dd></div><div className="flex justify-between gap-3"><dt>{t("USDC estimados a recibir")}</dt><dd>{result.net} USDC</dd></div><div className="flex justify-between gap-3"><dt>{t("Renta de posición y NFT")}</dt><dd>{result.rentSol} SOL</dd></div></dl>}{result.checks && <ul className="mt-4 space-y-1">{Object.entries(result.checks).map(([key, valid]) => <li key={key}>{({ closed: t("Cierre de posición y NFT"), usdc: t("Devolución de USDC"), fee: t("Comisión exacta"), rent: t("Devolución de renta en SOL") } as Record<string, string>)[key]}: {valid ? t("Comprobado antes de firmar") : t("No verificado")}</li>)}</ul>}</div>}
     {result?.remainingTokenRaw && result.remainingTokenRaw !== "0" && <p role="alert" className="text-xs leading-5 text-destructive">{t("Diferencia de tokens tras la conversión:")}{" "}{result.remainingTokenRaw} {t("unidades mínimas. No es un importe en USD; la liquidación no está validada.")}</p>}
     {result?.minimumGross && <dl className="grid gap-2 border-t border-border pt-3 text-sm"><div className="flex justify-between gap-3"><dt>{t("Mínimo bruto protegido")}</dt><dd>{result.minimumGross} USDC</dd></div><div className="flex justify-between gap-3"><dt>{t("Mínimo neto tras comisión")}</dt><dd>{result.minimumNet} USDC</dd></div></dl>}
-    {canSign && result?.success && !signature && !finished && <><label className="flex items-start gap-3 text-xs leading-5"><Checkbox checked={accepted} disabled={pending} onCheckedChange={(value) => setAccepted(value === true)} aria-label={t("Acepto la liquidación real")} /><span>{t("Acepto cerrar esta posición, la comisión sobre el mínimo protegido y los costes de red. La operación no se puede revertir.")}</span></label><Button disabled={!accepted || pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : t("Firmar liquidación a USDC")}</Button></>}
+    {canSign && result?.success && !signature && !finished && <><p className="text-xs leading-5 text-muted-foreground">{t("Acepto cerrar esta posición, la comisión sobre el mínimo protegido y los costes de red. La operación no se puede revertir.")}</p><Button disabled={pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : t("Firmar liquidación a USDC")}</Button></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta liquidación. No hay movimientos hasta que firmes.")}</p>}
     {message && <p role={finished ? "status" : "alert"} className="text-sm">{message}</p>}
     {signature && <a href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer" className="break-all text-xs underline">{t("Ver liquidación en Solscan")}</a>}

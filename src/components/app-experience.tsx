@@ -226,7 +226,7 @@ function WithdrawalReview({ kind, amount, onClose, onConfirm }: { kind: "harvest
   return <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-lg bg-card">
     <DialogTitle>{t("Prueba ·")} {kind === "harvest" ? t("Cosechar ganancias") : t("Cerrar y liquidar")}</DialogTitle>
     <DialogDescription>{kind === "harvest" ? t("El principal ficticio permanece invertido. El cargo simulado se descuenta solo de las ganancias cosechadas.") : t("Se cerrará la posición ficticia. El cargo simulado se descuenta del principal y las ganancias sin cosechar.")}</DialogDescription>
-    <FeeBreakdown amount={amount} /><AcceptTerms accepted={accepted} onChange={setAccepted} />
-    <Button disabled={!accepted} onClick={onConfirm}>{kind === "harvest" ? t("Confirmar cosecha") : t("Confirmar liquidación")}</Button>
+    <FeeBreakdown amount={amount} />{kind === "harvest" && <AcceptTerms accepted={accepted} onChange={setAccepted} />}
+    <Button disabled={kind === "harvest" && !accepted} onClick={onConfirm}>{kind === "harvest" ? t("Confirmar cosecha") : t("Confirmar liquidación")}</Button>
   </DialogContent></Dialog>;
 }
