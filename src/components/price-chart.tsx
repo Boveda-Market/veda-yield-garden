@@ -125,7 +125,7 @@ export function PriceChart({ market, points, price, reference, referenceLabel }:
             <rect x="0" y="0" width={W} height={refY} className="fill-primary" opacity="0.05" />
             <rect x="0" y={refY} width={W} height={H - refY} className="fill-destructive" opacity="0.05" />
           </>}
-          {style === "line" ? <>
+          {(style as Style) === "line" ? <>
             <defs><linearGradient id="pc-grad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="currentColor" stopOpacity="0.3" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient></defs>
             <polygon points={`${cx(0)},${H} ${d} ${cx(n - 1)},${H}`} fill="url(#pc-grad)" />
             <polyline points={d} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
@@ -143,7 +143,7 @@ export function PriceChart({ market, points, price, reference, referenceLabel }:
         {hc && <>
           <div className="pointer-events-none absolute inset-y-0 w-px bg-foreground/40" style={{ left: `${hx}%` }} />
           <div className="pointer-events-none absolute -top-2 rounded-md bg-foreground px-2 py-0.5 text-[10px] font-semibold tabular-nums text-background" style={{ left: `clamp(0px, calc(${hx}% - 60px), calc(100% - 130px))` }}>
-            {style === "line" ? `$${fmt(hc.c)}` : `A ${fmt(hc.o)} · C ${fmt(hc.c)}`}
+            {(style as Style) === "line" ? `$${fmt(hc.c)}` : `A ${fmt(hc.o)} · C ${fmt(hc.c)}`}
           </div>
         </>}
       </div>
