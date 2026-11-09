@@ -3,6 +3,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
 
 const mocks = vi.hoisted(() => ({ positions: [] as object[] }));
+vi.mock("@tanstack/react-router", () => ({ Link: ({ children }: { children: unknown }) => children }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@tanstack/react-query", () => ({ useQuery: () => ({ data: { success: true, data: { positions: mocks.positions, positionsComplete: true, usdc: "10", sol: "1", checkedAt: new Date().toISOString() } }, refetch: vi.fn() }) }));
 vi.mock("@/lib/solana.functions", () => ({ getRealWallet: vi.fn() }));

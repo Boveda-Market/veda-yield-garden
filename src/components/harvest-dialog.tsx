@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { simulateRealHarvest, prepareRealHarvest } from "@/lib/harvest.functions";
 import type { HarvestResult } from "@/lib/harvest";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
+import { ActionSuccess, ReceiveCard } from "@/components/action-success";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 
 export function HarvestDialog({ wallet, position, vaultId, onClose }: { wallet: string; position: string; vaultId: "sol" | "met"; onClose: () => void }) {
@@ -59,16 +60,28 @@ export function HarvestDialog({ wallet, position, vaultId, onClose }: { wallet: 
     } catch { setMessage(t("No se pudo preparar la cosecha. No se pidió ninguna firma.")); }
     finally { setPending(false); setStep(""); }
   }
+  const coin = vaultId === "sol" ? "SOL" : "MET";
   return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
-    <DialogTitle>{t("Cosechar Ganancias ·")}{" "}{vaultId === "sol" ? "SOL" : "MET"}</DialogTitle>
-    <DialogDescription>{t("Red principal · retira solo las comisiones acumuladas; la liquidez principal permanece en el pool.")}</DialogDescription>
-    <p className="break-all font-mono text-xs text-muted-foreground">{position}</p>
-    <p className="text-xs leading-5 text-muted-foreground">{t("Comisión del 1% sobre los USDC cosechados, en la misma transacción. La parte en")}{" "}{vaultId === "sol" ? "SOL" : "MET"} {t("se entrega a tu wallet sin convertir ni cobrar comisión en esta operación.")}</p>
-    <Button disabled={pending} onClick={() => void run()}>{pending && !step ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <ReceiptText className="mr-2 h-4 w-4" />}{pending && !step ? t("Verificando cosecha…") : t("Revisar cosecha")}</Button>
-    {result && <div role="status" className="border-t border-border pt-4 text-sm"><p className="font-semibold">{result.success ? t("Resumen de tu cosecha") : t("Cosecha no disponible")}</p>{!result.success && <p className="mt-2 leading-6">{result.message}</p>}{result.gross && <dl className="mt-4 grid gap-2"><div className="flex justify-between gap-3"><dt>{t("USDC cosechados")}</dt><dd>{result.gross}</dd></div><div className="flex justify-between gap-3"><dt>{t("Comisión · 1%")}</dt><dd>{result.fee} USDC</dd></div><div className="flex justify-between gap-3"><dt>{t("USDC netos")}</dt><dd>{result.net}</dd></div><div className="flex justify-between gap-3"><dt>{result.tokenSymbol} cosechados</dt><dd>{result.tokenAmount}</dd></div></dl>}{result.checks && <ul className="mt-4 space-y-1">{Object.entries(result.checks).map(([key, valid]) => <li key={key}>{({ position: t("Posición sigue abierta"), usdc: t("USDC netos"), fee: t("Comisión exacta"), token: t("Token cosechado") } as Record<string, string>)[key]}: {valid ? t("Comprobado antes de firmar") : t("No verificado")}</li>)}</ul>}</div>}
-    {canSign && result?.success && !signature && !finished && <><label className="flex items-start gap-3 text-xs leading-5"><Checkbox checked={accepted} disabled={pending} onCheckedChange={(value) => setAccepted(value === true)} aria-label={t("Acepto la cosecha real")} /><span>{t("Acepto cosechar las comisiones, la comisión del 1% sobre los USDC y los costes de red.")}</span></label><Button disabled={!accepted || pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : t("Firmar cosecha")}</Button></>}
+    <DialogTitle>{t("Cosechar Ganancias ·")}{" "}{coin}</DialogTitle>
+    <DialogDescription>{t("Recibe las ganancias acumuladas. Tu depósito sigue en la bóveda generando más.")}</DialogDescription>
+    {finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess title={t("¡Ganancias cosechadas!")} body={t("Las ganancias ya están en tu wallet y tu depósito sigue generando.")} signature={signature} onClose={onClose} /></> : <>
+    {!result?.success && <Button variant={result ? "outline" : "default"} disabled={pending} onClick={() => void run()}>{pending && !step ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <ReceiptText className="mr-2 h-4 w-4" />}{pending && !step ? t("Calculando tus ganancias…") : t("Revisar cosecha")}</Button>}
+    {result && <div role="status" className="grid gap-3 text-sm">
+      {!result.success && <><p className="font-semibold">{t("Cosecha no disponible")}</p><p className="leading-6 text-muted-foreground">{result.message}</p></>}
+      {result.gross && <>
+        <ReceiveCard label={t("Recibes")} amount={result.net ?? "—"} unit="USDC" sub={`+ ${result.tokenAmount} ${result.tokenSymbol}`} />
+        <dl className="grid gap-2 rounded-xl border border-border p-4">
+          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en USDC")}</dt><dd>{result.gross}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión BÓVEDA · 1%")}</dt><dd>−{result.fee} USDC</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en")} {result.tokenSymbol}</dt><dd>{result.tokenAmount} · {t("sin comisión")}</dd></div>
+        </dl>
+      </>}
+      {result.checks && <details className="text-xs text-muted-foreground"><summary className="cursor-pointer">{t("Ver verificaciones de seguridad")}</summary><ul className="mt-2 space-y-1">{Object.entries(result.checks).map(([key, valid]) => <li key={key}>{({ position: t("Posición sigue abierta"), usdc: t("USDC netos"), fee: t("Comisión exacta"), token: t("Token cosechado") } as Record<string, string>)[key]}: {valid ? t("Comprobado antes de firmar") : t("No verificado")}</li>)}</ul></details>}
+    </div>}
+    {canSign && result?.success && !signature && <><label className="flex items-start gap-3 text-xs leading-5 text-muted-foreground"><Checkbox checked={accepted} disabled={pending} onCheckedChange={(value) => setAccepted(value === true)} aria-label={t("Acepto la cosecha real")} /><span>{t("Revisé el resumen. La comisión del 1% se descuenta de los USDC; el costo de red se paga en SOL.")}</span></label><Button size="lg" disabled={!accepted || pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : t("Firmar cosecha")}</Button></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta cosecha. No hay movimientos hasta que firmes.")}</p>}
-    {message && <p role={finished ? "status" : "alert"} className="text-sm">{message}</p>}
-    {signature && <a href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer" className="break-all text-xs underline">{t("Ver cosecha en Solscan")}</a>}
+    {message && <p role="alert" className="text-sm">{message}</p>}
+    {signature && <a href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer" className="break-all text-xs underline">{t("Ver comprobante")}</a>}
+    </>}
   </DialogContent></Dialog>;
 }

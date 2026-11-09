@@ -4,6 +4,7 @@ import { BovedaSessionContext, type BovedaSession } from "@/hooks/use-boveda-ses
 import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
 
 const mocks = vi.hoisted(() => ({ preview: vi.fn(), prepare: vi.fn(), status: vi.fn(), invalidate: vi.fn(), send: vi.fn() }));
+vi.mock("@tanstack/react-router", () => ({ Link: ({ children }: { children: unknown }) => children }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@/lib/withdrawal.functions", () => ({ simulateRealWithdrawal: mocks.preview, prepareRealWithdrawal: mocks.prepare }));
 vi.mock("@/hooks/use-affiliate-report", () => ({ useAffiliateReport: () => async () => undefined }));

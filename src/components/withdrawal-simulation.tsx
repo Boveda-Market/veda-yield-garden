@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { simulateRealWithdrawal, prepareRealWithdrawal } from "@/lib/withdrawal.functions";
 import { withdrawalInput, type WithdrawalResult } from "@/lib/withdrawal";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
+import { ActionSuccess, ReceiveCard } from "@/components/action-success";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -64,19 +65,39 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
     } catch { setMessage(t("No se pudo preparar el retiro. No se pidió ninguna firma.")); }
     finally { setPending(false); setStep(""); }
   }
-  return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
-    <DialogTitle>{t("Retiro a USDC ·")}{" "}{vaultId === "sol" ? "SOL" : "MET"}</DialogTitle>
-    <DialogDescription>{t("Cierra tu posición y recibe USDC en tu wallet.")}</DialogDescription>
+  const prefilled = Boolean(wallet && position);
+  const inputs = <>
     <label className="grid gap-2 text-sm">{t("Wallet propietaria")}<Input aria-label={t("Wallet propietaria")} value={address} disabled={pending || Boolean(wallet) || Boolean(signature)} maxLength={44} onChange={(e) => { setAddress(e.target.value.trim()); setResult(null); setAccepted(false); }} /></label>
     <label className="grid gap-2 text-sm">{t("Dirección de la posición")}<Input aria-label={t("Dirección de la posición")} value={positionAddress} disabled={pending || Boolean(position) || Boolean(signature)} maxLength={44} onChange={(e) => { setPositionAddress(e.target.value.trim()); setResult(null); setAccepted(false); }} /></label>
-    <p className="text-xs leading-5 text-muted-foreground">{t("Retiro completo de liquidez no bloqueada, conversión a USDC y cierre de la posición y su NFT. Comisión fija del 1% sobre el mínimo bruto protegido por slippage, no sobre el importe final: cualquier USDC adicional es tuyo. La renta se devuelve en SOL, sin esta comisión. No se admiten posiciones bloqueadas ni recompensas adicionales.")}</p>
-    <Button disabled={pending || !input.success} onClick={() => void run()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <ReceiptText className="mr-2 h-4 w-4" />}{pending ? t("Verificando retiro…") : t("Revisar retiro")}</Button>
-    {result && <div role="status" className="border-t border-border pt-4 text-sm"><p className="font-semibold">{result.success ? t("Resumen de tu retiro") : t("Retiro no disponible")}</p>{!result.success && <p className="mt-2 leading-6">{result.message}</p>}{result.gross && <dl className="mt-4 grid gap-2"><div className="flex justify-between gap-3"><dt>{t("USDC antes de comisión")}</dt><dd>{result.gross}</dd></div><div className="flex justify-between gap-3"><dt>{t("Comisión · 1%")}</dt><dd>{result.fee} USDC</dd></div><div className="flex justify-between gap-3"><dt>{t("USDC estimados a recibir")}</dt><dd>{result.net} USDC</dd></div><div className="flex justify-between gap-3"><dt>{t("Renta de posición y NFT")}</dt><dd>{result.rentSol} SOL</dd></div></dl>}{result.checks && <ul className="mt-4 space-y-1">{Object.entries(result.checks).map(([key, valid]) => <li key={key}>{({ closed: t("Cierre de posición y NFT"), usdc: t("Devolución de USDC"), fee: t("Comisión exacta"), rent: t("Devolución de renta en SOL") } as Record<string, string>)[key]}: {valid ? t("Comprobado antes de firmar") : t("No verificado")}</li>)}</ul>}</div>}
+  </>;
+  return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
+    <DialogTitle>{t("Retiro a USDC ·")}{" "}{vaultId === "sol" ? "SOL" : "MET"}</DialogTitle>
+    <DialogDescription>{t("Cierra tu posición y recibe todo en USDC en tu wallet.")}</DialogDescription>
+    {finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess title={t("¡Retiro completado!")} body={t("Tus USDC ya están en tu wallet. También recuperaste el SOL de apertura de la posición.")} signature={signature} onClose={onClose} /></> : <>
+    {!prefilled && inputs}
+    {(!result || !result.success) && <Button variant={result ? "outline" : "default"} disabled={pending || !input.success} onClick={() => void run()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <ReceiptText className="mr-2 h-4 w-4" />}{pending ? t("Calculando tu retiro…") : t("Revisar retiro")}</Button>}
+    {result && <div role="status" className="grid gap-3 text-sm">
+      {!result.success && <><p className="font-semibold">{t("Retiro no disponible")}</p><p className="leading-6 text-muted-foreground">{result.message}</p></>}
+      {result.gross && <>
+        <ReceiveCard label={t("Recibes aproximadamente")} amount={result.net ?? "—"} unit="USDC" sub={result.minimumNet ? `${t("Mínimo garantizado:")} ${result.minimumNet} USDC · + ${result.rentSol} SOL ${t("de vuelta")}` : undefined} />
+        <dl className="grid gap-2 rounded-xl border border-border p-4">
+          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Valor de tu posición")}</dt><dd>{result.gross} USDC</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión BÓVEDA · 1%")}</dt><dd>−{result.fee} USDC</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("SOL de apertura devuelto")}</dt><dd>{result.rentSol} SOL</dd></div>
+        </dl>
+      </>}
+      {(result.checks || result.minimumGross) && <details className="text-xs text-muted-foreground"><summary className="cursor-pointer">{t("Ver detalles y verificaciones")}</summary>
+        <p className="mt-2 leading-5">{t("La comisión se calcula sobre el mínimo protegido por variación de precio; cualquier USDC adicional es tuyo. Las posiciones bloqueadas no se pueden retirar.")}</p>
+        {result.minimumGross && <dl className="mt-2 grid gap-1"><div className="flex justify-between gap-3"><dt>{t("Mínimo bruto protegido")}</dt><dd>{result.minimumGross} USDC</dd></div><div className="flex justify-between gap-3"><dt>{t("Mínimo neto tras comisión")}</dt><dd>{result.minimumNet} USDC</dd></div></dl>}
+        {result.checks && <ul className="mt-2 space-y-1">{Object.entries(result.checks).map(([key, valid]) => <li key={key}>{({ closed: t("Cierre de posición y NFT"), usdc: t("Devolución de USDC"), fee: t("Comisión exacta"), rent: t("Devolución de renta en SOL") } as Record<string, string>)[key]}: {valid ? t("Comprobado antes de firmar") : t("No verificado")}</li>)}</ul>}
+        {prefilled && <p className="mt-2 break-all font-mono">{positionAddress}</p>}
+      </details>}
+    </div>}
     {result?.remainingTokenRaw && result.remainingTokenRaw !== "0" && <p role="alert" className="text-xs leading-5 text-destructive">{t("Diferencia de tokens tras la conversión:")}{" "}{result.remainingTokenRaw} {t("unidades mínimas. No es un importe en USD; la liquidación no está validada.")}</p>}
-    {result?.minimumGross && <dl className="grid gap-2 border-t border-border pt-3 text-sm"><div className="flex justify-between gap-3"><dt>{t("Mínimo bruto protegido")}</dt><dd>{result.minimumGross} USDC</dd></div><div className="flex justify-between gap-3"><dt>{t("Mínimo neto tras comisión")}</dt><dd>{result.minimumNet} USDC</dd></div></dl>}
-    {canSign && result?.success && !signature && !finished && <><p className="text-xs leading-5 text-muted-foreground">{t("Acepto cerrar esta posición, la comisión sobre el mínimo protegido y los costes de red. La operación no se puede revertir.")}</p><Button disabled={pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : t("Firmar liquidación a USDC")}</Button></>}
+    {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : t("Firmar liquidación a USDC")}</Button><p className="text-center text-xs text-muted-foreground">{t("Al firmar cierras la posición; no se puede revertir.")}</p></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta liquidación. No hay movimientos hasta que firmes.")}</p>}
-    {message && <p role={finished ? "status" : "alert"} className="text-sm">{message}</p>}
-    {signature && <a href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer" className="break-all text-xs underline">{t("Ver liquidación en Solscan")}</a>}
+    {message && <p role="alert" className="text-sm">{message}</p>}
+    {signature && <a href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer" className="break-all text-xs underline">{t("Ver comprobante")}</a>}
+    </>}
   </DialogContent></Dialog>;
 }

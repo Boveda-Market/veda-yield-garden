@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor, cleanup } from "@testing-libra
 import { afterEach, expect, it, vi } from "vitest";
 import { BovedaSessionContext, type BovedaSession } from "@/hooks/use-boveda-session";
 const mocks = vi.hoisted(() => ({ review: vi.fn(), prepare: vi.fn(), send: vi.fn(), status: vi.fn(), invalidate: vi.fn() }));
+vi.mock("@tanstack/react-router", () => ({ Link: ({ children }: { children: unknown }) => children }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@tanstack/react-query", () => ({ useQueryClient: () => ({ invalidateQueries: mocks.invalidate }) }));
 vi.mock("@/lib/harvest.functions", () => ({ simulateRealHarvest: mocks.review, prepareRealHarvest: mocks.prepare }));
