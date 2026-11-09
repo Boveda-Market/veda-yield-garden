@@ -5,7 +5,6 @@ export const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 export const SOL_MINT = "So11111111111111111111111111111111111111112";
 /** SOL kept aside so the wallet can always pay network costs. */
 export const SOL_RESERVE_LAMPORTS = 10_000_000n;
-const PUBLIC_RPC = "https://api.mainnet-beta.solana.com";
 
 export type WalletAsset = "SOL" | "USDC";
 const DECIMALS: Record<WalletAsset, number> = { SOL: 9, USDC: 6 };
@@ -32,8 +31,7 @@ export const sendInput = z.object({ from: solanaAddressSchema, to: solanaAddress
 /** Builds an unsigned SOL or USDC transfer; the connected wallet signs and sends it. */
 export async function buildTransfer(input: z.infer<typeof sendInput>): Promise<Uint8Array> {
   const { from, to, asset, amount } = sendInput.parse(input);
-  const { Connection, PublicKey, SystemProgram, TransactionMessage, VersionedTransaction } = await import("@solana/web3.js");
-  const connection = new Connection(PUBLIC_RPC, "confirmed");
+  const { PublicKey, SystemProgram, TransactionMessage, VersionedTransaction } = await import("@solana/web3.js");
   const owner = new PublicKey(from), dest = new PublicKey(to);
   const instructions = [];
   if (asset === "SOL") instructions.push(SystemProgram.transfer({ fromPubkey: owner, toPubkey: dest, lamports: amount }));
@@ -45,7 +43,7 @@ export async function buildTransfer(input: z.infer<typeof sendInput>): Promise<U
     instructions.push(spl.createAssociatedTokenAccountIdempotentInstruction(owner, target, dest, mint));
     instructions.push(spl.createTransferCheckedInstruction(source, mint, target, owner, amount, 6));
   }
-  const { blockhash } = await connection.getLatestBlockhash("confirmed");
+  const { blockhash } = await txContext([]);
   const message = new TransactionMessage({ payerKey: owner, recentBlockhash: blockhash, instructions }).compileToV0Message();
   return new VersionedTransaction(message).serialize();
 }
@@ -104,22 +102,26 @@ export async function quoteSwap(from: string, to: string, amount: bigint): Promi
   return { from: a.symbol, to: b.symbol, amount, outAmount: raw.outAmount, minimum, feeUsdc, usdcValue: buying ? amount.toString() : raw.outAmount, priceImpactPct: raw.priceImpactPct, raw };
 }
 
-/** Classic SPL balance read from the public RPC; zero when the wallet has no account yet. */
+/** Classic SPL balance via a narrow server read; zero when the wallet has no account yet. */
 export async function readTokenBalance(owner: string, mint: string): Promise<bigint> {
-  const res = await fetch(PUBLIC_RPC, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getTokenAccountsByOwner", params: [owner, { mint }, { encoding: "jsonParsed", commitment: "confirmed" }] }) });
-  if (!res.ok) throw new Error("No se pudo leer el saldo.");
-  const j = await res.json() as { result?: { value: { account: { data: { parsed: { info: { mint: string; owner: string; tokenAmount: { amount: string } } } } } }[] } };
-  if (!j.result) throw new Error("No se pudo leer el saldo.");
-  return j.result.value.reduce((sum, v) => {
-    const info = v.account.data.parsed.info;
-    return info.mint === mint && info.owner === owner && /^\d+$/.test(info.tokenAmount.amount) ? sum + BigInt(info.tokenAmount.amount) : sum;
-  }, 0n);
+  const { getTokenBalance } = await import("@/lib/wallet-chain.functions");
+  const r = await getTokenBalance({ data: { wallet: owner, mint } });
+  if (!r.success) throw new Error(r.error);
+  return BigInt(r.amount);
+}
+
+/** Recent blockhash and lookup tables, read server-side because the public RPC rejects browsers. */
+async function txContext(lookupTables: string[]) {
+  const { getTxContext } = await import("@/lib/wallet-chain.functions");
+  const r = await getTxContext({ data: { lookupTables } });
+  if (!r.success) throw new Error(r.error);
+  return r.data;
 }
 
 type JupIx = { programId: string; accounts: { pubkey: string; isSigner: boolean; isWritable: boolean }[]; data: string };
 
 export async function buildSwap(wallet: string, quote: SwapQuote): Promise<Uint8Array> {
-  const { Connection, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } = await import("@solana/web3.js");
+  const { AddressLookupTableAccount, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } = await import("@solana/web3.js");
   const res = await fetch("https://lite-api.jup.ag/swap/v1/swap-instructions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ quoteResponse: quote.raw, userPublicKey: wallet, wrapAndUnwrapSol: true, dynamicComputeUnitLimit: true, prioritizationFeeLamports: { priorityLevelWithMaxLamports: { priorityLevel: "medium", maxLamports: 50_000 } }, ...(quote.to === "USDC" ? { feeAccount: FEE_USDC_ACCOUNT } : {}) }) });
   if (!res.ok) throw new Error("No se pudo preparar el cambio. Inténtalo de nuevo.");
   const j = await res.json() as { computeBudgetInstructions: JupIx[]; setupInstructions: JupIx[]; swapInstruction: JupIx; cleanupInstruction?: JupIx; addressLookupTableAddresses: string[] };
@@ -133,9 +135,9 @@ export async function buildSwap(wallet: string, quote: SwapQuote): Promise<Uint8
   }
   instructions.push(ix(j.swapInstruction));
   if (j.cleanupInstruction) instructions.push(ix(j.cleanupInstruction));
-  const connection = new Connection(PUBLIC_RPC, "confirmed");
-  const alts = (await Promise.all(j.addressLookupTableAddresses.map((a) => connection.getAddressLookupTable(new PublicKey(a))))).flatMap((r) => r.value ? [r.value] : []);
-  const { blockhash } = await connection.getLatestBlockhash("confirmed");
+  const ctx = await txContext(j.addressLookupTableAddresses);
+  const alts = ctx.tables.map((x) => new AddressLookupTableAccount({ key: new PublicKey(x.key), state: { deactivationSlot: BigInt("18446744073709551615"), lastExtendedSlot: 0, lastExtendedSlotStartIndex: 0, addresses: x.addresses.map((k) => new PublicKey(k)) } }));
+  const blockhash = ctx.blockhash;
   const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: blockhash, instructions }).compileToV0Message(alts));
   const bytes = tx.serialize();
   if (bytes.length > 1232) throw new Error("No se pudo preparar el cambio. Inténtalo con otro monto.");

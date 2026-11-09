@@ -1,22 +1,10 @@
-import { Connection, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import { CpAmm, getTokenProgram, getUnClaimLpFee, positionLiquidity } from "@meteora-ag/cp-amm-sdk";
 import { getMint } from "@solana/spl-token";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount, type ChainPosition, type RealWalletData } from "@/lib/solana-data";
 
-/** Every RPC failure is replaced before it can include the private query URL. */
-export function heliusConnection(apiKey: string) {
-  return new Connection(`https://mainnet.helius-rpc.com/?api-key=${encodeURIComponent(apiKey)}`, {
-    commitment: "confirmed",
-    disableRetryOnRateLimit: true,
-    fetch: async (input, init) => {
-      try {
-        const response = await fetch(input, { ...init, signal: AbortSignal.timeout(20_000) });
-        if (!response.ok) throw new Error("RPC indisponible");
-        return response;
-      } catch { throw new Error("La consulta de Solana no está disponible"); }
-    },
-  });
-}
+export { heliusConnection } from "@/lib/helius.server";
+import { heliusConnection } from "@/lib/helius.server";
 
 export async function readRealWallet(apiKey: string, address: string): Promise<RealWalletData> {
   const connection = heliusConnection(apiKey);
