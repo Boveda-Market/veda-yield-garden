@@ -61,7 +61,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
       // Sign first, then broadcast from the browser, so each stage fails with its own clear message.
       let signed: Uint8Array;
       try {
-        ({ signedTransaction: signed } = await signTransaction({ transaction, wallet, chain: "solana:mainnet" }));
+        ({ signedTransaction: signed } = await signTransaction({ transaction, wallet, chain: "solana:mainnet", options: { uiOptions: { showWalletUIs: false } } }));
       } catch (e) {
         console.error("[BÓVEDA] wallet signing failed", e);
         if (e instanceof Error && /reject|cancel|exited/i.test(e.message)) throw new Error(t("Cancelaste la firma."));
@@ -102,6 +102,6 @@ export default function PrivyAccess({ children }: { children: ReactNode }) {
     appearance: { theme: "dark", walletChainType: "solana-only", walletList: ["phantom", "jupiter"], logo: "/icon-512.png" },
     externalWallets: { solana: { connectors: solanaConnectors } },
     embeddedWallets: { solana: { createOnLogin: "users-without-wallets" }, ethereum: { createOnLogin: "off" } },
-    solana: { rpcs: solanaRpcs },
+    solanaRpcs,
   }}><SessionBridge>{children}</SessionBridge></PrivyProvider>;
 }
