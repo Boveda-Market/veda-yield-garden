@@ -1,7 +1,6 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, Copy, Sparkles } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
@@ -15,7 +14,6 @@ export function StartGuide({ className, onSwap }: { className?: string; onSwap?:
   const session = useBovedaSession();
   const address = session.walletAddress;
   const read = useServerFn(getRealWallet);
-  const [copied, setCopied] = useState(false);
   const q = useQuery({ queryKey: ["start-guide", address], enabled: !!address && session.authenticated, staleTime: 30_000, queryFn: async () => {
     const r = await read({ data: { wallet: address! } });
     if (!r.success) throw new Error(r.error);
@@ -32,7 +30,7 @@ export function StartGuide({ className, onSwap }: { className?: string; onSwap?:
     {step === "sol" ? <>
       <h2 className="mt-3 font-display text-xl font-semibold">{t("Paso 1: necesitas un poco de SOL para empezar")}</h2>
       <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("Cada movimiento cuesta unos centavos, y se pagan en SOL. Con $10 tienes de sobra para muchas operaciones. Cómpralo con tarjeta o envíalo desde otra wallet o exchange a tu dirección.")}</p>
-      <div className="mt-4 flex flex-wrap gap-2"><BuyUsdc only="SOL" /><Button variant="outline" onClick={() => { void navigator.clipboard.writeText(address); setCopied(true); setTimeout(() => setCopied(false), 1500); }}><Copy size={16} />{copied ? t("Copiado") : t("Copiar mi dirección")}</Button></div>
+      <div className="mt-4 flex flex-wrap gap-2"><BuyUsdc only="SOL" /></div>
     </> : <>
       <h2 className="mt-3 font-display text-xl font-semibold">{t("Paso 2: consigue USDC para poner a trabajar")}</h2>
       <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("Los USDC son dólares digitales: es lo que depositas en una bóveda. Cómpralos con tarjeta, envíalos desde un exchange o cambia parte de tu SOL en Mi wallet.")}</p>
