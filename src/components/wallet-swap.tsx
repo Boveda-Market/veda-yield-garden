@@ -1,31 +1,37 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDown, ArrowLeftRight, RefreshCw } from "lucide-react";
+import { ArrowUpDown, CheckCircle2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useLocale, useT } from "@/lib/i18n";
-import { quoteSwap, spendable, toBaseUnits, type SwapQuote, type WalletAsset } from "@/lib/wallet-actions";
+import { quoteSwap, SWAP_TOKENS, swapSpendable, swapToken, toTokenUnits, type SwapQuote } from "@/lib/wallet-actions";
+
+const QUOTE_TTL = 30_000;
 
 type Props = {
-  balance: bigint | undefined;
-  asset: WalletAsset;
-  onAssetChange: (asset: WalletAsset) => void;
+  balances: Record<string, bigint | undefined>;
+  initialFrom?: string;
   busy: boolean;
-  onConfirm: (quote: SwapQuote) => Promise<void>;
+  onConfirm: (quote: SwapQuote) => Promise<unknown>;
 };
 
-/** Quote-only requests never sign; only the reviewed, current input can be confirmed. */
-export function WalletSwap({ balance, asset, onAssetChange, busy, onConfirm }: Props) {
+/** Quote-only requests never sign; only the reviewed, current input can be confirmed. Every pair includes USDC. */
+export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: Props) {
   const t = useT();
   const locale = useLocale();
+  const [from, setFrom] = useState(initialFrom);
+  const [to, setTo] = useState(initialFrom === "USDC" ? "SOL" : "USDC");
   const [amount, setAmount] = useState("");
   const [debounced, setDebounced] = useState("");
   const [now, setNow] = useState(0);
-  const units = toBaseUnits(amount, asset);
-  const output = asset === "SOL" ? "USDC" : "SOL";
-  const max = balance === undefined ? undefined : spendable(balance, asset);
-  const format = (value: bigint | string, token: WalletAsset) =>
-    (Number(value) / 10 ** (token === "SOL" ? 9 : 6)).toLocaleString(locale, { maximumFractionDigits: token === "SOL" ? 9 : 6 });
+  const [done, setDone] = useState<SwapQuote | null>(null);
+  const units = toTokenUnits(amount, from);
+  const balance = balances[from];
+  const max = balance === undefined ? undefined : swapSpendable(balance, from);
+  const format = (value: bigint | string, symbol: string) => {
+    const d = swapToken(symbol).decimals;
+    return (Number(value) / 10 ** d).toLocaleString(locale, { maximumFractionDigits: symbol === "USDC" ? 2 : Math.min(d, 6) });
+  };
+  const usd = (value: string) => (Number(value) / 1e6).toLocaleString(locale, { style: "currency", currency: "USD" });
 
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(amount), 600);
@@ -33,71 +39,109 @@ export function WalletSwap({ balance, asset, onAssetChange, busy, onConfirm }: P
   }, [amount]);
 
   const quote = useQuery({
-    queryKey: ["wallet-swap-quote", asset, debounced],
+    queryKey: ["wallet-swap-quote", from, to, debounced],
     enabled: Boolean(units) && amount === debounced && !busy,
     queryFn: () => {
-      const input = toBaseUnits(debounced, asset);
+      const input = toTokenUnits(debounced, from);
       if (!input) throw new Error(t("Monto no válido"));
-      return quoteSwap(asset, input);
+      return quoteSwap(from, to, input);
     },
-    staleTime: 30_000,
+    staleTime: QUOTE_TTL,
+    refetchInterval: busy ? false : QUOTE_TTL,
     retry: false,
     refetchOnWindowFocus: false,
   });
-  const current = amount === debounced && quote.data?.asset === asset && quote.data.amount === units ? quote.data : undefined;
+  const current = amount === debounced && quote.data?.from === from && quote.data.to === to && quote.data.amount === units ? quote.data : undefined;
   useEffect(() => {
     if (!current) return;
     setNow(Date.now());
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, [current]);
-  const expired = Boolean(current) && now - quote.dataUpdatedAt >= 30_000;
+  const age = current ? Math.max(0, now - quote.dataUpdatedAt) : 0;
+  const expired = Boolean(current) && age >= QUOTE_TTL;
+  const secondsLeft = Math.max(0, Math.ceil((QUOTE_TTL - age) / 1000));
   const insufficient = Boolean(units && max !== undefined && units > max);
   const loading = Boolean(units) && (amount !== debounced || quote.isFetching);
-  const raw = current?.raw;
-  const minimum = raw && typeof raw === "object" && "otherAmountThreshold" in raw &&
-    typeof raw.otherAmountThreshold === "string" && /^\d+$/.test(raw.otherAmountThreshold)
-    ? raw.otherAmountThreshold : null;
-  const rate = current && units ? (Number(current.outAmount) / 10 ** (output === "SOL" ? 9 : 6)) / (Number(units) / 10 ** (asset === "SOL" ? 9 : 6)) : null;
+  const rate = current && units ? (Number(current.outAmount) / 10 ** swapToken(to).decimals) / (Number(units) / 10 ** swapToken(from).decimals) : null;
 
-  return <div className="mt-4 space-y-4" aria-busy={busy}>
-    <div className="flex items-center justify-between gap-3">
-      <h3 className="font-display text-lg">{t("Cambiar monedas")}</h3>
-      <Button size="icon" variant="outline" disabled={busy} aria-label={t("Invertir cambio")} title={t("Invertir cambio")} onClick={() => { setAmount(""); setDebounced(""); onAssetChange(output); }}><ArrowLeftRight /></Button>
+  const clear = () => { setAmount(""); setDebounced(""); };
+  const pick = (side: "from" | "to", symbol: string) => {
+    const other = side === "from" ? to : from;
+    let next = other;
+    if (symbol === other) next = side === "from" ? from : to; // selecting the other side's token flips the pair
+    if (symbol !== "USDC" && next !== "USDC") next = "USDC";
+    if (symbol === "USDC" && next === "USDC") next = SWAP_TOKENS.find((x) => x.symbol !== "USDC")?.symbol ?? "SOL";
+    if (side === "from") { setFrom(symbol); setTo(next); } else { setTo(symbol); setFrom(next); }
+    clear();
+  };
+  const setPercent = (pct: bigint) => {
+    if (max === undefined || max <= 0n) return;
+    const d = BigInt(swapToken(from).decimals);
+    const v = max * pct / 100n;
+    setAmount(`${v / 10n ** d}.${(v % 10n ** d).toString().padStart(Number(d), "0")}`.replace(/\.?0+$/, ""));
+  };
+
+  if (done) return <div className="mt-4 space-y-4 rounded-2xl bg-muted p-5 text-center" role="status">
+    <CheckCircle2 className="mx-auto size-10 text-primary" aria-hidden="true" />
+    <p className="font-display text-xl">{t("Cambio enviado")}</p>
+    <p className="text-sm text-muted-foreground">{t("Cambiaste {a} por aproximadamente {b}.", { a: `${format(done.amount, done.from)} ${done.from}`, b: `${format(done.outAmount, done.to)} ${done.to}` })}</p>
+    <p className="text-xs text-muted-foreground">{t("Tu saldo se actualizará en unos segundos.")}</p>
+    <Button className="w-full" onClick={() => setDone(null)}>{t("Hacer otro cambio")}</Button>
+  </div>;
+
+  const select = (side: "from" | "to", value: string) => <select aria-label={side === "from" ? t("Moneda que pagas") : t("Moneda que recibes")} value={value} disabled={busy}
+    onChange={(e) => pick(side, e.target.value)} className="h-10 rounded-full border border-border bg-background px-3 font-semibold">
+    {SWAP_TOKENS.map((x) => <option key={x.symbol} value={x.symbol}>{x.symbol}</option>)}
+  </select>;
+
+  return <div className="mt-4 space-y-3" aria-busy={busy}>
+    <h3 className="font-display text-lg">{t("Cambiar monedas")}</h3>
+    <div className="relative space-y-1">
+      <div className="rounded-2xl bg-muted p-4">
+        <div className="flex items-center justify-between text-sm text-muted-foreground"><label htmlFor="swap-amount">{t("Pagas")}</label><span>{t("Disponible")}: {max === undefined ? "—" : format(max, from)}</span></div>
+        <div className="mt-2 flex items-center gap-2">
+          <input id="swap-amount" inputMode="decimal" placeholder="0.00" value={amount} disabled={busy} onChange={(e) => setAmount(e.target.value)} className="min-w-0 flex-1 bg-transparent font-display text-3xl outline-none" />
+          {select("from", from)}
+        </div>
+        <p className="mt-1 h-4 text-xs text-muted-foreground">{current && !loading ? `≈ ${usd(current.usdcValue)}` : ""}</p>
+        <div className="mt-2 flex gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={String(p)} size="sm" variant="outline" className="h-7 flex-1 rounded-full px-2 text-xs" disabled={busy || max === undefined || max <= 0n} onClick={() => setPercent(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
+      </div>
+      <div className="flex justify-center"><Button size="icon" variant="secondary" className="-my-4 z-10 rounded-full border-4 border-card" disabled={busy} aria-label={t("Invertir cambio")} title={t("Invertir cambio")} onClick={() => { setFrom(to); setTo(from); clear(); }}><ArrowUpDown /></Button></div>
+      <div className="rounded-2xl bg-muted p-4" aria-live="polite">
+        <div className="text-sm text-muted-foreground">{t("Recibes aproximadamente")}</div>
+        <div className="mt-2 flex items-center gap-2">
+          <p className="min-w-0 flex-1 truncate font-display text-3xl text-primary">{loading ? t("Cotizando…") : current ? format(current.outAmount, to) : "0.00"}</p>
+          {select("to", to)}
+        </div>
+        <p className="mt-1 h-4 text-xs text-muted-foreground">{current && !loading ? t("Comisión ya descontada") : ""}</p>
+      </div>
     </div>
-    <div className="space-y-2">
-      <div className="flex items-center justify-between text-sm"><label htmlFor="swap-amount">{t("Pagas")}</label><strong>{asset}</strong></div>
-      <div className="flex gap-2"><Input id="swap-amount" inputMode="decimal" placeholder="0.00" value={amount} disabled={busy} onChange={(e) => setAmount(e.target.value)} /><Button size="sm" variant="outline" className="h-10" disabled={busy || max === undefined || max <= 0n} onClick={() => {
-        if (max === undefined) return;
-        const decimals = asset === "SOL" ? 9 : 6;
-        setAmount(`${max / 10n ** BigInt(decimals)}.${(max % 10n ** BigInt(decimals)).toString().padStart(decimals, "0")}`);
-      }}>{t("Máx")}</Button></div>
-      <p className="text-xs text-muted-foreground">{t("Disponible")}: {max === undefined ? "—" : format(max, asset)} {asset}</p>
-      {amount && !units && <p role="alert" className="text-sm text-destructive">{t("Monto no válido")}</p>}
-      {insufficient && <p role="alert" className="text-sm text-destructive">{t("Saldo insuficiente")}</p>}
-      {asset === "SOL" && <p className="text-xs text-muted-foreground">{t("Guardamos 0.01 SOL para pagar los costos de red.")}</p>}
-    </div>
-    <ArrowDown className="mx-auto size-4 text-muted-foreground" aria-hidden="true" />
-    <div className="min-h-24 border-y border-border py-4" aria-live="polite">
-      <div className="flex items-center justify-between text-sm"><span>{t("Recibes aproximadamente")}</span><strong>{output}</strong></div>
-      <p className="mt-1 break-words font-display text-2xl text-primary">{loading ? t("Cotizando…") : current ? `${format(current.outAmount, output)} ${output}` : "—"}</p>
-      {current && !loading && <p className="mt-1 text-xs text-muted-foreground">{t("Comisión ya descontada")}</p>}
-    </div>
-    {current && !loading && <dl className="space-y-2 text-sm">
-      <div className="flex flex-wrap justify-between gap-1"><dt className="text-muted-foreground">{t("Tipo de cambio estimado")}</dt><dd>1 {asset} ≈ {rate?.toLocaleString(locale, { maximumFractionDigits: 9 })} {output}</dd></div>
-      <div className="flex flex-wrap justify-between gap-1"><dt className="text-muted-foreground">{t("Comisión BÓVEDA (1%)")}</dt><dd>{format(current.feeUsdc, "USDC")} USDC</dd></div>
-      <div className="flex flex-wrap justify-between gap-1"><dt className="text-muted-foreground">{t("Mínimo a recibir")}</dt><dd>{minimum ? `${format(minimum, output)} ${output}` : "—"}</dd></div>
-      <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{t("Protección de precio")}</dt><dd>0.5%</dd></div>
-    </dl>}
+
+    {amount && !units && <p role="alert" className="text-sm text-destructive">{t("Monto no válido")}</p>}
+    {insufficient && <p role="alert" className="text-sm text-destructive">{t("Saldo insuficiente")}</p>}
+    {from === "SOL" && <p className="text-xs text-muted-foreground">{t("Guardamos 0.01 SOL para pagar los costos de red.")}</p>}
+
+    {current && !loading && <>
+      <div className="flex items-center justify-between text-sm"><span>1 {from} ≈ {rate?.toLocaleString(locale, { maximumFractionDigits: 6 })} {to}</span>
+        <span className="text-xs text-muted-foreground">{expired ? t("Actualizando…") : t("Válida por {s}s", { s: String(secondsLeft) })}</span></div>
+      <div className="h-1 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary transition-all duration-1000" style={{ width: `${(secondsLeft / 30) * 100}%` }} /></div>
+      <details className="rounded-xl border border-border px-3 py-2 text-sm">
+        <summary className="cursor-pointer text-muted-foreground">{t("Ver detalles")}</summary>
+        <dl className="mt-2 space-y-2">
+          <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{t("Comisión BÓVEDA (1%)")}</dt><dd>{format(current.feeUsdc, "USDC")} USDC</dd></div>
+          <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{t("Mínimo a recibir")}</dt><dd>{current.minimum ? `${format(current.minimum, to)} ${to}` : "—"}</dd></div>
+          <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{t("Protección de precio")}</dt><dd>0.5%</dd></div>
+        </dl>
+        <p className="mt-2 text-xs text-muted-foreground">{t("La comisión del 1% ya está incluida en lo que recibes. No hay cobros ocultos.")}</p>
+      </details>
+    </>}
     {quote.isError && amount === debounced && <p role="alert" className="text-sm text-destructive">{t(quote.error.message)}</p>}
-    {expired && !loading && <p role="status" className="text-sm text-muted-foreground">{t("Actualiza la cotización antes de confirmar.")}</p>}
-    <div className="flex flex-col gap-2">
-      {(current || quote.isError) && <Button variant="outline" disabled={busy || loading || !units} onClick={() => void quote.refetch()}><RefreshCw />{t("Actualizar cotización")}</Button>}
-      <Button className="w-full" disabled={busy || loading || !current || expired || insufficient || max === undefined} onClick={() => {
-        if (!current || Date.now() - quote.dataUpdatedAt >= 30_000 || insufficient || busy) return;
-        void onConfirm(current).then(() => { setAmount(""); setDebounced(""); }).catch(() => {});
-      }}>{busy ? t("Procesando…") : t("Confirmar y firmar cambio")}</Button>
-    </div>
+    {quote.isError && <Button variant="outline" className="w-full" disabled={busy || !units} onClick={() => void quote.refetch()}><RefreshCw />{t("Actualizar cotización")}</Button>}
+    <Button className="w-full" size="lg" disabled={busy || loading || !current || expired || insufficient || max === undefined} onClick={() => {
+      if (!current || Date.now() - quote.dataUpdatedAt >= QUOTE_TTL || insufficient || busy) return;
+      void onConfirm(current).then(() => { setDone(current); clear(); }).catch(() => {});
+    }}>{busy ? t("Procesando…") : t("Confirmar y firmar cambio")}</Button>
     <p className="text-xs text-muted-foreground">{t("La cotización no mueve tus fondos. El costo de red se paga aparte en SOL y lo verás en tu wallet antes de firmar.")}</p>
   </div>;
 }

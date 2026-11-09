@@ -1,9 +1,8 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { useState } from "react";
 import { WalletSwap } from "@/components/wallet-swap";
-import type { WalletAsset } from "@/lib/wallet-actions";
+import { SWAP_TOKENS } from "@/lib/wallet-actions";
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.useRealTimers(); });
 function mount(balance = 200_000_000n) {
@@ -11,13 +10,20 @@ function mount(balance = 200_000_000n) {
   const fetcher = vi.fn(async (_url: string) => ({ ok: true, json: async () => ({ outAmount: "500000000", otherAmountThreshold: "497500000", priceImpactPct: "0", platformFee: { amount: "1000000" } }) }));
   vi.stubGlobal("fetch", fetcher);
   function Harness() {
-    const [asset, setAsset] = useState<WalletAsset>("USDC");
-    return <WalletSwap asset={asset} onAssetChange={setAsset} balance={balance} busy={false} onConfirm={confirm} />;
+    return <WalletSwap balances={{ USDC: balance, SOL: balance, MET: balance }} busy={false} onConfirm={confirm} />;
   }
   render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } })}><Harness /></QueryClientProvider>);
   return { confirm, fetcher };
 }
 describe("wallet swap review", () => {
+  it("offers MET and keeps the unvalidated SPCX token out of swaps", () => {
+    expect(SWAP_TOKENS.map((x) => x.symbol)).toEqual(["USDC", "SOL", "MET"]);
+  });
+  it("forces USDC on the other side when choosing MET so the fee stays in USDC", () => {
+    mount();
+    fireEvent.change(screen.getByLabelText("Moneda que pagas"), { target: { value: "MET" } });
+    expect(screen.getByLabelText("Moneda que recibes")).toHaveValue("USDC");
+  });
   it("quotes automatically with the 1% USDC input fee and only signs on confirmation", async () => {
     const { fetcher, confirm } = mount();
     fireEvent.change(screen.getByLabelText("Pagas"), { target: { value: "100" } });

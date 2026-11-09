@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { solanaAddressSchema } from "@/lib/solana-data";
+import { CHAIN_POOLS, solanaAddressSchema } from "@/lib/solana-data";
 
 export const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 export const SOL_MINT = "So11111111111111111111111111111111111111112";
@@ -57,33 +57,76 @@ export const FEE_USDC_ACCOUNT = "DXbXVtrEEyJ7zuanJNzyyj1D3PQBsUm65hdQ3DHiarQW";
 /** 1% swap fee in micro-USDC, floored. */
 export function swapFee(usdcUnits: bigint) { return usdcUnits * SWAP_FEE_BPS / 10_000n; }
 
-export type SwapQuote = { asset: WalletAsset; amount: bigint; outAmount: string; feeUsdc: string; priceImpactPct: string; raw: unknown };
+/** Swappable tokens: USDC plus every vault token validated with `swapDecimals`; new pools appear automatically. */
+export type SwapToken = { symbol: string; mint: string; decimals: number };
+export const SWAP_TOKENS: SwapToken[] = [
+  { symbol: "USDC", mint: USDC_MINT, decimals: 6 },
+  ...CHAIN_POOLS.flatMap((p) => "swapDecimals" in p ? [{ symbol: p.symbol, mint: p.mint, decimals: p.swapDecimals }] : []),
+];
+export function swapToken(symbol: string) {
+  const token = SWAP_TOKENS.find((t) => t.symbol === symbol);
+  if (!token) throw new Error("Moneda no disponible para cambiar.");
+  return token;
+}
+/** Parses an amount for any swappable token. */
+export function toTokenUnits(value: string, symbol: string): bigint | null {
+  const d = swapToken(symbol).decimals;
+  const v = value.trim().replace(",", ".");
+  if (!new RegExp(`^\\d+(\\.\\d{1,${d}})?$`).test(v)) return null;
+  const [whole, frac = ""] = v.split(".");
+  const units = BigInt(whole ?? "0") * 10n ** BigInt(d) + BigInt(frac.padEnd(d, "0"));
+  return units > 0n ? units : null;
+}
+/** Spendable swap amount; SOL keeps its network reserve. */
+export function swapSpendable(balance: bigint, symbol: string) {
+  if (symbol !== "SOL") return balance;
+  return balance > SOL_RESERVE_LAMPORTS ? balance - SOL_RESERVE_LAMPORTS : 0n;
+}
+
+/** Every swap has USDC on one side so the 1% fee is always charged in USDC. */
+export type SwapQuote = { from: string; to: string; amount: bigint; outAmount: string; minimum: string | null; feeUsdc: string; usdcValue: string; priceImpactPct: string; raw: unknown };
 
 /** Public Jupiter quote with 0.5% slippage; the 1% fee is always charged in USDC. */
-export async function quoteSwap(asset: WalletAsset, amount: bigint): Promise<SwapQuote> {
-  const [input, output] = asset === "SOL" ? [SOL_MINT, USDC_MINT] : [USDC_MINT, SOL_MINT];
-  // SOL→USDC: Jupiter takes 1% of the USDC output. USDC→SOL: 1% of the USDC input is set aside before swapping.
-  const swapIn = asset === "USDC" ? amount - swapFee(amount) : amount;
-  const feeParam = asset === "SOL" ? `&platformFeeBps=${SWAP_FEE_BPS}` : "";
-  const res = await fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${input}&outputMint=${output}&amount=${swapIn}&slippageBps=50${feeParam}`);
+export async function quoteSwap(from: string, to: string, amount: bigint): Promise<SwapQuote> {
+  const a = swapToken(from), b = swapToken(to);
+  if ((a.symbol === "USDC") === (b.symbol === "USDC")) throw new Error("Cada cambio debe incluir USDC.");
+  const buying = a.symbol === "USDC";
+  // X→USDC: Jupiter takes 1% of the USDC output. USDC→X: 1% of the USDC input is set aside before swapping.
+  const swapIn = buying ? amount - swapFee(amount) : amount;
+  const feeParam = buying ? "" : `&platformFeeBps=${SWAP_FEE_BPS}`;
+  const res = await fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${a.mint}&outputMint=${b.mint}&amount=${swapIn}&slippageBps=50${feeParam}`);
   if (!res.ok) throw new Error("No se pudo cotizar el cambio. Inténtalo de nuevo.");
-  const raw = await res.json() as { outAmount: string; priceImpactPct: string; platformFee?: { amount: string } };
-  const feeUsdc = asset === "SOL" ? (raw.platformFee?.amount ?? "") : swapFee(amount).toString();
+  const raw = await res.json() as { outAmount: string; otherAmountThreshold?: string; priceImpactPct: string; platformFee?: { amount: string } };
+  if (!/^\d+$/.test(raw.outAmount ?? "")) throw new Error("No se pudo cotizar el cambio. Inténtalo de nuevo.");
+  const feeUsdc = buying ? swapFee(amount).toString() : (raw.platformFee?.amount ?? "");
   if (!feeUsdc || BigInt(feeUsdc) <= 0n) throw new Error("El monto es demasiado pequeño para cambiar.");
-  return { asset, amount, outAmount: raw.outAmount, feeUsdc, priceImpactPct: raw.priceImpactPct, raw };
+  const minimum = typeof raw.otherAmountThreshold === "string" && /^\d+$/.test(raw.otherAmountThreshold) ? raw.otherAmountThreshold : null;
+  return { from: a.symbol, to: b.symbol, amount, outAmount: raw.outAmount, minimum, feeUsdc, usdcValue: buying ? amount.toString() : raw.outAmount, priceImpactPct: raw.priceImpactPct, raw };
+}
+
+/** Classic SPL balance read from the public RPC; zero when the wallet has no account yet. */
+export async function readTokenBalance(owner: string, mint: string): Promise<bigint> {
+  const res = await fetch(PUBLIC_RPC, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getTokenAccountsByOwner", params: [owner, { mint }, { encoding: "jsonParsed", commitment: "confirmed" }] }) });
+  if (!res.ok) throw new Error("No se pudo leer el saldo.");
+  const j = await res.json() as { result?: { value: { account: { data: { parsed: { info: { mint: string; owner: string; tokenAmount: { amount: string } } } } } }[] } };
+  if (!j.result) throw new Error("No se pudo leer el saldo.");
+  return j.result.value.reduce((sum, v) => {
+    const info = v.account.data.parsed.info;
+    return info.mint === mint && info.owner === owner && /^\d+$/.test(info.tokenAmount.amount) ? sum + BigInt(info.tokenAmount.amount) : sum;
+  }, 0n);
 }
 
 type JupIx = { programId: string; accounts: { pubkey: string; isSigner: boolean; isWritable: boolean }[]; data: string };
 
 export async function buildSwap(wallet: string, quote: SwapQuote): Promise<Uint8Array> {
   const { Connection, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } = await import("@solana/web3.js");
-  const res = await fetch("https://lite-api.jup.ag/swap/v1/swap-instructions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ quoteResponse: quote.raw, userPublicKey: wallet, wrapAndUnwrapSol: true, dynamicComputeUnitLimit: true, prioritizationFeeLamports: { priorityLevelWithMaxLamports: { priorityLevel: "medium", maxLamports: 50_000 } }, ...(quote.asset === "SOL" ? { feeAccount: FEE_USDC_ACCOUNT } : {}) }) });
+  const res = await fetch("https://lite-api.jup.ag/swap/v1/swap-instructions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ quoteResponse: quote.raw, userPublicKey: wallet, wrapAndUnwrapSol: true, dynamicComputeUnitLimit: true, prioritizationFeeLamports: { priorityLevelWithMaxLamports: { priorityLevel: "medium", maxLamports: 50_000 } }, ...(quote.to === "USDC" ? { feeAccount: FEE_USDC_ACCOUNT } : {}) }) });
   if (!res.ok) throw new Error("No se pudo preparar el cambio. Inténtalo de nuevo.");
   const j = await res.json() as { computeBudgetInstructions: JupIx[]; setupInstructions: JupIx[]; swapInstruction: JupIx; cleanupInstruction?: JupIx; addressLookupTableAddresses: string[] };
   const ix = (i: JupIx) => new TransactionInstruction({ programId: new PublicKey(i.programId), keys: i.accounts.map((a) => ({ pubkey: new PublicKey(a.pubkey), isSigner: a.isSigner, isWritable: a.isWritable })), data: Uint8Array.from(atob(i.data), (c) => c.charCodeAt(0)) as Buffer });
   const owner = new PublicKey(wallet);
   const instructions = [...j.computeBudgetInstructions.map(ix), ...j.setupInstructions.map(ix)];
-  if (quote.asset === "USDC") {
+  if (quote.from === "USDC") {
     const spl = await import("@solana/spl-token");
     const mint = new PublicKey(USDC_MINT);
     instructions.push(spl.createTransferCheckedInstruction(spl.getAssociatedTokenAddressSync(mint, owner), mint, new PublicKey(FEE_USDC_ACCOUNT), owner, BigInt(quote.feeUsdc), 6));

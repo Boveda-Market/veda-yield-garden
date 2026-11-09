@@ -7,7 +7,7 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { buildSwap, buildTransfer, spendable, toBaseUnits, type SwapQuote, type WalletAsset } from "@/lib/wallet-actions";
+import { buildSwap, buildTransfer, readTokenBalance, spendable, SWAP_TOKENS, toBaseUnits, type SwapQuote, type WalletAsset } from "@/lib/wallet-actions";
 import { WalletSwap } from "@/components/wallet-swap";
 import { solanaAddressSchema } from "@/lib/solana-data";
 import { decimalToUnits } from "@/lib/onboarding";
@@ -28,6 +28,11 @@ export function WalletPanel() {
     if (!r.success) throw new Error(r.error);
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   } });
+  const extraTokens = SWAP_TOKENS.filter((x) => x.symbol !== "SOL" && x.symbol !== "USDC");
+  const extra = useQuery({ queryKey: ["my-wallet-tokens", address], enabled: !!address && extraTokens.length > 0, queryFn: async () =>
+    Object.fromEntries(await Promise.all(extraTokens.map(async (x) => [x.symbol, await readTokenBalance(address!, x.mint)] as const))) as Record<string, bigint> });
+  const swapBalances: Record<string, bigint | undefined> = { SOL: balances.data?.sol, USDC: balances.data?.usdc, ...(extra.data ?? {}) };
+  const [swapFrom, setSwapFrom] = useState({ key: 0, from: "USDC" });
   const [tab, setTab] = useState<"send" | "swap">("send");
   const [asset, setAsset] = useState<WalletAsset>("USDC");
   const [to, setTo] = useState("");
@@ -45,7 +50,7 @@ export function WalletPanel() {
   const amountError = amount && (!units ? t("Monto no válido") : units > max ? t("Saldo insuficiente") : null);
   const toError = tab === "send" && to && !solanaAddressSchema.safeParse(to).success ? t("Dirección no válida") : null;
   const reset = () => { setAmount(""); setTo(""); };
-  const done = (sig: string) => { setMessage(t("Listo. Operación enviada: {sig}", { sig: `${sig.slice(0, 8)}…` })); reset(); setTimeout(() => void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] }), 4000); };
+  const done = (sig: string) => { setMessage(t("Listo. Operación enviada: {sig}", { sig: `${sig.slice(0, 8)}…` })); reset(); setTimeout(() => { void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] }); void queryClient.invalidateQueries({ queryKey: ["my-wallet-tokens", address] }); }, 4000); };
   const fail = (e: unknown) => setMessage(e instanceof Error ? e.message : t("No se pudo completar la operación."));
 
   async function send() {
@@ -57,11 +62,11 @@ export function WalletPanel() {
   async function swap(quote: SwapQuote) {
     if (!address) return;
     setBusy(true); setMessage(null);
-    try { done(await session.signAndSend(await buildSwap(address, quote))); } catch (e) { fail(e); throw e; } finally { setBusy(false); }
+    try { done(await session.signAndSend(await buildSwap(address, quote))); setMessage(null); } catch (e) { fail(e); throw e; } finally { setBusy(false); }
   }
 
   return <div className="mx-auto max-w-2xl space-y-5">
-    <StartGuide onSwap={() => { setTab("swap"); setAsset("SOL"); }} />
+    <StartGuide onSwap={() => { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from: "SOL" })); }} />
     <section className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-center justify-between"><h2 className="font-display text-2xl">{t("Mi wallet")}</h2><Button variant="ghost" size="sm" onClick={() => void balances.refetch()} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
       <p className="mt-1 text-sm text-muted-foreground">{t("Tu dirección para recibir fondos")}</p>
@@ -69,6 +74,7 @@ export function WalletPanel() {
       <div className="mt-4 grid grid-cols-2 gap-3">
         <div className="rounded-xl bg-muted p-3"><p className="text-xs text-muted-foreground">USDC</p><p className="font-display text-xl">{balances.data ? fmtUnits(balances.data.usdc, 6, 2) : "—"}</p></div>
         <div className="rounded-xl bg-muted p-3"><p className="text-xs text-muted-foreground">{t("SOL · para costos de red")}</p><p className="font-display text-xl">{balances.data ? fmtUnits(balances.data.sol, 9) : "—"}</p></div>
+        {extraTokens.map((x) => <div key={x.symbol} className="rounded-xl bg-muted p-3"><p className="text-xs text-muted-foreground">{x.symbol}</p><p className="font-display text-xl">{extra.data?.[x.symbol] !== undefined ? fmtUnits(extra.data[x.symbol]!, x.decimals) : "—"}</p></div>)}
       </div>
       <BuyUsdc className="mt-4" />
       {balances.error && <p className="mt-2 text-sm text-destructive">{(balances.error as Error).message}</p>}
@@ -76,7 +82,7 @@ export function WalletPanel() {
 
     <section className="rounded-2xl border border-border bg-card p-5">
       <div className="flex gap-2"><Button disabled={busy} variant={tab === "send" ? "secondary" : "ghost"} onClick={() => setTab("send")}><Send size={16} />{t("Enviar")}</Button><Button disabled={busy} variant={tab === "swap" ? "secondary" : "ghost"} onClick={() => setTab("swap")}><ArrowLeftRight size={16} />{t("Cambiar")}</Button></div>
-      {tab === "swap" ? <WalletSwap balance={balance} asset={asset} onAssetChange={setAsset} busy={busy} onConfirm={swap} /> : <div className="mt-4 space-y-3">
+      {tab === "swap" ? <WalletSwap key={swapFrom.key} balances={swapBalances} initialFrom={swapFrom.from} busy={busy} onConfirm={swap} /> : <div className="mt-4 space-y-3">
         <div className="flex gap-2">{(["USDC", "SOL"] as const).map((a) => <Button key={a} size="sm" variant={asset === a ? "default" : "outline"} onClick={() => setAsset(a)}>{a}</Button>)}</div>
         {tab === "send" && <div><Input placeholder={t("Dirección de destino")} value={to} onChange={(e) => setTo(e.target.value.trim())} />{toError && <p className="mt-1 text-sm text-destructive">{toError}</p>}</div>}
         <div><div className="flex gap-2"><Input inputMode="decimal" placeholder={t("Monto")} value={amount} onChange={(e) => setAmount(e.target.value)} /><Button variant="outline" size="sm" className="h-10" onClick={() => setAmount((Number(max) / 10 ** (asset === "SOL" ? 9 : 6)).toString())}>{t("Máx")}</Button></div>{amountError && <p className="mt-1 text-sm text-destructive">{amountError}</p>}{asset === "SOL" && <p className="mt-1 text-xs text-muted-foreground">{t("Guardamos 0.01 SOL para pagar los costos de red.")}</p>}</div>
