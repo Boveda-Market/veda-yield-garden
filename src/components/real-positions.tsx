@@ -39,6 +39,10 @@ export function RealPositions({ positions, onAction }: { positions: ChainPositio
         <p className="mt-4 text-xs text-muted-foreground">{t("Valor estimado")}</p>
         <p className="font-display text-3xl font-semibold">{value === null ? t("No disponible") : `≈ ${formatUsd(value)}`}</p>
         <p className="mt-1 break-all text-xs text-muted-foreground">{p.tokenAmount === null ? "" : `${p.tokenAmount} ${p.symbol} + ${p.usdcAmount} USDC`}</p>
+        {apr !== null && !p.locked && <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+          <div className="rounded-md border border-border bg-muted/40 p-2"><p className="text-muted-foreground">{t("Tasa estimada (24h)")}</p><p className="mt-0.5 font-display text-base font-semibold tabular-nums text-primary">{apr.toFixed(2)}% APR</p><p className="tabular-nums text-muted-foreground">≈ +{(apr / 365).toFixed(3)}% / {t("día")}</p></div>
+          <div className="rounded-md border border-border bg-muted/40 p-2"><p className="text-muted-foreground">{t("Estimado próximas 24h")}</p><p className="mt-0.5 font-display text-base font-semibold tabular-nums text-primary">{value === null ? "—" : `≈ +$${(value * apr / 36500).toFixed(2)}`}</p><p className="text-muted-foreground">{t("con el ritmo reciente")}</p></div>
+        </div>}
         {fees !== null && <LiveEarnings base={fees} ratePerMs={p.locked ? 0 : earningRatePerMs(value, apr)} since={since} label={t("Ganancias por cosechar · estimado en vivo")} />}
         {p.locked && <p className="mt-2 text-xs text-muted-foreground">{t("Incluye liquidez bloqueada; no toda la posición es retirable.")}</p>}
         <div className="mt-4 flex flex-wrap gap-2"><Button variant="secondary" onClick={() => onAction(p, "harvest")}><Sprout size={16} />{t("Cosechar Ganancias")}</Button><Button variant="secondary" onClick={() => onAction(p, "compound")}><Repeat size={16} />{t("Reinvertir ganancias")}</Button><Button variant="outline" onClick={() => onAction(p, "exit")}><ArrowDownToLine size={16} />{t("Cerrar y Liquidar")}</Button></div>

@@ -184,4 +184,7 @@ export const extra: Record<string, string> = {
   "Sin plazos de permanencia": "No lock-in period",
   "Tú tienes el control": "You're in control",
   "Prueba gratis con 1,000 créditos": "Try free with 1,000 credits",
+  "Tasa estimada (24h)": "Estimated rate (24h)",
+  "Estimado próximas 24h": "Estimated next 24h",
+  "con el ritmo reciente": "at the recent pace",
 };
