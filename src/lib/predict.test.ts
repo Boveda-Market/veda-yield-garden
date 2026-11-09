@@ -8,8 +8,8 @@ describe("live prediction rules", () => {
     expect(validPredictAmount(5_000_000n)).toBe(true);
   });
   it("only exact Forecast up/down market ids", () => {
-    expect(MARKET_ID_RE.test("BISON-zJfDSnxoUj6aLZcvq15Q9SEWjBLVFwbh2wWNAT3A18f-UP")).toBe(true);
-    expect(MARKET_ID_RE.test("POLY-6274257")).toBe(false);
+    expect(MARKET_ID_RE.test("POLY-6274257")).toBe(true);
+    expect(MARKET_ID_RE.test("BISON-abc-UP")).toBe(false);
   });
   it("profit is contracts minus cost", () => expect(potentialProfit({ contractsMicro: "19000000", costMicro: "10000000" })).toBe(9_000_000n));
 });

@@ -141,7 +141,7 @@ export function MarketsPanel({ identity }: { identity: string }) {
       <div className="grid grid-cols-2 gap-1 rounded-2xl bg-secondary p-1" role="tablist" aria-label={t("Modo de mercados")}>
         {([["live", t("En vivo (USDC)")], ["practice", t("Práctica (créditos)")]] as const).map(([k, label]) => <button key={k} role="tab" aria-selected={mode === k} onClick={() => setMode(k)} className={`rounded-xl py-2.5 text-sm font-semibold transition ${mode === k ? "bg-card text-foreground shadow" : "text-muted-foreground"}`}>{label}</button>)}
       </div>
-      <section className="overflow-hidden rounded-2xl border border-border bg-card">
+      {live ? <PredictLive /> : <section className="overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex flex-wrap items-center justify-between gap-2 px-5 pt-5">
           <div className="flex items-center gap-2"><Zap className="text-primary" size={20} /><h1 className="font-display text-2xl font-bold">{t("Predicciones")}</h1><span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold">{live ? t("En vivo") : t("Práctica")}</span></div>
           {!live && <div className="text-right"><p className="text-xs text-muted-foreground">{t("Créditos de práctica")}</p><p className="font-display text-xl font-bold">{num(state.balance)}</p></div>}
@@ -192,7 +192,7 @@ export function MarketsPanel({ identity }: { identity: string }) {
           <p className="mt-1 text-[11px] text-muted-foreground">{t("Basado en los últimos movimientos del precio, no en apuestas de otros usuarios.")}</p>
         </div>
 
-        {live ? <div className="p-5"><PredictLive market={market} window={win} momentum={upShare} price={price ?? null} start={roundOpen ?? null} /></div> : <div className="space-y-4 p-5">
+        {live ? <div className="p-5">null</div> : <div className="space-y-4 p-5">
           <div>
             <label htmlFor="stake" className="text-sm font-semibold">{t("Tu predicción (créditos)")}</label>
             <input id="stake" inputMode="decimal" value={stake} onChange={(e) => setStake(e.target.value.replace(/[^0-9.]/g, ""))} className="mt-2 h-12 w-full rounded-xl border border-input bg-background px-4 font-display text-xl font-bold" />
@@ -207,7 +207,7 @@ export function MarketsPanel({ identity }: { identity: string }) {
           </div>
           <p className="text-xs text-muted-foreground">{t("Tu precio queda fijado al entrar. Al terminar la ronda, si el precio está a tu favor, ganas.")}</p>
         </div>}
-      </section>
+      </section>}
 
       {!live && <>
       {state.open.length > 0 && <section aria-label={t("Predicciones activas")} className="space-y-3">
