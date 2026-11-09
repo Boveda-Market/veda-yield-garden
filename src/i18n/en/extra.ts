@@ -281,4 +281,10 @@ export const extra: Record<string, string> = {
   "Enlace copiado": "Link copied",
   "Compartir con amigos": "Share with friends",
   "Incluye tu enlace de invitación si ya eres afiliado.": "Includes your invite link if you're already an affiliate.",
+  "Máx": "Max",
+  "Saldo insuficiente: tienes {v} USDC.": "Insufficient balance: you have {v} USDC.",
+  "Depositar o cambiar a USDC": "Deposit or swap to USDC",
+  "Si aciertas recibes aprox. el doble; verás la cifra exacta antes de firmar.": "If you're right you get roughly double; you'll see the exact amount before signing.",
+  "Va a favor": "Winning",
+  "Va en contra": "Losing",
 };

@@ -7,6 +7,9 @@ import { useT } from "@/lib/i18n";
 import { PREDICT_MAX_USDC, PREDICT_MIN_USDC, potentialProfit, type LiveRound, type PredictPosition, type PredictQuote, type PredictSide, type PredictWindow } from "@/lib/predict";
 import { executePredict, getLiveRounds, getPredictPositions, preparePredictBuy, preparePredictSell } from "@/lib/predict.functions";
 import { toBaseUnits } from "@/lib/wallet-actions";
+import { getRealWallet } from "@/lib/solana.functions";
+import { decimalToUnits } from "@/lib/onboarding";
+import { Link } from "@tanstack/react-router";
 
 const usdc = (micro: string | bigint | null) => micro === null ? "—" : (Number(micro) / 1e6).toFixed(2);
 const fromB64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
@@ -40,6 +43,12 @@ export function PredictLive({ market, window, momentum = 50 }: { market: string;
     if (r.success) setPositions(r.positions);
   }, [wallet]);
   useEffect(() => { void refresh(); const id = setInterval(refresh, 10_000); return () => clearInterval(id); }, [refresh]);
+  const [balance, setBalance] = useState<bigint | null>(null);
+  const loadBalance = useCallback(async () => {
+    if (!wallet) return;
+    try { const r = await getRealWallet({ data: { wallet } }); if (r.success) setBalance(decimalToUnits(r.data.usdc, 6) ?? 0n); } catch { /* keep last */ }
+  }, [wallet]);
+  useEffect(() => { void loadBalance(); const id = setInterval(loadBalance, 20_000); return () => clearInterval(id); }, [loadBalance]);
 
   const round = rounds.find((r) => r.series === market.toLowerCase() && r.window === window && r.closeTime > now);
   useEffect(() => { setReview(null); }, [round?.eventId]);
@@ -52,7 +61,11 @@ export function PredictLive({ market, window, momentum = 50 }: { market: string;
   );
 
   const units = toBaseUnits(amount, "USDC");
-  const valid = !!units && units >= BigInt(PREDICT_MIN_USDC * 1e6) && units <= BigInt(PREDICT_MAX_USDC * 1e6);
+  const inRange = !!units && units >= BigInt(PREDICT_MIN_USDC * 1e6) && units <= BigInt(PREDICT_MAX_USDC * 1e6);
+  const short = !!units && balance !== null && units > balance;
+  const valid = inRange && !short;
+  const maxMicro = balance === null ? null : (balance < BigInt(PREDICT_MAX_USDC * 1e6) ? balance : BigInt(PREDICT_MAX_USDC * 1e6));
+  const progress = round ? Math.min(100, Math.max(0, ((now - round.openTime) / Math.max(1, round.closeTime - round.openTime)) * 100)) : 0;
 
   const sign = async (tx: string, context: string) => {
     if (!session.signOnly) throw new Error(t("Tu wallet no admite esta operación."));
@@ -77,7 +90,7 @@ export function PredictLive({ market, window, momentum = 50 }: { market: string;
       const sig = await sign(review.tx, review.context);
       setReview(null);
       setMsg({ ok: true, text: t("Predicción confirmada. Al cerrar la ronda, si aciertas, el pago llega solo a tu wallet."), sig });
-      setTimeout(refresh, 3000);
+      setTimeout(() => { void refresh(); void loadBalance(); }, 3000);
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };
   const sell = async (p: PredictPosition) => {
@@ -89,7 +102,7 @@ export function PredictLive({ market, window, momentum = 50 }: { market: string;
       const profit = p.valueMicro ? BigInt(p.valueMicro) - BigInt(p.costMicro) : 0n;
       if (profit > 0n) setWin(usdc(profit));
       setMsg({ ok: true, text: t("Venta confirmada. El USDC está en tu wallet."), sig });
-      setTimeout(refresh, 3000);
+      setTimeout(() => { void refresh(); void loadBalance(); }, 3000);
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };
 
@@ -99,11 +112,14 @@ export function PredictLive({ market, window, momentum = 50 }: { market: string;
         : !round ? <p className="flex items-center gap-2 rounded-xl bg-secondary p-3 text-sm"><Clock size={16} />{t("No hay ronda en vivo para {m} en {w} ahora mismo. Hoy están disponibles Bitcoin 5 min y 15 min.", { m: market, w: window })}</p>
         : <>
           <div className="flex items-center justify-between rounded-xl bg-secondary p-3 text-sm"><span>{t("Ronda en vivo")}</span><strong className="font-display text-xl tabular-nums">{clock(round.closeTime - now)}</strong></div>
+          <div className="-mt-2 h-1.5 overflow-hidden rounded-full bg-secondary" aria-hidden><div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} /></div>
           <div>
-            <label htmlFor="predict-amount" className="text-sm font-semibold">{t("Tu predicción (USDC)")}</label>
+            <div className="flex items-center justify-between"><label htmlFor="predict-amount" className="text-sm font-semibold">{t("Tu predicción (USDC)")}</label><span className="text-xs text-muted-foreground">{t("Disponible")}: <strong className="text-foreground tabular-nums">{balance === null ? "…" : usdc(balance)} USDC</strong></span></div>
             <input id="predict-amount" inputMode="decimal" value={amount} onChange={(e) => { setAmount(e.target.value.replace(/[^0-9.]/g, "")); setReview(null); }} className="mt-2 h-12 w-full rounded-xl border border-input bg-background px-4 font-display text-xl font-bold" />
-            <div className="mt-2 grid grid-cols-4 gap-2">{[5, 10, 25, 50].map((v) => <Button key={v} type="button" variant="secondary" size="sm" onClick={() => { setAmount(String(v)); setReview(null); }}>{v}</Button>)}</div>
-            {!valid && <p className="mt-2 text-xs text-destructive">{t("Entre {min} y {max} USDC.", { min: PREDICT_MIN_USDC, max: PREDICT_MAX_USDC })}</p>}
+            <div className="mt-2 grid grid-cols-5 gap-2">{[5, 10, 25, 50].map((v) => <Button key={v} type="button" variant="secondary" size="sm" onClick={() => { setAmount(String(v)); setReview(null); }}>{v}</Button>)}<Button type="button" variant="outline" size="sm" disabled={!maxMicro || maxMicro <= 0n} onClick={() => { if (maxMicro) { setAmount((Math.floor(Number(maxMicro) / 1e4) / 100).toFixed(2)); setReview(null); } }}>{t("Máx")}</Button></div>
+            {!inRange && <p className="mt-2 text-xs text-destructive">{t("Entre {min} y {max} USDC.", { min: PREDICT_MIN_USDC, max: PREDICT_MAX_USDC })}</p>}
+            {short && <p className="mt-2 text-xs text-destructive">{t("Saldo insuficiente: tienes {v} USDC.", { v: usdc(balance) })} <Link to="/wallet" className="underline">{t("Depositar o cambiar a USDC")}</Link></p>}
+            {valid && <p className="mt-2 text-xs text-muted-foreground">{t("Si aciertas recibes aprox. el doble; verás la cifra exacta antes de firmar.")}</p>}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Button disabled={!valid || !!busy} onClick={() => prepare("up")} className={`h-20 flex-col rounded-2xl text-xl font-bold shadow-lg active:scale-95 ${momentum > 55 ? "ring-2 ring-primary ring-offset-2" : ""}`}>{busy === "up" ? <Loader2 className="animate-spin" /> : <span className="flex items-center gap-1"><ArrowUpRight size={26} />{t("Sube")}</span>}</Button>
@@ -129,7 +145,7 @@ export function PredictLive({ market, window, momentum = 50 }: { market: string;
           const pnl = p.pnlMicro ? BigInt(p.pnlMicro) : null;
           const open = p.status === "open";
           return <div key={p.pubkey} className="flex items-center justify-between gap-3 rounded-xl border border-border p-3 text-sm">
-            <div><p className="font-semibold">{t(p.side === "up" ? "Sube" : "Baja")} · {usdc(p.costMicro)} USDC</p><p className="text-xs text-muted-foreground">{t("Pago si aciertas")} {usdc(p.payoutMicro)} USDC{pnl !== null ? ` · ${pnl >= 0n ? "+" : ""}${usdc(pnl)}` : ""}{!open && p.result ? ` · ${t("Resultado")}: ${p.result}` : ""}</p></div>
+            <div><p className="font-semibold">{t(p.side === "up" ? "Sube" : "Baja")} · {usdc(p.costMicro)} USDC{open && pnl !== null && <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] ${pnl >= 0n ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{t(pnl >= 0n ? "Va a favor" : "Va en contra")}</span>}</p><p className="text-xs text-muted-foreground">{t("Pago si aciertas")} {usdc(p.payoutMicro)} USDC{pnl !== null ? ` · ${pnl >= 0n ? "+" : ""}${usdc(pnl)}` : ""}{!open && p.result ? ` · ${t("Resultado")}: ${p.result}` : ""}</p></div>
             {open && <Button size="sm" variant="outline" disabled={!!busy} onClick={() => sell(p)}>{busy === p.pubkey ? <Loader2 className="animate-spin" size={14} /> : t("Vender")}</Button>}
           </div>;
         })}
