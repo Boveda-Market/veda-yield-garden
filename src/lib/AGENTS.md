@@ -1,0 +1,1 @@
+- Compound adds harvested tokens to the same verified position: no swap/extra SOL wrap, capped by harvest, simulated.
