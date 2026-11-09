@@ -12,9 +12,9 @@ const W = 360, H = 140, PAD = 6;
 
 const fmt = (n: number) => n.toFixed(n >= 1000 ? 2 : 3).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 
-export function PriceChart({ market, price, reference, referenceLabel }: { market: MarketId; price?: number | undefined; reference?: number | undefined; referenceLabel?: string }) {
+export function PriceChart({ market, points, price, reference, referenceLabel }: { market: MarketId; points: number[]; price?: number | undefined; reference?: number | undefined; referenceLabel?: string }) {
   const t = useT();
-  const [style, setStyle] = useState<Style>("candles");
+  const [style, setStyle] = useState<Style>("line");
   const [zoom, setZoom] = useState<Zoom>("1m");
   const [hover, setHover] = useState<number | null>(null);
   const [hist, setHist] = useState<Candle[]>([]);
@@ -43,13 +43,54 @@ export function PriceChart({ market, price, reference, referenceLabel }: { marke
   const controls = (
     <div className="flex items-center justify-between px-5 pb-2">
       <div className="flex rounded-full bg-secondary p-0.5" role="tablist" aria-label={t("Estilo de gráfica")}>
-        {([["candles", t("Velas")], ["line", t("Línea")]] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={style === k} onClick={() => setStyle(k)} className={pill(style === k)}>{l}</button>)}
+        {([["line", t("Línea")], ["candles", t("Velas")]] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={style === k} onClick={() => setStyle(k)} className={pill(style === k)}>{l}</button>)}
       </div>
       <div className="flex rounded-full bg-secondary p-0.5" role="tablist" aria-label={t("Zoom de tiempo")}>
         {ZOOMS.map((z) => <button key={z.id} role="tab" aria-selected={zoom === z.id} onClick={() => setZoom(z.id)} className={pill(zoom === z.id)}>{z.id}</button>)}
       </div>
     </div>
   );
+
+  if (style === "line") {
+    const pts = points.slice(-Math.round((sec * 1000) / TICK_MS));
+    if (pts.length < 2) return <>{controls}<div className="h-36" /></>;
+    const all = reference ? [...pts, reference] : pts;
+    const min = Math.min(...all), max = Math.max(...all), span = max - min || 1;
+    const y = (v: number) => PAD + (1 - (v - min) / span) * (H - PAD * 2);
+    const px = (i: number) => (i / (pts.length - 1)) * W;
+    const d = pts.map((v, i) => `${px(i)},${y(v)}`).join(" ");
+    const lastP = pts[pts.length - 1]!;
+    const upL = reference ? lastP >= reference : lastP >= pts[0]!;
+    const refY = reference ? y(reference) : null;
+    const pickL = (e: React.PointerEvent<HTMLDivElement>) => {
+      const r = e.currentTarget.getBoundingClientRect();
+      setHover(Math.round(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * (pts.length - 1)));
+    };
+    const hv = hover !== null ? pts[Math.min(hover, pts.length - 1)] : undefined;
+    const hx = hover !== null ? (Math.min(hover, pts.length - 1) / (pts.length - 1)) * 100 : 0;
+    return (
+      <>
+        {controls}
+        <div className="relative touch-none" onPointerMove={pickL} onPointerDown={pickL} onPointerLeave={() => setHover(null)}>
+          <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className={`h-36 w-full ${upL ? "text-primary" : "text-destructive"}`} aria-hidden>
+            {refY !== null && <>
+              <rect x="0" y="0" width={W} height={refY} className="fill-primary" opacity="0.05" />
+              <rect x="0" y={refY} width={W} height={H - refY} className="fill-destructive" opacity="0.05" />
+            </>}
+            <defs><linearGradient id="pc-grad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="currentColor" stopOpacity="0.35" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient></defs>
+            <polygon points={`0,${H} ${d} ${W},${H}`} fill="url(#pc-grad)" />
+            <polyline points={d} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+            {refY !== null && <line x1="0" x2={W} y1={refY} y2={refY} className="text-muted-foreground" stroke="currentColor" strokeDasharray="4 3" strokeWidth="1" vectorEffect="non-scaling-stroke" />}
+          </svg>
+          {reference && refY !== null && <div className="pointer-events-none absolute left-1 -translate-y-1/2 rounded bg-secondary px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-secondary-foreground" style={{ top: `${(refY / H) * 100}%` }}>{referenceLabel} ${fmt(reference)}</div>}
+          {hv !== undefined && <>
+            <div className="pointer-events-none absolute inset-y-0 w-px bg-foreground/40" style={{ left: `${hx}%` }} />
+            <div className="pointer-events-none absolute -top-2 rounded-md bg-foreground px-2 py-0.5 text-xs font-semibold tabular-nums text-background" style={{ left: `clamp(0px, calc(${hx}% - 40px), calc(100% - 90px))` }}>${fmt(hv)}</div>
+          </>}
+        </div>
+      </>
+    );
+  }
 
   if (candles.length < 2) return <>{controls}<div className="flex h-36 items-center justify-center text-xs text-muted-foreground">{t("Cargando gráfica…")}</div></>;
 
