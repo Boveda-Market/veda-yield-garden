@@ -12,7 +12,7 @@ export function ActionSuccess({ title, body, signature, onClose }: { title: stri
     <p className="text-muted-foreground">{body}</p>
     <Button asChild className="w-full"><Link to="/portfolio" onClick={onClose}>{t("Ver en mi Portafolio")}</Link></Button>
     <Button variant="ghost" className="w-full" onClick={onClose}>{t("Listo")}</Button>
-    {signature && <a className="text-xs underline" href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("Ver comprobante")}</a>}
+    {signature && <a className="text-xs underline" href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("Ver comprobante")}</a>}
   </section>;
 }
 

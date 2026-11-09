@@ -58,10 +58,10 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
       for (let attempt = 0; attempt < 60; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó la transacción atómica: no se aplicaron el retiro ni la comisión; puede cobrarse el coste de red.")); return; }
-        if (status.status !== "pending") { setFinished(true); setMessage(t("Liquidación confirmada en la red. Consulta los importes finales y la renta devuelta en Solscan.")); void reportAffiliate(sig, "exit"); await queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", address] }); return; }
+        if (status.status !== "pending") { setFinished(true); setMessage(t("Liquidación confirmada en la red. Consulta los importes finales y la renta devuelta en Helius.")); void reportAffiliate(sig, "exit"); await queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", address] }); return; }
         await new Promise((resolve) => setTimeout(resolve, attempt < 10 ? 800 : 2_000));
       }
-      setMessage(t("Confirmación pendiente. Revisa Solscan antes de reintentar; no envíes una segunda liquidación."));
+      setMessage(t("Confirmación pendiente. Revisa Helius antes de reintentar; no envíes una segunda liquidación."));
     } catch { setMessage(t("No se pudo preparar el retiro. No se pidió ninguna firma.")); }
     finally { setPending(false); setStep(""); }
   }
@@ -97,7 +97,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
     {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : t("Firmar liquidación a USDC")}</Button><p className="text-center text-xs text-muted-foreground">{t("Al firmar cierras la posición; no se puede revertir.")}</p></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta liquidación. No hay movimientos hasta que firmes.")}</p>}
     {message && <p role="alert" className="text-sm">{message}</p>}
-    {signature && <a href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer" className="break-all text-xs underline">{t("Ver comprobante")}</a>}
+    {signature && <a href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer" className="break-all text-xs underline">{t("Ver comprobante")}</a>}
     </>}
   </DialogContent></Dialog>;
 }

@@ -56,7 +56,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose }: { wallet: 
         if (status.status !== "pending") { setFinished(true); setMessage(t("Cosecha confirmada en la red. Tu posición sigue abierta.")); void reportAffiliate(sig, "harvest"); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", wallet] }); return; }
         await new Promise((resolve) => setTimeout(resolve, 2_000));
       }
-      setMessage(t("Confirmación pendiente. Revisa Solscan antes de reintentar."));
+      setMessage(t("Confirmación pendiente. Revisa Helius antes de reintentar."));
     } catch { setMessage(t("No se pudo preparar la cosecha. No se pidió ninguna firma.")); }
     finally { setPending(false); setStep(""); }
   }
@@ -81,7 +81,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose }: { wallet: 
     {canSign && result?.success && !signature && <><label className="flex items-start gap-3 text-xs leading-5 text-muted-foreground"><Checkbox checked={accepted} disabled={pending} onCheckedChange={(value) => setAccepted(value === true)} aria-label={t("Acepto la cosecha real")} /><span>{t("Revisé el resumen. La comisión del 1% se descuenta de los USDC; el costo de red se paga en SOL.")}</span></label><Button size="lg" disabled={!accepted || pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : t("Firmar cosecha")}</Button></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta cosecha. No hay movimientos hasta que firmes.")}</p>}
     {message && <p role="alert" className="text-sm">{message}</p>}
-    {signature && <a href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer" className="break-all text-xs underline">{t("Ver comprobante")}</a>}
+    {signature && <a href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer" className="break-all text-xs underline">{t("Ver comprobante")}</a>}
     </>}
   </DialogContent></Dialog>;
 }

@@ -9,7 +9,7 @@ import { createSolanaRpc, createSolanaRpcSubscriptions, type Base64EncodedWireTr
 import { useQueryClient } from "@tanstack/react-query";
 
 // Privy-hosted mainnet RPC accepts browser requests (the public endpoint returns 403); the private Helius key stays server-only.
-const solanaRpcs = { "solana:mainnet": { rpc: createSolanaRpc("https://solana-mainnet.rpc.privy.systems?privyAppId=cmw6ftcf900ge0hl0jyw3rc75"), rpcSubscriptions: createSolanaRpcSubscriptions("wss://solana-mainnet.rpc.privy.systems?privyAppId=cmw6ftcf900ge0hl0jyw3rc75"), blockExplorerUrl: "https://solscan.io" } };
+const solanaRpcs = { "solana:mainnet": { rpc: createSolanaRpc("https://solana-mainnet.rpc.privy.systems?privyAppId=cmw6ftcf900ge0hl0jyw3rc75"), rpcSubscriptions: createSolanaRpcSubscriptions("wss://solana-mainnet.rpc.privy.systems?privyAppId=cmw6ftcf900ge0hl0jyw3rc75"), blockExplorerUrl: "https://orbmarkets.io" } };
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
 
 const solanaConnectors = toSolanaWalletConnectors({ shouldAutoConnect: true });

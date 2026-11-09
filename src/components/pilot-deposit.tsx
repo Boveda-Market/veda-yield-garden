@@ -51,7 +51,7 @@ export function PilotDeposit({ vaultId, amount, onBusyChange, onClose }: { vault
         if (next !== "pending") { setStep("done"); return; }
         await new Promise((resolve) => setTimeout(resolve, 2_000));
       }
-      setStep("error"); setMessage(t("La confirmación tarda más de lo habitual. Revisa el estado en Solscan antes de reintentar."));
+      setStep("error"); setMessage(t("La confirmación tarda más de lo habitual. Revisa el estado en Helius antes de reintentar."));
     } catch { setStep("error"); setMessage(t("No se pudo preparar el depósito. No se pidió ninguna firma.")); }
   }
 
@@ -62,7 +62,7 @@ export function PilotDeposit({ vaultId, amount, onBusyChange, onClose }: { vault
     <p role="status" className="sr-only">{t("Depósito confirmado en la red (")}{status === "finalized" ? "finalizado" : "confirmado"}).</p>
     <p className="text-muted-foreground">{t("Tu posición ya está generando comisiones. Puedes cosecharlas cuando quieras desde tu Portafolio.")}</p>
     <Button asChild className="w-full"><Link to="/portfolio" onClick={onClose}>{t("Ver en mi Portafolio")}</Link></Button>
-    {signature && <a className="text-xs underline" href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("Ver comprobante")}</a>}
+    {signature && <a className="text-xs underline" href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("Ver comprobante")}</a>}
   </section>;
   return <section aria-labelledby="pilot-title" className="grid gap-3 text-sm">
     <h3 id="pilot-title" className="sr-only">{t("Confirmar depósito")}</h3>
@@ -72,6 +72,6 @@ export function PilotDeposit({ vaultId, amount, onBusyChange, onClose }: { vault
       {!busy && <p className="text-center text-xs text-muted-foreground">{t("Tu wallet te pedirá aprobar la operación.")}</p>}
     </>}
     {message && <p role="alert" className="text-destructive">{message}</p>}
-    {signature && <p className="break-all text-xs">{t("Transacción:")}{" "}<a className="underline" href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("ver en Solscan")}</a></p>}
+    {signature && <p className="break-all text-xs">{t("Transacción:")}{" "}<a className="underline" href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("ver en Helius")}</a></p>}
   </section>;
 }
