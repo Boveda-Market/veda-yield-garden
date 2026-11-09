@@ -10,7 +10,7 @@ const questions = [
   { question: "¿Puedo personalizar mi cuenta?", answer: "Sí. En Mi cuenta puedes elegir un nombre y un avatar. Son opcionales y no cambian tu wallet." },
   { question: "¿Cuál es la diferencia entre Real y Prueba?", answer: "Real usa dinero de tu wallet. Prueba usa 1,000 créditos ficticios y no mueve dinero. Los invitados solo tienen acceso a Prueba." },
   { question: "¿Puedo convertir los créditos en dinero?", answer: "No. Los créditos y las ganancias de Prueba son ficticios. No se pueden retirar ni pasar a Real." },
-  { question: "¿Cómo cambio entre Real y Prueba?", answer: "Inicia sesión y elige el modo en la parte superior. Tus créditos de Prueba y tu dinero real siempre quedan separados." },
+  { question: "¿Cómo pruebo BÓVEDA sin cuenta?", answer: "Desde la página de inicio, toca «Probar como invitado». Usarás 1,000 créditos ficticios que nunca se mezclan con tu cuenta." },
   { question: "¿Cómo inicio sesión?", answer: "Puedes entrar con email, Google o una wallet compatible, como Phantom o Jupiter Wallet. Si entras con email o Google y no tienes wallet, Privy te crea una integrada." },
   { question: "¿Qué hago si no puedo conectar mi wallet?", answer: "Comprueba que esté instalada y desbloqueada. Si estás en la vista previa, prueba abrir la app en otra pestaña. Nunca compartas tus claves ni tu frase de recuperación." },
   { question: "¿Cómo compro USDC?", answer: "Pulsa Comprar USDC en Real o en Mi cuenta. Verás las opciones disponibles y sus costes antes de comprar. La disponibilidad depende del proveedor y de tu país." },
