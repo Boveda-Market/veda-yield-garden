@@ -17,7 +17,7 @@ export function ActionSuccess({ title, body, signature, onClose }: { title: stri
 }
 
 /** Big highlighted "you receive" card. */
-export function ReceiveCard({ label, amount, unit, sub }: { label: string; amount: string; unit: string; sub?: string }) {
+export function ReceiveCard({ label, amount, unit, sub }: { label: string; amount: string; unit: string; sub?: string | undefined }) {
   return <div className="rounded-xl bg-muted p-4">
     <p className="text-xs text-muted-foreground">{label}</p>
     <p className="font-display text-3xl font-bold text-primary">{amount} <span className="text-base font-semibold text-foreground">{unit}</span></p>
