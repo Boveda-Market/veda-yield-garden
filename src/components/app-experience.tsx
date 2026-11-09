@@ -17,6 +17,7 @@ import { AccountSettings } from "@/components/account-settings";
 import { AffiliatePanel } from "./affiliate-panel";
 import { WalletPanel } from "./wallet-panel";
 import { MarketsPanel } from "./markets-panel";
+import { BottomNav, ProfileMenu } from "./app-nav";
 import { ActivityView } from "@/components/activity-view";
 import { guestDemoKey, readTrialActivity, trialActivityKey, trialHarvestSummary, type TrialActivity } from "@/lib/trial-activity";
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
@@ -121,19 +122,14 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground"><VaultIcon size={18} /></span>
           BÓVEDA
         </Link>
-        {user && !guest && (
-          <Button variant="secondary" onClick={() => void (async () => { await session.logout(); await navigate({ to: "/", replace: true }); })()} className="min-w-0 max-w-[65%]" aria-label={t("Cerrar sesión")}>
-            <Wallet size={14} /><span className="truncate">{user}</span><span className="shrink-0">{t("· Cerrar sesión")}</span><LogOut size={14} />
-          </Button>
-        )}
+        {user && <ProfileMenu user={user} guest={guest} onSelect={(v) => { if (guest) setGuestView(v as typeof guestView); }} onLogout={() => void (async () => { await session.logout(); await navigate({ to: "/", replace: true }); })()} />}
       </header>
 
-      <main className="mx-auto max-w-5xl px-5 pb-16">
-        <Button asChild variant="ghost" size="sm" className="mb-4"><Link to="/"><Home size={16} />{t("Volver al inicio")}</Link></Button>
+      <main className="mx-auto max-w-5xl px-5 pb-28">
+        {guest && <p className="mb-4 text-xs text-muted-foreground"><strong className="text-foreground">{t("Invitado · Prueba")}</strong> {t("· Sin dinero real")}</p>}
         {session.error && <p role="alert" className="mb-4 text-sm text-destructive">{t(session.error)}</p>}
-        {guest ? <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-y border-border py-4"><p className="text-sm"><strong>{t("Invitado · Prueba")}</strong> {t("· Sin dinero real")}</p><Button asChild variant="outline" size="sm"><Link to="/">{t("Crear cuenta o entrar")}</Link></Button></div> : null}
+
         {!guest && user && (activeView === "portfolio" || activeView === "vaults") && <div className="mb-4 flex justify-end"><OfframpButton trial={mode === "trial"} wallet={session.walletAddress} /></div>}
-        <nav aria-label={t("Secciones de BÓVEDA")} className="mb-6 flex flex-wrap gap-2 border-b border-border pb-4">{guest ? <>{[["vaults", t("Bóvedas")], ["portfolio", t("Portafolio")], ["markets", t("Mercados")], ["invite", t("Invita y gana")], ["account", t("Mi cuenta")]].map(([key, label]) => <Button key={key} variant={activeView === key ? "secondary" : "ghost"} onClick={() => setGuestView(key as "vaults" | "portfolio" | "activity" | "invite" | "account" | "markets")}>{t(label ?? "")}</Button>)}<Button asChild variant="ghost"><Link to="/faq">FAQ</Link></Button></> : <><Button asChild variant={view === "vaults" ? "secondary" : "ghost"}><Link to="/app"><LayoutDashboard size={16} />{t("Bóvedas")}</Link></Button><Button asChild variant={view === "portfolio" ? "secondary" : "ghost"}><Link to="/portfolio"><PieChart size={16} />{t("Portafolio")}</Link></Button><Button asChild variant={view === "markets" ? "secondary" : "ghost"}><Link to="/mercados"><Zap size={16} />{t("Mercados")}</Link></Button><Button asChild variant={view === "wallet" ? "secondary" : "ghost"}><Link to="/wallet"><Wallet size={16} />{t("Mi wallet")}</Link></Button><Button asChild variant={view === "invite" ? "secondary" : "ghost"}><Link to="/invita"><Gift size={16} />{t("Invita y gana")}</Link></Button><Button asChild variant={view === "account" ? "secondary" : "ghost"}><Link to="/cuenta"><UserRound size={16} />{t("Mi cuenta")}</Link></Button></>}</nav>
         {activeView === "markets" ? (identity ? <MarketsPanel identity={identity} /> : null) : activeView === "wallet" ? <><WalletPanel /><div className="mt-10 border-t border-border"><ActivityView trial={false} wallet={session.walletAddress} rows={[]} heading={t("Historial de transacciones")} /></div></> : activeView === "invite" ? <div className="mx-auto max-w-3xl"><AffiliatePanel /></div> : activeView === "account" ? <AccountSettings /> : activeView === "activity" ? <ActivityView trial={mode === "trial"} wallet={session.walletAddress} rows={activities} /> : mode === "real" && !guest ? <RealOverview portfolioOnly={activeView === "portfolio"} walletAddress={session.walletAddress} onDetails={setDetailsFor} /> : user ? (
           <>
             <section aria-label={t("Estado del modo Prueba")} className="border-y border-border py-8">
@@ -168,7 +164,8 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
 
       </main>
 
-      <footer className="border-t border-border">
+      <BottomNav active={activeView} guest={guest} onSelect={(v) => setGuestView(v as typeof guestView)} />
+      <footer className="border-t border-border pb-20">
         <div className="mx-auto max-w-5xl px-5 py-8 text-xs leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">© {new Date().getFullYear()} Boveda Technologies LLC</p>
           <p className="mt-2">{t("BÓVEDA te permite usar bóvedas con tu wallet o practicar sin dinero. En Real puedes depositar entre 1 y 10,000 USDC en SOL y MET. Puedes cosechar o liquidar tus posiciones compatibles de SOL y MET con tu wallet. La liquidez bloqueada no se puede liquidar y SPCX aún no admite operaciones. Prueba usa 1,000 créditos ficticios y permite entrar como invitado.")}</p>
@@ -181,7 +178,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
       {mode === "trial" && depositFor && <DepositSheet vault={depositFor} max={wallet} onClose={() => setDepositFor(null)} onConfirm={deposit} />}
       {detailsFor && <PoolDetails key={detailsFor.id} vault={detailsFor} onClose={() => setDetailsFor(null)} />}
       {mode === "trial" && review && <WithdrawalReview key={`${review.kind}-${review.position.id}`} kind={review.kind} amount={review.amount} onClose={() => setReview(null)} onConfirm={confirmWithdrawal} />}
-      {toast && <div role="status" className="fixed bottom-6 left-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg">{toast}</div>}
+      {toast && <div role="status" className="fixed bottom-24 left-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg">{toast}</div>}
     </div>
   );
 }

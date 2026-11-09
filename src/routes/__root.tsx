@@ -8,7 +8,10 @@ import {
   HeadContent,
   Scripts,
   type ErrorComponentProps,
+  useRouterState,
 } from "@tanstack/react-router";
+
+const APP_PATHS = ["/app", "/portfolio", "/mercados", "/wallet", "/invita", "/cuenta", "/actividad", "/prueba"];
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
@@ -125,6 +128,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => {
     const code = normalizeCode(new URLSearchParams(window.location.search).get("ref"));
     if (code) localStorage.setItem(REF_STORAGE_KEY, code);
@@ -135,7 +139,7 @@ function RootComponent() {
       <LanguageProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
-        <LanguageMenu className="fixed bottom-4 right-4 z-50 shadow-lg" />
+        {!APP_PATHS.includes(pathname) && <LanguageMenu className="fixed bottom-4 right-4 z-50 shadow-lg" />}
       </LanguageProvider>
     </QueryClientProvider>
   );

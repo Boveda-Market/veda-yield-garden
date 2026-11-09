@@ -1,0 +1,64 @@
+import { Link } from "@tanstack/react-router";
+import { LayoutDashboard, PieChart, Zap, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, Home, History } from "lucide-react";
+import { useState } from "react";
+import { useT } from "@/lib/i18n";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
+import { LanguageMenu } from "./language-menu";
+
+export type AppView = "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" | "markets";
+
+const MAIN = [
+  { key: "vaults", label: "Bóvedas", icon: LayoutDashboard, to: "/app" },
+  { key: "markets", label: "Mercados", icon: Zap, to: "/mercados" },
+  { key: "portfolio", label: "Portafolio", icon: PieChart, to: "/portfolio" },
+  { key: "wallet", label: "Mi wallet", icon: Wallet, to: "/wallet" },
+] as const;
+
+export function BottomNav({ active, guest, onSelect }: { active: AppView; guest: boolean; onSelect: (v: AppView) => void }) {
+  const t = useT();
+  const items = guest ? MAIN.filter((i) => i.key !== "wallet") : MAIN;
+  return <nav aria-label={t("Secciones de BÓVEDA")} className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
+    <ul className="mx-auto flex max-w-lg">
+      {items.map(({ key, label, icon: Icon, to }) => {
+        const on = active === key;
+        const cls = `flex w-full flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${on ? "text-primary" : "text-muted-foreground"}`;
+        const body = <><Icon size={20} aria-hidden />{t(label)}</>;
+        return <li key={key} className="flex-1">{guest ? <button type="button" aria-current={on ? "page" : undefined} className={cls} onClick={() => onSelect(key)}>{body}</button> : <Link to={to} aria-current={on ? "page" : undefined} className={cls}>{body}</Link>}</li>;
+      })}
+    </ul>
+  </nav>;
+}
+
+export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string | null; guest: boolean; onSelect: (v: AppView) => void; onLogout: () => void }) {
+  const t = useT();
+  const [open, setOpen] = useState(false);
+  const row = "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-secondary";
+  const go = (v: AppView) => { setOpen(false); onSelect(v); };
+  return <>
+    <button type="button" onClick={() => setOpen(true)} aria-label={t("Abrir menú")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card"><Menu size={18} /></button>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetContent side="right" className="w-[85%] max-w-sm overflow-y-auto">
+        <SheetTitle className="font-display">{guest ? t("Invitado · Prueba") : t("Mi cuenta")}</SheetTitle>
+        <SheetDescription className="truncate">{user ?? ""}</SheetDescription>
+        <div className="mt-6 space-y-1">
+          {guest ? <>
+            <button type="button" className={row} onClick={() => go("invite")}><Gift size={18} />{t("Invita y gana")}</button>
+            <button type="button" className={row} onClick={() => go("account")}><UserRound size={18} />{t("Mi cuenta")}</button>
+          </> : <>
+            <Link to="/invita" className={row} onClick={() => setOpen(false)}><Gift size={18} />{t("Invita y gana")}</Link>
+            <Link to="/actividad" className={row} onClick={() => setOpen(false)}><History size={18} />{t("Actividad")}</Link>
+            <Link to="/cuenta" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Mi cuenta y seguridad")}</Link>
+          </>}
+          <Link to="/faq" className={row}><HelpCircle size={18} />{t("Preguntas frecuentes")}</Link>
+          <Link to="/terminos" className={row}><FileText size={18} />{t("Términos y condiciones")}</Link>
+          <Link to="/privacidad" className={row}><Shield size={18} />{t("Política de privacidad")}</Link>
+        </div>
+        <div className="mt-6 flex items-center justify-between border-t border-border pt-4 text-sm"><span>{t("Idioma")}</span><LanguageMenu /></div>
+        <div className="mt-4 border-t border-border pt-4">
+          {guest ? <Link to="/" className={row}><Home size={18} />{t("Crear cuenta o entrar")}</Link>
+            : <button type="button" className={`${row} text-destructive`} onClick={() => { setOpen(false); onLogout(); }}><LogOut size={18} />{t("Cerrar sesión")}</button>}
+        </div>
+      </SheetContent>
+    </Sheet>
+  </>;
+}

@@ -291,4 +291,7 @@ export const extra: Record<string, string> = {
   "Toca Sube si crees que Bitcoin terminará más alto o Baja si crees que terminará más bajo.": "Tap Up if you think Bitcoin will finish higher, or Down if you think it will finish lower.",
   "Si aciertas, el pago llega solo a tu wallet al cerrar la ronda.": "If you're right, the payout lands in your wallet automatically when the round closes.",
   "Si aciertas, ganas créditos de práctica al cerrar la ronda.": "If you're right, you win practice credits when the round closes.",
+  "Abrir menú": "Open menu",
+  "Actividad": "Activity",
+  "Mi cuenta y seguridad": "Account & security",
 };
