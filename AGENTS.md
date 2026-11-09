@@ -30,7 +30,7 @@ use the editor.
 <!-- LOVABLE:END -->
 
 - Pool details live in a shared dialog backed by browser-side public DexScreener queries; validate exact Solana pool addresses, distinguish USD metrics from token amounts, and leave missing statistics unavailable to avoid misleading financial data.
-- Real yield displays use a shared browser-side Meteora Data API query validated by exact pool address; annualize reported 24h fees / current TVL × 365 × 100 as estimated simple APR, never APY, personal net yield or trial rates, because no compounding or individual LP allocation is verified. DexScreener remains the source of price, volume and liquidity statistics; reuse its query cache in cards and details.
+- Real yield displays use a shared browser-side Meteora Data API query validated by exact pool address; annualize reported 24h fees / current TVL × 365 × 100 as estimated simple APR, never APY, personal net yield or trial rates, (no verified compounding/LP allocation). DexScreener supplies price, volume and liquidity; reuse its cache.
 - All demo financial actions use a shared integer-micro-USDC fee breakdown, deduct fees from gross proceeds and require review; no demo state may be represented as an on-chain transfer.
 - Email interest submissions share the same signup form on public pages and Tu Cuenta, using a public validated insert-only server function, a private RLS-locked Cloud table and explicit versioned consent; never expose leads through the demonstration login or treat the submitted email as a verified login identity.
 - Legal content has dedicated public routes and must distinguish current Real availability from fictitious Prueba capabilities; do not invent operator contact details or legal jurisdiction.
@@ -55,4 +55,4 @@ use the editor.
 - Real dialogs expose deposit authorization and harvest/exit quote review, not standalone diagnostic simulations; retain fresh server simulations, reviewed fee/minimum caps and on-chain ownership/asset gates because previous confirmation cannot validate a new transaction.
 - Revalidate SDK-discovered position NFT accounts with shared live mint/owner/amount/program checks before composing harvest or liquidation; only the wallet signs and post-confirmation refresh includes portfolio history.
 - Credit affiliates automatically after confirmation, server-side, from the fee-wallet USDC delta paid by a wallet the referred account proved by fresh signed message (one wallet, one account); unique signatures, manual payouts.
-- Size compute limits from simulated usage (+25%) with a fixed modest priority price (src/lib/compute-budget.ts) so wallets do not price congestion on the 1.4M maximum.
+- Compute limit = simulated units +25%, low fixed priority (compute-budget.ts).
