@@ -1,4 +1,6 @@
 # Tasks
+- [x] Improve Mi wallet swap with debounced quote previews, net received/minimum/fee review, reverse direction and freshness guards; automated quote/confirm tests pass, fees unchanged and no funds moved.
+- [ ] Verify the updated swap review inside the owner's Privy wallet session — requires owner sign-in; automated interaction tests cover quotes and signing guards.
 - [x] Simplify affiliates to a single 60% share for new earnings, remove influencer applications and allow owner-only unique referral-code customization; 18 targeted tests pass, guest editing verified desktop/mobile, build OK. Historical earnings unchanged.
 - [ ] Verify saving a customized affiliate link with a real Privy session — requires the owner's sign-in; owner scope and duplicate-code rejection pass automated tests.
 - [x] Add Mi Cuenta verified email/passkey management and provider-backed authenticator/2FA with explicit embedded-wallet protection scope; 15 targeted tests pass and desktop/mobile passkey login dialog verified.
