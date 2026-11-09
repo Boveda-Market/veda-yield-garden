@@ -16,7 +16,7 @@ export const prepareUsdcTransfer = createServerFn({ method: "POST" })
     try {
       const { prepareUsdcTransfer: prepare } = await import("@/lib/usdc-transfer.server");
       const result = await prepare(key, data.from, data.to, BigInt(data.amountMicro));
-      return result.ok ? { success: true, transaction: result.transaction } : { success: false, message: reasons[result.reason] };
+      return result.ok ? { success: true, transaction: result.transaction } : { success: false, message: reasons[result.reason] ?? "No se pudo preparar la transferencia. No se movió dinero." };
     } catch {
       return { success: false, message: "No se pudo preparar la transferencia. No se movió dinero." };
     }

@@ -7,7 +7,7 @@ export const MIN_TRANSFER_MICRO = 10_000n; // 0.01 USDC
 export function parseUsdcMicro(input: string): bigint | null {
   const clean = input.trim().replace(/,/g, "");
   if (!/^\d+(\.\d{1,6})?$/.test(clean)) return null;
-  const [whole, frac = ""] = clean.split(".");
+  const [whole = "0", frac = ""] = clean.split(".");
   return BigInt(whole) * 1_000_000n + BigInt(frac.padEnd(6, "0"));
 }
 
