@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useT } from "@/lib/i18n";
 import { PredictLive } from "@/components/predict-live";
+import { PriceChart } from "@/components/price-chart";
 import { ShareWin } from "@/components/share-win";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import {
@@ -19,41 +20,6 @@ const clock = (ms: number) => {
   const mm = String(m).padStart(2, "0"), ss = String(sec).padStart(2, "0");
   return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
 };
-
-function Sparkline({ points, lock }: { points: number[]; lock?: number | undefined }) {
-  const [hover, setHover] = useState<number | null>(null);
-  if (points.length < 2) return <div className="h-24" />;
-  const pick = (e: React.PointerEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    setHover(Math.round(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * (points.length - 1)));
-  };
-  const hv = hover !== null ? points[hover] : undefined;
-  return (
-    <div className="relative touch-none" onPointerMove={pick} onPointerDown={pick} onPointerLeave={() => setHover(null)}>
-      <SparkSvg points={points} lock={lock} />
-      {hover !== null && hv !== undefined && <>
-        <div className="pointer-events-none absolute inset-y-0 w-px bg-foreground/40" style={{ left: `${(hover / (points.length - 1)) * 100}%` }} />
-        <div className="pointer-events-none absolute -top-1 rounded-md bg-foreground px-2 py-0.5 text-xs font-semibold tabular-nums text-background" style={{ left: `clamp(0px, calc(${(hover / (points.length - 1)) * 100}% - 40px), calc(100% - 90px))` }}>${num(hv, priceDigits(hv))}</div>
-      </>}
-    </div>
-  );
-}
-
-function SparkSvg({ points, lock }: { points: number[]; lock?: number | undefined }) {
-  const all = lock ? [...points, lock] : points;
-  const min = Math.min(...all), max = Math.max(...all), span = max - min || 1;
-  const y = (v: number) => 40 - ((v - min) / span) * 36 - 2;
-  const d = points.map((v, i) => `${(i / (points.length - 1)) * 100},${y(v)}`).join(" ");
-  const up = lock ? points[points.length - 1]! >= lock : points[points.length - 1]! >= points[0]!;
-  return (
-    <svg viewBox="0 0 100 40" preserveAspectRatio="none" className={`h-24 w-full ${up ? "text-primary" : "text-destructive"}`} aria-hidden>
-      <defs><linearGradient id="spark" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="currentColor" stopOpacity="0.35" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient></defs>
-      <polygon points={`0,40 ${d} 100,40`} fill="url(#spark)" />
-      <polyline points={d} fill="none" stroke="currentColor" strokeWidth="1.4" vectorEffect="non-scaling-stroke" />
-      {lock && <line x1="0" x2="100" y1={y(lock)} y2={y(lock)} className="text-muted-foreground" stroke="currentColor" strokeDasharray="2 2" strokeWidth="1" vectorEffect="non-scaling-stroke" />}
-    </svg>
-  );
-}
 
 export function MarketsPanel({ identity }: { identity: string }) {
   const t = useT();
@@ -101,7 +67,7 @@ export function MarketsPanel({ identity }: { identity: string }) {
         if (!alive) return;
         setPriceError(false);
         setPrices((old) => ({ ...old, ...p }));
-        setSeries((s) => { const n = { ...s }; for (const m of MARKETS) { const v = p[m.id]; if (v) n[m.id] = [...s[m.id], v].slice(-120); } return n; });
+        setSeries((s) => { const n = { ...s }; for (const m of MARKETS) { const v = p[m.id]; if (v) n[m.id] = [...s[m.id], v].slice(-600); } return n; });
       } catch { if (alive) setPriceError(true); }
     };
     void tick();
@@ -138,6 +104,16 @@ export function MarketsPanel({ identity }: { identity: string }) {
   const mine = state.open.filter((p) => p.market === market && p.window === win && round && p.endsAt === round.end);
   const lock = mine[0]?.lock;
   const pts = series[market];
+  const roundStart = round?.start;
+  const [opens, setOpens] = useState<Record<string, number>>({});
+  const openKey = `${market}:${roundStart}`;
+  useEffect(() => {
+    if (!roundStart || opens[openKey]) return;
+    let alive = true;
+    void fetchPriceAt(market, roundStart).then((v) => { if (alive && v) setOpens((o) => ({ ...o, [openKey]: v })); });
+    return () => { alive = false; };
+  }, [openKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  const roundOpen = opens[openKey];
   const recent = pts.slice(-60);
   let ups = 0, downs = 0;
   for (let i = 1; i < recent.length; i++) { if (recent[i]! > recent[i - 1]!) ups++; else if (recent[i]! < recent[i - 1]!) downs++; }
@@ -199,7 +175,7 @@ export function MarketsPanel({ identity }: { identity: string }) {
           {priceError && <p role="alert" className="mt-1 text-sm text-destructive">{t("Precio no disponible. Reintentando…")}</p>}
           {!live && <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary"><div className="h-full bg-primary transition-all" style={{ width: `${progress * 100}%` }} /></div>}
         </div>
-        <div className="mt-4"><Sparkline points={pts} lock={live ? undefined : lock} /></div>
+        <div className="mt-4"><PriceChart points={pts} reference={lock ?? roundOpen} referenceLabel={lock ? t("Tu precio") : t("Inicio")} /></div>
 
         <div className="px-5 pt-3" aria-label={t("Impulso reciente")}>
           <div className="flex justify-between text-xs font-semibold"><span className="text-primary">▲ {upShare}% {t("al alza")}</span><span className="text-muted-foreground">{t("Impulso reciente")}</span><span className="text-destructive">{100 - upShare}% {t("a la baja")} ▼</span></div>

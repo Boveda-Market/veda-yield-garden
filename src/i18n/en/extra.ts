@@ -294,4 +294,10 @@ export const extra: Record<string, string> = {
   "Abrir menú": "Open menu",
   "Actividad": "Activity",
   "Mi cuenta y seguridad": "Account & security",
+  "Estilo de gráfica": "Chart style",
+  "Línea": "Line",
+  "Velas": "Candles",
+  "Zoom de tiempo": "Time zoom",
+  "Tu precio": "Your price",
+  "Inicio": "Start",
 };
