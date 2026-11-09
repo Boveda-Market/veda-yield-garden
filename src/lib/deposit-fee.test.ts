@@ -11,5 +11,5 @@ describe("deposit fee", () => {
     expect(depositFee(usdc(100))).toBe(usdc(0.475));
     expect(depositFee(usdc(1000))).toBe(usdc(4.975));
   });
-  it("affiliate earns 60% of the deposit fee", () => expect(affiliateCommission(depositFee(usdc(1000)), AFFILIATE_SHARE_BPS)).toBe(usdc(2.985)));
+  it("affiliate earns 50% of the deposit fee", () => expect(affiliateCommission(depositFee(usdc(1000)), AFFILIATE_SHARE_BPS)).toBe(usdc(2.4875)));
 });

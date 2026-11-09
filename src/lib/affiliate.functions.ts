@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { AFFILIATE_SHARE_BPS, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard } from "./affiliate";
+import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard } from "./affiliate";
 import { proofIsFresh, walletProofMessage, walletProofRequest } from "./wallet-proof";
 
 type Fail = { success: false; error: string };
@@ -37,16 +37,20 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
       const row = await getAffiliateRow(db, id);
       const [referred, earnings, joined] = await Promise.all([
         db.from("referrals").select("referred_privy_id", { count: "exact", head: true }).eq("affiliate_privy_id", id),
-        db.from("affiliate_earnings").select("signature, kind, fee_raw, commission_raw, status, created_at").eq("affiliate_privy_id", id).order("created_at", { ascending: false }).limit(50),
+        db.from("affiliate_earnings").select("signature, level, kind, fee_raw, commission_raw, status, created_at").eq("affiliate_privy_id", id).order("created_at", { ascending: false }).limit(50),
         db.from("referrals").select("referred_privy_id").eq("referred_privy_id", id).maybeSingle(),
       ]);
       const list = earnings.data ?? [];
+      const { data: directs } = await db.from("referrals").select("referred_privy_id").eq("affiliate_privy_id", id).limit(1000);
+      const directIds = (directs ?? []).map((r) => r.referred_privy_id);
+      const subCount = directIds.length ? ((await db.from("referrals").select("referred_privy_id", { count: "exact", head: true }).in("affiliate_privy_id", directIds)).count ?? 0) : 0;
       const total = (status: string) => list.filter((e) => e.status === status).reduce((a, e) => a + BigInt(e.commission_raw), 0n).toString();
       return { success: true, dashboard: {
         code: row.code, shareBps: row.share_bps, payoutWallet: row.payout_wallet, referred: referred.count ?? 0,
         pendingRaw: total("pending"), paidRaw: total("paid"),
         joinedCode: Boolean(joined.data),
-        earnings: list.map((e) => ({ signature: e.signature, kind: e.kind as "harvest" | "exit", feeRaw: String(e.fee_raw), commissionRaw: String(e.commission_raw), status: e.status, createdAt: e.created_at })),
+        subReferred: subCount,
+        earnings: list.map((e) => ({ signature: e.signature, level: e.level === 2 ? 2 : 1, kind: e.kind as "harvest" | "exit", feeRaw: String(e.fee_raw), commissionRaw: String(e.commission_raw), status: e.status, createdAt: e.created_at })),
       } };
     } catch { return { success: false, error: "No se pudo cargar tu programa de afiliados." }; }
   });
@@ -149,10 +153,18 @@ export const recordAffiliateFee = createServerFn({ method: "POST" })
       }
       const { data: aff } = await db.from("affiliates").select("share_bps").eq("privy_user_id", referral.affiliate_privy_id).maybeSingle();
       const shareBps = Math.min(aff?.share_bps ?? AFFILIATE_SHARE_BPS, 9000);
-      const { error } = await db.from("affiliate_earnings").insert({
-        signature: data.signature, affiliate_privy_id: referral.affiliate_privy_id, referred_privy_id: id, kind: data.kind,
+      const rows = [{
+        signature: data.signature, level: 1, affiliate_privy_id: referral.affiliate_privy_id, referred_privy_id: id, kind: data.kind,
         fee_raw: Number(transfer.feeRaw), share_bps: shareBps, commission_raw: Number(affiliateCommission(transfer.feeRaw, shareBps)),
-      });
+      }];
+      // Level 2: whoever referred the direct affiliate earns a smaller share. Two levels only.
+      const { data: parent } = await db.from("referrals").select("affiliate_privy_id").eq("referred_privy_id", referral.affiliate_privy_id).maybeSingle();
+      const subBps = subAffiliateShare(shareBps);
+      if (parent && parent.affiliate_privy_id !== id && subBps > 0) {
+        rows.push({ signature: data.signature, level: 2, affiliate_privy_id: parent.affiliate_privy_id, referred_privy_id: id, kind: data.kind,
+          fee_raw: Number(transfer.feeRaw), share_bps: subBps, commission_raw: Number(affiliateCommission(transfer.feeRaw, subBps)) });
+      }
+      const { error } = await db.from("affiliate_earnings").insert(rows);
       return { success: !error };
     } catch { return { success: false }; }
   });

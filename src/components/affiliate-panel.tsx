@@ -5,7 +5,7 @@ import { Copy, Users, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
-import { AFFILIATE_SHARE_BPS, PAYOUT_MIN_MICRO, payoutProgress, REF_STORAGE_KEY, normalizeCode, type AffiliateDashboard } from "@/lib/affiliate";
+import { AFFILIATE_SHARE_BPS, SUB_AFFILIATE_SHARE_BPS, PAYOUT_MIN_MICRO, payoutProgress, REF_STORAGE_KEY, normalizeCode, type AffiliateDashboard } from "@/lib/affiliate";
 import { customizeAffiliateCode, getAffiliateDashboard, joinAffiliate, savePayoutWallet } from "@/lib/affiliate.functions";
 
 const usdc = (raw: string) => (Number(raw) / 1e6).toLocaleString("en-US", { useGrouping: false,  minimumFractionDigits: 2, maximumFractionDigits: 6 });
@@ -54,7 +54,7 @@ export function AffiliatePanel() {
   }, [session.authenticated]);
 
   const preview = !session.authenticated;
-  if (preview && !dash) { setDash({ code: "EJEMPLO", shareBps: AFFILIATE_SHARE_BPS, referred: 3, pendingRaw: "1250000", paidRaw: "0", payoutWallet: null, joinedCode: false, earnings: [] }); setCustomCode("EJEMPLO"); }
+  if (preview && !dash) { setDash({ code: "EJEMPLO", shareBps: AFFILIATE_SHARE_BPS, referred: 3, subReferred: 2, pendingRaw: "1250000", paidRaw: "0", payoutWallet: null, joinedCode: false, earnings: [] }); setCustomCode("EJEMPLO"); }
   const link = dash ? `${window.location.origin}/?ref=${dash.code}` : "";
   return <section className="mt-10 border-t border-border pt-8" aria-labelledby="affiliate-title">
     <h2 id="affiliate-title" className="flex items-center gap-2 font-display text-2xl font-semibold"><Users size={20} />{t("Invita y gana")}</h2>
@@ -75,6 +75,7 @@ export function AffiliatePanel() {
       </form>
       <dl className="mt-4 grid grid-cols-3 gap-3 text-sm">
         <div className="rounded-xl border border-border p-3"><dt className="text-xs text-muted-foreground">{t("Invitados")}</dt><dd className="font-semibold">{dash.referred}</dd></div>
+        <div className="rounded-xl border border-border p-3"><dt className="text-xs text-muted-foreground">{t("Red secundaria")} ({SUB_AFFILIATE_SHARE_BPS / 100}%)</dt><dd className="font-semibold">{dash.subReferred}</dd></div>
         <div className="rounded-xl border border-border p-3"><dt className="text-xs text-muted-foreground">{t("Por cobrar")}</dt><dd className="font-semibold">{usdc(dash.pendingRaw)} USDC</dd></div>
         <div className="rounded-xl border border-border p-3"><dt className="text-xs text-muted-foreground">{t("Pagado")}</dt><dd className="font-semibold">{usdc(dash.paidRaw)} USDC</dd></div>
       </dl>
@@ -97,7 +98,7 @@ export function AffiliatePanel() {
         </form>}
       </div>; })()}
       <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Las comisiones se registran solo cuando la red confirma la operación y se pagan periódicamente en USDC tras revisión, al acumular al menos 10 USDC.")}</p>
-      {dash.earnings.length > 0 && <ul className="mt-5 divide-y divide-border text-sm">{dash.earnings.map((e) => <li key={e.signature} className="flex justify-between gap-3 py-2"><span>{e.kind === "harvest" ? t("Cosecha") : e.kind === "deposit" ? t("Depósito") : t("Cierre")} · {new Date(e.createdAt).toLocaleDateString()}</span><span>+{usdc(e.commissionRaw)} USDC · {t(e.status === "paid" ? "Pagado" : e.status === "rejected" ? "Rechazado" : "Por cobrar")}</span></li>)}</ul>}
+      {dash.earnings.length > 0 && <ul className="mt-5 divide-y divide-border text-sm">{dash.earnings.map((e) => <li key={e.signature + e.level} className="flex justify-between gap-3 py-2"><span>{e.kind === "harvest" ? t("Cosecha") : e.kind === "deposit" ? t("Depósito") : t("Cierre")} · {new Date(e.createdAt).toLocaleDateString()}{e.level === 2 && <span className="ml-1 text-xs text-muted-foreground">· {t("Nivel 2")}</span>}</span><span>+{usdc(e.commissionRaw)} USDC · {t(e.status === "paid" ? "Pagado" : e.status === "rejected" ? "Rechazado" : "Por cobrar")}</span></li>)}</ul>}
       <form className="mt-6" onSubmit={(e) => { e.preventDefault(); const c = normalizeCode(code); if (!c) { setMessage(t("Código no válido.")); return; } void act(async () => join({ data: { token: await token(), code: c } }), "Código aplicado. ¡Gracias!"); }}>
         <label className="block text-sm">{dash.joinedCode ? t("¿Tienes un código de socio? Escríbelo aquí") : t("¿Te invitó alguien o tienes un código de socio? Escríbelo")}<input value={code} maxLength={16} onChange={(e) => setCode(e.target.value)} className={field} /></label>
         <Button type="submit" size="sm" variant="outline" className="mt-2" disabled={busy}>{t("Aplicar código")}</Button>

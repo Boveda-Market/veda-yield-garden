@@ -1,7 +1,16 @@
 import { z } from "zod";
 
 /** Share of every BÓVEDA fee (entry, harvest, exit) paid to the referring affiliate, in basis points of that fee. */
-export const AFFILIATE_SHARE_BPS = 6000;
+export const AFFILIATE_SHARE_BPS = 5000;
+/** Second-tier share: the direct affiliate's own referrer earns this from their sub-affiliates' referrals. */
+export const SUB_AFFILIATE_SHARE_BPS = 1000;
+/** Combined payout across both levels never exceeds this share of the collected fee. */
+export const MAX_TOTAL_SHARE_BPS = 9000;
+
+/** Level-2 share, capped so level 1 + level 2 never exceed MAX_TOTAL_SHARE_BPS. */
+export function subAffiliateShare(directBps: number) {
+  return Math.max(0, Math.min(SUB_AFFILIATE_SHARE_BPS, MAX_TOTAL_SHARE_BPS - directBps));
+}
 
 /** Integer micro-USDC commission, floored so it never exceeds the collected fee share. */
 export function affiliateCommission(feeRaw: bigint, shareBps: number): bigint {
@@ -40,5 +49,6 @@ export type AffiliateDashboard = {
   pendingRaw: string;
   paidRaw: string;
   joinedCode: boolean;
-  earnings: Array<{ signature: string; kind: "harvest" | "exit" | "deposit"; feeRaw: string; commissionRaw: string; status: string; createdAt: string }>;
+  subReferred: number;
+  earnings: Array<{ signature: string; level: 1 | 2; kind: "harvest" | "exit" | "deposit"; feeRaw: string; commissionRaw: string; status: string; createdAt: string }>;
 };

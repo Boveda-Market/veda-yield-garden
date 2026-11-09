@@ -7,10 +7,10 @@ const earn = (gross: number) => affiliateCommission(progressiveFee(usdc(gross)),
 
 describe("affiliate economics", () => {
   it("pays nothing on operations up to 10 USDC", () => expect(earn(10)).toBe(0n));
-  it("pays 60% of the 1.25% excess fee", () => {
-    expect(earn(50)).toBe(usdc(0.3));
-    expect(earn(200)).toBe(usdc(1.425));
-    expect(earn(1000)).toBe(usdc(7.425));
+  it("pays 50% of the 1.25% excess fee", () => {
+    expect(earn(50)).toBe(usdc(0.25));
+    expect(earn(200)).toBe(usdc(1.1875));
+    expect(earn(1000)).toBe(usdc(6.1875));
   });
   it("payout requires 10 USDC accumulated", () => {
     expect(payoutProgress(usdc(4.5))).toEqual({ pct: 45, ready: false, missingRaw: usdc(5.5) });
