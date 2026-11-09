@@ -58,7 +58,7 @@ export function PilotDeposit({ vaultId, amount, onBusyChange, onClose }: { vault
   if (!eligible) return <p className="border-t border-border pt-4 text-xs text-muted-foreground">{t("Los depósitos no están disponibles para esta bóveda.")}</p>;
   if (step === "done") return <section className="grid justify-items-center gap-3 rounded-xl bg-primary/10 p-6 text-center text-sm">
     <CheckCircle2 className="h-12 w-12 text-primary motion-safe:animate-in motion-safe:zoom-in" aria-hidden />
-    <h3 className="font-display text-xl font-bold">{t("¡Depósito exitoso!")}</h3>
+    <h3 className="font-display text-xl font-bold">{t("¡Depósito exitoso!")}</h3><p className="mt-2 flex items-center justify-center gap-2 text-sm text-primary"><span className="h-2 w-2 animate-pulse rounded-full bg-primary" />{t("Tu depósito ya está en marcha y empezó a acumular ganancias. Míralas crecer en tu Portafolio.")}</p>
     <p role="status" className="sr-only">{t("Depósito confirmado en la red (")}{status === "finalized" ? "finalizado" : "confirmado"}).</p>
     <p className="text-muted-foreground">{t("Tu posición ya está generando comisiones. Puedes cosecharlas cuando quieras desde tu Portafolio.")}</p>
     <Button asChild className="w-full"><Link to="/portfolio" onClick={onClose}>{t("Ver en mi Portafolio")}</Link></Button>
