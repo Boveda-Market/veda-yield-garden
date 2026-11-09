@@ -35,7 +35,7 @@ export function DepositSimulation({ vault, wallet, onClose }: { vault: Vault; wa
   const typed = decimalToUnits(amount || "0", 6);
   const overBalance = usdc != null && typed != null && typed > usdc;
   const pick = (pct: bigint) => { if (usdc == null) return; const cap = usdc < MAX_MICRO ? usdc : MAX_MICRO; setAmount(microToText((cap * pct) / 100n)); };
-  const clean = (v: string) => { const s = v.replace(/,/g, ".").replace(/[^\d.]/g, ""); const [w, ...rest] = s.split("."); return rest.length ? `${w}.${rest.join("").slice(0, 6)}` : w; };
+  const clean = (v: string) => { const s = v.replace(/,/g, ".").replace(/[^\d.]/g, ""); const [w, ...rest] = s.split("."); return rest.length ? `${w}.${rest.join("").slice(0, 6)}` : (w ?? ""); };
 
   return <Dialog open onOpenChange={(open) => { if (!open && !busy) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
     <DialogTitle>{t("Depositar ·")}{" "}{t(vault.name)}</DialogTitle>
