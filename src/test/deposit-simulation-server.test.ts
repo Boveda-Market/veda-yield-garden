@@ -59,11 +59,11 @@ describe("unsigned composed deposit simulation", () => {
     expect(result.checks).toEqual({ fee: true, position: true });
     expect(result.fee).toBe("0");
     expect(result.net).toBe("1");
-    const [tx, options] = mocks.connection.simulateTransaction.mock.calls[0] ?? [];
+    const [tx, options] = mocks.connection.simulateTransaction.mock.calls[1] ?? [];
     expect(tx).toBeInstanceOf(VersionedTransaction);
     expect(options.sigVerify).toBe(false);
     expect(options.replaceRecentBlockhash).toBe(true);
-    expect(tx.message.compiledInstructions).toHaveLength(3);
+    expect(tx.message.compiledInstructions).toHaveLength(4);
     expect(mocks.getAccount).toHaveBeenCalledTimes(1);
     expect(tx.message.compiledInstructions.some((ix: { programIdIndex: number }) => tx.message.staticAccountKeys[ix.programIdIndex].equals(TOKEN_PROGRAM_ID))).toBe(false);
     expect(options.accounts.addresses[0]).toBe(getAssociatedTokenAddressSync(usdc, new PublicKey(FEE_WALLET)).toBase58());
@@ -80,7 +80,7 @@ describe("unsigned composed deposit simulation", () => {
     const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" });
     expect(result.success).toBe(true);
     const [tx] = mocks.connection.simulateTransaction.mock.calls[0] ?? [];
-    expect(tx.message.compiledInstructions).toHaveLength(3);
+    expect(tx.message.compiledInstructions).toHaveLength(4);
     expect(mocks.getAccount).toHaveBeenCalledTimes(1);
     expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
   });
@@ -99,7 +99,7 @@ describe("unsigned composed deposit simulation", () => {
     const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" }, { preparePilot: true });
     expect(result.success).toBe(true);
     if (!result.prepared) throw new Error("Missing prepared transaction");
-    expect(VersionedTransaction.deserialize(Buffer.from(result.prepared.transaction, "base64")).message.compiledInstructions).toHaveLength(3);
+    expect(VersionedTransaction.deserialize(Buffer.from(result.prepared.transaction, "base64")).message.compiledInstructions).toHaveLength(4);
     expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
   });
   it("pilot refuses deposits over 10,000 USDC", async () => {

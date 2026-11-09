@@ -77,7 +77,7 @@ type JupIx = { programId: string; accounts: { pubkey: string; isSigner: boolean;
 
 export async function buildSwap(wallet: string, quote: SwapQuote): Promise<Uint8Array> {
   const { Connection, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } = await import("@solana/web3.js");
-  const res = await fetch("https://lite-api.jup.ag/swap/v1/swap-instructions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ quoteResponse: quote.raw, userPublicKey: wallet, wrapAndUnwrapSol: true, dynamicComputeUnitLimit: true, ...(quote.asset === "SOL" ? { feeAccount: FEE_USDC_ACCOUNT } : {}) }) });
+  const res = await fetch("https://lite-api.jup.ag/swap/v1/swap-instructions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ quoteResponse: quote.raw, userPublicKey: wallet, wrapAndUnwrapSol: true, dynamicComputeUnitLimit: true, prioritizationFeeLamports: { priorityLevelWithMaxLamports: { priorityLevel: "medium", maxLamports: 50_000 } }, ...(quote.asset === "SOL" ? { feeAccount: FEE_USDC_ACCOUNT } : {}) }) });
   if (!res.ok) throw new Error("No se pudo preparar el cambio. Inténtalo de nuevo.");
   const j = await res.json() as { computeBudgetInstructions: JupIx[]; setupInstructions: JupIx[]; swapInstruction: JupIx; cleanupInstruction?: JupIx; addressLookupTableAddresses: string[] };
   const ix = (i: JupIx) => new TransactionInstruction({ programId: new PublicKey(i.programId), keys: i.accounts.map((a) => ({ pubkey: new PublicKey(a.pubkey), isSigner: a.isSigner, isWritable: a.isWritable })), data: Uint8Array.from(atob(i.data), (c) => c.charCodeAt(0)) as Buffer });

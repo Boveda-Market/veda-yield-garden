@@ -9,6 +9,7 @@ import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount, solanaAddressSchema } from "@/lib/solana-data";
 import { FEE_WALLET } from "@/lib/fees";
 import { compactDepositInstructions } from "@/lib/compact-deposit";
+import { computeBudgetIxs, computeLimit, MAX_COMPUTE_UNITS } from "@/lib/compute-budget";
 import { withdrawalAmounts, type WithdrawalInput, type WithdrawalResult } from "@/lib/withdrawal";
 
 const ixSchema = z.object({ programId: solanaAddressSchema, accounts: z.array(z.object({ pubkey: solanaAddressSchema, isSigner: z.boolean(), isWritable: z.boolean() })), data: z.string().max(20_000) });
@@ -58,15 +59,15 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput,
     const removalIxs = removal.instructions.filter((ix) => !(pool.tokenAMint.equals(NATIVE_MINT) && ix.programId.equals(TOKEN_PROGRAM_ID) && ix.data[0] === 9 && ix.keys[0]?.pubkey.equals(tokenA)));
     const block = await connection.getLatestBlockhash();
     const tables: NonNullable<Awaited<ReturnType<typeof connection.getAddressLookupTable>>["value"]>[] = [];
-    const simulate = async (instructions: TransactionInstruction[]) => {
-      const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 }), ...instructions.filter((ix) => !ix.programId.equals(ComputeBudgetProgram.programId))]) }).compileToV0Message(tables));
+    const simulate = async (instructions: TransactionInstruction[], units = MAX_COMPUTE_UNITS) => {
+      const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...instructions.filter((ix) => !ix.programId.equals(ComputeBudgetProgram.programId))]) }).compileToV0Message(tables));
       const bytes = tx.serialize().length;
       if (bytes > 1232) throw new Error("Tamaño excedido");
       const fee = await connection.getFeeForMessage(tx.message, "confirmed");
       if (fee.value === null) throw new Error("Coste de red no disponible");
       const response = await connection.simulateTransaction(tx, { sigVerify: false, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
       if (response.value.err || !response.value.accounts || response.value.accounts.length !== addresses.length) throw new Error("Simulación rechazada");
-      return { tx, accounts: response.value.accounts, bytes, networkFee: BigInt(fee.value) };
+      return { tx, accounts: response.value.accounts, bytes, networkFee: BigInt(fee.value), units: response.value.unitsConsumed };
     };
     stage = "Simulación del cierre";
     const removed = await simulate(removalIxs);
@@ -129,7 +130,9 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput,
     if (!before[2]) instructions.push(createAssociatedTokenAccountIdempotentInstruction(owner, recipient, feeOwner, usdc));
     instructions.push(createTransferCheckedInstruction(source, usdc, recipient, owner, breakdown.fee, 6));
     stage = "Simulación de comisión y renta";
-    const final = await simulate(instructions);
+    const sized = await simulate(instructions);
+    // Re-simulate with a tight compute limit so wallets do not price congestion on 1.4M units.
+    const final = await simulate(instructions, computeLimit(sized.units));
     const feeDelta = amount(final.accounts[2], usdc, feeOwner) - feeBefore;
     const netDelta = amount(final.accounts[0], usdc, owner) - usdcBefore;
     const realizedGross = netDelta + feeDelta;

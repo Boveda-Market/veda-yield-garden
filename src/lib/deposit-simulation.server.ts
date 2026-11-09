@@ -8,6 +8,7 @@ import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, solanaAddressSchema } from "@/lib/solana-data";
 import { simulationAmounts, simulationDisplay, type SimulationInput, type SimulationResult, type SimulationStage } from "@/lib/deposit-simulation";
 import { compactDepositInstructions } from "@/lib/compact-deposit";
+import { computeBudgetIxs, computeLimit, MAX_COMPUTE_UNITS } from "@/lib/compute-budget";
 import { pilotInput, type PreparedPilot } from "@/lib/pilot-deposit";
 
 const ixSchema = z.object({ programId: solanaAddressSchema, accounts: z.array(z.object({ pubkey: solanaAddressSchema, isSigner: z.boolean(), isWritable: z.boolean() })).max(128), data: z.string().max(20_000) });
@@ -98,18 +99,23 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
       return !transfer.toPubkey.equals(getAssociatedTokenAddressSync(NATIVE_MINT, owner));
     });
     // Entry is free: no fee transfer (including zero-value transfers) or fee ATA creation.
-    const instructions = compactDepositInstructions([ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 }), ...swapIxs, ...depositIxs, ...(swap.cleanupInstruction ? [decodeIx(swap.cleanupInstruction)] : [])].filter((ix, index) => index === 0 || !ix.programId.equals(ComputeBudgetProgram.programId)));
+    const body = [...swapIxs, ...depositIxs, ...(swap.cleanupInstruction ? [decodeIx(swap.cleanupInstruction)] : [])].filter((ix) => !ix.programId.equals(ComputeBudgetProgram.programId));
+    const build = (units: number) => compactDepositInstructions([...computeBudgetIxs(units), ...body]);
     const tables = await Promise.all(swap.addressLookupTableAddresses.map(async (address) => {
       const table = await connection.getAddressLookupTable(new PublicKey(address));
       if (!table.value) throw new Error("Tabla de direcciones no disponible");
       return table.value;
     }));
     const block = await connection.getLatestBlockhash();
-    const transaction = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions }).compileToV0Message(tables));
+    const compile = (units: number) => new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: build(units) }).compileToV0Message(tables));
+    let transaction = compile(MAX_COMPUTE_UNITS);
     bytes = transaction.serialize().length;
     if (bytes > 1232) return result(false, "La transacción supera 1232 bytes. No se divide ni se cobra la comisión por separado.");
     stage = "simulation";
     const positionAddress = derivePositionAddress(nft.publicKey);
+    const sizing = await connection.simulateTransaction(transaction, { sigVerify: false, replaceRecentBlockhash: true });
+    // Tight compute limit keeps congestion pricing proportional to real usage.
+    if (!sizing.value.err) transaction = compile(computeLimit(sizing.value.unitsConsumed));
     const simulated = await connection.simulateTransaction(transaction, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: [source.toBase58(), positionAddress.toBase58()] } });
     if (simulated.value.err) return { ...result(false, "La simulación de Solana rechazó la transacción compuesta. No se firmó ni envió; no se cobró comisión."), slot: simulated.context.slot, units: simulated.value.unitsConsumed };
     const [sourceAccount, positionAccount] = simulated.value.accounts ?? [];

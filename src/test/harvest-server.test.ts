@@ -31,7 +31,7 @@ beforeEach(() => {
   let calls = 0;
   mocks.simulate.mockImplementation(async (tx) => {
     expect(tx.signatures.every((sig: Uint8Array) => sig.every((b) => b === 0))).toBe(true);
-    const final = ++calls === 2;
+    const final = ++calls >= 2;
     const account = (value: bigint, mint: PublicKey, accountOwner: PublicKey) => ({ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(value, mint, accountOwner).toString("base64"), "base64"], lamports: 2_000_000 });
     return { value: { err: null, accounts: [account(final ? 10_900n : 11_000n, usdc, owner), account(500n, token, owner), account(final ? 100n : 0n, usdc, feeOwner), { lamports: 3_000_000 }, { lamports: 20_000_000 }, { lamports: 2_000_000 }, { lamports: 2_000_000 }] } };
   });

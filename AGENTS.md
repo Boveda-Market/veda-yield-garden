@@ -55,3 +55,4 @@ use the editor.
 - Real dialogs expose deposit authorization and harvest/exit quote review, not standalone diagnostic simulations; retain fresh server simulations, reviewed fee/minimum caps and on-chain ownership/asset gates because previous confirmation cannot validate a new transaction.
 - Revalidate SDK-discovered position NFT accounts with shared live mint/owner/amount/program checks before composing harvest or liquidation; only the wallet signs and post-confirmation refresh includes portfolio history.
 - Credit affiliates automatically after confirmation, server-side, from the fee-wallet USDC delta paid by a wallet the referred account proved by fresh signed message (one wallet, one account); unique signatures, manual payouts.
+- Size compute limits from simulated usage (+25%) with a fixed modest priority price (src/lib/compute-budget.ts) so wallets do not price congestion on the 1.4M maximum.

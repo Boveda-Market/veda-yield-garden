@@ -7,6 +7,7 @@ import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount } from "@/lib/solana-data";
 import { FEE_WALLET } from "@/lib/fees";
 import { compactDepositInstructions } from "@/lib/compact-deposit";
+import { computeBudgetIxs, computeLimit } from "@/lib/compute-budget";
 import { harvestAmounts, type HarvestResult } from "@/lib/harvest";
 import { type WithdrawalInput } from "@/lib/withdrawal";
 
@@ -46,13 +47,13 @@ export async function simulateHarvest(apiKey: string, input: WithdrawalInput, op
     // Keep claimed SOL wrapped; never unwrap or close a preexisting token account.
     const claimIxs = claim.instructions.filter((ix) => !ix.programId.equals(ComputeBudgetProgram.programId) && !(pool.tokenAMint.equals(NATIVE_MINT) && ix.programId.equals(TOKEN_PROGRAM_ID) && ix.data[0] === 9));
     const block = await connection.getLatestBlockhash();
-    const simulate = async (instructions: TransactionInstruction[]) => {
-      const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }), ...instructions]) }).compileToV0Message());
+    const simulate = async (instructions: TransactionInstruction[], units = 400_000) => {
+      const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...instructions]) }).compileToV0Message());
       const bytes = tx.serialize().length;
       if (bytes > 1232) throw new Error("Tamaño excedido");
       const response = await connection.simulateTransaction(tx, { sigVerify: false, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
       if (response.value.err || !response.value.accounts || response.value.accounts.length !== addresses.length) throw new Error("Simulación rechazada");
-      return { tx, accounts: response.value.accounts, bytes };
+      return { tx, accounts: response.value.accounts, bytes, units: response.value.unitsConsumed };
     };
     stage = "Simulación de la cosecha";
     const claimed = await simulate(claimIxs);
@@ -68,7 +69,8 @@ export async function simulateHarvest(apiKey: string, input: WithdrawalInput, op
       instructions.push(createTransferCheckedInstruction(source, usdc, recipient, owner, breakdown.fee, 6));
     }
     stage = "Simulación de comisión";
-    const final = await simulate(instructions);
+    const sized = await simulate(instructions);
+    const final = await simulate(instructions, computeLimit(sized.units));
     const feeDelta = amount(final.accounts[2], usdc, feeOwner) - feeBefore;
     const netDelta = amount(final.accounts[0], usdc, owner) - usdcBefore;
     const tokenDelta = amount(final.accounts[1], pool.tokenAMint, owner) - aBefore;
