@@ -1,4 +1,6 @@
 # Tasks
+- [x] Simplify affiliates to a single 60% share for new earnings, remove influencer applications and allow owner-only unique referral-code customization; 18 targeted tests pass, guest editing verified desktop/mobile, build OK. Historical earnings unchanged.
+- [ ] Verify saving a customized affiliate link with a real Privy session — requires the owner's sign-in; owner scope and duplicate-code rejection pass automated tests.
 - [x] Add Mi Cuenta verified email/passkey management and provider-backed authenticator/2FA with explicit embedded-wallet protection scope; 15 targeted tests pass and desktop/mobile passkey login dialog verified.
 - [ ] Verify security enrollment with the owner's Privy session/device; enable transaction MFA and desired authenticator methods in Privy if unavailable. Real email/passkey/TOTP enrollment cannot be completed without the owner's verification; external-wallet signatures are not protected by Privy MFA.
 - [x] Keep supported Real deposits and withdrawals available to any connected owner with plain-language informed review; preserve consent, wallet signature and safety validation.

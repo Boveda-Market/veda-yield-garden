@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, Users, Star } from "lucide-react";
+import { Copy, Users, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
-import { AFFILIATE_TIERS, REF_STORAGE_KEY, normalizeCode, type AffiliateDashboard } from "@/lib/affiliate";
-import { applyVip, getAffiliateDashboard, joinAffiliate, savePayoutWallet } from "@/lib/affiliate.functions";
+import { AFFILIATE_SHARE_BPS, REF_STORAGE_KEY, normalizeCode, type AffiliateDashboard } from "@/lib/affiliate";
+import { customizeAffiliateCode, getAffiliateDashboard, joinAffiliate, savePayoutWallet } from "@/lib/affiliate.functions";
 
 const usdc = (raw: string) => (Number(raw) / 1e6).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 });
 const field = "mt-2 w-full rounded-lg border border-input bg-card px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring";
@@ -15,13 +15,12 @@ export function AffiliatePanel() {
   const session = useBovedaSession();
   const load = useServerFn(getAffiliateDashboard);
   const join = useServerFn(joinAffiliate);
-  const apply = useServerFn(applyVip);
+  const saveCode = useServerFn(customizeAffiliateCode);
   const savePayout = useServerFn(savePayoutWallet);
   const [dash, setDash] = useState<AffiliateDashboard | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [code, setCode] = useState("");
-  const [channel, setChannel] = useState("");
-  const [audience, setAudience] = useState("");
+  const [customCode, setCustomCode] = useState("");
   const [payout, setPayout] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -29,7 +28,7 @@ export function AffiliatePanel() {
   async function refresh() {
     try {
       const result = await load({ data: { token: await token() } });
-      if (result.success) { setDash(result.dashboard); setPayout(result.dashboard.payoutWallet ?? session.walletAddress ?? ""); } else setMessage(t(result.error));
+      if (result.success) { setDash(result.dashboard); setCustomCode(result.dashboard.code); setPayout(result.dashboard.payoutWallet ?? session.walletAddress ?? ""); } else setMessage(t(result.error));
     } catch { setMessage(t("Inicia sesión para ver tu programa de afiliados.")); }
   }
   async function act(fn: () => Promise<{ success: boolean; error?: string }>, ok: string) {
@@ -48,20 +47,25 @@ export function AffiliatePanel() {
   }, [session.authenticated]);
 
   const preview = !session.authenticated;
-  if (preview && !dash) setDash({ code: "EJEMPLO", tier: "base", shareBps: 2500, referred: 3, pendingRaw: "1250000", paidRaw: "0", payoutWallet: null, application: null, joinedCode: false, earnings: [] } as AffiliateDashboard);
+  if (preview && !dash) { setDash({ code: "EJEMPLO", shareBps: AFFILIATE_SHARE_BPS, referred: 3, pendingRaw: "1250000", paidRaw: "0", payoutWallet: null, joinedCode: false, earnings: [] }); setCustomCode("EJEMPLO"); }
   const link = dash ? `${window.location.origin}/?ref=${dash.code}` : "";
   return <section className="mt-10 border-t border-border pt-8" aria-labelledby="affiliate-title">
     <h2 id="affiliate-title" className="flex items-center gap-2 font-display text-2xl font-semibold"><Users size={20} />{t("Invita y gana")}</h2>
-    <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("Comparte tu enlace con amigos y familia. Cada vez que alguien que invitaste cosecha ganancias o cierra una bóveda, tú recibes el 25% de la comisión que cobra BÓVEDA, sin que a ellos les cueste nada extra. Mientras más personas invites, más ganas.")}</p>
+    <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("Comparte tu enlace con amigos y familia. Cada vez que alguien que invitaste cosecha ganancias o cierra una bóveda, recibes el 60% de la comisión que cobra BÓVEDA, sin que a ellos les cueste nada extra.")}</p>
     {preview && <p className="mt-3 rounded-lg border border-border p-3 text-xs text-muted-foreground">{t("Vista de ejemplo: crea una cuenta para obtener tu código real.")}</p>}
     {!dash ? <p className="mt-4 text-sm text-muted-foreground">{message ?? t("Cargando…")}</p> : <>
       <div className="mt-5 rounded-xl border border-border bg-card p-4">
-        <p className="text-xs text-muted-foreground">{t("Tu nivel")}</p>
-        <p className="font-semibold">{t(AFFILIATE_TIERS[dash.tier].label)} · {dash.shareBps / 100}% {t("de la comisión")}</p>
+        <p className="text-xs text-muted-foreground">{t("Tu comisión")}</p>
+        <p className="font-semibold">{dash.shareBps / 100}% {t("de la comisión")}</p>
         <p className="mt-3 text-xs text-muted-foreground">{t("Tu código")}</p>
         <p className="font-mono text-lg font-semibold">{dash.code}</p>
         <div className="mt-3 flex gap-2"><input readOnly value={link} aria-label={t("Tu enlace")} className="min-w-0 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-xs" /><Button size="sm" variant="outline" onClick={() => { void navigator.clipboard.writeText(link); setMessage(t("Enlace copiado.")); }}><Copy size={14} />{t("Copiar")}</Button></div>
       </div>
+      <form className="mt-4" onSubmit={(e) => { e.preventDefault(); const value = normalizeCode(customCode); if (!value) { setMessage(t("Usa de 4 a 16 letras o números, sin espacios.")); return; } if (preview) { setDash({ ...dash, code: value }); setMessage(t("Enlace de ejemplo actualizado. Inicia sesión para guardar el tuyo.")); return; } void act(async () => saveCode({ data: { token: await token(), code: value } }), "Tu enlace se actualizó."); }}>
+        <label className="block text-sm">{t("Personaliza tu enlace")}<input value={customCode} minLength={4} maxLength={16} required onChange={(e) => setCustomCode(e.target.value)} className={field} /></label>
+        <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Usa de 4 a 16 letras o números, sin espacios.")} {t("Tus invitados actuales se mantienen. Al cambiar el código, comparte el nuevo enlace: el anterior deja de funcionar.")}</p>
+        <Button type="submit" size="sm" variant="outline" className="mt-2" disabled={busy}><Save size={14} />{t("Guardar enlace")}</Button>
+      </form>
       <dl className="mt-4 grid grid-cols-3 gap-3 text-sm">
         <div className="rounded-xl border border-border p-3"><dt className="text-xs text-muted-foreground">{t("Invitados")}</dt><dd className="font-semibold">{dash.referred}</dd></div>
         <div className="rounded-xl border border-border p-3"><dt className="text-xs text-muted-foreground">{t("Por cobrar")}</dt><dd className="font-semibold">{usdc(dash.pendingRaw)} USDC</dd></div>
@@ -73,15 +77,6 @@ export function AffiliatePanel() {
       </form>
       <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Las comisiones se registran solo cuando la red confirma la operación y se pagan periódicamente en USDC tras revisión.")}</p>
       {dash.earnings.length > 0 && <ul className="mt-5 divide-y divide-border text-sm">{dash.earnings.map((e) => <li key={e.signature} className="flex justify-between gap-3 py-2"><span>{e.kind === "harvest" ? t("Cosecha") : t("Cierre")} · {new Date(e.createdAt).toLocaleDateString()}</span><span>+{usdc(e.commissionRaw)} USDC · {t(e.status === "paid" ? "Pagado" : e.status === "rejected" ? "Rechazado" : "Por cobrar")}</span></li>)}</ul>}
-      {dash.tier !== "vip" && <div className="mt-6 rounded-xl border border-border p-4">
-        <h3 className="flex items-center gap-2 font-semibold"><Star size={16} />{t("¿Eres influencer? Gana 60%")}</h3>
-        {dash.application === "pending" ? <p className="mt-2 text-sm text-muted-foreground">{t("Tu solicitud está en revisión.")}</p> : <form onSubmit={(e) => { e.preventDefault(); void act(async () => apply({ data: { token: await token(), channel, audience } }), "Solicitud enviada. Te avisaremos cuando la revisemos."); }}>
-          {dash.application === "rejected" && <p className="mt-2 text-sm text-muted-foreground">{t("Tu solicitud anterior no fue aprobada. Puedes enviar otra.")}</p>}
-          <label className="mt-3 block text-sm">{t("Tu canal o red social principal")}<input required minLength={3} maxLength={200} value={channel} onChange={(e) => setChannel(e.target.value)} placeholder="youtube.com/@tucanal" className={field} /></label>
-          <label className="mt-3 block text-sm">{t("Cuéntanos sobre tu audiencia (opcional)")}<textarea maxLength={500} value={audience} onChange={(e) => setAudience(e.target.value)} className={field} /></label>
-          <Button type="submit" size="sm" className="mt-3" disabled={busy}>{t("Solicitar nivel VIP")}</Button>
-        </form>}
-      </div>}
       {!dash.joinedCode && <form className="mt-6" onSubmit={(e) => { e.preventDefault(); const c = normalizeCode(code); if (!c) { setMessage(t("Código no válido.")); return; } void act(async () => join({ data: { token: await token(), code: c } }), "Código aplicado. ¡Gracias!"); }}>
         <label className="block text-sm">{t("¿Te invitó alguien? Escribe su código")}<input value={code} maxLength={16} onChange={(e) => setCode(e.target.value)} className={field} /></label>
         <Button type="submit" size="sm" variant="outline" className="mt-2" disabled={busy}>{t("Aplicar código")}</Button>

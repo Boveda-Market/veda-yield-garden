@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { affiliateCommission, normalizeCode, tierShareBps } from "@/lib/affiliate";
+import { AFFILIATE_SHARE_BPS, affiliateCommission, customizeCodeRequest, normalizeCode } from "@/lib/affiliate";
 
 describe("affiliate commissions", () => {
-  it("base users earn 25% of the fee", () => expect(affiliateCommission(10_000_000n, tierShareBps("base"))).toBe(2_500_000n));
-  it("affiliates earn 30% of the fee", () => expect(affiliateCommission(10_000_000n, tierShareBps("promoter"))).toBe(3_000_000n));
-  it("approved VIP earn 60% of the fee", () => expect(affiliateCommission(10_000_000n, tierShareBps("vip"))).toBe(6_000_000n));
-  it("floors fractional micro-USDC", () => expect(affiliateCommission(9_630n, 2500)).toBe(2_407n));
-  it("unknown tiers fall back to 25%", () => expect(tierShareBps("x")).toBe(2500));
+  it("all affiliates earn 60% of the collected fee", () => { expect(AFFILIATE_SHARE_BPS).toBe(6000); expect(affiliateCommission(10_000_000n, AFFILIATE_SHARE_BPS)).toBe(6_000_000n); });
+  it("floors fractional micro-USDC", () => expect(affiliateCommission(9_631n, AFFILIATE_SHARE_BPS)).toBe(5_778n));
+  it("no collected fee earns no commission", () => expect(affiliateCommission(0n, AFFILIATE_SHARE_BPS)).toBe(0n));
+  it("custom codes normalize and reject account or rate overrides", () => {
+    const token = "x".repeat(20);
+    expect(customizeCodeRequest.parse({ token, code: " angel60 " }).code).toBe("ANGEL60");
+    expect(customizeCodeRequest.safeParse({ token, code: "ANGEL60", privy_user_id: "other" }).success).toBe(false);
+    expect(customizeCodeRequest.safeParse({ token, code: "ANGEL60", shareBps: 10000 }).success).toBe(false);
+  });
+  it("custom codes require 4–16 alphanumeric characters", () => { for (const code of ["abc", "a".repeat(17), "angel soto", "angel!"]) expect(normalizeCode(code)).toBeNull(); expect(normalizeCode("a".repeat(16))).toBe("A".repeat(16)); });
   it("normalizes codes", () => { expect(normalizeCode(" ab12cd ")).toBe("AB12CD"); expect(normalizeCode("a!")).toBeNull(); });
 });
