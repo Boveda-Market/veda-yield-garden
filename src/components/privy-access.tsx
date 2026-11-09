@@ -3,9 +3,9 @@ import "@/lib/buffer-polyfill";
 import { useState, type ReactNode } from "react";
 import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useMfaEnrollment, usePrivy } from "@privy-io/react-auth";
 import { useUpdateEmail } from "@privy-io/react-auth/ui";
-import { toSolanaWalletConnectors, useExportWallet, useFundWallet, useSignAndSendTransaction, useSignMessage, useWallets } from "@privy-io/react-auth/solana";
+import { toSolanaWalletConnectors, useExportWallet, useFundWallet, useSignMessage, useSignTransaction, useWallets } from "@privy-io/react-auth/solana";
 import bs58 from "bs58";
-import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
+import { createSolanaRpc, createSolanaRpcSubscriptions, type Base64EncodedWireTransaction } from "@solana/kit";
 import { useQueryClient } from "@tanstack/react-query";
 
 // Privy-hosted mainnet RPC accepts browser requests (the public endpoint returns 403); the private Helius key stays server-only.
@@ -26,7 +26,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const { showMfaEnrollmentModal } = useMfaEnrollment();
   const queryClient = useQueryClient();
   const { wallets } = useWallets();
-  const { signAndSendTransaction } = useSignAndSendTransaction();
+  const { signTransaction } = useSignTransaction();
   const { signMessage: signWalletMessage } = useSignMessage();
   const { addFunds } = useAddFunds();
   const { exportWallet } = useExportWallet();
@@ -58,8 +58,23 @@ function SessionBridge({ children }: { children: ReactNode }) {
     signAndSend: async (transaction) => {
       const wallet = wallets[0];
       if (!authenticated || !wallet) throw new Error(t("Conecta una wallet de Solana"));
-      const { signature } = await signAndSendTransaction({ transaction, wallet, chain: "solana:mainnet" });
-      return bs58.encode(signature);
+      // Sign first, then broadcast from the browser, so each stage fails with its own clear message.
+      let signed: Uint8Array;
+      try {
+        ({ signedTransaction: signed } = await signTransaction({ transaction, wallet, chain: "solana:mainnet" }));
+      } catch (e) {
+        console.error("[BÓVEDA] wallet signing failed", e);
+        if (e instanceof Error && /reject|cancel|exited/i.test(e.message)) throw new Error(t("Cancelaste la firma."));
+        throw new Error(`${t("La wallet no pudo firmar")}: ${e instanceof Error ? e.message : String(e)}`);
+      }
+      try {
+        const base64 = btoa(Array.from(signed, (b) => String.fromCharCode(b)).join("")) as Base64EncodedWireTransaction;
+        const sig = await solanaRpcs["solana:mainnet"].rpc.sendTransaction(base64, { encoding: "base64", preflightCommitment: "confirmed" }).send();
+        return String(sig);
+      } catch (e) {
+        console.error("[BÓVEDA] broadcast failed", e);
+        throw new Error(`${t("La red rechazó la operación")}: ${e instanceof Error ? e.message : String(e)}`);
+      }
     },
     signMessage: async (message) => {
       const wallet = wallets[0];
