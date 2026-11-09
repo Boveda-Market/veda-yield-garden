@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw } from "lucide-react";
+import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
@@ -14,7 +15,6 @@ import { decimalToUnits } from "@/lib/onboarding";
 import { StartGuide } from "@/components/start-guide";
 import { BuyUsdc } from "@/components/buy-usdc";
 
-const fmtUnits = (v: bigint | string, d: number, shown = 4) => (Number(v) / 10 ** d).toLocaleString(undefined, { maximumFractionDigits: shown });
 
 export function WalletPanel() {
   const t = useT();
@@ -40,6 +40,20 @@ export function WalletPanel() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [buyOpen, setBuyOpen] = useState(false);
+  const [receiveOpen, setReceiveOpen] = useState(false);
+  const [qr, setQr] = useState<string | null>(null);
+  const actionsRef = useRef<HTMLElement>(null);
+  const prices = useQuery({ queryKey: ["wallet-prices"], staleTime: 60_000, queryFn: async () => {
+    const out: Record<string, number> = { USDC: 1 };
+    await Promise.all(SWAP_TOKENS.filter((x) => x.symbol !== "USDC").map(async (x) => {
+      try { const r = await fetch(`https://api.dexscreener.com/tokens/v1/solana/${x.mint}`); const j = await r.json() as { priceUsd?: string; liquidity?: { usd?: number } }[];
+        const best = Array.isArray(j) ? [...j].sort((a, b) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0))[0] : undefined;
+        const p = Number(best?.priceUsd); if (Number.isFinite(p) && p > 0) out[x.symbol] = p; } catch { /* price unavailable */ }
+    }));
+    return out;
+  } });
+  useEffect(() => { if (!receiveOpen || !address || qr) return; void import("qrcode").then((m) => m.toDataURL(address, { width: 448, margin: 1 })).then(setQr).catch(() => setQr(null)); }, [receiveOpen, address, qr]);
 
   if (!session.authenticated) return <p className="text-muted-foreground">{t("Inicia sesión para ver tu wallet.")}</p>;
   if (!address) return <p className="text-muted-foreground">{t("Todavía no hay una wallet conectada a tu cuenta.")}</p>;
@@ -72,41 +86,82 @@ export function WalletPanel() {
     } catch (e) { fail(e); throw e; } finally { setBusy(false); }
   }
 
+  const fmt = (v: number, d = 2) => v.toLocaleString("en-US", { useGrouping: false, maximumFractionDigits: d });
+  const assets = [
+    { symbol: "USDC", label: t("Dólar digital"), raw: balances.data?.usdc, decimals: 6 },
+    { symbol: "SOL", label: t("Para costos de red"), raw: balances.data?.sol, decimals: 9 },
+    ...extraTokens.map((x) => ({ symbol: x.symbol, label: x.symbol, raw: extra.data?.[x.symbol], decimals: x.decimals })),
+  ].map((a) => { const amt = a.raw === undefined ? undefined : Number(a.raw) / 10 ** a.decimals; const p = prices.data?.[a.symbol]; return { ...a, amt, usd: amt !== undefined && p !== undefined ? amt * p : undefined }; });
+  const total = assets.every((a) => a.usd !== undefined || a.amt === 0) ? assets.reduce((s, a) => s + (a.usd ?? 0), 0) : undefined;
+  const openSwap = (from: string) => { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from })); actionsRef.current?.scrollIntoView({ behavior: "smooth" }); };
+  const openSend = (a: WalletAsset) => { setTab("send"); setAsset(a); actionsRef.current?.scrollIntoView({ behavior: "smooth" }); };
+  const decimals = asset === "SOL" ? 9 : 6;
+  const setPct = (pct: bigint) => setAmount((Number((max * pct) / 100n) / 10 ** decimals).toString());
+  const quick = [
+    { icon: CreditCard, label: t("Comprar"), on: () => setBuyOpen((v) => !v) },
+    { icon: ArrowLeftRight, label: t("Cambiar"), on: () => openSwap("USDC") },
+    { icon: Send, label: t("Enviar"), on: () => openSend("USDC") },
+    { icon: QrCode, label: t("Recibir"), on: () => setReceiveOpen(true) },
+  ];
+
   return <div className="mx-auto max-w-2xl space-y-5">
-    <StartGuide onSwap={() => { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from: "SOL" })); }} />
-    <section className="rounded-2xl border border-border bg-card p-5">
-      <div className="flex items-center justify-between"><h2 className="font-display text-2xl">{t("Mi wallet")}</h2><Button variant="ghost" size="sm" onClick={() => void balances.refetch()} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
-      <p className="mt-1 text-sm text-muted-foreground">{t("Tu dirección para recibir fondos")}</p>
-      <div className="mt-2 flex items-center gap-2"><code className="min-w-0 flex-1 truncate rounded-lg bg-muted px-3 py-2 text-sm">{address}</code><Button size="sm" variant="outline" onClick={() => { void navigator.clipboard.writeText(address); setCopied(true); setTimeout(() => setCopied(false), 1500); }}><Copy size={14} />{copied ? t("Copiado") : t("Copiar")}</Button></div>
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-muted p-3"><p className="text-xs text-muted-foreground">USDC</p><p className="font-display text-xl">{balances.data ? fmtUnits(balances.data.usdc, 6, 2) : "—"}</p></div>
-        <div className="rounded-xl bg-muted p-3"><p className="text-xs text-muted-foreground">{t("SOL · para costos de red")}</p><p className="font-display text-xl">{balances.data ? fmtUnits(balances.data.sol, 9) : "—"}</p></div>
-        {extraTokens.map((x) => <div key={x.symbol} className="rounded-xl bg-muted p-3"><p className="text-xs text-muted-foreground">{x.symbol}</p><p className="font-display text-xl">{extra.data?.[x.symbol] !== undefined ? fmtUnits(extra.data[x.symbol]!, x.decimals) : "—"}</p></div>)}
-      </div>
-      <BuyUsdc className="mt-4" />
+    <StartGuide onSwap={() => openSwap("SOL")} />
+    <section className="rounded-3xl border border-border bg-card p-6">
+      <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{t("Balance total")}</p><Button variant="ghost" size="sm" onClick={() => { void balances.refetch(); void extra.refetch(); void prices.refetch(); }} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
+      <p className="mt-1 font-display text-4xl">{total !== undefined ? `$${fmt(total)}` : "—"}</p>
+      <button type="button" onClick={() => setReceiveOpen(true)} className="mt-2 inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground hover:text-foreground"><code>{address.slice(0, 4)}…{address.slice(-4)}</code><Copy size={12} /></button>
+      <div className="mt-5 grid grid-cols-4 gap-2">{quick.map((q) => <button key={q.label} type="button" onClick={q.on} className="flex flex-col items-center gap-1.5 text-xs"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"><q.icon size={20} /></span>{q.label}</button>)}</div>
+      {buyOpen && <BuyUsdc className="mt-5" />}
       {balances.error && <p className="mt-2 text-sm text-destructive">{(balances.error as Error).message}</p>}
     </section>
 
-    <section className="rounded-2xl border border-border bg-card p-5">
+    <section className="rounded-2xl border border-border bg-card p-2">
+      <h3 className="px-3 pt-3 pb-1 font-display text-lg">{t("Tus activos")}</h3>
+      <ul>{assets.map((a) => <li key={a.symbol} className="flex items-center gap-3 rounded-xl p-3 hover:bg-muted">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted font-display text-xs">{a.symbol.slice(0, 4)}</span>
+        <div className="min-w-0 flex-1"><p className="font-medium">{a.symbol}</p><p className="text-xs text-muted-foreground">{a.label}</p></div>
+        <div className="text-right"><p className="font-medium">{a.amt !== undefined ? fmt(a.amt, a.symbol === "USDC" ? 2 : 4) : "—"}</p><p className="text-xs text-muted-foreground">{a.usd !== undefined ? `$${fmt(a.usd)}` : "—"}</p></div>
+        <Button size="icon" variant="ghost" aria-label={t("Cambiar")} onClick={() => openSwap(a.symbol)}><ArrowLeftRight size={16} /></Button>
+        {(a.symbol === "USDC" || a.symbol === "SOL") && <Button size="icon" variant="ghost" aria-label={t("Enviar")} onClick={() => openSend(a.symbol as WalletAsset)}><Send size={16} /></Button>}
+      </li>)}</ul>
+    </section>
+
+    <section ref={actionsRef} className="scroll-mt-20 rounded-2xl border border-border bg-card p-5">
       <div className="flex gap-2"><Button disabled={busy} variant={tab === "swap" ? "secondary" : "ghost"} onClick={() => setTab("swap")}><ArrowLeftRight size={16} />{t("Cambiar")}</Button><Button disabled={busy} variant={tab === "send" ? "secondary" : "ghost"} onClick={() => setTab("send")}><Send size={16} />{t("Enviar")}</Button></div>
-      {tab === "swap" ? <WalletSwap key={swapFrom.key} balances={swapBalances} initialFrom={swapFrom.from} busy={busy} onConfirm={swap} /> : <div className="mt-4 space-y-3">
-        <div className="flex gap-2">{(["USDC", "SOL"] as const).map((a) => <Button key={a} size="sm" variant={asset === a ? "default" : "outline"} onClick={() => setAsset(a)}>{a}</Button>)}</div>
-        {tab === "send" && <div><Input placeholder={t("Dirección de destino")} value={to} onChange={(e) => setTo(e.target.value.trim())} />{toError && <p className="mt-1 text-sm text-destructive">{toError}</p>}</div>}
-        <div><div className="flex gap-2"><Input inputMode="decimal" placeholder={t("Monto")} value={amount} onChange={(e) => setAmount(e.target.value)} /><Button variant="outline" size="sm" className="h-10" onClick={() => setAmount((Number(max) / 10 ** (asset === "SOL" ? 9 : 6)).toString())}>{t("Máx")}</Button></div>{amountError && <p className="mt-1 text-sm text-destructive">{amountError}</p>}{asset === "SOL" && <p className="mt-1 text-xs text-muted-foreground">{t("Guardamos 0.01 SOL para pagar los costos de red.")}</p>}</div>
-        <>
-          <p className="text-xs text-muted-foreground">{t("Revisa bien la dirección: los envíos no se pueden revertir. BÓVEDA no cobra comisión por enviar.")}</p>
-          <Button className="w-full" disabled={busy || !units || !!amountError || !to || !!toError} onClick={() => void send()}>{busy ? t("Procesando…") : t("Revisar y firmar envío")}</Button>
-        </>
+      {tab === "swap" ? <WalletSwap key={swapFrom.key} balances={swapBalances} initialFrom={swapFrom.from} busy={busy} onConfirm={swap} /> : <div className="mt-4 space-y-4">
+        <div className="grid grid-cols-2 gap-2">{(["USDC", "SOL"] as const).map((a) => { const b = a === "SOL" ? balances.data?.sol : balances.data?.usdc; return <button key={a} type="button" onClick={() => setAsset(a)} className={`rounded-xl border p-3 text-left ${asset === a ? "border-primary bg-primary/10" : "border-border"}`}><p className="font-medium">{a}</p><p className="text-xs text-muted-foreground">{t("Disponible")}: {b !== undefined ? fmt(Number(spendable(b, a)) / 10 ** (a === "SOL" ? 9 : 6), 4) : "—"}</p></button>; })}</div>
+        <div><label className="text-xs text-muted-foreground">{t("Dirección de destino")}</label><Input className="mt-1" placeholder={t("Pega la dirección aquí")} value={to} onChange={(e) => setTo(e.target.value.trim())} />
+          {toError ? <p className="mt-1 text-sm text-destructive">{toError}</p> : to && <p className="mt-1 flex items-center gap-1 text-xs text-primary"><CheckCircle2 size={12} />{t("Dirección válida")}: {to.slice(0, 4)}…{to.slice(-4)}</p>}
+          {to && to === address && <p className="mt-1 text-xs text-destructive">{t("Esta es tu propia dirección.")}</p>}</div>
+        <div><label className="text-xs text-muted-foreground">{t("Monto")}</label><Input className="mt-1" inputMode="decimal" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value.replace(",", "."))} />
+          <div className="mt-2 grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={String(p)} size="sm" variant="outline" onClick={() => setPct(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
+          {amountError && <p className="mt-1 text-sm text-destructive">{amountError}</p>}{asset === "SOL" && <p className="mt-1 text-xs text-muted-foreground">{t("Guardamos 0.01 SOL para pagar los costos de red.")}</p>}</div>
+        {units && !amountError && to && !toError && <div className="rounded-xl bg-muted p-3 text-sm"><div className="flex justify-between"><span className="text-muted-foreground">{t("Envías")}</span><span>{amount} {asset}</span></div><div className="flex justify-between"><span className="text-muted-foreground">{t("Comisión BÓVEDA")}</span><span>0</span></div><div className="flex justify-between"><span className="text-muted-foreground">{t("Destino")}</span><code>{to.slice(0, 4)}…{to.slice(-4)}</code></div></div>}
+        <p className="text-xs text-muted-foreground">{t("Revisa bien la dirección: los envíos no se pueden revertir. BÓVEDA no cobra comisión por enviar.")}</p>
+        <Button className="w-full" disabled={busy || !units || !!amountError || !to || !!toError} onClick={() => void send()}>{busy ? t("Procesando…") : t("Revisar y firmar envío")}</Button>
       </div>}
       {message && <p role="status" className="mt-3 text-sm">{message}</p>}
     </section>
 
-    <section className="rounded-2xl border border-border bg-card p-5">
-      <h3 className="flex items-center gap-2 font-display text-lg"><KeyRound size={18} />{t("Tu llave privada")}</h3>
+    <details className="group rounded-2xl border border-border bg-card p-5">
+      <summary className="flex cursor-pointer list-none items-center justify-between font-display text-lg"><span className="flex items-center gap-2"><ShieldAlert size={18} />{t("Avanzado")}</span><ChevronDown size={18} className="transition-transform group-open:rotate-180" /></summary>
+      <h4 className="mt-4 flex items-center gap-2 font-medium"><KeyRound size={16} />{t("Tu llave privada")}</h4>
       {session.exportWallet ? <>
         <p className="mt-2 text-sm text-muted-foreground">{t("Puedes ver y copiar tu llave privada para usar esta wallet en otra app. Quien tenga esta llave controla tus fondos: nunca la compartas.")}</p>
         <Button className="mt-3" variant="outline" onClick={() => void session.exportWallet?.().catch(fail)}>{t("Ver mi llave privada")}</Button>
       </> : <p className="mt-2 text-sm text-muted-foreground">{t("Tu wallet externa (Phantom o Jupiter) guarda tu llave. Puedes verla desde esa app.")}</p>}
-    </section>
+    </details>
+
+    <Dialog open={receiveOpen} onOpenChange={setReceiveOpen}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader><DialogTitle>{t("Recibir fondos")}</DialogTitle></DialogHeader>
+        <div className="flex flex-col items-center gap-4">
+          <div className="rounded-2xl bg-card p-3 ring-1 ring-border">{qr ? <img src={qr} alt={t("Código QR de tu dirección")} className="h-56 w-56" /> : <div className="h-56 w-56 animate-pulse rounded-xl bg-muted" />}</div>
+          <code className="w-full break-all rounded-lg bg-muted p-3 text-center text-xs">{address}</code>
+          <Button className="w-full" onClick={() => { void navigator.clipboard.writeText(address); setCopied(true); setTimeout(() => setCopied(false), 1500); }}><Copy size={14} />{copied ? t("Copiado") : t("Copiar dirección")}</Button>
+          <p className="text-center text-xs text-muted-foreground">{t("Envía solo USDC, SOL o monedas compatibles a esta dirección.")}</p>
+        </div>
+      </DialogContent>
+    </Dialog>
   </div>;
 }
