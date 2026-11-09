@@ -82,7 +82,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
         <ReceiveCard label={t("Recibes aproximadamente")} amount={result.net ?? "—"} unit="USDC" sub={result.minimumNet ? `${t("Mínimo garantizado:")} ${result.minimumNet} USDC · + ${result.rentSol} SOL ${t("de vuelta")}` : undefined} />
         <dl className="grid gap-2 rounded-xl border border-border p-4">
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Valor de tu posición")}</dt><dd>{result.gross} USDC</dd></div>
-          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión BÓVEDA · 1%")}</dt><dd>−{result.fee} USDC</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión BÓVEDA")}</dt><dd>−{result.fee} USDC</dd></div>
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("SOL de apertura devuelto")}</dt><dd>{result.rentSol} SOL</dd></div>
         </dl>
       </>}

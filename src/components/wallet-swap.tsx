@@ -135,11 +135,11 @@ export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: 
       <details className="rounded-xl border border-border px-3 py-2 text-sm">
         <summary className="cursor-pointer text-muted-foreground">{t("Ver detalles")}</summary>
         <dl className="mt-2 space-y-2">
-          <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{t("Comisión BÓVEDA (1%)")}</dt><dd>{format(current.feeUsdc, "USDC")} USDC</dd></div>
+          <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{t("Comisión BÓVEDA")}</dt><dd>{format(current.feeUsdc, "USDC")} USDC</dd></div>
           <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{t("Mínimo a recibir")}</dt><dd>{current.minimum ? `${format(current.minimum, to)} ${to}` : "—"}</dd></div>
           <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{t("Protección de precio")}</dt><dd>0.5%</dd></div>
         </dl>
-        <p className="mt-2 text-xs text-muted-foreground">{t("La comisión del 1% ya está incluida en lo que recibes. No hay cobros ocultos.")}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{t("Los primeros 10 USDC no pagan comisión; sobre el resto se cobra 1.25%. Ya está incluida en lo que recibes.")}</p>
       </details>
     </>}
     {quote.isError && amount === debounced && <p role="alert" className="text-sm text-destructive">{t(quote.error.message)}</p>}

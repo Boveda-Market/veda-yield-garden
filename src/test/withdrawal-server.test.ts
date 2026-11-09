@@ -36,16 +36,16 @@ describe("full-close withdrawal simulation", () => {
     let call = 0;
     mocks.simulate.mockImplementation(async () => {
       const final = ++call >= 3;
-      return { value: { err: null, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 990_050n : 1_000_000n, owner).toString("base64"), "base64"], lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 9_950n : 0n, new PublicKey(FEE_WALLET)).toString("base64"), "base64"], lamports: 2_000_000 }, null, null, null, { lamports: 27_000_000 }] } };
+      return { value: { err: null, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 1_000_000n : 1_000_000n, owner).toString("base64"), "base64"], lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(0n, new PublicKey(FEE_WALLET)).toString("base64"), "base64"], lamports: 2_000_000 }, null, null, null, { lamports: 27_000_000 }] } };
     });
   });
-  it("checks net USDC, 1% fee and all three NFT rent closures without signing or sending", async () => {
+  it("checks net USDC, zero fee under 10 USDC and all three NFT rent closures without signing or sending", async () => {
     const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" });
     expect(result.success).toBe(true);
     expect(result.checks).toEqual({ closed: true, usdc: true, fee: true, rent: true });
-    expect(result.net).toBe("0.99005");
+    expect(result.net).toBe("1");
     expect(result.minimumGross).toBe("0.995");
-    expect(result.fee).toBe("0.00995");
+    expect(result.fee).toBe("0");
     expect(result.rentSol).toBe("0.007");
     expect(result).not.toHaveProperty("transaction");
     expect(mocks.send).not.toHaveBeenCalled();
@@ -59,7 +59,7 @@ describe("full-close withdrawal simulation", () => {
     const accounts = await mocks.before();
     accounts[5] = nftAccount(CHAIN_POOLS[2].mint, new PublicKey(FEE_WALLET));
     mocks.before.mockResolvedValue(accounts);
-    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "9950", minimumNetRaw: "985050" });
+    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "0", minimumNetRaw: "995000" });
     expect(result.prepared).toBeUndefined();
     expect(mocks.remove).not.toHaveBeenCalled();
   });
@@ -87,15 +87,15 @@ describe("full-close withdrawal simulation", () => {
     let call = 0;
     mocks.simulate.mockImplementation(async () => {
       const final = ++call >= 3;
-      return { value: { err: null, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 1_010_050n : 1_000_000n, owner).toString("base64"), "base64"], lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 9_950n : 0n, new PublicKey(FEE_WALLET)).toString("base64"), "base64"], lamports: 2_000_000 }, null, null, null, { lamports: 27_000_000 }] } };
+      return { value: { err: null, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 1_020_000n : 1_000_000n, owner).toString("base64"), "base64"], lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(0n, new PublicKey(FEE_WALLET)).toString("base64"), "base64"], lamports: 2_000_000 }, null, null, null, { lamports: 27_000_000 }] } };
     });
     const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" });
     expect(result.success).toBe(true);
     expect(result.checks?.fee).toBe(true);
-    expect(result.net).toBe("1.01005");
+    expect(result.net).toBe("1.02");
     expect(result.gross).toBe("1.02");
-    expect(result.fee).toBe("0.00995");
-    expect(result.expectedFee).toBe("0.00995");
+    expect(result.fee).toBe("0");
+    expect(result.expectedFee).toBe("0");
     expect(result).not.toHaveProperty("transaction");
     expect(mocks.send).not.toHaveBeenCalled();
   });
@@ -134,7 +134,7 @@ describe("full-close withdrawal simulation", () => {
     expect(mocks.send).not.toHaveBeenCalled();
   });
   it("prepares new owned MET positions beyond the original pilot", async () => {
-    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "9950", minimumNetRaw: "985050" });
+    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "0", minimumNetRaw: "995000" });
     expect(result.success).toBe(true);
     expect(result.prepared?.wallet).toBe(wallet);
     expect(result.prepared?.position).toBe(position);
@@ -142,7 +142,7 @@ describe("full-close withdrawal simulation", () => {
     expect(mocks.send).not.toHaveBeenCalled();
   });
   it("rejects a minimum more than 1% worse than reviewed for new positions", async () => {
-    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "9950", minimumNetRaw: "999999" });
+    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "0", minimumNetRaw: "1100000" });
     expect(result.success).toBe(false);
     expect(result.prepared).toBeUndefined();
   });
@@ -156,14 +156,14 @@ describe("full-close withdrawal simulation", () => {
     mocks.simulate.mockImplementation(async (transaction) => {
       expect(transaction.signatures.every((sig: Uint8Array) => sig.every((byte) => byte === 0))).toBe(true);
       const final = ++count >= 3;
-      return { value: { err: null, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 990_050n : 1_000_000n, pilotOwner).toString("base64"), "base64"], lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 9_950n : 0n, new PublicKey(FEE_WALLET)).toString("base64"), "base64"], lamports: 2_000_000 }, null, null, null, { lamports: 27_000_000 }] } };
+      return { value: { err: null, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 1_000_000n : 1_000_000n, pilotOwner).toString("base64"), "base64"], lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(0n, new PublicKey(FEE_WALLET)).toString("base64"), "base64"], lamports: 2_000_000 }, null, null, null, { lamports: 27_000_000 }] } };
     });
-    const result = await simulateWithdrawal("test", WITHDRAWAL_PILOT, { prepare: true, maximumFeeRaw: "9950", minimumNetRaw: "985050" });
+    const result = await simulateWithdrawal("test", WITHDRAWAL_PILOT, { prepare: true, maximumFeeRaw: "0", minimumNetRaw: "995000" });
     expect(result.success).toBe(true);
     expect(result.prepared?.wallet).toBe(WITHDRAWAL_PILOT.wallet);
     expect(result.prepared?.transaction).toBeTruthy();
     expect(mocks.send).not.toHaveBeenCalled();
-    const worse = await simulateWithdrawal("test", WITHDRAWAL_PILOT, { prepare: true, maximumFeeRaw: "9000", minimumNetRaw: "985050" });
+    const worse = await simulateWithdrawal("test", WITHDRAWAL_PILOT, { prepare: true, maximumFeeRaw: "0", minimumNetRaw: "1100000" });
     expect(worse.success).toBe(false);
     expect(worse.prepared).toBeUndefined();
   });

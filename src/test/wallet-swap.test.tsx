@@ -24,16 +24,16 @@ describe("wallet swap review", () => {
     fireEvent.change(screen.getByLabelText("Moneda que pagas"), { target: { value: "MET" } });
     expect(screen.getByLabelText("Moneda que recibes")).toHaveValue("USDC");
   });
-  it("quotes automatically with the 1% USDC input fee and only signs on confirmation", async () => {
+  it("quotes automatically with the progressive USDC input fee and only signs on confirmation", async () => {
     const { fetcher, confirm } = mount();
     fireEvent.change(screen.getByLabelText("Pagas"), { target: { value: "100" } });
     await waitFor(() => expect(fetcher).toHaveBeenCalledOnce(), { timeout: 2000 });
-    expect(fetcher.mock.calls[0]?.[0]).toContain("amount=99000000");
+    expect(fetcher.mock.calls[0]?.[0]).toContain("amount=98875000");
     const button = screen.getByRole("button", { name: "Confirmar y firmar cambio" });
     await waitFor(() => expect(button).toBeEnabled());
     expect(confirm).not.toHaveBeenCalled();
     await act(async () => { fireEvent.click(button); });
-    expect(confirm).toHaveBeenCalledWith(expect.objectContaining({ amount: 100_000_000n, feeUsdc: "1000000", outAmount: "500000000" }));
+    expect(confirm).toHaveBeenCalledWith(expect.objectContaining({ amount: 100_000_000n, feeUsdc: "1125000", outAmount: "500000000" }));
   });
   it("invalidates the reviewed amount immediately after an edit", async () => {
     const { confirm } = mount();

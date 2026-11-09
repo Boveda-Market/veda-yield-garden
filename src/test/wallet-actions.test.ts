@@ -22,7 +22,7 @@ describe("wallet actions", () => {
 import { swapFee } from "@/lib/wallet-actions";
 describe("swap fee", () => {
   it("charges 1% of USDC, floored", () => {
-    expect(swapFee(100_000_000n)).toBe(1_000_000n);
-    expect(swapFee(150n)).toBe(1n);
+    expect(swapFee(100_000_000n)).toBe(1_125_000n);
+    expect(swapFee(10_000_000n)).toBe(0n);
   });
 });

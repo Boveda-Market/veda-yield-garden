@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { withdrawalInput } from "@/lib/withdrawal";
+import { progressiveFee } from "@/lib/fees";
 
 export const prepareHarvestInput = withdrawalInput.extend({ maximumFeeRaw: z.string().max(20).regex(/^\d+$/) }).strict();
 export type HarvestResult = {
@@ -22,6 +23,6 @@ export type HarvestResult = {
 /** 1% exit fee (floored, integer micro-USDC) on claimed USDC earnings. */
 export function harvestAmounts(claimedUsdc: bigint) {
   if (claimedUsdc < 0n) throw new Error("Importe inválido");
-  const fee = claimedUsdc / 100n;
+  const fee = progressiveFee(claimedUsdc);
   return { gross: claimedUsdc, fee, net: claimedUsdc - fee };
 }

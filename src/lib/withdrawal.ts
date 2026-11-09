@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { solanaAddressSchema } from "@/lib/solana-data";
+import { progressiveFee } from "@/lib/fees";
 
 export const withdrawalInput = z.object({ wallet: solanaAddressSchema, position: solanaAddressSchema, vaultId: z.enum(["sol", "met"]) }).strict();
 export type WithdrawalInput = z.infer<typeof withdrawalInput>;
@@ -27,6 +28,6 @@ export type WithdrawalResult = {
 /** Fixed fee on the enforced gross USDC minimum; refundable SOL rent is excluded. */
 export function withdrawalAmounts(minimumGross: bigint) {
   if (minimumGross < 0n) throw new Error("Importe inválido");
-  const fee = minimumGross / 100n;
+  const fee = progressiveFee(minimumGross);
   return { gross: minimumGross, fee, net: minimumGross - fee };
 }

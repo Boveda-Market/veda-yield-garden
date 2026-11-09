@@ -3,11 +3,22 @@ export const DEPOSIT_FEE_PERCENT = 0;
 export const FEE_WALLET = "93bF1K1dWMJseMuf15WLaNt1diVGACQ9gUFA7szsSbs7";
 const SCALE = 1_000_000;
 
+/** First 10 USDC of every fee-bearing operation is free. */
+export const FEE_FREE_MICRO = 10_000_000n;
+/** Marginal rate applied only to the amount above the free allowance (1.25%). */
+export const FEE_MARGINAL_BPS = 125n;
+
+/** Progressive fee in micro-USDC: 0 up to 10 USDC, 1.25% on the excess, floored. */
+export function progressiveFee(units: bigint) {
+  if (units <= FEE_FREE_MICRO) return 0n;
+  return ((units - FEE_FREE_MICRO) * FEE_MARGINAL_BPS) / 10_000n;
+}
+
 /** Amounts and fees truncate to USDC's six decimal places, never rounding fees up. */
 export function transactionAmounts(amount: number, kind: "deposit" | "exit" = "exit") {
   if (!Number.isFinite(amount) || amount < 0 || amount > Number.MAX_SAFE_INTEGER / SCALE) throw new Error("Importe inválido");
   const units = Math.floor(Number((amount * SCALE).toFixed(4)));
-  const feeUnits = Math.floor(units * (kind === "deposit" ? DEPOSIT_FEE_PERCENT : FEE_PERCENT) / 100);
+  const feeUnits = kind === "deposit" ? 0 : Number(progressiveFee(BigInt(units)));
   return { gross: units / SCALE, fee: feeUnits / SCALE, net: (units - feeUnits) / SCALE };
 }
 
