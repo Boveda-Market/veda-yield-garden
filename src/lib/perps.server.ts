@@ -1,4 +1,4 @@
-import { collateralMint, perpCloseFee, PERP_MARKETS, PERP_SLIPPAGE_BPS, type PerpAsset, type PerpPosition, type PerpQuote, type PerpSide } from "@/lib/perps";
+import { collateralMint, perpCloseFee, perpOpenFee, PERP_MARKETS, PERP_SLIPPAGE_BPS, type PerpAsset, type PerpPosition, type PerpQuote, type PerpSide } from "@/lib/perps";
 import { FEE_USDC_ACCOUNT, USDC_MINT } from "@/lib/wallet-actions";
 
 const API = "https://perps-api.jup.ag/v1";
