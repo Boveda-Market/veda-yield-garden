@@ -124,6 +124,7 @@ export const account: Record<string, string> = {
   "Conecta una wallet o escribe una dirección para recibir tus pagos.": "Connect a wallet or enter an address to receive your payouts.",
   "Cambiar wallet de destino": "Change destination wallet",
   "Usar mi wallet conectada": "Use my connected wallet",
+  "Cancelar": "Cancel",
   "Las comisiones se registran solo cuando la red confirma la operación y se pagan periódicamente en USDC tras revisión.": "Commissions are recorded only once the network confirms the operation and are paid periodically in USDC after review.",
   "Cosecha": "Harvest",
   "Cierre": "Close",
