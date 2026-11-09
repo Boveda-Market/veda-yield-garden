@@ -65,6 +65,12 @@ export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: 
   const loading = Boolean(units) && (amount !== debounced || quote.isFetching);
   const rate = current && units ? (Number(current.outAmount) / 10 ** swapToken(to).decimals) / (Number(units) / 10 ** swapToken(from).decimals) : null;
 
+  /** Keeps only digits and one decimal separator, capped at the token's precision, so typing can't produce an invalid amount. */
+  const sanitize = (raw: string) => {
+    const d = swapToken(from).decimals;
+    const [whole = "", ...rest] = raw.replace(/,/g, ".").replace(/[^\d.]/g, "").split(".");
+    return rest.length ? `${whole || "0"}.${rest.join("").slice(0, d)}` : whole;
+  };
   const clear = () => { setAmount(""); setDebounced(""); };
   const pick = (side: "from" | "to", symbol: string) => {
     const other = side === "from" ? to : from;
@@ -79,7 +85,8 @@ export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: 
     if (max === undefined || max <= 0n) return;
     const d = BigInt(swapToken(from).decimals);
     const v = max * pct / 100n;
-    setAmount(`${v / 10n ** d}.${(v % 10n ** d).toString().padStart(Number(d), "0")}`.replace(/\.?0+$/, ""));
+    const frac = (v % 10n ** d).toString().padStart(Number(d), "0").replace(/0+$/, "");
+    setAmount(frac ? `${v / 10n ** d}.${frac}` : `${v / 10n ** d}`);
   };
 
   if (done) return <div className="mt-4 space-y-4 rounded-2xl bg-muted p-5 text-center" role="status">
@@ -101,7 +108,7 @@ export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: 
       <div className="rounded-2xl bg-muted p-4">
         <div className="flex items-center justify-between text-sm text-muted-foreground"><label htmlFor="swap-amount">{t("Pagas")}</label><span>{t("Disponible")}: {max === undefined ? "—" : format(max, from)}</span></div>
         <div className="mt-2 flex items-center gap-2">
-          <input id="swap-amount" inputMode="decimal" placeholder="0.00" value={amount} disabled={busy} onChange={(e) => setAmount(e.target.value)} className="min-w-0 flex-1 bg-transparent font-display text-3xl outline-none" />
+          <input id="swap-amount" inputMode="decimal" placeholder="0.00" value={amount} disabled={busy} onChange={(e) => setAmount(sanitize(e.target.value))} className="min-w-0 flex-1 bg-transparent font-display text-3xl outline-none" />
           {select("from", from)}
         </div>
         <p className="mt-1 h-4 text-xs text-muted-foreground">{current && !loading ? `≈ ${usd(current.usdcValue)}` : ""}</p>
@@ -118,7 +125,7 @@ export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: 
       </div>
     </div>
 
-    {amount && !units && <p role="alert" className="text-sm text-destructive">{t("Monto no válido")}</p>}
+    {amount && !units && !/^[0.]*$/.test(amount) && <p role="alert" className="text-sm text-destructive">{t("Monto no válido")}</p>}
     {insufficient && <p role="alert" className="text-sm text-destructive">{t("Saldo insuficiente")}</p>}
     {from === "SOL" && <p className="text-xs text-muted-foreground">{t("Guardamos 0.01 SOL para pagar los costos de red.")}</p>}
 
