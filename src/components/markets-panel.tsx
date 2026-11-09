@@ -3,6 +3,7 @@ import { ArrowDownRight, ArrowUpRight, Clock, Lock, RotateCcw, Timer, Trophy, Za
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useT } from "@/lib/i18n";
+import { PerpsLive } from "@/components/perps-live";
 import {
   MARKETS, MIN_STAKE, PAYOUT_MULTIPLE, STARTING_CREDITS, WINDOWS, fetchPriceAt, fetchPrices, readMarkets, resolve, roundOf, validStake,
   type MarketId, type MarketsState, type PredictionResult, type Side, type WindowId,
@@ -189,9 +190,11 @@ export function MarketsPanel({ identity }: { identity: string }) {
         {state.history.slice(0, 15).map((h) => <li key={h.id} className="flex items-center justify-between px-4 py-3 text-sm"><span>{h.market} · {WINDOWS.find((w) => w.id === h.window)?.label} · {t(h.side === "up" ? "Sube" : "Baja")}<span className="block text-xs text-muted-foreground">${num(h.lock, priceDigits(h.lock))} → ${num(h.close, priceDigits(h.close))}</span></span><span className={`font-semibold tabular-nums ${h.outcome === "win" ? "text-primary" : h.outcome === "loss" ? "text-destructive" : ""}`}>{h.payout - h.stake >= 0 ? "+" : ""}{num(h.payout - h.stake)}</span></li>)}
       </ul></section>}
 
+      <PerpsLive asset={market} />
+
       <section className="rounded-2xl border border-border bg-secondary/40 p-5">
-        <div className="flex items-center gap-2"><Lock size={18} /><h2 className="font-semibold">{t("Con tu wallet: muy pronto")}</h2></div>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("Por ahora las predicciones funcionan solo con créditos de práctica y precios en vivo: no se usa dinero ni se envían transacciones.")}</p>
+        <div className="flex items-center gap-2"><Lock size={18} /><h2 className="font-semibold">{t("Rondas de práctica")}</h2></div>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("Las rondas por tiempo usan solo créditos de práctica: no se usa dinero ni se envían transacciones.")}</p>
         <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Ganancia gratis hasta 10 créditos y cargo ficticio de 1.25% sobre el resto. Si el precio termina igual, recuperas tu predicción.")}</p>
         <Button variant="ghost" size="sm" className="mt-3" onClick={reset}><RotateCcw size={14} />{t("Reiniciar créditos de práctica")}</Button>
       </section>

@@ -56,3 +56,4 @@ use the editor.
 - Revalidate SDK-discovered position NFT accounts with shared live mint/owner/amount/program checks before composing harvest or liquidation; only the wallet signs and post-confirmation refresh includes portfolio history.
 - Credit affiliates automatically after confirmation, server-side, from the fee-wallet USDC delta paid by a wallet the referred account proved by fresh signed message (one wallet, one account); unique signatures, manual payouts.
 - Compute limit = simulated units +25%, low fixed priority (compute-budget.ts).
+- Live up/down trading routes through Jupiter Perps API (JLP is counterparty, no treasury); server re-simulates, appends only the BÓVEDA USDC fee at open, requires the wallet as sole signer; close is fee-free (perps.server.ts).
