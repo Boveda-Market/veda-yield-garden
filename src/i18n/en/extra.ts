@@ -287,4 +287,8 @@ export const extra: Record<string, string> = {
   "Si aciertas recibes aprox. el doble; verás la cifra exacta antes de firmar.": "If you're right you get roughly double; you'll see the exact amount before signing.",
   "Va a favor": "Winning",
   "Va en contra": "Losing",
+  "Elige cuánto quieres poner.": "Choose how much you want to put in.",
+  "Toca Sube si crees que Bitcoin terminará más alto o Baja si crees que terminará más bajo.": "Tap Up if you think Bitcoin will finish higher, or Down if you think it will finish lower.",
+  "Si aciertas, el pago llega solo a tu wallet al cerrar la ronda.": "If you're right, the payout lands in your wallet automatically when the round closes.",
+  "Si aciertas, ganas créditos de práctica al cerrar la ronda.": "If you're right, you win practice credits when the round closes.",
 };

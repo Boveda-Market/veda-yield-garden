@@ -170,6 +170,11 @@ export function MarketsPanel({ identity }: { identity: string }) {
           <div className="flex items-center gap-2"><Zap className="text-primary" size={20} /><h1 className="font-display text-2xl font-bold">{t("Predicciones")}</h1><span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold">{live ? t("En vivo") : t("Práctica")}</span></div>
           {!live && <div className="text-right"><p className="text-xs text-muted-foreground">{t("Créditos de práctica")}</p><p className="font-display text-xl font-bold">{num(state.balance)}</p></div>}
         </div>
+        <ol className="mx-5 mt-2 list-decimal space-y-0.5 pl-4 text-xs text-muted-foreground">
+          <li>{t("Elige cuánto quieres poner.")}</li>
+          <li>{t("Toca Sube si crees que Bitcoin terminará más alto o Baja si crees que terminará más bajo.")}</li>
+          <li>{live ? t("Si aciertas, el pago llega solo a tu wallet al cerrar la ronda.") : t("Si aciertas, ganas créditos de práctica al cerrar la ronda.")}</li>
+        </ol>
 
         <div className="flex gap-2 overflow-x-auto px-5 pt-4" role="tablist" aria-label={t("Mercado")}>
           {MARKETS.map((m) => <button key={m.id} role="tab" aria-selected={market === m.id} onClick={() => setMarket(m.id)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition ${market === m.id ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}>{m.name}</button>)}
