@@ -30,6 +30,8 @@ export type BovedaSession = {
   buyUsdc?: () => Promise<void>;
   getAccessToken?: () => Promise<string | null>;
   security?: AccountSecurity;
+  /** Opens Privy's secure private-key export; only for Privy-created wallets. */
+  exportWallet?: (() => Promise<void>) | undefined;
 };
 
 // The preview can reload this module before the lazy Privy provider reloads.

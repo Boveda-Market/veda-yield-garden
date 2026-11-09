@@ -3,7 +3,7 @@ import "@/lib/buffer-polyfill";
 import { useState, type ReactNode } from "react";
 import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useMfaEnrollment, usePrivy } from "@privy-io/react-auth";
 import { useUpdateEmail } from "@privy-io/react-auth/ui";
-import { toSolanaWalletConnectors, useSignAndSendTransaction, useSignMessage, useWallets } from "@privy-io/react-auth/solana";
+import { toSolanaWalletConnectors, useExportWallet, useSignAndSendTransaction, useSignMessage, useWallets } from "@privy-io/react-auth/solana";
 import bs58 from "bs58";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 import { useQueryClient } from "@tanstack/react-query";
@@ -29,6 +29,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const { signAndSendTransaction } = useSignAndSendTransaction();
   const { signMessage: signWalletMessage } = useSignMessage();
   const { addFunds } = useAddFunds();
+  const { exportWallet } = useExportWallet();
   const [error, setError] = useState<string | null>(null);
   const { login } = useLogin({
     onComplete: () => setError(null),
@@ -39,6 +40,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
     ready, authenticated, userId: authenticated ? user?.id ?? null : null,
     label: user?.email?.address ?? user?.google?.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : t("Mi cuenta")),
     walletAddress, error, getAccessToken,
+    exportWallet: user?.linkedAccounts.some(account => account.type === "wallet" && account.address === walletAddress && (account.walletClientType === "privy" || account.walletClientType === "privy-v2")) ? async () => { await exportWallet({ address: walletAddress! }); } : undefined,
     security: {
       email: user?.email?.address ?? null,
       passkeyCount: user?.linkedAccounts.filter(account => account.type === "passkey").length ?? 0,
