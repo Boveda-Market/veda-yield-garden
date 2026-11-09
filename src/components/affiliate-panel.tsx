@@ -91,7 +91,7 @@ export function AffiliatePanel() {
           <li>{t("Tú recibes el")} {dash.shareBps / 100}% {t("de esa comisión en USDC.")}</li>
         </ol>
         <table className="mt-3 w-full text-xs"><thead><tr className="text-muted-foreground"><th className="text-left font-normal">{t("Monto")}</th><th className="text-right font-normal">{t("Depósito")}</th><th className="text-right font-normal">{t("Cosecha o cierre")}</th></tr></thead>
-          <tbody>{[50, 200, 1000].map((g) => <tr key={g} className="border-t border-border"><td className="py-1.5">{g} USDC</td><td className="py-1.5 text-right font-semibold">{usdc(affiliateCommission(depositFee(BigInt(g) * 1_000_000n), dash.shareBps).toString())}</td><td className="py-1.5 text-right font-semibold">{usdc(affiliateCommission(progressiveFee(BigInt(g) * 1_000_000n), dash.shareBps).toString())}</td></tr>)}</tbody></table>
+          <tbody>{[1000, 5000, 10000].map((g) => <tr key={g} className="border-t border-border"><td className="py-1.5">{g} USDC</td><td className="py-1.5 text-right font-semibold">{usdc(affiliateCommission(depositFee(BigInt(g) * 1_000_000n), dash.shareBps).toString())}</td><td className="py-1.5 text-right font-semibold">{usdc(affiliateCommission(progressiveFee(BigInt(g) * 1_000_000n), dash.shareBps).toString())}</td></tr>)}</tbody></table>
         <p className="mt-2 text-xs text-muted-foreground">{t("Envíos y cambios no generan comisión de afiliado.")}</p>
       </div>
       {(() => { const connected = session.walletAddress ?? null; const current = dash.payoutWallet ?? connected; const isConnected = !!current && current === connected; const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`; return <div className="mt-5 rounded-xl border border-border bg-card p-4">
