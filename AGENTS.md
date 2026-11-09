@@ -54,3 +54,4 @@ use the editor.
 
 - Real dialogs expose deposit authorization and harvest/exit quote review, not standalone diagnostic simulations; retain fresh server simulations, reviewed fee/minimum caps and on-chain ownership/asset gates because previous confirmation cannot validate a new transaction.
 - Revalidate SDK-discovered position NFT accounts with shared live mint/owner/amount/program checks before composing harvest or liquidation; only the wallet signs and post-confirmation refresh includes portfolio history.
+- Affiliate commissions are credited only server-side from a confirmed on-chain USDC fee to the fee wallet whose fee payer matches the referred user's first-bound wallet; signatures are unique, tiers live in the locked affiliates table and only the owner changes them, and payouts stay manual pending review.

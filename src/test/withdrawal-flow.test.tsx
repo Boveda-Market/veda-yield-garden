@@ -6,6 +6,7 @@ import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
 const mocks = vi.hoisted(() => ({ preview: vi.fn(), prepare: vi.fn(), status: vi.fn(), invalidate: vi.fn(), send: vi.fn() }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@/lib/withdrawal.functions", () => ({ simulateRealWithdrawal: mocks.preview, prepareRealWithdrawal: mocks.prepare }));
+vi.mock("@/hooks/use-affiliate-report", () => ({ useAffiliateReport: () => async () => undefined }));
 vi.mock("@/lib/pilot-deposit.functions", () => ({ pilotDepositStatus: mocks.status }));
 vi.mock("@tanstack/react-query", () => ({ useQueryClient: () => ({ invalidateQueries: mocks.invalidate }) }));
 import { WithdrawalSimulation } from "@/components/withdrawal-simulation";

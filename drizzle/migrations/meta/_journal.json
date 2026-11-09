@@ -15,6 +15,13 @@
       "when": 1794143004505,
       "tag": "0001_create_privy_account_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794222729105,
+      "tag": "0002_affiliate_program",
+      "breakpoints": true
     }
   ]
 }

@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({ review: vi.fn(), prepare: vi.fn(), send: vi.fn
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@tanstack/react-query", () => ({ useQueryClient: () => ({ invalidateQueries: mocks.invalidate }) }));
 vi.mock("@/lib/harvest.functions", () => ({ simulateRealHarvest: mocks.review, prepareRealHarvest: mocks.prepare }));
+vi.mock("@/hooks/use-affiliate-report", () => ({ useAffiliateReport: () => async () => undefined }));
 vi.mock("@/lib/pilot-deposit.functions", () => ({ pilotDepositStatus: mocks.status }));
 import { HarvestDialog } from "@/components/harvest-dialog";
 afterEach(() => { cleanup(); vi.resetAllMocks(); });

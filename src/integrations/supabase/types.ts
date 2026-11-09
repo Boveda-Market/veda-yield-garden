@@ -38,6 +38,93 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_applications: {
+        Row: {
+          audience: string
+          channel: string
+          created_at: string
+          id: string
+          privy_user_id: string
+          status: string
+        }
+        Insert: {
+          audience?: string
+          channel: string
+          created_at?: string
+          id?: string
+          privy_user_id: string
+          status?: string
+        }
+        Update: {
+          audience?: string
+          channel?: string
+          created_at?: string
+          id?: string
+          privy_user_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      affiliate_earnings: {
+        Row: {
+          affiliate_privy_id: string
+          commission_raw: number
+          created_at: string
+          fee_raw: number
+          kind: string
+          referred_privy_id: string
+          share_bps: number
+          signature: string
+          status: string
+        }
+        Insert: {
+          affiliate_privy_id: string
+          commission_raw: number
+          created_at?: string
+          fee_raw: number
+          kind: string
+          referred_privy_id: string
+          share_bps: number
+          signature: string
+          status?: string
+        }
+        Update: {
+          affiliate_privy_id?: string
+          commission_raw?: number
+          created_at?: string
+          fee_raw?: number
+          kind?: string
+          referred_privy_id?: string
+          share_bps?: number
+          signature?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      affiliates: {
+        Row: {
+          code: string
+          created_at: string
+          payout_wallet: string | null
+          privy_user_id: string
+          tier: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          payout_wallet?: string | null
+          privy_user_id: string
+          tier?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          payout_wallet?: string | null
+          privy_user_id?: string
+          tier?: string
+        }
+        Relationships: []
+      }
       email_submissions: {
         Row: {
           consent_version: string
@@ -59,6 +146,27 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          affiliate_privy_id: string
+          created_at: string
+          referred_privy_id: string
+          wallet: string | null
+        }
+        Insert: {
+          affiliate_privy_id: string
+          created_at?: string
+          referred_privy_id: string
+          wallet?: string | null
+        }
+        Update: {
+          affiliate_privy_id?: string
+          created_at?: string
+          referred_privy_id?: string
+          wallet?: string | null
         }
         Relationships: []
       }

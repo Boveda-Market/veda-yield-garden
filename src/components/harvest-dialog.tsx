@@ -1,3 +1,4 @@
+import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -16,6 +17,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose }: { wallet: 
   const simulate = useServerFn(simulateRealHarvest);
   const prepare = useServerFn(prepareRealHarvest);
   const readStatus = useServerFn(pilotDepositStatus);
+  const reportAffiliate = useAffiliateReport();
   const session = useBovedaSession();
   const queryClient = useQueryClient();
   const [pending, setPending] = useState(false);
@@ -50,7 +52,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose }: { wallet: 
       for (let attempt = 0; attempt < 30; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó la transacción: no se aplicaron la cosecha ni la comisión; puede cobrarse el coste de red.")); return; }
-        if (status.status !== "pending") { setFinished(true); setMessage(t("Cosecha confirmada en la red. Tu posición sigue abierta.")); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", wallet] }); return; }
+        if (status.status !== "pending") { setFinished(true); setMessage(t("Cosecha confirmada en la red. Tu posición sigue abierta.")); void reportAffiliate(sig, "harvest"); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", wallet] }); return; }
         await new Promise((resolve) => setTimeout(resolve, 2_000));
       }
       setMessage(t("Confirmación pendiente. Revisa Solscan antes de reintentar."));

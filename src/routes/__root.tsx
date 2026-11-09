@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LanguageProvider } from "../lib/i18n";
 import { LanguageMenu } from "../components/language-menu";
+import { REF_STORAGE_KEY, normalizeCode } from "../lib/affiliate";
 
 function NotFoundComponent() {
   return (
@@ -123,6 +124,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    const code = normalizeCode(new URLSearchParams(window.location.search).get("ref"));
+    if (code) localStorage.setItem(REF_STORAGE_KEY, code);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

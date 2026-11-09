@@ -1,3 +1,4 @@
+import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -17,6 +18,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
   const simulate = useServerFn(simulateRealWithdrawal);
   const prepare = useServerFn(prepareRealWithdrawal);
   const readStatus = useServerFn(pilotDepositStatus);
+  const reportAffiliate = useAffiliateReport();
   const session = useBovedaSession();
   const queryClient = useQueryClient();
   const [address, setAddress] = useState(wallet ?? "");
@@ -53,7 +55,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
       for (let attempt = 0; attempt < 30; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó la transacción atómica: no se aplicaron el retiro ni la comisión; puede cobrarse el coste de red.")); return; }
-        if (status.status !== "pending") { setFinished(true); setMessage(t("Liquidación confirmada en la red. Consulta los importes finales y la renta devuelta en Solscan.")); await queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", address] }); return; }
+        if (status.status !== "pending") { setFinished(true); setMessage(t("Liquidación confirmada en la red. Consulta los importes finales y la renta devuelta en Solscan.")); void reportAffiliate(sig, "exit"); await queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", address] }); return; }
         await new Promise((resolve) => setTimeout(resolve, 2_000));
       }
       setMessage(t("Confirmación pendiente. Revisa Solscan antes de reintentar; no envíes una segunda liquidación."));
