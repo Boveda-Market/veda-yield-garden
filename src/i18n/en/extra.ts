@@ -315,4 +315,7 @@ export const extra: Record<string, string> = {
   "MIN": "MIN",
   "SEG": "SEC",
   "A batir": "To beat",
+  "Pones": "You put in",
+  "Ganancia posible": "Potential profit",
+  "Estimada con el precio actual": "Estimated from current price",
 };
