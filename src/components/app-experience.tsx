@@ -3,7 +3,7 @@ import { useT, useLocale } from "@/lib/i18n";
 import { OfframpButton } from "@/components/offramp-dialog";
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { ShieldAlert, ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, LayoutDashboard, PieChart, UserRound, Home, Gift } from "lucide-react";
+import { ShieldAlert, ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, LayoutDashboard, PieChart, UserRound, Home, Gift, Zap } from "lucide-react";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { demoSessionKey, readDemoSession } from "@/lib/demo-session";
 import { VAULTS, accrued, type Position, type Vault } from "@/lib/vaults";
@@ -16,6 +16,7 @@ import { canUseTrial, type AppMode } from "@/lib/app-mode";
 import { AccountSettings } from "@/components/account-settings";
 import { AffiliatePanel } from "./affiliate-panel";
 import { WalletPanel } from "./wallet-panel";
+import { MarketsPanel } from "./markets-panel";
 import { ActivityView } from "@/components/activity-view";
 import { guestDemoKey, readTrialActivity, trialActivityKey, trialHarvestSummary, type TrialActivity } from "@/lib/trial-activity";
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
@@ -29,11 +30,11 @@ function AccessLoading() {
   return <div className="grid min-h-screen place-items-center bg-background text-foreground"><p role="status" className="font-display">{t("BÓVEDA · Conectando acceso…")}</p></div>;
 }
 
-export function AppExperience({ guest = false, view = "vaults" }: { guest?: boolean; view?: "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" }) {
+export function AppExperience({ guest = false, view = "vaults" }: { guest?: boolean; view?: "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" | "markets" }) {
   const t = useT();
   return <ClientOnly fallback={<AccessLoading />}><Suspense fallback={<AccessLoading />}>{guest ? <BovedaSessionContext.Provider value={{ ready: true, authenticated: false, userId: null, label: t("Invitado"), walletAddress: null, error: null, login: () => {}, logout: async () => {}, signAndSend: async () => { throw new Error(t("Invitado solo puede usar Prueba")); } }}><SessionPage guest view={view} /></BovedaSessionContext.Provider> : <PrivyAccess><SessionPage view={view} /></PrivyAccess>}</Suspense></ClientOnly>;
 }
-function SessionPage({ guest = false, view }: { guest?: boolean; view: "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" }) {
+function SessionPage({ guest = false, view }: { guest?: boolean; view: "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" | "markets" }) {
   const t = useT();
   const session = useBovedaSession();
   const [mode, setMode] = useState<AppMode>("real");
@@ -44,7 +45,7 @@ function SessionPage({ guest = false, view }: { guest?: boolean; view: "vaults" 
   return <Dashboard key={`${session.userId ?? "guest"}:${guest ? "trial" : mode}`} mode={guest ? "trial" : mode} guest={guest} view={view} onModeChange={(value) => { if (guest) return; setMode(value); try { sessionStorage.setItem("boveda-mode", value); } catch {} }} />;
 }
 
-function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeChange: (mode: AppMode) => void; guest: boolean; view: "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" }) {
+function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeChange: (mode: AppMode) => void; guest: boolean; view: "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" | "markets" }) {
   const t = useT();
   const locale = useLocale();
   const fmt = (n: number, d = 2) => n.toLocaleString(locale, { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -55,7 +56,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
   const storageKey = guest ? guestDemoKey : identity ? demoSessionKey(identity) : "";
   const trialAllowed = canUseTrial(mode, session.authenticated, session.userId, guest);
   const [activities, setActivities] = useState<TrialActivity[]>([]);
-  const [guestView, setGuestView] = useState<"vaults" | "portfolio" | "activity" | "invite" | "account">("vaults");
+  const [guestView, setGuestView] = useState<"vaults" | "portfolio" | "activity" | "invite" | "account" | "markets">("vaults");
   const activeView = guest ? guestView : view;
   const [wallet, setWallet] = useState(0);
   const [positions, setPositions] = useState<Position[]>([]);
@@ -132,8 +133,8 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
         {session.error && <p role="alert" className="mb-4 text-sm text-destructive">{t(session.error)}</p>}
         {guest ? <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-y border-border py-4"><p className="text-sm"><strong>{t("Invitado · Prueba")}</strong> {t("· Sin dinero real")}</p><Button asChild variant="outline" size="sm"><Link to="/">{t("Crear cuenta o entrar")}</Link></Button></div> : null}
         {!guest && user && (activeView === "portfolio" || activeView === "vaults") && <div className="mb-4 flex justify-end"><OfframpButton trial={mode === "trial"} wallet={session.walletAddress} /></div>}
-        <nav aria-label={t("Secciones de BÓVEDA")} className="mb-6 flex flex-wrap gap-2 border-b border-border pb-4">{guest ? <>{[["vaults", t("Bóvedas")], ["portfolio", t("Portafolio")], ["invite", t("Invita y gana")], ["account", t("Mi cuenta")]].map(([key, label]) => <Button key={key} variant={activeView === key ? "secondary" : "ghost"} onClick={() => setGuestView(key as "vaults" | "portfolio" | "activity" | "invite" | "account")}>{t(label ?? "")}</Button>)}<Button asChild variant="ghost"><Link to="/faq">FAQ</Link></Button></> : <><Button asChild variant={view === "vaults" ? "secondary" : "ghost"}><Link to="/app"><LayoutDashboard size={16} />{t("Bóvedas")}</Link></Button><Button asChild variant={view === "portfolio" ? "secondary" : "ghost"}><Link to="/portfolio"><PieChart size={16} />{t("Portafolio")}</Link></Button><Button asChild variant={view === "wallet" ? "secondary" : "ghost"}><Link to="/wallet"><Wallet size={16} />{t("Mi wallet")}</Link></Button><Button asChild variant={view === "invite" ? "secondary" : "ghost"}><Link to="/invita"><Gift size={16} />{t("Invita y gana")}</Link></Button><Button asChild variant={view === "account" ? "secondary" : "ghost"}><Link to="/cuenta"><UserRound size={16} />{t("Mi cuenta")}</Link></Button></>}</nav>
-        {activeView === "wallet" ? <><WalletPanel /><div className="mt-10 border-t border-border"><ActivityView trial={false} wallet={session.walletAddress} rows={[]} heading={t("Historial de transacciones")} /></div></> : activeView === "invite" ? <div className="mx-auto max-w-3xl"><AffiliatePanel /></div> : activeView === "account" ? <AccountSettings /> : activeView === "activity" ? <ActivityView trial={mode === "trial"} wallet={session.walletAddress} rows={activities} /> : mode === "real" && !guest ? <RealOverview portfolioOnly={activeView === "portfolio"} walletAddress={session.walletAddress} onDetails={setDetailsFor} /> : user ? (
+        <nav aria-label={t("Secciones de BÓVEDA")} className="mb-6 flex flex-wrap gap-2 border-b border-border pb-4">{guest ? <>{[["vaults", t("Bóvedas")], ["portfolio", t("Portafolio")], ["markets", t("Mercados")], ["invite", t("Invita y gana")], ["account", t("Mi cuenta")]].map(([key, label]) => <Button key={key} variant={activeView === key ? "secondary" : "ghost"} onClick={() => setGuestView(key as "vaults" | "portfolio" | "activity" | "invite" | "account" | "markets")}>{t(label ?? "")}</Button>)}<Button asChild variant="ghost"><Link to="/faq">FAQ</Link></Button></> : <><Button asChild variant={view === "vaults" ? "secondary" : "ghost"}><Link to="/app"><LayoutDashboard size={16} />{t("Bóvedas")}</Link></Button><Button asChild variant={view === "portfolio" ? "secondary" : "ghost"}><Link to="/portfolio"><PieChart size={16} />{t("Portafolio")}</Link></Button><Button asChild variant={view === "markets" ? "secondary" : "ghost"}><Link to="/mercados"><Zap size={16} />{t("Mercados")}</Link></Button><Button asChild variant={view === "wallet" ? "secondary" : "ghost"}><Link to="/wallet"><Wallet size={16} />{t("Mi wallet")}</Link></Button><Button asChild variant={view === "invite" ? "secondary" : "ghost"}><Link to="/invita"><Gift size={16} />{t("Invita y gana")}</Link></Button><Button asChild variant={view === "account" ? "secondary" : "ghost"}><Link to="/cuenta"><UserRound size={16} />{t("Mi cuenta")}</Link></Button></>}</nav>
+        {activeView === "markets" ? (identity ? <MarketsPanel identity={identity} /> : null) : activeView === "wallet" ? <><WalletPanel /><div className="mt-10 border-t border-border"><ActivityView trial={false} wallet={session.walletAddress} rows={[]} heading={t("Historial de transacciones")} /></div></> : activeView === "invite" ? <div className="mx-auto max-w-3xl"><AffiliatePanel /></div> : activeView === "account" ? <AccountSettings /> : activeView === "activity" ? <ActivityView trial={mode === "trial"} wallet={session.walletAddress} rows={activities} /> : mode === "real" && !guest ? <RealOverview portfolioOnly={activeView === "portfolio"} walletAddress={session.walletAddress} onDetails={setDetailsFor} /> : user ? (
           <>
             <section aria-label={t("Estado del modo Prueba")} className="border-y border-border py-8">
               <div className="flex items-center gap-3"><ShieldAlert className="shrink-0 text-primary" size={24} /><h1 className="font-display text-2xl font-semibold">{activeView === "portfolio" ? t("Tu portafolio · Prueba") : t("BÓVEDA · Prueba")}</h1></div>

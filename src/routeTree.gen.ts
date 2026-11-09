@@ -15,6 +15,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as CuentaRouteImport } from './routes/cuenta'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as InvitaRouteImport } from './routes/invita'
+import { Route as MercadosRouteImport } from './routes/mercados'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as PruebaRouteImport } from './routes/prueba'
@@ -51,6 +52,11 @@ const InvitaRoute = InvitaRouteImport.update({
   path: '/invita',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MercadosRoute = MercadosRouteImport.update({
+  id: '/mercados',
+  path: '/mercados',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortfolioRoute = PortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/cuenta': typeof CuentaRoute
   '/faq': typeof FaqRoute
   '/invita': typeof InvitaRoute
+  '/mercados': typeof MercadosRoute
   '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/cuenta': typeof CuentaRoute
   '/faq': typeof FaqRoute
   '/invita': typeof InvitaRoute
+  '/mercados': typeof MercadosRoute
   '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/cuenta': typeof CuentaRoute
   '/faq': typeof FaqRoute
   '/invita': typeof InvitaRoute
+  '/mercados': typeof MercadosRoute
   '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/cuenta'
     | '/faq'
     | '/invita'
+    | '/mercados'
     | '/portfolio'
     | '/privacidad'
     | '/prueba'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/cuenta'
     | '/faq'
     | '/invita'
+    | '/mercados'
     | '/portfolio'
     | '/privacidad'
     | '/prueba'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/cuenta'
     | '/faq'
     | '/invita'
+    | '/mercados'
     | '/portfolio'
     | '/privacidad'
     | '/prueba'
@@ -166,6 +178,7 @@ export interface RootRouteChildren {
   CuentaRoute: typeof CuentaRoute
   FaqRoute: typeof FaqRoute
   InvitaRoute: typeof InvitaRoute
+  MercadosRoute: typeof MercadosRoute
   PortfolioRoute: typeof PortfolioRoute
   PrivacidadRoute: typeof PrivacidadRoute
   PruebaRoute: typeof PruebaRoute
@@ -217,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvitaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mercados': {
+      id: '/mercados'
+      path: '/mercados'
+      fullPath: '/mercados'
+      preLoaderRoute: typeof MercadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/portfolio': {
       id: '/portfolio'
       path: '/portfolio'
@@ -262,6 +282,7 @@ const rootRouteChildren: RootRouteChildren = {
   CuentaRoute: CuentaRoute,
   FaqRoute: FaqRoute,
   InvitaRoute: InvitaRoute,
+  MercadosRoute: MercadosRoute,
   PortfolioRoute: PortfolioRoute,
   PrivacidadRoute: PrivacidadRoute,
   PruebaRoute: PruebaRoute,

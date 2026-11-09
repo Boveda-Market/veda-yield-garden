@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { AppExperience } from "@/components/app-experience";
+export const Route = createFileRoute("/mercados")({ head: () => ({ meta: [{ title: "Mercados rápidos — BÓVEDA" }, { name: "description", content: "Practica operaciones Sube o Baja con multiplicadores de 500× a 1000× usando créditos de práctica y precios en vivo." }, { property: "og:title", content: "Mercados rápidos — BÓVEDA" }, { property: "og:description", content: "Sube o Baja con precios en vivo de SOL, Bitcoin y Ethereum, sin arriesgar dinero." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: () => <AppExperience view="markets" /> });
