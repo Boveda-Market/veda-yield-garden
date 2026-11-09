@@ -1,7 +1,8 @@
 import { useT } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { LoaderCircle, PenLine } from "lucide-react";
+import { CheckCircle2, LoaderCircle, PenLine } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
@@ -12,7 +13,7 @@ type Step = "idle" | "preparing" | "signing" | "confirming" | "done" | "error";
 const labels: Record<Step, string> = { idle: "", preparing: "Preparando tu depósito…", signing: "Esperando tu firma en la wallet…", confirming: "Enviada. Esperando confirmación en la red…", done: "", error: "" };
 
 /** Selected real deposit with fresh simulation and owner signature. */
-export function PilotDeposit({ vaultId, amount, onBusyChange }: { vaultId: string; amount: string; onBusyChange: (busy: boolean) => void }) {
+export function PilotDeposit({ vaultId, amount, onBusyChange, onClose }: { vaultId: string; amount: string; onBusyChange: (busy: boolean) => void; onClose?: () => void }) {
   const t = useT();
   const { walletAddress, signAndSend } = useBovedaSession();
   const prepare = useServerFn(preparePilotDeposit);
@@ -55,14 +56,21 @@ export function PilotDeposit({ vaultId, amount, onBusyChange }: { vaultId: strin
   }
 
   if (!eligible) return <p className="border-t border-border pt-4 text-xs text-muted-foreground">{t("Los depósitos no están disponibles para esta bóveda.")}</p>;
-  return <section aria-labelledby="pilot-title" className="grid gap-3 border-t border-border pt-4 text-sm">
-    <h3 id="pilot-title" className="font-semibold">{t("Depósito real · hasta 10,000 USDC")}</h3>
-    <p role="note" className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs leading-5">{t("Entre 1 y 10,000 USDC por depósito, comisión de entrada 0%; comisión de salida 1%.")}{" "}<strong>{t("Puedes cosechar y liquidar tus posiciones compatibles de SOL y MET. La liquidez bloqueada no se puede liquidar.")}</strong> {t("La posición queda en tu wallet como NFT de posición. Necesitas unos 0.015 SOL para las cuentas del pool y los costes de red y creación de cuentas, independientes de la comisión operativa.")}</p>
+  if (step === "done") return <section className="grid justify-items-center gap-3 rounded-xl bg-primary/10 p-6 text-center text-sm">
+    <CheckCircle2 className="h-12 w-12 text-primary motion-safe:animate-in motion-safe:zoom-in" aria-hidden />
+    <h3 className="font-display text-xl font-bold">{t("¡Depósito exitoso!")}</h3>
+    <p role="status" className="sr-only">{t("Depósito confirmado en la red (")}{status === "finalized" ? "finalizado" : "confirmado"}).</p>
+    <p className="text-muted-foreground">{t("Tu posición ya está generando comisiones. Puedes cosecharlas cuando quieras desde tu Portafolio.")}</p>
+    <Button asChild className="w-full"><Link to="/portfolio" onClick={onClose}>{t("Ver en mi Portafolio")}</Link></Button>
+    {signature && <a className="text-xs underline" href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("Ver comprobante")}</a>}
+  </section>;
+  return <section aria-labelledby="pilot-title" className="grid gap-3 text-sm">
+    <h3 id="pilot-title" className="sr-only">{t("Confirmar depósito")}</h3>
     {!walletAddress ? <p className="text-xs text-muted-foreground">{t("Inicia sesión con una wallet para firmar.")}</p> : <>
-      <label className="flex items-start gap-3 text-xs leading-5"><Checkbox checked={accepted} disabled={busy || !valid.success} onCheckedChange={(value) => setAccepted(value === true)} aria-label={t("Acepto el depósito real")} /><span>{t("Acepto depositar")}{" "}{valid.success ? valid.data.amount : t("el importe indicado")} {t("USDC reales, la entrada al 0% y la salida al 1%. Entiendo que la transacción no se puede revertir y que cada cosecha o liquidación requiere una nueva revisión y mi firma.")}</span></label>
-      <Button disabled={!accepted || busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? labels[step] : t("Firmar depósito real")}</Button>
+      <label className="flex items-start gap-3 text-xs leading-5 text-muted-foreground"><Checkbox checked={accepted} disabled={busy || !valid.success} onCheckedChange={(value) => setAccepted(value === true)} aria-label={t("Acepto el depósito real")} /><span>{t("Revisé el importe y entiendo que el depósito no se puede revertir; retirar o cosechar tiene una comisión del 1%.")}</span></label>
+      <Button size="lg" disabled={!accepted || busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? labels[step] : t("Confirmar y depositar")}</Button>
+      {!busy && <p className="text-center text-xs text-muted-foreground">{t("Tu wallet te pedirá aprobar la operación.")}</p>}
     </>}
-    {step === "done" && <p role="status" className="font-semibold">{t("Depósito confirmado en la red (")}{status === "finalized" ? "finalizado" : "confirmado"}).</p>}
     {message && <p role="alert" className="text-destructive">{message}</p>}
     {signature && <p className="break-all text-xs">{t("Transacción:")}{" "}<a className="underline" href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("ver en Solscan")}</a></p>}
   </section>;

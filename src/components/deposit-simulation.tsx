@@ -1,25 +1,67 @@
 import { useT } from "@/lib/i18n";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { simulationDisplay } from "@/lib/deposit-simulation";
 import type { Vault } from "@/lib/vaults";
 import { PilotDeposit } from "@/components/pilot-deposit";
+import { getRealWallet } from "@/lib/solana.functions";
+import { decimalToUnits, MIN_SOL_LAMPORTS } from "@/lib/onboarding";
+import { poolYieldOptions } from "@/lib/pool-yield";
+import { BuyUsdc } from "@/components/buy-usdc";
+
+const MAX_MICRO = 10_000_000_000n;
+const microToText = (v: bigint) => { const w = v / 1_000_000n; const f = (v % 1_000_000n).toString().padStart(6, "0").replace(/0+$/, ""); return f ? `${w}.${f}` : `${w}`; };
 
 export function DepositSimulation({ vault, wallet, onClose }: { vault: Vault; wallet: string | null; onClose: () => void }) {
   const t = useT();
-  const [amount, setAmount] = useState("1");
+  const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState(false);
+  const readWallet = useServerFn(getRealWallet);
+  const balances = useQuery({ queryKey: ["my-wallet", wallet], enabled: !!wallet, queryFn: async () => {
+    const r = await readWallet({ data: { wallet: wallet! } });
+    if (!r.success) throw new Error(r.error);
+    return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
+  } });
+  const yieldQ = useQuery(poolYieldOptions(vault.pool));
+  const apr = yieldQ.data?.apr;
   let breakdown: ReturnType<typeof simulationDisplay> | null = null;
   try { breakdown = simulationDisplay(amount); } catch { /* Incomplete input. */ }
+  const usdc = balances.data?.usdc;
+  const lowSol = balances.data ? balances.data.sol < MIN_SOL_LAMPORTS : false;
+  const typed = decimalToUnits(amount || "0", 6);
+  const overBalance = usdc != null && typed != null && typed > usdc;
+  const pick = (pct: bigint) => { if (usdc == null) return; const cap = usdc < MAX_MICRO ? usdc : MAX_MICRO; setAmount(microToText((cap * pct) / 100n)); };
+  const clean = (v: string) => { const s = v.replace(/,/g, ".").replace(/[^\d.]/g, ""); const [w, ...rest] = s.split("."); return rest.length ? `${w}.${rest.join("").slice(0, 6)}` : w; };
+
   return <Dialog open onOpenChange={(open) => { if (!open && !busy) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
     <DialogTitle>{t("Depositar ·")}{" "}{t(vault.name)}</DialogTitle>
-    <DialogDescription>{t("Revisa el importe y autoriza el depósito con tu wallet.")}</DialogDescription>
-    {wallet && <p className="break-all text-xs text-muted-foreground">{t("Wallet conectada:")}{" "}{wallet}</p>}
-    <label className="grid gap-2 text-sm">{t("Importe (USDC)")}<Input aria-label={t("Importe (USDC)")} inputMode="decimal" value={amount} maxLength={12} disabled={busy} onChange={(event) => setAmount(event.target.value)} /></label>
-    <p className="text-xs text-muted-foreground">{t("Entre 1 y 10,000 USDC.")}</p>
-    {breakdown && <dl className="grid gap-2 border-y border-border py-4 text-sm"><div className="flex justify-between gap-3"><dt>{t("Total")}</dt><dd>{breakdown.gross} USDC</dd></div><div className="flex justify-between gap-3"><dt>{t("Comisión de entrada · 0%")}</dt><dd>{breakdown.fee} USDC</dd></div><div className="flex justify-between gap-3"><dt>{t("Disponible para el depósito")}</dt><dd>{breakdown.net} USDC</dd></div></dl>}
-    <p className="text-xs leading-5 text-muted-foreground">{t("Parte de tus USDC puede convertirse al otro token de la bóveda. Pueden quedar tokens en tu wallet. Los costes de red y conversión se pagan aparte.")}</p>
-    {wallet ? <PilotDeposit vaultId={vault.id} amount={amount} onBusyChange={setBusy} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
+    <DialogDescription>{t("Elige cuánto quieres depositar y confirma con tu wallet.")}</DialogDescription>
+    <div className="flex items-center justify-between rounded-xl bg-muted p-3 text-sm">
+      <span className="text-muted-foreground">{t("Rendimiento estimado")}</span>
+      <span className="font-display text-lg font-bold text-primary">{apr == null ? "—" : `${apr.toFixed(2)}% APR`}</span>
+    </div>
+    <div className="grid gap-2 rounded-xl border border-border p-4">
+      <div className="flex justify-between text-xs text-muted-foreground"><span>{t("Importe (USDC)")}</span><span>{t("Disponible:")} {usdc == null ? "—" : microToText(usdc)} USDC</span></div>
+      <Input aria-label={t("Importe (USDC)")} inputMode="decimal" placeholder="0.00" value={amount} maxLength={12} disabled={busy} className="border-0 px-0 font-display text-3xl shadow-none focus-visible:ring-0" onChange={(e) => setAmount(clean(e.target.value))} />
+      <div className="grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={p.toString()} type="button" size="sm" variant="secondary" disabled={busy || !usdc} onClick={() => pick(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
+      <p className="text-xs text-muted-foreground">{t("Entre 1 y 10,000 USDC.")}</p>
+      {overBalance && <p role="alert" className="text-xs text-destructive">{t("No tienes suficientes USDC para este importe.")}</p>}
+    </div>
+    {lowSol && <div role="note" className="grid gap-2 rounded-xl border border-primary/40 bg-primary/10 p-3 text-xs leading-5">
+      <p>{t("Necesitas unos 0.015 SOL para los costos de red antes de depositar.")}</p>
+      <BuyUsdc only="SOL" />
+    </div>}
+    {breakdown && <dl className="grid gap-2 rounded-xl bg-muted p-4 text-sm">
+      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Bóveda")}</dt><dd>{vault.pair}</dd></div>
+      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Importe")}</dt><dd>{breakdown.gross} USDC</dd></div>
+      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión de entrada")}</dt><dd className="font-semibold text-primary">0% · {breakdown.fee} USDC</dd></div>
+      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión al cosechar o retirar")}</dt><dd>1%</dd></div>
+    </dl>}
+    <p className="text-xs leading-5 text-muted-foreground">{t("Parte de tus USDC se convierte automáticamente al otro token de la bóveda. Los costos de red se pagan aparte en SOL.")}</p>
+    {wallet ? <PilotDeposit vaultId={vault.id} amount={amount} onBusyChange={setBusy} onClose={onClose} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
   </DialogContent></Dialog>;
 }
