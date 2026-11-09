@@ -52,7 +52,7 @@ export function AffiliatePanel() {
   const link = dash ? `${window.location.origin}/?ref=${dash.code}` : "";
   return <section className="mt-10 border-t border-border pt-8" aria-labelledby="affiliate-title">
     <h2 id="affiliate-title" className="flex items-center gap-2 font-display text-2xl font-semibold"><Users size={20} />{t("Invita y gana")}</h2>
-    <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("Comparte tu enlace. Cuando alguien que invitaste cosecha ganancias o cierra una bóveda, recibes 25% de todas las comisiones BÓVEDA. A ellos no les cuesta nada extra.")}</p>
+    <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("Comparte tu enlace con amigos y familia. Cada vez que alguien que invitaste cosecha ganancias o cierra una bóveda, tú recibes el 25% de la comisión que cobra BÓVEDA, sin que a ellos les cueste nada extra. Mientras más personas invites, más ganas.")}</p>
     {preview && <p className="mt-3 rounded-lg border border-border p-3 text-xs text-muted-foreground">{t("Vista de ejemplo: crea una cuenta para obtener tu código real.")}</p>}
     {!dash ? <p className="mt-4 text-sm text-muted-foreground">{message ?? t("Cargando…")}</p> : <>
       <div className="mt-5 rounded-xl border border-border bg-card p-4">

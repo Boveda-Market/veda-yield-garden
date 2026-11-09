@@ -71,7 +71,7 @@ export const account: Record<string, string> = {
   "Conecta una wallet de Solana": "Connect a wallet",
   "Primero entra a tu cuenta": "Sign in to your account first",
   "Invita y gana": "Invite and earn",
-  "Comparte tu enlace. Cuando alguien que invitaste cosecha ganancias o cierra una bóveda, recibes una parte de la comisión del 1% que cobra BÓVEDA. A ellos no les cuesta nada extra.": "Share your link. When someone you invited harvests earnings or closes a vault, you get a share of BÓVEDA's 1% fee. It costs them nothing extra.",
+  "Comparte tu enlace con amigos y familia. Cada vez que alguien que invitaste cosecha ganancias o cierra una bóveda, tú recibes el 25% de la comisión que cobra BÓVEDA, sin que a ellos les cueste nada extra. Mientras más personas invites, más ganas.": "Share your link with friends and family. Every time someone you invited harvests earnings or closes a vault, you receive 25% of the fee BÓVEDA charges, at no extra cost to them. The more people you invite, the more you earn.",
   "Tu nivel": "Your level",
   "Usuario": "User",
   "Afiliado": "Affiliate",
