@@ -141,8 +141,8 @@ describe("full-close withdrawal simulation", () => {
     expect(result.prepared?.transaction).toBeTruthy();
     expect(mocks.send).not.toHaveBeenCalled();
   });
-  it("rejects a worse reviewed minimum for new positions", async () => {
-    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "9950", minimumNetRaw: "985051" });
+  it("rejects a minimum more than 1% worse than reviewed for new positions", async () => {
+    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "9950", minimumNetRaw: "999999" });
     expect(result.success).toBe(false);
     expect(result.prepared).toBeUndefined();
   });

@@ -125,7 +125,7 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput,
     const minimumGross = BigInt(minimumB.toString()) + minimumSwap;
     const breakdown = withdrawalAmounts(minimumGross);
     if (minimumGross <= 0n) return fail("No hay un mínimo de USDC protegido por los contratos.");
-    if (options.prepare && (options.maximumFeeRaw === undefined || options.minimumNetRaw === undefined || breakdown.fee > BigInt(options.maximumFeeRaw) || breakdown.net < BigInt(options.minimumNetRaw))) return fail("La cotización cambió: vuelve a revisar el mínimo y la comisión antes de firmar.");
+    if (options.prepare && (options.maximumFeeRaw === undefined || options.minimumNetRaw === undefined || breakdown.fee > BigInt(options.maximumFeeRaw) * 101n / 100n + 1n || breakdown.net < BigInt(options.minimumNetRaw) * 99n / 100n)) return fail("La cotización cambió: vuelve a revisar el mínimo y la comisión antes de firmar.");
     if (!before[2]) instructions.push(createAssociatedTokenAccountIdempotentInstruction(owner, recipient, feeOwner, usdc));
     instructions.push(createTransferCheckedInstruction(source, usdc, recipient, owner, breakdown.fee, 6));
     stage = "Simulación de comisión y renta";

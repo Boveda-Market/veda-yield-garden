@@ -47,7 +47,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
     try {
       const next = await prepare({ data: { ...input.data, maximumFeeRaw: result.feeRaw, minimumNetRaw: result.minimumNetRaw } });
       setResult(next);
-      if (!next.success || !next.prepared) { setAccepted(false); setMessage(next.message); return; }
+      if (!next.success || !next.prepared) { setAccepted(false); const moved = next.message.includes("cotización cambió"); setMessage(moved ? t("El precio se movió. Actualizamos el resumen; toca «Firmar» de nuevo.") : next.message); if (moved) { try { setResult(await simulate({ data: input.data })); } catch { /* keep message */ } } return; }
       if (next.prepared.expiresAt <= Date.now() || next.prepared.wallet !== session.walletAddress || next.prepared.position !== positionAddress) { setMessage(t("La preparación caducó o la wallet cambió. Revisa nuevamente el retiro.")); return; }
       setStep(t("Esperando firma en tu wallet…"));
       let sig: string;
