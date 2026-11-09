@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { affiliateCommission, affiliateRequest, applyRequest, joinRequest, payoutRequest, recordRequest, tierShareBps, type AffiliateDashboard, type AffiliateTier } from "./affiliate";
+import { proofIsFresh, walletProofMessage, walletProofRequest } from "./wallet-proof";
 
 type Fail = { success: false; error: string };
 
@@ -84,6 +85,36 @@ export const savePayoutWallet = createServerFn({ method: "POST" })
     } catch { return { success: false, error: "Dirección de cobro no válida." }; }
   });
 
+/** Has this account already proven ownership of the wallet? */
+export const walletIsVerified = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => payoutRequest.parse(input))
+  .handler(async ({ data }): Promise<{ verified: boolean }> => {
+    try {
+      const { id, db } = await admin(data.token);
+      const { data: row } = await db.from("verified_wallets").select("privy_user_id").eq("wallet", data.wallet).maybeSingle();
+      return { verified: row?.privy_user_id === id };
+    } catch { return { verified: false }; }
+  });
+
+/** Stores a wallet ownership proof after verifying its ed25519 signature; a wallet binds to one account forever. */
+export const verifyWalletOwnership = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => walletProofRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: boolean }> => {
+    try {
+      if (!proofIsFresh(data.issuedAt)) return { success: false };
+      const { id, db } = await admin(data.token);
+      const [{ ed25519 }, { default: bs58 }] = await Promise.all([import("@noble/curves/ed25519.js"), import("bs58")]);
+      const message = new TextEncoder().encode(walletProofMessage(id, data.wallet, data.issuedAt));
+      const pub = bs58.decode(data.wallet);
+      const sig = bs58.decode(data.signature);
+      if (pub.length !== 32 || sig.length !== 64 || !ed25519.verify(sig, message, pub)) return { success: false };
+      const { data: existing } = await db.from("verified_wallets").select("privy_user_id").eq("wallet", data.wallet).maybeSingle();
+      if (existing) return { success: existing.privy_user_id === id };
+      const { error } = await db.from("verified_wallets").insert({ wallet: data.wallet, privy_user_id: id });
+      return { success: !error };
+    } catch { return { success: false }; }
+  });
+
 /** Credits the referrer only from a confirmed on-chain fee paid to BÓVEDA by the referred user's wallet. */
 export const recordAffiliateFee = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => recordRequest.parse(input))
@@ -97,6 +128,9 @@ export const recordAffiliateFee = createServerFn({ method: "POST" })
       const { confirmedFeeTransfer } = await import("./affiliate.server");
       const transfer = await confirmedFeeTransfer(key, data.signature);
       if (!transfer || transfer.feeRaw <= 0n) return { success: false };
+      // Only a wallet this account proved it controls (signed message) can earn the referrer a commission.
+      const { data: proof } = await db.from("verified_wallets").select("privy_user_id").eq("wallet", transfer.payer).maybeSingle();
+      if (!proof || proof.privy_user_id !== id) return { success: false };
       if (referral.wallet && referral.wallet !== transfer.payer) return { success: false };
       if (!referral.wallet) {
         const { error } = await db.from("referrals").update({ wallet: transfer.payer }).eq("referred_privy_id", id).is("wallet", null);

@@ -3,7 +3,7 @@ import "@/lib/buffer-polyfill";
 import { useState, type ReactNode } from "react";
 import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useMfaEnrollment, usePrivy } from "@privy-io/react-auth";
 import { useUpdateEmail } from "@privy-io/react-auth/ui";
-import { toSolanaWalletConnectors, useSignAndSendTransaction, useWallets } from "@privy-io/react-auth/solana";
+import { toSolanaWalletConnectors, useSignAndSendTransaction, useSignMessage, useWallets } from "@privy-io/react-auth/solana";
 import bs58 from "bs58";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,6 +27,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const { wallets } = useWallets();
   const { signAndSendTransaction } = useSignAndSendTransaction();
+  const { signMessage: signWalletMessage } = useSignMessage();
   const { addFunds } = useAddFunds();
   const [error, setError] = useState<string | null>(null);
   const { login } = useLogin({
@@ -55,6 +56,12 @@ function SessionBridge({ children }: { children: ReactNode }) {
       const wallet = wallets[0];
       if (!authenticated || !wallet) throw new Error(t("Conecta una wallet de Solana"));
       const { signature } = await signAndSendTransaction({ transaction, wallet, chain: "solana:mainnet" });
+      return bs58.encode(signature);
+    },
+    signMessage: async (message) => {
+      const wallet = wallets[0];
+      if (!authenticated || !wallet) throw new Error(t("Conecta una wallet de Solana"));
+      const { signature } = await signWalletMessage({ message: new TextEncoder().encode(message), wallet });
       return bs58.encode(signature);
     },
     buyUsdc: async () => {

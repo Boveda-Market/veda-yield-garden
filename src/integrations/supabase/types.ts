@@ -170,6 +170,24 @@ export type Database = {
         }
         Relationships: []
       }
+      verified_wallets: {
+        Row: {
+          privy_user_id: string
+          verified_at: string
+          wallet: string
+        }
+        Insert: {
+          privy_user_id: string
+          verified_at?: string
+          wallet: string
+        }
+        Update: {
+          privy_user_id?: string
+          verified_at?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

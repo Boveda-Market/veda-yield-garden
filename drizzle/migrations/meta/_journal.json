@@ -22,6 +22,13 @@
       "when": 1794222729105,
       "tag": "0002_affiliate_program",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794223573805,
+      "tag": "0003_verified_wallets",
+      "breakpoints": true
     }
   ]
 }

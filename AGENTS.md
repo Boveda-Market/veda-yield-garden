@@ -54,4 +54,4 @@ use the editor.
 
 - Real dialogs expose deposit authorization and harvest/exit quote review, not standalone diagnostic simulations; retain fresh server simulations, reviewed fee/minimum caps and on-chain ownership/asset gates because previous confirmation cannot validate a new transaction.
 - Revalidate SDK-discovered position NFT accounts with shared live mint/owner/amount/program checks before composing harvest or liquidation; only the wallet signs and post-confirmation refresh includes portfolio history.
-- Credit affiliates only server-side from a confirmed on-chain fee-wallet USDC delta paid by the referral's bound wallet; unique signatures, owner-only tiers, manual payouts.
+- Credit affiliates automatically right after confirmation, server-side, from the confirmed fee-wallet USDC delta paid by a wallet the referred account proved via fresh signed message (one wallet, one account); unique signatures, owner-only tiers, manual payouts.
