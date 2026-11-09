@@ -67,6 +67,7 @@ export function MarketsPanel({ identity }: { identity: string }) {
       return () => clearTimeout(id);
     }
     prevPrice.current = price;
+    return undefined;
   }, [price]);
   useEffect(() => { prevPrice.current = undefined; }, [market]);
 
@@ -77,13 +78,13 @@ export function MarketsPanel({ identity }: { identity: string }) {
     if (!hit.length) return;
     const results = hit.map((p) => settle(p, prices[p.market]!, now));
     setState((s) => ({ ...s, positions: s.positions.filter((p) => !hit.some((h) => h.id === p.id)), history: [...results, ...s.history].slice(0, 50) }));
-    setResult(results[0]);
+    setResult(results[0] ?? null);
   }, [prices, state.positions]);
 
   const stakeNum = Number(stake);
   const canOpen = !!price && validStake(stakeNum, state.balance) && validLeverage(leverage);
   const pts = series[market];
-  const change = pts.length > 1 ? ((pts[pts.length - 1] - pts[0]) / pts[0]) * 100 : 0;
+  const change = pts.length > 1 ? ((pts[pts.length - 1]! - pts[0]!) / pts[0]!) * 100 : 0;
 
   const open = (side: Side) => {
     if (!canOpen || !price) return;
@@ -116,7 +117,7 @@ export function MarketsPanel({ identity }: { identity: string }) {
 
         <div className="flex gap-2 overflow-x-auto px-5 pt-4" role="tablist" aria-label={t("Mercado")}>
           {MARKETS.map((m) => {
-            const s = series[m.id]; const ch = s.length > 1 ? ((s[s.length - 1] - s[0]) / s[0]) * 100 : 0;
+            const s = series[m.id]; const ch = s.length > 1 ? ((s[s.length - 1]! - s[0]!) / s[0]!) * 100 : 0;
             return <button key={m.id} role="tab" aria-selected={market === m.id} onClick={() => setMarket(m.id)} className={`min-w-[7rem] rounded-xl border px-3 py-2 text-left transition ${market === m.id ? "border-primary bg-primary/10" : "border-border hover:bg-secondary"}`}>
               <span className="block text-sm font-bold">{m.id}</span>
               <span className={`text-xs ${ch >= 0 ? "text-primary" : "text-destructive"}`}>{ch >= 0 ? "+" : ""}{ch.toFixed(3)}%</span>
