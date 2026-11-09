@@ -1,4 +1,5 @@
 import { useT, useLocale } from "@/lib/i18n";
+import { OfframpButton } from "@/components/offramp-dialog";
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { ShieldAlert, ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, LayoutDashboard, PieChart, UserRound, Home, Gift } from "lucide-react";
