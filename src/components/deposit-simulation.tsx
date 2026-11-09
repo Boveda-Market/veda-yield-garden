@@ -16,9 +16,9 @@ import { BuyUsdc } from "@/components/buy-usdc";
 const MAX_MICRO = 10_000_000_000n;
 const microToText = (v: bigint) => { const w = v / 1_000_000n; const f = (v % 1_000_000n).toString().padStart(6, "0").replace(/0+$/, ""); return f ? `${w}.${f}` : `${w}`; };
 
-export function DepositSimulation({ vault, wallet, onClose }: { vault: Vault; wallet: string | null; onClose: () => void }) {
+export function DepositSimulation({ vault, wallet, onClose, initialAmount = "" }: { vault: Vault; wallet: string | null; onClose: () => void; initialAmount?: string }) {
   const t = useT();
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState(initialAmount);
   const [busy, setBusy] = useState(false);
   const readWallet = useServerFn(getRealWallet);
   const balances = useQuery({ queryKey: ["my-wallet", wallet], enabled: !!wallet, queryFn: async () => {

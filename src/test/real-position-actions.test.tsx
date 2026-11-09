@@ -5,11 +5,11 @@ import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
 const mocks = vi.hoisted(() => ({ positions: [] as object[] }));
 vi.mock("@tanstack/react-router", () => ({ Link: ({ children }: { children: unknown }) => children }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
-vi.mock("@tanstack/react-query", () => ({ useQuery: () => ({ data: { success: true, data: { positions: mocks.positions, positionsComplete: true, usdc: "10", sol: "1", checkedAt: new Date().toISOString() } }, refetch: vi.fn() }) }));
+vi.mock("@tanstack/react-query", () => ({ useQuery: () => ({ data: { success: true, data: { positions: mocks.positions, positionsComplete: true, usdc: "10", sol: "1", checkedAt: new Date().toISOString() } }, refetch: vi.fn() }), useQueries: ({ queries }: { queries: unknown[] }) => queries.map(() => ({ data: undefined })) }));
 vi.mock("@/lib/solana.functions", () => ({ getRealWallet: vi.fn() }));
 vi.mock("@/components/deposit-simulation", () => ({ DepositSimulation: () => null }));
 vi.mock("@/components/withdrawal-simulation", () => ({ WithdrawalSimulation: () => <p>Revisión de cierre autorizada</p> }));
-vi.mock("@/components/harvest-dialog", () => ({ HarvestDialog: () => <p>Revisión de cosecha autorizada</p> }));
+vi.mock("@/components/harvest-dialog", () => ({ HarvestDialog: ({ onReinvest }: { onReinvest?: unknown }) => <p>{onReinvest ? "Revisión de reinversión autorizada" : "Revisión de cosecha autorizada"}</p> }));
 vi.mock("@/components/pool-yield", () => ({ PoolYield: () => null }));
 vi.mock("@/components/buy-usdc", () => ({ BuyUsdc: () => null }));
 vi.mock("@/components/real-portfolio-panel", () => ({ RealPortfolioPanel: () => null }));
@@ -42,4 +42,8 @@ it("does not authorize closing locked pilot liquidity", () => {
   fireEvent.click(screen.getByRole("button", { name: "Cerrar y Liquidar" }));
   expect(screen.getByRole("dialog")).toBeInTheDocument();
   expect(screen.queryByText("Revisión de cierre autorizada")).not.toBeInTheDocument();
+});it("opens the two-step reinvest flow from Reinvertir ganancias", () => {
+  show("new-position");
+  fireEvent.click(screen.getByRole("button", { name: "Reinvertir ganancias" }));
+  expect(screen.getByText("Revisión de reinversión autorizada")).toBeInTheDocument();
 });

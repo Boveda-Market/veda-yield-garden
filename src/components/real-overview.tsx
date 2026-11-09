@@ -20,16 +20,17 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   const t = useT();
   const [simulationVault, setSimulationVault] = useState<Vault | null>(null);
   const [withdrawal, setWithdrawal] = useState<{ position?: string; vaultId: "sol" | "met" } | null>(null);
-  const [harvest, setHarvest] = useState<{ position: string; vaultId: "sol" | "met" } | null>(null);
+  const [harvest, setHarvest] = useState<{ position: string; vaultId: "sol" | "met"; compound?: boolean } | null>(null);
+  const [reinvest, setReinvest] = useState<{ vault: Vault; amount: string } | null>(null);
   const [unavailableAction, setUnavailableAction] = useState<"harvest" | "exit" | null>(null);
-  function openPositionAction(position: import("@/lib/solana-data").ChainPosition, action: "harvest" | "exit") {
+  function openPositionAction(position: import("@/lib/solana-data").ChainPosition, action: "harvest" | "exit" | "compound") {
     const vaultId = position.vaultId;
     const authorized = Boolean(walletAddress) && (vaultId === "sol" || vaultId === "met");
     if (!authorized || (vaultId !== "sol" && vaultId !== "met") || (action === "exit" && position.locked)) {
-      setUnavailableAction(action);
+      setUnavailableAction(action === "exit" ? "exit" : "harvest");
       return;
     }
-    if (action === "harvest") setHarvest({ position: position.address, vaultId });
+    if (action !== "exit") setHarvest({ position: position.address, vaultId, compound: action === "compound" });
     else setWithdrawal({ position: position.address, vaultId });
   }
   const readWallet = useServerFn(getRealWallet);
@@ -73,7 +74,8 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
 
     </article>)}</div></>}
     {simulationVault && <DepositSimulation key={simulationVault.id} vault={simulationVault} wallet={walletAddress} onClose={() => setSimulationVault(null)} />}
-    {harvest && walletAddress && <HarvestDialog wallet={walletAddress} {...harvest} onClose={() => setHarvest(null)} />}
+    {harvest && walletAddress && <HarvestDialog wallet={walletAddress} position={harvest.position} vaultId={harvest.vaultId} onClose={() => setHarvest(null)} onReinvest={harvest.compound ? (amount) => { const vault = VAULTS.find((v) => v.id === harvest.vaultId); setHarvest(null); if (vault) setReinvest({ vault, amount }); } : undefined} />}
+    {reinvest && <DepositSimulation key={`re-${reinvest.vault.id}`} vault={reinvest.vault} wallet={walletAddress} initialAmount={reinvest.amount} onClose={() => setReinvest(null)} />}
     {withdrawal && <WithdrawalSimulation wallet={walletAddress} {...withdrawal} onClose={() => setWithdrawal(null)} />}
     <Dialog open={unavailableAction !== null} onOpenChange={(open) => { if (!open) setUnavailableAction(null); }}>
       <DialogContent>
