@@ -2,14 +2,29 @@ import { useT } from "@/lib/i18n";
 import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
 import { fetchPoolStats } from "@/lib/pool-stats";
 import { useServerFn } from "@tanstack/react-start";
-import { ExternalLink, RefreshCw } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, ExternalLink, Info, RefreshCw, Sparkles, XCircle } from "lucide-react";
 import { getMeteoraHistory } from "@/lib/meteora-history.functions";
 import { harvestedUsdValue, meteoraMetrics } from "@/lib/meteora-history";
 import { tokenAmount, type ChainPosition } from "@/lib/solana-data";
 import { Button } from "./ui/button";
 import { useState } from "react";
 
-const names = { deposit: "Depósito de liquidez", withdraw: "Retiro de liquidez", harvest: "Comisiones cosechadas", close: "Posición cerrada" };
+const names = { deposit: "Depósito", withdraw: "Retiro", harvest: "Cosecha de ganancias", close: "Posición cerrada" };
+type Kind = keyof typeof names;
+const styles: Record<Kind, { Icon: typeof Sparkles; tone: string; sign: string }> = {
+  deposit: { Icon: ArrowDownLeft, tone: "bg-primary/10 text-primary", sign: "" },
+  harvest: { Icon: Sparkles, tone: "bg-accent text-accent-foreground", sign: "+" },
+  withdraw: { Icon: ArrowUpRight, tone: "bg-secondary text-secondary-foreground", sign: "" },
+  close: { Icon: XCircle, tone: "bg-muted text-muted-foreground", sign: "" },
+};
+const matches = (filter: string, kind: string) => filter === "all" || kind === filter || (filter === "withdraw" && kind === "close");
+function dayLabel(at: number | string | null | undefined, t: (s: string) => string) {
+  if (!at) return t("Fecha no disponible");
+  const d = new Date(at), today = new Date(), y = new Date(); y.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return t("Hoy");
+  if (d.toDateString() === y.toDateString()) return t("Ayer");
+  return d.toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
+}
 export function MeteoraPortfolio({ wallet, positions }: { wallet: string | null; positions: ChainPosition[] }) {
   const t = useT();
   const [filter, setFilter] = useState<"all" | "deposit" | "harvest" | "withdraw">("all");
@@ -33,23 +48,25 @@ export function MeteoraPortfolio({ wallet, positions }: { wallet: string | null;
   const withdrawCount = records.filter((row) => row.kind === "withdraw").length;
   return <div>
     <div className="flex items-center justify-between gap-3"><h2 className="font-display text-lg font-semibold">{t("Tus resultados")}</h2><Button size="icon" variant="outline" title={t("Actualizar registros del pool")} aria-label={t("Actualizar registros del pool")} disabled={!wallet || query.isFetching} onClick={() => void query.refetch()}><RefreshCw size={16} /></Button></div>
-    <div className="mt-6 grid grid-cols-2 gap-6 lg:grid-cols-5">{[
-      [t("Ganancias (PNL)"), pnl ? `$${pnl}` : t("No disponible")],
-      [`Total depositado · ${depositCount} ${depositCount === 1 ? t("depósito") : t("depósitos")}`, ready ? format(metrics.deposited) : t("No disponible")],
-      [`Total retirado · ${withdrawCount} ${withdrawCount === 1 ? "retiro" : "retiros"}`, ready ? format(withdrawn) : t("No disponible")],
-      [t("Comisiones cobradas"), ready ? format(metrics.harvested) : t("No disponible")],
-      [t("Ganancia sobre lo depositado"), ready && metrics.usdcHarvestPercent !== null ? `${metrics.usdcHarvestPercent}%` : t("No disponible")],
-    ].map(([label, value]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="mt-2 break-words font-display text-xl">{value}</p></div>)}</div>
-    <p className="mt-5 text-xs leading-5 text-muted-foreground">{t("Totales en USDC de tus movimientos confirmados. Tus depósitos y retiros también incluyen SOL o MET, que verás abajo por bóveda. Las ganancias suman tus comisiones cobradas al precio actual; no incluyen cambios de precio de tu capital ni cargos.")}</p>
+    <div className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-5">
+      <p className="flex items-center gap-1.5 text-xs text-muted-foreground"><Sparkles size={14} className="text-primary" />{t("Ganancias (PNL)")}<span title={t("Suma de tus comisiones cosechadas al precio actual. No incluye cambios de precio de tu capital.")} className="cursor-help"><Info size={13} /></span></p>
+      <p className="mt-2 font-display text-4xl font-semibold text-primary">{pnl ? `+$${pnl}` : t("No disponible")}</p>
+      <p className="mt-2 text-sm text-muted-foreground">{ready && metrics.usdcHarvestPercent !== null ? t("{percent}% sobre lo depositado", { percent: metrics.usdcHarvestPercent }) : t("Se calcula con tus movimientos confirmados.")}</p>
+    </div>
+    <div className="mt-3 grid gap-3 sm:grid-cols-3">{([
+      [ArrowDownLeft, `${t("Total depositado")} · ${depositCount}`, ready ? format(metrics.deposited) : t("No disponible"), t("Incluye también SOL o MET aportados; ver desglose abajo.")],
+      [ArrowUpRight, `${t("Total retirado")} · ${withdrawCount}`, ready ? format(withdrawn) : t("No disponible"), t("Liquidez que salió de las bóvedas; no es ganancia.")],
+      [Sparkles, t("Comisiones cobradas"), ready ? format(metrics.harvested) : t("No disponible"), t("Parte en USDC de tus cosechas, antes del cargo.")],
+    ] as const).map(([Icon, label, value, help]) => <div key={label} className="rounded-2xl border border-border bg-card p-4"><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="grid h-6 w-6 place-items-center rounded-full bg-secondary"><Icon size={13} /></span>{label}<span title={help} className="cursor-help"><Info size={12} /></span></p><p className="mt-2 break-words font-display text-xl">{value}</p></div>)}</div>
     {!wallet && <p className="mt-4 text-muted-foreground">{t("Conecta tu wallet para consultar tus registros.")}</p>}
     {query.isFetching && <p role="status" className="mt-4 text-sm">{t("Consultando registros del pool…")}</p>}
     {query.isError && <p role="alert" className="mt-4 text-sm text-destructive">{t("No pudimos cargar todos los registros. Los resultados anteriores se conservan; intenta actualizar.")}</p>}
     {ready && <p className="mt-4 text-xs text-muted-foreground">{metrics.count} {t("eventos en")}{" "}{pages.reduce((sum, page) => sum + page.scanned, 0)} {t("transacciones revisadas.")}{" "}{query.hasNextPage ? t("Hay movimientos anteriores por consultar.") : t("Fin de las páginas consultadas; no garantiza incluir cuentas de tokens, delegados o posiciones transferidas.")} {missing > 0 && `${missing} transacciones no pudieron verificarse; los totales son parciales.`} {t("Solo se suman los registros cargados. SPCX no se incluye.")}</p>}
-    {metrics.totals.filter((pool) => pool.count > 0 || positions.some((p) => p.vaultId === pool.id)).map((pool) => <div key={pool.id} className="mt-6 border-y border-border py-4"><h3 className="font-semibold">{pool.symbol}/USDC</h3><dl className="mt-3 space-y-2 text-sm"><div><dt className="text-muted-foreground">{t("Comisiones cosechadas · brutas")}</dt><dd>{tokenAmount(pool.harvestToken.toString(), pool.id === "sol" ? 9 : 6)} {pool.symbol} + {tokenAmount(pool.harvestUsdc.toString(), 6)} USDC</dd></div><div><dt className="text-muted-foreground">{t("Liquidez aportada · registros cargados")}</dt><dd>{tokenAmount(pool.depositToken.toString(), pool.id === "sol" ? 9 : 6)} {pool.symbol} + {tokenAmount(pool.depositUsdc.toString(), 6)} USDC</dd></div><div><dt className="text-muted-foreground">{t("Liquidez retirada · no es ganancia")}</dt><dd>{tokenAmount(pool.withdrawToken.toString(), pool.id === "sol" ? 9 : 6)} {pool.symbol} + {tokenAmount(pool.withdrawUsdc.toString(), 6)} USDC</dd></div></dl></div>)}
+    {metrics.totals.filter((pool) => pool.count > 0 || positions.some((p) => p.vaultId === pool.id)).map((pool) => <details key={pool.id} className="mt-3 rounded-2xl border border-border bg-card p-4"><summary className="flex cursor-pointer items-center justify-between font-semibold"><span>{t("Bóveda")} {pool.symbol}</span><span className="text-xs font-normal text-muted-foreground">{t("Ver desglose")}</span></summary><dl className="mt-3 space-y-2 text-sm"><div><dt className="text-muted-foreground">{t("Comisiones cosechadas · brutas")}</dt><dd>{tokenAmount(pool.harvestToken.toString(), pool.id === "sol" ? 9 : 6)} {pool.symbol} + {tokenAmount(pool.harvestUsdc.toString(), 6)} USDC</dd></div><div><dt className="text-muted-foreground">{t("Liquidez aportada · registros cargados")}</dt><dd>{tokenAmount(pool.depositToken.toString(), pool.id === "sol" ? 9 : 6)} {pool.symbol} + {tokenAmount(pool.depositUsdc.toString(), 6)} USDC</dd></div><div><dt className="text-muted-foreground">{t("Liquidez retirada · no es ganancia")}</dt><dd>{tokenAmount(pool.withdrawToken.toString(), pool.id === "sol" ? 9 : 6)} {pool.symbol} + {tokenAmount(pool.withdrawUsdc.toString(), 6)} USDC</dd></div></dl></details>)}
     <h3 className="mt-8 font-display text-lg font-semibold">{t("Movimientos en bóvedas")}</h3>
-    <div className="mt-3 flex flex-wrap gap-1" role="group" aria-label={t("Filtrar movimientos")}>{([["all", t("Todos")], ["deposit", t("Depósitos")], ["harvest", t("Cosechas")], ["withdraw", t("Retiros")]] as const).map(([id, label]) => <Button key={id} size="sm" variant={filter === id ? "secondary" : "ghost"} aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}</Button>)}</div>
-    {ready && records.length === 0 && <p className="mt-4 text-sm text-muted-foreground">{t("No hay eventos SOL/MET en las transacciones revisadas.")}</p>}
-    {records.filter((row) => filter === "all" || row.kind === filter || (filter === "withdraw" && row.kind === "close")).map((row) => { const pool = metrics.totals.find((p) => p.pool === row.pool); if (!pool) return null; return <article key={row.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-4"><div className="min-w-0"><p className="text-sm font-semibold">{names[row.kind]} · {pool.symbol}/USDC</p><p className="mt-1 text-xs text-muted-foreground">{row.at ? new Date(row.at).toLocaleString("es-PR") : t("Fecha no disponible")}</p>{row.kind !== "close" && <p className="mt-2 break-words text-sm">{tokenAmount(row.tokenRaw, pool.id === "sol" ? 9 : 6)} {pool.symbol} + {tokenAmount(row.usdcRaw, 6)} USDC</p>}</div><Button asChild size="sm" variant="outline"><a href={`https://orbmarkets.io/tx/${row.signature}`} target="_blank" rel="noopener noreferrer">{t("Comprobante")}<ExternalLink size={14} /></a></Button></article>; })}
+    <div className="mt-3 flex flex-wrap gap-1" role="group" aria-label={t("Filtrar movimientos")}>{([["all", t("Todos")], ["deposit", t("Depósitos")], ["harvest", t("Cosechas")], ["withdraw", t("Retiros")]] as const).map(([id, label]) => { const count = records.filter((r) => matches(id, r.kind)).length; return <Button key={id} size="sm" variant={filter === id ? "secondary" : "ghost"} aria-pressed={filter === id} onClick={() => setFilter(id)}>{label} <span className="text-xs text-muted-foreground">({count})</span></Button>; })}</div>
+    {ready && records.length === 0 && <p className="mt-4 text-sm text-muted-foreground">{t("Aún no tienes movimientos en bóvedas.")}</p>}
+    {(() => { let lastGroup = ""; return records.filter((row) => matches(filter, row.kind)).map((row) => { const pool = metrics.totals.find((p) => p.pool === row.pool); if (!pool) return null; const group = dayLabel(row.at, t); const header = group !== lastGroup; lastGroup = group; const s = styles[row.kind]; const Icon = s.Icon; return <div key={row.id}>{header && <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group}</p>}<article className="flex items-center gap-3 border-b border-border py-3"><span className={`grid h-10 w-10 shrink-0 place-items-center rounded-full ${s.tone}`}><Icon size={18} /></span><div className="min-w-0 flex-1"><p className="text-sm font-semibold">{t(names[row.kind])}</p><p className="text-xs text-muted-foreground">{t("Bóveda")} {pool.symbol} · {row.at ? new Date(row.at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : t("Fecha no disponible")}</p></div><div className="text-right">{row.kind !== "close" ? <><p className={`text-sm font-semibold ${row.kind === "harvest" ? "text-primary" : ""}`}>{s.sign}{tokenAmount(row.usdcRaw, 6)} USDC</p><p className="text-xs text-muted-foreground">{s.sign}{tokenAmount(row.tokenRaw, pool.id === "sol" ? 9 : 6)} {pool.symbol}</p></> : <p className="text-xs text-muted-foreground">{t("Posición cerrada")}</p>}<a className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:underline" href={`https://orbmarkets.io/tx/${row.signature}`} target="_blank" rel="noopener noreferrer">{t("Comprobante")}<ExternalLink size={11} /></a></div></article></div>; }); })()}
     {query.hasNextPage && pages.length < 8 && <Button className="mt-5" variant="outline" disabled={query.isFetching} onClick={() => void query.fetchNextPage()}>{t("Consultar movimientos anteriores")}</Button>}
     {pages.length >= 8 && <p className="mt-4 text-xs text-muted-foreground">{t("Límite de consulta: 200 transacciones para mantener la aplicación ligera. Estos totales no representan todo tu historial.")}</p>}
   </div>;
