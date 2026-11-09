@@ -13,7 +13,7 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { ActionSuccess, ReceiveCard } from "@/components/action-success";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 
-export function HarvestDialog({ wallet, position, vaultId, onClose, onReinvest }: { wallet: string; position: string; vaultId: "sol" | "met"; onClose: () => void; onReinvest?: (netUsdc: string) => void }) {
+export function HarvestDialog({ wallet, position, vaultId, onClose, onReinvest }: { wallet: string; position: string; vaultId: "sol" | "met"; onClose: () => void; onReinvest?: ((netUsdc: string) => void) | undefined }) {
   const t = useT();
   const simulate = useServerFn(simulateRealHarvest);
   const prepare = useServerFn(prepareRealHarvest);
