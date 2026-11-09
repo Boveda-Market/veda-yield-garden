@@ -18,3 +18,11 @@ describe("wallet actions", () => {
     expect(sendInput.safeParse({ from: w, to: w, asset: "SOL", amount: 1n }).success).toBe(false);
   });
 });
+
+import { swapFee } from "@/lib/wallet-actions";
+describe("swap fee", () => {
+  it("charges 1% of USDC, floored", () => {
+    expect(swapFee(100_000_000n)).toBe(1_000_000n);
+    expect(swapFee(150n)).toBe(1n);
+  });
+});

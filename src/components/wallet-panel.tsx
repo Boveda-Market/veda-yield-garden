@@ -84,7 +84,8 @@ export function WalletPanel() {
           <Button className="w-full" disabled={busy || !units || !!amountError || !to || !!toError} onClick={() => void send()}>{busy ? t("Procesando…") : t("Revisar y firmar envío")}</Button>
         </> : quote ? <div className="space-y-3 rounded-xl bg-muted p-3 text-sm">
           <p>{t("Recibirás aproximadamente")} <strong>{fmtUnits(quote.outAmount, out === "SOL" ? 9 : 6)} {out}</strong></p>
-          <p className="text-xs text-muted-foreground">{t("Protección de precio 0.5%. BÓVEDA no cobra comisión por cambiar.")}</p>
+          <p>{t("Comisión BÓVEDA (1%)")}: <strong>{fmtUnits(quote.feeUsdc, 6)} USDC</strong></p>
+          <p className="text-xs text-muted-foreground">{t("Protección de precio 0.5%. La comisión del 1% se cobra en USDC y ya está descontada.")}</p>
           <Button className="w-full" disabled={busy} onClick={() => void swap()}>{busy ? t("Procesando…") : t("Confirmar y firmar cambio")}</Button>
         </div> : <Button className="w-full" disabled={busy || !units || !!amountError} onClick={() => void getQuote()}>{busy ? t("Cotizando…") : t("Ver cotización")}</Button>}
         {message && <p role="status" className="text-sm">{message}</p>}

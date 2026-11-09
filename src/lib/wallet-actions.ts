@@ -50,20 +50,51 @@ export async function buildTransfer(input: z.infer<typeof sendInput>): Promise<U
   return new VersionedTransaction(message).serialize();
 }
 
-export type SwapQuote = { outAmount: string; priceImpactPct: string; raw: unknown };
+export const SWAP_FEE_BPS = 100n;
+/** BÓVEDA's existing USDC account for the fee wallet; every swap fee is paid in USDC here. */
+export const FEE_USDC_ACCOUNT = "DXbXVtrEEyJ7zuanJNzyyj1D3PQBsUm65hdQ3DHiarQW";
 
-/** Public Jupiter quote with 0.5% slippage protection. */
+/** 1% swap fee in micro-USDC, floored. */
+export function swapFee(usdcUnits: bigint) { return usdcUnits * SWAP_FEE_BPS / 10_000n; }
+
+export type SwapQuote = { asset: WalletAsset; amount: bigint; outAmount: string; feeUsdc: string; priceImpactPct: string; raw: unknown };
+
+/** Public Jupiter quote with 0.5% slippage; the 1% fee is always charged in USDC. */
 export async function quoteSwap(asset: WalletAsset, amount: bigint): Promise<SwapQuote> {
   const [input, output] = asset === "SOL" ? [SOL_MINT, USDC_MINT] : [USDC_MINT, SOL_MINT];
-  const res = await fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${input}&outputMint=${output}&amount=${amount}&slippageBps=50`);
+  // SOL→USDC: Jupiter takes 1% of the USDC output. USDC→SOL: 1% of the USDC input is set aside before swapping.
+  const swapIn = asset === "USDC" ? amount - swapFee(amount) : amount;
+  const feeParam = asset === "SOL" ? `&platformFeeBps=${SWAP_FEE_BPS}` : "";
+  const res = await fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${input}&outputMint=${output}&amount=${swapIn}&slippageBps=50${feeParam}`);
   if (!res.ok) throw new Error("No se pudo cotizar el cambio. Inténtalo de nuevo.");
-  const raw = await res.json() as { outAmount: string; priceImpactPct: string };
-  return { outAmount: raw.outAmount, priceImpactPct: raw.priceImpactPct, raw };
+  const raw = await res.json() as { outAmount: string; priceImpactPct: string; platformFee?: { amount: string } };
+  const feeUsdc = asset === "SOL" ? (raw.platformFee?.amount ?? "") : swapFee(amount).toString();
+  if (!feeUsdc || BigInt(feeUsdc) <= 0n) throw new Error("El monto es demasiado pequeño para cambiar.");
+  return { asset, amount, outAmount: raw.outAmount, feeUsdc, priceImpactPct: raw.priceImpactPct, raw };
 }
 
+type JupIx = { programId: string; accounts: { pubkey: string; isSigner: boolean; isWritable: boolean }[]; data: string };
+
 export async function buildSwap(wallet: string, quote: SwapQuote): Promise<Uint8Array> {
-  const res = await fetch("https://lite-api.jup.ag/swap/v1/swap", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ quoteResponse: quote.raw, userPublicKey: wallet, wrapAndUnwrapSol: true, dynamicComputeUnitLimit: true }) });
+  const { Connection, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } = await import("@solana/web3.js");
+  const res = await fetch("https://lite-api.jup.ag/swap/v1/swap-instructions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ quoteResponse: quote.raw, userPublicKey: wallet, wrapAndUnwrapSol: true, dynamicComputeUnitLimit: true, ...(quote.asset === "SOL" ? { feeAccount: FEE_USDC_ACCOUNT } : {}) }) });
   if (!res.ok) throw new Error("No se pudo preparar el cambio. Inténtalo de nuevo.");
-  const { swapTransaction } = await res.json() as { swapTransaction: string };
-  return Uint8Array.from(atob(swapTransaction), (c) => c.charCodeAt(0));
+  const j = await res.json() as { computeBudgetInstructions: JupIx[]; setupInstructions: JupIx[]; swapInstruction: JupIx; cleanupInstruction?: JupIx; addressLookupTableAddresses: string[] };
+  const ix = (i: JupIx) => new TransactionInstruction({ programId: new PublicKey(i.programId), keys: i.accounts.map((a) => ({ pubkey: new PublicKey(a.pubkey), isSigner: a.isSigner, isWritable: a.isWritable })), data: Uint8Array.from(atob(i.data), (c) => c.charCodeAt(0)) as Buffer });
+  const owner = new PublicKey(wallet);
+  const instructions = [...j.computeBudgetInstructions.map(ix), ...j.setupInstructions.map(ix)];
+  if (quote.asset === "USDC") {
+    const spl = await import("@solana/spl-token");
+    const mint = new PublicKey(USDC_MINT);
+    instructions.push(spl.createTransferCheckedInstruction(spl.getAssociatedTokenAddressSync(mint, owner), mint, new PublicKey(FEE_USDC_ACCOUNT), owner, BigInt(quote.feeUsdc), 6));
+  }
+  instructions.push(ix(j.swapInstruction));
+  if (j.cleanupInstruction) instructions.push(ix(j.cleanupInstruction));
+  const connection = new Connection(PUBLIC_RPC, "confirmed");
+  const alts = (await Promise.all(j.addressLookupTableAddresses.map((a) => connection.getAddressLookupTable(new PublicKey(a))))).flatMap((r) => r.value ? [r.value] : []);
+  const { blockhash } = await connection.getLatestBlockhash("confirmed");
+  const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: blockhash, instructions }).compileToV0Message(alts));
+  const bytes = tx.serialize();
+  if (bytes.length > 1232) throw new Error("No se pudo preparar el cambio. Inténtalo con otro monto.");
+  return bytes;
 }
