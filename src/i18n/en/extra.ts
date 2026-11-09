@@ -248,6 +248,7 @@ export const extra: Record<string, string> = {
   "Entre {min} y {max} USDC por posición.": "Between {min} and {max} USDC per position.",
   "Comisión BÓVEDA al abrir": "BÓVEDA opening fee",
   "gratis hasta 10 USDC, 1.25% sobre el resto. Cerrar no tiene comisión de BÓVEDA.": "free up to 10 USDC, 1.25% on the rest. Closing has no BÓVEDA fee.",
+  "Abrir no tiene comisión de BÓVEDA. Al cerrar: gratis hasta 10 USDC, 1.25% sobre el resto del valor de la posición.": "Opening has no BÓVEDA fee. On close: free up to 10 USDC, 1.25% on the rest of the position value.",
   "Revisa tu posición": "Review your position",
   "Tamaño": "Size",
   "Garantía": "Collateral",

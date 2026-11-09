@@ -16,8 +16,9 @@ export const PERP_MIN_LEVERAGE = 2;
 export const PERP_MAX_LEVERAGE = 50;
 export const PERP_SLIPPAGE_BPS = 200;
 
-/** BÓVEDA opening fee in micro-USDC: same progressive rule (free up to 10 USDC, 1.25% on excess). */
-export function perpOpenFee(units: bigint) { return progressiveFee(units); }
+/** Opening is free; BÓVEDA charges the progressive fee (free up to 10 USDC, 1.25% on excess) at close. */
+export function perpOpenFee(_units: bigint) { return 0n; }
+export function perpCloseFee(valueMicro: bigint) { return progressiveFee(valueMicro); }
 
 export function validPerpAmount(units: bigint) {
   return units >= BigInt(PERP_MIN_USDC * 1e6) && units <= BigInt(PERP_MAX_USDC * 1e6);

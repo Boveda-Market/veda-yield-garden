@@ -4,7 +4,7 @@ import { AlertTriangle, ArrowDownRight, ArrowUpRight, ExternalLink, Loader2, Wal
 import { Button } from "@/components/ui/button";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useT } from "@/lib/i18n";
-import { perpOpenFee, PERP_MAX_LEVERAGE, PERP_MAX_USDC, PERP_MIN_LEVERAGE, PERP_MIN_USDC, type PerpAsset, type PerpPosition, type PerpQuote, type PerpSide } from "@/lib/perps";
+import { PERP_MAX_LEVERAGE, PERP_MAX_USDC, PERP_MIN_LEVERAGE, PERP_MIN_USDC, type PerpAsset, type PerpPosition, type PerpQuote, type PerpSide } from "@/lib/perps";
 import { getPerpPositions, preparePerpClose, preparePerpOpen } from "@/lib/perps.functions";
 import { toBaseUnits } from "@/lib/wallet-actions";
 
@@ -45,7 +45,7 @@ export function PerpsLive({ asset, momentum = 50 }: { asset: PerpAsset; momentum
 
   const units = toBaseUnits(amount, "USDC");
   const valid = !!units && units >= BigInt(PERP_MIN_USDC * 1e6) && units <= BigInt(PERP_MAX_USDC * 1e6);
-  const fee = units ? Number(perpOpenFee(units)) / 1e6 : 0;
+
 
   const prepare = async (side: PerpSide) => {
     if (!units || !valid) return;
@@ -96,7 +96,7 @@ export function PerpsLive({ asset, momentum = 50 }: { asset: PerpAsset; momentum
         <div className="flex justify-between text-sm"><label htmlFor="perp-lev" className="font-semibold">{t("Multiplicador")}</label><span className="font-display font-bold">{leverage}×</span></div>
         <input id="perp-lev" type="range" min={PERP_MIN_LEVERAGE} max={PERP_MAX_LEVERAGE} value={leverage} onChange={(e) => { setLeverage(Number(e.target.value)); setReview(null); }} className="mt-2 w-full accent-primary" />
       </div>
-      <p className="text-xs text-muted-foreground">{t("Comisión BÓVEDA al abrir")}: <strong className="text-foreground">{fee.toFixed(6)} USDC</strong> · {t("gratis hasta 10 USDC, 1.25% sobre el resto. Cerrar no tiene comisión de BÓVEDA.")}</p>
+      <p className="text-xs text-muted-foreground">{t("Abrir no tiene comisión de BÓVEDA. Al cerrar: gratis hasta 10 USDC, 1.25% sobre el resto del valor de la posición.")}</p>
       <div className="grid grid-cols-2 gap-3">
         <Button disabled={!valid || !!busy} onClick={() => prepare("long")} className={`h-16 rounded-2xl text-lg font-bold transition active:scale-95 ${momentum >= 60 ? "shadow-lg shadow-primary/40 ring-2 ring-primary/40" : ""}`}>{busy === "long" ? <Loader2 className="animate-spin" /> : <><ArrowUpRight />{t("Sube")}</>}</Button>
         <Button disabled={!valid || !!busy} onClick={() => prepare("short")} variant="destructive" className={`h-16 rounded-2xl text-lg font-bold transition active:scale-95 ${momentum <= 40 ? "shadow-lg shadow-destructive/40 ring-2 ring-destructive/40" : ""}`}>{busy === "short" ? <Loader2 className="animate-spin" /> : <><ArrowDownRight />{t("Baja")}</>}</Button>

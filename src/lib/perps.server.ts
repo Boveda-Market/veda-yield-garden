@@ -1,4 +1,4 @@
-import { collateralMint, perpOpenFee, PERP_MARKETS, PERP_SLIPPAGE_BPS, type PerpAsset, type PerpPosition, type PerpQuote, type PerpSide } from "@/lib/perps";
+import { collateralMint, perpCloseFee, PERP_MARKETS, PERP_SLIPPAGE_BPS, type PerpAsset, type PerpPosition, type PerpQuote, type PerpSide } from "@/lib/perps";
 import { FEE_USDC_ACCOUNT, USDC_MINT } from "@/lib/wallet-actions";
 
 const API = "https://perps-api.jup.ag/v1";
@@ -64,14 +64,17 @@ export async function buildOpen(apiKey: string, i: { wallet: string; asset: Perp
   return { transaction: await finalize(apiKey, i.wallet, r.serializedTxBase64, fee), feeMicro: fee.toString(), quote: { entryPriceUsd: q.entryPriceUsd, liquidationPriceUsd: q.liquidationPriceUsd, positionSizeUsd: q.positionSizeUsd, positionCollateralSizeUsd: q.positionCollateralSizeUsd, openFeeUsd: q.openFeeUsd, priceImpactFeeUsd: q.priceImpactFeeUsd, leverage: q.leverage } };
 }
 
-/** Closing is free on BÓVEDA's side: proceeds arrive later from Jupiter's keeper in USDC. */
-export async function buildClose(apiKey: string, i: { wallet: string; position: string }): Promise<{ transaction: string }> {
+/** Close fee: progressive on the current position value, paid from wallet USDC in the same transaction. */
+export async function buildClose(apiKey: string, i: { wallet: string; position: string }): Promise<{ transaction: string; feeMicro: string }> {
   const owned = await listPositions(i.wallet);
-  if (!owned.some((p) => p.positionPubkey === i.position)) throw new Error("not owner");
+  const pos = owned.find((p) => p.positionPubkey === i.position);
+  if (!pos) throw new Error("not owner");
+  const value = Number(pos.valueUsd);
+  const fee = Number.isFinite(value) && value > 0 ? perpCloseFee(BigInt(Math.floor(value * 1e6))) : 0n;
   const r = await jup<{ serializedTxBase64: string | null; requireKeeperSignature?: boolean }>("/positions/decrease", {
     method: "POST",
     body: JSON.stringify({ positionPubkey: i.position, entirePosition: true, receiveToken: "USDC", receiveMint: USDC_MINT, desiredMint: USDC_MINT, maxSlippageBps: String(PERP_SLIPPAGE_BPS) }),
   });
   if (!r.serializedTxBase64 || r.requireKeeperSignature) throw new Error("not executable");
-  return { transaction: await finalize(apiKey, i.wallet, r.serializedTxBase64, 0n) };
+  return { transaction: await finalize(apiKey, i.wallet, r.serializedTxBase64, fee), feeMicro: fee.toString() };
 }
