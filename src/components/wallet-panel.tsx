@@ -33,7 +33,7 @@ export function WalletPanel() {
     Object.fromEntries(await Promise.all(extraTokens.map(async (x) => [x.symbol, await readTokenBalance(address!, x.mint)] as const))) as Record<string, bigint> });
   const swapBalances: Record<string, bigint | undefined> = { SOL: balances.data?.sol, USDC: balances.data?.usdc, ...(extra.data ?? {}) };
   const [swapFrom, setSwapFrom] = useState({ key: 0, from: "USDC" });
-  const [tab, setTab] = useState<"send" | "swap">("send");
+  const [tab, setTab] = useState<"send" | "swap">("swap");
   const [asset, setAsset] = useState<WalletAsset>("USDC");
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
@@ -81,7 +81,7 @@ export function WalletPanel() {
     </section>
 
     <section className="rounded-2xl border border-border bg-card p-5">
-      <div className="flex gap-2"><Button disabled={busy} variant={tab === "send" ? "secondary" : "ghost"} onClick={() => setTab("send")}><Send size={16} />{t("Enviar")}</Button><Button disabled={busy} variant={tab === "swap" ? "secondary" : "ghost"} onClick={() => setTab("swap")}><ArrowLeftRight size={16} />{t("Cambiar")}</Button></div>
+      <div className="flex gap-2"><Button disabled={busy} variant={tab === "swap" ? "secondary" : "ghost"} onClick={() => setTab("swap")}><ArrowLeftRight size={16} />{t("Cambiar")}</Button><Button disabled={busy} variant={tab === "send" ? "secondary" : "ghost"} onClick={() => setTab("send")}><Send size={16} />{t("Enviar")}</Button></div>
       {tab === "swap" ? <WalletSwap key={swapFrom.key} balances={swapBalances} initialFrom={swapFrom.from} busy={busy} onConfirm={swap} /> : <div className="mt-4 space-y-3">
         <div className="flex gap-2">{(["USDC", "SOL"] as const).map((a) => <Button key={a} size="sm" variant={asset === a ? "default" : "outline"} onClick={() => setAsset(a)}>{a}</Button>)}</div>
         {tab === "send" && <div><Input placeholder={t("Dirección de destino")} value={to} onChange={(e) => setTo(e.target.value.trim())} />{toError && <p className="mt-1 text-sm text-destructive">{toError}</p>}</div>}
