@@ -12,11 +12,6 @@ export const getLiveRounds = createServerFn({ method: "GET" }).handler(async () 
   catch (e) { console.error("[predict] rounds", e instanceof Error ? e.message : e); return { success: false as const, rounds: [] }; }
 });
 
-export const getPolyEvents = createServerFn({ method: "GET" }).handler(async () => {
-  try { const { listPolyEvents } = await import("@/lib/predict.server"); return { success: true as const, events: await listPolyEvents() }; }
-  catch (e) { console.error("[predict] poly", e instanceof Error ? e.message : e); return { success: false as const, events: [] }; }
-});
-
 export const getPredictPositions = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => z.object({ wallet: solanaAddressSchema }).strict().parse(i))
   .handler(async ({ data }) => {

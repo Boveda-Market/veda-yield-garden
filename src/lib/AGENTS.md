@@ -1,2 +1,2 @@
 - Compound adds harvested tokens to the same verified position: no swap/extra SOL wrap, capped by harvest, simulated.
-- Live predictions: Polymarket crypto markets via Jupiter Prediction API, wallet sole signer, simulated before review, executed via /execute; BÓVEDA is never counterparty.
+- Live predictions: only BTC/ETH/SOL Up-or-Down rounds (5m/15m/1h) from Polymarket via Jupiter Prediction API, one current round per asset/window, wallet sole signer, simulated before review, executed via /execute; no practice mode; BÓVEDA is never counterparty.

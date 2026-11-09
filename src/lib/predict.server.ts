@@ -1,4 +1,4 @@
-import { PREDICT_SERIES, PREDICT_WINDOWS, type LiveRound, type PolyEvent, type PredictPosition, type PredictQuote, type PredictWindow } from "@/lib/predict";
+import { MARKET_ID_RE, assetOfTitle, windowOfTags, type LiveRound, type PredictPosition, type PredictQuote } from "@/lib/predict";
 import { USDC_MINT } from "@/lib/wallet-actions";
 
 const API = "https://api.jup.ag/prediction/v1";
@@ -13,26 +13,34 @@ async function jup<T>(path: string, init?: RequestInit): Promise<T> {
   return body;
 }
 
-type Market = { marketId: string; outcomeSide?: string; tradable?: boolean; openTime: number; closeTime: number; pricing?: { buyYesPriceUsd?: number | null } };
-type Event = { eventId: string; tags: string[]; metadata: { series: string }; markets?: Market[] };
+type PolyMarket = { marketId: string; status: string; closeTime: number; pricing?: { buyYesPriceUsd?: number; sellYesPriceUsd?: number; buyNoPriceUsd?: number; volume?: number } };
+type PolyRaw = { eventId: string; isActive?: boolean; tags?: string[]; beginAt?: string; volumeUsd?: string | number; metadata?: { title?: string }; markets?: PolyMarket[] };
 
 let cache: { at: number; rounds: LiveRound[] } | null = null;
+const pr = (v: unknown) => { const n = Number(v); return Number.isFinite(n) && n > 0 && n < 1e6 ? n / 1e6 : null; };
 
-const px = (m: { pricing?: { buyYesPriceUsd?: number | null } }) => { const v = Number(m.pricing?.buyYesPriceUsd); return Number.isFinite(v) && v > 0 && v < 1e6 ? v / 1e6 : null; };
-
+/** Current BTC/ETH/SOL Up or Down rounds (5m, 15m, 1h) with real order-book prices; one per asset and window. */
 export async function listRounds(): Promise<LiveRound[]> {
-  if (cache && Date.now() - cache.at < 10_000) return cache.rounds;
+  if (cache && Date.now() - cache.at < 8_000) return cache.rounds;
   const now = Math.floor(Date.now() / 1000);
-  const r = await jup<{ data: Event[] }>(`/events?provider=bisonfi&category=crypto&filter=live&includeMarkets=true&start=0&end=50`);
-  const rounds: LiveRound[] = [];
-  for (const e of r.data ?? []) {
-    if (!(PREDICT_SERIES as readonly string[]).includes(e.metadata?.series)) continue;
-    const window = e.tags.find((t) => (PREDICT_WINDOWS as readonly string[]).includes(t)) as PredictWindow | undefined;
-    const up = e.markets?.find((m) => m.outcomeSide === "up"), down = e.markets?.find((m) => m.outcomeSide === "down");
-    if (!window || !up?.tradable || !down?.tradable || !(up.openTime <= now && now < up.closeTime)) continue;
-    rounds.push({ eventId: e.eventId, series: e.metadata.series, window, openTime: up.openTime, closeTime: up.closeTime, up: up.marketId, down: down.marketId, upPrice: px(up), downPrice: px(down) });
+  const pages = await Promise.all([0, 50].map((s) => jup<{ data: PolyRaw[] }>(`/events?provider=polymarket&category=crypto&filter=live&includeMarkets=true&start=${s}&end=${s + 50}`).catch(() => ({ data: [] as PolyRaw[] }))));
+  const best = new Map<string, LiveRound>();
+  for (const e of pages.flatMap((p) => p.data ?? [])) {
+    if (!e.eventId?.startsWith("POLY-") || e.isActive === false) continue;
+    const asset = assetOfTitle(e.metadata?.title ?? ""), window = windowOfTags(e.tags ?? []);
+    const m = e.markets?.[0];
+    if (!asset || !window || !m || m.status !== "open" || !MARKET_ID_RE.test(m.marketId)) continue;
+    const openTime = Number(e.beginAt), closeTime = m.closeTime;
+    if (!(openTime <= now && now < closeTime)) continue;
+    const upPrice = pr(m.pricing?.buyYesPriceUsd);
+    const sellYes = pr(m.pricing?.sellYesPriceUsd);
+    const downPrice = pr(m.pricing?.buyNoPriceUsd) ?? (sellYes !== null ? Math.max(0.01, Math.min(0.99, 1 - sellYes)) : null);
+    if (upPrice === null || upPrice >= 1) continue;
+    const r: LiveRound = { eventId: e.eventId, asset, window, openTime, closeTime, marketId: m.marketId, upPrice, downPrice, volume: Number(m.pricing?.volume ?? 0) };
+    const k = `${asset}:${window}`, prev = best.get(k);
+    if (!prev || r.closeTime < prev.closeTime || (r.closeTime === prev.closeTime && r.volume > prev.volume)) best.set(k, r);
   }
-  rounds.sort((a, b) => a.closeTime - b.closeTime);
+  const rounds = [...best.values()];
   cache = { at: Date.now(), rounds };
   return rounds;
 }
@@ -50,34 +58,9 @@ async function verify(heliusKey: string, wallet: string, base64: string) {
 
 type Build = { transaction: string | null; requiredSigners?: string[]; execution?: { context?: unknown }; order?: { contractsMicro?: string; orderCostUsd?: string } };
 
-type PolyMarket = { marketId: string; status: string; title: string; closeTime: number; rulesPrimary?: string; pricing?: { buyYesPriceUsd?: number; buyNoPriceUsd?: number; volume?: number } };
-type PolyRaw = { eventId: string; isActive: boolean; volumeUsd?: string | number; metadata?: { title?: string; imageUrl?: string; closeTime?: string }; markets?: PolyMarket[] };
-let polyCache: { at: number; events: PolyEvent[] } | null = null;
-const pr = (v: unknown) => { const n = Number(v); return Number.isFinite(n) && n > 0 && n < 1e6 ? n / 1e6 : null; };
-
-/** Open Polymarket crypto events with real order-book prices. */
-export async function listPolyEvents(): Promise<PolyEvent[]> {
-  if (polyCache && Date.now() - polyCache.at < 15_000) return polyCache.events;
-  const r = await jup<{ data: PolyRaw[] }>(`/events?provider=polymarket&category=crypto&includeMarkets=true&start=0&end=40`);
-  const now = Math.floor(Date.now() / 1000);
-  const events: PolyEvent[] = [];
-  for (const e of r.data ?? []) {
-    if (!e.eventId?.startsWith("POLY-") || e.isActive === false) continue;
-    const markets = (e.markets ?? []).filter((m) => m.status === "open" && m.closeTime > now && /^POLY-\d+$/.test(m.marketId))
-      .map((m) => ({ marketId: m.marketId, title: m.title, yes: pr(m.pricing?.buyYesPriceUsd), no: pr(m.pricing?.buyNoPriceUsd), volume: Number(m.pricing?.volume ?? 0) }))
-      .filter((m) => m.yes !== null && m.yes > 0.02 && m.yes < 0.98);
-    if (!markets.length) continue;
-    const close = Math.min(...(e.markets ?? []).map((m) => m.closeTime).filter((x) => x > now));
-    events.push({ eventId: e.eventId, title: e.metadata?.title ?? "", imageUrl: e.metadata?.imageUrl?.startsWith("https://") ? e.metadata.imageUrl : null, closeTime: close, volume: Number(e.volumeUsd ?? 0) / 1e6, rules: e.markets?.[0]?.rulesPrimary?.slice(0, 900) ?? "", markets: markets.slice(0, 12) });
-  }
-  events.sort((a, b) => a.closeTime - b.closeTime);
-  polyCache = { at: Date.now(), events };
-  return events;
-}
-
 export async function buildBuy(heliusKey: string, d: { wallet: string; marketId: string; isYes: boolean; amount: bigint }) {
-  const live = await listPolyEvents();
-  if (!live.some((e) => e.markets.some((m) => m.marketId === d.marketId))) throw new Error("market not open");
+  const live = await listRounds();
+  if (!live.some((r) => r.marketId === d.marketId)) throw new Error("market not open");
   const b = await jup<Build>(`/orders`, { method: "POST", body: JSON.stringify({ ownerPubkey: d.wallet, marketId: d.marketId, isBuy: true, isYes: d.isYes, depositAmount: d.amount.toString(), depositMint: USDC_MINT }) });
   if (!b.transaction || (b.requiredSigners && b.requiredSigners.some((s) => s !== d.wallet))) throw new Error("bad build");
   await verify(heliusKey, d.wallet, b.transaction);
