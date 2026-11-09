@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { Link } from "@tanstack/react-router";
 import { Copy, Users, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
-import { depositFee, progressiveFee } from "@/lib/fees";
-import { AFFILIATE_SHARE_BPS, PAYOUT_MIN_MICRO, affiliateCommission, payoutProgress, REF_STORAGE_KEY, normalizeCode, type AffiliateDashboard } from "@/lib/affiliate";
+import { AFFILIATE_SHARE_BPS, PAYOUT_MIN_MICRO, payoutProgress, REF_STORAGE_KEY, normalizeCode, type AffiliateDashboard } from "@/lib/affiliate";
 import { customizeAffiliateCode, getAffiliateDashboard, joinAffiliate, savePayoutWallet } from "@/lib/affiliate.functions";
 
 const usdc = (raw: string) => (Number(raw) / 1e6).toLocaleString("en-US", { useGrouping: false,  minimumFractionDigits: 2, maximumFractionDigits: 6 });
@@ -83,17 +83,7 @@ export function AffiliatePanel() {
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={p.pct} aria-valuemin={0} aria-valuemax={100}><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${p.pct}%` }} /></div>
         <p className="mt-2 text-xs text-muted-foreground">{p.ready ? t("¡Listo! Tu pago se incluirá en el próximo desembolso.") : `${t("Te faltan")} ${usdc(p.missingRaw.toString())} USDC ${t("para tu próximo pago.")}`}</p>
       </div>; })()}
-      <div className="mt-4 rounded-xl border border-border bg-card p-4">
-        <p className="text-sm font-semibold">{t("Cómo ganas")}</p>
-        <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs leading-5 text-muted-foreground">
-          <li>{t("Al depositar: gratis hasta 5 USDC y 0.5% sobre el resto. Ganas al instante.")}</li>
-          <li>{t("Al cosechar o cerrar: gratis hasta 10 USDC y 1.25% sobre el resto.")}</li>
-          <li>{t("Tú recibes el")} {dash.shareBps / 100}% {t("de esa comisión en USDC.")}</li>
-        </ol>
-        <table className="mt-3 w-full text-xs"><thead><tr className="text-muted-foreground"><th className="text-left font-normal">{t("Monto")}</th><th className="text-right font-normal">{t("Depósito")}</th><th className="text-right font-normal">{t("Cosecha o cierre")}</th></tr></thead>
-          <tbody>{[1000, 5000, 10000].map((g) => <tr key={g} className="border-t border-border"><td className="py-1.5">{g} USDC</td><td className="py-1.5 text-right font-semibold">{usdc(affiliateCommission(depositFee(BigInt(g) * 1_000_000n), dash.shareBps).toString())}</td><td className="py-1.5 text-right font-semibold">{usdc(affiliateCommission(progressiveFee(BigInt(g) * 1_000_000n), dash.shareBps).toString())}</td></tr>)}</tbody></table>
-        <p className="mt-2 text-xs text-muted-foreground">{t("Envíos y cambios no generan comisión de afiliado.")}</p>
-      </div>
+      <p className="mt-4 text-xs text-muted-foreground">{t("Recibes el")} {dash.shareBps / 100}% {t("de las comisiones de tus invitados.")} <Link to="/terminos" hash="afiliados" className="font-medium text-primary underline">{t("Ver cómo funciona")}</Link></p>
       {(() => { const connected = session.walletAddress ?? null; const current = dash.payoutWallet ?? connected; const isConnected = !!current && current === connected; const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`; return <div className="mt-5 rounded-xl border border-border bg-card p-4">
         <p className="text-sm font-semibold">{t("Destino de tus comisiones (USDC)")}</p>
         {current ? <p className="mt-2 flex items-center gap-2 text-sm"><span className="h-2 w-2 rounded-full bg-primary" aria-hidden />{isConnected ? t("Tu wallet conectada") : t("Wallet personalizada")}<span className="font-mono text-xs text-muted-foreground">{short(current)}</span></p> : <p className="mt-2 text-xs text-muted-foreground">{t("Conecta una wallet o escribe una dirección para recibir tus pagos.")}</p>}
