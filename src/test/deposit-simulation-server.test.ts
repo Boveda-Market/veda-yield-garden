@@ -125,14 +125,18 @@ describe("unsigned composed deposit simulation", () => {
     await expect(simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "10000.000001" }, { preparePilot: true })).rejects.toThrow();
     expect(mocks.connection.simulateTransaction).not.toHaveBeenCalled();
   });
-  it("accepts a verified 10,000 USDC budget without charging entry fees or sending", async () => {
+  it("charges 0.5% above 5 USDC on a verified 10,000 USDC deposit without sending", async () => {
     mocks.getAccount.mockReset();
     mocks.getAccount.mockResolvedValue({ amount: 10_000_000_000n });
+    const fee = Buffer.alloc(AccountLayout.span);
+    AccountLayout.encode({ mint: usdc, owner: new PublicKey(FEE_WALLET), amount: 10_049_975_000n, delegateOption: 0, delegate: PublicKey.default, state: 1, isNativeOption: 0, isNative: 0n, delegatedAmount: 0n, closeAuthorityOption: 0, closeAuthority: PublicKey.default }, fee);
+    const base = await mocks.connection.simulateTransaction();
+    mocks.connection.simulateTransaction.mockResolvedValue({ ...base, value: { ...base.value, accounts: [...base.value.accounts, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [fee.toString("base64"), "base64"] }] } });
     const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "10000" }, { preparePilot: true });
     expect(result.success).toBe(true);
     expect(result.prepared).toBeDefined();
-    expect(result.net).toBe("10000");
-    expect(result.fee).toBe("0");
+    expect(result.fee).toBe("49.975");
+    expect(result.net).toBe("9950.025");
     expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
   });
   it("does not prepare 10,000 USDC when the wallet only has 2 USDC", async () => {

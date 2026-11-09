@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-/** Share of BÓVEDA's 1% exit fee paid to the referring affiliate, in basis points of that fee. */
+/** Share of every BÓVEDA fee (entry, harvest, exit) paid to the referring affiliate, in basis points of that fee. */
 export const AFFILIATE_SHARE_BPS = 6000;
 
 /** Integer micro-USDC commission, floored so it never exceeds the collected fee share. */
@@ -30,7 +30,7 @@ export const affiliateRequest = z.object({ token }).strict();
 export const joinRequest = z.object({ token, code: codeSchema }).strict();
 export const customizeCodeRequest = z.object({ token, code: codeSchema }).strict();
 export const payoutRequest = z.object({ token, wallet: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/) }).strict();
-export const recordRequest = z.object({ token, signature: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,90}$/), kind: z.enum(["harvest", "exit"]) }).strict();
+export const recordRequest = z.object({ token, signature: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,90}$/), kind: z.enum(["harvest", "exit", "deposit"]) }).strict();
 
 export type AffiliateDashboard = {
   code: string;
@@ -40,5 +40,5 @@ export type AffiliateDashboard = {
   pendingRaw: string;
   paidRaw: string;
   joinedCode: boolean;
-  earnings: Array<{ signature: string; kind: "harvest" | "exit"; feeRaw: string; commissionRaw: string; status: string; createdAt: string }>;
+  earnings: Array<{ signature: string; kind: "harvest" | "exit" | "deposit"; feeRaw: string; commissionRaw: string; status: string; createdAt: string }>;
 };

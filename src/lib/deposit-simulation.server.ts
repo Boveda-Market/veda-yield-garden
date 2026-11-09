@@ -2,7 +2,8 @@ import BN from "bn.js";
 import { Buffer } from "buffer";
 import { z } from "zod";
 import { ComputeBudgetProgram, Keypair, PublicKey, SystemProgram, SystemInstruction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
-import { getAssociatedTokenAddressSync, getAccount, TOKEN_PROGRAM_ID, AccountLayout, NATIVE_MINT } from "@solana/spl-token";
+import { getAssociatedTokenAddressSync, getAccount, TOKEN_PROGRAM_ID, AccountLayout, NATIVE_MINT, createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction } from "@solana/spl-token";
+import { FEE_WALLET } from "@/lib/fees";
 import { CpAmm, derivePositionAddress, cpAmmCoder } from "@meteora-ag/cp-amm-sdk/dist/index.js";
 import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, solanaAddressSchema } from "@/lib/solana-data";
@@ -98,8 +99,15 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
       const transfer = SystemInstruction.decodeTransfer(ix);
       return !transfer.toPubkey.equals(getAssociatedTokenAddressSync(NATIVE_MINT, owner));
     });
-    // Entry is free: no fee transfer (including zero-value transfers) or fee ATA creation.
-    const body = [...swapIxs, ...depositIxs, ...(swap.cleanupInstruction ? [decodeIx(swap.cleanupInstruction)] : [])].filter((ix) => !ix.programId.equals(ComputeBudgetProgram.programId));
+    // Entry fee (0.5% above 5 USDC) moves atomically to the fee wallet; none when zero.
+    const feeOwner = new PublicKey(FEE_WALLET);
+    const feeAta = getAssociatedTokenAddressSync(usdc, feeOwner);
+    const feeBefore = amounts.fee > 0n ? await getAccount(connection, feeAta).then((a) => a.amount).catch(() => null) : null;
+    const feeIxs = amounts.fee > 0n ? [
+      ...(feeBefore === null ? [createAssociatedTokenAccountIdempotentInstruction(owner, feeAta, feeOwner, usdc)] : []),
+      createTransferCheckedInstruction(source, usdc, feeAta, owner, amounts.fee, 6),
+    ] : [];
+    const body = [...feeIxs, ...swapIxs, ...depositIxs, ...(swap.cleanupInstruction ? [decodeIx(swap.cleanupInstruction)] : [])].filter((ix) => !ix.programId.equals(ComputeBudgetProgram.programId));
     const build = (units: number) => compactDepositInstructions([...computeBudgetIxs(units), ...body]);
     const tables = await Promise.all(swap.addressLookupTableAddresses.map(async (address) => {
       const table = await connection.getAddressLookupTable(new PublicKey(address));
@@ -116,13 +124,18 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
     const sizing = await connection.simulateTransaction(transaction, { sigVerify: false, replaceRecentBlockhash: true });
     // Tight compute limit keeps congestion pricing proportional to real usage.
     if (!sizing.value.err) transaction = compile(computeLimit(sizing.value.unitsConsumed));
-    const simulated = await connection.simulateTransaction(transaction, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: [source.toBase58(), positionAddress.toBase58()] } });
+    const simulated = await connection.simulateTransaction(transaction, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: [source.toBase58(), positionAddress.toBase58(), feeAta.toBase58()] } });
     if (simulated.value.err) return { ...result(false, "La simulación de Solana rechazó la transacción compuesta. No se firmó ni envió; no se cobró comisión."), slot: simulated.context.slot, units: simulated.value.unitsConsumed };
-    const [sourceAccount, positionAccount] = simulated.value.accounts ?? [];
+    const [sourceAccount, positionAccount, feeAccount] = simulated.value.accounts ?? [];
     let feeVerified = false, positionVerified = false;
+    let feeReceived = amounts.fee === 0n;
+    if (amounts.fee > 0n && feeAccount?.owner === TOKEN_PROGRAM_ID.toBase58() && feeAccount.data[0]) {
+      const decoded = AccountLayout.decode(Buffer.from(feeAccount.data[0], "base64"));
+      feeReceived = decoded.mint.equals(usdc) && decoded.owner.equals(feeOwner) && decoded.amount - (feeBefore ?? 0n) === amounts.fee;
+    }
     if (sourceAccount?.owner === TOKEN_PROGRAM_ID.toBase58() && sourceAccount.data[0]) {
       const decoded = AccountLayout.decode(Buffer.from(sourceAccount.data[0], "base64"));
-      feeVerified = amounts.fee === 0n && decoded.mint.equals(usdc) && decoded.owner.equals(owner) && decoded.amount >= balance.amount - amounts.gross && decoded.amount <= balance.amount;
+      feeVerified = feeReceived && decoded.mint.equals(usdc) && decoded.owner.equals(owner) && decoded.amount >= balance.amount - amounts.gross && decoded.amount <= balance.amount;
     }
     if (positionAccount?.data[0]) {
       const state = cpAmmCoder.accounts.decode("Position", Buffer.from(positionAccount.data[0], "base64"));
@@ -133,7 +146,7 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
     // Pilot only: return the exact simulated message, partially signed by the
     // ephemeral position NFT key. The wallet owner still has to sign it.
     const prepared = verified && options.preparePilot ? (() => { transaction.sign([nft]); return { transaction: Buffer.from(transaction.serialize()).toString("base64"), lastValidBlockHeight: block.lastValidBlockHeight, position: positionAddress.toBase58() }; })() : undefined;
-    return { ...(prepared ? { prepared } : {}), ...result(feeVerified && positionVerified, feeVerified && positionVerified ? "Simulación satisfactoria: entrada sin comisión operativa, gasto dentro del presupuesto y posición verificada. No se ha movido dinero ni se han verificado retiros." : "Solana no rechazó la simulación, pero no se pudieron verificar el presupuesto y la posición; no se considera validada."), slot: simulated.context.slot, units: simulated.value.unitsConsumed, checks: { fee: feeVerified, position: positionVerified } };
+    return { ...(prepared ? { prepared } : {}), ...result(feeVerified && positionVerified, feeVerified && positionVerified ? "Simulación satisfactoria: comisión de entrada verificada, gasto dentro del presupuesto y posición verificada. No se ha movido dinero ni se han verificado retiros." : "Solana no rechazó la simulación, pero no se pudieron verificar el presupuesto y la posición; no se considera validada."), slot: simulated.context.slot, units: simulated.value.unitsConsumed, checks: { fee: feeVerified, position: positionVerified } };
   } catch (error) {
     // Server-only diagnostics; strip any credential before logging.
     console.error("[deposit-simulation]", stage, String(error instanceof Error ? error.message : error).replace(/api-key=[^&\s"]+/gi, "api-key=***").slice(0, 500));

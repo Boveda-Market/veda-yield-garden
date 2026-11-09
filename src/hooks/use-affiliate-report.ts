@@ -5,7 +5,7 @@ import { joinAffiliate, recordAffiliateFee, verifyWalletOwnership, walletIsVerif
 import { walletProofMessage } from "@/lib/wallet-proof";
 
 /**
- * Right after a confirmed harvest/exit, credits the referrer automatically from the on-chain fee.
+ * Right after a confirmed deposit/harvest/exit, credits the referrer automatically from the on-chain fee.
  * The first time, the wallet signs a free text message proving it belongs to this account. Never blocks the user.
  */
 export function useAffiliateReport() {
@@ -14,7 +14,7 @@ export function useAffiliateReport() {
   const record = useServerFn(recordAffiliateFee);
   const isVerified = useServerFn(walletIsVerified);
   const verify = useServerFn(verifyWalletOwnership);
-  return async (signature: string, kind: "harvest" | "exit") => {
+  return async (signature: string, kind: "harvest" | "exit" | "deposit") => {
     try {
       const token = await session.getAccessToken?.();
       const wallet = session.walletAddress;

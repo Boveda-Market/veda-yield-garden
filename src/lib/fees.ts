@@ -1,5 +1,5 @@
 export const FEE_PERCENT = 1;
-export const DEPOSIT_FEE_PERCENT = 0;
+export const DEPOSIT_FEE_PERCENT = 0.5;
 export const FEE_WALLET = "93bF1K1dWMJseMuf15WLaNt1diVGACQ9gUFA7szsSbs7";
 const SCALE = 1_000_000;
 
@@ -14,11 +14,22 @@ export function progressiveFee(units: bigint) {
   return ((units - FEE_FREE_MICRO) * FEE_MARGINAL_BPS) / 10_000n;
 }
 
+/** First 5 USDC of every deposit enters free. */
+export const DEPOSIT_FEE_FREE_MICRO = 5_000_000n;
+/** Deposit rate applied only to the amount above the free allowance (0.5%). */
+export const DEPOSIT_FEE_BPS = 50n;
+
+/** Progressive deposit fee in micro-USDC: 0 up to 5 USDC, 0.5% on the excess, floored. */
+export function depositFee(units: bigint) {
+  if (units <= DEPOSIT_FEE_FREE_MICRO) return 0n;
+  return ((units - DEPOSIT_FEE_FREE_MICRO) * DEPOSIT_FEE_BPS) / 10_000n;
+}
+
 /** Amounts and fees truncate to USDC's six decimal places, never rounding fees up. */
 export function transactionAmounts(amount: number, kind: "deposit" | "exit" = "exit") {
   if (!Number.isFinite(amount) || amount < 0 || amount > Number.MAX_SAFE_INTEGER / SCALE) throw new Error("Importe inválido");
   const units = Math.floor(Number((amount * SCALE).toFixed(4)));
-  const feeUnits = kind === "deposit" ? 0 : Number(progressiveFee(BigInt(units)));
+  const feeUnits = kind === "deposit" ? Number(depositFee(BigInt(units))) : Number(progressiveFee(BigInt(units)));
   return { gross: units / SCALE, fee: feeUnits / SCALE, net: (units - feeUnits) / SCALE };
 }
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEPOSIT_FEE_PERCENT, FEE_PERCENT, FEE_WALLET, transactionAmounts, validDeposit } from "@/lib/fees";
 import { emailSignupSchema } from "@/lib/email-signup";
 describe("Operational USDC fee", () => {
-  it("charges 0% on entry leaving all 100 USDC invested", () => { expect(DEPOSIT_FEE_PERCENT).toBe(0); expect(transactionAmounts(100, "deposit")).toEqual({ gross: 100, fee: 0, net: 100 }); });
+  it("charges 0.5% on entry above 5 USDC", () => { expect(transactionAmounts(100, "deposit")).toEqual({ gross: 100, fee: 0.475, net: 99.525 }); expect(transactionAmounts(5, "deposit").fee).toBe(0); });
   it("charges nothing on exits up to 10 USDC", () => { expect(transactionAmounts(10)).toEqual({ gross: 10, fee: 0, net: 10 }); });
   it("charges 1% on full liquidation proceeds", () => { expect(FEE_PERCENT).toBe(1); expect(transactionAmounts(110)).toEqual({ gross: 110, fee: 1.25, net: 108.75 }); });
   it("uses the specified recipient wallet", () => { expect(FEE_WALLET).toBe("93bF1K1dWMJseMuf15WLaNt1diVGACQ9gUFA7szsSbs7"); });

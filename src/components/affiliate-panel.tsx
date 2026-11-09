@@ -4,7 +4,7 @@ import { Copy, Users, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
-import { progressiveFee } from "@/lib/fees";
+import { depositFee, progressiveFee } from "@/lib/fees";
 import { AFFILIATE_SHARE_BPS, PAYOUT_MIN_MICRO, affiliateCommission, payoutProgress, REF_STORAGE_KEY, normalizeCode, type AffiliateDashboard } from "@/lib/affiliate";
 import { customizeAffiliateCode, getAffiliateDashboard, joinAffiliate, savePayoutWallet } from "@/lib/affiliate.functions";
 
@@ -52,7 +52,7 @@ export function AffiliatePanel() {
   const link = dash ? `${window.location.origin}/?ref=${dash.code}` : "";
   return <section className="mt-10 border-t border-border pt-8" aria-labelledby="affiliate-title">
     <h2 id="affiliate-title" className="flex items-center gap-2 font-display text-2xl font-semibold"><Users size={20} />{t("Invita y gana")}</h2>
-    <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("Comparte tu enlace con amigos y familia. Cada vez que alguien que invitaste cosecha ganancias o cierra una bóveda, recibes el 60% de la comisión que cobra BÓVEDA, sin que a ellos les cueste nada extra.")}</p>
+    <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("Comparte tu enlace con amigos y familia. Cada vez que alguien que invitaste deposita, cosecha ganancias o cierra una bóveda, recibes el 60% de la comisión que cobra BÓVEDA, sin que a ellos les cueste nada extra.")}</p>
     {preview && <p className="mt-3 rounded-lg border border-border p-3 text-xs text-muted-foreground">{t("Vista de ejemplo: crea una cuenta para obtener tu código real.")}</p>}
     {!dash ? <p className="mt-4 text-sm text-muted-foreground">{message ?? t("Cargando…")}</p> : <>
       <div className="mt-5 rounded-xl border border-border bg-card p-4">
@@ -80,20 +80,20 @@ export function AffiliatePanel() {
       <div className="mt-4 rounded-xl border border-border bg-card p-4">
         <p className="text-sm font-semibold">{t("Cómo ganas")}</p>
         <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs leading-5 text-muted-foreground">
-          <li>{t("Tus invitados no pagan comisión hasta 10 USDC.")}</li>
-          <li>{t("Sobre lo que pase de 10 USDC al cosechar o cerrar, BÓVEDA cobra 1.25%.")}</li>
+          <li>{t("Al depositar: gratis hasta 5 USDC y 0.5% sobre el resto. Ganas al instante.")}</li>
+          <li>{t("Al cosechar o cerrar: gratis hasta 10 USDC y 1.25% sobre el resto.")}</li>
           <li>{t("Tú recibes el 60% de esa comisión en USDC.")}</li>
         </ol>
-        <table className="mt-3 w-full text-xs"><thead><tr className="text-muted-foreground"><th className="text-left font-normal">{t("Cosecha o cierre")}</th><th className="text-right font-normal">{t("Tú ganas")}</th></tr></thead>
-          <tbody>{[50, 200, 1000].map((g) => <tr key={g} className="border-t border-border"><td className="py-1.5">{g} USDC</td><td className="py-1.5 text-right font-semibold">{usdc(affiliateCommission(progressiveFee(BigInt(g) * 1_000_000n), AFFILIATE_SHARE_BPS).toString())} USDC</td></tr>)}</tbody></table>
-        <p className="mt-2 text-xs text-muted-foreground">{t("Depósitos, envíos y cambios no generan comisión de afiliado.")}</p>
+        <table className="mt-3 w-full text-xs"><thead><tr className="text-muted-foreground"><th className="text-left font-normal">{t("Monto")}</th><th className="text-right font-normal">{t("Depósito")}</th><th className="text-right font-normal">{t("Cosecha o cierre")}</th></tr></thead>
+          <tbody>{[50, 200, 1000].map((g) => <tr key={g} className="border-t border-border"><td className="py-1.5">{g} USDC</td><td className="py-1.5 text-right font-semibold">{usdc(affiliateCommission(depositFee(BigInt(g) * 1_000_000n), AFFILIATE_SHARE_BPS).toString())}</td><td className="py-1.5 text-right font-semibold">{usdc(affiliateCommission(progressiveFee(BigInt(g) * 1_000_000n), AFFILIATE_SHARE_BPS).toString())}</td></tr>)}</tbody></table>
+        <p className="mt-2 text-xs text-muted-foreground">{t("Envíos y cambios no generan comisión de afiliado.")}</p>
       </div>
       <form className="mt-5" onSubmit={(e) => { e.preventDefault(); void act(async () => savePayout({ data: { token: await token(), wallet: payout.trim() } }), "Wallet de cobro guardada."); }}>
         <label className="block text-sm">{t("Wallet donde recibes tus pagos (USDC)")}<input value={payout} maxLength={44} onChange={(e) => setPayout(e.target.value)} className={field} /></label>
         <Button type="submit" size="sm" className="mt-2" disabled={busy}>{t("Guardar wallet de cobro")}</Button>
       </form>
       <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Las comisiones se registran solo cuando la red confirma la operación y se pagan periódicamente en USDC tras revisión, al acumular al menos 10 USDC.")}</p>
-      {dash.earnings.length > 0 && <ul className="mt-5 divide-y divide-border text-sm">{dash.earnings.map((e) => <li key={e.signature} className="flex justify-between gap-3 py-2"><span>{e.kind === "harvest" ? t("Cosecha") : t("Cierre")} · {new Date(e.createdAt).toLocaleDateString()}</span><span>+{usdc(e.commissionRaw)} USDC · {t(e.status === "paid" ? "Pagado" : e.status === "rejected" ? "Rechazado" : "Por cobrar")}</span></li>)}</ul>}
+      {dash.earnings.length > 0 && <ul className="mt-5 divide-y divide-border text-sm">{dash.earnings.map((e) => <li key={e.signature} className="flex justify-between gap-3 py-2"><span>{e.kind === "harvest" ? t("Cosecha") : e.kind === "deposit" ? t("Depósito") : t("Cierre")} · {new Date(e.createdAt).toLocaleDateString()}</span><span>+{usdc(e.commissionRaw)} USDC · {t(e.status === "paid" ? "Pagado" : e.status === "rejected" ? "Rechazado" : "Por cobrar")}</span></li>)}</ul>}
       {!dash.joinedCode && <form className="mt-6" onSubmit={(e) => { e.preventDefault(); const c = normalizeCode(code); if (!c) { setMessage(t("Código no válido.")); return; } void act(async () => join({ data: { token: await token(), code: c } }), "Código aplicado. ¡Gracias!"); }}>
         <label className="block text-sm">{t("¿Te invitó alguien? Escribe su código")}<input value={code} maxLength={16} onChange={(e) => setCode(e.target.value)} className={field} /></label>
         <Button type="submit" size="sm" variant="outline" className="mt-2" disabled={busy}>{t("Aplicar código")}</Button>

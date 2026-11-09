@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { solanaAddressSchema, tokenAmount } from "@/lib/solana-data";
+import { depositFee } from "@/lib/fees";
 
 export const MIN_DEPOSIT_USDC = 1;
 export const MAX_DEPOSIT_USDC = 10_000;
@@ -32,7 +33,7 @@ export function simulationAmounts(amount: string) {
   if (!whole) throw new Error("Importe inválido");
   const gross = BigInt(whole) * 1_000_000n + BigInt(fraction.padEnd(6, "0"));
   if (gross < 1_000_000n || gross > 10_000_000_000n) throw new Error("Introduce entre 1 y 10,000 USDC");
-  const fee = 0n;
+  const fee = depositFee(gross);
   return { gross, fee, net: gross - fee };
 }
 

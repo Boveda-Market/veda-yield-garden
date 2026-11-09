@@ -16,8 +16,8 @@ describe("read-only deposit simulation", () => {
     expect(simulationInput.safeParse({ wallet: FEE_WALLET, vaultId: "sol", amount: "1" }).success).toBe(true);
     expect(simulationInput.safeParse({ wallet: FEE_WALLET, vaultId: "arbitrary", amount: "1" }).success).toBe(false);
   });
-  it("accepts 10,000 USDC exactly with a zero entry fee", () => {
-    expect(simulationAmounts("10000")).toEqual({ gross: 10_000_000_000n, fee: 0n, net: 10_000_000_000n });
+  it("accepts 10,000 USDC exactly with 0.5% above 5 USDC", () => {
+    expect(simulationAmounts("10000")).toEqual({ gross: 10_000_000_000n, fee: 49_975_000n, net: 9_950_025_000n });
     expect(simulationInput.safeParse({ wallet: FEE_WALLET, vaultId: "sol", amount: "10000" }).success).toBe(true);
   });
   it("rejects attempts to supply RPC URLs or send options", () => {

@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
+import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { pilotDepositStatus, preparePilotDeposit } from "@/lib/pilot-deposit.functions";
 import { PILOT_VAULTS, pilotInput, type PilotStatus } from "@/lib/pilot-deposit";
 
@@ -17,6 +18,7 @@ export function PilotDeposit({ vaultId, amount, onBusyChange, onClose }: { vault
   const t = useT();
   const { walletAddress, signAndSend } = useBovedaSession();
   const prepare = useServerFn(preparePilotDeposit);
+  const reportAffiliate = useAffiliateReport();
   const readStatus = useServerFn(pilotDepositStatus);
   const [accepted, setAccepted] = useState(false);
   const [step, setStep] = useState<Step>("idle");
@@ -48,7 +50,7 @@ export function PilotDeposit({ vaultId, amount, onBusyChange, onClose }: { vault
         const { status: next } = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as PilotStatus }));
         setStatus(next);
         if (next === "failed") { setStep("error"); setMessage(t("La red rechazó la transacción; al ser atómica, no se aplicaron ni la comisión ni el depósito (solo el coste de red).")); return; }
-        if (next !== "pending") { setStep("done"); return; }
+        if (next !== "pending") { setStep("done"); void reportAffiliate(sig, "deposit"); return; }
         await new Promise((resolve) => setTimeout(resolve, 2_000));
       }
       setStep("error"); setMessage(t("La confirmación tarda más de lo habitual. Revisa el estado en Helius antes de reintentar."));
