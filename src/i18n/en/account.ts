@@ -113,4 +113,5 @@ export const account: Record<string, string> = {
   "No se pudo cargar tu programa de afiliados.": "Couldn't load your affiliate program.",
   "No se pudo aplicar el código.": "Couldn't apply the code.",
   "No se pudo enviar la solicitud.": "Couldn't send the application.",
+  "Vista de ejemplo: crea una cuenta para obtener tu código real.": "Sample view: create an account to get your real code.",
 };

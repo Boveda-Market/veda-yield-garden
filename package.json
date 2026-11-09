@@ -17,6 +17,7 @@
     "rolldown": "1.2.1"
   },
   "dependencies": {
+    "@farcaster/mini-app-solana": "^3.0.0",
     "@hookform/resolvers": "^5.2.2",
     "@meteora-ag/cp-amm-sdk": "^1.5.1",
     "@noble/curves": "^2.4.0",
