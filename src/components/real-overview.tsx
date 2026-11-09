@@ -1,5 +1,5 @@
 import { useT } from "@/lib/i18n";
-import { RefreshCw, ShieldAlert, Sprout, ArrowDownToLine } from "lucide-react";
+import { RefreshCw, ShieldAlert } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
 import { PoolYield } from "@/components/pool-yield";
 import { HarvestDialog } from "@/components/harvest-dialog";
 import { BuyUsdc } from "@/components/buy-usdc";
+import { RealPositions, PortfolioEmpty } from "@/components/real-positions";
 import { StartGuide } from "@/components/start-guide";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 const RealPortfolioPanel = lazy(() => import("./real-portfolio-panel").then((module) => ({ default: module.RealPortfolioPanel })));
@@ -59,9 +60,9 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       {data && <p className="mt-4 text-xs text-muted-foreground">{t("Lectura confirmada en la red ·")}{" "}{new Date(data.checkedAt).toLocaleTimeString("es-MX")} {t("· no autoriza movimientos")}</p>}
       {data && !data.positionsComplete && <p role="status" className="mt-3 text-sm text-muted-foreground">{t("La consulta de posiciones está incompleta. No se puede concluir que no tengas posiciones.")}</p>}
     </section>
-    {portfolioOnly && data && data.positions.length > 0 && <section aria-label={t("Posiciones reales")} className="border-b border-border py-8"><h2 className="font-display text-lg font-semibold">{t("Mis posiciones")}</h2><p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Estimaciones en tokens, no valor total en USD ni mínimos de liquidación. Bloqueos, precios y costes pueden alterar el resultado.")}</p><div className="mt-4 space-y-4">{data.positions.map((position) => <article key={position.address} className="rounded-lg border border-border bg-card p-5"><h3 className="font-display font-semibold">{VAULTS.find((vault) => vault.id === position.vaultId)?.name ?? `${position.symbol}/USDC`}</h3><p className="mt-2 break-all font-mono text-xs text-muted-foreground">{position.address}</p><p className="mt-3 break-all text-sm">{t("Liquidez estimada:")}{" "}{position.tokenAmount === null ? t("No disponible") : `${position.tokenAmount} ${position.symbol} + ${position.usdcAmount} USDC`}</p><p className="mt-2 break-all text-sm text-muted-foreground">{t("Comisiones acumuladas:")}{" "}{position.feeTokenAmount === null ? t("No disponibles") : `${position.feeTokenAmount} ${position.symbol} + ${position.feeUsdcAmount} USDC`}</p>{position.locked && <p className="mt-2 text-xs text-muted-foreground">{t("Incluye liquidez bloqueada; no toda la posición es retirable.")}</p>}<div className="mt-4 flex flex-wrap gap-2"><Button variant="secondary" onClick={() => openPositionAction(position, "harvest")}><Sprout size={16} />{t("Cosechar Ganancias")}</Button><Button variant="outline" onClick={() => openPositionAction(position, "exit")}><ArrowDownToLine size={16} />{t("Cerrar y Liquidar")}</Button></div><p className="mt-3 text-xs leading-5 text-muted-foreground">{(position.vaultId === "sol" || position.vaultId === "met") ? t("Revisa los importes y la comisión antes de firmar.") : t("Cosechas y retiros todavía no disponibles para esta posición.")}</p></article>)}</div></section>}
+    {portfolioOnly && data && data.positions.length > 0 && <RealPositions positions={data.positions} onAction={openPositionAction} />}
     {portfolioOnly && <Suspense fallback={<p role="status">{t("Cargando portafolio…")}</p>}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
-    {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && <p className="border-b border-border py-8 text-muted-foreground">{t("No tienes posiciones activas en estas bóvedas. Las posiciones cerradas no aparecen aquí; puedes consultar sus comprobantes en Movimientos de bóvedas.")}</p>}
+    {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && <PortfolioEmpty />}
     {!portfolioOnly && <><h2 className="mb-4 mt-10 font-display text-lg font-semibold">{t("Bóvedas disponibles")}</h2>
     <div className="grid gap-4 md:grid-cols-3">{VAULTS.map((vault) => <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"><span>{t("Pool de liquidez")}</span><span>{t("Riesgo")}{" "}{t(vault.risk)}</span></div><h3 className="mt-4 font-display text-xl font-semibold">{t(vault.name)}</h3><p className="mt-1 text-sm text-muted-foreground">{vault.pair}</p>
