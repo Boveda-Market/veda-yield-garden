@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PublicKey, type ParsedTransactionWithMeta } from "@solana/web3.js";
 import { CHAIN_POOLS } from "@/lib/solana-data";
 const mocks = vi.hoisted(() => ({ decode: vi.fn(), signatures: vi.fn(), transaction: vi.fn() }));
-vi.mock("@meteora-ag/cp-amm-sdk", async () => {
+vi.mock("@meteora-ag/cp-amm-sdk/dist/index.js", async () => {
   const { PublicKey } = await import("@solana/web3.js");
   return { CP_AMM_PROGRAM_ID: new PublicKey("cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG"), cpAmmCoder: { events: { decode: mocks.decode } } };
 });

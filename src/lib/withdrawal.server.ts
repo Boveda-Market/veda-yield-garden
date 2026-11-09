@@ -3,7 +3,7 @@ import { Buffer } from "buffer";
 import { z } from "zod";
 import { ComputeBudgetProgram, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import { AccountLayout, TOKEN_PROGRAM_ID, createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, getAssociatedTokenAddressSync, NATIVE_MINT } from "@solana/spl-token";
-import { CpAmm, getCurrentPoint } from "@meteora-ag/cp-amm-sdk";
+import { CpAmm, getCurrentPoint } from "@meteora-ag/cp-amm-sdk/dist/index.js";
 import { ownsPositionNft } from "@/lib/position-ownership.server";
 import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount, solanaAddressSchema } from "@/lib/solana-data";

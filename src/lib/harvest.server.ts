@@ -1,7 +1,7 @@
 import { Buffer } from "buffer";
 import { ComputeBudgetProgram, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import { AccountLayout, TOKEN_PROGRAM_ID, NATIVE_MINT, createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, getAssociatedTokenAddressSync } from "@solana/spl-token";
-import { CpAmm } from "@meteora-ag/cp-amm-sdk";
+import { CpAmm } from "@meteora-ag/cp-amm-sdk/dist/index.js";
 import { ownsPositionNft } from "@/lib/position-ownership.server";
 import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount } from "@/lib/solana-data";

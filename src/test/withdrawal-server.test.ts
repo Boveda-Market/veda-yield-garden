@@ -10,7 +10,7 @@ import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
 
 const mocks = vi.hoisted(() => ({ genesis: vi.fn(), owned: vi.fn(), pool: vi.fn(), before: vi.fn(), simulate: vi.fn(), remove: vi.fn(), send: vi.fn() }));
 vi.mock("@/lib/solana-read.server", () => ({ heliusConnection: () => ({ getGenesisHash: mocks.genesis, getMultipleAccountsInfo: mocks.before, getLatestBlockhash: async () => ({ blockhash: USDC_MINT }), getFeeForMessage: async () => ({ value: 0 }), simulateTransaction: mocks.simulate, sendRawTransaction: mocks.send }) }));
-vi.mock("@meteora-ag/cp-amm-sdk", () => ({ getCurrentPoint: async () => new BN(1), CpAmm: class { getPositionsByUser = mocks.owned; fetchPoolState = mocks.pool; removeAllLiquidityAndClosePosition = mocks.remove; getWithdrawQuote = () => ({ outAmountA: new BN(100), outAmountB: new BN(1_000_000) }); } }));
+vi.mock("@meteora-ag/cp-amm-sdk/dist/index.js", () => ({ getCurrentPoint: async () => new BN(1), CpAmm: class { getPositionsByUser = mocks.owned; fetchPoolState = mocks.pool; removeAllLiquidityAndClosePosition = mocks.remove; getWithdrawQuote = () => ({ outAmountA: new BN(100), outAmountB: new BN(1_000_000) }); } }));
 import { simulateWithdrawal } from "@/lib/withdrawal.server";
 
 describe("full-close withdrawal simulation", () => {

@@ -8,7 +8,7 @@ import { FEE_WALLET } from "@/lib/fees";
 
 const mocks = vi.hoisted(() => ({ owned: vi.fn(), pool: vi.fn(), before: vi.fn(), simulate: vi.fn(), claim: vi.fn(), send: vi.fn() }));
 vi.mock("@/lib/solana-read.server", () => ({ heliusConnection: () => ({ getGenesisHash: async () => "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d", getMultipleAccountsInfo: mocks.before, getLatestBlockhash: async () => ({ blockhash: USDC_MINT }), simulateTransaction: mocks.simulate, sendRawTransaction: mocks.send }) }));
-vi.mock("@meteora-ag/cp-amm-sdk", () => ({ CpAmm: class { getPositionsByUser = mocks.owned; fetchPoolState = mocks.pool; claimPositionFee = mocks.claim; } }));
+vi.mock("@meteora-ag/cp-amm-sdk/dist/index.js", () => ({ CpAmm: class { getPositionsByUser = mocks.owned; fetchPoolState = mocks.pool; claimPositionFee = mocks.claim; } }));
 import { simulateHarvest } from "@/lib/harvest.server";
 
 const owner = Keypair.generate().publicKey, nft = Keypair.generate().publicKey, position = Keypair.generate().publicKey;

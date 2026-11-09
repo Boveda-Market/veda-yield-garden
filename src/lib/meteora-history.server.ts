@@ -1,6 +1,6 @@
 import { Buffer } from "buffer";
 import { PublicKey, type ParsedTransactionWithMeta } from "@solana/web3.js";
-import { CP_AMM_PROGRAM_ID, cpAmmCoder } from "@meteora-ag/cp-amm-sdk";
+import { CP_AMM_PROGRAM_ID, cpAmmCoder } from "@meteora-ag/cp-amm-sdk/dist/index.js";
 import { CHAIN_POOLS } from "./solana-data";
 import { heliusConnection } from "./solana-read.server";
 import type { MeteoraHistoryPage, MeteoraRecord } from "./meteora-history";

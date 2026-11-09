@@ -41,4 +41,30 @@ describe("selectable Real deposit review", () => {
     expect(screen.getByRole("checkbox")).toBeDisabled();
     expect(screen.getByRole("button")).toBeDisabled();
   });
+  it("passes MET deposits to the wallet and checks confirmation automatically", async () => {
+    render(<PilotDeposit vaultId="met" amount="1" onBusyChange={() => {}} />);
+    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("button"));
+    await screen.findByText("Depósito confirmado en la red (confirmado).");
+    expect(mocks.prepare).toHaveBeenCalledWith({ data: { wallet: FEE_WALLET, vaultId: "met", amount: "1" } });
+    expect(mocks.sign).toHaveBeenCalledWith(new Uint8Array([1, 2, 3]));
+    expect(mocks.status).toHaveBeenCalledWith({ data: { signature: "signature" } });
+  });
+  it("never checks a sent transaction when Privy rejects the signature", async () => {
+    mocks.sign.mockRejectedValue(new Error("User rejected"));
+    render(<PilotDeposit vaultId="sol" amount="1" onBusyChange={() => {}} />);
+    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("button"));
+    await screen.findByRole("alert");
+    expect(mocks.status).not.toHaveBeenCalled();
+  });
+  it("does not report a confirmed deposit when the network rejects it", async () => {
+    mocks.status.mockResolvedValue({ status: "failed" });
+    render(<PilotDeposit vaultId="sol" amount="1" onBusyChange={() => {}} />);
+    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("button"));
+    await screen.findByRole("alert");
+    expect(screen.queryByText("Depósito confirmado en la red (confirmado).")).toBeNull();
+    expect(mocks.sign).toHaveBeenCalledTimes(1);
+  });
 });

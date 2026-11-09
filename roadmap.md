@@ -1,4 +1,6 @@
 # Tasks
+- [x] Fix reproduced SOL/MET deposit preparation SDK import failure; live preview now reaches genuine balance checks, 54 regressions pass including cryptographically valid NFT partial signatures and Privy codec round-trip. No funds moved; sampled public wallets lack 1 USDC, so full live composition remains unverified.
+- [ ] Verify deposit authorization with an actual funded Privy email/Google wallet — requires the owner's Privy login and explicit signature; managed Cloud auth cannot substitute for Privy.
 - [x] Improve Mi wallet swap with debounced quote previews, net received/minimum/fee review, reverse direction and freshness guards; automated quote/confirm tests pass, fees unchanged and no funds moved.
 - [ ] Verify the updated swap review inside the owner's Privy wallet session — requires owner sign-in; automated interaction tests cover quotes and signing guards.
 - [x] Simplify affiliates to a single 60% share for new earnings, remove influencer applications and allow owner-only unique referral-code customization; 18 targeted tests pass, guest editing verified desktop/mobile, build OK. Historical earnings unchanged.

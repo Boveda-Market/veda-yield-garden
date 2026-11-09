@@ -3,7 +3,7 @@ import { Buffer } from "buffer";
 import { z } from "zod";
 import { ComputeBudgetProgram, Keypair, PublicKey, SystemProgram, SystemInstruction, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync, getAccount, TOKEN_PROGRAM_ID, AccountLayout, NATIVE_MINT } from "@solana/spl-token";
-import { CpAmm, derivePositionAddress, cpAmmCoder } from "@meteora-ag/cp-amm-sdk";
+import { CpAmm, derivePositionAddress, cpAmmCoder } from "@meteora-ag/cp-amm-sdk/dist/index.js";
 import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, solanaAddressSchema } from "@/lib/solana-data";
 import { simulationAmounts, simulationDisplay, type SimulationInput, type SimulationResult, type SimulationStage } from "@/lib/deposit-simulation";

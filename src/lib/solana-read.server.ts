@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { CpAmm, getTokenProgram, getUnClaimLpFee, positionLiquidity } from "@meteora-ag/cp-amm-sdk";
+import { CpAmm, getTokenProgram, getUnClaimLpFee, positionLiquidity } from "@meteora-ag/cp-amm-sdk/dist/index.js";
 import { getMint } from "@solana/spl-token";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount, type ChainPosition, type RealWalletData } from "@/lib/solana-data";
 

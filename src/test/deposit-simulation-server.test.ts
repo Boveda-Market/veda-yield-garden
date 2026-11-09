@@ -6,12 +6,14 @@ import { PublicKey, Transaction, TransactionInstruction, VersionedTransaction } 
 import { AccountLayout, getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { FEE_WALLET } from "@/lib/fees";
 import { CHAIN_POOLS, USDC_MINT } from "@/lib/solana-data";
+import { getTransactionDecoder, getTransactionEncoder } from "@solana/kit";
+import { ed25519 } from "@noble/curves/ed25519.js";
 
 const mocks = vi.hoisted(() => ({ connection: { getGenesisHash: vi.fn(), getBalance: vi.fn(), getLatestBlockhash: vi.fn(), getAddressLookupTable: vi.fn(), simulateTransaction: vi.fn(), sendRawTransaction: vi.fn() }, getAccount: vi.fn(), pool: vi.fn(), deposit: vi.fn(), decode: vi.fn() }));
 vi.mock("@/lib/solana-read.server", () => ({ heliusConnection: () => mocks.connection }));
 vi.mock("@solana/spl-token", async (original) => ({ ...await original<typeof import("@solana/spl-token")>(), getAccount: mocks.getAccount }));
-vi.mock("@meteora-ag/cp-amm-sdk", async (original) => {
-  const actual = await original<typeof import("@meteora-ag/cp-amm-sdk")>();
+vi.mock("@meteora-ag/cp-amm-sdk/dist/index.js", async (original) => {
+  const actual = await original<typeof import("@meteora-ag/cp-amm-sdk/dist/index.js")>();
   return { ...actual, CpAmm: class {
     fetchPoolState = mocks.pool;
     getDepositQuote = () => ({ outputAmount: new BN(10) });
@@ -100,6 +102,23 @@ describe("unsigned composed deposit simulation", () => {
     expect(result.success).toBe(true);
     if (!result.prepared) throw new Error("Missing prepared transaction");
     expect(VersionedTransaction.deserialize(Buffer.from(result.prepared.transaction, "base64")).message.compiledInstructions).toHaveLength(4);
+    expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
+  });
+  it("preserves a valid NFT signature in Privy's transaction codec while leaving the owner unsigned", async () => {
+    const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" }, { preparePilot: true });
+    if (!result.prepared) throw new Error("Missing prepared transaction");
+    const wire = Buffer.from(result.prepared.transaction, "base64");
+    const tx = VersionedTransaction.deserialize(wire);
+    const ownerIndex = tx.message.staticAccountKeys.findIndex(key => key.toBase58() === wallet);
+    expect(ownerIndex).toBe(0);
+    expect(tx.signatures[ownerIndex]?.every(byte => byte === 0)).toBe(true);
+    const nftIndex = tx.message.staticAccountKeys.findIndex((key, index) => index < tx.message.header.numRequiredSignatures && key.toBase58() !== wallet);
+    const nftSignature = tx.signatures[nftIndex];
+    const nftKey = tx.message.staticAccountKeys[nftIndex];
+    if (!nftSignature || !nftKey) throw new Error("Missing NFT signer");
+    expect(ed25519.verify(nftSignature, tx.message.serialize(), nftKey.toBytes())).toBe(true);
+    const decoded = getTransactionDecoder().decode(wire);
+    expect(new Uint8Array(getTransactionEncoder().encode(decoded))).toEqual(new Uint8Array(wire));
     expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
   });
   it("pilot refuses deposits over 10,000 USDC", async () => {
