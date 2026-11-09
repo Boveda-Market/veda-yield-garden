@@ -21,7 +21,7 @@ it("re-simulates with reviewed limits, signs only as the connected owner and ref
   mocks.status.mockResolvedValue({ status: "confirmed" });
   const session: BovedaSession = { ready: true, authenticated: true, userId: "verified-owner", label: "Owner", walletAddress: WITHDRAWAL_PILOT.wallet, error: null, login: vi.fn(), logout: vi.fn(), signAndSend: mocks.send };
   render(<BovedaSessionContext.Provider value={session}><WithdrawalSimulation wallet={WITHDRAWAL_PILOT.wallet} position={"BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1"} vaultId="met" onClose={vi.fn()} /></BovedaSessionContext.Provider>);
-  fireEvent.click(screen.getByRole("button", { name: "Revisar retiro" }));
+  expect(mocks.preview).toHaveBeenCalledTimes(1);
   await waitFor(() => expect(screen.getByRole("checkbox", { name: "Acepto la liquidación real" })).toBeInTheDocument());
   fireEvent.click(screen.getByRole("checkbox", { name: "Acepto la liquidación real" }));
   await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Firmar liquidación a USDC" })); });
