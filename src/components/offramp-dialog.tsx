@@ -21,7 +21,7 @@ export function OfframpButton({ wallet, trial }: { wallet: string | null; trial:
     { icon: Wallet, title: "PayPal", text: t("Según tu país") },
   ];
   return <>
-    <Button size="lg" className="w-full font-semibold shadow-lg sm:w-auto" onClick={() => setOpen(true)}><Banknote size={18} />{t("Retirar a banco o tarjeta")}</Button>
+    <Button size="sm" onClick={() => setOpen(true)}><Banknote size={16} />{t("Retirar a banco o tarjeta")}</Button>
     <Dialog open={open} onOpenChange={setOpen}><DialogContent>
       <DialogHeader><DialogTitle>{t("Retirar a banco o tarjeta")}</DialogTitle><DialogDescription>{t("Convierte tus USDC en dólares con un proveedor de pagos regulado. Ellos verifican tu identidad y envían el dinero; BÓVEDA no cobra nada por este retiro.")}</DialogDescription></DialogHeader>
       <ul className="space-y-3">{methods.map(({ icon: Icon, title, text }) => <li key={title} className="flex items-start gap-3 rounded-lg border border-border p-3"><Icon size={18} className="mt-0.5 shrink-0 text-primary" /><div><p className="text-sm font-semibold">{title}</p><p className="text-xs text-muted-foreground">{text}</p></div></li>)}</ul>
