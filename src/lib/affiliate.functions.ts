@@ -17,17 +17,24 @@ function randomCode() {
   return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
 }
 
+type Db = Awaited<ReturnType<typeof admin>>["db"];
+async function getAffiliateRow(db: Db, id: string) {
+  const cols = "code, payout_wallet, share_bps";
+  let { data: row } = await db.from("affiliates").select(cols).eq("privy_user_id", id).maybeSingle();
+  for (let i = 0; !row && i < 5; i++) {
+    const { data: created } = await db.from("affiliates").insert({ privy_user_id: id, code: randomCode() }).select(cols).maybeSingle();
+    row = created ?? (await db.from("affiliates").select(cols).eq("privy_user_id", id).maybeSingle()).data;
+  }
+  if (!row) throw new Error();
+  return row;
+}
+
 export const getAffiliateDashboard = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => affiliateRequest.parse(input))
   .handler(async ({ data }): Promise<{ success: true; dashboard: AffiliateDashboard } | Fail> => {
     try {
       const { id, db } = await admin(data.token);
-      let { data: row } = await db.from("affiliates").select("code, payout_wallet").eq("privy_user_id", id).maybeSingle();
-      for (let i = 0; !row && i < 5; i++) {
-        const { data: created } = await db.from("affiliates").insert({ privy_user_id: id, code: randomCode() }).select("code, payout_wallet").maybeSingle();
-        row = created ?? (await db.from("affiliates").select("code, payout_wallet").eq("privy_user_id", id).maybeSingle()).data;
-      }
-      if (!row) throw new Error();
+      const row = await getAffiliateRow(db, id);
       const [referred, earnings, joined] = await Promise.all([
         db.from("referrals").select("referred_privy_id", { count: "exact", head: true }).eq("affiliate_privy_id", id),
         db.from("affiliate_earnings").select("signature, kind, fee_raw, commission_raw, status, created_at").eq("affiliate_privy_id", id).order("created_at", { ascending: false }).limit(50),
@@ -36,7 +43,7 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
       const list = earnings.data ?? [];
       const total = (status: string) => list.filter((e) => e.status === status).reduce((a, e) => a + BigInt(e.commission_raw), 0n).toString();
       return { success: true, dashboard: {
-        code: row.code, shareBps: AFFILIATE_SHARE_BPS, payoutWallet: row.payout_wallet, referred: referred.count ?? 0,
+        code: row.code, shareBps: row.share_bps, payoutWallet: row.payout_wallet, referred: referred.count ?? 0,
         pendingRaw: total("pending"), paidRaw: total("paid"),
         joinedCode: Boolean(joined.data),
         earnings: list.map((e) => ({ signature: e.signature, kind: e.kind as "harvest" | "exit", feeRaw: String(e.fee_raw), commissionRaw: String(e.commission_raw), status: e.status, createdAt: e.created_at })),
@@ -46,11 +53,17 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
 
 export const joinAffiliate = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => joinRequest.parse(input))
-  .handler(async ({ data }): Promise<{ success: true } | Fail> => {
+  .handler(async ({ data }): Promise<{ success: true; upgradedBps?: number } | Fail> => {
     try {
       const { id, db } = await admin(data.token);
       const { data: owner } = await db.from("affiliates").select("privy_user_id").eq("code", data.code).maybeSingle();
-      if (!owner) return { success: false, error: "Ese código no existe." };
+      if (!owner) {
+        // Not a friend's code: try a partner upgrade code assigned by BÓVEDA.
+        await getAffiliateRow(db, id);
+        const { data: bps } = await db.rpc("redeem_affiliate_upgrade", { _code: data.code, _privy_user_id: id });
+        if (typeof bps === "number") return { success: true, upgradedBps: bps };
+        return { success: false, error: "Ese código no existe o ya fue usado." };
+      }
       if (owner.privy_user_id === id) return { success: false, error: "No puedes usar tu propio código." };
       const { error } = await db.from("referrals").insert({ referred_privy_id: id, affiliate_privy_id: owner.privy_user_id });
       if (error) return { success: false, error: "Tu cuenta ya tiene un código de invitación." };
@@ -134,7 +147,8 @@ export const recordAffiliateFee = createServerFn({ method: "POST" })
         const { error } = await db.from("referrals").update({ wallet: transfer.payer }).eq("referred_privy_id", id).is("wallet", null);
         if (error) return { success: false };
       }
-      const shareBps = AFFILIATE_SHARE_BPS;
+      const { data: aff } = await db.from("affiliates").select("share_bps").eq("privy_user_id", referral.affiliate_privy_id).maybeSingle();
+      const shareBps = Math.min(aff?.share_bps ?? AFFILIATE_SHARE_BPS, 9000);
       const { error } = await db.from("affiliate_earnings").insert({
         signature: data.signature, affiliate_privy_id: referral.affiliate_privy_id, referred_privy_id: id, kind: data.kind,
         fee_raw: Number(transfer.feeRaw), share_bps: shareBps, commission_raw: Number(affiliateCommission(transfer.feeRaw, shareBps)),

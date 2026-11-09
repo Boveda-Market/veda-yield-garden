@@ -101,12 +101,58 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_upgrade_codes: {
+        Row: {
+          code: string
+          created_at: string
+          is_active: boolean
+          max_uses: number
+          share_bps: number
+          times_used: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          is_active?: boolean
+          max_uses?: number
+          share_bps: number
+          times_used?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          is_active?: boolean
+          max_uses?: number
+          share_bps?: number
+          times_used?: number
+        }
+        Relationships: []
+      }
+      affiliate_upgrade_redemptions: {
+        Row: {
+          code: string
+          privy_user_id: string
+          redeemed_at: string
+        }
+        Insert: {
+          code: string
+          privy_user_id: string
+          redeemed_at?: string
+        }
+        Update: {
+          code?: string
+          privy_user_id?: string
+          redeemed_at?: string
+        }
+        Relationships: []
+      }
       affiliates: {
         Row: {
           code: string
           created_at: string
           payout_wallet: string | null
           privy_user_id: string
+          share_bps: number
           tier: string
         }
         Insert: {
@@ -114,6 +160,7 @@ export type Database = {
           created_at?: string
           payout_wallet?: string | null
           privy_user_id: string
+          share_bps?: number
           tier?: string
         }
         Update: {
@@ -121,6 +168,7 @@ export type Database = {
           created_at?: string
           payout_wallet?: string | null
           privy_user_id?: string
+          share_bps?: number
           tier?: string
         }
         Relationships: []
@@ -193,7 +241,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      redeem_affiliate_upgrade: {
+        Args: { _code: string; _privy_user_id: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
