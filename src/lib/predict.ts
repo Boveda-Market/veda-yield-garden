@@ -13,7 +13,7 @@ export function validPredictAmount(units: bigint) {
 /** Exact Forecast market id: BISON-<base58 pda>-UP|DOWN. */
 export const MARKET_ID_RE = /^BISON-[1-9A-HJ-NP-Za-km-z]{32,44}-(UP|DOWN)$/;
 
-export type LiveRound = { eventId: string; series: string; window: PredictWindow; openTime: number; closeTime: number; up: string; down: string };
+export type LiveRound = { eventId: string; series: string; window: PredictWindow; openTime: number; closeTime: number; up: string; down: string; upPrice: number | null; downPrice: number | null };
 export type PredictQuote = { contractsMicro: string; costMicro: string };
 export type PredictPosition = { pubkey: string; marketId: string; title: string; side: PredictSide; contractsMicro: string; costMicro: string; valueMicro: string | null; payoutMicro: string; pnlMicro: string | null; closeTime: number | null; status: string; result: string | null };
 

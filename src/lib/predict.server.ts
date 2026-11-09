@@ -13,10 +13,12 @@ async function jup<T>(path: string, init?: RequestInit): Promise<T> {
   return body;
 }
 
-type Market = { marketId: string; outcomeSide?: string; tradable?: boolean; openTime: number; closeTime: number };
+type Market = { marketId: string; outcomeSide?: string; tradable?: boolean; openTime: number; closeTime: number; pricing?: { buyYesPriceUsd?: number | null } };
 type Event = { eventId: string; tags: string[]; metadata: { series: string }; markets?: Market[] };
 
 let cache: { at: number; rounds: LiveRound[] } | null = null;
+
+const px = (m: { pricing?: { buyYesPriceUsd?: number | null } }) => { const v = Number(m.pricing?.buyYesPriceUsd); return Number.isFinite(v) && v > 0 && v < 1e6 ? v / 1e6 : null; };
 
 export async function listRounds(): Promise<LiveRound[]> {
   if (cache && Date.now() - cache.at < 10_000) return cache.rounds;
@@ -28,7 +30,7 @@ export async function listRounds(): Promise<LiveRound[]> {
     const window = e.tags.find((t) => (PREDICT_WINDOWS as readonly string[]).includes(t)) as PredictWindow | undefined;
     const up = e.markets?.find((m) => m.outcomeSide === "up"), down = e.markets?.find((m) => m.outcomeSide === "down");
     if (!window || !up?.tradable || !down?.tradable || !(up.openTime <= now && now < up.closeTime)) continue;
-    rounds.push({ eventId: e.eventId, series: e.metadata.series, window, openTime: up.openTime, closeTime: up.closeTime, up: up.marketId, down: down.marketId });
+    rounds.push({ eventId: e.eventId, series: e.metadata.series, window, openTime: up.openTime, closeTime: up.closeTime, up: up.marketId, down: down.marketId, upPrice: px(up), downPrice: px(down) });
   }
   rounds.sort((a, b) => a.closeTime - b.closeTime);
   cache = { at: Date.now(), rounds };

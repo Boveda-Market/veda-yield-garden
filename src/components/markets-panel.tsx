@@ -159,7 +159,16 @@ export function MarketsPanel({ identity }: { identity: string }) {
           {WINDOWS.map((w) => <button key={w.id} role="tab" aria-selected={win === w.id} onClick={() => setWin(w.id)} className={`rounded-xl border py-2 text-sm font-semibold transition ${win === w.id ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}>{w.label}</button>)}
         </div>
 
-        <div className="px-5 pt-5">
+        {live ? <div className="px-5 pt-5">
+          <div className="flex items-center gap-2"><h2 className="font-display text-lg font-bold">{t("{m} Sube o Baja {w}", { m: market, w: WINDOWS.find((w) => w.id === win)?.label ?? win })}</h2><span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />{t("En vivo")}</span></div>
+          {round && <p className="text-xs text-muted-foreground tabular-nums">{new Date(round.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} – {new Date(round.end).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>}
+          <div className="mt-3 grid grid-cols-[1fr_1fr_auto] items-end gap-3">
+            <div><p className="text-xs text-muted-foreground">{t("Precio a batir")}</p><p className="font-display text-lg font-bold tabular-nums">{roundOpen ? `$${num(roundOpen, priceDigits(roundOpen))}` : "—"}</p></div>
+            <div><p className="text-xs text-muted-foreground">{t("Precio actual")}</p><p className={`font-display text-lg font-bold tabular-nums ${price && roundOpen ? (price >= roundOpen ? "text-primary" : "text-destructive") : ""}`}>{price ? `$${num(price, priceDigits(price))}` : "—"}</p>{price && roundOpen && <p className={`text-[11px] font-semibold tabular-nums ${price >= roundOpen ? "text-primary" : "text-destructive"}`}>{price >= roundOpen ? "▲" : "▼"} ${num(Math.abs(price - roundOpen), priceDigits(price))}</p>}</div>
+            <div className="flex gap-1 text-center">{(() => { const s = round ? Math.max(0, Math.ceil(round.remaining / 1000)) : 0; return [[Math.floor(s / 60), t("MIN")], [s % 60, t("SEG")]].map(([v, l]) => <div key={String(l)} className="min-w-11 rounded-lg bg-secondary px-1.5 py-1"><p className="font-display text-xl font-bold tabular-nums">{String(v).padStart(2, "0")}</p><p className="text-[9px] font-semibold text-muted-foreground">{l}</p></div>); })()}</div>
+          </div>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-secondary"><div className="h-full bg-primary transition-all" style={{ width: `${progress * 100}%` }} /></div>
+        </div> : <div className="px-5 pt-5">
           <div className="flex items-end justify-between gap-3">
             <div>
               <p className="text-sm text-muted-foreground">{MARKETS.find((m) => m.id === market)?.name} / USD · {t("en vivo")} <span className="ml-1 inline-block h-2 w-2 animate-pulse rounded-full bg-primary align-middle" /></p>
@@ -174,8 +183,8 @@ export function MarketsPanel({ identity }: { identity: string }) {
           </div>
           {priceError && <p role="alert" className="mt-1 text-sm text-destructive">{t("Precio no disponible. Reintentando…")}</p>}
           {!live && <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary"><div className="h-full bg-primary transition-all" style={{ width: `${progress * 100}%` }} /></div>}
-        </div>
-        <div className="mt-4"><PriceChart market={market} points={pts} price={price} reference={lock ?? roundOpen} referenceLabel={lock ? t("Tu precio") : t("Inicio")} /></div>
+        </div>}
+        <div className="mt-4"><PriceChart market={market} points={pts} price={price} reference={lock ?? roundOpen} referenceLabel={lock ? t("Tu precio") : live ? t("A batir") : t("Inicio")} /></div>
 
         <div className="px-5 pt-3" aria-label={t("Impulso reciente")}>
           <div className="flex justify-between text-xs font-semibold"><span className="text-primary">▲ {upShare}% {t("al alza")}</span><span className="text-muted-foreground">{t("Impulso reciente")}</span><span className="text-destructive">{100 - upShare}% {t("a la baja")} ▼</span></div>

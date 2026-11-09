@@ -29,6 +29,7 @@ export function PredictLive({ market, window, momentum = 50 }: { market: string;
   const [positions, setPositions] = useState<PredictPosition[]>([]);
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
   const [win, setWin] = useState<string | null>(null);
+  const [side, setSide] = useState<PredictSide>(momentum < 45 ? "down" : "up");
 
   useEffect(() => { const id = setInterval(() => setNow(Math.floor(Date.now() / 1000)), 1000); return () => clearInterval(id); }, []);
   useEffect(() => {
@@ -65,6 +66,7 @@ export function PredictLive({ market, window, momentum = 50 }: { market: string;
   const short = !!units && balance !== null && units > balance;
   const valid = inRange && !short;
   const maxMicro = balance === null ? null : (balance < BigInt(PREDICT_MAX_USDC * 1e6) ? balance : BigInt(PREDICT_MAX_USDC * 1e6));
+  const selPrice = round ? (side === "up" ? round.upPrice : round.downPrice) : null;
   const progress = round ? Math.min(100, Math.max(0, ((now - round.openTime) / Math.max(1, round.closeTime - round.openTime)) * 100)) : 0;
 
   const sign = async (tx: string, context: string) => {
@@ -111,19 +113,27 @@ export function PredictLive({ market, window, momentum = 50 }: { market: string;
       {!loaded ? <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin" size={16} />{t("Buscando la ronda en vivo…")}</p>
         : !round ? <p className="flex items-center gap-2 rounded-xl bg-secondary p-3 text-sm"><Clock size={16} />{t("No hay ronda en vivo para {m} en {w} ahora mismo. Hoy están disponibles Bitcoin 5 min y 15 min.", { m: market, w: window })}</p>
         : <>
-          <div className="flex items-center justify-between rounded-xl bg-secondary p-3 text-sm"><span>{t("Ronda en vivo")}</span><strong className="font-display text-xl tabular-nums">{clock(round.closeTime - now)}</strong></div>
-          <div className="-mt-2 h-1.5 overflow-hidden rounded-full bg-secondary" aria-hidden><div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} /></div>
-          <div>
-            <div className="flex items-center justify-between"><label htmlFor="predict-amount" className="text-sm font-semibold">{t("Tu predicción (USDC)")}</label><span className="text-xs text-muted-foreground">{t("Disponible")}: <strong className="text-foreground tabular-nums">{balance === null ? "…" : usdc(balance)} USDC</strong></span></div>
+          <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label={t("Elige tu predicción")}>
+            {(["up", "down"] as const).map((sd) => {
+              const pr = sd === "up" ? round.upPrice : round.downPrice;
+              const on = side === sd, up = sd === "up";
+              return <button key={sd} type="button" role="radio" aria-checked={on} onClick={() => { setSide(sd); setReview(null); }}
+                className={`rounded-2xl border-2 p-4 text-left transition active:scale-95 ${on ? (up ? "border-primary bg-primary/10" : "border-destructive bg-destructive/10") : "border-border bg-secondary/40"}`}>
+                <span className={`flex items-center gap-1 text-lg font-bold ${up ? "text-primary" : "text-destructive"}`}>{up ? <ArrowUpRight size={22} /> : <ArrowDownRight size={22} />}{t(up ? "Sube" : "Baja")}</span>
+                <span className="mt-1 block font-display text-3xl font-bold tabular-nums">{pr ? `${Math.round(pr * 100)}%` : "—"}</span>
+                <span className="block text-xs text-muted-foreground">{pr ? t("Pago aprox. {v}×", { v: (1 / pr).toFixed(2) }) : t("Probabilidad")}</span>
+              </button>;
+            })}
+          </div>
+          <div className="rounded-2xl border border-border bg-secondary/30 p-4">
+            <div className="flex items-center justify-between"><label htmlFor="predict-amount" className="text-sm font-semibold">{t("Estás poniendo (USDC)")}</label><span className="text-xs text-muted-foreground">{t("Disponible")}: <strong className="text-foreground tabular-nums">{balance === null ? "…" : usdc(balance)} USDC</strong></span></div>
             <input id="predict-amount" inputMode="decimal" value={amount} onChange={(e) => { setAmount(e.target.value.replace(/[^0-9.]/g, "")); setReview(null); }} className="mt-2 h-12 w-full rounded-xl border border-input bg-background px-4 font-display text-xl font-bold" />
             <div className="mt-2 grid grid-cols-5 gap-2">{[5, 10, 25, 50].map((v) => <Button key={v} type="button" variant="secondary" size="sm" onClick={() => { setAmount(String(v)); setReview(null); }}>{v}</Button>)}<Button type="button" variant="outline" size="sm" disabled={!maxMicro || maxMicro <= 0n} onClick={() => { if (maxMicro) { setAmount((Math.floor(Number(maxMicro) / 1e4) / 100).toFixed(2)); setReview(null); } }}>{t("Máx")}</Button></div>
             {!inRange && <p className="mt-2 text-xs text-destructive">{t("Entre {min} y {max} USDC.", { min: PREDICT_MIN_USDC, max: PREDICT_MAX_USDC })}</p>}
             {short && <p className="mt-2 text-xs text-destructive">{t("Saldo insuficiente: tienes {v} USDC.", { v: usdc(balance) })} <Link to="/wallet" className="underline">{t("Depositar o cambiar a USDC")}</Link></p>}
-            {valid && <p className="mt-2 text-xs text-muted-foreground">{t("Si aciertas recibes aprox. el doble; verás la cifra exacta antes de firmar.")}</p>}
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Button disabled={!valid || !!busy} onClick={() => prepare("up")} className={`h-20 flex-col rounded-2xl text-xl font-bold shadow-lg active:scale-95 ${momentum > 55 ? "ring-2 ring-primary ring-offset-2" : ""}`}>{busy === "up" ? <Loader2 className="animate-spin" /> : <span className="flex items-center gap-1"><ArrowUpRight size={26} />{t("Sube")}</span>}</Button>
-            <Button disabled={!valid || !!busy} onClick={() => prepare("down")} variant="destructive" className={`h-20 flex-col rounded-2xl text-xl font-bold shadow-lg active:scale-95 ${momentum < 45 ? "ring-2 ring-destructive ring-offset-2" : ""}`}>{busy === "down" ? <Loader2 className="animate-spin" /> : <span className="flex items-center gap-1"><ArrowDownRight size={26} />{t("Baja")}</span>}</Button>
+            {valid && selPrice && <p className="mt-3 flex justify-between text-sm"><span className="text-muted-foreground">{t("Si aciertas recibes aprox.")}</span><strong className="text-primary tabular-nums">{(Number(units) / 1e6 / selPrice).toFixed(2)} USDC</strong></p>}
+            <Button disabled={!valid || !!busy} onClick={() => prepare(side)} variant={side === "up" ? "default" : "destructive"} className="mt-3 h-12 w-full rounded-xl text-base font-bold">{busy === side ? <Loader2 className="animate-spin" /> : t(side === "up" ? "Predecir Sube" : "Predecir Baja")}</Button>
+            <p className="mt-2 text-[11px] text-muted-foreground">{t("Verás la cifra exacta antes de firmar.")}</p>
           </div>
         </>}
 
