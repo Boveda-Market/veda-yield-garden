@@ -3,7 +3,7 @@ import "@/lib/buffer-polyfill";
 import { useState, type ReactNode } from "react";
 import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useMfaEnrollment, usePrivy } from "@privy-io/react-auth";
 import { useUpdateEmail } from "@privy-io/react-auth/ui";
-import { toSolanaWalletConnectors, useExportWallet, useSignAndSendTransaction, useSignMessage, useWallets } from "@privy-io/react-auth/solana";
+import { toSolanaWalletConnectors, useExportWallet, useFundWallet, useSignAndSendTransaction, useSignMessage, useWallets } from "@privy-io/react-auth/solana";
 import bs58 from "bs58";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 import { useQueryClient } from "@tanstack/react-query";
@@ -30,6 +30,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const { signMessage: signWalletMessage } = useSignMessage();
   const { addFunds } = useAddFunds();
   const { exportWallet } = useExportWallet();
+  const { fundWallet } = useFundWallet();
   const [error, setError] = useState<string | null>(null);
   const { login } = useLogin({
     onComplete: () => setError(null),
@@ -70,6 +71,11 @@ function SessionBridge({ children }: { children: ReactNode }) {
       if (!authenticated || !walletAddress) throw new Error(t("Primero entra a tu cuenta"));
       // Solana mainnet CAIP-2 id and the official USDC mint.
       await addFunds({ destination: { address: walletAddress, chain: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", asset: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" }, fiat: { defaultAmount: "50", source: { defaultAsset: "usd" } } });
+    },
+    buySol: async () => {
+      if (!authenticated || !walletAddress) throw new Error(t("Primero entra a tu cuenta"));
+      // Native SOL (not wrapped) so it can pay network costs right away.
+      await fundWallet({ address: walletAddress, options: { chain: "solana:mainnet", asset: "native-currency", amount: "0.1", defaultFundingMethod: "card" } });
     },
     logout: async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError("No se pudo cerrar sesión. Inténtalo de nuevo."); } },
   }}>{children}</BovedaSessionContext.Provider>;

@@ -28,6 +28,8 @@ export type BovedaSession = {
   signMessage?: (message: string) => Promise<string>;
   /** Opens the card/exchange purchase flow to receive USDC in the user's wallet. */
   buyUsdc?: () => Promise<void>;
+  /** Opens the card purchase flow to receive native SOL for network costs. */
+  buySol?: () => Promise<void>;
   getAccessToken?: () => Promise<string | null>;
   security?: AccountSecurity;
   /** Opens Privy's secure private-key export; only for Privy-created wallets. */

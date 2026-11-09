@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { buildSwap, buildTransfer, quoteSwap, spendable, toBaseUnits, type SwapQuote, type WalletAsset } from "@/lib/wallet-actions";
 import { solanaAddressSchema } from "@/lib/solana-data";
+import { decimalToUnits } from "@/lib/onboarding";
+import { StartGuide } from "@/components/start-guide";
+import { BuyUsdc } from "@/components/buy-usdc";
 
 const fmtUnits = (v: bigint | string, d: number, shown = 4) => (Number(v) / 10 ** d).toLocaleString(undefined, { maximumFractionDigits: shown });
 
@@ -21,7 +24,7 @@ export function WalletPanel() {
   const balances = useQuery({ queryKey: ["my-wallet", address], enabled: !!address, queryFn: async () => {
     const r = await readWallet({ data: { wallet: address! } });
     if (!r.success) throw new Error(r.error);
-    return { sol: BigInt(r.data.sol), usdc: BigInt(r.data.usdc) };
+    return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   } });
   const [tab, setTab] = useState<"send" | "swap">("send");
   const [asset, setAsset] = useState<WalletAsset>("USDC");
@@ -62,6 +65,7 @@ export function WalletPanel() {
   const out: WalletAsset = asset === "SOL" ? "USDC" : "SOL";
 
   return <div className="mx-auto max-w-2xl space-y-5">
+    <StartGuide onSwap={() => { setTab("swap"); setAsset("SOL"); setQuote(null); }} />
     <section className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-center justify-between"><h2 className="font-display text-2xl">{t("Mi wallet")}</h2><Button variant="ghost" size="sm" onClick={() => void balances.refetch()} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
       <p className="mt-1 text-sm text-muted-foreground">{t("Tu dirección para recibir fondos")}</p>
@@ -70,6 +74,7 @@ export function WalletPanel() {
         <div className="rounded-xl bg-muted p-3"><p className="text-xs text-muted-foreground">USDC</p><p className="font-display text-xl">{balances.data ? fmtUnits(balances.data.usdc, 6, 2) : "—"}</p></div>
         <div className="rounded-xl bg-muted p-3"><p className="text-xs text-muted-foreground">{t("SOL · para costos de red")}</p><p className="font-display text-xl">{balances.data ? fmtUnits(balances.data.sol, 9) : "—"}</p></div>
       </div>
+      <BuyUsdc className="mt-4" />
       {balances.error && <p className="mt-2 text-sm text-destructive">{(balances.error as Error).message}</p>}
     </section>
 
