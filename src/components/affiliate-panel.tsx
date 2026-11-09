@@ -48,7 +48,7 @@ export function AffiliatePanel() {
   }, [session.authenticated]);
 
   const preview = !session.authenticated;
-  if (preview && !dash) setDash({ code: "EJEMPLO", tier: "user", shareBps: 2500, referred: 3, pendingRaw: "1250000", paidRaw: "0", payoutWallet: null, application: null, joinedCode: false, earnings: [] } as AffiliateDashboard);
+  if (preview && !dash) setDash({ code: "EJEMPLO", tier: "base", shareBps: 2500, referred: 3, pendingRaw: "1250000", paidRaw: "0", payoutWallet: null, application: null, joinedCode: false, earnings: [] } as AffiliateDashboard);
   const link = dash ? `${window.location.origin}/?ref=${dash.code}` : "";
   return <section className="mt-10 border-t border-border pt-8" aria-labelledby="affiliate-title">
     <h2 id="affiliate-title" className="flex items-center gap-2 font-display text-2xl font-semibold"><Users size={20} />{t("Invita y gana")}</h2>
