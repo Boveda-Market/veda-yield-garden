@@ -61,7 +61,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
       // Sign first, then broadcast from the browser, so each stage fails with its own clear message.
       let signed: Uint8Array;
       try {
-        ({ signedTransaction: signed } = await signTransaction({ transaction, wallet, chain: "solana:mainnet", options: { uiOptions: { showWalletUIs: false } } }));
+        ({ signedTransaction: signed } = await signTransaction({ transaction, wallet, chain: "solana:mainnet" }));
       } catch (e) {
         console.error("[BÓVEDA] wallet signing failed", e);
         if (e instanceof Error && /reject|cancel|exited/i.test(e.message)) throw new Error(t("Cancelaste la firma."));
