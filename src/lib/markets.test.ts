@@ -1,30 +1,29 @@
 import { describe, expect, it } from "vitest";
-import { liquidationPrice, pnlOf, profitFee, settle, validLeverage, validStake } from "./markets";
+import { profitFee, resolve, roundOf, validStake } from "./markets";
 
-const pos = { id: "x", market: "BTC" as const, side: "long" as const, stake: 10, leverage: 1000, entry: 100_000, openedAt: 0 };
+const p = { id: "x", market: "BTC" as const, window: "5m" as const, side: "up" as const, stake: 10, lock: 100_000, placedAt: 0, endsAt: 300_000 };
 
-describe("practice markets", () => {
-  it("10 credits at 1000x moves like 10,000: +0.1% pays +10", () => {
-    expect(pnlOf(pos, 100_100)).toBeCloseTo(10, 6);
+describe("prediction rounds", () => {
+  it("5m rounds align to the clock and close entries in the last 20%", () => {
+    expect(roundOf("5m", 310_000)).toMatchObject({ start: 300_000, end: 600_000 });
+    expect(roundOf("5m", 300_000 + 239_000).entryOpen).toBe(true);
+    expect(roundOf("5m", 300_000 + 241_000).entryOpen).toBe(false);
   });
-  it("short gains when price falls", () => {
-    expect(pnlOf({ ...pos, side: "short" }, 99_900)).toBeCloseTo(10, 6);
+  it("correct Up prediction pays 1.9x", () => {
+    expect(resolve(p, 100_001)).toMatchObject({ outcome: "win", payout: 19 });
   });
-  it("liquidates at a 0.098% adverse move at 1000x and loses the whole stake", () => {
-    expect(liquidationPrice(pos)).toBeCloseTo(99_902, 4);
-    const r = settle(pos, 99_900, 1);
-    expect(r.liquidated).toBe(true);
-    expect(r.payout).toBe(0);
+  it("wrong prediction loses the stake; equal price refunds", () => {
+    expect(resolve(p, 99_999).payout).toBe(0);
+    expect(resolve({ ...p, side: "down" }, 99_999).outcome).toBe("win");
+    expect(resolve(p, 100_000)).toMatchObject({ outcome: "tie", payout: 10 });
   });
   it("profit up to 10 is fee-free, 1.25% on the excess", () => {
     expect(profitFee(10)).toBe(0);
     expect(profitFee(50)).toBe(0.5);
+    expect(resolve({ ...p, stake: 100 }, 100_001).payout).toBe(189);
   });
-  it("stake minimum 5 and leverage 500–1000", () => {
+  it("minimum stake 5", () => {
     expect(validStake(4.99, 100)).toBe(false);
     expect(validStake(5, 100)).toBe(true);
-    expect(validLeverage(499)).toBe(false);
-    expect(validLeverage(1000)).toBe(true);
-    expect(validLeverage(1001)).toBe(false);
   });
 });
