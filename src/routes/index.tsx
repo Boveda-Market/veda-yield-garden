@@ -1,15 +1,12 @@
-import { TokenIcon } from "@/components/token-icon";
 import { Lock } from "lucide-react";
 import { PoweredBy } from "@/components/powered-by";
 import { allowTrialEntry } from "@/lib/trial-entry";
 import { useT } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ShieldCheck, Sparkles, KeyRound, Eye, UserPlus, Vault as VaultIcon, Coins, ChevronDown } from "lucide-react";
+import { ArrowRight, ShieldCheck, Sparkles, UserPlus, Vault as VaultIcon, Coins, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EntryAccess } from "@/components/entry-access";
-import { VAULTS } from "@/lib/vaults";
-import { useQuery } from "@tanstack/react-query";
-import { poolYieldOptions } from "@/lib/pool-yield";
+import { HomePredict } from "@/components/home-predict";
 
 export const Route = createFileRoute("/")({ staticData: { sitemap: true },
   head: () => ({ meta: [
@@ -29,19 +26,6 @@ const FAQS = [
   { q: "¿Cuándo puedo retirar?", a: "Puedes cosechar tus ganancias o cerrar tu posición cuando quieras, sin plazos de permanencia. Cada operación se revisa antes de firmar con tu wallet." },
   { q: "¿Qué comisiones cobra BÓVEDA?", a: "Enviar es gratis. Al depositar, los primeros 5 USDC son gratis y se cobra 0.5% sobre el resto. Al cosechar, retirar o cambiar, los primeros 10 USDC son gratis y se cobra 1.25% sobre el resto. Los costes de red se pagan aparte." },
 ];
-
-function VaultTeaser({ id, name, pair, pool, risk }: (typeof VAULTS)[number]) {
-  const t = useT();
-  const q = useQuery({ ...poolYieldOptions(pool), enabled: id !== "rwa" });
-  const apr = q.data?.apr;
-  return <div className="rounded-2xl border border-border bg-card p-5 text-left">
-    <div className="flex items-center justify-between"><p className="flex items-center gap-2 font-display font-semibold"><TokenIcon symbol={pair.split("/")[0] ?? ""} size={24} />{t(name)}</p><span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">{t("Riesgo")} {t(risk)}</span></div>
-    <p className="text-xs text-muted-foreground">{pair}</p>
-    <p className="mt-4 font-display text-3xl font-bold text-primary">{apr == null ? "—" : `${apr.toFixed(2)}%`}</p>
-    <p className="text-xs text-muted-foreground">{apr == null ? (id === "rwa" ? t("Muy pronto") : q.isPending ? t("Consultando…") : t("Tasa no disponible")) : t("APR estimado · últimas 24 h")}</p>
-    <Button asChild variant="ghost" size="sm" className="mt-3 px-0"><Link to="/prueba" onClick={allowTrialEntry}>{t("Ver en modo prueba")}<ArrowRight size={14} /></Link></Button>
-  </div>;
-}
 
 function Landing() {
   const t = useT();
@@ -78,23 +62,13 @@ function Landing() {
         </div>
       </section>
 
-      <section className="py-12">
-        <h2 className="font-display text-2xl font-bold">{t("Bóvedas disponibles")}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t("Rendimientos estimados con datos actuales. No están garantizados.")}</p>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">{VAULTS.map((v) => <VaultTeaser key={v.id} {...v} />)}</div>
-      </section>
+      <HomePredict />
 
       <section className="border-t border-border py-12">
         <h2 className="font-display text-2xl font-bold">{t("Cómo funciona")}</h2>
         <ol className="mt-6 grid gap-4 sm:grid-cols-3">{steps.map(({ icon: Icon, title, body }, i) => <li key={title} className="rounded-2xl border border-border bg-card p-5">
           <div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={18} /></span><span className="text-xs text-muted-foreground">{t("Paso")} {i + 1}</span></div>
           <p className="mt-4 font-display font-semibold">{t(title)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(body)}</p></li>)}</ol>
-      </section>
-
-      <section className="grid gap-3 rounded-2xl border border-border bg-card p-5 text-sm sm:grid-cols-3">
-        <p className="flex items-center gap-2"><Eye size={16} className="text-primary" />{t("Enviar: 0% de comisión")}</p>
-        <p className="flex items-center gap-2"><Eye size={16} className="text-primary" />{t("Depósitos: primeros 5 USDC gratis")}</p>
-        <p className="flex items-center gap-2"><KeyRound size={16} className="text-primary" />{t("Sin costos ocultos")}</p>
       </section>
 
       <section className="py-12">
