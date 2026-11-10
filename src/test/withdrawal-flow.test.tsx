@@ -26,7 +26,7 @@ it("re-simulates with reviewed limits, signs only as the connected owner and ref
   await waitFor(() => expect(screen.getByRole("button", { name: /Firmar liquidación/ })).toBeEnabled());
   await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Firmar liquidación a USDC" })); });
   await waitFor(() => expect(mocks.invalidate).toHaveBeenCalledWith({ queryKey: ["real-solana", WITHDRAWAL_PILOT.wallet] }));
-  expect(mocks.prepare).toHaveBeenCalledWith({ data: { wallet: WITHDRAWAL_PILOT.wallet, position: "BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1", vaultId: "met", maximumFeeRaw: "9640", minimumNetRaw: "954400" } });
+  expect(mocks.prepare).toHaveBeenCalledWith({ data: { wallet: WITHDRAWAL_PILOT.wallet, position: "BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1", vaultId: "met", percent: 100, maximumFeeRaw: "9640", minimumNetRaw: "954400" } });
   expect(mocks.send).toHaveBeenCalledTimes(1);
   expect(Array.from(mocks.send.mock.calls[0]?.[0] ?? [])).toEqual(Array.from("unsigned").map((c) => c.charCodeAt(0)));
   expect(mocks.status).toHaveBeenCalledWith({ data: { signature: "pilot-signature" } });

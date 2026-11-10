@@ -21,3 +21,12 @@ describe("withdrawal rules", () => {
     expect(withdrawalInput.safeParse({ ...input, send: true }).success).toBe(false);
   });
 });
+import { partialLiquidity as _pl, exitInput as _ei } from "@/lib/withdrawal";
+describe("partial exit", () => {
+  it("withdraws the chosen share of liquidity, floored", () => { expect(_pl(1001n, 50)).toBe(500n); expect(_pl(1000n, 100)).toBe(1000n); });
+  it("defaults to full close and rejects 0%", () => {
+    const base = { wallet: "GZ3wFmrMdXJAigwooa8GTginE6tLeTzgGLbXhgYTp7HR", position: "BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1", vaultId: "met" as const };
+    expect(_ei.parse(base).percent).toBe(100);
+    expect(_ei.safeParse({ ...base, percent: 0 }).success).toBe(false);
+  });
+});

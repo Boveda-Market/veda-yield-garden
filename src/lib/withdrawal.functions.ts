@@ -1,8 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
-import { withdrawalInput, prepareWithdrawalInput } from "@/lib/withdrawal";
+import { exitInput, prepareWithdrawalInput } from "@/lib/withdrawal";
 
 export const simulateRealWithdrawal = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => withdrawalInput.parse(input))
+  .inputValidator((input: unknown) => exitInput.parse(input))
   .handler(async ({ data }) => {
     const key = process.env["HELIUS_API_KEY"];
     if (!key) throw new Error("La conexión de la red no está configurada.");

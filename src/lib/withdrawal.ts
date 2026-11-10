@@ -5,7 +5,16 @@ import { progressiveFee } from "@/lib/fees";
 export const withdrawalInput = z.object({ wallet: solanaAddressSchema, position: solanaAddressSchema, vaultId: z.enum(["sol", "met"]) }).strict();
 export type WithdrawalInput = z.infer<typeof withdrawalInput>;
 export const WITHDRAWAL_PILOT = { wallet: "GZ3wFmrMdXJAigwooa8GTginE6tLeTzgGLbXhgYTp7HR", position: "2pugCpz54EYthPuCma2C7XBViHWeYWBrA5QALiPaXhvV", nft: "HRsmPKBacA87JcnvLiHhXsnFUJariZmsTzoANydrVZUv", vaultId: "sol" } as const;
-export const prepareWithdrawalInput = withdrawalInput.extend({ maximumFeeRaw: z.string().max(20).regex(/^\d+$/), minimumNetRaw: z.string().max(20).regex(/^\d+$/) }).strict();
+/** Exit share of unlocked liquidity: 100 closes the position, 1–99 keeps it open. */
+export const EXIT_PERCENTS = [25, 50, 75, 100] as const;
+export const exitInput = withdrawalInput.extend({ percent: z.number().int().min(1).max(100).default(100) }).strict();
+export type ExitInput = z.infer<typeof exitInput>;
+/** Floor share of liquidity (u128-safe bigint). */
+export function partialLiquidity(liquidity: bigint, percent: number) {
+  if (!Number.isInteger(percent) || percent < 1 || percent > 100) throw new Error("Porcentaje inválido");
+  return liquidity * BigInt(percent) / 100n;
+}
+export const prepareWithdrawalInput = exitInput.extend({ maximumFeeRaw: z.string().max(20).regex(/^\d+$/), minimumNetRaw: z.string().max(20).regex(/^\d+$/) }).strict();
 export type WithdrawalResult = {
   success: boolean;
   message: string;

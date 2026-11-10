@@ -10,20 +10,22 @@ import { CHAIN_POOLS, USDC_MINT, tokenAmount, solanaAddressSchema } from "@/lib/
 import { FEE_WALLET } from "@/lib/fees";
 import { compactDepositInstructions } from "@/lib/compact-deposit";
 import { computeBudgetIxs, computeLimit, MAX_COMPUTE_UNITS } from "@/lib/compute-budget";
-import { withdrawalAmounts, type WithdrawalInput, type WithdrawalResult } from "@/lib/withdrawal";
+import { withdrawalAmounts, partialLiquidity, type WithdrawalInput, type WithdrawalResult } from "@/lib/withdrawal";
 
 const ixSchema = z.object({ programId: solanaAddressSchema, accounts: z.array(z.object({ pubkey: solanaAddressSchema, isSigner: z.boolean(), isWritable: z.boolean() })), data: z.string().max(20_000) });
 const swapSchema = z.object({ setupInstructions: z.array(ixSchema), otherInstructions: z.array(ixSchema).optional(), tokenLedgerInstruction: ixSchema.optional(), swapInstruction: ixSchema, cleanupInstruction: ixSchema.nullable().optional(), addressLookupTableAddresses: z.array(solanaAddressSchema).max(16) });
 const quoteSchema = z.object({ inputMint: z.string(), outputMint: z.string(), inAmount: z.string().regex(/^\d+$/), otherAmountThreshold: z.string().regex(/^\d+$/), swapMode: z.literal("ExactIn"), routePlan: z.array(z.object({ swapInfo: z.object({ ammKey: z.string() }).passthrough() }).passthrough()) }).passthrough();
 
 /** Atomic owner-verified close: fixed 1% fee on on-chain minima, delta-only conversion, owner signs only. */
-export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput, options: { prepare?: boolean; maximumFeeRaw?: string; minimumNetRaw?: string } = {}): Promise<WithdrawalResult> {
+export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput & { percent?: number | undefined }, options: { prepare?: boolean; maximumFeeRaw?: string; minimumNetRaw?: string } = {}): Promise<WithdrawalResult> {
   const startedAt = Date.now();
   let stage = "Lectura de posición";
   const fail = (message: string, bytes?: number): WithdrawalResult => ({ success: false, sent: false, message, ...(bytes === undefined ? {} : { bytes }) });
   try {
     const connection = heliusConnection(apiKey);
     if (await connection.getGenesisHash() !== "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d") return fail("La conexión no corresponde a la red principal.");
+    const percent = input.percent ?? 100, full = percent === 100;
+    if (!Number.isInteger(percent) || percent < 1 || percent > 100) return fail("Porcentaje de retiro no válido.");
     const config = CHAIN_POOLS.find((p) => p.id === input.vaultId);
     if (!config) return fail("Bóveda no válida.");
     const owner = new PublicKey(input.wallet), position = new PublicKey(input.position), usdc = new PublicKey(USDC_MINT);
@@ -32,8 +34,8 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput,
     if (!owned || owned.positionState.pool.toBase58() !== config.pool) return fail("La posición no pertenece a esta wallet y bóveda.");
     const state = owned.positionState, pool = await cp.fetchPoolState(state.pool);
     if (!pool.tokenAMint.equals(new PublicKey(config.mint)) || !pool.tokenBMint.equals(usdc) || pool.tokenAFlag !== 0 || pool.tokenBFlag !== 0) return fail("Los tokens o programas de este pool no están validados.");
-    if (!state.vestedLiquidity.isZero() || !state.permanentLockedLiquidity.isZero()) return fail("La posición tiene liquidez bloqueada; no se cerrará ni se prometerá recuperar su renta.");
-    if (pool.rewardInfos.some((r) => r.initialized)) return fail("Esta posición requiere validar recompensas adicionales antes de liquidarla por completo.");
+    if (full && (!state.vestedLiquidity.isZero() || !state.permanentLockedLiquidity.isZero())) return fail("La posición tiene liquidez bloqueada; no se cerrará ni se prometerá recuperar su renta.");
+    if (full && pool.rewardInfos.some((r) => r.initialized)) return fail("Esta posición requiere validar recompensas adicionales antes de liquidarla por completo.");
     const source = getAssociatedTokenAddressSync(usdc, owner), tokenA = getAssociatedTokenAddressSync(pool.tokenAMint, owner);
     const feeOwner = new PublicKey(FEE_WALLET), recipient = getAssociatedTokenAddressSync(usdc, feeOwner);
     if (recipient.equals(source)) return fail("La wallet de recaudo no puede usarse para esta comprobación de comisión.");
@@ -50,11 +52,15 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput,
     const asSim = (a: (typeof before)[number]) => a ? { owner: a.owner.toBase58(), data: [Buffer.from(a.data).toString("base64"), "base64"] as [string, string] } : null;
     const usdcBefore = amount(asSim(before[0] ?? null), usdc, owner), aBefore = amount(asSim(before[1] ?? null), pool.tokenAMint, owner), feeBefore = amount(asSim(before[2] ?? null), usdc, feeOwner);
     stage = "Preparación del cierre";
-    const quote = cp.getWithdrawQuote({ liquidityDelta: state.unlockedLiquidity, sqrtPrice: pool.sqrtPrice, minSqrtPrice: pool.sqrtMinPrice, maxSqrtPrice: pool.sqrtMaxPrice, collectFeeMode: pool.collectFeeMode, tokenAAmount: pool.tokenAAmount, tokenBAmount: pool.tokenBAmount, liquidity: pool.liquidity });
+    const liquidityDelta = full ? state.unlockedLiquidity : new BN(partialLiquidity(BigInt(state.unlockedLiquidity.toString()), percent).toString());
+    if (liquidityDelta.isZero()) return fail("La parte elegida es demasiado pequeña para retirarla.");
+    const quote = cp.getWithdrawQuote({ liquidityDelta, sqrtPrice: pool.sqrtPrice, minSqrtPrice: pool.sqrtMinPrice, maxSqrtPrice: pool.sqrtMaxPrice, collectFeeMode: pool.collectFeeMode, tokenAAmount: pool.tokenAAmount, tokenBAmount: pool.tokenBAmount, liquidity: pool.liquidity });
     const minimumA = quote.outAmountA.muln(995).divn(1000);
     const minimumB = quote.outAmountB.muln(995).divn(1000);
     const currentPoint = await getCurrentPoint(connection, pool.activationType);
-    const removal = await cp.removeAllLiquidityAndClosePosition({ owner, position, positionNftAccount: owned.positionNftAccount, positionState: state, poolState: pool, vestings: [], currentPoint, tokenAAmountThreshold: minimumA, tokenBAmountThreshold: minimumB, isSkipReward: false });
+    const removal = full
+      ? await cp.removeAllLiquidityAndClosePosition({ owner, position, positionNftAccount: owned.positionNftAccount, positionState: state, poolState: pool, vestings: [], currentPoint, tokenAAmountThreshold: minimumA, tokenBAmountThreshold: minimumB, isSkipReward: false })
+      : await cp.removeLiquidity({ owner, position, pool: state.pool, positionNftAccount: owned.positionNftAccount, liquidityDelta, tokenAAmountThreshold: minimumA, tokenBAmountThreshold: minimumB, tokenAMint: pool.tokenAMint, tokenBMint: pool.tokenBMint, tokenAVault: pool.tokenAVault, tokenBVault: pool.tokenBVault, tokenAProgram: TOKEN_PROGRAM_ID, tokenBProgram: TOKEN_PROGRAM_ID, vestings: [], currentPoint });
     // Hold withdrawn wrapped SOL for Jupiter. Never unwrap or close preexisting token accounts.
     const removalIxs = removal.instructions.filter((ix) => !(pool.tokenAMint.equals(NATIVE_MINT) && ix.programId.equals(TOKEN_PROGRAM_ID) && ix.data[0] === 9 && ix.keys[0]?.pubkey.equals(tokenA)));
     const block = await connection.getLatestBlockhash();
@@ -140,16 +146,18 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput,
     const realizedGross = netDelta + feeDelta;
     if (netDelta < 0n || feeDelta < 0n || realizedGross <= 0n) return fail("La liquidación no conserva los saldos de USDC anteriores; no se autoriza ninguna firma.");
     const remainingToken = amount(final.accounts[1], pool.tokenAMint, owner) - aBefore;
-    const closed = [3, 4, 5].every((i) => !final.accounts[i] || final.accounts[i]?.lamports === 0);
-    const rentLamports = [3, 4, 5].reduce((sum, i) => sum + BigInt(before[i]?.lamports ?? 0), 0n);
+    const gone = [3, 4, 5].every((i) => !final.accounts[i] || final.accounts[i]?.lamports === 0);
+    const kept = [3, 4, 5].every((i) => (final.accounts[i]?.lamports ?? 0) > 0) && ownsPositionNft(owner, state.nftMint, final.accounts[5] ? { ...final.accounts[5], owner: new PublicKey(final.accounts[5].owner), data: Buffer.from(final.accounts[5].data[0] ?? "", "base64") } as never : null, final.accounts[4] ? { ...final.accounts[4], owner: new PublicKey(final.accounts[4].owner), data: Buffer.from(final.accounts[4].data[0] ?? "", "base64") } as never : null);
+    const closed = full ? gone : kept;
+    const rentLamports = full ? [3, 4, 5].reduce((sum, i) => sum + BigInt(before[i]?.lamports ?? 0), 0n) : 0n;
     // Account for simulated network fees. Compare the complete wallet lamport delta,
     // allowing only rent for newly created token accounts, not token principal.
     const newAccountRent = [0, 1, 2].reduce((sum, i) => sum + BigInt(before[i] ? 0 : final.accounts[i]?.lamports ?? 0), 0n);
     const solDelta = BigInt(final.accounts[6]?.lamports ?? 0) - BigInt(before[6]?.lamports ?? 0);
-    const checks = { closed, usdc: remainingToken === 0n && netDelta >= breakdown.net && realizedGross >= minimumGross, fee: feeDelta === breakdown.fee && feeDelta === withdrawalAmounts(minimumGross).fee, rent: closed && rentLamports > 0n && solDelta + newAccountRent + final.networkFee === rentLamports };
+    const checks = { closed, usdc: remainingToken === 0n && netDelta >= breakdown.net && realizedGross >= minimumGross, fee: feeDelta === breakdown.fee && feeDelta === withdrawalAmounts(minimumGross).fee, rent: closed && (full ? rentLamports > 0n : true) && solDelta + newAccountRent + final.networkFee === rentLamports };
     const success = Object.values(checks).every(Boolean);
     if (options.prepare && Date.now() - startedAt > 45_000) return fail("La preparación tardó demasiado. Repite la revisión para obtener una transacción reciente.");
-    return { success, sent: false, bytes: final.bytes, checks, gross: tokenAmount(realizedGross.toString(), 6), fee: tokenAmount(feeDelta.toString(), 6), net: tokenAmount(netDelta.toString(), 6), expectedFee: tokenAmount(breakdown.fee.toString(), 6), minimumGross: tokenAmount(minimumGross.toString(), 6), minimumNet: tokenAmount(breakdown.net.toString(), 6), feeRaw: breakdown.fee.toString(), minimumNetRaw: breakdown.net.toString(), remainingTokenRaw: remainingToken.toString(), rentSol: tokenAmount(rentLamports.toString(), 9), ...(success && options.prepare ? { prepared: { transaction: Buffer.from(final.tx.serialize()).toString("base64"), expiresAt: startedAt + 45_000, lastValidBlockHeight: block.lastValidBlockHeight, wallet: input.wallet, position: input.position } } : {}), message: success ? "Retiro verificado en simulación. Comisión fija del 1% sobre el mínimo bruto protegido por slippage; cualquier USDC adicional es tuyo. La renta del NFT se devuelve en SOL y no lleva esta comisión. Solo tu wallet puede firmar y enviar." : "El retiro no superó todas las comprobaciones de mínimos, saldos previos, comisión y renta. No se autoriza ninguna firma." };
+    return { success, sent: false, bytes: final.bytes, checks, gross: tokenAmount(realizedGross.toString(), 6), fee: tokenAmount(feeDelta.toString(), 6), net: tokenAmount(netDelta.toString(), 6), expectedFee: tokenAmount(breakdown.fee.toString(), 6), minimumGross: tokenAmount(minimumGross.toString(), 6), minimumNet: tokenAmount(breakdown.net.toString(), 6), feeRaw: breakdown.fee.toString(), minimumNetRaw: breakdown.net.toString(), remainingTokenRaw: remainingToken.toString(), rentSol: tokenAmount(rentLamports.toString(), 9), ...(success && options.prepare ? { prepared: { transaction: Buffer.from(final.tx.serialize()).toString("base64"), expiresAt: startedAt + 45_000, lastValidBlockHeight: block.lastValidBlockHeight, wallet: input.wallet, position: input.position } } : {}), message: success && !full ? `Retiro parcial del ${percent}% verificado en simulación. Tu posición sigue abierta con el resto; comisión según la tarifa progresiva sobre el mínimo protegido. Solo tu wallet puede firmar y enviar.` : success ? "Retiro verificado en simulación. Comisión fija del 1% sobre el mínimo bruto protegido por slippage; cualquier USDC adicional es tuyo. La renta del NFT se devuelve en SOL y no lleva esta comisión. Solo tu wallet puede firmar y enviar." : "El retiro no superó todas las comprobaciones de mínimos, saldos previos, comisión y renta. No se autoriza ninguna firma." };
   } catch {
     return fail(`No se pudo validar el retiro. Etapa: ${stage}. No se firmó ni envió nada; la posición permanece intacta.`);
   }
