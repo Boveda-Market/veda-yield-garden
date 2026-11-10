@@ -2,7 +2,7 @@ import { useT } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalLayout, LegalSection } from "@/components/legal-layout";
 
-export const Route = createFileRoute("/privacidad")({
+export const Route = createFileRoute("/privacidad")({ staticData: { sitemap: true },
   head: () => ({ meta: [
     { title: "Política de privacidad — BÓVEDA" },
     { name: "description", content: "Cómo BÓVEDA trata acceso Privy, datos de Real y Prueba, emails y exposición pública en Solana." },

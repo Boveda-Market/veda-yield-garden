@@ -10,7 +10,7 @@ import { VAULTS } from "@/lib/vaults";
 import { useQuery } from "@tanstack/react-query";
 import { poolYieldOptions } from "@/lib/pool-yield";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/")({ staticData: { sitemap: true },
   head: () => ({ meta: [
     { title: "BÓVEDA — Pon tus monedas a trabajar" },
     { name: "description", content: "Entra a tu cuenta o prueba gratis con 1,000 créditos ficticios. Mira rendimientos estimados, cómo funciona y las comisiones antes de empezar." },

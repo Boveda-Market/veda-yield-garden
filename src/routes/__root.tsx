@@ -81,6 +81,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  staticData: { sitemap: false },
   head: () => ({
     // Replace these placeholders with the app's name and description when first building the app.
     // Each content route, / included, must still set its own head(). Never add og:image or
@@ -91,6 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "BÓVEDA" },
       { name: "description", content: "BÓVEDA: acceso rápido, prueba sin registro con 1,000 créditos ficticios y operaciones reales con tu wallet." },
       { name: "theme-color", content: "#0b0d0c" },
+      { name: "google-site-verification", content: "Y2kXe30nuZ-9oRhJr3vJImNAM6JqMbCDl5_3nuAcUdE" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

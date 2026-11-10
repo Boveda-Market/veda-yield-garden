@@ -56,3 +56,4 @@ use the editor.
 - Revalidate SDK-discovered position NFT accounts with shared live mint/owner/amount/program checks before composing harvest or liquidation; only the wallet signs and post-confirmation refresh includes portfolio history.
 - Credit affiliates automatically after confirmation, server-side, from the fee-wallet USDC delta paid by a wallet the referred account proved by fresh signed message (one wallet, one account); unique signatures, manual payouts.
 - Compute limit = simulated units +25%, low fixed priority (compute-budget.ts).
+- Sitemap is router-derived (src/lib/sitemap.ts + /sitemap.xml route): every route sets staticData.sitemap; only public marketing/legal/trial pages are true, signed-in app views false.

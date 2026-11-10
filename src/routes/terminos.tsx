@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LegalLayout, LegalSection } from "@/components/legal-layout";
 import { FEE_WALLET } from "@/lib/fees";
 
-export const Route = createFileRoute("/terminos")({
+export const Route = createFileRoute("/terminos")({ staticData: { sitemap: true },
   head: () => ({ meta: [
     { title: "Términos y condiciones — BÓVEDA" },
     { name: "description", content: "Condiciones de Real y Prueba en BÓVEDA: créditos ficticios, disponibilidad, comisiones progresivas y riesgos de Solana y Meteora." },

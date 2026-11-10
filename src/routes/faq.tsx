@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Faq } from "@/components/faq";
 import { LegalLayout } from "@/components/legal-layout";
 
-export const Route = createFileRoute("/faq")({
+export const Route = createFileRoute("/faq")({ staticData: { sitemap: true },
   head: () => ({ meta: [
     { title: "Preguntas frecuentes — BÓVEDA" },
     { name: "description", content: "Respuestas sobre Real y Prueba, 1,000 créditos, wallets, USDC, cargo del 1%, conversiones y disponibilidad en BÓVEDA." },

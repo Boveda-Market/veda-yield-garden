@@ -19,6 +19,7 @@ import { Route as MercadosRouteImport } from './routes/mercados'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as PruebaRouteImport } from './routes/prueba'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as WalletRouteImport } from './routes/wallet'
 
@@ -72,6 +73,11 @@ const PruebaRoute = PruebaRouteImport.update({
   path: '/prueba',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TerminosRoute = TerminosRouteImport.update({
   id: '/terminos',
   path: '/terminos',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
 }
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
 }
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
 }
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/privacidad'
     | '/prueba'
+    | '/sitemap.xml'
     | '/terminos'
     | '/wallet'
   fileRoutesByTo: FileRoutesByTo
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/privacidad'
     | '/prueba'
+    | '/sitemap.xml'
     | '/terminos'
     | '/wallet'
   id:
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/privacidad'
     | '/prueba'
+    | '/sitemap.xml'
     | '/terminos'
     | '/wallet'
   fileRoutesById: FileRoutesById
@@ -182,6 +194,7 @@ export interface RootRouteChildren {
   PortfolioRoute: typeof PortfolioRoute
   PrivacidadRoute: typeof PrivacidadRoute
   PruebaRoute: typeof PruebaRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TerminosRoute: typeof TerminosRoute
   WalletRoute: typeof WalletRoute
 }
@@ -258,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PruebaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terminos': {
       id: '/terminos'
       path: '/terminos'
@@ -286,6 +306,7 @@ const rootRouteChildren: RootRouteChildren = {
   PortfolioRoute: PortfolioRoute,
   PrivacidadRoute: PrivacidadRoute,
   PruebaRoute: PruebaRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TerminosRoute: TerminosRoute,
   WalletRoute: WalletRoute,
 }
