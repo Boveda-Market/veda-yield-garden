@@ -1,3 +1,4 @@
+import { SafetyNotice } from "@/components/safety-notice";
 import { Dismissible } from "@/components/dismissible";
 import { PoweredBy } from "@/components/powered-by";
 import { TokenIcon } from "@/components/token-icon";
@@ -175,7 +176,8 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
         <div className="mx-auto max-w-5xl px-5 py-8 text-xs leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">© {new Date().getFullYear()} Boveda Technologies LLC</p>
           <p className="mt-2">{t("BÓVEDA te permite usar bóvedas con tu wallet o practicar sin dinero. En Real puedes depositar entre 1 y 10,000 USDC en SOL y MET. Puedes cosechar o liquidar tus posiciones compatibles de SOL y MET con tu wallet. La liquidez bloqueada no se puede liquidar. Prueba usa 1,000 créditos ficticios y permite entrar como invitado.")}</p>
-          <p className="mt-3">{t("Las estadísticas públicas provienen de DexScreener. Los APY y ganancias de Prueba son ilustrativos; no representan rendimientos reales ni garantizados. Proveer liquidez implica volatilidad, pérdida impermanente, fallos de contratos y posible pérdida total del capital. Nada aquí constituye asesoría financiera, legal o fiscal. Boveda Technologies LLC no solicita claves privadas ni frases semilla.")}</p>
+          <p className="mt-3">{t("BÓVEDA es una interfaz no custodia: tú firmas cada operación con tu wallet. Las estadísticas públicas provienen de DexScreener; los rendimientos mostrados son estimados y las ganancias de Prueba son ficticias. Las bóvedas implican volatilidad, pérdida impermanente y riesgo de contratos; en Sube/Baja puedes perder todo lo invertido en una predicción y BÓVEDA nunca es tu contraparte. Nada aquí es asesoría financiera, legal o fiscal.")}</p>
+          <SafetyNotice className="mt-4" />
           <p className="mt-3">{t("Comisión operativa: entrada gratis hasta 5 USDC y 0.5% sobre el resto; cosechas y liquidaciones gratis hasta 10 USDC y 1.25% sobre el resto. En las liquidaciones, la comisión se calcula sobre el mínimo bruto USDC protegido por slippage, excluyendo la renta SOL. Los costes de red y conversión son independientes. En Prueba el cargo es ficticio.")}</p>
           <nav className="mt-4 flex flex-wrap gap-5 text-primary"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to="/terminos">{t("Términos y condiciones")}</Link><Link to="/privacidad">{t("Política de privacidad")}</Link></nav>
         </div>
