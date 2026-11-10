@@ -60,7 +60,7 @@ export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: 
   const age = current ? Math.max(0, now - quote.dataUpdatedAt) : 0;
   const expired = Boolean(current) && age >= QUOTE_TTL;
   const secondsLeft = Math.max(0, Math.ceil((QUOTE_TTL - age) / 1000));
-  const usdcBal = balances.USDC;
+  const usdcBal = balances["USDC"];
   const feeShort = Boolean(current && from !== "USDC" && to !== "USDC" && BigInt(current.feeUsdc) > 0n && (usdcBal ?? 0n) < BigInt(current.feeUsdc));
   const insufficient = Boolean(units && max !== undefined && units > max) || feeShort;
   const loading = Boolean(units) && (amount !== debounced || quote.isFetching);
