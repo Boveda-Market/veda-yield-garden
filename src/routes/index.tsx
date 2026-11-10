@@ -72,17 +72,6 @@ function Landing() {
         </div>
       </section>
 
-      <section aria-label={t("Tecnología que nos respalda")} className="pt-12">
-        <p className="text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("Tecnología que nos respalda")}</p>
-        <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
-          {[{ n: "Privy", d: "Acceso seguro", l: "/logos/privy.png" }, { n: "Polymarket", d: "Mercados Sube/Baja", l: "/logos/polymarket.png" }, { n: "Jupiter", d: "Cambios de monedas", l: "/logos/jupiter.svg" }, { n: "USDC", d: "Dólar digital", l: "/logos/usdc.svg" }, { n: "Helius", d: "Datos en vivo", l: "/logos/helius.png" }].map(({ n, d, l }) => <li key={n} className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card px-3 py-4 text-center">
-            <img src={l} alt={`Logo ${n}`} width={36} height={36} loading="lazy" className="mb-2 h-9 w-9 rounded-lg object-contain" />
-            <span className="font-display text-base font-bold tracking-tight">{n}</span>
-            <span className="mt-0.5 text-[11px] text-muted-foreground">{t(d)}</span>
-          </li>)}
-        </ul>
-      </section>
-
       <section className="py-12">
         <h2 className="font-display text-2xl font-bold">{t("Bóvedas disponibles")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("Rendimientos estimados con datos actuales. No están garantizados.")}</p>
