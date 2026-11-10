@@ -64,7 +64,7 @@ export function PilotDeposit({ vaultId, amount, onBusyChange, onClose }: { vault
     <p role="status" className="sr-only">{t("Depósito confirmado en la red (")}{status === "finalized" ? "finalizado" : "confirmado"}).</p>
     <p className="text-muted-foreground">{t("Tu posición ya está generando comisiones. Puedes cosecharlas cuando quieras desde tu Portafolio.")}</p>
     <Button asChild className="w-full"><Link to="/portfolio" onClick={onClose}>{t("Ver en mi Portafolio")}</Link></Button>
-    {signature && <a className="text-xs underline" href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("Ver comprobante")}</a>}
+    <Link to="/wallet" onClick={onClose} className="text-xs underline">{t("Ver en tu wallet")}</Link>
   </section>;
   return <section aria-labelledby="pilot-title" className="grid gap-3 text-sm">
     <h3 id="pilot-title" className="sr-only">{t("Confirmar depósito")}</h3>
