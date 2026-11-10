@@ -14,7 +14,7 @@ type Step = "idle" | "preparing" | "signing" | "confirming" | "done" | "error";
 const labels: Record<Step, string> = { idle: "", preparing: "Preparando tu depósito…", signing: "Esperando tu firma en la wallet…", confirming: "Enviada. Esperando confirmación en la red…", done: "", error: "" };
 
 /** Selected real deposit with fresh simulation and owner signature. */
-export function PilotDeposit({ vaultId, amount, onBusyChange, onClose }: { vaultId: string; amount: string; onBusyChange: (busy: boolean) => void; onClose?: () => void }) {
+export function PilotDeposit({ vaultId, amount, position, onBusyChange, onClose }: { vaultId: string; amount: string; position?: string | undefined; onBusyChange: (busy: boolean) => void; onClose?: () => void }) {
   const t = useT();
   const { walletAddress, signAndSend } = useBovedaSession();
   const prepare = useServerFn(preparePilotDeposit);
@@ -27,7 +27,7 @@ export function PilotDeposit({ vaultId, amount, onBusyChange, onClose }: { vault
   const [status, setStatus] = useState<PilotStatus | null>(null);
   const eligible = (PILOT_VAULTS as readonly string[]).includes(vaultId);
   const busy = step === "preparing" || step === "signing" || step === "confirming";
-  const valid = pilotInput.safeParse({ wallet: walletAddress, vaultId, amount });
+  const valid = pilotInput.safeParse({ wallet: walletAddress, vaultId, amount, ...(position ? { position } : {}) });
   useEffect(() => { setAccepted(false); setMessage(null); }, [amount, walletAddress]);
   useEffect(() => { onBusyChange(busy); }, [busy, onBusyChange]);
 

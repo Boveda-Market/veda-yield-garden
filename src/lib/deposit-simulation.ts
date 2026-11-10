@@ -10,6 +10,7 @@ export const simulationInput = z.object({
   wallet: solanaAddressSchema,
   vaultId: z.enum(["sol", "met", "rwa"]),
   amount: depositAmountSchema,
+  position: solanaAddressSchema.optional(),
 }).strict();
 export type SimulationInput = z.infer<typeof simulationInput>;
 export type SimulationStage = "pool" | "jupiter" | "composition" | "simulation";

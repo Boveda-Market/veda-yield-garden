@@ -11,6 +11,7 @@ import { simulationAmounts, simulationDisplay, type SimulationInput, type Simula
 import { compactDepositInstructions } from "@/lib/compact-deposit";
 import { computeBudgetIxs, computeLimit, MAX_COMPUTE_UNITS } from "@/lib/compute-budget";
 import { pilotInput, type PreparedPilot } from "@/lib/pilot-deposit";
+import { ownsPositionNft } from "@/lib/position-ownership.server";
 
 const ixSchema = z.object({ programId: solanaAddressSchema, accounts: z.array(z.object({ pubkey: solanaAddressSchema, isSigner: z.boolean(), isWritable: z.boolean() })).max(128), data: z.string().max(20_000) });
 const swapSchema = z.object({ setupInstructions: z.array(ixSchema), swapInstruction: ixSchema, cleanupInstruction: ixSchema.nullable().optional(), otherInstructions: z.array(ixSchema).optional(), addressLookupTableAddresses: z.array(solanaAddressSchema).max(16) });
@@ -90,7 +91,20 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
     // Reserve 0.5% headroom within the swap minimum and remaining USDC caps.
     const depositLiquidity = liquidity.muln(995).divn(1000);
     const nft = Keypair.generate(); // Ephemeral public identity only; never sign.
-    const deposit = await cp.createPositionAndAddLiquidity({ owner, pool: poolAddress, positionNft: nft.publicKey, liquidityDelta: depositLiquidity, maxAmountTokenA: selected.minimum, maxAmountTokenB: selected.remaining, tokenAAmountThreshold: selected.minimum, tokenBAmountThreshold: selected.remaining, tokenAMint: pool.tokenAMint, tokenBMint: pool.tokenBMint, tokenAProgram: TOKEN_PROGRAM_ID, tokenBProgram: TOKEN_PROGRAM_ID });
+    // "Depositar más": add to the same owner-verified position instead of opening a new one.
+    let existing: { position: PublicKey; nftMint: PublicKey } | null = null;
+    let deposit;
+    if (input.position) {
+      const position = new PublicKey(input.position);
+      const owned = (await cp.getPositionsByUser(owner)).find((p) => p.position.equals(position));
+      if (!owned || !owned.positionState.pool.equals(poolAddress)) return result(false, "La posición no pertenece a esta wallet y bóveda.");
+      const [nftAccount, nftMint] = await connection.getMultipleAccountsInfo([owned.positionNftAccount, owned.positionState.nftMint]);
+      if (!ownsPositionNft(owner, owned.positionState.nftMint, nftAccount, nftMint)) return result(false, "No se pudo comprobar que esta posición es tuya.");
+      existing = { position, nftMint: owned.positionState.nftMint };
+      deposit = await cp.addLiquidity({ owner, position, pool: poolAddress, positionNftAccount: owned.positionNftAccount, liquidityDelta: depositLiquidity, maxAmountTokenA: selected.minimum, maxAmountTokenB: selected.remaining, tokenAAmountThreshold: selected.minimum, tokenBAmountThreshold: selected.remaining, tokenAMint: pool.tokenAMint, tokenBMint: pool.tokenBMint, tokenAVault: pool.tokenAVault, tokenBVault: pool.tokenBVault, tokenAProgram: TOKEN_PROGRAM_ID, tokenBProgram: TOKEN_PROGRAM_ID });
+    } else {
+      deposit = await cp.createPositionAndAddLiquidity({ owner, pool: poolAddress, positionNft: nft.publicKey, liquidityDelta: depositLiquidity, maxAmountTokenA: selected.minimum, maxAmountTokenB: selected.remaining, tokenAAmountThreshold: selected.minimum, tokenBAmountThreshold: selected.remaining, tokenAMint: pool.tokenAMint, tokenBMint: pool.tokenBMint, tokenAProgram: TOKEN_PROGRAM_ID, tokenBProgram: TOKEN_PROGRAM_ID });
+    }
     const swapIxs = [...swap.setupInstructions, ...(swap.otherInstructions ?? []), swap.swapInstruction].map(decodeIx);
     // Jupiter supplies wrapped SOL already. Do not wrap additional wallet SOL.
     const depositIxs = deposit.instructions.filter((ix) => {
@@ -120,7 +134,7 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
     bytes = transaction.serialize().length;
     if (bytes > 1232) return result(false, "La transacción supera 1232 bytes. No se divide ni se cobra la comisión por separado.");
     stage = "simulation";
-    const positionAddress = derivePositionAddress(nft.publicKey);
+    const positionAddress = existing ? existing.position : derivePositionAddress(nft.publicKey);
     const sizing = await connection.simulateTransaction(transaction, { sigVerify: false, replaceRecentBlockhash: true });
     // Tight compute limit keeps congestion pricing proportional to real usage.
     if (!sizing.value.err) transaction = compile(computeLimit(sizing.value.unitsConsumed));
@@ -140,12 +154,12 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
     if (positionAccount?.data[0]) {
       const state = cpAmmCoder.accounts.decode("Position", Buffer.from(positionAccount.data[0], "base64"));
       // The raw IDL coder keeps on-chain snake_case field names.
-      positionVerified = state.pool.equals(poolAddress) && state.nft_mint.equals(nft.publicKey) && state.unlocked_liquidity.gt(new BN(0));
+      positionVerified = state.pool.equals(poolAddress) && state.nft_mint.equals(existing ? existing.nftMint : nft.publicKey) && state.unlocked_liquidity.gt(new BN(0));
     }
     const verified = feeVerified && positionVerified;
     // Pilot only: return the exact simulated message, partially signed by the
     // ephemeral position NFT key. The wallet owner still has to sign it.
-    const prepared = verified && options.preparePilot ? (() => { transaction.sign([nft]); return { transaction: Buffer.from(transaction.serialize()).toString("base64"), lastValidBlockHeight: block.lastValidBlockHeight, position: positionAddress.toBase58() }; })() : undefined;
+    const prepared = verified && options.preparePilot ? (() => { if (!existing) transaction.sign([nft]); return { transaction: Buffer.from(transaction.serialize()).toString("base64"), lastValidBlockHeight: block.lastValidBlockHeight, position: positionAddress.toBase58() }; })() : undefined;
     return { ...(prepared ? { prepared } : {}), ...result(feeVerified && positionVerified, feeVerified && positionVerified ? "Simulación satisfactoria: comisión de entrada verificada, gasto dentro del presupuesto y posición verificada. No se ha movido dinero ni se han verificado retiros." : "Solana no rechazó la simulación, pero no se pudieron verificar el presupuesto y la posición; no se considera validada."), slot: simulated.context.slot, units: simulated.value.unitsConsumed, checks: { fee: feeVerified, position: positionVerified } };
   } catch (error) {
     // Server-only diagnostics; strip any credential before logging.

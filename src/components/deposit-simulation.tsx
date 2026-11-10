@@ -16,7 +16,7 @@ import { BuyUsdc } from "@/components/buy-usdc";
 const MAX_MICRO = 10_000_000_000n;
 const microToText = (v: bigint) => { const w = v / 1_000_000n; const f = (v % 1_000_000n).toString().padStart(6, "0").replace(/0+$/, ""); return f ? `${w}.${f}` : `${w}`; };
 
-export function DepositSimulation({ vault, wallet, onClose, initialAmount = "" }: { vault: Vault; wallet: string | null; onClose: () => void; initialAmount?: string }) {
+export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", position }: { vault: Vault; wallet: string | null; onClose: () => void; initialAmount?: string; position?: string }) {
   const t = useT();
   const [amount, setAmount] = useState(initialAmount);
   const [busy, setBusy] = useState(false);
@@ -38,7 +38,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "" }
   const clean = (v: string) => { const s = v.replace(/,/g, ".").replace(/[^\d.]/g, ""); const [w, ...rest] = s.split("."); return rest.length ? `${w}.${rest.join("").slice(0, 6)}` : (w ?? ""); };
 
   return <Dialog open onOpenChange={(open) => { if (!open && !busy) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
-    <DialogTitle>{t("Depositar ·")}{" "}{t(vault.name)}</DialogTitle>
+    <DialogTitle>{position ? t("Depositar más ·") : t("Depositar ·")}{" "}{t(vault.name)}</DialogTitle>
     <DialogDescription>{t("Elige cuánto quieres depositar y confirma con tu wallet.")}</DialogDescription>
     <div className="flex items-center justify-between rounded-xl bg-muted p-3 text-sm">
       <span className="text-muted-foreground">{t("Rendimiento estimado")}</span>
@@ -63,6 +63,6 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "" }
       <p className="text-xs text-muted-foreground">{t("Los primeros 5 USDC entran gratis; 0.5% solo sobre el resto.")}</p>
     </dl>}
     <p className="text-xs leading-5 text-muted-foreground">{t("Parte de tus USDC se convierte automáticamente al otro token de la bóveda. Los costos de red se pagan aparte en SOL.")}</p>
-    {wallet ? <PilotDeposit vaultId={vault.id} amount={amount} onBusyChange={setBusy} onClose={onClose} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
+    {wallet ? <PilotDeposit vaultId={vault.id} amount={amount} position={position} onBusyChange={setBusy} onClose={onClose} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
   </DialogContent></Dialog>;
 }

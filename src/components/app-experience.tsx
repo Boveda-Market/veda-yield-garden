@@ -67,6 +67,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
   const [loaded, setLoaded] = useState(false);
   const [now, setNow] = useState(0);
   const [depositFor, setDepositFor] = useState<Vault | null>(null);
+  const [addToId, setAddToId] = useState<string | null>(null);
   const [detailsFor, setDetailsFor] = useState<Vault | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [review, setReview] = useState<{ kind: "harvest" | "exit"; position: Position; amount: number } | null>(null);
@@ -114,7 +115,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
     if (!trialAllowed || !user || !Number.isFinite(amt) || !validDeposit(String(amt), wallet)) return;
     const values = transactionAmounts(amt, "deposit");
     record("deposit", v.id, values);
-    setPositions((ps) => [...ps, { id: crypto.randomUUID(), vaultId: v.id, principal: values.net, openedAt: Date.now(), claimed: 0 }]);
+    setPositions((ps) => addToId && ps.some((x) => x.id === addToId) ? ps.map((x) => x.id === addToId ? { ...x, principal: x.principal + values.net } : x) : [...ps, { id: crypto.randomUUID(), vaultId: v.id, principal: values.net, openedAt: Date.now(), claimed: 0 }]); setAddToId(null);
     setWallet((w) => w - values.gross); setDepositFor(null); notify(t("Depósito de Prueba: {net} créditos invertidos · cargo ficticio {fee}", { net: fmt(values.net, 6), fee: fmt(values.fee, 6) }));
   };
 
@@ -150,7 +151,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
               </dl>
               <p className="mt-5 text-xs leading-5 text-muted-foreground">{t("Cosechado después del cargo ficticio del 1%, sobre los depósitos del historial de Prueba de este navegador; no es una tasa anual. Las posiciones de Prueba no aparecen en Real.")}</p>
             </section>
-            {activeView === "portfolio" && positions.length > 0 && <section aria-label={t("Posiciones de Prueba")} className="border-b border-border py-8"><h2 className="font-display text-lg font-semibold">{t("Mis posiciones · Prueba")}</h2><div className="mt-4 space-y-4">{positions.map((p) => { const v = vault(p.vaultId); if (!v) return null; const a = accrued(p, v.apy, now); return <article key={p.id} className="rounded-lg border border-border bg-card p-5"><h3 className="font-display font-semibold">{t(v.name)}</h3><p className="mt-1 text-xs text-muted-foreground">{v.pair}</p><p className="mt-3 break-all text-sm">{t("Capital:")} {fmt(p.principal)} {t("créditos")}</p><LiveEarnings base={a} ratePerMs={p.principal * (v.apy / 100) / (365 * 24 * 3600 * 1000)} since={now} unit="" suffix={` ${t("créditos")}`} label={t("Ganancias acumuladas:")} /><div className="mt-4 flex flex-wrap gap-2"><Button onClick={() => setDepositFor(v)}>{t("Depositar más")}</Button><Button variant="secondary" disabled={transactionAmounts(a).gross <= 0} onClick={() => setReview({ kind: "harvest", position: p, amount: a })}><Sprout size={16} />{t("Cosechar Ganancias")}</Button><Button variant="outline" onClick={() => setReview({ kind: "exit", position: p, amount: p.principal + a })}><ArrowDownToLine size={16} />{t("Cerrar y Liquidar")}</Button></div></article>; })}</div></section>}
+            {activeView === "portfolio" && positions.length > 0 && <section aria-label={t("Posiciones de Prueba")} className="border-b border-border py-8"><h2 className="font-display text-lg font-semibold">{t("Mis posiciones · Prueba")}</h2><div className="mt-4 space-y-4">{positions.map((p) => { const v = vault(p.vaultId); if (!v) return null; const a = accrued(p, v.apy, now); return <article key={p.id} className="rounded-lg border border-border bg-card p-5"><h3 className="font-display font-semibold">{t(v.name)}</h3><p className="mt-1 text-xs text-muted-foreground">{v.pair}</p><p className="mt-3 break-all text-sm">{t("Capital:")} {fmt(p.principal)} {t("créditos")}</p><LiveEarnings base={a} ratePerMs={p.principal * (v.apy / 100) / (365 * 24 * 3600 * 1000)} since={now} unit="" suffix={` ${t("créditos")}`} label={t("Ganancias acumuladas:")} /><div className="mt-4 flex flex-wrap gap-2"><Button onClick={() => { setAddToId(p.id); setDepositFor(v); }}>{t("Depositar más")}</Button><Button variant="secondary" disabled={transactionAmounts(a).gross <= 0} onClick={() => setReview({ kind: "harvest", position: p, amount: a })}><Sprout size={16} />{t("Cosechar Ganancias")}</Button><Button variant="outline" onClick={() => setReview({ kind: "exit", position: p, amount: p.principal + a })}><ArrowDownToLine size={16} />{t("Cerrar y Liquidar")}</Button></div></article>; })}</div></section>}
             {activeView === "portfolio" && identity && loaded && <div className="py-8"><Suspense fallback={<p role="status">{t("Cargando portafolio…")}</p>}><PortfolioPanel identity={identity} wallet={wallet} invested={invested} pending={earned} positions={positions} rows={activities} now={now} /></Suspense></div>}
             {activeView === "vaults" && positions.length === 0 && <p className="border-b border-border py-8 text-muted-foreground">{t("Aún no tienes posiciones. Elige una bóveda abajo para empezar.")}</p>}
             {activeView === "vaults" && <><div className="mb-4 mt-10 flex flex-wrap items-center justify-between gap-2"><h2 className="font-display text-lg font-semibold">{t("Bóvedas disponibles · Prueba")}</h2><PoweredBy brand="meteora" /></div>
@@ -160,7 +161,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
               <p className="mt-2 text-xs text-muted-foreground">{t("Ejemplo de simulación · no es una tasa verificada del pool.")}</p>
               <p className="mt-5 flex-1 text-sm leading-6 text-muted-foreground">{t(v.blurb)}</p>
               <Button variant="outline" className="mt-4 w-full" onClick={() => setDetailsFor(v)}>{t("Detalles del pool")}</Button>
-              <Button variant="secondary" className="mt-2 w-full" onClick={() => setDepositFor(v)}>{t("Depositar créditos")}</Button>
+              <Button variant="secondary" className="mt-2 w-full" onClick={() => { setAddToId(null); setDepositFor(v); }}>{t("Depositar créditos")}</Button>
             </article>)}</div></>}
           </>
         ) : null}
@@ -178,7 +179,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
         </div>
       </footer>
 
-      {mode === "trial" && depositFor && <DepositSheet vault={depositFor} max={wallet} onClose={() => setDepositFor(null)} onConfirm={deposit} />}
+      {mode === "trial" && depositFor && <DepositSheet vault={depositFor} max={wallet} onClose={() => { setDepositFor(null); setAddToId(null); }} onConfirm={deposit} />}
       {detailsFor && <PoolDetails key={detailsFor.id} vault={detailsFor} onClose={() => setDetailsFor(null)} />}
       {mode === "trial" && review && <WithdrawalReview key={`${review.kind}-${review.position.id}`} kind={review.kind} amount={review.amount} onClose={() => setReview(null)} onConfirm={confirmWithdrawal} />}
       {toast && <div role="status" className="fixed bottom-24 left-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg">{toast}</div>}
