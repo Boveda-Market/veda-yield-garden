@@ -1,4 +1,3 @@
-import { SafetyNotice } from "@/components/safety-notice";
 import { TokenIcon } from "@/components/token-icon";
 import { PoweredBy } from "@/components/powered-by";
 import { allowTrialEntry } from "@/lib/trial-entry";
@@ -103,6 +102,6 @@ function Landing() {
         </details>)}
       </section>
     </main>
-    <footer className="mx-auto max-w-5xl border-t border-border px-6 py-6 text-xs leading-5 text-muted-foreground"><nav className="flex flex-wrap justify-center gap-5"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to="/terminos">{t("Términos")}</Link><Link to="/privacidad">{t("Privacidad")}</Link></nav><SafetyNotice className="mt-4" /><p className="mt-4 text-center">{t("Boveda Technologies LLC · Interfaz no custodia. No es un banco ni asesoría financiera. Sin ganancias garantizadas: bóvedas y Sube/Baja pueden perder capital. Prueba usa créditos ficticios y no mueve fondos.")}</p></footer>
+    <footer className="mx-auto max-w-5xl border-t border-border px-6 py-6 text-xs leading-5 text-muted-foreground"><nav className="flex flex-wrap justify-center gap-5"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to="/terminos">{t("Términos")}</Link><Link to="/privacidad">{t("Privacidad")}</Link></nav><p className="mt-4 text-center"><a href="https://t.me/bovedaappsupport" target="_blank" rel="noopener noreferrer" className="text-primary underline">{t("Soporte y sugerencias en Telegram")}</a></p><p className="mt-4 text-center">{t("Boveda Technologies LLC · Interfaz no custodia. No es un banco ni asesoría financiera. Sin ganancias garantizadas: bóvedas y Sube/Baja pueden perder capital. Prueba usa créditos ficticios y no mueve fondos.")}</p></footer>
   </div>;
 }

@@ -1,4 +1,4 @@
-import { SafetyNotice } from "@/components/safety-notice";
+import { SafetyPopup } from "@/components/safety-popup";
 import { Dismissible } from "@/components/dismissible";
 import { PoweredBy } from "@/components/powered-by";
 import { TokenIcon } from "@/components/token-icon";
@@ -128,9 +128,10 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground"><VaultIcon size={18} /></span>
           BÓVEDA
         </Link>
-        {user && <div className="flex items-center gap-2">{!guest && <Link to="/wallet" aria-label={t("Cambiar monedas")} title={t("Cambiar monedas")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-primary hover:bg-secondary"><ArrowLeftRight size={18} /></Link>}<ProfileMenu user={user} guest={guest} onSelect={(v) => { if (guest) setGuestView(v as typeof guestView); }} onLogout={() => void (async () => { await session.logout(); await navigate({ to: "/", replace: true }); })()} /></div>}
+        {user && <div className="flex items-center gap-2">{!guest && <Link to="/wallet" aria-label={t("Cambiar monedas")} title={t("Cambiar monedas")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-primary hover:bg-secondary"><ArrowLeftRight size={18} /></Link>}<ProfileMenu user={user} guest={guest} onSelect={(v) => { if (guest) setGuestView(v as typeof guestView); }} onLogout={() => void (async () => { try { localStorage.removeItem("boveda.safety.seen"); } catch {} await session.logout(); await navigate({ to: "/", replace: true }); })()} /></div>}
       </header>
 
+      {!guest && <SafetyPopup identity={session.userId ?? null} ready={session.ready} />}
       <main className="mx-auto max-w-5xl px-5 pb-28">
         {guest && <p className="mb-4 text-xs text-muted-foreground"><strong className="text-foreground">{t("Invitado · Prueba")}</strong> {t("· Sin dinero real")}</p>}
         {session.error && <p role="alert" className="mb-4 text-sm text-destructive">{t(session.error)}</p>}
@@ -177,7 +178,6 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
           <p className="font-semibold text-foreground">© {new Date().getFullYear()} Boveda Technologies LLC</p>
           <p className="mt-2">{t("BÓVEDA te permite usar bóvedas con tu wallet o practicar sin dinero. En Real puedes depositar entre 1 y 10,000 USDC en SOL y MET. Puedes cosechar o liquidar tus posiciones compatibles de SOL y MET con tu wallet. La liquidez bloqueada no se puede liquidar. Prueba usa 1,000 créditos ficticios y permite entrar como invitado.")}</p>
           <p className="mt-3">{t("BÓVEDA es una interfaz no custodia: tú firmas cada operación con tu wallet. Las estadísticas públicas provienen de DexScreener; los rendimientos mostrados son estimados y las ganancias de Prueba son ficticias. Las bóvedas implican volatilidad, pérdida impermanente y riesgo de contratos; en Sube/Baja puedes perder todo lo invertido en una predicción y BÓVEDA nunca es tu contraparte. Nada aquí es asesoría financiera, legal o fiscal.")}</p>
-          <SafetyNotice className="mt-4" />
           <p className="mt-3">{t("Comisión operativa: entrada gratis hasta 5 USDC y 0.5% sobre el resto; cosechas y liquidaciones gratis hasta 10 USDC y 1.25% sobre el resto. En las liquidaciones, la comisión se calcula sobre el mínimo bruto USDC protegido por slippage, excluyendo la renta SOL. Los costes de red y conversión son independientes. En Prueba el cargo es ficticio.")}</p>
           <nav className="mt-4 flex flex-wrap gap-5 text-primary"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to="/terminos">{t("Términos y condiciones")}</Link><Link to="/privacidad">{t("Política de privacidad")}</Link></nav>
         </div>
