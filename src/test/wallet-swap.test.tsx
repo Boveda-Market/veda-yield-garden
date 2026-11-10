@@ -16,13 +16,17 @@ function mount(balance = 200_000_000n) {
   return { confirm, fetcher };
 }
 describe("wallet swap review", () => {
-  it("offers MET and keeps the unvalidated SPCX token out of swaps", () => {
-    expect(SWAP_TOKENS.map((x) => x.symbol)).toEqual(["USDC", "SOL", "MET"]);
+  it("offers JupUSD and MET and keeps the unvalidated SPCX token out of swaps", () => {
+    const s = SWAP_TOKENS.map((x) => x.symbol);
+    expect(s).toEqual(expect.arrayContaining(["USDC", "JupUSD", "SOL", "MET"]));
+    expect(s).not.toContain("SPCX");
   });
-  it("forces USDC on the other side when choosing MET so the fee stays in USDC", () => {
+  it("allows pairs without USDC", () => {
     mount();
     fireEvent.change(screen.getByLabelText("Moneda que pagas"), { target: { value: "MET" } });
-    expect(screen.getByLabelText("Moneda que recibes")).toHaveValue("USDC");
+    fireEvent.change(screen.getByLabelText("Moneda que recibes"), { target: { value: "SOL" } });
+    expect(screen.getByLabelText("Moneda que pagas")).toHaveValue("MET");
+    expect(screen.getByLabelText("Moneda que recibes")).toHaveValue("SOL");
   });
   it("quotes automatically with the progressive USDC input fee and only signs on confirmation", async () => {
     const { fetcher, confirm } = mount();

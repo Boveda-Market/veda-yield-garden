@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { CHAIN_POOLS, solanaAddressSchema } from "@/lib/solana-data";
+import { solanaAddressSchema } from "@/lib/solana-data";
+import { SWAP_TOKENS } from "@/lib/wallet-actions";
 
 // Narrow public-chain reads for building wallet transactions in the browser.
 // The public RPC rejects browser origins, so these go through the private provider.
@@ -28,7 +29,7 @@ export const getTxContext = createServerFn({ method: "POST" })
     }
   });
 
-const SWAP_MINTS = CHAIN_POOLS.flatMap((p) => "swapDecimals" in p ? [p.mint] : []) as string[];
+const SWAP_MINTS = SWAP_TOKENS.map((t) => t.mint);
 const balanceInput = z.object({ wallet: solanaAddressSchema, mint: z.string().refine((m) => SWAP_MINTS.includes(m)) }).strict();
 
 export const getTokenBalance = createServerFn({ method: "POST" })

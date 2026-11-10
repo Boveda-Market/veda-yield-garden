@@ -8,7 +8,7 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { buildSwap, buildTransfer, readTokenBalance, spendable, SWAP_TOKENS, toBaseUnits, type SwapQuote, type WalletAsset } from "@/lib/wallet-actions";
+import { buildSwap, buildTransfer, readTokenBalance, spendable, STABLE_SYMBOLS, SWAP_TOKENS, toBaseUnits, type SwapQuote, type WalletAsset } from "@/lib/wallet-actions";
 import { WalletSwap } from "@/components/wallet-swap";
 import { solanaAddressSchema } from "@/lib/solana-data";
 import { decimalToUnits } from "@/lib/onboarding";
@@ -30,7 +30,7 @@ export function WalletPanel() {
   } });
   const extraTokens = SWAP_TOKENS.filter((x) => x.symbol !== "SOL" && x.symbol !== "USDC");
   const extra = useQuery({ queryKey: ["my-wallet-tokens", address], enabled: !!address && extraTokens.length > 0, queryFn: async () =>
-    Object.fromEntries(await Promise.all(extraTokens.map(async (x) => [x.symbol, await readTokenBalance(address!, x.mint)] as const))) as Record<string, bigint> });
+    Object.fromEntries(await Promise.all(extraTokens.map(async (x) => [x.symbol, await readTokenBalance(address!, x.mint).catch(() => undefined)] as const))) as Record<string, bigint | undefined> });
   const swapBalances: Record<string, bigint | undefined> = { SOL: balances.data?.sol, USDC: balances.data?.usdc, ...(extra.data ?? {}) };
   const [swapFrom, setSwapFrom] = useState({ key: 0, from: "USDC" });
   const [tab, setTab] = useState<"send" | "swap">("swap");
@@ -45,8 +45,8 @@ export function WalletPanel() {
   const [qr, setQr] = useState<string | null>(null);
   const actionsRef = useRef<HTMLElement>(null);
   const prices = useQuery({ queryKey: ["wallet-prices"], staleTime: 60_000, queryFn: async () => {
-    const out: Record<string, number> = { USDC: 1 };
-    await Promise.all(SWAP_TOKENS.filter((x) => x.symbol !== "USDC").map(async (x) => {
+    const out: Record<string, number> = Object.fromEntries(STABLE_SYMBOLS.map((s) => [s, 1]));
+    await Promise.all(SWAP_TOKENS.filter((x) => !STABLE_SYMBOLS.includes(x.symbol)).map(async (x) => {
       try { const r = await fetch(`https://api.dexscreener.com/tokens/v1/solana/${x.mint}`); const j = await r.json() as { priceUsd?: string; liquidity?: { usd?: number } }[];
         const best = Array.isArray(j) ? [...j].sort((a, b) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0))[0] : undefined;
         const p = Number(best?.priceUsd); if (Number.isFinite(p) && p > 0) out[x.symbol] = p; } catch { /* price unavailable */ }
@@ -90,8 +90,8 @@ export function WalletPanel() {
   const assets = [
     { symbol: "USDC", label: t("Dólar digital"), raw: balances.data?.usdc, decimals: 6 },
     { symbol: "SOL", label: t("Para costos de red"), raw: balances.data?.sol, decimals: 9 },
-    ...extraTokens.map((x) => ({ symbol: x.symbol, label: x.symbol, raw: extra.data?.[x.symbol], decimals: x.decimals })),
-  ].map((a) => { const amt = a.raw === undefined ? undefined : Number(a.raw) / 10 ** a.decimals; const p = prices.data?.[a.symbol]; return { ...a, amt, usd: amt !== undefined && p !== undefined ? amt * p : undefined }; });
+    ...extraTokens.map((x) => ({ symbol: x.symbol, label: x.symbol === "JupUSD" ? t("Pagos de predicciones") : x.symbol, raw: extra.data?.[x.symbol], decimals: x.decimals })),
+  ].filter((a) => a.symbol === "USDC" || a.symbol === "SOL" || a.symbol === "MET" || (a.raw !== undefined && a.raw > 0n)).map((a) => { const amt = a.raw === undefined ? undefined : Number(a.raw) / 10 ** a.decimals; const p = prices.data?.[a.symbol]; return { ...a, amt, usd: amt !== undefined && p !== undefined ? amt * p : undefined }; });
   const total = assets.every((a) => a.usd !== undefined || a.amt === 0) ? assets.reduce((s, a) => s + (a.usd ?? 0), 0) : undefined;
   const openSwap = (from: string) => { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from })); actionsRef.current?.scrollIntoView({ behavior: "smooth" }); };
   const openSend = (a: WalletAsset) => { setTab("send"); setAsset(a); actionsRef.current?.scrollIntoView({ behavior: "smooth" }); };

@@ -14,7 +14,7 @@ type Props = {
   onConfirm: (quote: SwapQuote) => Promise<unknown>;
 };
 
-/** Quote-only requests never sign; only the reviewed, current input can be confirmed. Every pair includes USDC. */
+/** Quote-only requests never sign; only the reviewed, current input can be confirmed. Any pair; fee always in USDC. */
 export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: Props) {
   const t = useT();
   const [from, setFrom] = useState(initialFrom);
@@ -60,7 +60,9 @@ export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: 
   const age = current ? Math.max(0, now - quote.dataUpdatedAt) : 0;
   const expired = Boolean(current) && age >= QUOTE_TTL;
   const secondsLeft = Math.max(0, Math.ceil((QUOTE_TTL - age) / 1000));
-  const insufficient = Boolean(units && max !== undefined && units > max);
+  const usdcBal = balances.USDC;
+  const feeShort = Boolean(current && from !== "USDC" && to !== "USDC" && BigInt(current.feeUsdc) > 0n && (usdcBal ?? 0n) < BigInt(current.feeUsdc));
+  const insufficient = Boolean(units && max !== undefined && units > max) || feeShort;
   const loading = Boolean(units) && (amount !== debounced || quote.isFetching);
   const rate = current && units ? (Number(current.outAmount) / 10 ** swapToken(to).decimals) / (Number(units) / 10 ** swapToken(from).decimals) : null;
 
@@ -75,8 +77,7 @@ export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: 
     const other = side === "from" ? to : from;
     let next = other;
     if (symbol === other) next = side === "from" ? from : to; // selecting the other side's token flips the pair
-    if (symbol !== "USDC" && next !== "USDC") next = "USDC";
-    if (symbol === "USDC" && next === "USDC") next = SWAP_TOKENS.find((x) => x.symbol !== "USDC")?.symbol ?? "SOL";
+    if (symbol === next) next = SWAP_TOKENS.find((x) => x.symbol !== symbol)?.symbol ?? "USDC";
     if (side === "from") { setFrom(symbol); setTo(next); } else { setTo(symbol); setFrom(next); }
     clear();
   };
@@ -120,12 +121,12 @@ export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: 
           <p className="min-w-0 flex-1 truncate font-display text-3xl text-primary">{loading ? t("Cotizando…") : current ? format(current.outAmount, to) : "0.00"}</p>
           {select("to", to)}
         </div>
-        <p className="mt-1 h-4 text-xs text-muted-foreground">{current && !loading ? t("Comisión ya descontada") : ""}</p>
+        <p className="mt-1 h-4 text-xs text-muted-foreground">{current && !loading ? (from !== "USDC" && to !== "USDC" ? t("Comisión aparte en USDC") : t("Comisión ya descontada")) : ""}</p>
       </div>
     </div>
 
     {amount && !units && !/^[0.]*$/.test(amount) && <p role="alert" className="text-sm text-destructive">{t("Monto no válido")}</p>}
-    {insufficient && <p role="alert" className="text-sm text-destructive">{t("Saldo insuficiente")}</p>}
+    {insufficient && <p role="alert" className="text-sm text-destructive">{feeShort ? t("Necesitas USDC para la comisión de este cambio.") : t("Saldo insuficiente")}</p>}
     {from === "SOL" && <p className="text-xs text-muted-foreground">{t("Guardamos 0.01 SOL para pagar los costos de red.")}</p>}
 
     {current && !loading && <>

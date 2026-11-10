@@ -63,7 +63,13 @@ export const SWAP_TOKENS: SwapToken[] = [
   { symbol: "USDC", mint: USDC_MINT, decimals: 6 },
   { symbol: "JupUSD", mint: JUPUSD_MINT, decimals: 6 },
   ...CHAIN_POOLS.flatMap((p) => "swapDecimals" in p ? [{ symbol: p.symbol, mint: p.mint, decimals: p.swapDecimals }] : []),
+  { symbol: "USDT", mint: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", decimals: 6 },
+  { symbol: "JUP", mint: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN", decimals: 6 },
+  { symbol: "BONK", mint: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263", decimals: 5 },
+  { symbol: "WIF", mint: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm", decimals: 6 },
 ];
+/** Stable dollars valued 1:1 with USD. */
+export const STABLE_SYMBOLS = ["USDC", "JupUSD", "USDT"];
 export function swapToken(symbol: string) {
   const token = SWAP_TOKENS.find((t) => t.symbol === symbol);
   if (!token) throw new Error("Moneda no disponible para cambiar.");
@@ -90,15 +96,24 @@ export type SwapQuote = { from: string; to: string; amount: bigint; outAmount: s
 /** Public Jupiter quote with 0.5% slippage; the 1% fee is always charged in USDC. */
 export async function quoteSwap(from: string, to: string, amount: bigint): Promise<SwapQuote> {
   const a = swapToken(from), b = swapToken(to);
-  if ((a.symbol === "USDC") === (b.symbol === "USDC")) throw new Error("Cada cambio debe incluir USDC.");
+  if (a.symbol === b.symbol) throw new Error("Elige dos monedas distintas.");
   const buying = a.symbol === "USDC";
+  const direct = buying || b.symbol === "USDC";
   // X→USDC: Jupiter takes 1% of the USDC output. USDC→X: 1% of the USDC input is set aside before swapping.
   // USDC→X: fee set aside from the input. X→USDC: fee on the guaranteed minimum output, paid after the swap.
   const swapIn = buying ? amount - swapFee(amount) : amount;
   const res = await fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${a.mint}&outputMint=${b.mint}&amount=${swapIn}&slippageBps=50`);
   if (!res.ok) throw new Error("No se pudo cotizar el cambio. Inténtalo de nuevo.");
-  const raw = await res.json() as { outAmount: string; otherAmountThreshold?: string; priceImpactPct: string };
+  const raw = await res.json() as { outAmount: string; otherAmountThreshold?: string; priceImpactPct: string; swapUsdValue?: string };
   if (!/^\d+$/.test(raw.outAmount ?? "")) throw new Error("No se pudo cotizar el cambio. Inténtalo de nuevo.");
+  if (!direct) {
+    // Pairs without USDC: the same progressive fee, measured on the swap's USD value, is paid separately in USDC.
+    const usdValue = Number(raw.swapUsdValue);
+    if (!Number.isFinite(usdValue) || usdValue <= 0) throw new Error("No se pudo cotizar el cambio. Inténtalo de nuevo.");
+    const valueUnits = BigInt(Math.floor(usdValue * 1e6));
+    const minimum = typeof raw.otherAmountThreshold === "string" && /^\d+$/.test(raw.otherAmountThreshold) ? raw.otherAmountThreshold : null;
+    return { from: a.symbol, to: b.symbol, amount, outAmount: raw.outAmount, minimum, feeUsdc: swapFee(valueUnits).toString(), usdcValue: valueUnits.toString(), priceImpactPct: raw.priceImpactPct, raw };
+  }
   const rawMin = typeof raw.otherAmountThreshold === "string" && /^\d+$/.test(raw.otherAmountThreshold) ? raw.otherAmountThreshold : null;
   if (!buying && rawMin === null) throw new Error("No se pudo cotizar el cambio. Inténtalo de nuevo.");
   const fee = buying ? swapFee(amount) : swapFee(BigInt(rawMin!));
@@ -149,7 +164,7 @@ export async function buildSwap(wallet: string, quote: SwapQuote): Promise<Uint8
     const data = new Uint8Array(10); data[0] = 12; new DataView(data.buffer).setBigUint64(1, BigInt(quote.feeUsdc), true); data[9] = 6;
     feeIx = { programAddress: tokenProgram, accounts: [{ address: source, role: AccountRole.WRITABLE }, { address: mint, role: AccountRole.READONLY }, { address: address(FEE_USDC_ACCOUNT), role: AccountRole.WRITABLE }, { address: owner, role: AccountRole.READONLY_SIGNER }], data };
   }
-  if (feeIx && quote.from === "USDC") instructions.push(feeIx);
+  if (feeIx && quote.to !== "USDC") instructions.push(feeIx);
   instructions.push(ix(j.swapInstruction));
   if (feeIx && quote.to === "USDC") instructions.push(feeIx);
   if (j.cleanupInstruction) instructions.push(ix(j.cleanupInstruction));
