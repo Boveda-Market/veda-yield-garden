@@ -528,6 +528,5 @@ export const extra: Record<string, string> = {
   "Cada cambio paga una comisión y recibes tu parte proporcional.": "Each swap pays a fee and you receive your proportional share.",
   "Cosechar o liquidar": "Harvest or liquidate",
   "Cosechar cobra solo tus ganancias y tu depósito sigue trabajando. Liquidar retira tu dinero a USDC.": "Harvesting collects only your earnings while your deposit keeps working. Liquidating withdraws your money to USDC.",
-  "Tú tienes el control": "You're in control",
   "Sin plazos de permanencia. Revisas y firmas cada operación. Las ganancias no están garantizadas y puedes perder dinero.": "No lock-up periods. You review and sign every operation. Earnings are not guaranteed and you can lose money.",
 };
