@@ -1,10 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { ArrowDownToLine, Plus } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { Button } from "./ui/button";
 import { TokenIcon } from "./token-icon";
 
-export type MiniPosition = { key: string; symbol: string; name: string; value: string; onDeposit?: () => void };
+export type MiniPosition = { key: string; symbol: string; name: string; value: string; onDeposit?: () => void; onClose?: () => void };
 
 /** Compact summary of open positions shown above the vault catalog. */
 export function OpenPositionsMini({ items, portfolioTo = "/portfolio" }: { items: MiniPosition[]; portfolioTo?: "/portfolio" | "/prueba" }) {
@@ -15,7 +15,7 @@ export function OpenPositionsMini({ items, portfolioTo = "/portfolio" }: { items
     <ul className="mt-3 divide-y divide-border">{items.map((i) => <li key={i.key} className="flex items-center gap-3 py-2">
       <TokenIcon symbol={i.symbol} size={24} />
       <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{t(i.name)}</p><p className="truncate text-xs text-muted-foreground">{i.value}</p></div>
-      {i.onDeposit && <Button size="sm" variant="secondary" onClick={i.onDeposit}><Plus size={14} />{t("Depositar más")}</Button>}
+      <div className="flex shrink-0 gap-2">{i.onDeposit && <Button size="sm" variant="secondary" onClick={i.onDeposit}><Plus size={14} />{t("Depositar más")}</Button>}{i.onClose && <Button size="sm" variant="outline" onClick={i.onClose}><ArrowDownToLine size={14} />{t("Cerrar")}</Button>}</div>
     </li>)}</ul>
   </section>;
 }
