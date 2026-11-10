@@ -1,4 +1,5 @@
 import { TokenIcon } from "@/components/token-icon";
+import { PoweredBy } from "@/components/powered-by";
 import { allowTrialEntry } from "@/lib/trial-entry";
 import { useT } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -53,6 +54,7 @@ function Landing() {
       <section className="grid items-center gap-10 pb-12 pt-6 md:grid-cols-2 md:pt-12">
         <div className="text-center md:text-left">
           <h1 className="font-display text-4xl font-bold leading-tight sm:text-5xl">{t("Tus monedas generando comisiones, día a día.")}</h1>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 md:justify-start [&>p]:justify-start"><PoweredBy brand="meteora" /><PoweredBy brand="polymarket" /></div>
           <p className="mt-5 text-lg leading-7 text-muted-foreground">{t("Con la simplicidad de una cuenta digital. Revisa tu saldo, tus ganancias y cada movimiento.")}</p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs md:justify-start">
             {["Sin plazos de permanencia", "Tú tienes el control", "Prueba gratis con 1,000 créditos"].map((b) => <li key={b} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"><ShieldCheck size={13} className="text-primary" />{t(b)}</li>)}
