@@ -529,4 +529,7 @@ export const extra: Record<string, string> = {
   "Cosechar o liquidar": "Harvest or liquidate",
   "Cosechar cobra solo tus ganancias y tu depósito sigue trabajando. Liquidar retira tu dinero a USDC.": "Harvesting collects only your earnings while your deposit keeps working. Liquidating withdraws your money to USDC.",
   "Sin plazos de permanencia. Revisas y firmas cada operación. Las ganancias no están garantizadas y puedes perder dinero.": "No lock-up periods. You review and sign every operation. Earnings are not guaranteed and you can lose money.",
+  "¿Sigues ahí?": "Are you still there?",
+  "Por tu seguridad cerraremos tu sesión por inactividad en": "For your security we will sign you out for inactivity in",
+  "Mantener sesión abierta": "Stay signed in",
 };

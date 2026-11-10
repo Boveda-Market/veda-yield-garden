@@ -1,6 +1,6 @@
 import { useT } from "@/lib/i18n";
 import "@/lib/buffer-polyfill";
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { setPrivyTokenGetter } from "@/lib/privy-token";
 import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useMfaEnrollment, usePrivy } from "@privy-io/react-auth";
 import { useUpdateEmail } from "@privy-io/react-auth/ui";
@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 // Privy-hosted mainnet RPC accepts browser requests (the public endpoint returns 403); the private Helius key stays server-only.
 const solanaRpcs = { "solana:mainnet": { rpc: createSolanaRpc("https://solana-mainnet.rpc.privy.systems?privyAppId=cmw6ftcf900ge0hl0jyw3rc75"), rpcSubscriptions: createSolanaRpcSubscriptions("wss://solana-mainnet.rpc.privy.systems?privyAppId=cmw6ftcf900ge0hl0jyw3rc75"), blockExplorerUrl: "https://orbmarkets.io" } };
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
+import { IdleLogout } from "@/components/idle-logout";
 
 const solanaConnectors = toSolanaWalletConnectors({ shouldAutoConnect: true });
 
@@ -42,6 +43,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
     setPrivyTokenGetter(authenticated ? getAccessToken : null);
     return () => setPrivyTokenGetter(null);
   }, [authenticated, getAccessToken]);
+  const doLogout = useCallback(async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError("No se pudo cerrar sesión. Inténtalo de nuevo."); } }, [queryClient, logout]);
   return <BovedaSessionContext.Provider value={{
     ready, authenticated, userId: authenticated ? user?.id ?? null : null,
     label: user?.email?.address ?? user?.google?.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : t("Mi cuenta")),
@@ -106,8 +108,8 @@ function SessionBridge({ children }: { children: ReactNode }) {
       // Native SOL (not wrapped) so it can pay network costs right away.
       await fundWallet({ address: walletAddress, options: { chain: "solana:mainnet", asset: "native-currency", amount: "0.1", defaultFundingMethod: "card" } });
     },
-    logout: async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError("No se pudo cerrar sesión. Inténtalo de nuevo."); } },
-  }}>{children}</BovedaSessionContext.Provider>;
+    logout: doLogout,
+  }}>{children}<IdleLogout active={ready && authenticated} onLogout={doLogout} /></BovedaSessionContext.Provider>;
 }
 
 export default function PrivyAccess({ children }: { children: ReactNode }) {
