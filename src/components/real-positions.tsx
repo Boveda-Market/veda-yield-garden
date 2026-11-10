@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { earningRatePerMs } from "@/lib/live-earnings";
 import { LiveEarnings } from "./live-earnings";
+import { PoweredBy } from "./powered-by";
 
 export function RealPositions({ positions, onAction, onDeposit }: { positions: ChainPosition[]; onAction: (p: ChainPosition, a: "harvest" | "exit" | "compound") => void; onDeposit?: (p: ChainPosition) => void }) {
   const t = useT();
@@ -34,7 +35,7 @@ export function RealPositions({ positions, onAction, onDeposit }: { positions: C
     <div className="mt-4 grid gap-4 md:grid-cols-2">{rows.map(({ p, value, fees, apr }) => {
       const vault = VAULTS.find((v) => v.id === p.vaultId);
       return <article key={p.address} className="rounded-lg border border-border bg-card p-5">
-        <div className="flex items-start justify-between gap-3"><div><h3 className="font-display font-semibold">{vault ? t(vault.name) : `${p.symbol}/USDC`}</h3><p className="mt-1 text-xs text-muted-foreground">{p.symbol}/USDC · {p.locked ? t("Con liquidez bloqueada") : t("Activa")}</p></div>
+        <div className="flex items-start justify-between gap-3"><div><h3 className="font-display font-semibold">{vault ? t(vault.name) : `${p.symbol}/USDC`}</h3><p className="mt-1 text-xs text-muted-foreground">{p.symbol}/USDC · {p.locked ? t("Con liquidez bloqueada") : t("Activa")}</p><PoweredBy brand="meteora" className="mt-1 !justify-start" /></div>
           <div className="flex gap-1"><Button size="icon" variant="ghost" aria-label={t("Copiar identificador")} title={t("Copiar identificador")} onClick={() => copy(p.address)}><Copy size={14} /></Button><Button asChild size="icon" variant="ghost"><a href={`https://orbmarkets.io/address/${p.address}`} target="_blank" rel="noopener noreferrer" aria-label={t("Ver en el explorador")} title={t("Ver en el explorador")}><ExternalLink size={14} /></a></Button></div></div>
         <p className="mt-4 text-xs text-muted-foreground">{t("Valor estimado")}</p>
         <p className="font-display text-3xl font-semibold">{value === null ? t("No disponible") : `≈ ${formatUsd(value)}`}</p>

@@ -1,4 +1,5 @@
 import { TokenIcon } from "@/components/token-icon";
+import { PoweredBy } from "@/components/powered-by";
 import { useEffect, useState } from "react";
 import { ArrowDownRight, ArrowUpRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
       <div className="min-w-0">
         <p className="flex items-center gap-2 font-semibold">{Up ? <ArrowUpRight size={16} className="text-primary" /> : <ArrowDownRight size={16} className="text-destructive" />}{asset && <TokenIcon symbol={asset} size={18} />}{asset ?? "—"} · {t(Up ? "Sube" : "Baja")}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">{when}</p>
+        <PoweredBy brand="polymarket" className="mt-1 !justify-start" />
       </div>
       <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${open ? (pnl !== null && pnl < 0n ? "bg-destructive/15 text-destructive" : "bg-primary/15 text-primary") : won ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
         {open ? (mmss ? t("Cierra en {v}", { v: mmss }) : t("Resolviendo…")) : won === null ? t("Cerrada") : won ? t("Acertaste") : t("No acertaste")}
