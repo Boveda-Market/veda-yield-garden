@@ -1,4 +1,5 @@
 import { TokenIcon } from "@/components/token-icon";
+import { Lock } from "lucide-react";
 import { PoweredBy } from "@/components/powered-by";
 import { allowTrialEntry } from "@/lib/trial-entry";
 import { useT } from "@/lib/i18n";
@@ -62,8 +63,9 @@ function Landing() {
           </ul>
           <p className="mt-4 text-xs text-muted-foreground">{t("Las ganancias cambian y puedes perder dinero.")}</p>
         </div>
-        <div id="acceso" className="flex justify-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
+        <div id="acceso" className="flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
           <EntryAccess />
+          <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span></p>
         </div>
       </section>
 
