@@ -371,5 +371,7 @@ export const extra: Record<string, string> = {
   "Reclamar ganancias": "Claim winnings",
   "Normalmente se acredita solo. Si aún no lo ves en tu wallet, reclámalo aquí.": "Usually credited automatically. If you don't see it in your wallet yet, claim it here.",
   "Ganancias reclamadas. {v} USDC llegaron a tu wallet.": "Winnings claimed. {v} USDC arrived in your wallet.",
+  "Pago cobrado. Ahora firma el cambio a USDC…": "Payout claimed. Now sign the conversion to USDC…",
+  "Pago cobrado, pero falta el cambio a USDC. Hazlo en Mi wallet → Cambiar (JupUSD → USDC).": "Payout claimed, but the USDC conversion is pending. Do it in My wallet → Swap (JupUSD → USDC).",
   "No se pudo preparar el cobro. Si ya se acreditó, el USDC está en tu wallet.": "Couldn't prepare the claim. If it was already credited, the USDC is in your wallet.",
 };
