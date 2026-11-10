@@ -28,7 +28,7 @@ export function windowOfTags(tags: readonly string[]): PredictWindow | null {
 /** Polymarket market id as routed through Jupiter Prediction. */
 export const MARKET_ID_RE = /^POLY-\d{1,12}(-\d{1,3})?$/;
 
-export type LiveRound = { eventId: string; asset: PredictAsset; window: PredictWindow; openTime: number; closeTime: number; marketId: string; upPrice: number | null; downPrice: number | null; volume: number };
+export type LiveRound = { eventId: string; asset: PredictAsset; window: PredictWindow; openTime: number; closeTime: number; marketId: string; downMarketId: string; upPrice: number | null; downPrice: number | null; volume: number };
 export type PredictQuote = { contractsMicro: string; costMicro: string };
 export type PredictPosition = { pubkey: string; marketId: string; title: string; side: PredictSide; outcome: string; contractsMicro: string; costMicro: string; valueMicro: string | null; payoutMicro: string; pnlMicro: string | null; closeTime: number | null; status: string; result: string | null };
 
