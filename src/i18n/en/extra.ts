@@ -402,7 +402,7 @@ export const extra: Record<string, string> = {
   "Por eso ya no aparece entre tus predicciones abiertas. No hay nada que reclamar.": "That's why it no longer shows among your open predictions. There's nothing to claim.",
   "Entendido": "Got it",
   // FAQ
-  "Todo": "All", "Bóvedas y retiros": "Vaults & withdrawals", "Comisiones": "Fees", "Wallet y acceso": "Wallet & access", "Afiliados": "Affiliates", "Prueba": "Trial",
+  "Bóvedas y retiros": "Vaults & withdrawals", "Comisiones": "Fees", "Wallet y acceso": "Wallet & access", "Afiliados": "Affiliates", "Prueba": "Trial",
   "Lo más consultado": "Most asked", "Busca tu duda: comisiones, retirar, predicciones…": "Search: fees, withdraw, predictions…", "Buscar en preguntas frecuentes": "Search FAQs", "Limpiar búsqueda": "Clear search", "Categorías": "Categories",
   "resultado": "result", "resultados": "results", "No encontramos preguntas con esa búsqueda.": "No questions match that search.", "Ver todas las preguntas": "See all questions",
   "¿No encontraste tu respuesta?": "Didn't find your answer?", "Revisa los términos o la política de privacidad, o abre Mi cuenta para ver tu actividad y seguridad.": "Check the terms or privacy policy, or open My account to see your activity and security.",
