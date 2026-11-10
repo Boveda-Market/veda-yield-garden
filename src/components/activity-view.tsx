@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 import { getWalletActivity } from "@/lib/wallet-activity.functions";
 import type { TrialActivity } from "@/lib/trial-activity";
 import { VAULTS } from "@/lib/vaults";
+import { ACTIVITY_LABEL } from "@/lib/wallet-activity";
 
 export function ActivityView({ trial, wallet, rows, heading = "Tu actividad" }: { trial: boolean; wallet: string | null; rows: TrialActivity[]; heading?: string }) {
   const t = useT();
@@ -19,7 +20,7 @@ export function ActivityView({ trial, wallet, rows, heading = "Tu actividad" }: 
       {query.isFetching && <p role="status">{t("Consultando la red…")}</p>}
       {query.isError && <p role="alert" className="text-destructive">{t("No se pudo consultar la actividad.")}</p>}
       {query.data && !query.data.success && <p role="alert" className="text-destructive">{t(query.data.error)}</p>}
-      {query.data?.success && (query.data.rows.length ? query.data.rows.map((row) => <article key={row.signature} className="flex flex-wrap items-center justify-between gap-4 border-b border-border py-5"><div><p className="text-sm font-semibold">{t("Transacción ·")} {row.failed ? t("Fallida") : row.status === "finalized" ? t("Finalizada") : t("Confirmada")}</p><p className="mt-1 text-xs text-muted-foreground">{row.at ? new Date(row.at).toLocaleString(locale) : t("Fecha no disponible")}</p><p className="mt-1 break-all font-mono text-xs text-muted-foreground">{row.signature.slice(0, 12)}…{row.signature.slice(-8)}</p></div><Button asChild variant="outline" size="sm"><a href={`https://orbmarkets.io/tx/${row.signature}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}<ExternalLink size={14} /></a></Button></article>) : <p className="py-6 text-muted-foreground">{t("No se encontraron transacciones recientes para esta dirección.")}</p>)}
+      {query.data?.success && (query.data.rows.length ? query.data.rows.map((row) => <article key={row.signature} className="flex flex-wrap items-center justify-between gap-4 border-b border-border py-5"><div><p className="text-sm font-semibold">{t(ACTIVITY_LABEL[row.kind] ?? "Otra transacción")} <span className={`ml-1 text-xs font-normal ${row.failed ? "text-destructive" : "text-muted-foreground"}`}>· {row.failed ? t("Fallida") : row.status === "finalized" ? t("Finalizada") : t("Confirmada")}</span></p><p className="mt-1 text-xs text-muted-foreground">{row.at ? new Date(row.at).toLocaleString(locale) : t("Fecha no disponible")}</p><p className="mt-1 break-all font-mono text-xs text-muted-foreground">{row.signature.slice(0, 12)}…{row.signature.slice(-8)}</p></div><Button asChild variant="outline" size="sm"><a href={`https://orbmarkets.io/tx/${row.signature}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}<ExternalLink size={14} /></a></Button></article>) : <p className="py-6 text-muted-foreground">{t("No se encontraron transacciones recientes para esta dirección.")}</p>)}
     </div>}
   </section>;
 }

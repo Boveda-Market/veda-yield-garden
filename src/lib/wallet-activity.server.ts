@@ -1,8 +1,11 @@
 import { PublicKey } from "@solana/web3.js";
 import { heliusConnection } from "./solana-read.server";
-import type { WalletActivity } from "./wallet-activity.functions";
+import { classifyActivity, type WalletActivity } from "./wallet-activity";
 
 export async function readWalletActivity(key: string, wallet: string): Promise<WalletActivity[]> {
-  const rows = await heliusConnection(key).getSignaturesForAddress(new PublicKey(wallet), { limit: 20 }, "confirmed");
-  return rows.map((row) => ({ signature: row.signature, at: row.blockTime ? row.blockTime * 1000 : null, failed: row.err !== null, status: row.confirmationStatus ?? "confirmed" }));
+  const connection = heliusConnection(key);
+  const rows = await connection.getSignaturesForAddress(new PublicKey(wallet), { limit: 20 }, "confirmed");
+  let txs: Array<{ meta: { logMessages?: string[] | null } | null } | null> = [];
+  try { txs = await connection.getTransactions(rows.map((r) => r.signature), { commitment: "confirmed", maxSupportedTransactionVersion: 0 }); } catch { txs = []; }
+  return rows.map((row, i) => ({ signature: row.signature, at: row.blockTime ? row.blockTime * 1000 : null, failed: row.err !== null, status: row.confirmationStatus ?? "confirmed", kind: classifyActivity(txs[i]?.meta?.logMessages ?? []) }));
 }

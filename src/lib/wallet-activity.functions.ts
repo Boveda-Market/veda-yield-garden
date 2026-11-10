@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { realWalletInput } from "./solana-data";
 
-export type WalletActivity = { signature: string; at: number | null; failed: boolean; status: string };
+import type { WalletActivity } from "./wallet-activity";
+export type { WalletActivity } from "./wallet-activity";
 export const getWalletActivity = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => realWalletInput.parse(input))
   .handler(async ({ data }): Promise<{ success: true; rows: WalletActivity[] } | { success: false; error: string }> => {

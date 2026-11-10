@@ -133,6 +133,13 @@ export const extra: Record<string, string> = {
   "Los primeros 5 USDC entran gratis; 0.5% solo sobre el resto.": "The first 5 USDC are free; 0.5% only on the rest.",
   "Parte de tus USDC se convierte automáticamente al otro token de la bóveda. Los costos de red se pagan aparte en SOL.": "Part of your USDC is automatically converted to the vault's other token. Network costs are paid separately in SOL.",
   "Actividad del wallet": "Wallet activity",
+  "Cambio (swap)": "Swap",
+  "Reclamo de predicción": "Prediction claim",
+  "Predicción Sube/Baja": "Up/Down prediction",
+  "Cierre de predicción": "Prediction close",
+  "Depósito en bóveda": "Vault deposit",
+  "Envío / transferencia": "Transfer",
+  "Otra transacción": "Other transaction",
   "Entrada gratis hasta 5 créditos y 0.5% sobre el resto; salida gratis hasta 10 y 1.25% sobre el resto. Un crédito simula un USDC; no se puede retirar ni convertir en dinero.": "Entry free up to 5 credits and 0.5% on the rest; exit free up to 10 and 1.25% on the rest. One credit simulates one USDC; it can't be withdrawn or converted to money.",
   "Comisión operativa: entrada gratis hasta 5 USDC y 0.5% sobre el resto; cosechas y liquidaciones gratis hasta 10 USDC y 1.25% sobre el resto. En las liquidaciones, la comisión se calcula sobre el mínimo bruto USDC protegido por slippage, excluyendo la renta SOL. Los costes de red y conversión son independientes. En Prueba el cargo es ficticio.": "Operating fee: entry free up to 5 USDC and 0.5% on the rest; harvests and liquidations free up to 10 USDC and 1.25% on the rest. On liquidations, the fee is calculated on the slippage-protected gross USDC minimum, excluding SOL rent. Network and conversion costs are separate. In Trial the fee is fictitious.",
   // Affiliates
