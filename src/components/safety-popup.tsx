@@ -4,7 +4,7 @@ import { useT } from "@/lib/i18n";
 import { SafetyNotice } from "@/components/safety-notice";
 
 const KEY = "boveda.safety.seen";
-const DURATION = 8000;
+const DURATION = 15000;
 
 /** Shows the anti-scam notice once per sign-in; cleared when the user signs out. */
 export function SafetyPopup({ identity, ready }: { identity: string | null; ready: boolean }) {
