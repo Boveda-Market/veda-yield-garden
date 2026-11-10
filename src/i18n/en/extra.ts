@@ -85,6 +85,7 @@ export const extra: Record<string, string> = {
   "día": "day",
   // Deposit
   "¡Depósito exitoso!": "Deposit successful!",
+  "Cerrar": "Close",
   "Tu depósito ya está en marcha y empezó a acumular ganancias. Míralas crecer en tu Portafolio.": "Your deposit is live and has started earning. Watch it grow in your Portfolio.",
   "Tu posición ya está generando comisiones. Puedes cosecharlas cuando quieras desde tu Portafolio.": "Your position is already earning fees. Harvest them anytime from your Portfolio.",
   "Confirmar depósito": "Confirm deposit",

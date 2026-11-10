@@ -164,3 +164,5 @@
 .portfolio-meter::-webkit-meter-bar { background: var(--muted); border: none; border-radius: 4px; }
 .portfolio-meter::-webkit-meter-optimum-value { background: var(--primary); border-radius: 4px; }
 .portfolio-meter::-moz-meter-bar { background: var(--primary); border-radius: 4px; }
+
+@keyframes dismiss-bar { from { transform: scaleX(1); } to { transform: scaleX(0); } }

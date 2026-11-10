@@ -1,3 +1,4 @@
+import { Dismissible } from "@/components/dismissible";
 import { TokenIcon } from "@/components/token-icon";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -90,13 +91,13 @@ export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: 
     setAmount(frac ? `${v / 10n ** d}.${frac}` : `${v / 10n ** d}`);
   };
 
-  if (done) return <div className="mt-4 space-y-4 rounded-2xl bg-muted p-5 text-center" role="status">
+  if (done) return <Dismissible onDismiss={() => setDone(null)} className="mt-4 rounded-2xl bg-muted text-primary"><div className="space-y-4 p-5 text-center text-foreground" role="status">
     <CheckCircle2 className="mx-auto size-10 text-primary" aria-hidden="true" />
     <p className="font-display text-xl">{t("Cambio enviado")}</p>
     <p className="text-sm text-muted-foreground">{t("Cambiaste {a} por aproximadamente {b}.", { a: `${format(done.amount, done.from)} ${done.from}`, b: `${format(done.outAmount, done.to)} ${done.to}` })}</p>
     <p className="text-xs text-muted-foreground">{t("Tu saldo se actualizará en unos segundos.")}</p>
     <Button className="w-full" onClick={() => setDone(null)}>{t("Hacer otro cambio")}</Button>
-  </div>;
+  </div></Dismissible>;
 
   const select = (side: "from" | "to", value: string) => <div className="flex shrink-0 items-center gap-1.5"><TokenIcon symbol={value} size={28} /><select aria-label={side === "from" ? t("Moneda que pagas") : t("Moneda que recibes")} value={value} disabled={busy}
     onChange={(e) => pick(side, e.target.value)} className="h-10 rounded-full border border-border bg-background px-3 font-semibold">

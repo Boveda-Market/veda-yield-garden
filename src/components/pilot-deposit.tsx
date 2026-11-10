@@ -5,6 +5,7 @@ import { CheckCircle2, LoaderCircle, PenLine } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dismissible } from "@/components/dismissible";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { pilotDepositStatus, preparePilotDeposit } from "@/lib/pilot-deposit.functions";
@@ -58,14 +59,14 @@ export function PilotDeposit({ vaultId, amount, position, onBusyChange, onClose 
   }
 
   if (!eligible) return <p className="border-t border-border pt-4 text-xs text-muted-foreground">{t("Los depósitos no están disponibles para esta bóveda.")}</p>;
-  if (step === "done") return <section className="grid justify-items-center gap-3 rounded-xl bg-primary/10 p-6 text-center text-sm">
+  if (step === "done") return <Dismissible onDismiss={() => { if (onClose) onClose(); else setStep("idle"); }} className="rounded-xl bg-primary/10 text-primary"><section className="grid justify-items-center gap-3 p-6 text-center text-sm text-foreground">
     <CheckCircle2 className="h-12 w-12 text-primary motion-safe:animate-in motion-safe:zoom-in" aria-hidden />
     <h3 className="font-display text-xl font-bold">{t("¡Depósito exitoso!")}</h3><p className="mt-2 flex items-center justify-center gap-2 text-sm text-primary"><span className="h-2 w-2 animate-pulse rounded-full bg-primary" />{t("Tu depósito ya está en marcha y empezó a acumular ganancias. Míralas crecer en tu Portafolio.")}</p>
     <p role="status" className="sr-only">{t("Depósito confirmado en la red (")}{status === "finalized" ? "finalizado" : "confirmado"}).</p>
     <p className="text-muted-foreground">{t("Tu posición ya está generando comisiones. Puedes cosecharlas cuando quieras desde tu Portafolio.")}</p>
     <Button asChild className="w-full"><Link to="/portfolio" onClick={onClose}>{t("Ver en mi Portafolio")}</Link></Button>
     <Link to="/wallet" onClick={onClose} className="text-xs underline">{t("Ver en tu wallet")}</Link>
-  </section>;
+  </section></Dismissible>;
   return <section aria-labelledby="pilot-title" className="grid gap-3 text-sm">
     <h3 id="pilot-title" className="sr-only">{t("Confirmar depósito")}</h3>
     {!walletAddress ? <p className="text-xs text-muted-foreground">{t("Inicia sesión con una wallet para firmar.")}</p> : <>

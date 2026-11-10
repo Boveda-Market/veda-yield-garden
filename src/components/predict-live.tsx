@@ -1,3 +1,4 @@
+import { Dismissible } from "@/components/dismissible";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -177,7 +178,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
         <Button className="w-full" disabled={busy === "sign"} onClick={confirm}>{busy === "sign" ? <Loader2 className="animate-spin" /> : t("Confirmar y firmar")}</Button>
       </section>}
 
-      {msg && <p role="status" className={`text-sm ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text} {msg.wallet && <Link to="/wallet" className="underline">{t("Ver en tu wallet")}</Link>}{msg.sig && <a className="inline-flex items-center gap-1 underline" href={`https://orbmarkets.io/tx/${msg.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}<ExternalLink size={12} /></a>}</p>}
+      {msg && <Dismissible key={msg.text} onDismiss={() => setMsg(null)} ms={msg.ok ? 6000 : 10000} className={`rounded-xl border p-3 pr-10 ${msg.ok ? "border-primary/30 bg-primary/10 text-primary" : "border-destructive/30 bg-destructive/10 text-destructive"}`}><p role="status" className="text-sm">{msg.text} {msg.wallet && <Link to="/wallet" className="underline">{t("Ver en tu wallet")}</Link>}{msg.sig && <a className="inline-flex items-center gap-1 underline" href={`https://orbmarkets.io/tx/${msg.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}<ExternalLink size={12} /></a>}</p></Dismissible>}
       {win && <ShareWin headline={t("¡Acerté! +{v} USDC", { v: win })} />}
 
       {positions.length > 0 && <section className="space-y-2">

@@ -1,3 +1,4 @@
+import { Dismissible } from "@/components/dismissible";
 import { PoweredBy } from "@/components/powered-by";
 import { TokenIcon } from "@/components/token-icon";
 import { LiveEarnings } from "./live-earnings";
@@ -92,7 +93,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
   }, [loaded, mode, session.authenticated, session.userId, wallet, positions, activities]);
 
   const record = (kind: TrialActivity["kind"], vaultId: string, values: ReturnType<typeof transactionAmounts>) => setActivities((previous) => [{ id: crypto.randomUUID(), kind, vaultId, ...values, at: Date.now() }, ...previous].slice(0, 200));
-  const notify = (m: string) => { setToast(m); setTimeout(() => setToast(null), 2800); };
+  const notify = (m: string) => setToast(m);
   const vault = (id: string) => VAULTS.find((v) => v.id === id);
   const invested = positions.reduce((s, p) => s + p.principal, 0);
   const earned = positions.reduce((s, p) => s + accrued(p, vault(p.vaultId)?.apy ?? 0, now), 0);
@@ -184,7 +185,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
       {mode === "trial" && depositFor && <DepositSheet vault={depositFor} max={wallet} onClose={() => { setDepositFor(null); setAddToId(null); }} onConfirm={deposit} />}
       {detailsFor && <PoolDetails key={detailsFor.id} vault={detailsFor} onClose={() => setDetailsFor(null)} />}
       {mode === "trial" && review && <WithdrawalReview key={`${review.kind}-${review.position.id}`} kind={review.kind} amount={review.amount} onClose={() => setReview(null)} onConfirm={confirmWithdrawal} />}
-      {toast && <div role="status" className="fixed bottom-24 left-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg">{toast}</div>}
+      {toast && <Dismissible key={toast} onDismiss={() => setToast(null)} className="fixed bottom-24 left-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 rounded-lg bg-primary text-primary-foreground shadow-lg"><div role="status" className="px-5 py-3 pr-12 text-sm font-semibold">{toast}</div></Dismissible>}
     </div>
   );
 }
