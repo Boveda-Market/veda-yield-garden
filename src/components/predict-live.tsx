@@ -7,7 +7,7 @@ import { ShareWin } from "@/components/share-win";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useT } from "@/lib/i18n";
 import { PREDICT_MAX_USDC, PREDICT_MIN_USDC, potentialProfit, type LiveRound, type PredictPosition, type PredictQuote, type PredictSide } from "@/lib/predict";
-import { executePredict, getPredictPositions, preparePredictBuy, preparePredictSell } from "@/lib/predict.functions";
+import { executePredict, getPredictPositions, preparePredictBuy, preparePredictClaim, preparePredictSell } from "@/lib/predict.functions";
 import { toBaseUnits } from "@/lib/wallet-actions";
 import { getRealWallet } from "@/lib/solana.functions";
 import { decimalToUnits } from "@/lib/onboarding";
@@ -106,6 +106,18 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };
 
+  const claim = async (p: PredictPosition) => {
+    if (!wallet) return; setBusy(p.pubkey); setMsg(null);
+    try {
+      const r = await preparePredictClaim({ data: { wallet, position: p.pubkey } });
+      if (!r.success) throw new Error(r.error);
+      const sig = await sign(r.transaction, r.context);
+      setWin(usdc(BigInt(p.payoutMicro || "0") - BigInt(p.costMicro || "0")));
+      setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(p.payoutMicro) }), sig });
+      setTimeout(() => { void refresh(); void loadBalance(); }, 3000);
+    } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
@@ -157,7 +169,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
 
       {positions.length > 0 && <section className="space-y-2">
         <h2 className="font-display text-lg font-semibold">{t("Tus predicciones en vivo")}</h2>
-        {positions.map((p) => <PredictPositionCard key={p.pubkey} p={p} onSell={() => sell(p)} selling={busy === p.pubkey} disabled={!!busy} />)}
+        {positions.map((p) => <PredictPositionCard key={p.pubkey} p={p} onSell={() => sell(p)} onClaim={() => claim(p)} claiming={busy === p.pubkey} selling={busy === p.pubkey} disabled={!!busy} />)}
       </section>}
       <p className="text-xs text-muted-foreground">{t("Las predicciones en vivo se operan en un mercado externo con USDC real; BÓVEDA no es la contraparte. El pago ganador se acredita automáticamente.")}</p>
     </div>

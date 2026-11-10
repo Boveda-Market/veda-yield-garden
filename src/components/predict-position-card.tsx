@@ -9,7 +9,7 @@ export const usdcText = (micro: string | bigint | null) => micro === null ? "—
 function useNow() { const [n, setN] = useState(() => Date.now()); useEffect(() => { const id = setInterval(() => setN(Date.now()), 1000); return () => clearInterval(id); }, []); return n; }
 
 /** Transparent detail card for one prediction position: side, contracts, price, stake, live value, payout, countdown and result. */
-export function PredictPositionCard({ p, onSell, selling, disabled }: { p: PredictPosition; onSell?: () => void; selling?: boolean; disabled?: boolean }) {
+export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, claiming }: { p: PredictPosition; onSell?: () => void; selling?: boolean; disabled?: boolean; onClaim?: () => void; claiming?: boolean }) {
   const t = useT(); const locale = useLocale(); const now = useNow();
   const open = p.status === "open";
   const asset = assetOfTitle(p.title);
@@ -42,7 +42,9 @@ export function PredictPositionCard({ p, onSell, selling, disabled }: { p: Predi
       {p.closeTime && <Row k={t("Cierre de la ronda")} v={new Date(p.closeTime * 1000).toLocaleString(locale, { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" })} />}
     </div>
     {open && onSell && <Button className="mt-3 w-full" size="sm" variant="outline" disabled={disabled} onClick={onSell}>{selling ? <Loader2 className="animate-spin" size={14} /> : t("Vender ahora")}</Button>}
-    {!open && won && <p className="mt-3 text-xs text-muted-foreground">{t("El pago ganador se acredita automáticamente en tu wallet.")}</p>}
+    {!open && won && <div className="mt-3 rounded-xl bg-primary/10 p-3"><p className="text-xs text-muted-foreground">{t("Cantidad final para tu wallet")}</p><p className="font-display text-xl font-bold text-primary tabular-nums">{usdcText(payout)} USDC</p><p className="text-xs text-muted-foreground">{t("Ganancia neta")} +{usdcText(profit)} USDC</p>
+      {onClaim && <Button className="mt-2 w-full" size="sm" disabled={disabled} onClick={onClaim}>{claiming ? <Loader2 className="animate-spin" size={14} /> : t("Reclamar ganancias")}</Button>}
+      <p className="mt-2 text-[11px] text-muted-foreground">{t("Normalmente se acredita solo. Si aún no lo ves en tu wallet, reclámalo aquí.")}</p></div>}
     {p.eventId && <a className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary underline" href={`https://jup.ag/prediction/${p.eventId}`} target="_blank" rel="noopener noreferrer">{t("Verificar en el mercado oficial")}<ExternalLink size={12} /></a>}
   </article>;
 }

@@ -45,6 +45,14 @@ export const preparePredictSell = createServerFn({ method: "POST" })
     catch (e) { console.error("[predict] sell", e instanceof Error ? e.message : e); return { success: false as const, error: FAIL }; }
   });
 
+export const preparePredictClaim = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => z.object({ wallet: solanaAddressSchema, position: solanaAddressSchema }).strict().parse(i))
+  .handler(async ({ data }) => {
+    const k = helius(); if (!k) return { success: false as const, error: "No se pudo preparar el cobro. Si ya se acreditó, el USDC está en tu wallet." };
+    try { const { buildClaim } = await import("@/lib/predict.server"); return { success: true as const, ...(await buildClaim(k, data)) }; }
+    catch (e) { console.error("[predict] claim", e instanceof Error ? e.message : e); return { success: false as const, error: "No se pudo preparar el cobro. Si ya se acreditó, el USDC está en tu wallet." }; }
+  });
+
 export const executePredict = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => z.object({ wallet: solanaAddressSchema, signed: b64, context: z.string().max(8000) }).strict().parse(i))
   .handler(async ({ data }) => {

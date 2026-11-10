@@ -85,6 +85,14 @@ export async function buildSell(heliusKey: string, d: { wallet: string; position
   return { transaction: b.transaction, context: JSON.stringify(b.execution?.context ?? null) };
 }
 
+/** Claim a resolved winning position: the payout goes to the owner's wallet; only the wallet signs. */
+export async function buildClaim(heliusKey: string, d: { wallet: string; position: string }) {
+  const b = await jup<Build>(`/positions/${d.position}/claim`, { method: "POST", body: JSON.stringify({ ownerPubkey: d.wallet }) });
+  if (!b.transaction || (b.requiredSigners && b.requiredSigners.some((s) => s !== d.wallet))) throw new Error("bad build");
+  await verify(heliusKey, d.wallet, b.transaction);
+  return { transaction: b.transaction, context: JSON.stringify(b.execution?.context ?? null) };
+}
+
 export async function execute(wallet: string, signed: string, context: string) {
   const web3 = await import("@solana/web3.js");
   const tx = web3.VersionedTransaction.deserialize(Uint8Array.from(atob(signed), (c) => c.charCodeAt(0)));

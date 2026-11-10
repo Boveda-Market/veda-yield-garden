@@ -17,7 +17,7 @@ export function PredictPortfolio({ wallet }: { wallet: string | null }) {
   const s = predictSummary(list);
   const open = list.filter((p) => p.status === "open"), closed = list.filter((p) => p.status !== "open");
   return <section className="mt-8" aria-label={t("Predicciones")}>
-    <div className="flex items-center justify-between gap-3"><h2 className="font-display text-lg font-semibold">{t("Predicciones")}</h2><Button asChild size="sm" variant="outline"><Link to="/mercados">{t("Ir a Mercados")}</Link></Button></div>
+    <div className="flex items-center justify-between gap-3"><h2 className="font-display text-lg font-semibold">{t("Predicciones")}</h2><Button asChild size="sm" variant="outline"><Link to="/mercados">{t("Ir a Sube/Baja")}</Link></Button></div>
     {q.isLoading && <p role="status" className="mt-3 text-sm text-muted-foreground">{t("Consultando tus predicciones…")}</p>}
     {q.data && !q.data.success && <p role="alert" className="mt-3 text-sm text-destructive">{t("No se pudieron consultar tus predicciones ahora mismo.")}</p>}
     {q.data?.success && <>

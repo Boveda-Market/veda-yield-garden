@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, PieChart, Zap, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, Home, History } from "lucide-react";
+import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, Home, History } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
@@ -9,7 +9,7 @@ export type AppView = "vaults" | "portfolio" | "activity" | "account" | "invite"
 
 const MAIN = [
   { key: "vaults", label: "Bóvedas", icon: LayoutDashboard, to: "/app" },
-  { key: "markets", label: "Mercados", icon: Zap, to: "/mercados" },
+  { key: "markets", label: "Sube/Baja", icon: TrendingUp, to: "/mercados" },
   { key: "portfolio", label: "Portafolio", icon: PieChart, to: "/portfolio" },
   { key: "wallet", label: "Mi wallet", icon: Wallet, to: "/wallet" },
 ] as const;
