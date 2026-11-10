@@ -26,7 +26,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
   const [amount, setAmount] = useState("10");
   const [review, setReview] = useState<{ side: PredictSide; round: LiveRound; quote: PredictQuote; tx: string; context: string } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
-  const [msg, setMsg] = useState<{ ok: boolean; text: string; sig?: string } | null>(null);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string; sig?: string; wallet?: boolean } | null>(null);
   const [positions, setPositions] = useState<PredictPosition[]>([]);
   const [balance, setBalance] = useState<bigint | null>(null);
   const [win, setWin] = useState<string | null>(null);
@@ -124,8 +124,8 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
         if (bal > 0n) {
           const q = await quoteSwap("JupUSD", "USDC", bal);
           const swapSig = await session.signAndSend(await buildSwap(wallet, q));
-          setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(q.outAmount) }), sig: swapSig });
-        } else setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(p.payoutMicro) }), sig });
+          setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(q.outAmount) }), wallet: true });
+        } else setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(p.payoutMicro) }), wallet: true });
       } catch { setMsg({ ok: true, text: t("Pago cobrado, pero falta el cambio a USDC. Hazlo en Mi wallet → Cambiar (JupUSD → USDC)."), sig }); }
       setTimeout(() => { void refresh(); void loadBalance(); }, 3000);
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
@@ -177,7 +177,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
         <Button className="w-full" disabled={busy === "sign"} onClick={confirm}>{busy === "sign" ? <Loader2 className="animate-spin" /> : t("Confirmar y firmar")}</Button>
       </section>}
 
-      {msg && <p role="status" className={`text-sm ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text} {msg.sig && <a className="inline-flex items-center gap-1 underline" href={`https://orbmarkets.io/tx/${msg.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}<ExternalLink size={12} /></a>}</p>}
+      {msg && <p role="status" className={`text-sm ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text} {msg.wallet && <Link to="/wallet" className="underline">{t("Ver en tu wallet")}</Link>}{msg.sig && <a className="inline-flex items-center gap-1 underline" href={`https://orbmarkets.io/tx/${msg.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}<ExternalLink size={12} /></a>}</p>}
       {win && <ShareWin headline={t("¡Acerté! +{v} USDC", { v: win })} />}
 
       {positions.length > 0 && <section className="space-y-2">
