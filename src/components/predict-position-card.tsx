@@ -1,3 +1,4 @@
+import { TokenIcon } from "@/components/token-icon";
 import { useEffect, useState } from "react";
 import { ArrowDownRight, ArrowUpRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
   return <article className="rounded-xl border border-border bg-card p-4 text-sm">
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
-        <p className="flex items-center gap-2 font-semibold">{Up ? <ArrowUpRight size={16} className="text-primary" /> : <ArrowDownRight size={16} className="text-destructive" />}{asset ?? "—"} · {t(Up ? "Sube" : "Baja")}</p>
+        <p className="flex items-center gap-2 font-semibold">{Up ? <ArrowUpRight size={16} className="text-primary" /> : <ArrowDownRight size={16} className="text-destructive" />}{asset && <TokenIcon symbol={asset} size={18} />}{asset ?? "—"} · {t(Up ? "Sube" : "Baja")}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">{when}</p>
       </div>
       <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${open ? (pnl !== null && pnl < 0n ? "bg-destructive/15 text-destructive" : "bg-primary/15 text-primary") : won ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>

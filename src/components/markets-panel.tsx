@@ -1,3 +1,4 @@
+import { TokenIcon } from "@/components/token-icon";
 import { PredictResults } from "@/components/predict-results";
 import { useEffect, useState } from "react";
 import { Loader2, Zap } from "lucide-react";
@@ -12,7 +13,6 @@ const num = (n: number, d = 2) => n.toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, 
 const digits = (p: number) => (p >= 1000 ? 2 : 3);
 const short = (p: number) => p >= 1000 ? `$${(p / 1000).toFixed(1)}k` : `$${p.toFixed(2)}`;
 const WIN_LABEL: Record<PredictWindow, string> = { "5m": "5 min", "15m": "15 min", "1h": "1 h" };
-const ICON: Record<MarketId, string> = { BTC: "₿", ETH: "Ξ", SOL: "◎" };
 
 /** Live-only Up/Down rounds: BTC, ETH and SOL in 5 min, 15 min and 1 h. */
 export function MarketsPanel(_: { identity: string }) {
@@ -80,7 +80,7 @@ export function MarketsPanel(_: { identity: string }) {
         {MARKETS.map((m) => {
           const on = market === m.id, p = prices[m.id];
           return <button key={m.id} role="tab" aria-selected={on} onClick={() => setMarket(m.id)} className={`rounded-2xl border p-2.5 text-left transition ${on ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
-            <span className="flex items-center gap-1.5 text-sm font-bold"><span className={`grid h-6 w-6 place-items-center rounded-full text-xs ${on ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>{ICON[m.id]}</span>{m.id}</span>
+            <span className="flex items-center gap-1.5 text-sm font-bold"><TokenIcon symbol={m.id} size={24} />{m.id}</span>
             <span className="mt-1 block font-display text-sm font-semibold tabular-nums text-muted-foreground">{p ? short(p) : "—"}</span>
           </button>;
         })}
@@ -92,7 +92,7 @@ export function MarketsPanel(_: { identity: string }) {
       <section className="overflow-hidden rounded-3xl border border-border bg-card">
         <div className="px-5 pt-5">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="font-display text-lg font-bold">{t("{m} Sube o Baja {w}", { m: name, w: WIN_LABEL[win] })}</h2>
+            <h2 className="flex items-center gap-2 font-display text-lg font-bold"><TokenIcon symbol={market} size={22} />{t("{m} Sube o Baja {w}", { m: name, w: WIN_LABEL[win] })}</h2>
             {round && <span className="text-xs tabular-nums text-muted-foreground">{new Date(round.openTime * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} – {new Date(round.closeTime * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>}
           </div>
           <div className="mt-3 grid grid-cols-[1fr_1fr_auto] items-end gap-3">

@@ -1,3 +1,4 @@
+import { TokenIcon } from "@/components/token-icon";
 import { useT } from "@/lib/i18n";
 import { RefreshCw, ShieldAlert } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -65,7 +66,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
     {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && <PortfolioEmpty />}
     {!portfolioOnly && <><h2 className="mb-4 mt-10 font-display text-lg font-semibold">{t("Bóvedas disponibles")}</h2>
     <div className="grid gap-4 md:grid-cols-3">{VAULTS.map((vault) => <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"><span>{t("Pool de liquidez")}</span><span>{t("Riesgo")}{" "}{t(vault.risk)}</span></div><h3 className="mt-4 font-display text-xl font-semibold">{t(vault.name)}</h3><p className="mt-1 text-sm text-muted-foreground">{vault.pair}</p>
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"><span>{t("Pool de liquidez")}</span><span>{t("Riesgo")}{" "}{t(vault.risk)}</span></div><h3 className="mt-4 flex items-center gap-2 font-display text-xl font-semibold"><TokenIcon symbol={vault.pair.split("/")[0] ?? ""} size={28} />{t(vault.name)}</h3><p className="mt-1 text-sm text-muted-foreground">{vault.pair}</p>
       <PoolYield address={vault.pool} />
       <p className="mt-5 flex-1 text-sm leading-6 text-muted-foreground">{t(vault.blurb)}</p>
       <Button variant="outline" className="mt-4 w-full" onClick={() => onDetails(vault)}>{t("Detalles del pool")}</Button>

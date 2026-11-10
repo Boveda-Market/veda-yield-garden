@@ -1,3 +1,4 @@
+import { TokenIcon } from "@/components/token-icon";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpDown, CheckCircle2, RefreshCw } from "lucide-react";
@@ -97,10 +98,10 @@ export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: 
     <Button className="w-full" onClick={() => setDone(null)}>{t("Hacer otro cambio")}</Button>
   </div>;
 
-  const select = (side: "from" | "to", value: string) => <select aria-label={side === "from" ? t("Moneda que pagas") : t("Moneda que recibes")} value={value} disabled={busy}
+  const select = (side: "from" | "to", value: string) => <div className="flex shrink-0 items-center gap-1.5"><TokenIcon symbol={value} size={28} /><select aria-label={side === "from" ? t("Moneda que pagas") : t("Moneda que recibes")} value={value} disabled={busy}
     onChange={(e) => pick(side, e.target.value)} className="h-10 rounded-full border border-border bg-background px-3 font-semibold">
     {SWAP_TOKENS.map((x) => <option key={x.symbol} value={x.symbol}>{x.symbol}</option>)}
-  </select>;
+  </select></div>;
 
   return <div className="mt-4 space-y-3" aria-busy={busy}>
     <h3 className="font-display text-lg">{t("Cambiar monedas")}</h3>

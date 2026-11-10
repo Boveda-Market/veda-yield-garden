@@ -1,3 +1,4 @@
+import { TokenIcon } from "@/components/token-icon";
 import { allowTrialEntry } from "@/lib/trial-entry";
 import { useT } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -31,7 +32,7 @@ function VaultTeaser({ id, name, pair, pool, risk }: (typeof VAULTS)[number]) {
   const q = useQuery({ ...poolYieldOptions(pool), enabled: id !== "rwa" });
   const apr = q.data?.apr;
   return <div className="rounded-2xl border border-border bg-card p-5 text-left">
-    <div className="flex items-center justify-between"><p className="font-display font-semibold">{t(name)}</p><span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">{t("Riesgo")} {t(risk)}</span></div>
+    <div className="flex items-center justify-between"><p className="flex items-center gap-2 font-display font-semibold"><TokenIcon symbol={pair.split("/")[0] ?? ""} size={24} />{t(name)}</p><span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">{t("Riesgo")} {t(risk)}</span></div>
     <p className="text-xs text-muted-foreground">{pair}</p>
     <p className="mt-4 font-display text-3xl font-bold text-primary">{apr == null ? "—" : `${apr.toFixed(2)}%`}</p>
     <p className="text-xs text-muted-foreground">{apr == null ? (id === "rwa" ? t("Muy pronto") : q.isPending ? t("Consultando…") : t("Tasa no disponible")) : t("APR estimado · últimas 24 h")}</p>

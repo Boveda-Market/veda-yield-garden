@@ -1,3 +1,4 @@
+import { TokenIcon } from "@/components/token-icon";
 import { LiveEarnings } from "./live-earnings";
 import { useT, useLocale } from "@/lib/i18n";
 import { OfframpButton } from "@/components/offramp-dialog";
@@ -153,7 +154,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
             {activeView === "vaults" && positions.length === 0 && <p className="border-b border-border py-8 text-muted-foreground">{t("Aún no tienes posiciones. Elige una bóveda abajo para empezar.")}</p>}
             {activeView === "vaults" && <><h2 className="mb-4 mt-10 font-display text-lg font-semibold">{t("Bóvedas disponibles · Prueba")}</h2>
             <div className="grid gap-4 md:grid-cols-3">{VAULTS.map((v) => <article key={v.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"><span>{t("Pool de liquidez")}</span><span>{t("Riesgo")} {t(v.risk)}</span></div><h3 className="mt-4 font-display text-xl font-semibold">{t(v.name)}</h3><p className="mt-1 text-sm text-muted-foreground">{v.pair}</p>
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"><span>{t("Pool de liquidez")}</span><span>{t("Riesgo")} {t(v.risk)}</span></div><h3 className="mt-4 flex items-center gap-2 font-display text-xl font-semibold"><TokenIcon symbol={v.pair.split("/")[0] ?? ""} size={28} />{t(v.name)}</h3><p className="mt-1 text-sm text-muted-foreground">{v.pair}</p>
               <p className="mt-5 font-display text-4xl font-bold text-primary">{v.apy}%<span className="ml-1 text-sm font-normal text-muted-foreground">{t("APY ilustrativo")}</span></p>
               <p className="mt-2 text-xs text-muted-foreground">{t("Ejemplo de simulación · no es una tasa verificada del pool.")}</p>
               <p className="mt-5 flex-1 text-sm leading-6 text-muted-foreground">{t(v.blurb)}</p>
