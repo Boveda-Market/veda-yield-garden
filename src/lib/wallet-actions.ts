@@ -28,12 +28,13 @@ export function spendable(balance: bigint, asset: WalletAsset) {
   return balance > SOL_RESERVE_LAMPORTS ? balance - SOL_RESERVE_LAMPORTS : 0n;
 }
 
-export const sendInput = z.object({ from: solanaAddressSchema, to: solanaAddressSchema, asset: z.enum(["SOL", "USDC"]), amount: z.bigint().positive() })
+export const sendInput = z.object({ from: solanaAddressSchema, to: solanaAddressSchema, asset: z.enum(["SOL", "USDC"]), amount: z.bigint().positive(), fee: z.bigint().nonnegative().optional() })
   .refine((v) => v.from !== v.to, { message: "La dirección de destino es tu propia wallet." });
 
 /** Builds an unsigned SOL or USDC transfer; the connected wallet signs and sends it. */
 export async function buildTransfer(input: z.infer<typeof sendInput>): Promise<Uint8Array> {
-  const { from, to, asset, amount } = sendInput.parse(input);
+  const { from, to, asset, amount, fee } = sendInput.parse(input);
+  if (fee && asset !== "USDC") throw new Error("Comisión solo en USDC");
   const { PublicKey, SystemProgram, TransactionMessage, VersionedTransaction } = await import("@solana/web3.js");
   const owner = new PublicKey(from), dest = new PublicKey(to);
   const instructions = [];
@@ -45,6 +46,7 @@ export async function buildTransfer(input: z.infer<typeof sendInput>): Promise<U
     const target = spl.getAssociatedTokenAddressSync(mint, dest, true);
     instructions.push(spl.createAssociatedTokenAccountIdempotentInstruction(owner, target, dest, mint));
     instructions.push(spl.createTransferCheckedInstruction(source, mint, target, owner, amount, 6));
+    if (fee && fee > 0n) instructions.push(spl.createTransferCheckedInstruction(source, mint, new PublicKey(FEE_USDC_ACCOUNT), owner, fee, 6));
   }
   const { blockhash } = await txContext([]);
   const message = new TransactionMessage({ payerKey: owner, recentBlockhash: blockhash, instructions }).compileToV0Message();

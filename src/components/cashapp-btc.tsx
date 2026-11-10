@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { withdrawFee } from "@/lib/fees";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useT } from "@/lib/i18n";
 import { BTC_OFFRAMP_MAX_USDC, BTC_OFFRAMP_MIN_USDC, amountAllowed, isBtcAddress, providerCost } from "@/lib/btc-offramp";
@@ -35,15 +36,18 @@ export function CashAppBtc({ wallet }: { wallet: string }) {
   const n = Number(amount);
   const amountOk = amountAllowed(n);
   const addrOk = isBtcAddress(addr);
+  const grossUnits = /^\d+(\.\d{1,6})?$/.test(amount) ? toBaseUnits(amount, "USDC") : null;
+  const feeUnits = grossUnits ? withdrawFee(grossUnits) : 0n;
+  const netAmount = grossUnits ? (Number(grossUnits - feeUnits) / 1e6).toFixed(6) : "";
 
   useEffect(() => {
     setQuote(null); setError(null);
     if (!amountOk || !/^\d+(\.\d{1,6})?$/.test(amount)) return;
     let alive = true;
-    const run = () => { setQuoting(true); quoteFn({ data: { amount } }).then((q) => { if (alive) setQuote(q); }).catch((e) => { if (alive) setError(e instanceof Error ? e.message : String(e)); }).finally(() => { if (alive) setQuoting(false); }); };
+    const run = () => { setQuoting(true); quoteFn({ data: { amount: netAmount } }).then((q) => { if (alive) setQuote(q); }).catch((e) => { if (alive) setError(e instanceof Error ? e.message : String(e)); }).finally(() => { if (alive) setQuoting(false); }); };
     const h = setTimeout(run, 500); const r = setInterval(run, 60_000);
     return () => { alive = false; clearTimeout(h); clearInterval(r); };
-  }, [amount, amountOk, quoteFn]);
+  }, [amount, amountOk, netAmount, quoteFn]);
 
   useEffect(() => {
     if (!done || status === "settled" || status === "refunded") return;
@@ -62,7 +66,7 @@ export function CashAppBtc({ wallet }: { wallet: string }) {
       if (shift.depositAmount !== quote.depositAmount) throw new Error(t("La cotización cambió. Revisa de nuevo."));
       const units = toBaseUnits(shift.depositAmount, "USDC");
       if (!units) throw new Error(t("Monto no válido"));
-      const sig = await signAndSend(await buildTransfer({ from: wallet, to: shift.depositAddress, asset: "USDC", amount: units }));
+      const sig = await signAndSend(await buildTransfer({ from: wallet, to: shift.depositAddress, asset: "USDC", amount: units, fee: feeUnits }));
       setDone({ sig, shiftId: shift.shiftId, btc: shift.settleAmount }); setStatus("waiting");
     } catch (e) { setError(e instanceof Error ? e.message : t("No se pudo completar la operación.")); }
     finally { setBusy(false); }
@@ -87,11 +91,11 @@ export function CashAppBtc({ wallet }: { wallet: string }) {
     {balance != null && n > balance && <p className="text-xs text-destructive">{t("Saldo insuficiente")}</p>}
     {quoting && !quote && <p className="flex items-center gap-2 text-xs"><LoaderCircle size={14} className="animate-spin" />{t("Cotizando…")}</p>}
     {quote && cost && <div className="grid gap-1 rounded-lg border p-3 text-sm">
-      <div className="flex justify-between"><span>{t("Envías")}</span><b>{Number(quote.depositAmount).toFixed(2)} USDC</b></div>
+      <div className="flex justify-between"><span>{t("Envías")}</span><b>{(Number(quote.depositAmount) + Number(feeUnits) / 1e6).toFixed(2)} USDC</b></div>
       <div className="flex justify-between"><span>{t("Llega a Cash App")}</span><b className="flex items-center gap-1"><Bitcoin size={14} />{quote.settleAmount} BTC</b></div>
       <div className="flex justify-between text-xs text-muted-foreground"><span>{t("Valor aproximado")}</span><span>≈ ${cost.value.toFixed(2)}</span></div>
       <div className="flex justify-between text-xs"><span>{t("Costo del cambio y red Bitcoin")}</span><span>≈ ${cost.cost.toFixed(2)} ({cost.pct.toFixed(1)}%)</span></div>
-      <div className="flex justify-between text-xs"><span>{t("Comisión de BÓVEDA")}</span><span>$0.00</span></div>
+      <div className="flex justify-between text-xs"><span>{t("Comisión de BÓVEDA (1%)")}</span><span>${(Number(feeUnits) / 1e6).toFixed(2)}</span></div>
       <p className="pt-1 text-xs text-muted-foreground">{t("El precio queda fijo unos minutos. Tarda de 15 a 30 minutos por las confirmaciones de Bitcoin. Si algo falla, el proveedor devuelve tus USDC a tu wallet.")}</p>
     </div>}
     <label className="grid gap-1 text-sm"><span className="font-medium">{t("Dirección de Bitcoin de tu Cash App")}</span><Input value={addr} onChange={(e) => setAddr(e.target.value.trim())} placeholder="bc1q…" disabled={busy} autoComplete="off" spellCheck={false} /></label>

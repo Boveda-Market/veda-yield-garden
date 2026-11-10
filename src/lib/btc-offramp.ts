@@ -1,7 +1,7 @@
 /** USDC → native Bitcoin (Cash App) withdrawal rules shared by UI, server and tests. */
 export const BTC_OFFRAMP_MIN_USDC = 25;
 export const BTC_OFFRAMP_MAX_USDC = 5000;
-export const BOVEDA_BTC_FEE_PCT = 0;
+export const BOVEDA_BTC_FEE_PCT = 1;
 
 const BECH32 = /^bc1[ac-hj-np-z02-9]{11,71}$/;
 const BASE58 = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
