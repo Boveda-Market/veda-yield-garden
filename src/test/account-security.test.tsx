@@ -51,7 +51,7 @@ describe("verified account security", () => {
   });
   it("opens passkey linking without locally inventing a credential", () => {
     const security = mount();
-    fireEvent.click(screen.getByRole("button", { name: "Añadir passkey" }));
+    fireEvent.click(screen.getByRole("button", { name: "Vincular huella o Face ID" }));
     expect(security.linkPasskey).toHaveBeenCalledOnce();
     expect(security.passkeyCount).toBe(0);
   });

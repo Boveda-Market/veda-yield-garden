@@ -31,10 +31,10 @@ export function AccountSecuritySettings() {
         <Button type="button" variant="outline" className="mt-3" onClick={() => security.email ? security.updateEmail() : security.linkEmail()}><Mail size={16} />{security.email ? t("Cambiar correo") : t("Vincular correo")}</Button>
       </div>
       <div className="py-5">
-        <h3 className="flex items-center gap-2 font-medium"><Fingerprint size={18} />Passkeys</h3>
-        <p className="mt-2 text-sm text-muted-foreground">{security.passkeyCount ? t(security.passkeyCount === 1 ? "{count} passkey vinculada" : "{count} passkeys vinculadas", { count: security.passkeyCount }) : t("Sin passkeys vinculadas")}</p>
+        <h3 className="flex items-center gap-2 font-medium"><Fingerprint size={18} />{t("Acceso biométrico")}</h3>
+        <p className="mt-2 text-sm text-muted-foreground">{security.passkeyCount ? t("Huella o Face ID activado") : t("Sin huella ni Face ID configurado")}</p>
         <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Entra con la huella, el rostro o el PIN de tu dispositivo, sin contraseña. Necesitas un dispositivo y navegador compatibles.")}</p>
-        <Button type="button" variant="outline" className="mt-3" onClick={() => security.linkPasskey()}><Fingerprint size={16} />{t("Añadir passkey")}</Button>
+        <Button type="button" variant="outline" className="mt-3" onClick={() => security.linkPasskey()}><Fingerprint size={16} />{t("Vincular huella o Face ID")}</Button>
       </div>
       <div className="py-5">
         <h3 className="flex items-center gap-2 font-medium"><Smartphone size={18} />{t("Doble verificación · 2FA")}</h3>
