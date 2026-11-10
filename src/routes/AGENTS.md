@@ -1,0 +1,1 @@
+- Every route sets staticData.sitemap (router-derived /sitemap.xml via src/lib/sitemap.ts): true only for public marketing/legal/trial pages, false for signed-in app views, so private screens never reach search.
