@@ -3,12 +3,12 @@ export const PREDICT_MIN_USDC = 5;
 export const PREDICT_MAX_USDC = 250;
 export const PREDICT_ASSETS = ["BTC", "ETH", "SOL"] as const;
 export type PredictAsset = (typeof PREDICT_ASSETS)[number];
-export const PREDICT_WINDOWS = ["5m", "15m", "1h"] as const;
+export const PREDICT_WINDOWS = ["5m", "15m", "1d"] as const;
 export type PredictWindow = (typeof PREDICT_WINDOWS)[number];
 export type PredictSide = "up" | "down";
 
 /** Provider tags that map to each supported window. */
-export const WINDOW_TAGS: Record<PredictWindow, readonly string[]> = { "5m": ["5m"], "15m": ["15m"], "1h": ["1h", "60m", "hourly"] };
+export const WINDOW_TAGS: Record<PredictWindow, readonly string[]> = { "5m": ["5m"], "15m": ["15m"], "1d": ["daily", "daily-close"] };
 
 export function validPredictAmount(units: bigint) {
   return units >= BigInt(PREDICT_MIN_USDC * 1e6) && units <= BigInt(PREDICT_MAX_USDC * 1e6);
@@ -57,11 +57,11 @@ export function positionWon(p: Pick<PredictPosition, "result"> & { isYes?: boole
 
 export type PastRound = { slug: string; title: string; asset: PredictAsset; window: PredictWindow; endTime: number; winner: PredictSide };
 
-/** Parse one resolved Polymarket Up/Down event; null unless BTC/ETH/SOL 5m/15m/1h with a definitive winner. */
+/** Parse one resolved Polymarket Up/Down event; null unless BTC/ETH/SOL 5m/15m/daily with a definitive winner. */
 export function parsePastRound(e: { slug?: string; title?: string; endDate?: string; markets?: { outcomes?: string; outcomePrices?: string }[] }): PastRound | null {
   const title = e.title ?? "", slug = e.slug ?? "";
   const asset = assetOfTitle(title); if (!asset || !/^[a-z0-9-]{1,120}$/.test(slug)) return null;
-  const window: PredictWindow | null = slug.includes("updown-5m") ? "5m" : slug.includes("updown-15m") ? "15m" : /\d{1,2}(AM|PM) ET$/i.test(title) ? "1h" : null;
+  const window: PredictWindow | null = slug.includes("updown-5m") ? "5m" : slug.includes("updown-15m") ? "15m" : / Up or Down on /i.test(title) ? "1d" : null;
   if (!window) return null;
   try {
     const outs = JSON.parse(e.markets?.[0]?.outcomes ?? "[]") as string[], px = JSON.parse(e.markets?.[0]?.outcomePrices ?? "[]") as string[];

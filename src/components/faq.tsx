@@ -18,7 +18,7 @@ export const CATEGORIES: { id: Cat | "all"; label: string }[] = [
 ];
 
 export const questions: Q[] = [
-  { id: "predict-how", cat: "predict", question: "¿Cómo funciona Sube/Baja?", answer: "Eliges Bitcoin, Ethereum o SOL y una ronda de 5 minutos, 15 minutos o 1 hora. Predices si el precio terminará arriba (Sube) o abajo (Baja) del precio de inicio. Cada contrato ganador paga 1.00 USD; si no aciertas, pierdes lo que invertiste." },
+  { id: "predict-how", cat: "predict", question: "¿Cómo funciona Sube/Baja?", answer: "Eliges Bitcoin, Ethereum o SOL y una ronda de 5 minutos, 15 minutos o diaria. Predices si el precio terminará arriba (Sube) o abajo (Baja) del precio de inicio. Cada contrato ganador paga 1.00 USD; si no aciertas, pierdes lo que invertiste." },
   { id: "predict-claim", cat: "predict", question: "¿Cómo cobro mis predicciones ganadas?", answer: "Cuando la ronda termina y aciertas, aparece el botón «Reclamar ganancias». Firmarás dos transacciones: 1) cobrar el pago y 2) cambiarlo a USDC. Si la segunda falla, el dinero sigue en tu wallet y puedes cambiarlo en Mi wallet → Cambiar." },
   { id: "predict-odds", cat: "predict", question: "¿Qué significan los porcentajes de Sube y Baja?", answer: "Son el precio actual de cada lado en el mercado. Un 60% significa que un contrato cuesta unos 0.60 USD y paga 1.00 USD si aciertas. Cambian en tiempo real según lo que compran otras personas." },
   { id: "predict-sell", cat: "predict", question: "¿Puedo salir de una predicción antes de que termine?", answer: "Sí, mientras la ronda está abierta puedes vender tu posición al precio del momento. Puede ser más o menos de lo que pagaste. BÓVEDA nunca es tu contraparte." },

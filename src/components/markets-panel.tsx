@@ -13,9 +13,9 @@ import { getLiveRounds } from "@/lib/predict.functions";
 const num = (n: number, d = 2) => n.toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 const digits = (p: number) => (p >= 1000 ? 2 : 3);
 const short = (p: number) => p >= 1000 ? `$${(p / 1000).toFixed(1)}k` : `$${p.toFixed(2)}`;
-const WIN_LABEL: Record<PredictWindow, string> = { "5m": "5 min", "15m": "15 min", "1h": "1 h" };
+const WIN_LABEL: Record<PredictWindow, string> = { "5m": "5 min", "15m": "15 min", "1d": "Diaria" };
 
-/** Live-only Up/Down rounds: BTC, ETH and SOL in 5 min, 15 min and 1 h. */
+/** Live-only Up/Down rounds: BTC, ETH and SOL in 5 min, 15 min and daily. */
 export function MarketsPanel(_: { identity: string }) {
   const t = useT();
   const [prices, setPrices] = useState<Partial<Record<MarketId, number>>>({});
@@ -87,8 +87,8 @@ export function MarketsPanel(_: { identity: string }) {
           </button>;
         })}
       </div>
-      <div className="grid grid-cols-3 gap-1 rounded-2xl bg-secondary p-1" role="tablist" aria-label={t("Duración de la ronda")}>
-        {PREDICT_WINDOWS.map((w) => <button key={w} role="tab" aria-selected={win === w} onClick={() => setWin(w)} className={`rounded-xl py-2 text-sm font-semibold transition ${win === w ? "bg-card text-foreground shadow" : "text-muted-foreground"}`}>{WIN_LABEL[w]}</button>)}
+      <div className="grid grid-cols-3 gap-1.5 rounded-2xl border border-border bg-muted p-1.5" role="tablist" aria-label={t("Duración de la ronda")}>
+        {PREDICT_WINDOWS.map((w) => <button key={w} role="tab" aria-selected={win === w} onClick={() => setWin(w)} className={`rounded-xl border py-2.5 text-sm font-bold transition ${win === w ? "border-primary bg-primary text-primary-foreground shadow-md" : "border-border bg-card text-foreground hover:border-primary/60"}`}>{t(WIN_LABEL[w])}</button>)}
       </div>
 
       <section className="overflow-hidden rounded-3xl border border-border bg-card">
@@ -102,7 +102,7 @@ export function MarketsPanel(_: { identity: string }) {
             <div><p className="text-xs text-muted-foreground">{t("Precio actual")}</p>
               <p className={`font-display text-lg font-bold tabular-nums ${ahead === null ? "" : ahead ? "text-primary" : "text-destructive"}`}>{price ? `$${num(price, digits(price))}` : "—"}</p>
               {price && strike && <p className={`text-[11px] font-semibold tabular-nums ${ahead ? "text-primary" : "text-destructive"}`}>{ahead ? "▲" : "▼"} ${num(Math.abs(price - strike), digits(price))}</p>}</div>
-            <div className="flex gap-1 text-center">{[[Math.floor(s / 60), t("MIN")], [s % 60, t("SEG")]].map(([v, l]) => <div key={String(l)} className={`min-w-11 rounded-lg px-1.5 py-1 ${round && remaining < 30_000 ? "bg-destructive/15 text-destructive" : "bg-secondary"}`}><p className="font-display text-xl font-bold tabular-nums">{round ? String(v).padStart(2, "0") : "--"}</p><p className="text-[9px] font-semibold text-muted-foreground">{l}</p></div>)}</div>
+            <div className="flex gap-1 text-center">{(s >= 3600 ? [[Math.floor(s / 3600), t("HORAS")], [Math.floor(s / 60) % 60, t("MIN")], [s % 60, t("SEG")]] : [[Math.floor(s / 60), t("MIN")], [s % 60, t("SEG")]]).map(([v, l]) => <div key={String(l)} className={`min-w-11 rounded-lg px-1.5 py-1 ${round && remaining < 30_000 ? "bg-destructive/15 text-destructive" : "bg-secondary"}`}><p className="font-display text-xl font-bold tabular-nums">{round ? String(v).padStart(2, "0") : "--"}</p><p className="text-[9px] font-semibold text-muted-foreground">{l}</p></div>)}</div>
           </div>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-secondary"><div className={`h-full transition-all ${ahead === false ? "bg-destructive" : "bg-primary"}`} style={{ width: `${progress * 100}%` }} /></div>
           {ahead !== null && <p className={`mt-2 text-xs font-semibold ${ahead ? "text-primary" : "text-destructive"}`}>{t(ahead ? "Ahora mismo va ganando Sube" : "Ahora mismo va ganando Baja")}</p>}

@@ -17,9 +17,9 @@ describe("live prediction rules", () => {
     expect(assetOfTitle("XRP Up or Down - November 9")).toBeNull();
     expect(assetOfTitle("What price will Bitcoin hit in November?")).toBeNull();
   });
-  it("only 5m, 15m and 1h windows", () => {
+  it("only 5m, 15m and daily windows", () => {
     expect(windowOfTags(["crypto", "5m"])).toBe("5m");
-    expect(windowOfTags(["crypto", "1h"])).toBe("1h");
+    expect(windowOfTags(["crypto", "daily"])).toBe("1d");
     expect(windowOfTags(["crypto", "4h"])).toBeNull();
   });
   it("profit is contracts minus cost", () => expect(potentialProfit({ contractsMicro: "19000000", costMicro: "10000000" })).toBe(9_000_000n));

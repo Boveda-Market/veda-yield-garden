@@ -20,11 +20,13 @@ type PolyRaw = { eventId: string; isActive?: boolean; tags?: string[]; beginAt?:
 let cache: { at: number; rounds: LiveRound[] } | null = null;
 const pr = (v: unknown) => { const n = Number(v); return Number.isFinite(n) && n > 0 && n < 1e6 ? n / 1e6 : null; };
 
-/** Current BTC/ETH/SOL Up or Down rounds (5m, 15m, 1h) with real order-book prices; one per asset and window. */
+/** Current BTC/ETH/SOL Up or Down rounds (5m, 15m, daily) with real order-book prices; one per asset and window. */
 export async function listRounds(): Promise<LiveRound[]> {
   if (cache && Date.now() - cache.at < 8_000) return cache.rounds;
   const now = Math.floor(Date.now() / 1000);
-  const pages = await Promise.all([0, 50].map((s) => jup<{ data: PolyRaw[] }>(`/events?provider=polymarket&category=crypto&filter=live&includeMarkets=true&start=${s}&end=${s + 50}`).catch(() => ({ data: [] as PolyRaw[] }))));
+  const paths = [0, 50].map((s) => `/events?provider=polymarket&category=crypto&filter=live&includeMarkets=true&start=${s}&end=${s + 50}`);
+  paths.push("/events?provider=polymarket&category=crypto&tags=daily&includeMarkets=true");
+  const pages = await Promise.all(paths.map((path) => jup<{ data: PolyRaw[] }>(path).catch(() => ({ data: [] as PolyRaw[] }))));
   const best = new Map<string, LiveRound>();
   for (const e of pages.flatMap((p) => p.data ?? [])) {
     if (!e.eventId?.startsWith("POLY-") || e.isActive === false) continue;
