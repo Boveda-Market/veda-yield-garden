@@ -10,7 +10,8 @@ export const Route = createFileRoute("/terminos")({ staticData: { sitemap: true 
     { property: "og:title", content: "Términos y condiciones — BÓVEDA" },
     { property: "og:description", content: "Modos Real y Prueba, autorización, cargos operativos y riesgos de BÓVEDA." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
-  ] }), component: Terms,
+    { property: "og:url", content: "https://bovedamarket.app/terminos" },
+  ], links: [{ rel: "canonical", href: "https://bovedamarket.app/terminos" }] }), component: Terms,
 });
 
 function Terms() {

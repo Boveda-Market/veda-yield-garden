@@ -11,7 +11,8 @@ export const Route = createFileRoute("/faq")({ staticData: { sitemap: true },
     { property: "og:description", content: "Real y Prueba en BÓVEDA: créditos ficticios, acceso con wallets, cargos y operaciones en la red." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
-  ] }),
+    { property: "og:url", content: "https://bovedamarket.app/faq" },
+  ], links: [{ rel: "canonical", href: "https://bovedamarket.app/faq" }] }),
   component: FaqPage,
 });
 

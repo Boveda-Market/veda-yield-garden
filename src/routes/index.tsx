@@ -17,7 +17,8 @@ export const Route = createFileRoute("/")({ staticData: { sitemap: true },
     { property: "og:title", content: "BÓVEDA — Pon tus monedas a trabajar" },
     { property: "og:description", content: "Prueba sin registro, revisa rendimientos estimados y entra en segundos con email o Google." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
-  ] }), component: Landing,
+    { property: "og:url", content: "https://bovedamarket.app/" },
+  ], links: [{ rel: "canonical", href: "https://bovedamarket.app/" }] }), component: Landing,
 });
 
 const FAQS = [

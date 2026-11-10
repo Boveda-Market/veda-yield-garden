@@ -13,4 +13,5 @@ function TrialPage() {
   return allowed ? <AppExperience guest /> : null;
 }
 
-export const Route = createFileRoute("/prueba")({ staticData: { sitemap: true }, head: () => ({ meta: [{ title: "Prueba sin cuenta — BÓVEDA" }, { name: "description", content: "Prueba BÓVEDA como invitado con 1,000 créditos ficticios, sin registro y sin mover dinero." }, { property: "og:title", content: "Prueba sin cuenta — BÓVEDA" }, { property: "og:description", content: "Explora depósitos, cosechas y tu portafolio con créditos ficticios." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: TrialPage });
+export const Route = createFileRoute("/prueba")({ staticData: { sitemap: true }, head: () => ({ meta: [{ title: "Prueba sin cuenta — BÓVEDA" }, { name: "description", content: "Prueba BÓVEDA como invitado con 1,000 créditos ficticios, sin registro y sin mover dinero." }, { property: "og:title", content: "Prueba sin cuenta — BÓVEDA" }, { property: "og:description", content: "Explora depósitos, cosechas y tu portafolio con créditos ficticios." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { property: "og:url", content: "https://bovedamarket.app/prueba" },
+  ], links: [{ rel: "canonical", href: "https://bovedamarket.app/prueba" }] }), component: TrialPage });

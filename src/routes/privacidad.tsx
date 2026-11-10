@@ -9,7 +9,8 @@ export const Route = createFileRoute("/privacidad")({ staticData: { sitemap: tru
     { property: "og:title", content: "Política de privacidad — BÓVEDA" },
     { property: "og:description", content: "Privacidad de Real y Prueba: wallets, créditos locales, consentimiento y derechos en BÓVEDA." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
-  ] }), component: Privacy,
+    { property: "og:url", content: "https://bovedamarket.app/privacidad" },
+  ], links: [{ rel: "canonical", href: "https://bovedamarket.app/privacidad" }] }), component: Privacy,
 });
 
 function Privacy() {
