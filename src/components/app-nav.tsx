@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, Home, History, Send } from "lucide-react";
 import { SUPPORT_URL } from "./safety-notice";
+import { InstallAppButton } from "./install-app";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
@@ -50,6 +51,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
             <Link to="/actividad" className={row} onClick={() => setOpen(false)}><History size={18} />{t("Actividad")}</Link>
             <Link to="/cuenta" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Mi cuenta y seguridad")}</Link>
           </>}
+          <InstallAppButton className={row} />
           <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className={row}><Send size={18} />{t("Soporte y sugerencias")}</a>
           <Link to="/faq" className={row}><HelpCircle size={18} />{t("Preguntas frecuentes")}</Link>
           <Link to="/terminos" className={row}><FileText size={18} />{t("Términos y condiciones")}</Link>
