@@ -67,9 +67,10 @@ export function MarketsPanel(_: { identity: string }) {
 
   return (
     <div className="space-y-4">
-      <header className="flex items-center gap-2">
+      <header className="flex flex-wrap items-center gap-2">
         <Zap className="text-primary" size={20} /><h1 className="font-display text-2xl font-bold">{t("Predicciones")}</h1>
         <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />{t("En vivo")}</span>
+        <PoweredBy brand="polymarket" className="ml-auto" />
       </header>
       <ol className="list-decimal space-y-0.5 pl-4 text-xs text-muted-foreground">
         <li>{t("Elige cripto y tiempo de la ronda.")}</li>
@@ -113,7 +114,6 @@ export function MarketsPanel(_: { identity: string }) {
         : !round && <p role="status" className="rounded-xl bg-secondary p-3 text-sm">{t("No hay una ronda abierta de {m} a {w} ahora mismo. Prueba otra duración o vuelve en unos minutos.", { m: name, w: WIN_LABEL[win] })}</p>}
       <PredictLive round={round} />
       <PredictResults asset={market} window={win} />
-      <PoweredBy brand="polymarket" className="mt-6" />
     </div>
   );
 }
