@@ -51,7 +51,13 @@ async function verify(heliusKey: string, wallet: string, base64: string) {
   const { heliusConnection } = await import("@/lib/helius.server");
   const tx = web3.VersionedTransaction.deserialize(Uint8Array.from(atob(base64), (c) => c.charCodeAt(0)));
   const owner = new web3.PublicKey(wallet);
-  if (tx.message.header.numRequiredSignatures !== 1 || !tx.message.staticAccountKeys[0]!.equals(owner)) throw new Error("unexpected signers");
+  // Jupiter co-signs as a second signer; the user's wallet must remain the fee payer (index 0)
+  // and every other required signer must already be pre-signed by the provider.
+  const n = tx.message.header.numRequiredSignatures;
+  if (n < 1 || n > 2 || !tx.message.staticAccountKeys[0]!.equals(owner)) throw new Error("unexpected signers");
+  for (let i = 1; i < n; i++) {
+    if (tx.message.staticAccountKeys[i]!.equals(owner) || tx.signatures[i]!.every((b) => b === 0)) throw new Error("unexpected signers");
+  }
   const sim = await heliusConnection(heliusKey).simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: true });
   if (sim.value.err) throw new Error("simulation failed");
 }
