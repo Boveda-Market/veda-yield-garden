@@ -116,7 +116,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
       const sig = await sign(r.transaction, r.context);
       setWin(usdc(BigInt(p.payoutMicro || "0") - BigInt(p.costMicro || "0")));
       annotateRecord(wallet, p.pubkey, { claimSig: sig });
-      setMsg({ ok: true, text: t("Pago cobrado. Ahora firma el cambio a USDC…"), sig });
+      setMsg({ ok: true, text: t("Firma 1 de 2 lista: pago cobrado. Ahora firma la 2 de 2 para cambiarlo a USDC…"), sig });
       // Payout arrives as the venue's stable dollar; convert the whole balance to USDC with a second wallet signature.
       try {
         await new Promise((r) => setTimeout(r, 2500));

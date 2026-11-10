@@ -369,6 +369,8 @@ export const extra: Record<string, string> = {
   "Cantidad final para tu wallet": "Final amount to your wallet",
   "Ganancia neta": "Net profit",
   "Reclamar ganancias": "Claim winnings",
+  "Para reclamar firmarás dos transacciones: 1) cobrar el pago y 2) cambiarlo a USDC.": "Claiming takes two signatures: 1) collect the payout and 2) convert it to USDC.",
+  "Firma 1 de 2 lista: pago cobrado. Ahora firma la 2 de 2 para cambiarlo a USDC…": "Signature 1 of 2 done: payout collected. Now sign 2 of 2 to convert it to USDC…",
   "Normalmente se acredita solo. Si aún no lo ves en tu wallet, reclámalo aquí.": "Usually credited automatically. If you don't see it in your wallet yet, claim it here.",
   "Ganancias reclamadas. {v} USDC llegaron a tu wallet.": "Winnings claimed. {v} USDC arrived in your wallet.",
   "Pago cobrado. Ahora firma el cambio a USDC…": "Payout claimed. Now sign the conversion to USDC…",
