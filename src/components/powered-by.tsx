@@ -1,5 +1,5 @@
 const BRANDS = {
-  polymarket: { src: "/brands/polymarket.svg", name: "Polymarket", wide: true },
+  polymarket: { src: "/brands/polymarket-mark.svg", name: "Polymarket", wide: false },
   meteora: { src: "/brands/meteora.svg", name: "Meteora", wide: false },
 } as const;
 
@@ -11,7 +11,7 @@ export function PoweredBy({ brand, className = "" }: { brand: keyof typeof BRAND
       <span>Powered by</span>
       {b.wide
         ? <img src={b.src} alt={b.name} className="h-3 w-auto rounded-sm bg-foreground/90 px-1 py-0.5 dark:bg-transparent" loading="lazy" />
-        : <><img src={b.src} alt="" className="h-3.5 w-3.5 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">{b.name}</span></>}
+        : <><img src={b.src} alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">{b.name}</span></>}
     </p>
   );
 }
