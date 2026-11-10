@@ -24,3 +24,16 @@ describe("live prediction rules", () => {
   });
   it("profit is contracts minus cost", () => expect(potentialProfit({ contractsMicro: "19000000", costMicro: "10000000" })).toBe(9_000_000n));
 });
+
+import { predictSummary as _ps, pricePerContract as _ppc } from "./predict";
+describe("predictSummary", () => {
+  const base = { pubkey: "x", marketId: "POLY-1-0", title: "", side: "up" as const, outcome: "Up", contractsMicro: "10000000", closeTime: null, result: null };
+  it("sums open stake, value and payout; realized only from closed", () => {
+    const s = _ps([
+      { ...base, status: "open", costMicro: "5000000", valueMicro: "6000000", payoutMicro: "10000000", pnlMicro: "1000000" },
+      { ...base, status: "closed", costMicro: "5000000", valueMicro: null, payoutMicro: "10000000", pnlMicro: "-5000000" },
+    ]);
+    expect(s.atStake).toBe(5000000n); expect(s.openValue).toBe(6000000n); expect(s.potential).toBe(10000000n); expect(s.realized).toBe(-5000000n); expect(s.open).toBe(1); expect(s.closed).toBe(1);
+  });
+  it("price per contract", () => { expect(_ppc({ costMicro: "5000000", contractsMicro: "10000000" })).toBe(0.5); });
+});

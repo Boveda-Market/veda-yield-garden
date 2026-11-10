@@ -34,3 +34,16 @@ export type PredictPosition = { pubkey: string; marketId: string; title: string;
 
 /** Payout if the side wins: each contract redeems for 1 USDC. */
 export const potentialProfit = (q: PredictQuote) => BigInt(q.contractsMicro) - BigInt(q.costMicro);
+
+/** Portfolio totals for prediction positions, in integer micro-USDC. Open = still in play; resolved PNL only counts closed positions with a reported PNL. */
+export function predictSummary(positions: readonly PredictPosition[]) {
+  let atStake = 0n, openValue = 0n, potential = 0n, realized = 0n, open = 0, closed = 0;
+  for (const p of positions) {
+    if (p.status === "open") { open++; atStake += BigInt(p.costMicro || "0"); openValue += BigInt(p.valueMicro ?? "0"); potential += BigInt(p.payoutMicro || "0"); }
+    else { closed++; if (p.pnlMicro) realized += BigInt(p.pnlMicro); }
+  }
+  return { atStake, openValue, potential, realized, open, closed };
+}
+
+/** Average price paid per contract (0–1 USDC), or null when unknown. */
+export const pricePerContract = (p: Pick<PredictPosition, "costMicro" | "contractsMicro">) => { const c = Number(p.contractsMicro); return c > 0 ? Number(p.costMicro) / c : null; };

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { PredictPositionCard } from "@/components/predict-position-card";
 import { ShareWin } from "@/components/share-win";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useT } from "@/lib/i18n";
@@ -156,15 +157,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
 
       {positions.length > 0 && <section className="space-y-2">
         <h2 className="font-display text-lg font-semibold">{t("Tus predicciones en vivo")}</h2>
-        {positions.map((p) => {
-          const pnl = p.pnlMicro ? BigInt(p.pnlMicro) : null;
-          const open = p.status === "open";
-          return <div key={p.pubkey} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-3 text-sm">
-            <div className="min-w-0"><p className="font-semibold">{p.title}</p><p className="text-xs text-muted-foreground">{t(p.side === "up" ? "Sube" : "Baja")} · {usdc(p.costMicro)} USDC · {t("Pago si aciertas")} {usdc(p.payoutMicro)}{pnl !== null ? ` · ${pnl >= 0n ? "+" : ""}${usdc(pnl)}` : ""}{!open && p.result ? ` · ${t("Resultado")}: ${p.result}` : ""}</p>
-              {open && pnl !== null && <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${pnl >= 0n ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{t(pnl >= 0n ? "Va a favor" : "Va en contra")}</span>}</div>
-            {open && <Button size="sm" variant="outline" disabled={!!busy} onClick={() => sell(p)}>{busy === p.pubkey ? <Loader2 className="animate-spin" size={14} /> : t("Vender")}</Button>}
-          </div>;
-        })}
+        {positions.map((p) => <PredictPositionCard key={p.pubkey} p={p} onSell={() => sell(p)} selling={busy === p.pubkey} disabled={!!busy} />)}
       </section>}
       <p className="text-xs text-muted-foreground">{t("Las predicciones en vivo se operan en un mercado externo con USDC real; BÓVEDA no es la contraparte. El pago ganador se acredita automáticamente.")}</p>
     </div>
