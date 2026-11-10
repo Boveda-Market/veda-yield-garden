@@ -28,12 +28,25 @@ const FAQS = [
   { q: "¿Qué comisiones cobra BÓVEDA?", a: "Enviar es gratis. Al depositar, los primeros 5 USDC son gratis y se cobra 0.5% sobre el resto. Al cosechar, retirar o cambiar, los primeros 10 USDC son gratis y se cobra 1.25% sobre el resto. Los costes de red se pagan aparte." },
 ];
 
+const LEARN = [
+  ["¿Qué es USDC?", "Una moneda digital que busca valer 1 dólar. Tu saldo, tus predicciones y tus retiros se manejan en USDC para que no dependan de monedas que suben y bajan."],
+  ["¿Cómo funciona Sube/Baja?", "No compras cripto: predices si el precio de BTC, ETH o SOL termina arriba o abajo al cerrar la ronda. Cada contrato ganador paga 1.00 USDC y nunca pierdes más de lo que pusiste."],
+  ["¿Cómo se generan las comisiones en las bóvedas?", "Tu aporte se suma a una bóveda que cobra comisiones cuando otras personas cambian monedas. Las tasas son estimadas, cambian y puedes perder dinero."],
+  ["¿Cuánto cuesta retirar?", "BÓVEDA cobra una comisión fija del 1% en retiros a banco o Cash App, que ves antes de firmar. Para Cash App hay un mínimo de 25 USDC para que el costo de la red no se coma tu dinero."],
+];
+
+const GUARANTEES = [
+  { icon: ShieldCheck, title: "Control y firma propia", body: "Cada operación requiere tu autorización. BÓVEDA nunca mueve tus fondos sin tu firma." },
+  { icon: Landmark, title: "Sin dinero congelado", body: "Sin plazos de permanencia. Sales de tus predicciones o bóvedas cuando tú decidas." },
+  { icon: Lock, title: "Seguridad moderna", body: "Entra con huella, Face ID o email cifrado, sin frases secretas escritas en papel." },
+];
+
 function Landing() {
   const t = useT();
   const steps = [
-    { icon: Fingerprint, title: "Entra en segundos con un toque", body: "Inicia sesión con Google, email o tu huella o Face ID. Tu cuenta queda lista al instante, sin frases secretas complicadas." },
-    { icon: TrendingUp, title: "Haz crecer tu saldo como prefieras", body: "Juega rondas rápidas de 5 o 15 minutos en Sube/Baja para ganar en USDC, o genera comisiones día a día con las bóvedas." },
-    { icon: Landmark, title: "Retira a tu banco o Cash App cuando quieras", body: "Sin plazos de permanencia. Envía tus USDC a Coinbase o PayPal, o recibe Bitcoin automático en tu Cash App." },
+    { icon: Fingerprint, title: "Entra en segundos con un toque", body: "Inicia sesión con Google, email o tu huella o Face ID. Tu cuenta queda lista al instante." },
+    { icon: TrendingUp, title: "Genera saldo a tu ritmo", body: "Predice si el precio sube o baja en rondas de 5 min, 15 min o diarias, o recibe comisiones con las bóvedas." },
+    { icon: Landmark, title: "Retira cuando quieras", body: "Envía tus USDC a Coinbase o PayPal para tu banco, o recibe Bitcoin automático en tu Cash App." },
   ];
   return <div className="min-h-screen bg-background text-foreground">
     <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6"><Link to="/" className="flex items-center gap-3 font-display text-lg font-bold"><img src="/icon-512.png" alt="" className="h-9 w-9 rounded-lg" />BÓVEDA</Link></header>
@@ -44,13 +57,14 @@ function Landing() {
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 md:justify-start [&>p]:justify-start"><PoweredBy brand="meteora" /><PoweredBy brand="polymarket" /></div>
           <p className="mt-5 text-lg leading-7 text-muted-foreground">{t("Con la simplicidad de una cuenta digital. Revisa tu saldo, tus ganancias y cada movimiento.")}</p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs md:justify-start">
-            {["Sin plazos de permanencia", "Tú tienes el control", "Prueba gratis con 1,000 créditos"].map((b) => <li key={b} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"><ShieldCheck size={13} className="text-primary" />{t(b)}</li>)}
+            {["Prueba gratis con 1,000 créditos"].map((b) => <li key={b} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"><ShieldCheck size={13} className="text-primary" />{t(b)}</li>)}
           </ul>
           <p className="mt-4 text-xs text-muted-foreground">{t("Las ganancias cambian y puedes perder dinero.")}</p>
         </div>
         <div id="acceso" className="flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
           <EntryAccess />
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span></p>
+          <ul className="mt-3 flex flex-wrap justify-center gap-2 text-[11px]">{["Tú tienes el control total", "Sin plazos de permanencia"].map((b) => <li key={b} className="flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 font-medium text-foreground"><ShieldCheck size={12} className="text-primary" />{t(b)}</li>)}</ul>
         </div>
       </section>
 
@@ -70,6 +84,17 @@ function Landing() {
         <ol className="mt-6 grid gap-4 sm:grid-cols-3">{steps.map(({ icon: Icon, title, body }, i) => <li key={title} className="rounded-2xl border border-border bg-card p-5">
           <div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={18} /></span><span className="text-xs text-muted-foreground">{t("Paso")} {i + 1}</span></div>
           <p className="mt-4 font-display font-semibold">{t(title)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(body)}</p></li>)}</ol>
+        <details className="group mt-5 rounded-2xl border border-border bg-card">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 font-display text-sm font-semibold text-primary [&::-webkit-details-marker]:hidden"><span>{t("Conoce los detalles a fondo")}</span><ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" /></summary>
+          <dl className="grid gap-4 px-4 pb-5 sm:grid-cols-2">{LEARN.map(([h, d]) => <div key={h}><dt className="font-display text-sm font-semibold">{t(h)}</dt><dd className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</dd></div>)}</dl>
+        </details>
+      </section>
+
+      <section className="border-t border-border py-12">
+        <h2 className="font-display text-2xl font-bold">{t("Tu tranquilidad en BÓVEDA")}</h2>
+        <ul className="mt-6 grid gap-4 sm:grid-cols-3">{GUARANTEES.map(({ icon: Icon, title, body }) => <li key={title} className="rounded-2xl border border-border bg-card p-5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={18} /></span>
+          <p className="mt-4 font-display font-semibold">{t(title)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(body)}</p></li>)}</ul>
       </section>
 
       <section className="py-12">
