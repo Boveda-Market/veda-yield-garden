@@ -72,10 +72,8 @@ export function MarketsPanel(_: { identity: string }) {
         <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />{t("En vivo")}</span>
         <PoweredBy brand="polymarket" className="ml-auto" />
       </header>
-      <ol className="list-decimal space-y-0.5 pl-4 text-xs text-muted-foreground">
-        <li>{t("Elige cripto y tiempo de la ronda.")}</li>
-        <li>{t("Toca Sube si crees que terminará más alto o Baja si crees que terminará más bajo.")}</li>
-        <li>{t("Si aciertas, el pago llega solo a tu wallet al cerrar la ronda.")}</li>
+      <ol className="grid grid-cols-3 gap-2" aria-label={t("Cómo jugar")}>
+        {[["1", t("Elige tu cripto y tu ronda")], ["2", t("¿Sube o baja? ¡Tú decides!")], ["3", t("¿Acertaste? ¡Cobras al instante!")]].map(([n, txt]) => <li key={n} className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 p-2 text-xs font-semibold text-foreground"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{n}</span>{txt}</li>)}
       </ol>
 
       <div className="grid grid-cols-3 gap-2" role="tablist" aria-label={t("Mercado")}>
