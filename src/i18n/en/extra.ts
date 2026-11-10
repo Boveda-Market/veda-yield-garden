@@ -12,7 +12,7 @@ export const extra: Record<string, string> = {
   // Entry
   "Iniciar sesión": "Log in",
   "Crear cuenta": "Sign up",
-  "O usa acceso avanzado": "Or use advanced access",
+  "¿Usas wallet externa? Conectar Phantom o Jupiter": "Using an external wallet? Connect Phantom or Jupiter",
   // Portfolio
   "Hoy": "Today",
   "Ayer": "Yesterday",

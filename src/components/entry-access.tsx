@@ -25,9 +25,8 @@ function EntryButtons() {
     </div>
     <Button disabled={!session.ready} className="h-12 w-full" onClick={() => session.login("google")}>{t("Continuar con Google")}<ArrowRight size={16} /></Button>
     <Button disabled={!session.ready} variant="secondary" className="h-12 w-full" onClick={() => session.login("email")}>{signup ? t("Registrarme con email") : t("Entrar con email")}</Button>
-    <p className="pt-1 text-center text-xs text-muted-foreground">{t("O usa acceso avanzado")}</p>
-    <Button disabled={!session.ready} variant="outline" className="h-12 w-full" onClick={() => session.login("wallet")}><Wallet size={16} />Phantom / Jupiter Wallet</Button>
     {!signup && <Button disabled={!session.ready} variant="outline" className="h-12 w-full" onClick={() => session.login("passkey")}><Fingerprint size={16} />{t("Entrar con passkey")}</Button>}
+    <button type="button" disabled={!session.ready} onClick={() => session.login("wallet")} className="flex w-full items-center justify-center gap-2 pt-1 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline disabled:opacity-50"><Wallet size={14} />{t("¿Usas wallet externa? Conectar Phantom o Jupiter")}</button>
     {signup && <p className="text-xs leading-5 text-muted-foreground">{t("Tu primer acceso crea tu cuenta con Privy. Después puedes elegir tu nombre y avatar.")}</p>}
     {session.error && <p role="alert" className="text-sm text-destructive">{session.error}</p>}
     <p className="pt-2 text-xs leading-5 text-muted-foreground">{t("Al continuar, aceptas los")}{" "}<Link className="underline" to="/terminos">{t("términos")}</Link> {t("y conoces la")}{" "}<Link className="underline" to="/privacidad">{t("política de privacidad")}</Link>{t(". Entrar no mueve tus monedas.")}</p>
