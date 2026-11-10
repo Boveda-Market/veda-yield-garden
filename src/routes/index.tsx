@@ -51,7 +51,7 @@ function Landing() {
     { icon: Coins, title: "Cosecha o retira cuando quieras", body: "Mira tus ganancias subir en vivo y decide si cobrarlas, reinvertirlas o cerrar." },
   ];
   return <div className="min-h-screen bg-background text-foreground">
-    <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6"><Link to="/" className="flex items-center gap-3 font-display text-lg font-bold"><img src="/icon-512.png" alt="" className="h-9 w-9 rounded-lg" />BÓVEDA</Link><a href="#acceso" className="text-sm font-medium text-primary">{t("Entrar")}</a></header>
+    <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6"><Link to="/" className="flex items-center gap-3 font-display text-lg font-bold"><img src="/icon-512.png" alt="" className="h-9 w-9 rounded-lg" />BÓVEDA</Link></header>
     <main className="mx-auto max-w-5xl px-6">
       <section className="grid items-center gap-10 pb-12 pt-6 md:grid-cols-2 md:pt-12">
         <div className="text-center md:text-left">
