@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
@@ -58,15 +58,30 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
     if (!r.success) throw new Error(r.error);
     return r.signature;
   };
-  const prepare = async () => {
-    if (!wallet || !units || !valid || !round || !side) return;
-    setBusy("prep"); setMsg(null); setReview(null);
-    try {
-      const r = await preparePredictBuy({ data: { wallet, marketId: round.marketId, isYes: side === "up", amount: units.toString() } });
-      if (!r.success) throw new Error(r.error);
-      setReview({ side, round, quote: r.quote, tx: r.transaction, context: r.context });
-    } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
-  };
+  // Real network quote: build + simulate the exact signable order automatically, refreshed every 15s.
+  const [quoting, setQuoting] = useState(false);
+  const [quoteErr, setQuoteErr] = useState<string | null>(null);
+  const seq = useRef(0);
+  const unitsKey = units?.toString() ?? "";
+  useEffect(() => {
+    setReview(null); setQuoteErr(null);
+    if (!wallet || !valid || !round || !side || !unitsKey) return;
+    const run = async () => {
+      if (busy === "sign") return;
+      const id = ++seq.current; setQuoting(true);
+      try {
+        const r = await preparePredictBuy({ data: { wallet, marketId: round.marketId, isYes: side === "up", amount: unitsKey } });
+        if (id !== seq.current) return;
+        if (!r.success) throw new Error(r.error);
+        setReview({ side, round, quote: r.quote, tx: r.transaction, context: r.context }); setQuoteErr(null);
+      } catch (e) { if (id === seq.current) { setReview(null); setQuoteErr(e instanceof Error ? e.message : String(e)); } }
+      finally { if (id === seq.current) setQuoting(false); }
+    };
+    const d = setTimeout(run, 500);
+    const iv = setInterval(run, 15_000);
+    return () => { clearTimeout(d); clearInterval(iv); seq.current++; setQuoting(false); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallet, valid, round?.marketId, side, unitsKey]);
   const confirm = async () => {
     if (!review || !wallet) return;
     setBusy("sign");
@@ -111,19 +126,21 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
         <div className="mt-2 grid grid-cols-5 gap-2">{[5, 10, 25, 50].map((v) => <Button key={v} type="button" variant="secondary" size="sm" onClick={() => { setAmount(String(v)); setReview(null); }}>${v}</Button>)}<Button type="button" variant="outline" size="sm" disabled={!maxMicro || maxMicro <= 0n} onClick={() => { if (maxMicro) { setAmount((Math.floor(Number(maxMicro) / 1e4) / 100).toFixed(2)); setReview(null); } }}>{t("Máx")}</Button></div>
         {!inRange && <p className="mt-2 text-xs text-destructive">{t("Entre {min} y {max} USDC.", { min: PREDICT_MIN_USDC, max: PREDICT_MAX_USDC })}</p>}
         {short && <p className="mt-2 text-xs text-destructive">{t("Saldo insuficiente: tienes {v} USDC.", { v: usdc(balance) })} <Link to="/wallet" className="underline">{t("Depositar o cambiar a USDC")}</Link></p>}
-        {inRange && selPrice && <div className="mt-3 space-y-1 rounded-xl bg-secondary/50 p-3 text-sm">
+        {inRange && selPrice && !review && <div className="mt-3 space-y-1 rounded-xl bg-secondary/50 p-3 text-sm">
           <p className="flex justify-between"><span className="text-muted-foreground">{t("Pones")}</span><strong className="tabular-nums">{amt.toFixed(2)} USDC</strong></p>
           <p className="flex justify-between"><span className="text-muted-foreground">{t("Si aciertas recibes aprox.")}</span><strong className="text-primary tabular-nums">{(amt / selPrice).toFixed(2)} USDC</strong></p>
           <p className="flex justify-between"><span className="text-muted-foreground">{t("Ganancia posible")}</span><strong className="tabular-nums">+{(amt / selPrice - amt).toFixed(2)} USDC</strong></p>
         </div>}
         {!side && <p className="mt-3 text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
         {!wallet ? <p className="mt-3 rounded-xl bg-secondary p-3 text-center text-sm font-semibold">{t("Entra con tu cuenta para predecir en vivo con el USDC de tu wallet.")}</p>
-          : <Button disabled={!valid || !!busy} onClick={prepare} variant={side === "down" ? "destructive" : "default"} className="mt-3 h-12 w-full rounded-xl text-base font-bold">{busy === "prep" ? <Loader2 className="animate-spin" /> : side ? t(side === "up" ? "Predecir Sube" : "Predecir Baja") : t("Elige Sube o Baja")}</Button>}
-        <p className="mt-2 text-[11px] text-muted-foreground">{t("Verás la cifra exacta antes de firmar.")}</p>
+          : !review && <Button disabled className="mt-3 h-12 w-full rounded-xl text-base font-bold">{quoting ? <><Loader2 className="animate-spin" /> {t("Cotizando en la red…")}</> : side ? t(side === "up" ? "Predecir Sube" : "Predecir Baja") : t("Elige Sube o Baja")}</Button>}
+        {quoteErr && <p className="mt-2 text-xs text-destructive">{t("No se pudo cotizar ahora mismo. Reintentando…")}</p>}
+        {wallet && !review && <p className="mt-2 text-[11px] text-muted-foreground">{t("La cotización real aparece aquí, lista para firmar.")}</p>}
       </section>
 
       {review && <section className="space-y-2 rounded-2xl border-2 border-primary/50 bg-primary/5 p-4 text-sm" aria-label={t("Revisión")}>
-        <p className="font-semibold">{t("Revisa tu predicción")} · {t(review.side === "up" ? "Sube" : "Baja")}</p>
+        <p className="flex items-center justify-between font-semibold"><span>{t("Cotización real")} · {t(review.side === "up" ? "Sube" : "Baja")}</span>{quoting && <Loader2 size={14} className="animate-spin text-muted-foreground" />}</p>
+        <p className="text-[11px] text-muted-foreground">{t("Transacción simulada en la red; se actualiza cada 15 s.")}</p>
         <p className="flex justify-between"><span>{t("Pagas")}</span><strong>{usdc(review.quote.costMicro)} USDC</strong></p>
         <p className="flex justify-between"><span>{t("Si aciertas recibes")}</span><strong className="text-primary">{usdc(review.quote.contractsMicro)} USDC</strong></p>
         <p className="flex justify-between"><span>{t("Ganancia posible")}</span><strong>+{usdc(potentialProfit(review.quote))} USDC</strong></p>
