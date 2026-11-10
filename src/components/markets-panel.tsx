@@ -111,7 +111,7 @@ export function MarketsPanel(_: { identity: string }) {
       </section>
 
       {!loaded ? <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin" size={16} />{t("Buscando rondas en vivo…")}</p>
-        : !round && <p role="status" className="rounded-xl bg-secondary p-3 text-sm">{t("No hay una ronda abierta de {m} a {w} ahora mismo. Prueba otra duración o vuelve en unos minutos.", { m: name, w: WIN_LABEL[win] })}</p>}
+        : !round && <div role="status" className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/10 p-3 text-sm"><Loader2 className="mt-0.5 shrink-0 animate-spin text-primary" size={16} /><p><strong>{t("Esperando la próxima ronda de {m} ({w})…", { m: name, w: WIN_LABEL[win] })}</strong><br /><span className="text-muted-foreground">{t("Abre en breve. Mientras tanto puedes probar otra duración o cripto arriba.")}</span></p></div>}
       <PredictLive round={round} />
       <PredictResults asset={market} window={win} />
     </div>
