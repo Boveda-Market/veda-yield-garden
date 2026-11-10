@@ -1,3 +1,4 @@
+import { PredictResults } from "@/components/predict-results";
 import { useEffect, useState } from "react";
 import { Loader2, Zap } from "lucide-react";
 import { useT } from "@/lib/i18n";
@@ -110,6 +111,7 @@ export function MarketsPanel(_: { identity: string }) {
       {!loaded ? <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin" size={16} />{t("Buscando rondas en vivo…")}</p>
         : !round && <p role="status" className="rounded-xl bg-secondary p-3 text-sm">{t("No hay una ronda abierta de {m} a {w} ahora mismo. Prueba otra duración o vuelve en unos minutos.", { m: name, w: WIN_LABEL[win] })}</p>}
       <PredictLive round={round} />
+      <PredictResults asset={market} window={win} />
     </div>
   );
 }

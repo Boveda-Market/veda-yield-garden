@@ -1,3 +1,4 @@
+import { parsePastRound, type PastRound } from "@/lib/predict";
 import { MARKET_ID_RE, assetOfTitle, windowOfTags, type LiveRound, type PredictPosition, type PredictQuote } from "@/lib/predict";
 import { USDC_MINT } from "@/lib/wallet-actions";
 
@@ -93,13 +94,25 @@ export async function execute(wallet: string, signed: string, context: string) {
   return r.signature;
 }
 
-type RawPos = { pubkey: string; marketId: string; isYes: boolean; contractsMicro: string; totalCostUsd: string; valueUsd: string | null; payoutUsd: string; pnlUsd: string | null; eventMetadata?: { title?: string }; marketMetadata?: { title?: string; status?: string; result?: string | null; closeTime?: number } };
+type RawPos = { pubkey: string; marketId: string; isYes: boolean; contractsMicro: string; totalCostUsd: string; valueUsd: string | null; payoutUsd: string; pnlUsd: string | null; eventId?: string; eventMetadata?: { title?: string }; marketMetadata?: { title?: string; status?: string; result?: string | null; closeTime?: number } };
 
 export async function listPositions(wallet: string): Promise<PredictPosition[]> {
   const r = await jup<{ data: RawPos[] }>(`/positions?ownerPubkey=${encodeURIComponent(wallet)}`);
   return (r.data ?? []).filter((p) => p.marketId.startsWith("POLY-") && BigInt(p.contractsMicro || "0") > 0n).map((p) => ({
     pubkey: p.pubkey, marketId: p.marketId, title: p.eventMetadata?.title ?? "", side: (p.marketMetadata?.title === "Down") === p.isYes ? "down" : "up", outcome: p.marketMetadata?.title ?? "",
     contractsMicro: p.contractsMicro, costMicro: p.totalCostUsd, valueMicro: p.valueUsd, payoutMicro: p.payoutUsd, pnlMicro: p.pnlUsd,
-    closeTime: p.marketMetadata?.closeTime ?? null, status: p.marketMetadata?.status ?? "", result: p.marketMetadata?.result ?? null,
+    closeTime: p.marketMetadata?.closeTime ?? null, status: p.marketMetadata?.status ?? "", result: p.marketMetadata?.result ?? null, isYes: p.isYes, eventId: p.eventId && /^POLY-\d{1,12}$/.test(p.eventId) ? p.eventId : undefined,
   }));
+}
+
+let pastCache: { at: number; rounds: PastRound[] } | null = null;
+/** Recently resolved BTC/ETH/SOL Up/Down rounds from Polymarket's public data, for user verification. */
+export async function listPastRounds(): Promise<PastRound[]> {
+  if (pastCache && Date.now() - pastCache.at < 30_000) return pastCache.rounds;
+  const res = await fetch("https://gamma-api.polymarket.com/events?closed=true&limit=200&order=endDate&ascending=false&tag_slug=up-or-down", { signal: AbortSignal.timeout(15_000) });
+  if (!res.ok) throw new Error(`gamma ${res.status}`);
+  const rows = (await res.json()) as unknown[];
+  const rounds = (Array.isArray(rows) ? rows : []).map((e) => parsePastRound(e as never)).filter((r): r is PastRound => !!r).slice(0, 60);
+  pastCache = { at: Date.now(), rounds };
+  return rounds;
 }

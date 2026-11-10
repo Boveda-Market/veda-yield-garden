@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { ArrowDownRight, ArrowUpRight, Loader2 } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT, useLocale } from "@/lib/i18n";
-import { assetOfTitle, pricePerContract, type PredictPosition } from "@/lib/predict";
+import { assetOfTitle, positionWon, pricePerContract, type PredictPosition } from "@/lib/predict";
 
 export const usdcText = (micro: string | bigint | null) => micro === null ? "—" : (Number(micro) / 1e6).toFixed(2);
 
@@ -20,7 +20,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled }: { p: Predi
   const ppc = pricePerContract(p);
   const left = p.closeTime ? p.closeTime * 1000 - now : null;
   const mmss = left !== null && left > 0 ? `${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")}` : null;
-  const won = !open && p.result ? p.result.toLowerCase() === (p.outcome || (p.side === "up" ? "up" : "down")).toLowerCase() : null;
+  const won = open ? null : positionWon(p);
   const Up = p.side === "up";
   const Row = ({ k, v, tone }: { k: string; v: string; tone?: string }) => <div className="flex justify-between gap-2"><span className="text-muted-foreground">{k}</span><span className={`font-medium ${tone ?? ""}`}>{v}</span></div>;
   return <article className="rounded-xl border border-border bg-card p-4 text-sm">
@@ -43,5 +43,6 @@ export function PredictPositionCard({ p, onSell, selling, disabled }: { p: Predi
     </div>
     {open && onSell && <Button className="mt-3 w-full" size="sm" variant="outline" disabled={disabled} onClick={onSell}>{selling ? <Loader2 className="animate-spin" size={14} /> : t("Vender ahora")}</Button>}
     {!open && won && <p className="mt-3 text-xs text-muted-foreground">{t("El pago ganador se acredita automáticamente en tu wallet.")}</p>}
+    {p.eventId && <a className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary underline" href={`https://jup.ag/prediction/${p.eventId}`} target="_blank" rel="noopener noreferrer">{t("Verificar en el mercado oficial")}<ExternalLink size={12} /></a>}
   </article>;
 }

@@ -30,7 +30,7 @@ export const MARKET_ID_RE = /^POLY-\d{1,12}(-\d{1,3})?$/;
 
 export type LiveRound = { eventId: string; asset: PredictAsset; window: PredictWindow; openTime: number; closeTime: number; marketId: string; downMarketId: string; upPrice: number | null; downPrice: number | null; volume: number };
 export type PredictQuote = { contractsMicro: string; costMicro: string };
-export type PredictPosition = { pubkey: string; marketId: string; title: string; side: PredictSide; outcome: string; contractsMicro: string; costMicro: string; valueMicro: string | null; payoutMicro: string; pnlMicro: string | null; closeTime: number | null; status: string; result: string | null };
+export type PredictPosition = { pubkey: string; marketId: string; title: string; side: PredictSide; outcome: string; contractsMicro: string; costMicro: string; valueMicro: string | null; payoutMicro: string; pnlMicro: string | null; closeTime: number | null; status: string; result: string | null; isYes?: boolean; eventId?: string | undefined };
 
 /** Payout if the side wins: each contract redeems for 1 USDC. */
 export const potentialProfit = (q: PredictQuote) => BigInt(q.contractsMicro) - BigInt(q.costMicro);
@@ -47,3 +47,27 @@ export function predictSummary(positions: readonly PredictPosition[]) {
 
 /** Average price paid per contract (0–1 USDC), or null when unknown. */
 export const pricePerContract = (p: Pick<PredictPosition, "costMicro" | "contractsMicro">) => { const c = Number(p.contractsMicro); return c > 0 ? Number(p.costMicro) / c : null; };
+
+/** Win/loss of a resolved position: each side is bought as YES on its own market, so "yes" means that market won. */
+export function positionWon(p: Pick<PredictPosition, "result"> & { isYes?: boolean }): boolean | null {
+  const r = p.result?.toLowerCase();
+  if (r !== "yes" && r !== "no") return null;
+  return (r === "yes") === (p.isYes ?? true);
+}
+
+export type PastRound = { slug: string; title: string; asset: PredictAsset; window: PredictWindow; endTime: number; winner: PredictSide };
+
+/** Parse one resolved Polymarket Up/Down event; null unless BTC/ETH/SOL 5m/15m/1h with a definitive winner. */
+export function parsePastRound(e: { slug?: string; title?: string; endDate?: string; markets?: { outcomes?: string; outcomePrices?: string }[] }): PastRound | null {
+  const title = e.title ?? "", slug = e.slug ?? "";
+  const asset = assetOfTitle(title); if (!asset || !/^[a-z0-9-]{1,120}$/.test(slug)) return null;
+  const window: PredictWindow | null = slug.includes("updown-5m") ? "5m" : slug.includes("updown-15m") ? "15m" : /\d{1,2}(AM|PM) ET$/i.test(title) ? "1h" : null;
+  if (!window) return null;
+  try {
+    const outs = JSON.parse(e.markets?.[0]?.outcomes ?? "[]") as string[], px = JSON.parse(e.markets?.[0]?.outcomePrices ?? "[]") as string[];
+    const i = px.findIndex((v) => Number(v) === 1); const o = outs[i]?.toLowerCase();
+    if (o !== "up" && o !== "down") return null;
+    const endTime = Math.floor(Date.parse(e.endDate ?? "") / 1000); if (!Number.isFinite(endTime)) return null;
+    return { slug, title, asset, window, endTime, winner: o };
+  } catch { return null; }
+}

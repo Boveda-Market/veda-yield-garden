@@ -37,3 +37,18 @@ describe("predictSummary", () => {
   });
   it("price per contract", () => { expect(_ppc({ costMicro: "5000000", contractsMicro: "10000000" })).toBe(0.5); });
 });
+
+import { positionWon, parsePastRound } from "./predict";
+describe("prediction results", () => {
+  it("a resolved 'yes' on the bought market is a win", () => {
+    expect(positionWon({ result: "yes", isYes: true })).toBe(true);
+    expect(positionWon({ result: "no", isYes: true })).toBe(false);
+    expect(positionWon({ result: null })).toBeNull();
+  });
+  it("parses only resolved BTC/ETH/SOL rounds", () => {
+    const m = [{ outcomes: '["Up","Down"]', outcomePrices: '["0","1"]' }];
+    expect(parsePastRound({ slug: "btc-updown-5m-1", title: "Bitcoin Up or Down - November 9, 7:55PM-8:00PM ET", endDate: "2026-11-10T01:00:00Z", markets: m })?.winner).toBe("down");
+    expect(parsePastRound({ slug: "xrp-updown-5m-1", title: "XRP Up or Down - November 9", endDate: "2026-11-10T01:00:00Z", markets: m })).toBeNull();
+    expect(parsePastRound({ slug: "btc-updown-5m-1", title: "Bitcoin Up or Down - x", endDate: "2026-11-10T01:00:00Z", markets: [{ outcomes: '["Up","Down"]', outcomePrices: '["0.5","0.5"]' }] })).toBeNull();
+  });
+});

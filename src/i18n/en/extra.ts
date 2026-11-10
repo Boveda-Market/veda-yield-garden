@@ -337,4 +337,12 @@ export const extra: Record<string, string> = {
   "Ahora mismo va ganando Baja": "Down is winning right now",
   "Buscando rondas en vivo…": "Looking for live rounds…",
   "No hay una ronda abierta de {m} a {w} ahora mismo. Prueba otra duración o vuelve en unos minutos.": "No open {m} {w} round right now. Try another length or come back in a few minutes.",
+  "Verificar en el mercado oficial": "Verify on the official market",
+  "Resultados recientes": "Recent results",
+  "Rondas ya resueltas. Toca cualquiera para verificarla en la fuente oficial.": "Already resolved rounds. Tap any to verify it at the official source.",
+  "Consultando resultados…": "Loading results…",
+  "No se pudieron cargar los resultados ahora mismo.": "Results couldn't be loaded right now.",
+  "Aún no hay rondas resueltas recientes para esta duración.": "No recently resolved rounds for this length yet.",
+  "Ganó Sube": "Up won",
+  "Ganó Baja": "Down won",
 };
