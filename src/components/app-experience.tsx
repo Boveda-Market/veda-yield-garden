@@ -1,4 +1,3 @@
-import { SafetyPopup } from "@/components/safety-popup";
 import { Dismissible } from "@/components/dismissible";
 import { PoweredBy } from "@/components/powered-by";
 import { TokenIcon } from "@/components/token-icon";
@@ -132,7 +131,6 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
         {user && <div className="flex items-center gap-2">{!guest && <Link to="/wallet" aria-label={t("Cambiar monedas")} title={t("Cambiar monedas")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-primary hover:bg-secondary"><ArrowLeftRight size={18} /></Link>}<ProfileMenu user={user} guest={guest} onSelect={(v) => { if (guest) setGuestView(v as typeof guestView); }} onLogout={signOut} /><button type="button" onClick={signOut} aria-label={guest ? t("Salir de la prueba") : t("Cerrar sesión")} title={guest ? t("Salir de la prueba") : t("Cerrar sesión")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-destructive hover:bg-destructive/10"><LogOut size={18} /></button></div>}
       </header>
 
-      {!guest && <SafetyPopup identity={session.userId ?? null} ready={session.ready} />}
       <main className="mx-auto max-w-5xl px-5 pb-28">
         {guest && <p className="mb-4 text-xs text-muted-foreground"><strong className="text-foreground">{t("Invitado · Prueba")}</strong> {t("· Sin dinero real")}</p>}
         {session.error && <p role="alert" className="mb-4 text-sm text-destructive">{t(session.error)}</p>}

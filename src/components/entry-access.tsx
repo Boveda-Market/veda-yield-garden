@@ -1,23 +1,17 @@
 import { useT } from "@/lib/i18n";
-import { lazy, Suspense, useEffect, useState } from "react";
-import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
+import { lazy, Suspense, useState } from "react";
+import { ClientOnly, Link } from "@tanstack/react-router";
 import { Wallet, ArrowRight, LogOut, Fingerprint } from "lucide-react";
 import { Button } from "./ui/button";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
+import { SafetyNotice } from "./safety-notice";
 const PrivyAccess = lazy(() => import("./privy-access"));
 
 function EntryButtons() {
   const t = useT();
   const session = useBovedaSession();
-  const navigate = useNavigate();
   const [signup, setSignup] = useState(false);
-  const [startedSignedOut, setStartedSignedOut] = useState(false);
-  useEffect(() => {
-    if (!session.ready) return;
-    if (!session.authenticated) setStartedSignedOut(true);
-    else if (startedSignedOut) void navigate({ to: "/wallet", replace: true });
-  }, [session.ready, session.authenticated, startedSignedOut]);
-  if (session.ready && session.authenticated) return <div className="mt-8 w-full max-w-sm"><p className="mb-4 text-sm text-muted-foreground">{t("Tu sesión está abierta.")}</p><Button asChild className="h-12 w-full"><Link to="/wallet">{t("Entrar a mi cuenta")}<ArrowRight size={16} /></Link></Button><Button variant="outline" className="mt-3 h-12 w-full" onClick={() => void session.logout()}><LogOut size={16} />{t("Cerrar sesión")}</Button></div>;
+  if (session.ready && session.authenticated) return <div className="mt-8 w-full max-w-sm"><SafetyNotice className="mb-4" /><p className="mb-4 text-sm text-muted-foreground">{t("Tu sesión está abierta.")}</p><Button asChild className="h-12 w-full"><Link to="/wallet">{t("Entrar a mi cuenta")}<ArrowRight size={16} /></Link></Button><Button variant="outline" className="mt-3 h-12 w-full" onClick={() => void session.logout()}><LogOut size={16} />{t("Cerrar sesión")}</Button></div>;
   return <div className="mt-8 w-full max-w-sm space-y-3">
     <div role="tablist" className="mb-4 grid grid-cols-2 rounded-xl bg-secondary p-1 text-sm font-medium">
       <button role="tab" aria-selected={!signup} onClick={() => setSignup(false)} className={`rounded-lg py-2 ${!signup ? "bg-background shadow-sm" : "text-muted-foreground"}`}>{t("Iniciar sesión")}</button>
