@@ -28,7 +28,7 @@ const FAQS = [
   { q: "¿Qué comisiones cobra BÓVEDA?", a: "Enviar es gratis. Al depositar, los primeros 5 USDC son gratis y se cobra 0.5% sobre el resto. Al cosechar, retirar o cambiar, los primeros 10 USDC son gratis y se cobra 1.25% sobre el resto. Los costes de red se pagan aparte." },
 ];
 
-const LEARN = [
+const LEARN: [string, string][] = [
   ["¿Qué es USDC?", "Una moneda digital que busca valer 1 dólar. Tu saldo, tus predicciones y tus retiros se manejan en USDC para que no dependan de monedas que suben y bajan."],
   ["¿Cómo funciona Sube/Baja?", "No compras cripto: predices si el precio de BTC, ETH o SOL termina arriba o abajo al cerrar la ronda. Cada contrato ganador paga 1.00 USDC y nunca pierdes más de lo que pusiste."],
   ["¿Cómo se generan las comisiones en las bóvedas?", "Tu aporte se suma a una bóveda que cobra comisiones cuando otras personas cambian monedas. Las tasas son estimadas, cambian y puedes perder dinero."],
