@@ -57,6 +57,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
   const fmt = (n: number, d = 2) => n.toLocaleString(locale, { minimumFractionDigits: d, maximumFractionDigits: d });
   const session = useBovedaSession();
   const navigate = useNavigate();
+  const signOut = () => void (async () => { try { localStorage.removeItem("boveda.safety.seen"); } catch {} await session.logout(); await navigate({ to: "/", replace: true }); })();
   const user = guest ? t("Invitado") : session.authenticated && session.userId ? session.label : null;
   const identity = guest ? "guest" : session.userId;
   const storageKey = guest ? guestDemoKey : identity ? demoSessionKey(identity) : "";
@@ -128,7 +129,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground"><VaultIcon size={18} /></span>
           BÓVEDA
         </Link>
-        {user && <div className="flex items-center gap-2">{!guest && <Link to="/wallet" aria-label={t("Cambiar monedas")} title={t("Cambiar monedas")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-primary hover:bg-secondary"><ArrowLeftRight size={18} /></Link>}<ProfileMenu user={user} guest={guest} onSelect={(v) => { if (guest) setGuestView(v as typeof guestView); }} onLogout={() => void (async () => { try { localStorage.removeItem("boveda.safety.seen"); } catch {} await session.logout(); await navigate({ to: "/", replace: true }); })()} /></div>}
+        {user && <div className="flex items-center gap-2">{!guest && <Link to="/wallet" aria-label={t("Cambiar monedas")} title={t("Cambiar monedas")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-primary hover:bg-secondary"><ArrowLeftRight size={18} /></Link>}<ProfileMenu user={user} guest={guest} onSelect={(v) => { if (guest) setGuestView(v as typeof guestView); }} onLogout={signOut} /><button type="button" onClick={signOut} aria-label={guest ? t("Salir de la prueba") : t("Cerrar sesión")} title={guest ? t("Salir de la prueba") : t("Cerrar sesión")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-destructive hover:bg-destructive/10"><LogOut size={18} /></button></div>}
       </header>
 
       {!guest && <SafetyPopup identity={session.userId ?? null} ready={session.ready} />}
