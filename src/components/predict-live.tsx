@@ -7,7 +7,7 @@ import { PredictPositionCard } from "@/components/predict-position-card";
 import { ShareWin } from "@/components/share-win";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useT } from "@/lib/i18n";
-import { PREDICT_MAX_USDC, PREDICT_MIN_USDC, potentialProfit, type LiveRound, type PredictPosition, type PredictQuote, type PredictSide } from "@/lib/predict";
+import { PREDICT_MAX_USDC, PREDICT_MIN_USDC, assetOfTitle, positionWon, potentialProfit, type LiveRound, type PredictPosition, type PredictQuote, type PredictSide } from "@/lib/predict";
 import { executePredict, getPredictPositions, preparePredictBuy, preparePredictClaim, preparePredictSell } from "@/lib/predict.functions";
 import { buildSwap, JUPUSD_MINT, quoteSwap, readTokenBalance, toBaseUnits } from "@/lib/wallet-actions";
 import { getRealWallet } from "@/lib/solana.functions";
@@ -16,6 +16,7 @@ import { annotateRecord } from "@/lib/predict-history";
 
 const usdc = (micro: string | bigint | null) => micro === null ? "—" : (Number(micro) / 1e6).toFixed(2);
 const fromB64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const dismissedLost = (wallet: string) => { try { const v = JSON.parse(localStorage.getItem(`boveda:predict-lost-seen:${wallet}`) ?? "[]"); return new Set<string>(Array.isArray(v) ? v : []); } catch { return new Set<string>(); } };
 const toB64 = (b: Uint8Array) => btoa(Array.from(b, (x) => String.fromCharCode(x)).join(""));
 
 /** Order ticket for the selected live Up/Down round. Wallet USDC only; BÓVEDA is never the counterparty. */
@@ -31,13 +32,30 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
   const [positions, setPositions] = useState<PredictPosition[]>([]);
   const [balance, setBalance] = useState<bigint | null>(null);
   const [win, setWin] = useState<string | null>(null);
+  const [lost, setLost] = useState<PredictPosition[]>([]);
+  const prevRef = useRef<PredictPosition[]>([]);
+  const doneRef = useRef(new Set<string>());
+  const lostRef = useRef(new Set<string>());
 
   useEffect(() => { setReview(null); }, [round?.marketId]);
   const refresh = useCallback(async () => {
     if (!wallet) return;
     const r = await getPredictPositions({ data: { wallet } });
-    if (r.success) setPositions(r.positions);
-  }, [wallet]);
+    if (!r.success) return;
+    const nowSec = Date.now() / 1000;
+    const seen = dismissedLost(wallet);
+    const liveKeys = new Set(r.positions.map((p) => p.pubkey));
+    // A lost round either reports result "no" for our side or simply vanishes after closing; keep it visible with an explanation.
+    const newly = [...r.positions.filter((p) => positionWon(p) === false), ...prevRef.current.filter((p) => !liveKeys.has(p.pubkey) && !doneRef.current.has(p.pubkey) && positionWon(p) !== true && (p.closeTime ?? 0) < nowSec)].filter((p) => !seen.has(p.pubkey));
+    if (newly.length) {
+      setLost((old) => { const m = new Map(old.map((p) => [p.pubkey, p])); newly.forEach((p) => m.set(p.pubkey, p)); return [...m.values()]; });
+      if (newly.some((p) => !lostRef.current.has(p.pubkey))) setMsg({ ok: false, text: t("Una de tus predicciones terminó y no acertaste. Abajo ves el detalle.") });
+      newly.forEach((p) => lostRef.current.add(p.pubkey));
+    }
+    prevRef.current = r.positions.filter((p) => positionWon(p) !== false);
+    setPositions(prevRef.current);
+  }, [wallet, t]);
+  const dismissLost = (pk: string) => { setLost((l) => l.filter((p) => p.pubkey !== pk)); if (wallet) try { const k = `boveda:predict-lost-seen:${wallet}`; localStorage.setItem(k, JSON.stringify([...dismissedLost(wallet), pk].slice(-200))); } catch {} };
   useEffect(() => { void refresh(); const id = setInterval(refresh, 15_000); return () => clearInterval(id); }, [refresh]);
   const loadBalance = useCallback(async () => {
     if (!wallet) return;
@@ -103,7 +121,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
       const sig = await sign(r.transaction, r.context);
       const profit = p.valueMicro ? BigInt(p.valueMicro) - BigInt(p.costMicro) : 0n;
       if (profit > 0n) setWin(usdc(profit));
-      annotateRecord(wallet, p.pubkey, { soldMicro: p.valueMicro ?? "0", sellSig: sig });
+      doneRef.current.add(p.pubkey); annotateRecord(wallet, p.pubkey, { soldMicro: p.valueMicro ?? "0", sellSig: sig });
       setMsg({ ok: true, text: t("Venta confirmada. El USDC está en tu wallet."), sig });
       setTimeout(() => { void refresh(); void loadBalance(); }, 3000);
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
@@ -116,7 +134,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
       if (!r.success) throw new Error(r.error);
       const sig = await sign(r.transaction, r.context);
       setWin(usdc(BigInt(p.payoutMicro || "0") - BigInt(p.costMicro || "0")));
-      annotateRecord(wallet, p.pubkey, { claimSig: sig });
+      doneRef.current.add(p.pubkey); annotateRecord(wallet, p.pubkey, { claimSig: sig });
       setMsg({ ok: true, text: t("Firma 1 de 2 lista: pago cobrado. Ahora firma la 2 de 2 para cambiarlo a USDC…"), sig });
       // Payout arrives as the venue's stable dollar; convert the whole balance to USDC with a second wallet signature.
       try {
@@ -181,6 +199,14 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
       {msg && <Dismissible key={msg.text} onDismiss={() => setMsg(null)} ms={msg.ok ? 6000 : 10000} className={`rounded-xl border p-3 pr-10 ${msg.ok ? "border-primary/30 bg-primary/10 text-primary" : "border-destructive/30 bg-destructive/10 text-destructive"}`}><p role="status" className="text-sm">{msg.text} {msg.wallet && <Link to="/wallet" className="underline">{t("Ver en tu wallet")}</Link>}{msg.sig && <a className="inline-flex items-center gap-1 underline" href={`https://orbmarkets.io/tx/${msg.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}<ExternalLink size={12} /></a>}</p></Dismissible>}
       {win && <ShareWin headline={t("¡Acerté! +{v} USDC", { v: win })} />}
 
+      {lost.length > 0 && <section className="space-y-2" aria-label={t("Predicciones no acertadas")}>
+        {lost.map((p) => <div key={p.pubkey} role="status" className="rounded-xl border border-destructive/40 bg-destructive/10 p-4">
+          <p className="font-semibold text-destructive">{t("No acertaste · {a} {s}", { a: assetOfTitle(p.title) ?? "", s: p.side === "up" ? t("Sube") : t("Baja") })}</p>
+          <p className="mt-1 text-sm">{t("La ronda cerró en la dirección contraria. Perdiste lo invertido: -{v} USDC.", { v: usdc(p.costMicro) })}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("Por eso ya no aparece entre tus predicciones abiertas. No hay nada que reclamar.")}</p>
+          <Button size="sm" variant="outline" className="mt-3" onClick={() => dismissLost(p.pubkey)}>{t("Entendido")}</Button>
+        </div>)}
+      </section>}
       {positions.length > 0 && <section className="space-y-2">
         <h2 className="font-display text-lg font-semibold">{t("Tus predicciones en vivo")}</h2>
         {positions.map((p) => <PredictPositionCard key={p.pubkey} p={p} onSell={() => sell(p)} onClaim={() => claim(p)} claiming={busy === p.pubkey} selling={busy === p.pubkey} disabled={!!busy} />)}

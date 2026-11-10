@@ -395,4 +395,10 @@ export const extra: Record<string, string> = {
   "Firmar retiro del {p}%": "Sign {p}% withdrawal",
   "Al firmar retiras esta parte; no se puede revertir.": "Signing withdraws this part; it can't be reversed.",
   "La posición sigue en tu wallet": "Position stays in your wallet",
+  "Una de tus predicciones terminó y no acertaste. Abajo ves el detalle.": "One of your predictions ended and you missed. See the details below.",
+  "Predicciones no acertadas": "Missed predictions",
+  "No acertaste · {a} {s}": "You missed · {a} {s}",
+  "La ronda cerró en la dirección contraria. Perdiste lo invertido: -{v} USDC.": "The round closed the other way. You lost your stake: -{v} USDC.",
+  "Por eso ya no aparece entre tus predicciones abiertas. No hay nada que reclamar.": "That's why it no longer shows among your open predictions. There's nothing to claim.",
+  "Entendido": "Got it",
 };
