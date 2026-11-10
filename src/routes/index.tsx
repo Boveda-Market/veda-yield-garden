@@ -72,6 +72,16 @@ function Landing() {
         </div>
       </section>
 
+      <section aria-label={t("Tecnología que nos respalda")} className="pt-12">
+        <p className="text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("Tecnología que nos respalda")}</p>
+        <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+          {[{ n: "Privy", d: "Acceso seguro" }, { n: "Polymarket", d: "Mercados Sube/Baja" }, { n: "Jupiter", d: "Cambios de monedas" }, { n: "USDC", d: "Dólar digital" }, { n: "Helius", d: "Datos en vivo" }].map(({ n, d }) => <li key={n} className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card px-3 py-4 text-center">
+            <span className="font-display text-lg font-bold tracking-tight">{n}</span>
+            <span className="mt-0.5 text-[11px] text-muted-foreground">{t(d)}</span>
+          </li>)}
+        </ul>
+      </section>
+
       <section className="py-12">
         <h2 className="font-display text-2xl font-bold">{t("Bóvedas disponibles")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("Rendimientos estimados con datos actuales. No están garantizados.")}</p>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT, useLocale } from "@/lib/i18n";
 import { assetOfTitle, positionWon, pricePerContract, type PredictPosition } from "@/lib/predict";
@@ -45,6 +45,5 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
     {!open && won && <div className="mt-3 rounded-xl bg-primary/10 p-3"><p className="text-xs text-muted-foreground">{t("Cantidad final para tu wallet")}</p><p className="font-display text-xl font-bold text-primary tabular-nums">{usdcText(payout)} USDC</p><p className="text-xs text-muted-foreground">{t("Ganancia neta")} +{usdcText(profit)} USDC</p>
       {onClaim && <Button className="mt-2 w-full" size="sm" disabled={disabled} onClick={onClaim}>{claiming ? <Loader2 className="animate-spin" size={14} /> : t("Reclamar ganancias")}</Button>}
       <p className="mt-2 text-[11px] text-muted-foreground">{t("Normalmente se acredita solo. Si aún no lo ves en tu wallet, reclámalo aquí.")}</p></div>}
-    {p.eventId && <a className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary underline" href={`https://jup.ag/prediction/${p.eventId}`} target="_blank" rel="noopener noreferrer">{t("Verificar en el mercado oficial")}<ExternalLink size={12} /></a>}
   </article>;
 }
