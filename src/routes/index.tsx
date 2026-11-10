@@ -1,9 +1,10 @@
+import { Fingerprint, TrendingUp, Landmark } from "lucide-react";
 import { Lock } from "lucide-react";
 import { PoweredBy } from "@/components/powered-by";
 import { allowTrialEntry } from "@/lib/trial-entry";
 import { useT } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ShieldCheck, Sparkles, UserPlus, Vault as VaultIcon, Coins, ChevronDown } from "lucide-react";
+import { ArrowRight, ShieldCheck, Sparkles, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EntryAccess } from "@/components/entry-access";
 import { HomePredict } from "@/components/home-predict";
@@ -30,9 +31,9 @@ const FAQS = [
 function Landing() {
   const t = useT();
   const steps = [
-    { icon: UserPlus, title: "Crea tu cuenta en segundos", body: "Entra con tu email o Google. Sin frases secretas complicadas." },
-    { icon: VaultIcon, title: "Elige tu bóveda", body: "Tu depósito recibe parte de las comisiones que genera cada cambio de monedas." },
-    { icon: Coins, title: "Cosecha o retira cuando quieras", body: "Mira tus ganancias subir en vivo y decide si cobrarlas, reinvertirlas o cerrar." },
+    { icon: Fingerprint, title: "Entra en segundos con un toque", body: "Inicia sesión con Google, email o tu huella o Face ID. Tu cuenta queda lista al instante, sin frases secretas complicadas." },
+    { icon: TrendingUp, title: "Haz crecer tu saldo como prefieras", body: "Juega rondas rápidas de 5 o 15 minutos en Sube/Baja para ganar en USDC, o genera comisiones día a día con las bóvedas." },
+    { icon: Landmark, title: "Retira a tu banco o Cash App cuando quieras", body: "Sin plazos de permanencia. Envía tus USDC a Coinbase o PayPal, o recibe Bitcoin automático en tu Cash App." },
   ];
   return <div className="min-h-screen bg-background text-foreground">
     <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6"><Link to="/" className="flex items-center gap-3 font-display text-lg font-bold"><img src="/icon-512.png" alt="" className="h-9 w-9 rounded-lg" />BÓVEDA</Link></header>
