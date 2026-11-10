@@ -337,7 +337,7 @@ export const extra: Record<string, string> = {
   "Cómo jugar": "How to play",
   "Elige tu cripto y tu ronda": "Pick your crypto and round",
   "¿Sube o baja? ¡Tú decides!": "Up or down? You call it!",
-  "¿Acertaste? ¡Cobras al instante!": "Called it? Get paid instantly!",
+  "¡Acierta y cobra al cerrar la ronda!": "Call it right and get paid when the round closes!",
   "Toca Sube si crees que terminará más alto o Baja si crees que terminará más bajo.": "Tap Up if you think it will finish higher, or Down if lower.",
   "Paga {x}×": "Pays {x}×",
   "Sin precio": "No price",

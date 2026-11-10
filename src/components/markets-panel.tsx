@@ -73,7 +73,7 @@ export function MarketsPanel(_: { identity: string }) {
         <PoweredBy brand="polymarket" className="ml-auto" />
       </header>
       <ol className="grid grid-cols-3 gap-2" aria-label={t("Cómo jugar")}>
-        {[["1", t("Elige tu cripto y tu ronda")], ["2", t("¿Sube o baja? ¡Tú decides!")], ["3", t("¿Acertaste? ¡Cobras al instante!")]].map(([n, txt]) => <li key={n} className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 p-2 text-xs font-semibold text-foreground"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{n}</span>{txt}</li>)}
+        {[["1", t("Elige tu cripto y tu ronda")], ["2", t("¿Sube o baja? ¡Tú decides!")], ["3", t("¡Acierta y cobra al cerrar la ronda!")]].map(([n, txt]) => <li key={n} className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 p-2 text-xs font-semibold text-foreground"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{n}</span>{txt}</li>)}
       </ol>
 
       <div className="grid grid-cols-3 gap-2" role="tablist" aria-label={t("Mercado")}>
