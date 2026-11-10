@@ -61,3 +61,5 @@
 - [ ] Verify complete Privy login and embedded wallet creation — blocked by Privy's allowed domains excluding localhost and the preview, and by needing the user's email verification or wallet authorization.
 - [ ] Finalize legal contact and jurisdiction — waiting for the operator's legal address, privacy email and applicable jurisdiction.- [x] Harden affiliate attribution with signed wallet-ownership proof and automatic crediting on confirmation.
 - [ ] Verify affiliate credit with a real invited wallet harvest/close — needs a real referred user's signature.
+
+- [x] Cash App: live quote before signing + 25/50/75/Max amount buttons.

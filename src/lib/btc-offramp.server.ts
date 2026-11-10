@@ -11,11 +11,11 @@ function creds() {
 }
 
 async function call<T>(path: string, body?: unknown): Promise<T> {
-  const { secret } = creds();
+  creds();
   const ip = getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for")?.split(",")[0]?.trim();
   const res = await fetch(`${API}${path}`, {
     method: body ? "POST" : "GET",
-    headers: { "content-type": "application/json", "x-sideshift-secret": secret, ...(ip ? { "x-user-ip": ip } : {}) },
+    headers: { "content-type": "application/json", ...(ip ? { "x-user-ip": ip } : {}) },
     body: body ? JSON.stringify(body) : null,
   });
   const json = (await res.json().catch(() => null)) as (T & { error?: { message?: string } }) | null;
