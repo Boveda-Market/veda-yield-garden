@@ -12,6 +12,7 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { ActionSuccess, ReceiveCard } from "@/components/action-success";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 
 export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { wallet: string | null; position?: string; vaultId: "sol" | "met"; onClose: () => void }) {
   const t = useT();
@@ -97,7 +98,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
     {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : t("Firmar liquidación a USDC")}</Button><p className="text-center text-xs text-muted-foreground">{t("Al firmar cierras la posición; no se puede revertir.")}</p></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta liquidación. No hay movimientos hasta que firmes.")}</p>}
     {message && <p role="alert" className="text-sm">{message}</p>}
-    {signature && <a href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer" className="break-all text-xs underline">{t("Ver comprobante")}</a>}
+    {signature && <Link to="/wallet" onClick={onClose} className="text-xs underline">{t("Ver en tu wallet")}</Link>}
     </>}
   </DialogContent></Dialog>;
 }
