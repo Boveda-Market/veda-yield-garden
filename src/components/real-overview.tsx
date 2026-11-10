@@ -17,6 +17,7 @@ import { RealPositions, PortfolioEmpty } from "@/components/real-positions";
 import { OpenPositionsMini } from "@/components/open-positions-mini";
 import { StartGuide } from "@/components/start-guide";
 import { VaultSteps } from "@/components/vault-steps";
+import { OpenPredictions, useOpenPredictions } from "@/components/open-predictions";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 const RealPortfolioPanel = lazy(() => import("./real-portfolio-panel").then((module) => ({ default: module.RealPortfolioPanel })));
 
@@ -37,6 +38,8 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
     if (action !== "exit") setHarvest({ position: position.address, vaultId, compound: action === "compound" });
     else setWithdrawal({ position: position.address, vaultId });
   }
+  const [tab, setTab] = useState<"all" | "vaults" | "predict">("all");
+  const predictions = useOpenPredictions();
   const readWallet = useServerFn(getRealWallet);
   const query = useQuery({
     queryKey: ["real-solana", walletAddress],
@@ -66,9 +69,11 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       {data && <p className="mt-4 text-xs text-muted-foreground">{t("Lectura confirmada en la red ·")}{" "}{new Date(data.checkedAt).toLocaleTimeString("es-MX")} {t("· no autoriza movimientos")}</p>}
       {data && !data.positionsComplete && <p role="status" className="mt-3 text-sm text-muted-foreground">{t("La consulta de posiciones está incompleta. No se puede concluir que no tengas posiciones.")}</p>}
     </section>
-    {portfolioOnly && data && data.positions.length > 0 && <RealPositions positions={data.positions} onAction={openPositionAction} onDeposit={(p) => { const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) { setAddTo(p.address); setSimulationVault(v); } }} />}
+    {portfolioOnly && (() => { const nv = data?.positions.length ?? 0, np = predictions.items.length; const tabs = [{ id: "all", label: t("Todas"), n: nv + np }, { id: "vaults", label: t("Bóvedas"), n: nv }, { id: "predict", label: t("Sube / Baja"), n: np }] as const; return <div role="tablist" aria-label={t("Posiciones abiertas")} className="mt-8 flex gap-2 overflow-x-auto">{tabs.map((x) => <button key={x.id} role="tab" aria-selected={tab === x.id} onClick={() => setTab(x.id)} className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${tab === x.id ? "border-primary bg-primary text-primary-foreground shadow-md" : "border-border bg-card text-foreground hover:bg-secondary"}`}>{x.label}<span className={`rounded-full px-2 text-xs ${tab === x.id ? "bg-primary-foreground/20" : "bg-muted"}`}>{x.n}</span></button>)}</div>; })()}
+    {portfolioOnly && tab !== "vaults" && <section aria-label={t("Predicciones abiertas")} className="border-b border-border py-8"><h2 className="mb-4 font-display text-lg font-semibold">{t("Predicciones abiertas")}</h2><OpenPredictions state={predictions} /></section>}
+    {portfolioOnly && tab !== "predict" && data && data.positions.length > 0 && <RealPositions positions={data.positions} onAction={openPositionAction} onDeposit={(p) => { const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) { setAddTo(p.address); setSimulationVault(v); } }} />}
     {portfolioOnly && <Suspense fallback={<p role="status">{t("Cargando portafolio…")}</p>}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
-    {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && <PortfolioEmpty />}
+    {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && tab !== "predict" && <PortfolioEmpty />}
     {!portfolioOnly && data && <OpenPositionsMini items={data.positions.map((p) => { const v = VAULTS.find((x) => x.id === p.vaultId); return { key: p.address, symbol: p.symbol, name: v?.name ?? `${p.symbol}/USDC`, value: `${p.tokenAmount ?? "—"} ${p.symbol} · ${p.usdcAmount ?? "—"} USDC`, ...(v && walletAddress ? { onDeposit: () => { setAddTo(p.address); setSimulationVault(v); }, onClose: () => openPositionAction(p, "exit") } : {}) }; })} />}
     {!portfolioOnly && <><div className="mb-4 mt-10 flex flex-wrap items-center justify-between gap-2"><h2 className="font-display text-lg font-semibold">{t("Bóvedas disponibles")}</h2><PoweredBy brand="meteora" /></div>
     <div className="grid gap-4 md:grid-cols-2">{VAULTS.map((vault) => <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
