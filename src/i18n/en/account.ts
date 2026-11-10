@@ -80,7 +80,7 @@ export const account: Record<string, string> = {
   "Tu email quedó registrado.": "Your email has been registered.",
   "No pudimos guardar tu email. Revisa los datos o espera un minuto e inténtalo de nuevo.": "We couldn't save your email. Check your details or wait a minute and try again.",
   "Tu sesión está abierta.": "You're signed in.",
-  "Entrar a mi cuenta": "Go to my account",
+  "Continuar al app": "Continue to the app",
   "Crea tu cuenta": "Create your account",
   "Entra a tu cuenta": "Sign in to your account",
   "Registrarme con email": "Sign up with email",
