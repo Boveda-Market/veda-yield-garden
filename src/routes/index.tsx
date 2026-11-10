@@ -76,7 +76,7 @@ function Landing() {
       <section className="py-12">
         <h2 className="font-display text-2xl font-bold">{t("Bóvedas disponibles")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("Rendimientos estimados con datos actuales. No están garantizados.")}</p>
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">{VAULTS.map((v) => <VaultTeaser key={v.id} {...v} />)}</div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">{VAULTS.map((v) => <VaultTeaser key={v.id} {...v} />)}</div>
       </section>
 
       <section className="border-t border-border py-12">

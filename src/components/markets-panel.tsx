@@ -1,4 +1,5 @@
 import { TokenIcon } from "@/components/token-icon";
+import { PoweredBy } from "@/components/powered-by";
 import { PredictResults } from "@/components/predict-results";
 import { useEffect, useState } from "react";
 import { Loader2, Zap } from "lucide-react";
@@ -112,6 +113,7 @@ export function MarketsPanel(_: { identity: string }) {
         : !round && <p role="status" className="rounded-xl bg-secondary p-3 text-sm">{t("No hay una ronda abierta de {m} a {w} ahora mismo. Prueba otra duración o vuelve en unos minutos.", { m: name, w: WIN_LABEL[win] })}</p>}
       <PredictLive round={round} />
       <PredictResults asset={market} window={win} />
+      <PoweredBy brand="polymarket" className="mt-6" />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { PoweredBy } from "@/components/powered-by";
 import { TokenIcon } from "@/components/token-icon";
 import { LiveEarnings } from "./live-earnings";
 import { useT, useLocale } from "@/lib/i18n";
@@ -153,14 +154,14 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
             {activeView === "portfolio" && identity && loaded && <div className="py-8"><Suspense fallback={<p role="status">{t("Cargando portafolio…")}</p>}><PortfolioPanel identity={identity} wallet={wallet} invested={invested} pending={earned} positions={positions} rows={activities} now={now} /></Suspense></div>}
             {activeView === "vaults" && positions.length === 0 && <p className="border-b border-border py-8 text-muted-foreground">{t("Aún no tienes posiciones. Elige una bóveda abajo para empezar.")}</p>}
             {activeView === "vaults" && <><h2 className="mb-4 mt-10 font-display text-lg font-semibold">{t("Bóvedas disponibles · Prueba")}</h2>
-            <div className="grid gap-4 md:grid-cols-3">{VAULTS.map((v) => <article key={v.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
+            <div className="grid gap-4 md:grid-cols-2">{VAULTS.map((v) => <article key={v.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"><span>{t("Pool de liquidez")}</span><span>{t("Riesgo")} {t(v.risk)}</span></div><h3 className="mt-4 flex items-center gap-2 font-display text-xl font-semibold"><TokenIcon symbol={v.pair.split("/")[0] ?? ""} size={28} />{t(v.name)}</h3><p className="mt-1 text-sm text-muted-foreground">{v.pair}</p>
               <p className="mt-5 font-display text-4xl font-bold text-primary">{v.apy}%<span className="ml-1 text-sm font-normal text-muted-foreground">{t("APY ilustrativo")}</span></p>
               <p className="mt-2 text-xs text-muted-foreground">{t("Ejemplo de simulación · no es una tasa verificada del pool.")}</p>
               <p className="mt-5 flex-1 text-sm leading-6 text-muted-foreground">{t(v.blurb)}</p>
               <Button variant="outline" className="mt-4 w-full" onClick={() => setDetailsFor(v)}>{t("Detalles del pool")}</Button>
               <Button variant="secondary" className="mt-2 w-full" onClick={() => setDepositFor(v)}>{t("Depositar créditos")}</Button>
-            </article>)}</div></>}
+            </article>)}</div><PoweredBy brand="meteora" className="mt-6" /></>}
           </>
         ) : null}
 
@@ -170,8 +171,8 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
       <footer className="border-t border-border pb-20">
         <div className="mx-auto max-w-5xl px-5 py-8 text-xs leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">© {new Date().getFullYear()} Boveda Technologies LLC</p>
-          <p className="mt-2">{t("BÓVEDA te permite usar bóvedas con tu wallet o practicar sin dinero. En Real puedes depositar entre 1 y 10,000 USDC en SOL y MET. Puedes cosechar o liquidar tus posiciones compatibles de SOL y MET con tu wallet. La liquidez bloqueada no se puede liquidar y SPCX aún no admite operaciones. Prueba usa 1,000 créditos ficticios y permite entrar como invitado.")}</p>
-          <p className="mt-3">{t("Las estadísticas públicas provienen de DexScreener. Los APY y ganancias de Prueba son ilustrativos; no representan rendimientos reales ni garantizados. Proveer liquidez implica volatilidad, pérdida impermanente, fallos de contratos y posible pérdida total del capital. SPCX no implica afiliación con SpaceX ni acciones directas. Nada aquí constituye asesoría financiera, legal o fiscal. Boveda Technologies LLC no solicita claves privadas ni frases semilla.")}</p>
+          <p className="mt-2">{t("BÓVEDA te permite usar bóvedas con tu wallet o practicar sin dinero. En Real puedes depositar entre 1 y 10,000 USDC en SOL y MET. Puedes cosechar o liquidar tus posiciones compatibles de SOL y MET con tu wallet. La liquidez bloqueada no se puede liquidar. Prueba usa 1,000 créditos ficticios y permite entrar como invitado.")}</p>
+          <p className="mt-3">{t("Las estadísticas públicas provienen de DexScreener. Los APY y ganancias de Prueba son ilustrativos; no representan rendimientos reales ni garantizados. Proveer liquidez implica volatilidad, pérdida impermanente, fallos de contratos y posible pérdida total del capital. Nada aquí constituye asesoría financiera, legal o fiscal. Boveda Technologies LLC no solicita claves privadas ni frases semilla.")}</p>
           <p className="mt-3">{t("Comisión operativa: entrada gratis hasta 5 USDC y 0.5% sobre el resto; cosechas y liquidaciones gratis hasta 10 USDC y 1.25% sobre el resto. En las liquidaciones, la comisión se calcula sobre el mínimo bruto USDC protegido por slippage, excluyendo la renta SOL. Los costes de red y conversión son independientes. En Prueba el cargo es ficticio.")}</p>
           <nav className="mt-4 flex flex-wrap gap-5 text-primary"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to="/terminos">{t("Términos y condiciones")}</Link><Link to="/privacidad">{t("Política de privacidad")}</Link></nav>
         </div>

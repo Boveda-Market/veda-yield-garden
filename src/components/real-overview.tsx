@@ -1,3 +1,4 @@
+import { PoweredBy } from "@/components/powered-by";
 import { TokenIcon } from "@/components/token-icon";
 import { useT } from "@/lib/i18n";
 import { RefreshCw, ShieldAlert } from "lucide-react";
@@ -47,7 +48,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   return <>
     <section aria-label={t("Estado del modo Real")} className="border-y border-border py-8">
       <div className="flex items-center gap-3"><ShieldAlert className="shrink-0 text-primary" size={24} /><h1 className="font-display text-2xl font-semibold">{portfolioOnly ? t("Tu portafolio") : t("BÓVEDA")}</h1></div>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Deposita entre 1 y 10,000 USDC en las bóvedas SOL y MET. Cosecha comisiones o liquida tus posiciones compatibles de SOL y MET, revisando los importes antes de firmar. SPCX aún no admite operaciones. Las posiciones bloqueadas no se pueden liquidar.")}</p>
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Deposita entre 1 y 10,000 USDC en las bóvedas SOL y MET. Cosecha comisiones o liquida tus posiciones compatibles de SOL y MET, revisando los importes antes de firmar. Las posiciones bloqueadas no se pueden liquidar.")}</p>
       {walletAddress && <div className="mt-4 flex flex-wrap items-center gap-3"><p className="min-w-0 break-all text-xs text-muted-foreground">{t("Wallet conectada:")}{" "}{walletAddress}</p><Button variant="outline" size="icon" title={t("Actualizar saldo y posiciones")} aria-label={t("Actualizar saldo y posiciones")} disabled={query.isFetching} onClick={() => void query.refetch()}><RefreshCw size={16} className={query.isFetching ? "animate-spin motion-reduce:animate-none" : ""} /></Button></div>}
       {!portfolioOnly && <StartGuide className="mt-4" />}
       <BuyUsdc className="mt-4" />
@@ -65,14 +66,14 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
     {portfolioOnly && <Suspense fallback={<p role="status">{t("Cargando portafolio…")}</p>}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
     {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && <PortfolioEmpty />}
     {!portfolioOnly && <><h2 className="mb-4 mt-10 font-display text-lg font-semibold">{t("Bóvedas disponibles")}</h2>
-    <div className="grid gap-4 md:grid-cols-3">{VAULTS.map((vault) => <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
+    <div className="grid gap-4 md:grid-cols-2">{VAULTS.map((vault) => <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"><span>{t("Pool de liquidez")}</span><span>{t("Riesgo")}{" "}{t(vault.risk)}</span></div><h3 className="mt-4 flex items-center gap-2 font-display text-xl font-semibold"><TokenIcon symbol={vault.pair.split("/")[0] ?? ""} size={28} />{t(vault.name)}</h3><p className="mt-1 text-sm text-muted-foreground">{vault.pair}</p>
       <PoolYield address={vault.pool} />
       <p className="mt-5 flex-1 text-sm leading-6 text-muted-foreground">{t(vault.blurb)}</p>
       <Button variant="outline" className="mt-4 w-full" onClick={() => onDetails(vault)}>{t("Detalles del pool")}</Button>
       <Button variant="secondary" className="mt-2 w-full" disabled={!walletAddress || (vault.id !== "sol" && vault.id !== "met")} onClick={() => setSimulationVault(vault)}>{t("Depositar USDC")}</Button>
 
-    </article>)}</div></>}
+    </article>)}</div><PoweredBy brand="meteora" className="mt-6" /></>}
     {simulationVault && <DepositSimulation key={simulationVault.id} vault={simulationVault} wallet={walletAddress} onClose={() => setSimulationVault(null)} />}
     {harvest && walletAddress && <HarvestDialog wallet={walletAddress} position={harvest.position} vaultId={harvest.vaultId} onClose={() => setHarvest(null)} compound={harvest.compound} />}
     {withdrawal && <WithdrawalSimulation wallet={walletAddress} {...withdrawal} onClose={() => setWithdrawal(null)} />}
@@ -80,7 +81,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <DialogContent>
         <DialogTitle>{unavailableAction === "harvest" ? t("Cosechar Ganancias") : t("Cerrar y Liquidar")}</DialogTitle>
         <DialogDescription>{t("Esta operación todavía no está habilitada para esta posición.")}</DialogDescription>
-        <p className="text-sm leading-6 text-muted-foreground">{t("Puedes operar posiciones compatibles de SOL y MET con su wallet propietaria. SPCX aún no admite operaciones y la liquidez bloqueada no se puede liquidar. No se ha solicitado ninguna firma ni se ha movido dinero.")}</p>
+        <p className="text-sm leading-6 text-muted-foreground">{t("Puedes operar posiciones compatibles de SOL y MET con su wallet propietaria. La liquidez bloqueada no se puede liquidar. No se ha solicitado ninguna firma ni se ha movido dinero.")}</p>
         <Button variant="outline" onClick={() => setUnavailableAction(null)}>{t("Volver a mis posiciones")}</Button>
       </DialogContent>
     </Dialog>
