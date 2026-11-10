@@ -151,6 +151,7 @@ export const realOps: Record<string, string> = {
   "Cargando portafolio…": "Loading portfolio…",
   "Riesgo": "Risk",
   "Depositar USDC": "Deposit USDC",
+  "Depositar más": "Deposit more",
   "Volver a mis posiciones": "Back to my positions",
   "Todo": "All",
   "Ganancias (PNL)": "Earnings (PNL)",

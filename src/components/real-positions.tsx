@@ -1,6 +1,6 @@
 import { useQueries } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { ArrowDownToLine, Repeat, Copy, ExternalLink, Sprout, Vault as VaultIcon } from "lucide-react";
+import { ArrowDownToLine, Plus, Repeat, Copy, ExternalLink, Sprout, Vault as VaultIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { fetchPoolStats } from "@/lib/pool-stats";
@@ -13,7 +13,7 @@ import { poolYieldOptions } from "@/lib/pool-yield";
 import { earningRatePerMs } from "@/lib/live-earnings";
 import { LiveEarnings } from "./live-earnings";
 
-export function RealPositions({ positions, onAction }: { positions: ChainPosition[]; onAction: (p: ChainPosition, a: "harvest" | "exit" | "compound") => void }) {
+export function RealPositions({ positions, onAction, onDeposit }: { positions: ChainPosition[]; onAction: (p: ChainPosition, a: "harvest" | "exit" | "compound") => void; onDeposit?: (p: ChainPosition) => void }) {
   const t = useT();
   const pools = positions.map((p) => VAULTS.find((v) => v.id === p.vaultId)?.pool ?? null);
   const stats = useQueries({ queries: pools.map((pool) => ({ queryKey: ["dexscreener-pool-stats", pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(pool as string, signal), enabled: Boolean(pool), staleTime: 60_000, retry: 1 })) });
@@ -45,7 +45,7 @@ export function RealPositions({ positions, onAction }: { positions: ChainPositio
         </div>}
         {fees !== null && <LiveEarnings base={fees} ratePerMs={p.locked ? 0 : earningRatePerMs(value, apr)} since={since} label={t("Ganancias por cosechar · estimado en vivo")} />}
         {p.locked && <p className="mt-2 text-xs text-muted-foreground">{t("Incluye liquidez bloqueada; no toda la posición es retirable.")}</p>}
-        <div className="mt-4 flex flex-wrap gap-2"><Button variant="secondary" onClick={() => onAction(p, "harvest")}><Sprout size={16} />{t("Cosechar Ganancias")}</Button><Button variant="secondary" onClick={() => onAction(p, "compound")}><Repeat size={16} />{t("Reinvertir ganancias")}</Button><Button variant="outline" onClick={() => onAction(p, "exit")}><ArrowDownToLine size={16} />{t("Cerrar y Liquidar")}</Button></div>
+        <div className="mt-4 flex flex-wrap gap-2">{onDeposit && (p.vaultId === "sol" || p.vaultId === "met") && <Button onClick={() => onDeposit(p)}><Plus size={16} />{t("Depositar más")}</Button>}<Button variant="secondary" onClick={() => onAction(p, "harvest")}><Sprout size={16} />{t("Cosechar Ganancias")}</Button><Button variant="secondary" onClick={() => onAction(p, "compound")}><Repeat size={16} />{t("Reinvertir ganancias")}</Button><Button variant="outline" onClick={() => onAction(p, "exit")}><ArrowDownToLine size={16} />{t("Cerrar y Liquidar")}</Button></div>
         {p.vaultId !== "sol" && p.vaultId !== "met" && <p className="mt-3 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
       </article>;
     })}</div>

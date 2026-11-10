@@ -62,7 +62,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       {data && <p className="mt-4 text-xs text-muted-foreground">{t("Lectura confirmada en la red ·")}{" "}{new Date(data.checkedAt).toLocaleTimeString("es-MX")} {t("· no autoriza movimientos")}</p>}
       {data && !data.positionsComplete && <p role="status" className="mt-3 text-sm text-muted-foreground">{t("La consulta de posiciones está incompleta. No se puede concluir que no tengas posiciones.")}</p>}
     </section>
-    {portfolioOnly && data && data.positions.length > 0 && <RealPositions positions={data.positions} onAction={openPositionAction} />}
+    {portfolioOnly && data && data.positions.length > 0 && <RealPositions positions={data.positions} onAction={openPositionAction} onDeposit={(p) => { const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) setSimulationVault(v); }} />}
     {portfolioOnly && <Suspense fallback={<p role="status">{t("Cargando portafolio…")}</p>}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
     {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && <PortfolioEmpty />}
     {!portfolioOnly && <><div className="mb-4 mt-10 flex flex-wrap items-center justify-between gap-2"><h2 className="font-display text-lg font-semibold">{t("Bóvedas disponibles")}</h2><PoweredBy brand="meteora" /></div>
