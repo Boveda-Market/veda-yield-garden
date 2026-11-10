@@ -3,6 +3,8 @@ import { CHAIN_POOLS, solanaAddressSchema } from "@/lib/solana-data";
 import { progressiveFee } from "@/lib/fees";
 
 export const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+/** Stable dollar in which prediction payouts arrive; converted to USDC after claiming. */
+export const JUPUSD_MINT = "JuprjznTrTSp2UFa3ZBUFgwdAmtZCq4MQCwysN55USD";
 export const SOL_MINT = "So11111111111111111111111111111111111111112";
 /** SOL kept aside so the wallet can always pay network costs. */
 export const SOL_RESERVE_LAMPORTS = 10_000_000n;
@@ -59,6 +61,7 @@ export function swapFee(usdcUnits: bigint) { return progressiveFee(usdcUnits); }
 export type SwapToken = { symbol: string; mint: string; decimals: number };
 export const SWAP_TOKENS: SwapToken[] = [
   { symbol: "USDC", mint: USDC_MINT, decimals: 6 },
+  { symbol: "JupUSD", mint: JUPUSD_MINT, decimals: 6 },
   ...CHAIN_POOLS.flatMap((p) => "swapDecimals" in p ? [{ symbol: p.symbol, mint: p.mint, decimals: p.swapDecimals }] : []),
 ];
 export function swapToken(symbol: string) {

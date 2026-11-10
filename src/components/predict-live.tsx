@@ -8,7 +8,7 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useT } from "@/lib/i18n";
 import { PREDICT_MAX_USDC, PREDICT_MIN_USDC, potentialProfit, type LiveRound, type PredictPosition, type PredictQuote, type PredictSide } from "@/lib/predict";
 import { executePredict, getPredictPositions, preparePredictBuy, preparePredictClaim, preparePredictSell } from "@/lib/predict.functions";
-import { toBaseUnits } from "@/lib/wallet-actions";
+import { buildSwap, JUPUSD_MINT, quoteSwap, readTokenBalance, toBaseUnits } from "@/lib/wallet-actions";
 import { getRealWallet } from "@/lib/solana.functions";
 import { decimalToUnits } from "@/lib/onboarding";
 import { annotateRecord } from "@/lib/predict-history";
@@ -116,7 +116,17 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
       const sig = await sign(r.transaction, r.context);
       setWin(usdc(BigInt(p.payoutMicro || "0") - BigInt(p.costMicro || "0")));
       annotateRecord(wallet, p.pubkey, { claimSig: sig });
-      setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(p.payoutMicro) }), sig });
+      setMsg({ ok: true, text: t("Pago cobrado. Ahora firma el cambio a USDC…"), sig });
+      // Payout arrives as the venue's stable dollar; convert the whole balance to USDC with a second wallet signature.
+      try {
+        await new Promise((r) => setTimeout(r, 2500));
+        const bal = await readTokenBalance(wallet, JUPUSD_MINT);
+        if (bal > 0n) {
+          const q = await quoteSwap("JupUSD", "USDC", bal);
+          const swapSig = await session.signAndSend(await buildSwap(wallet, q));
+          setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(q.outAmount) }), sig: swapSig });
+        } else setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(p.payoutMicro) }), sig });
+      } catch { setMsg({ ok: true, text: t("Pago cobrado, pero falta el cambio a USDC. Hazlo en Mi wallet → Cambiar (JupUSD → USDC)."), sig }); }
       setTimeout(() => { void refresh(); void loadBalance(); }, 3000);
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };
