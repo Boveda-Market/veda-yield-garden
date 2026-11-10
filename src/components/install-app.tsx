@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, Share, PlusSquare } from "lucide-react";
+import { Download, Share, PlusSquare, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
@@ -9,18 +9,18 @@ if (typeof window !== "undefined") {
   window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferred = e as PromptEvent; });
 }
 
-export function InstallAppButton({ className }: { className: string }) {
-  const t = useT();
-  const [installed, setInstalled] = useState(false);
+function useInstall() {
+  const [installed, setInstalled] = useState(true);
   const [help, setHelp] = useState<null | "ios" | "other">(null);
   useEffect(() => {
-    const standalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as { standalone?: boolean }).standalone === true;
-    setInstalled(standalone);
+    const mq = window.matchMedia("(display-mode: standalone)");
+    const check = () => setInstalled(mq.matches || (navigator as { standalone?: boolean }).standalone === true);
+    check();
     const done = () => setInstalled(true);
     window.addEventListener("appinstalled", done);
-    return () => window.removeEventListener("appinstalled", done);
+    mq.addEventListener?.("change", check);
+    return () => { window.removeEventListener("appinstalled", done); mq.removeEventListener?.("change", check); };
   }, []);
-  if (installed) return null;
   const install = async () => {
     if (deferred) {
       await deferred.prompt();
@@ -32,9 +32,12 @@ export function InstallAppButton({ className }: { className: string }) {
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     setHelp(ios ? "ios" : "other");
   };
-  return <>
-    <button type="button" className={className} onClick={install}><Download size={18} />{t("Instalar app")}</button>
-    <Dialog open={help !== null} onOpenChange={(o) => !o && setHelp(null)}>
+  return { installed, help, setHelp, install };
+}
+
+function InstallHelp({ help, setHelp }: { help: null | "ios" | "other"; setHelp: (v: null) => void }) {
+  const t = useT();
+  return <Dialog open={help !== null} onOpenChange={(o) => !o && setHelp(null)}>
       <DialogContent className="max-w-sm">
         <DialogTitle className="font-display">{t("Instala BÓVEDA")}</DialogTitle>
         <DialogDescription>{t("Tenla en tu pantalla de inicio y ábrela como cualquier app.")}</DialogDescription>
@@ -47,6 +50,36 @@ export function InstallAppButton({ className }: { className: string }) {
           <p className="mt-2 text-sm">{t("Abre el menú de tu navegador (⋮) y elige «Instalar aplicación» o «Agregar a la pantalla principal».")}</p>
         )}
       </DialogContent>
-    </Dialog>
+    </Dialog>;
+}
+
+export function InstallAppButton({ className }: { className: string }) {
+  const t = useT();
+  const { installed, help, setHelp, install } = useInstall();
+  if (installed) return null;
+  return <>
+    <button type="button" className={className} onClick={install}><Download size={18} />{t("Instalar app")}</button>
+    <InstallHelp help={help} setHelp={setHelp} />
+  </>;
+}
+
+const DISMISS_KEY = "boveda-install-banner-dismissed";
+
+/** Dismissible card; hidden while running as the installed app, so it returns after uninstall. Dismissal lasts for the browser session. */
+export function InstallAppBanner() {
+  const t = useT();
+  const { installed, help, setHelp, install } = useInstall();
+  const [dismissed, setDismissed] = useState(true);
+  useEffect(() => { setDismissed(sessionStorage.getItem(DISMISS_KEY) === "1"); }, []);
+  if (installed || dismissed) return null;
+  const close = () => { sessionStorage.setItem(DISMISS_KEY, "1"); setDismissed(true); };
+  return <>
+    <div className="flex items-center gap-3 rounded-2xl border border-primary/30 bg-primary/10 p-3">
+      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground"><Download size={18} /></span>
+      <p className="flex-1 text-sm">{t("Instala BÓVEDA en tu pantalla de inicio para abrirla en un toque.")}</p>
+      <button type="button" onClick={install} className="rounded-full bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground">{t("Instalar")}</button>
+      <button type="button" onClick={close} aria-label={t("Cerrar")} className="rounded-full p-1 text-muted-foreground hover:text-foreground"><X size={16} /></button>
+    </div>
+    <InstallHelp help={help} setHelp={setHelp} />
   </>;
 }

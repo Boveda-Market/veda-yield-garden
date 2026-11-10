@@ -457,6 +457,8 @@ export const extra: Record<string, string> = {
   "Soporte y sugerencias en Telegram": "Support and suggestions on Telegram",
   "Soporte y sugerencias": "Support and suggestions",
   "Instalar app": "Install app",
+  "Instala BÓVEDA en tu pantalla de inicio para abrirla en un toque.": "Install BÓVEDA on your home screen to open it in one tap.",
+  "Instalar": "Install",
   "Instala BÓVEDA": "Install BÓVEDA",
   "Tenla en tu pantalla de inicio y ábrela como cualquier app.": "Keep it on your home screen and open it like any app.",
   "1. Toca el botón Compartir de Safari.": "1. Tap Safari's Share button.",
