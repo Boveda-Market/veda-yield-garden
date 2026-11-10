@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requirePrivyAuth } from "@/lib/privy-auth.middleware";
 import { z } from "zod";
 import { solanaAddressSchema } from "@/lib/solana-data";
 import { SWAP_TOKENS } from "@/lib/wallet-actions";
@@ -11,6 +12,7 @@ const contextInput = z.object({ lookupTables: z.array(solanaAddressSchema).max(8
 export type ChainContext = { blockhash: string; tables: { key: string; addresses: string[] }[] };
 
 export const getTxContext = createServerFn({ method: "POST" })
+  .middleware([requirePrivyAuth])
   .inputValidator((input: unknown) => contextInput.parse(input))
   .handler(async ({ data }): Promise<{ success: true; data: ChainContext } | { success: false; error: string }> => {
     const key = process.env["HELIUS_API_KEY"];
@@ -33,6 +35,7 @@ const SWAP_MINTS = SWAP_TOKENS.map((t) => t.mint);
 const balanceInput = z.object({ wallet: solanaAddressSchema, mint: z.string().refine((m) => SWAP_MINTS.includes(m)) }).strict();
 
 export const getTokenBalance = createServerFn({ method: "POST" })
+  .middleware([requirePrivyAuth])
   .inputValidator((input: unknown) => balanceInput.parse(input))
   .handler(async ({ data }): Promise<{ success: true; amount: string } | { success: false; error: string }> => {
     const key = process.env["HELIUS_API_KEY"];

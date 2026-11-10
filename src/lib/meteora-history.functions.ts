@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requirePrivyAuth } from "@/lib/privy-auth.middleware";
 import { meteoraHistoryInput, type MeteoraHistoryPage } from "./meteora-history";
 
 export const getMeteoraHistory = createServerFn({ method: "POST" })
+  .middleware([requirePrivyAuth])
   .inputValidator((input: unknown) => meteoraHistoryInput.parse(input))
   .handler(async ({ data }): Promise<{ success: true; page: MeteoraHistoryPage } | { success: false; error: string }> => {
     const key = process.env["HELIUS_API_KEY"];

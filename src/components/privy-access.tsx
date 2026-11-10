@@ -1,6 +1,7 @@
 import { useT } from "@/lib/i18n";
 import "@/lib/buffer-polyfill";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { setPrivyTokenGetter } from "@/lib/privy-token";
 import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useMfaEnrollment, usePrivy } from "@privy-io/react-auth";
 import { useUpdateEmail } from "@privy-io/react-auth/ui";
 import { toSolanaWalletConnectors, useExportWallet, useFundWallet, useSignMessage, useSignTransaction, useWallets } from "@privy-io/react-auth/solana";
@@ -37,6 +38,10 @@ function SessionBridge({ children }: { children: ReactNode }) {
     onError: () => setError(t("No se pudo iniciar sesión. Revisa los métodos y dominios permitidos en Privy e inténtalo de nuevo.")),
   });
   const walletAddress = wallets[0]?.address ?? null;
+  useEffect(() => {
+    setPrivyTokenGetter(authenticated ? getAccessToken : null);
+    return () => setPrivyTokenGetter(null);
+  }, [authenticated, getAccessToken]);
   return <BovedaSessionContext.Provider value={{
     ready, authenticated, userId: authenticated ? user?.id ?? null : null,
     label: user?.email?.address ?? user?.google?.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : t("Mi cuenta")),

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requirePrivyAuth } from "@/lib/privy-auth.middleware";
 import { pilotInput, signatureInput, type PilotStatus } from "@/lib/pilot-deposit";
 
 /** Re-simulates the chosen deposit and returns it only when budget and position verify. */
@@ -12,6 +13,7 @@ export const preparePilotDeposit = createServerFn({ method: "POST" })
   });
 
 export const pilotDepositStatus = createServerFn({ method: "POST" })
+  .middleware([requirePrivyAuth])
   .inputValidator((input: unknown) => signatureInput.parse(input))
   .handler(async ({ data }): Promise<{ status: PilotStatus }> => {
     const key = process.env["HELIUS_API_KEY"];

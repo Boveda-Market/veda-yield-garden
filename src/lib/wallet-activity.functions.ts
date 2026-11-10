@@ -1,9 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requirePrivyAuth } from "@/lib/privy-auth.middleware";
 import { realWalletInput } from "./solana-data";
 
 import type { WalletActivity } from "./wallet-activity";
 export type { WalletActivity } from "./wallet-activity";
 export const getWalletActivity = createServerFn({ method: "POST" })
+  .middleware([requirePrivyAuth])
   .inputValidator((input: unknown) => realWalletInput.parse(input))
   .handler(async ({ data }): Promise<{ success: true; rows: WalletActivity[] } | { success: false; error: string }> => {
     const key = process.env["HELIUS_API_KEY"];

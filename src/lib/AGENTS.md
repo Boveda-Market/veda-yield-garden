@@ -1,2 +1,3 @@
 - Compound adds harvested tokens to the same verified position: no swap/extra SOL wrap, capped by harvest, simulated.
 - Live predictions: only BTC/ETH/SOL Up-or-Down rounds (5m/15m/1h) from Polymarket via Jupiter Prediction API, one current round per asset/window, wallet sole signer, simulated before review, executed via /execute; no practice mode; BÓVEDA is never counterparty.
+- Server functions that spend the private Helius quota use requirePrivyAuth (Privy JWT via x-boveda-auth header, getter registered by the session bridge) so anonymous callers cannot drain it.
