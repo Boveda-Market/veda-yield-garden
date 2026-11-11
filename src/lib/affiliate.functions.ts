@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue, type PayoutRecent, claimRequest, claimNet } from "./affiliate";
+import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue, type PayoutRecent, claimRequest, claimFinalizeRequest, claimNet } from "./affiliate";
 import { proofIsFresh, walletProofMessage, walletProofRequest } from "./wallet-proof";
 
 type Fail = { success: false; error: string };
@@ -224,36 +224,70 @@ export const markAffiliatePaid = createServerFn({ method: "POST" })
     } catch { return { success: false, error: "No se pudo registrar el pago." }; }
   });
 
-/** Affiliate collects their own pending commissions: server locks rows, sends net USDC (minus flat network fee) from the payout wallet, and records the signature. */
+const STALE_CLAIM_MS = 5 * 60_000;
+async function claimCtx(token: string) {
+  const ctx = await admin(token);
+  const { data: aff } = await ctx.db.from("affiliates").select("payout_wallet").eq("privy_user_id", ctx.id).maybeSingle();
+  return { ...ctx, wallet: aff?.payout_wallet ?? null };
+}
+
+/** Step 1: lock pending commissions and return a payout transaction pre-signed by the treasury; the affiliate's wallet co-signs as fee payer (pays network costs in its own SOL). */
 export const claimAffiliatePayout = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => claimRequest.parse(input))
-  .handler(async ({ data }): Promise<{ success: true; signature: string; netRaw: string } | Fail> => {
+  .handler(async ({ data }): Promise<{ success: true; transaction: string; netRaw: string; wallet: string } | Fail> => {
     const key = process.env["HELIUS_API_KEY"];
     const secret = process.env["AFFILIATE_PAYOUT_SECRET_KEY"];
     if (!key || !secret) return { success: false, error: "Los cobros automáticos no están disponibles todavía." };
-    const { id, db } = await admin(data.token);
-    const { data: aff } = await db.from("affiliates").select("payout_wallet").eq("privy_user_id", id).maybeSingle();
-    if (!aff?.payout_wallet) return { success: false, error: "Guarda primero tu wallet de cobro." };
+    const { id, db, wallet } = await claimCtx(data.token);
+    if (!wallet) return { success: false, error: "Guarda primero tu wallet de cobro." };
+    // Release abandoned locks (never signed / expired transactions).
+    await db.from("affiliate_earnings").update({ status: "pending", paid_at: null }).eq("affiliate_privy_id", id).eq("status", "paid").is("payout_signature", null).lt("paid_at", new Date(Date.now() - STALE_CLAIM_MS).toISOString());
     const { data: pending } = await db.from("affiliate_earnings").select("commission_raw").eq("affiliate_privy_id", id).eq("status", "pending");
-    const owedPre = (pending ?? []).reduce((a, r) => a + BigInt(r.commission_raw), 0n);
-    if (claimNet(owedPre) === null) return { success: false, error: "Necesitas al menos 10 USDC acumulados para cobrar." };
-    // Atomic lock: flip pending rows to paid; a concurrent claim finds nothing left.
+    if (claimNet((pending ?? []).reduce((a, r) => a + BigInt(r.commission_raw), 0n)) === null) return { success: false, error: "Necesitas al menos 10 USDC acumulados para cobrar." };
     const { data: locked, error: lockErr } = await db.from("affiliate_earnings").update({ status: "paid", paid_at: new Date().toISOString() }).eq("affiliate_privy_id", id).eq("status", "pending").is("payout_signature", null).select("signature, level, commission_raw");
-    if (lockErr || !locked?.length) return { success: false, error: "Ya hay un cobro en proceso." };
-    const owed = locked.reduce((a, r) => a + BigInt(r.commission_raw), 0n);
-    const net = claimNet(owed);
+    if (lockErr || !locked?.length) return { success: false, error: "Ya hay un cobro en proceso. Espera unos minutos." };
+    const net = claimNet(locked.reduce((a, r) => a + BigInt(r.commission_raw), 0n));
     const revert = async () => { for (const r of locked) await db.from("affiliate_earnings").update({ status: "pending", paid_at: null }).eq("signature", r.signature).eq("level", r.level).eq("affiliate_privy_id", id).is("payout_signature", null); };
-    if (net === null || net <= 0n) { await revert(); return { success: false, error: "Necesitas al menos 10 USDC acumulados para cobrar." }; }
-    let signature: string;
+    if (net === null) { await revert(); return { success: false, error: "Necesitas al menos 10 USDC acumulados para cobrar." }; }
     try {
       const { AFFILIATE_PAYOUT_WALLET } = await import("./affiliate");
-      const { sendAffiliateClaim } = await import("./affiliate.server");
-      signature = await sendAffiliateClaim(key, secret, AFFILIATE_PAYOUT_WALLET, aff.payout_wallet, net);
+      const { buildAffiliateClaim } = await import("./affiliate.server");
+      const transaction = await buildAffiliateClaim(key, secret, AFFILIATE_PAYOUT_WALLET, wallet, net);
+      return { success: true, transaction, netRaw: net.toString(), wallet };
     } catch (e) {
-      console.error("affiliate claim failed", e instanceof Error ? e.message : "unknown");
+      console.error("affiliate claim build failed", e instanceof Error ? e.message : "unknown");
       await revert();
-      return { success: false, error: "No se pudo enviar tu cobro ahora. Inténtalo más tarde." };
+      return { success: false, error: "No se pudo preparar tu cobro. Asegúrate de tener un poco de SOL para la red (≈0.003 SOL) e inténtalo de nuevo." };
     }
-    for (const r of locked) await db.from("affiliate_earnings").update({ payout_signature: signature }).eq("signature", r.signature).eq("level", r.level).eq("affiliate_privy_id", id);
-    return { success: true, signature, netRaw: net.toString() };
+  });
+
+/** Step 2: after the affiliate signs and broadcasts, verify the confirmed USDC payout on-chain and record it. */
+export const finalizeAffiliateClaim = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => claimFinalizeRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: true } | Fail> => {
+    const key = process.env["HELIUS_API_KEY"];
+    if (!key) return { success: false, error: "Servicio no disponible." };
+    const { id, db, wallet } = await claimCtx(data.token);
+    if (!wallet) return { success: false, error: "Guarda primero tu wallet de cobro." };
+    const { data: used } = await db.from("affiliate_earnings").select("signature").eq("payout_signature", data.signature).limit(1);
+    if (used?.length) return { success: false, error: "Esa transacción ya se registró." };
+    const { data: locked } = await db.from("affiliate_earnings").select("signature, level, commission_raw").eq("affiliate_privy_id", id).eq("status", "paid").is("payout_signature", null);
+    if (!locked?.length) return { success: false, error: "No hay un cobro en proceso." };
+    const owed = locked.reduce((a, r) => a + BigInt(r.commission_raw), 0n);
+    const { AFFILIATE_PAYOUT_WALLET } = await import("./affiliate");
+    const { confirmedPayoutTransfer } = await import("./affiliate.server");
+    let received: bigint | null = null;
+    for (let i = 0; i < 8 && received === null; i++) { received = await confirmedPayoutTransfer(key, data.signature, AFFILIATE_PAYOUT_WALLET, wallet); if (received === null) await new Promise((r) => setTimeout(r, 2000)); }
+    if (received === null || received < owed) return { success: false, error: "Aún no vemos tu cobro confirmado en la red. Revisa tu wallet en unos minutos." };
+    for (const r of locked) await db.from("affiliate_earnings").update({ payout_signature: data.signature }).eq("signature", r.signature).eq("level", r.level).eq("affiliate_privy_id", id).is("payout_signature", null);
+    return { success: true };
+  });
+
+/** Releases a claim lock when the affiliate cancels the signature. */
+export const cancelAffiliateClaim = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => claimRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: true }> => {
+    const { id, db } = await claimCtx(data.token);
+    await db.from("affiliate_earnings").update({ status: "pending", paid_at: null }).eq("affiliate_privy_id", id).eq("status", "paid").is("payout_signature", null);
+    return { success: true };
   });

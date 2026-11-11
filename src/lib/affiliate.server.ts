@@ -16,12 +16,12 @@ export async function confirmedFeeTransfer(apiKey: string, signature: string) {
   return { payer, feeRaw };
 }
 
-/** Confirmed USDC moved from the payout wallet to `recipient` in this transaction (micro-USDC), or null. */
+/** Confirmed USDC moved from the payout wallet (which must have signed) to `recipient` in this transaction (micro-USDC), or null. */
 export async function confirmedPayoutTransfer(apiKey: string, signature: string, payoutWallet: string, recipient: string) {
   const { heliusConnection } = await import("@/lib/solana-read.server");
   const tx = await heliusConnection(apiKey).getParsedTransaction(signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
   if (!tx?.meta || tx.meta.err) return null;
-  if (tx.transaction.message.accountKeys[0]?.pubkey.toBase58() !== payoutWallet) return null;
+  if (!tx.transaction.message.accountKeys.some((k) => k.signer && k.pubkey.toBase58() === payoutWallet)) return null;
   const mint = USDC_MINT.toString();
   const sum = (owner: string, list: typeof tx.meta.preTokenBalances) => (list ?? []).filter((b) => b.owner === owner && b.mint === mint).reduce((a, b) => a + BigInt(b.uiTokenAmount.amount), 0n);
   const received = sum(recipient, tx.meta.postTokenBalances) - sum(recipient, tx.meta.preTokenBalances);
@@ -39,9 +39,9 @@ async function payoutSigner(secret: string, expected: string) {
   return kp;
 }
 
-/** Sends `amount` micro-USDC from the payout wallet to `recipient` (creating its USDC account if missing) and returns the confirmed signature. */
-export async function sendAffiliateClaim(apiKey: string, secret: string, payoutWallet: string, recipient: string, amount: bigint) {
-  const { PublicKey, Transaction } = await import("@solana/web3.js");
+/** Builds the USDC payout from the payout wallet to `recipient`, with the recipient as fee payer (they pay network costs in their own SOL). Partially signed by the payout wallet, simulated, returned as base64 for the recipient's wallet to co-sign. */
+export async function buildAffiliateClaim(apiKey: string, secret: string, payoutWallet: string, recipient: string, amount: bigint) {
+  const { PublicKey, TransactionMessage, VersionedTransaction } = await import("@solana/web3.js");
   const { createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, getAssociatedTokenAddressSync } = await import("@solana/spl-token");
   const { heliusConnection } = await import("@/lib/solana-read.server");
   const kp = await payoutSigner(secret, payoutWallet);
@@ -50,16 +50,14 @@ export async function sendAffiliateClaim(apiKey: string, secret: string, payoutW
   const mint = new PublicKey(USDC_MINT.toString());
   const fromAta = getAssociatedTokenAddressSync(mint, kp.publicKey);
   const toAta = getAssociatedTokenAddressSync(mint, to, true);
-  const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash("confirmed");
-  const tx = new Transaction({ feePayer: kp.publicKey, blockhash, lastValidBlockHeight }).add(
-    createAssociatedTokenAccountIdempotentInstruction(kp.publicKey, toAta, to, mint),
+  const { blockhash } = await conn.getLatestBlockhash("confirmed");
+  const message = new TransactionMessage({ payerKey: to, recentBlockhash: blockhash, instructions: [
+    createAssociatedTokenAccountIdempotentInstruction(to, toAta, to, mint),
     createTransferCheckedInstruction(fromAta, mint, toAta, kp.publicKey, amount, 6),
-  );
-  tx.sign(kp);
-  const sim = await conn.simulateTransaction(tx);
+  ] }).compileToV0Message();
+  const tx = new VersionedTransaction(message);
+  tx.sign([kp]);
+  const sim = await conn.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: false });
   if (sim.value.err) throw new Error("simulation failed");
-  const signature = await conn.sendRawTransaction(tx.serialize(), { skipPreflight: false });
-  const res = await conn.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
-  if (res.value.err) throw new Error("tx failed");
-  return signature;
+  return Buffer.from(tx.serialize()).toString("base64");
 }

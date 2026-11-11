@@ -5,8 +5,8 @@ import { Copy, Users, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
-import { AFFILIATE_SHARE_BPS, SUB_AFFILIATE_SHARE_BPS, PAYOUT_MIN_MICRO, payoutProgress, REF_STORAGE_KEY, normalizeCode, CLAIM_NETWORK_FEE_MICRO, type AffiliateDashboard } from "@/lib/affiliate";
-import { claimAffiliatePayout, customizeAffiliateCode, getAffiliateDashboard, joinAffiliate, savePayoutWallet } from "@/lib/affiliate.functions";
+import { AFFILIATE_SHARE_BPS, SUB_AFFILIATE_SHARE_BPS, PAYOUT_MIN_MICRO, payoutProgress, REF_STORAGE_KEY, normalizeCode, type AffiliateDashboard } from "@/lib/affiliate";
+import { cancelAffiliateClaim, finalizeAffiliateClaim, claimAffiliatePayout, customizeAffiliateCode, getAffiliateDashboard, joinAffiliate, savePayoutWallet } from "@/lib/affiliate.functions";
 
 const usdc = (raw: string) => (Number(raw) / 1e6).toLocaleString("en-US", { useGrouping: false,  minimumFractionDigits: 2, maximumFractionDigits: 6 });
 const field = "mt-2 w-full rounded-lg border border-input bg-card px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring";
@@ -19,6 +19,17 @@ export function AffiliatePanel() {
   const saveCode = useServerFn(customizeAffiliateCode);
   const savePayout = useServerFn(savePayoutWallet);
   const claim = useServerFn(claimAffiliatePayout);
+  const finalize = useServerFn(finalizeAffiliateClaim);
+  const cancel = useServerFn(cancelAffiliateClaim);
+  async function collect(): Promise<{ success: boolean; error?: string }> {
+    if (!dash?.payoutWallet || session.walletAddress !== dash.payoutWallet) return { success: false, error: "Conecta la wallet donde cobras tus comisiones para firmar el cobro." };
+    const prepared = await claim({ data: { token: await token() } });
+    if (!prepared.success) return prepared;
+    let signature: string;
+    try { signature = await session.signAndSend(Uint8Array.from(atob(prepared.transaction), (c) => c.charCodeAt(0))); }
+    catch (e) { try { await cancel({ data: { token: await token() } }); } catch { /* lock expires */ } return { success: false, error: e instanceof Error ? e.message : "No se pudo firmar." }; }
+    return finalize({ data: { token: await token(), signature } });
+  }
   const [dash, setDash] = useState<AffiliateDashboard | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -85,8 +96,8 @@ export function AffiliatePanel() {
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={p.pct} aria-valuemin={0} aria-valuemax={100}><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${p.pct}%` }} /></div>
         <p className="mt-2 text-xs text-muted-foreground">{p.ready ? t("¡Listo! Ya puedes cobrar tus comisiones.") : `${t("Te faltan")} ${usdc(p.missingRaw.toString())} USDC ${t("para tu próximo pago.")}`}</p>
         {p.ready && !preview && <div className="mt-3">
-          <p className="text-xs text-muted-foreground">{t("Recibes")} <span className="font-semibold text-foreground">{usdc((BigInt(dash.pendingRaw) - CLAIM_NETWORK_FEE_MICRO).toString())} USDC</span> · {t("costo de red")} {usdc(CLAIM_NETWORK_FEE_MICRO.toString())} USDC</p>
-          <Button className="mt-2 w-full" disabled={busy} onClick={() => void act(async () => claim({ data: { token: await token() } }), "¡Cobro enviado a tu wallet!")}>{busy ? t("Enviando…") : t("Cobrar comisiones")}</Button>
+          <p className="text-xs text-muted-foreground">{t("Recibes")} <span className="font-semibold text-foreground">{usdc(dash.pendingRaw)} USDC</span> · {t("la tarifa de red la pagas con tu SOL (≈0.003 SOL)")}</p>
+          <Button className="mt-2 w-full" disabled={busy} onClick={() => void act(collect, "¡Cobro enviado a tu wallet!")}>{busy ? t("Enviando…") : t("Cobrar comisiones")}</Button>
         </div>}
       </div>; })()}
       <p className="mt-4 text-xs text-muted-foreground">{t("Recibes el")} {dash.shareBps / 100}% {t("de las comisiones de tus invitados.")} <Link to="/terminos" hash="afiliados" className="font-medium text-primary underline">{t("Ver cómo funciona")}</Link></p>
