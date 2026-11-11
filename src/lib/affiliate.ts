@@ -65,3 +65,12 @@ export function payoutsDue(rows: Array<{ affiliate_privy_id: string; commission_
   for (const r of rows) { const e = map.get(r.affiliate_privy_id) ?? { raw: 0n, count: 0 }; e.raw += BigInt(r.commission_raw); e.count++; map.set(r.affiliate_privy_id, e); }
   return [...map].filter(([, v]) => v.raw >= PAYOUT_MIN_MICRO).map(([affiliate, v]) => ({ affiliate, raw: v.raw, count: v.count }));
 }
+
+/** Flat network cost deducted from each self-service claim so affiliates can collect with 0 SOL (0.10 USDC). */
+export const CLAIM_NETWORK_FEE_MICRO = 100_000n;
+export const claimRequest = z.object({ token }).strict();
+/** Net USDC sent on a self-service claim; null when the owed total is below the payout minimum. */
+export function claimNet(owedRaw: bigint) {
+  if (owedRaw < PAYOUT_MIN_MICRO) return null;
+  return owedRaw - CLAIM_NETWORK_FEE_MICRO;
+}

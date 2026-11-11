@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue } from "./affiliate";
+import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue, claimRequest, claimNet } from "./affiliate";
 import { proofIsFresh, walletProofMessage, walletProofRequest } from "./wallet-proof";
 
 type Fail = { success: false; error: string };
@@ -217,4 +217,38 @@ export const markAffiliatePaid = createServerFn({ method: "POST" })
       }
       return { success: true };
     } catch { return { success: false, error: "No se pudo registrar el pago." }; }
+  });
+
+/** Affiliate collects their own pending commissions: server locks rows, sends net USDC (minus flat network fee) from the payout wallet, and records the signature. */
+export const claimAffiliatePayout = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => claimRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: true; signature: string; netRaw: string } | Fail> => {
+    const key = process.env["HELIUS_API_KEY"];
+    const secret = process.env["AFFILIATE_PAYOUT_SECRET_KEY"];
+    if (!key || !secret) return { success: false, error: "Los cobros automáticos no están disponibles todavía." };
+    const { id, db } = await admin(data.token);
+    const { data: aff } = await db.from("affiliates").select("payout_wallet").eq("privy_user_id", id).maybeSingle();
+    if (!aff?.payout_wallet) return { success: false, error: "Guarda primero tu wallet de cobro." };
+    const { data: pending } = await db.from("affiliate_earnings").select("commission_raw").eq("affiliate_privy_id", id).eq("status", "pending");
+    const owedPre = (pending ?? []).reduce((a, r) => a + BigInt(r.commission_raw), 0n);
+    if (claimNet(owedPre) === null) return { success: false, error: "Necesitas al menos 10 USDC acumulados para cobrar." };
+    // Atomic lock: flip pending rows to paid; a concurrent claim finds nothing left.
+    const { data: locked, error: lockErr } = await db.from("affiliate_earnings").update({ status: "paid", paid_at: new Date().toISOString() }).eq("affiliate_privy_id", id).eq("status", "pending").is("payout_signature", null).select("signature, level, commission_raw");
+    if (lockErr || !locked?.length) return { success: false, error: "Ya hay un cobro en proceso." };
+    const owed = locked.reduce((a, r) => a + BigInt(r.commission_raw), 0n);
+    const net = claimNet(owed);
+    const revert = async () => { for (const r of locked) await db.from("affiliate_earnings").update({ status: "pending", paid_at: null }).eq("signature", r.signature).eq("level", r.level).eq("affiliate_privy_id", id).is("payout_signature", null); };
+    if (net === null || net <= 0n) { await revert(); return { success: false, error: "Necesitas al menos 10 USDC acumulados para cobrar." }; }
+    let signature: string;
+    try {
+      const { AFFILIATE_PAYOUT_WALLET } = await import("./affiliate");
+      const { sendAffiliateClaim } = await import("./affiliate.server");
+      signature = await sendAffiliateClaim(key, secret, AFFILIATE_PAYOUT_WALLET, aff.payout_wallet, net);
+    } catch (e) {
+      console.error("affiliate claim failed", e instanceof Error ? e.message : "unknown");
+      await revert();
+      return { success: false, error: "No se pudo enviar tu cobro ahora. Inténtalo más tarde." };
+    }
+    for (const r of locked) await db.from("affiliate_earnings").update({ payout_signature: signature }).eq("signature", r.signature).eq("level", r.level).eq("affiliate_privy_id", id);
+    return { success: true, signature, netRaw: net.toString() };
   });

@@ -5,8 +5,8 @@ import { Copy, Users, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
-import { AFFILIATE_SHARE_BPS, SUB_AFFILIATE_SHARE_BPS, PAYOUT_MIN_MICRO, payoutProgress, REF_STORAGE_KEY, normalizeCode, type AffiliateDashboard } from "@/lib/affiliate";
-import { customizeAffiliateCode, getAffiliateDashboard, joinAffiliate, savePayoutWallet } from "@/lib/affiliate.functions";
+import { AFFILIATE_SHARE_BPS, SUB_AFFILIATE_SHARE_BPS, PAYOUT_MIN_MICRO, payoutProgress, REF_STORAGE_KEY, normalizeCode, CLAIM_NETWORK_FEE_MICRO, type AffiliateDashboard } from "@/lib/affiliate";
+import { claimAffiliatePayout, customizeAffiliateCode, getAffiliateDashboard, joinAffiliate, savePayoutWallet } from "@/lib/affiliate.functions";
 
 const usdc = (raw: string) => (Number(raw) / 1e6).toLocaleString("en-US", { useGrouping: false,  minimumFractionDigits: 2, maximumFractionDigits: 6 });
 const field = "mt-2 w-full rounded-lg border border-input bg-card px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring";
@@ -18,6 +18,7 @@ export function AffiliatePanel() {
   const join = useServerFn(joinAffiliate);
   const saveCode = useServerFn(customizeAffiliateCode);
   const savePayout = useServerFn(savePayoutWallet);
+  const claim = useServerFn(claimAffiliatePayout);
   const [dash, setDash] = useState<AffiliateDashboard | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -82,7 +83,11 @@ export function AffiliatePanel() {
       {(() => { const p = payoutProgress(BigInt(dash.pendingRaw)); return <div className="mt-4 rounded-xl border border-border p-4">
         <div className="flex justify-between text-xs text-muted-foreground"><span>{t("Próximo pago")}</span><span className="font-semibold text-foreground">{usdc(dash.pendingRaw)} / {usdc(PAYOUT_MIN_MICRO.toString())} USDC</span></div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={p.pct} aria-valuemin={0} aria-valuemax={100}><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${p.pct}%` }} /></div>
-        <p className="mt-2 text-xs text-muted-foreground">{p.ready ? t("¡Listo! Tu pago se incluirá en el próximo desembolso.") : `${t("Te faltan")} ${usdc(p.missingRaw.toString())} USDC ${t("para tu próximo pago.")}`}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{p.ready ? t("¡Listo! Ya puedes cobrar tus comisiones.") : `${t("Te faltan")} ${usdc(p.missingRaw.toString())} USDC ${t("para tu próximo pago.")}`}</p>
+        {p.ready && !preview && <div className="mt-3">
+          <p className="text-xs text-muted-foreground">{t("Recibes")} <span className="font-semibold text-foreground">{usdc((BigInt(dash.pendingRaw) - CLAIM_NETWORK_FEE_MICRO).toString())} USDC</span> · {t("costo de red")} {usdc(CLAIM_NETWORK_FEE_MICRO.toString())} USDC</p>
+          <Button className="mt-2 w-full" disabled={busy} onClick={() => void act(async () => claim({ data: { token: await token() } }), "¡Cobro enviado a tu wallet!")}>{busy ? t("Enviando…") : t("Cobrar comisiones")}</Button>
+        </div>}
       </div>; })()}
       <p className="mt-4 text-xs text-muted-foreground">{t("Recibes el")} {dash.shareBps / 100}% {t("de las comisiones de tus invitados.")} <Link to="/terminos" hash="afiliados" className="font-medium text-primary underline">{t("Ver cómo funciona")}</Link></p>
       {(() => { const connected = session.walletAddress ?? null; const current = dash.payoutWallet ?? connected; const isConnected = !!current && current === connected; const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`; return <div className="mt-5 rounded-xl border border-border bg-card p-4">

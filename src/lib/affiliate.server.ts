@@ -27,3 +27,38 @@ export async function confirmedPayoutTransfer(apiKey: string, signature: string,
   const received = sum(recipient, tx.meta.postTokenBalances) - sum(recipient, tx.meta.preTokenBalances);
   return received > 0n ? received : null;
 }
+
+/** Decodes the payout wallet secret (base58 or JSON byte array) and checks it matches the expected public key. */
+async function payoutSigner(secret: string, expected: string) {
+  const { Keypair } = await import("@solana/web3.js");
+  const bs58 = (await import("bs58")).default;
+  const s = secret.trim();
+  const bytes = s.startsWith("[") ? Uint8Array.from(JSON.parse(s) as number[]) : bs58.decode(s);
+  const kp = Keypair.fromSecretKey(bytes);
+  if (kp.publicKey.toBase58() !== expected) throw new Error("payout key mismatch");
+  return kp;
+}
+
+/** Sends `amount` micro-USDC from the payout wallet to `recipient` (creating its USDC account if missing) and returns the confirmed signature. */
+export async function sendAffiliateClaim(apiKey: string, secret: string, payoutWallet: string, recipient: string, amount: bigint) {
+  const { PublicKey, Transaction } = await import("@solana/web3.js");
+  const { createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, getAssociatedTokenAddressSync } = await import("@solana/spl-token");
+  const { heliusConnection } = await import("@/lib/solana-read.server");
+  const kp = await payoutSigner(secret, payoutWallet);
+  const conn = heliusConnection(apiKey);
+  const to = new PublicKey(recipient);
+  const fromAta = getAssociatedTokenAddressSync(USDC_MINT, kp.publicKey);
+  const toAta = getAssociatedTokenAddressSync(USDC_MINT, to, true);
+  const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash("confirmed");
+  const tx = new Transaction({ feePayer: kp.publicKey, blockhash, lastValidBlockHeight }).add(
+    createAssociatedTokenAccountIdempotentInstruction(kp.publicKey, toAta, to, USDC_MINT),
+    createTransferCheckedInstruction(fromAta, USDC_MINT, toAta, kp.publicKey, amount, 6),
+  );
+  tx.sign(kp);
+  const sim = await conn.simulateTransaction(tx);
+  if (sim.value.err) throw new Error("simulation failed");
+  const signature = await conn.sendRawTransaction(tx.serialize(), { skipPreflight: false });
+  const res = await conn.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+  if (res.value.err) throw new Error("tx failed");
+  return signature;
+}
