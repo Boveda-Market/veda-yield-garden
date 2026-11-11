@@ -39,15 +39,18 @@ function SessionBridge({ children }: { children: ReactNode }) {
     onError: () => setError(t("No se pudo iniciar sesión. Revisa los métodos y dominios permitidos en Privy e inténtalo de nuevo.")),
   });
   const walletAddress = wallets[0]?.address ?? null;
+  // If Privy never reports ready (blocked iframe, shields, slow network), stop waiting after 4s so buttons and screens never freeze.
+  const [stalled, setStalled] = useState(false);
+  useEffect(() => { if (ready) { setStalled(false); return; } const id = setTimeout(() => setStalled(true), 4000); return () => clearTimeout(id); }, [ready]);
   useEffect(() => {
     setPrivyTokenGetter(authenticated ? getAccessToken : null);
     return () => setPrivyTokenGetter(null);
   }, [authenticated, getAccessToken]);
   const doLogout = useCallback(async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError("No se pudo cerrar sesión. Inténtalo de nuevo."); } }, [queryClient, logout]);
   return <BovedaSessionContext.Provider value={{
-    ready, authenticated, userId: authenticated ? user?.id ?? null : null,
+    ready: ready || stalled, authenticated, userId: authenticated ? user?.id ?? null : null,
     label: user?.email?.address ?? user?.google?.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : t("Mi cuenta")),
-    walletAddress, error, getAccessToken,
+    walletAddress, error: error ?? (stalled && !ready ? t("El acceso seguro está tardando. Si usas Brave, AdBlock o protección contra rastreo, desactívalos para este sitio y recarga la página.") : null), getAccessToken,
     exportWallet: user?.linkedAccounts.some(account => account.type === "wallet" && account.address === walletAddress && (account.walletClientType === "privy" || account.walletClientType === "privy-v2")) ? async () => { await exportWallet({ address: walletAddress! }); } : undefined,
     security: {
       email: user?.email?.address ?? null,
@@ -61,7 +64,10 @@ function SessionBridge({ children }: { children: ReactNode }) {
       linkPasskey: () => { setSecurityMessage(null); linkPasskey({ name: "BÓVEDA" }); },
       manageMfa: async () => { setSecurityMessage(null); await showMfaEnrollmentModal(); },
     },
-    login: (method) => { setError(null); login({ loginMethods: [method] }); },
+    login: (method) => {
+      if (!ready) { setError(t("El acceso seguro no responde. Desactiva bloqueadores (Brave Shields, AdBlock) o abre bovedamarket.app en una ventana normal y recarga.")); return; }
+      setError(null); login({ loginMethods: [method] });
+    },
     signAndSend: async (transaction) => {
       const wallet = wallets[0];
       if (!authenticated || !wallet) throw new Error(t("Conecta una wallet de Solana"));
