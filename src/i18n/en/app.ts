@@ -1,4 +1,8 @@
 export const app: Record<string, string> = {
+  "El acceso seguro no respondió. Revisa tu conexión y recarga la página.": "Secure sign-in didn't respond. Check your connection and reload the page.",
+  "Conectando el acceso seguro…": "Connecting secure sign-in…",
+  "Para entrar, abre bovedamarket.app. En esta vista previa el acceso seguro no está disponible.": "To sign in, open bovedamarket.app. Secure sign-in isn't available in this preview.",
+  "Abrimos bovedamarket.app en una pestaña nueva para que puedas entrar.": "We opened bovedamarket.app in a new tab so you can sign in.",
   "BÓVEDA · Conectando acceso…": "BÓVEDA · Connecting…",
   "Invitado": "Guest",
   "Invitado solo puede usar Prueba": "Guests can only use Trial mode",

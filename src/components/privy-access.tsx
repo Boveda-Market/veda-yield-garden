@@ -14,6 +14,10 @@ const solanaRpcs = { "solana:mainnet": { rpc: createSolanaRpc("https://solana-ma
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
 import { IdleLogout } from "@/components/idle-logout";
 
+// Privy only authorizes the official domains; preview/other hosts can never finish loading it.
+const OFFICIAL_ORIGIN = "https://bovedamarket.app";
+const isOfficialHost = () => typeof window === "undefined" || ["bovedamarket.app", "www.bovedamarket.app", "veda-yield-garden.lovable.app"].includes(window.location.hostname.toLowerCase());
+
 const solanaConnectors = toSolanaWalletConnectors({ shouldAutoConnect: true });
 
 function SessionBridge({ children }: { children: ReactNode }) {
@@ -42,6 +46,14 @@ function SessionBridge({ children }: { children: ReactNode }) {
   // If Privy never reports ready (blocked iframe, shields, slow network), stop waiting after 4s so buttons and screens never freeze.
   const [stalled, setStalled] = useState(false);
   useEffect(() => { if (ready) { setStalled(false); return; } const id = setTimeout(() => setStalled(true), 4000); return () => clearTimeout(id); }, [ready]);
+  // A click before Privy is ready is queued and opens the login as soon as it is (up to 15s) instead of failing instantly.
+  const [pendingMethod, setPendingMethod] = useState<"email" | "google" | "wallet" | "passkey" | null>(null);
+  useEffect(() => {
+    if (!pendingMethod) return;
+    if (ready) { const m = pendingMethod; setPendingMethod(null); setError(null); login({ loginMethods: [m] }); return; }
+    const id = setTimeout(() => { setPendingMethod(null); setError(t("El acceso seguro no respondió. Revisa tu conexión y recarga la página.")); }, 15000);
+    return () => clearTimeout(id);
+  }, [pendingMethod, ready, login, t]);
   useEffect(() => {
     setPrivyTokenGetter(authenticated ? getAccessToken : null);
     return () => setPrivyTokenGetter(null);
@@ -50,7 +62,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   return <BovedaSessionContext.Provider value={{
     ready: ready || stalled, authenticated, userId: authenticated ? user?.id ?? null : null,
     label: user?.email?.address ?? user?.google?.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : t("Mi cuenta")),
-    walletAddress, error: error ?? (stalled && !ready ? t("El acceso seguro está tardando. Si usas Brave, AdBlock o protección contra rastreo, desactívalos para este sitio y recarga la página.") : null), getAccessToken,
+    walletAddress, error: error ?? (pendingMethod && !ready ? t("Conectando el acceso seguro…") : stalled && !ready && !isOfficialHost() ? t("Para entrar, abre bovedamarket.app. En esta vista previa el acceso seguro no está disponible.") : null), getAccessToken,
     exportWallet: user?.linkedAccounts.some(account => account.type === "wallet" && account.address === walletAddress && (account.walletClientType === "privy" || account.walletClientType === "privy-v2")) ? async () => { await exportWallet({ address: walletAddress! }); } : undefined,
     security: {
       email: user?.email?.address ?? null,
@@ -65,7 +77,10 @@ function SessionBridge({ children }: { children: ReactNode }) {
       manageMfa: async () => { setSecurityMessage(null); await showMfaEnrollmentModal(); },
     },
     login: (method) => {
-      if (!ready) { setError(t("El acceso seguro no responde. Desactiva bloqueadores (Brave Shields, AdBlock) o abre bovedamarket.app en una ventana normal y recarga.")); return; }
+      if (!ready) {
+        if (!isOfficialHost()) { setError(t("Abrimos bovedamarket.app en una pestaña nueva para que puedas entrar.")); window.open(OFFICIAL_ORIGIN + window.location.pathname, "_blank", "noopener"); return; }
+        setError(null); setPendingMethod(method); return;
+      }
       setError(null); login({ loginMethods: [method] });
     },
     signAndSend: async (transaction) => {
