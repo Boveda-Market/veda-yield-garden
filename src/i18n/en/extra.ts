@@ -556,4 +556,11 @@ export const extra: Record<string, string> = {
   "Tú recibes": "You receive",
   "Nivel 2: si tu amigo invita a otra persona, tú también recibes el 10% de lo que cobra BÓVEDA a esa persona.": "Level 2: if your friend invites someone else, you also receive 10% of what BÓVEDA charges that person.",
   "¿Quieres los detalles legales completos?": "Want the full legal details?",
+  "Añade saldo inicial": "Add starting balance",
+  "Paso 1: añade tu saldo inicial con tarjeta": "Step 1: add your starting balance by card",
+  "Compra SOL con tarjeta. El mínimo de compra es 0.19 SOL (unos $35). Una parte pequeña paga los costos de red por meses y el resto lo conviertes a USDC (dólares) en el paso 2, sin comisión.": "Buy SOL by card. The minimum purchase is 0.19 SOL (about $35). A small part pays network costs for months and you convert the rest to USDC (dollars) in step 2, fee-free.",
+  "Ya viene fijado en 0.19 SOL · es la cantidad en SOL, no en dólares": "Preset to 0.19 SOL · this is an amount in SOL, not dollars",
+  "Paso 3: con tus USDC, elige una bóveda o entra a Sube/Baja.": "Step 3: with your USDC, choose a vault or try Up/Down.",
+  "Comprar SOL con tarjeta (0.19 SOL)": "Buy SOL by card (0.19 SOL)",
+  "La compra de SOL con tarjeta tiene un mínimo de 0.19 SOL (unos $35). Lo que no uses para la red, cámbialo a USDC sin comisión.": "Card SOL purchases have a 0.19 SOL minimum (about $35). Whatever you don't need for the network, swap to USDC fee-free.",
 };

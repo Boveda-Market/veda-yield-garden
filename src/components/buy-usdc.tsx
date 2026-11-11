@@ -15,10 +15,10 @@ export function BuyUsdc({ className, only }: { className?: string; only?: "SOL" 
   return <div className={className}>
     <div className="flex flex-wrap gap-2">
       {only !== "SOL" && session.buyUsdc && <Button onClick={() => open(session.buyUsdc)}><CreditCard size={16} />{t("Comprar USDC")}</Button>}
-      {only !== "USDC" && session.buySol && <Button variant="outline" onClick={() => open(session.buySol)}><Fuel size={16} />{t("Añadir gas de red ($2 – $3)")}</Button>}
+      {only !== "USDC" && session.buySol && <Button variant="outline" onClick={() => open(session.buySol)}><Fuel size={16} />{t("Comprar SOL con tarjeta (0.19 SOL)")}</Button>}
       {!only && <QuickSwapButton />}
     </div>
-    {!only && <p className="mt-2 text-xs text-muted-foreground">{t("Compra USDC (dólares) por el monto que quieras usar. El gas de red solo necesita entre $2 y $3 y dura meses: no compres más.")}</p>}
+    {!only && <p className="mt-2 text-xs text-muted-foreground">{t("La compra de SOL con tarjeta tiene un mínimo de 0.19 SOL (unos $35). Lo que no uses para la red, cámbialo a USDC sin comisión.")}</p>}
     {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}
   </div>;
 }

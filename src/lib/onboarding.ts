@@ -40,5 +40,5 @@ export function unitsToDecimal(v: bigint, decimals: number): string {
   return frac ? `${v / d}.${frac}` : `${v / d}`;
 }
 
-/** Fixed small SOL top-up (~$2–$3) offered for network costs, so users never buy SOL in place of dollars. */
-export const GAS_TOP_UP_SOL = "0.02";
+/** Starting SOL card purchase, preset to the card provider minimum (0.19 SOL); extra converts to USDC. */
+export const GAS_TOP_UP_SOL = "0.19";
