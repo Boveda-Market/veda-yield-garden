@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
+import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
 import { solanaAddressSchema } from "@/lib/solana-data";
 import { buildTransfer, toBaseUnits } from "@/lib/wallet-actions";
@@ -17,6 +18,7 @@ type Provider = "coinbase" | "paypal" | "cashapp";
 export function OfframpButton({ wallet, trial }: { wallet: string | null; trial: boolean }) {
   const t = useT();
   const { signAndSend } = useBovedaSession();
+  const reportAffiliate = useAffiliateReport();
   const [open, setOpen] = useState(false);
   const [provider, setProvider] = useState<Provider>("coinbase");
   const [to, setTo] = useState("");
@@ -35,7 +37,7 @@ export function OfframpButton({ wallet, trial }: { wallet: string | null; trial:
   async function send() {
     if (!canSend || !wallet || !units) return;
     setBusy(true); setError(null);
-    try { setSig(await signAndSend(await buildTransfer({ from: wallet, to: to.trim(), asset: "USDC", amount: net, fee }))); }
+    try { const s = await signAndSend(await buildTransfer({ from: wallet, to: to.trim(), asset: "USDC", amount: net, fee })); setSig(s); if (fee > 0n) void reportAffiliate(s, "withdraw"); }
     catch (e) { setError(e instanceof Error ? e.message : t("No se pudo completar la operación.")); }
     finally { setBusy(false); }
   }

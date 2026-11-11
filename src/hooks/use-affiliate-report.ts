@@ -1,6 +1,6 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
-import { REF_STORAGE_KEY, normalizeCode } from "@/lib/affiliate";
+import { REF_STORAGE_KEY, normalizeCode, type AffiliateKind } from "@/lib/affiliate";
 import { joinAffiliate, recordAffiliateFee, verifyWalletOwnership, walletIsVerified } from "@/lib/affiliate.functions";
 import { walletProofMessage } from "@/lib/wallet-proof";
 
@@ -14,7 +14,7 @@ export function useAffiliateReport() {
   const record = useServerFn(recordAffiliateFee);
   const isVerified = useServerFn(walletIsVerified);
   const verify = useServerFn(verifyWalletOwnership);
-  return async (signature: string, kind: "harvest" | "exit" | "deposit") => {
+  return async (signature: string, kind: AffiliateKind) => {
     try {
       const token = await session.getAccessToken?.();
       const wallet = session.walletAddress;

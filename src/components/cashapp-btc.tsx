@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { withdrawFee } from "@/lib/fees";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
+import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
 import { BTC_OFFRAMP_MAX_USDC, BTC_OFFRAMP_MIN_USDC, amountAllowed, isBtcAddress, providerCost } from "@/lib/btc-offramp";
 import { btcWithdrawStatus, createBtcWithdraw, quoteBtcWithdraw } from "@/lib/btc-offramp.functions";
@@ -17,6 +18,7 @@ type Quote = Awaited<ReturnType<typeof quoteBtcWithdraw>>;
 export function CashAppBtc({ wallet }: { wallet: string }) {
   const t = useT();
   const { signAndSend } = useBovedaSession();
+  const reportAffiliate = useAffiliateReport();
   const quoteFn = useServerFn(quoteBtcWithdraw);
   const createFn = useServerFn(createBtcWithdraw);
   const statusFn = useServerFn(btcWithdrawStatus);
@@ -67,6 +69,7 @@ export function CashAppBtc({ wallet }: { wallet: string }) {
       const units = toBaseUnits(shift.depositAmount, "USDC");
       if (!units) throw new Error(t("Monto no válido"));
       const sig = await signAndSend(await buildTransfer({ from: wallet, to: shift.depositAddress, asset: "USDC", amount: units, fee: feeUnits }));
+      if (feeUnits > 0n) void reportAffiliate(sig, "withdraw");
       setDone({ sig, shiftId: shift.shiftId, btc: shift.settleAmount }); setStatus("waiting");
     } catch (e) { setError(e instanceof Error ? e.message : t("No se pudo completar la operación.")); }
     finally { setBusy(false); }

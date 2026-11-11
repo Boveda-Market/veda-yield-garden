@@ -15,6 +15,8 @@ import { buildSwap, JUPUSD_MINT, quoteSwap, readTokenBalance, toBaseUnits } from
 import { getRealWallet } from "@/lib/solana.functions";
 import { decimalToUnits } from "@/lib/onboarding";
 import { annotateRecord } from "@/lib/predict-history";
+import { predictClaimFee } from "@/lib/fees";
+import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 
 const usdc = (micro: string | bigint | null) => micro === null ? "—" : (Number(micro) / 1e6).toFixed(2);
 const fromB64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
@@ -25,6 +27,7 @@ const toB64 = (b: Uint8Array) => btoa(Array.from(b, (x) => String.fromCharCode(x
 export function PredictLive({ round }: { round: LiveRound | null }) {
   const t = useT();
   const session = useBovedaSession();
+  const reportAffiliate = useAffiliateReport();
   const wallet = session.walletAddress;
   const [side, setSide] = useState<PredictSide | null>(null);
   const [amount, setAmount] = useState("10");
@@ -143,8 +146,9 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
         await new Promise((r) => setTimeout(r, 2500));
         const bal = await readTokenBalance(wallet, JUPUSD_MINT);
         if (bal > 0n) {
-          const q = await quoteSwap("JupUSD", "USDC", bal);
+          const q = await quoteSwap("JupUSD", "USDC", bal, { feeUsdc: predictClaimFee(BigInt(p.payoutMicro || "0"), BigInt(p.costMicro || "0")) });
           const swapSig = await session.signAndSend(await buildSwap(wallet, q));
+          if (BigInt(q.feeUsdc) > 0n) void reportAffiliate(swapSig, "predict");
           setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(q.outAmount) }), wallet: true });
         } else setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(p.payoutMicro) }), wallet: true });
       } catch { setMsg({ ok: true, text: t("Pago cobrado, pero falta el cambio a USDC. Hazlo en Mi wallet → Cambiar (JupUSD → USDC)."), sig }); }

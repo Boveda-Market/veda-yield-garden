@@ -1,29 +1,20 @@
 export const FEE_PERCENT = 1;
-export const DEPOSIT_FEE_PERCENT = 0.5;
+export const DEPOSIT_FEE_PERCENT = 1;
 export const FEE_WALLET = "93bF1K1dWMJseMuf15WLaNt1diVGACQ9gUFA7szsSbs7";
 const SCALE = 1_000_000;
 
-/** First 10 USDC of every fee-bearing operation is free. */
-export const FEE_FREE_MICRO = 10_000_000n;
-/** Marginal rate applied only to the amount above the free allowance (1.25%). */
-export const FEE_MARGINAL_BPS = 125n;
+/** Flat BÓVEDA rate on every fee-bearing operation (1%), no free allowance. */
+export const FEE_BPS = 100n;
+const flat = (units: bigint) => (units > 0n ? (units * FEE_BPS) / 10_000n : 0n);
 
-/** Progressive fee in micro-USDC: 0 up to 10 USDC, 1.25% on the excess, floored. */
-export function progressiveFee(units: bigint) {
-  if (units <= FEE_FREE_MICRO) return 0n;
-  return ((units - FEE_FREE_MICRO) * FEE_MARGINAL_BPS) / 10_000n;
-}
+/** Harvest / liquidation fee in micro-USDC: flat 1% from the first unit, floored. (Name kept for callers.) */
+export function progressiveFee(units: bigint) { return flat(units); }
 
-/** First 5 USDC of every deposit enters free. */
-export const DEPOSIT_FEE_FREE_MICRO = 5_000_000n;
-/** Deposit rate applied only to the amount above the free allowance (0.5%). */
-export const DEPOSIT_FEE_BPS = 50n;
+/** Deposit fee in micro-USDC: flat 1%, floored. */
+export function depositFee(units: bigint) { return flat(units); }
 
-/** Progressive deposit fee in micro-USDC: 0 up to 5 USDC, 0.5% on the excess, floored. */
-export function depositFee(units: bigint) {
-  if (units <= DEPOSIT_FEE_FREE_MICRO) return 0n;
-  return ((units - DEPOSIT_FEE_FREE_MICRO) * DEPOSIT_FEE_BPS) / 10_000n;
-}
+/** Up/Down: entries are free; on claim, 1% of the profit only (payout − cost), floored; 0 when no profit. */
+export function predictClaimFee(payout: bigint, cost: bigint) { return payout > cost ? flat(payout - cost) : 0n; }
 
 /** Amounts and fees truncate to USDC's six decimal places, never rounding fees up. */
 export function transactionAmounts(amount: number, kind: "deposit" | "exit" = "exit") {

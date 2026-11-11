@@ -8,6 +8,8 @@ import { CHAIN_POOLS, USDC_MINT } from "@/lib/solana-data";
 import { FEE_WALLET } from "@/lib/fees";
 import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
 
+// Plumbing tests: exits here stay fee-free; the flat 1% rule itself is covered in withdrawal/fees tests.
+vi.mock("@/lib/fees", async (orig) => ({ ...(await orig<typeof import("@/lib/fees")>()), progressiveFee: () => 0n }));
 const mocks = vi.hoisted(() => ({ genesis: vi.fn(), owned: vi.fn(), pool: vi.fn(), before: vi.fn(), simulate: vi.fn(), remove: vi.fn(), send: vi.fn() }));
 vi.mock("@/lib/solana-read.server", () => ({ heliusConnection: () => ({ getGenesisHash: mocks.genesis, getMultipleAccountsInfo: mocks.before, getLatestBlockhash: async () => ({ blockhash: USDC_MINT }), getFeeForMessage: async () => ({ value: 0 }), simulateTransaction: mocks.simulate, sendRawTransaction: mocks.send }) }));
 vi.mock("@meteora-ag/cp-amm-sdk/dist/index.js", () => ({ getCurrentPoint: async () => new BN(1), CpAmm: class { getPositionsByUser = mocks.owned; fetchPoolState = mocks.pool; removeAllLiquidityAndClosePosition = mocks.remove; getWithdrawQuote = () => ({ outAmountA: new BN(100), outAmountB: new BN(1_000_000) }); } }));

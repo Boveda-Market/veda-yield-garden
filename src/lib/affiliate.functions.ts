@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue, type PayoutRecent, claimRequest, claimFinalizeRequest, claimNet } from "./affiliate";
+import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue, type PayoutRecent, claimRequest, claimFinalizeRequest, claimNet, type AffiliateKind } from "./affiliate";
 import { proofIsFresh, walletProofMessage, walletProofRequest } from "./wallet-proof";
 
 type Fail = { success: false; error: string };
@@ -50,7 +50,7 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
         pendingRaw: total("pending"), paidRaw: total("paid"),
         joinedCode: Boolean(joined.data),
         subReferred: subCount,
-        earnings: list.map((e) => ({ signature: e.signature, level: e.level === 2 ? 2 : 1, kind: e.kind as "harvest" | "exit", feeRaw: String(e.fee_raw), commissionRaw: String(e.commission_raw), status: e.status, createdAt: e.created_at })),
+        earnings: list.map((e) => ({ signature: e.signature, level: e.level === 2 ? 2 : 1, kind: e.kind as AffiliateKind, feeRaw: String(e.fee_raw), commissionRaw: String(e.commission_raw), status: e.status, createdAt: e.created_at })),
       } };
     } catch { return { success: false, error: "No se pudo cargar tu programa de afiliados." }; }
   });

@@ -50,6 +50,13 @@
       "when": 1794402948556,
       "tag": "0006_affiliate_payout_signature",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794500000000,
+      "tag": "0007_affiliate_all_fee_kinds",
+      "breakpoints": true
     }
   ]
 }

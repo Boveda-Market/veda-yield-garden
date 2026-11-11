@@ -34,13 +34,17 @@ export function normalizeCode(value: string | null | undefined) {
   return parsed.success ? parsed.data : null;
 }
 
+/** Every fee-bearing operation credits affiliates: deposits, harvests, exits, withdrawals and Up/Down claim profits. Swaps and transfers carry no fee. */
+export const AFFILIATE_KINDS = ["harvest", "exit", "deposit", "withdraw", "predict"] as const;
+export type AffiliateKind = (typeof AFFILIATE_KINDS)[number];
+
 export const REF_STORAGE_KEY = "boveda-ref";
 const token = z.string().min(20).max(12000);
 export const affiliateRequest = z.object({ token }).strict();
 export const joinRequest = z.object({ token, code: codeSchema }).strict();
 export const customizeCodeRequest = z.object({ token, code: codeSchema }).strict();
 export const payoutRequest = z.object({ token, wallet: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/) }).strict();
-export const recordRequest = z.object({ token, signature: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,90}$/), kind: z.enum(["harvest", "exit", "deposit"]) }).strict();
+export const recordRequest = z.object({ token, signature: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,90}$/), kind: z.enum(AFFILIATE_KINDS) }).strict();
 
 export type AffiliateDashboard = {
   code: string;
@@ -51,7 +55,7 @@ export type AffiliateDashboard = {
   paidRaw: string;
   joinedCode: boolean;
   subReferred: number;
-  earnings: Array<{ signature: string; level: 1 | 2; kind: "harvest" | "exit" | "deposit"; feeRaw: string; commissionRaw: string; status: string; createdAt: string }>;
+  earnings: Array<{ signature: string; level: 1 | 2; kind: AffiliateKind; feeRaw: string; commissionRaw: string; status: string; createdAt: string }>;
 };
 
 /** Single treasury: affiliate payouts are sent from the same wallet that receives app fees. Connecting it unlocks the treasury dashboard. */

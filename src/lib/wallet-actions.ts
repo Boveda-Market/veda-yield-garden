@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { CHAIN_POOLS, solanaAddressSchema } from "@/lib/solana-data";
-import { progressiveFee } from "@/lib/fees";
 
 export const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 /** Stable dollar in which prediction payouts arrive; converted to USDC after claiming. */
@@ -56,8 +55,8 @@ export async function buildTransfer(input: z.infer<typeof sendInput>): Promise<U
 /** BÓVEDA's existing USDC account for the fee wallet; every swap fee is paid in USDC here. */
 export const FEE_USDC_ACCOUNT = "DXbXVtrEEyJ7zuanJNzyyj1D3PQBsUm65hdQ3DHiarQW";
 
-/** Progressive swap fee in micro-USDC: free up to 10 USDC, 1.25% on the excess. */
-export function swapFee(usdcUnits: bigint) { return progressiveFee(usdcUnits); }
+/** Swaps carry no BÓVEDA fee. */
+export function swapFee(_usdcUnits: bigint) { return 0n; }
 
 /** Swappable tokens: USDC plus every vault token validated with `swapDecimals`; new pools appear automatically. */
 export type SwapToken = { symbol: string; mint: string; decimals: number };
@@ -96,7 +95,7 @@ export function swapSpendable(balance: bigint, symbol: string) {
 export type SwapQuote = { from: string; to: string; amount: bigint; outAmount: string; minimum: string | null; feeUsdc: string; usdcValue: string; priceImpactPct: string; raw: unknown };
 
 /** Public Jupiter quote with 0.5% slippage; the 1% fee is always charged in USDC. */
-export async function quoteSwap(from: string, to: string, amount: bigint): Promise<SwapQuote> {
+export async function quoteSwap(from: string, to: string, amount: bigint, opts?: { feeUsdc?: bigint }): Promise<SwapQuote> {
   const a = swapToken(from), b = swapToken(to);
   if (a.symbol === b.symbol) throw new Error("Elige dos monedas distintas.");
   const buying = a.symbol === "USDC";
@@ -118,7 +117,7 @@ export async function quoteSwap(from: string, to: string, amount: bigint): Promi
   }
   const rawMin = typeof raw.otherAmountThreshold === "string" && /^\d+$/.test(raw.otherAmountThreshold) ? raw.otherAmountThreshold : null;
   if (!buying && rawMin === null) throw new Error("No se pudo cotizar el cambio. Inténtalo de nuevo.");
-  const fee = buying ? swapFee(amount) : swapFee(BigInt(rawMin!));
+  const fee = buying ? swapFee(amount) : opts?.feeUsdc && opts.feeUsdc > 0n && opts.feeUsdc < BigInt(rawMin!) ? opts.feeUsdc : swapFee(BigInt(rawMin!));
   const outAmount = buying ? raw.outAmount : (BigInt(raw.outAmount) - fee).toString();
   const minimum = buying ? rawMin : (BigInt(rawMin!) - fee).toString();
   if (BigInt(outAmount) <= 0n) throw new Error("El monto es demasiado pequeño para cambiar.");

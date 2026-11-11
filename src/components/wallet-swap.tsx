@@ -144,7 +144,7 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
           <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{t("Mínimo a recibir")}</dt><dd>{current.minimum ? `${format(current.minimum, to)} ${to}` : "—"}</dd></div>
           <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{t("Protección de precio")}</dt><dd>0.5%</dd></div>
         </dl>
-        <p className="mt-2 text-xs text-muted-foreground">{t("Los primeros 10 USDC no pagan comisión; sobre el resto se cobra 1.25%. Ya está incluida en lo que recibes.")}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{t("Los cambios no tienen comisión de BÓVEDA. Solo pagas el precio del mercado.")}</p>
       </details>
     </>}
     {quote.isError && amount === debounced && <p role="alert" className="text-sm text-destructive">{t(quote.error.message)}</p>}

@@ -10,6 +10,8 @@ import { assetOfTitle, positionWon, type PredictPosition } from "@/lib/predict";
 import { executePredict, preparePredictClaim } from "@/lib/predict.functions";
 import { buildSwap, JUPUSD_MINT, quoteSwap, readTokenBalance } from "@/lib/wallet-actions";
 import { annotateRecord } from "@/lib/predict-history";
+import { predictClaimFee } from "@/lib/fees";
+import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 
 const usdc = (m: string | bigint) => (Number(m) / 1e6).toFixed(2);
 const fromB64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
@@ -21,6 +23,7 @@ export function PendingClaims() {
   const session = useBovedaSession();
   const wallet = session.walletAddress;
   const qc = useQueryClient();
+  const reportAffiliate = useAffiliateReport();
   const q = usePredictPositions(wallet);
   const [claimed, setClaimed] = useState<string[]>([]);
   const items = (q.data ?? []).filter((p) => !claimed.includes(p.pubkey) && p.status !== "open" && positionWon(p) === true && BigInt(p.payoutMicro || "0") > 0n);
@@ -42,7 +45,8 @@ export function PendingClaims() {
       try {
         await new Promise((res) => setTimeout(res, 2500));
         const bal = await readTokenBalance(wallet, JUPUSD_MINT);
-        const out = bal > 0n ? (await (async () => { const q = await quoteSwap("JupUSD", "USDC", bal); await session.signAndSend(await buildSwap(wallet, q)); return q.outAmount; })()) : p.payoutMicro;
+        const feeUsdc = predictClaimFee(BigInt(p.payoutMicro || "0"), BigInt(p.costMicro || "0"));
+        const out = bal > 0n ? (await (async () => { const q = await quoteSwap("JupUSD", "USDC", bal, { feeUsdc }); const s = await session.signAndSend(await buildSwap(wallet, q)); if (BigInt(q.feeUsdc) > 0n) void reportAffiliate(s, "predict"); return q.outAmount; })()) : p.payoutMicro;
         setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(out) }) });
       } catch { setMsg({ ok: true, text: t("Pago cobrado, pero falta el cambio a USDC. Hazlo en Mi wallet → Cambiar (JupUSD → USDC).") }); }
       setClaimed((l) => [...l, p.pubkey]);

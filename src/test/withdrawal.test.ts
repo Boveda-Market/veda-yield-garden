@@ -3,10 +3,9 @@ import { withdrawalAmounts, withdrawalInput, prepareWithdrawalInput } from "@/li
 import { FEE_WALLET } from "@/lib/fees";
 
 describe("withdrawal rules", () => {
-  it("is free up to 10 USDC and charges 1.25% on the excess of the protected minimum", () => {
-    expect(withdrawalAmounts(1_000_000n).fee).toBe(0n);
-    expect(withdrawalAmounts(10_000_000n).fee).toBe(0n);
-    expect(withdrawalAmounts(110_000_000n)).toEqual({ gross: 110_000_000n, fee: 1_250_000n, net: 108_750_000n });
+  it("charges a flat 1% of the protected minimum", () => {
+    expect(withdrawalAmounts(10_000_000n).fee).toBe(100_000n);
+    expect(withdrawalAmounts(110_000_000n)).toEqual({ gross: 110_000_000n, fee: 1_100_000n, net: 108_900_000n });
   });
   it("accepts supported wallets without a pilot allowlist and bounds reviewed integer amounts", () => {
     const input = { wallet: FEE_WALLET, position: FEE_WALLET, vaultId: "met", maximumFeeRaw: "10000", minimumNetRaw: "990000" };
