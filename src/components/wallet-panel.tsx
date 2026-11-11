@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, Plus } from "lucide-react";
+import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, ChevronRight, LayoutDashboard, PieChart, Plus, TrendingUp } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
@@ -111,6 +112,11 @@ export function WalletPanel() {
     { icon: Send, label: t("Enviar"), on: () => openSend("USDC") },
     { icon: QrCode, label: t("Recibir"), on: () => setReceiveOpen(true) },
   ];
+  const shortcuts = [
+    { to: "/app", icon: LayoutDashboard, title: t("Bóvedas"), sub: t("Genera rendimiento diario") },
+    { to: "/mercados", icon: TrendingUp, title: t("Sube/Baja"), sub: t("Predicciones BTC, ETH, SOL") },
+    { to: "/portfolio", icon: PieChart, title: t("Portafolio"), sub: t("Tus ganancias y estadísticas") },
+  ] as const;
 
   return <div className="mx-auto max-w-2xl space-y-5">
     <InstallAppBanner />
@@ -124,6 +130,14 @@ export function WalletPanel() {
       <div className="mt-5 grid grid-cols-4 gap-2">{quick.map((q) => <button key={q.label} type="button" onClick={q.on} className="flex flex-col items-center gap-1.5 text-xs"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"><q.icon size={20} /></span>{q.label}</button>)}</div>
       {buyOpen ? <BuyUsdc className="mt-5" auto={buyOpen} /> : null}
       {balances.error && <p className="mt-2 text-sm text-destructive">{(balances.error as Error).message}</p>}
+    </section>
+
+    <section aria-label={t("Accesos rápidos")} className="grid gap-2 sm:grid-cols-3 sm:gap-3">
+      {shortcuts.map((s) => <Link key={s.to} to={s.to} className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-primary/5 sm:flex-col sm:items-start">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><s.icon size={20} aria-hidden /></span>
+        <span className="min-w-0 flex-1"><span className="block font-display text-base font-semibold">{s.title}</span><span className="block text-xs text-muted-foreground">{s.sub}</span></span>
+        <ChevronRight size={16} className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 sm:hidden" aria-hidden />
+      </Link>)}
     </section>
 
     <WalletPositions wallet={address} />

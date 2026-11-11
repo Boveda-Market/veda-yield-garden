@@ -1,5 +1,10 @@
 /** English strings for the homepage, wallet, portfolio, operation dialogs, affiliates and account redesigns. */
 export const extra: Record<string, string> = {
+  // Wallet quick access cards
+  "Accesos rápidos": "Quick access",
+  "Genera rendimiento diario": "Earn daily yield",
+  "Predicciones BTC, ETH, SOL": "BTC, ETH, SOL predictions",
+  "Tus ganancias y estadísticas": "Your earnings and stats",
   // Account
   "Tu perfil": "Your profile",
   "Cuenta activa": "Active account",
