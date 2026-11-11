@@ -13,8 +13,8 @@ export function progressiveFee(units: bigint) { return flat(units); }
 /** Deposit fee in micro-USDC: flat 1%, floored. */
 export function depositFee(units: bigint) { return flat(units); }
 
-/** Up/Down: entries are free; on claim, 1% of the profit only (payout − cost), floored; 0 when no profit. */
-export function predictClaimFee(payout: bigint, cost: bigint) { return payout > cost ? flat(payout - cost) : 0n; }
+/** Up/Down: entries are free; on claim, 1% of the total payout, floored. */
+export function predictClaimFee(payout: bigint, _cost?: bigint) { return payout > 0n ? flat(payout) : 0n; }
 
 /** Amounts and fees truncate to USDC's six decimal places, never rounding fees up. */
 export function transactionAmounts(amount: number, kind: "deposit" | "exit" = "exit") {
