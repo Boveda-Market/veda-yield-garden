@@ -2,12 +2,11 @@ import { useT } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
-import { Leaf, Sun, Gem, Waves, Check, LogOut, Copy, Wallet, Gift, UserRound, Bell, Scale, ChevronRight, ShieldCheck, Languages } from "lucide-react";
+import { Leaf, Sun, Gem, Waves, Check, LogOut, Copy, Wallet, Gift, UserRound, Scale, ChevronRight, ShieldCheck, Languages } from "lucide-react";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { Button } from "./ui/button";
 import { defaultProfile, profileSchema, type AccountProfile } from "@/lib/account-profile";
 import { getAccountProfile, saveAccountProfile } from "@/lib/account-profile.functions";
-import { EmailSignup } from "./email-signup";
 import { AccountSecuritySettings } from "./account-security";
 import { LanguageMenu } from "./language-menu";
 
@@ -86,11 +85,6 @@ export function AccountSettings() {
     </div>
 
     <div className={`${card} [&>section]:mt-0 [&>section]:border-t-0 [&>section]:pt-0`}><AccountSecuritySettings /></div>
-
-    <div className={card}>
-      <h2 className="flex items-center gap-2 font-display text-xl font-semibold"><Bell size={20} className="text-primary" />{t("Comunicaciones oficiales")}</h2>
-      <EmailSignup />
-    </div>
 
     <div className={card}>
       <h2 className="flex items-center gap-2 font-display text-xl font-semibold"><Scale size={20} className="text-primary" />{t("Legal y ayuda")}</h2>
