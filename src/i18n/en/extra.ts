@@ -1,6 +1,22 @@
 /** English strings for the homepage, wallet, portfolio, operation dialogs, affiliates and account redesigns. */
 export const extra: Record<string, string> = {
   "Retirar": "Withdraw",
+  // Withdraw
+  "Banco o tarjeta": "Bank or card",
+  "Llega en segundos · vía Coinbase o tu exchange": "Arrives in seconds · via Coinbase or your exchange",
+  "Automático a Bitcoin · 15 a 30 min": "Automatic to Bitcoin · 15 to 30 min",
+  "En Coinbase (o tu exchange) toca «Recibir» y elige USDC.": "In Coinbase (or your exchange) tap “Receive” and choose USDC.",
+  "Elige la red Solana. Es muy importante.": "Choose the Solana network. This is very important.",
+  "Copia la dirección y pégala aquí.": "Copy the address and paste it here.",
+  "¿Usas PayPal? Retira primero a Coinbase y desde allí pásalo a PayPal.": "Using PayPal? Withdraw to Coinbase first, then move it to PayPal from there.",
+  "Dirección USDC de tu exchange (red Solana)": "Your exchange's USDC address (Solana network)",
+  "Pegar": "Paste",
+  "Esta dirección es de otra red (Ethereum/Base/Polygon). En tu exchange elige la red Solana o perderás el dinero.": "This address is on another network (Ethereum/Base/Polygon). Choose the Solana network in your exchange or you will lose the money.",
+  "Esta es una dirección de Bitcoin. Para enviar a Bitcoin usa la opción Cash App.": "This is a Bitcoin address. To send Bitcoin, use the Cash App option.",
+  "Monto a retirar": "Amount to withdraw",
+  "Costo de red": "Network cost",
+  "Tiempo estimado": "Estimated time",
+  "unos segundos": "a few seconds",
   // Wallet quick access cards
   "Accesos rápidos": "Quick access",
   "Genera rendimiento diario": "Earn daily yield",
