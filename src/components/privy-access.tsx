@@ -1,3 +1,4 @@
+import { GAS_TOP_UP_SOL } from "@/lib/onboarding";
 import { useT } from "@/lib/i18n";
 import "@/lib/buffer-polyfill";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
@@ -127,7 +128,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
     buySol: async () => {
       if (!authenticated || !walletAddress) throw new Error(t("Primero entra a tu cuenta"));
       // Native SOL (not wrapped) so it can pay network costs right away.
-      await fundWallet({ address: walletAddress, options: { chain: "solana:mainnet", asset: "native-currency", amount: "0.1", defaultFundingMethod: "card" } });
+      await fundWallet({ address: walletAddress, options: { chain: "solana:mainnet", asset: "native-currency", amount: GAS_TOP_UP_SOL, defaultFundingMethod: "card" } });
     },
     logout: doLogout,
   }}>{children}<IdleLogout active={ready && authenticated} signedOut={ready && !authenticated} onLogout={doLogout} /></BovedaSessionContext.Provider>;

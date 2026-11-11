@@ -28,10 +28,10 @@ export function StartGuide({ className, onSwap }: { className?: string; onSwap?:
     <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Sparkles size={14} />{t("Guía de inicio")}</p>
     <ol className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground/70">{steps.map((s, i) => <li key={s} className={i === current ? "font-semibold text-foreground" : ""}>{i < current ? <Check size={12} className="mr-1 inline text-primary" /> : `${i + 1}. `}{s}</li>)}</ol>
     {step === "sol" ? <>
-      <h2 className="mt-3 font-display text-xl font-semibold">{t("Paso 1: añade fondos con tarjeta para empezar")}</h2>
-      <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Haz una sola compra con tarjeta por el total que quieras usar. Te llega en SOL en unos minutos: una parte paga los costos de red y el resto lo conviertes a USDC en el siguiente paso.")}</p>
-      <p className="mt-2 inline-block rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">{t("Mínimo sugerido: $10 · puedes comprar lo que quieras")}</p>
-      <div className="mt-4 flex flex-wrap gap-2"><BuyUsdc only="SOL" /></div>
+      <h2 className="mt-3 font-display text-xl font-semibold">{t("Paso 1: compra USDC (dólares) y un poco de gas")}</h2>
+      <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Compra USDC por el monto en dólares que quieras usar. Aparte, añade gas de red: solo necesitas entre $2 y $3 y te dura meses. No compres más gas del necesario.")}</p>
+      <p className="mt-2 inline-block rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">{t("Gas: ya viene fijado en ~$3 · no lo cambies")}</p>
+      <div className="mt-4"><BuyUsdc /></div>
     </> : <>
       <h2 className="mt-3 font-display text-xl font-semibold">{t("Paso 2: convierte tus fondos a USDC")}</h2>
       <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Ya tienes saldo. Los USDC son dólares digitales: es lo que depositas en una bóveda. Cambia la parte que quieras usar; siempre guardamos un poco de SOL para tus costos de red.")}</p>
