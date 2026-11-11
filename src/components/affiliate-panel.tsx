@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Copy, Users, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
+import { AffiliateHow } from "@/components/affiliate-how";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { AFFILIATE_SHARE_BPS, SUB_AFFILIATE_SHARE_BPS, PAYOUT_MIN_MICRO, payoutProgress, REF_STORAGE_KEY, normalizeCode, type AffiliateDashboard } from "@/lib/affiliate";
 import { cancelAffiliateClaim, finalizeAffiliateClaim, claimAffiliatePayout, customizeAffiliateCode, getAffiliateDashboard, joinAffiliate, savePayoutWallet } from "@/lib/affiliate.functions";
@@ -100,7 +101,8 @@ export function AffiliatePanel() {
           <Button className="mt-2 w-full" disabled={busy} onClick={() => void act(collect, "¡Cobro enviado a tu wallet!")}>{busy ? t("Enviando…") : t("Cobrar comisiones")}</Button>
         </div>}
       </div>; })()}
-      <p className="mt-4 text-xs text-muted-foreground">{t("Recibes el")} {dash.shareBps / 100}% {t("de las comisiones de tus invitados.")} <Link to="/terminos" hash="afiliados" className="font-medium text-primary underline">{t("Ver cómo funciona")}</Link></p>
+      <p className="mt-4 text-xs text-muted-foreground">{t("Recibes el")} {dash.shareBps / 100}% {t("de las comisiones de tus invitados.")}</p>
+      <div className="mt-2"><AffiliateHow /></div>
       {(() => { const connected = session.walletAddress ?? null; const current = dash.payoutWallet ?? connected; const isConnected = !!current && current === connected; const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`; return <div className="mt-5 rounded-xl border border-border bg-card p-4">
         <p className="text-sm font-semibold">{t("Destino de tus comisiones (USDC)")}</p>
         {current ? <p className="mt-2 flex items-center gap-2 text-sm"><span className="h-2 w-2 rounded-full bg-primary" aria-hidden />{isConnected ? t("Tu wallet conectada") : t("Wallet personalizada")}<span className="font-mono text-xs text-muted-foreground">{short(current)}</span></p> : <p className="mt-2 text-xs text-muted-foreground">{t("Conecta una wallet o escribe una dirección para recibir tus pagos.")}</p>}
