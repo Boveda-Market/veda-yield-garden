@@ -40,7 +40,7 @@ export function QuickSwapButton() {
   return <>
     <Button variant="secondary" onClick={() => { setError(null); setOpen(true); }}><ArrowLeftRight size={16} />{t("Cambiar SOL ⇄ USDC")}</Button>
     <Dialog open={open} onOpenChange={(v) => { if (!busy) setOpen(v); }}>
-      <DialogContent className="max-h-[92dvh] w-[calc(100%-1.5rem)] max-w-md gap-2 overflow-y-auto rounded-2xl p-4">
+      <DialogContent className="max-h-[92dvh] w-[calc(100%-3rem)] max-w-[350px] gap-2 overflow-y-auto rounded-2xl p-3.5">
         <DialogTitle className="pr-6 text-base">{t("Cambiar SOL ⇄ USDC")}</DialogTitle>
         <DialogDescription className="text-xs">{t("Toca ⇅ para invertir la dirección. Revisa la cotización antes de firmar; siempre se guarda un poco de SOL para costos de red.")}</DialogDescription>
         {open && <WalletSwap key={from} balances={{ SOL: b?.sol, USDC: b?.usdc }} initialFrom={from} busy={busy} onConfirm={swap} compact />}
