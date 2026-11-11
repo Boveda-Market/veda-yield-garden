@@ -17,3 +17,11 @@ describe("affiliate economics", () => {
     expect(payoutProgress(usdc(10)).ready).toBe(true);
   });
 });
+
+import { payoutsDue } from "./affiliate";
+describe("payoutsDue", () => {
+  it("only affiliates with 10 USDC or more pending are due", () => {
+    const due = payoutsDue([{ affiliate_privy_id: "a", commission_raw: 6_000_000 }, { affiliate_privy_id: "a", commission_raw: 4_000_000 }, { affiliate_privy_id: "b", commission_raw: 9_999_999 }]);
+    expect(due).toEqual([{ affiliate: "a", raw: 10_000_000n, count: 2 }]);
+  });
+});

@@ -73,6 +73,8 @@ export type Database = {
           fee_raw: number
           kind: string
           level: number
+          paid_at: string | null
+          payout_signature: string | null
           referred_privy_id: string
           share_bps: number
           signature: string
@@ -85,6 +87,8 @@ export type Database = {
           fee_raw: number
           kind: string
           level?: number
+          paid_at?: string | null
+          payout_signature?: string | null
           referred_privy_id: string
           share_bps: number
           signature: string
@@ -97,6 +101,8 @@ export type Database = {
           fee_raw?: number
           kind?: string
           level?: number
+          paid_at?: string | null
+          payout_signature?: string | null
           referred_privy_id?: string
           share_bps?: number
           signature?: string

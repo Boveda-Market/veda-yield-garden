@@ -52,3 +52,16 @@ export type AffiliateDashboard = {
   subReferred: number;
   earnings: Array<{ signature: string; level: 1 | 2; kind: "harvest" | "exit" | "deposit"; feeRaw: string; commissionRaw: string; status: string; createdAt: string }>;
 };
+
+/** Dedicated wallet that only funds affiliate payouts (separate from the operating fee wallet). Connecting it unlocks the payout panel. */
+export const AFFILIATE_PAYOUT_WALLET = "5YhN1yeEKS9NgqQEezMyt8u7mDEdvsQbD9j1KZ35EHce";
+const sig = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,90}$/);
+export const payoutAdminRequest = z.object({ token }).strict();
+export const markPaidRequest = z.object({ token, affiliate: z.string().min(1).max(200), signature: sig }).strict();
+export type PayoutDue = { affiliate: string; code: string; wallet: string | null; pendingRaw: string; count: number };
+/** Sums pending commissions per affiliate; only totals at or above the payout minimum are due. */
+export function payoutsDue(rows: Array<{ affiliate_privy_id: string; commission_raw: number | string }>) {
+  const map = new Map<string, { raw: bigint; count: number }>();
+  for (const r of rows) { const e = map.get(r.affiliate_privy_id) ?? { raw: 0n, count: 0 }; e.raw += BigInt(r.commission_raw); e.count++; map.set(r.affiliate_privy_id, e); }
+  return [...map].filter(([, v]) => v.raw >= PAYOUT_MIN_MICRO).map(([affiliate, v]) => ({ affiliate, raw: v.raw, count: v.count }));
+}

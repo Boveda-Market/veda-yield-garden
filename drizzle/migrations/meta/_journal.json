@@ -43,6 +43,13 @@
       "when": 1794256373462,
       "tag": "0005_two_tier_affiliates",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794402948556,
+      "tag": "0006_affiliate_payout_signature",
+      "breakpoints": true
     }
   ]
 }

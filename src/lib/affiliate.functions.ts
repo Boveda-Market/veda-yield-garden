@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard } from "./affiliate";
+import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue } from "./affiliate";
 import { proofIsFresh, walletProofMessage, walletProofRequest } from "./wallet-proof";
 
 type Fail = { success: false; error: string };
@@ -167,4 +167,54 @@ export const recordAffiliateFee = createServerFn({ method: "POST" })
       const { error } = await db.from("affiliate_earnings").insert(rows);
       return { success: !error };
     } catch { return { success: false }; }
+  });
+
+/** Only the account that proved ownership of the dedicated payout wallet may manage payouts. */
+async function payoutAdmin(token: string) {
+  const { AFFILIATE_PAYOUT_WALLET } = await import("./affiliate");
+  const ctx = await admin(token);
+  const { data } = await ctx.db.from("verified_wallets").select("privy_user_id").eq("wallet", AFFILIATE_PAYOUT_WALLET).maybeSingle();
+  if (!data || data.privy_user_id !== ctx.id) throw new Error("forbidden");
+  return ctx;
+}
+
+export const listAffiliatePayouts = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => payoutAdminRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: true; due: PayoutDue[]; paidRaw: string } | Fail> => {
+    try {
+      const { db } = await payoutAdmin(data.token);
+      const { data: rows } = await db.from("affiliate_earnings").select("affiliate_privy_id, commission_raw, status").in("status", ["pending", "paid"]).limit(10000);
+      const pending = (rows ?? []).filter((r) => r.status === "pending");
+      const paidRaw = (rows ?? []).filter((r) => r.status === "paid").reduce((a, r) => a + BigInt(r.commission_raw), 0n).toString();
+      const due = payoutsDue(pending);
+      const ids = due.map((d) => d.affiliate);
+      const { data: affs } = ids.length ? await db.from("affiliates").select("privy_user_id, code, payout_wallet").in("privy_user_id", ids) : { data: [] };
+      return { success: true, paidRaw, due: due.map((d) => { const a = (affs ?? []).find((x) => x.privy_user_id === d.affiliate); return { affiliate: d.affiliate, code: a?.code ?? "—", wallet: a?.payout_wallet ?? null, pendingRaw: d.raw.toString(), count: d.count }; }) };
+    } catch { return { success: false, error: "Solo la wallet de pagos verificada puede ver este panel." }; }
+  });
+
+export const markAffiliatePaid = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => markPaidRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: true } | Fail> => {
+    try {
+      const key = process.env["HELIUS_API_KEY"];
+      if (!key) return { success: false, error: "Servicio no disponible." };
+      const { db } = await payoutAdmin(data.token);
+      const { AFFILIATE_PAYOUT_WALLET } = await import("./affiliate");
+      const { data: used } = await db.from("affiliate_earnings").select("signature").eq("payout_signature", data.signature).limit(1);
+      if (used?.length) return { success: false, error: "Esa transacción ya se registró." };
+      const { data: aff } = await db.from("affiliates").select("payout_wallet").eq("privy_user_id", data.affiliate).maybeSingle();
+      if (!aff?.payout_wallet) return { success: false, error: "El afiliado no tiene wallet de cobro." };
+      const { data: rows } = await db.from("affiliate_earnings").select("signature, level, commission_raw").eq("affiliate_privy_id", data.affiliate).eq("status", "pending");
+      const owed = (rows ?? []).reduce((a, r) => a + BigInt(r.commission_raw), 0n);
+      const { confirmedPayoutTransfer } = await import("./affiliate.server");
+      let received: bigint | null = null;
+      for (let i = 0; i < 6 && received === null; i++) { received = await confirmedPayoutTransfer(key, data.signature, AFFILIATE_PAYOUT_WALLET, aff.payout_wallet); if (received === null) await new Promise((r) => setTimeout(r, 2000)); }
+      if (received === null || received < owed) return { success: false, error: "No se encontró en la red un pago confirmado por el total adeudado." };
+      for (const r of rows ?? []) {
+        const { error } = await db.from("affiliate_earnings").update({ status: "paid", payout_signature: data.signature, paid_at: new Date().toISOString() }).eq("signature", r.signature).eq("level", r.level).eq("affiliate_privy_id", data.affiliate).eq("status", "pending");
+        if (error) throw error;
+      }
+      return { success: true };
+    } catch { return { success: false, error: "No se pudo registrar el pago." }; }
   });
