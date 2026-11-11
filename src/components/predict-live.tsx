@@ -4,6 +4,7 @@ import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2 } from "lucide-reac
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { PredictPositionCard } from "@/components/predict-position-card";
+import { SolConvertShortcut } from "@/components/sol-convert-shortcut";
 import { ShareWin } from "@/components/share-win";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useT } from "@/lib/i18n";
@@ -178,6 +179,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
           <p className="flex justify-between"><span className="text-muted-foreground">{t("Precio por contrato")}</span><strong className="tabular-nums">{Math.round(selPrice * 100)}¢ · {(1 / selPrice).toFixed(2)}×</strong></p>
           {short && <p className="pt-1 text-[11px] text-muted-foreground">{t("Cotización con el precio actual del mercado. Fondea tu wallet para firmarla.")}</p>}
         </div>}
+        {short && <SolConvertShortcut className="mt-3" />}
         {short && side && <Button asChild className="mt-3 h-12 w-full rounded-xl text-base font-bold"><Link to="/wallet">{t("Depositar o cambiar a USDC")}</Link></Button>}
         {!side && <p className="mt-3 text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
         {!wallet ? <p className="mt-3 rounded-xl bg-secondary p-3 text-center text-sm font-semibold">{t("Entra con tu cuenta para predecir en vivo con el USDC de tu wallet.")}</p>
