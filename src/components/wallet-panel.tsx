@@ -18,6 +18,7 @@ import { SolExcessCard } from "@/components/sol-excess-card";
 import { BuyUsdc } from "@/components/buy-usdc";
 import { InstallAppBanner } from "@/components/install-app";
 import { PendingClaims } from "@/components/pending-claims";
+import { WalletPositions } from "@/components/wallet-positions";
 
 
 export function WalletPanel() {
@@ -123,6 +124,8 @@ export function WalletPanel() {
       {buyOpen && <BuyUsdc className="mt-5" />}
       {balances.error && <p className="mt-2 text-sm text-destructive">{(balances.error as Error).message}</p>}
     </section>
+
+    <WalletPositions wallet={address} />
 
     <section className="rounded-2xl border border-border bg-card p-2">
       <h3 className="px-3 pt-3 pb-1 font-display text-lg">{t("Tus activos")}</h3>
