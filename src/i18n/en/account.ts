@@ -48,7 +48,7 @@ export const account: Record<string, string> = {
   "Seguridad": "Security",
   "Correo de acceso": "Sign-in email",
   "Aún no has vinculado un correo.": "You haven't linked an email address yet.",
-  "Verifica tu correo con un código para entrar a tu cuenta. Es independiente del registro de novedades.": "Verify your email with a code to sign in to your account. This is separate from signing up for updates.",
+  "Verifica tu correo con un código para entrar a tu cuenta.": "Verify your email with a code to sign in to your account.",
   "Cambiar correo": "Change email",
   "Vincular correo": "Link email",
   "{count} passkey vinculada": "{count} linked passkey",

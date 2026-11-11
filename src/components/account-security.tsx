@@ -27,7 +27,7 @@ export function AccountSecuritySettings() {
       <div className="py-5">
         <h3 className="flex items-center gap-2 font-medium"><Mail size={18} />{t("Correo de acceso")}</h3>
         <p className="mt-2 break-all text-sm text-muted-foreground">{security.email ?? t("Aún no has vinculado un correo.")}</p>
-        <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Verifica tu correo con un código para entrar a tu cuenta. Es independiente del registro de novedades.")}</p>
+        <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Verifica tu correo con un código para entrar a tu cuenta.")}</p>
         <Button type="button" variant="outline" className="mt-3" onClick={() => security.email ? security.updateEmail() : security.linkEmail()}><Mail size={16} />{security.email ? t("Cambiar correo") : t("Vincular correo")}</Button>
       </div>
       <div className="py-5">
