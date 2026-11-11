@@ -109,7 +109,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
       await fundWallet({ address: walletAddress, options: { chain: "solana:mainnet", asset: "native-currency", amount: "0.1", defaultFundingMethod: "card" } });
     },
     logout: doLogout,
-  }}>{children}<IdleLogout active={ready && authenticated} onLogout={doLogout} /></BovedaSessionContext.Provider>;
+  }}>{children}<IdleLogout active={ready && authenticated} signedOut={ready && !authenticated} onLogout={doLogout} /></BovedaSessionContext.Provider>;
 }
 
 export default function PrivyAccess({ children }: { children: ReactNode }) {
