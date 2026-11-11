@@ -60,9 +60,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <BuyUsdc className="mt-4" />
       {query.data && !query.data.success && <p role="alert" className="mt-3 text-sm text-destructive">{query.data.error}</p>}
       {query.isError && <p role="alert" className="mt-3 text-sm text-destructive">{t("No se pudo consultar la red. Inténtalo de nuevo.")}</p>}
-      <dl className="mt-6 grid gap-5 sm:grid-cols-3">
-        <div><dt className="text-sm text-muted-foreground">{t("Saldo USDC en tu wallet")}</dt><dd className="mt-1 break-all font-display text-xl">{data ? `${data.usdc} USDC` : walletAddress ? unavailable : t("Conecta tu wallet")}</dd></div>
-        <div><dt className="text-sm text-muted-foreground">{t("SOL para costes de red")}</dt><dd className="mt-1 break-all font-display text-xl">{data ? `${data.sol} SOL` : walletAddress ? unavailable : t("Conecta tu wallet")}</dd></div>
+      <dl className="mt-6 grid gap-5">
         <div><dt className="text-sm text-muted-foreground">{t("Posiciones en estos pools")}</dt><dd className="mt-1 font-display text-xl">{data?.positionsComplete ? data.positions.length : walletAddress ? unavailable : t("Conecta tu wallet")}</dd></div>
       </dl>
       {data && <p className="mt-4 text-xs text-muted-foreground">{t("Lectura confirmada en la red ·")}{" "}{new Date(data.checkedAt).toLocaleTimeString("es-MX")} {t("· no autoriza movimientos")}</p>}
