@@ -42,3 +42,10 @@ export function unitsToDecimal(v: bigint, decimals: number): string {
 
 /** Starting SOL card purchase, preset to the card provider minimum (0.19 SOL); extra converts to USDC. */
 export const GAS_TOP_UP_SOL = "0.19";
+
+/** SOL kept for network costs when auto-converting new funds (covers MIN_SOL_LAMPORTS plus headroom). */
+export const GAS_KEEP_LAMPORTS = 20_000_000n;
+/** Lamports auto-converted to USDC: everything above the kept network reserve. */
+export function autoConvertLamports(balance: bigint): bigint {
+  return balance > GAS_KEEP_LAMPORTS ? balance - GAS_KEEP_LAMPORTS : 0n;
+}

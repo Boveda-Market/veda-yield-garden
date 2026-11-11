@@ -1,43 +1,86 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeftRight, Check, Sparkles } from "lucide-react";
+import { CheckCircle2, CreditCard, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
-import { decimalToUnits, onboardingStep } from "@/lib/onboarding";
-import { BuyUsdc } from "@/components/buy-usdc";
+import { autoConvertLamports, decimalToUnits, GAS_KEEP_LAMPORTS, MIN_USDC_MICRO, onboardingStep, SOL_EXCESS_MIN_USD } from "@/lib/onboarding";
+import { buildSwap, quoteSwap, type SwapQuote } from "@/lib/wallet-actions";
 import { Button } from "@/components/ui/button";
 
-/** Shows new users the next funding step (SOL, then USDC); hides once funded. */
-export function StartGuide({ className, onSwap }: { className?: string; onSwap?: () => void }) {
+type Receipt = { solIn: bigint; usdcOut: bigint; minimum: bigint | null; kept: bigint; signature: string };
+const num = (v: bigint, d: number, max: number) => (Number(v) / 10 ** d).toLocaleString("en-US", { useGrouping: false, minimumFractionDigits: Math.min(2, max), maximumFractionDigits: max });
+
+/** One-button funding: buy with card, then one tap converts everything above the network reserve to USDC and shows a receipt. */
+export function StartGuide({ className }: { className?: string; onSwap?: () => void }) {
   const t = useT();
   const session = useBovedaSession();
+  const queryClient = useQueryClient();
   const address = session.walletAddress;
   const read = useServerFn(getRealWallet);
-  const q = useQuery({ queryKey: ["start-guide", address], enabled: !!address && session.authenticated, staleTime: 30_000, queryFn: async () => {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [receipt, setReceipt] = useState<Receipt | null>(null);
+  const q = useQuery({ queryKey: ["start-guide", address], enabled: !!address && session.authenticated, staleTime: 10_000, refetchInterval: 15_000, queryFn: async () => {
     const r = await read({ data: { wallet: address! } });
     if (!r.success) throw new Error(r.error);
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   } });
+  const convertible = q.data ? autoConvertLamports(q.data.sol) : 0n;
+  const preview = useQuery({ queryKey: ["auto-fund-quote", convertible.toString()], enabled: convertible > 0n && !!q.data && q.data.usdc < MIN_USDC_MICRO && !busy && !receipt, staleTime: 20_000, refetchInterval: 30_000, retry: false, queryFn: () => quoteSwap("SOL", "USDC", convertible) });
+
+  const box = `rounded-2xl border border-primary/40 bg-primary/10 p-5 ${className ?? ""}`;
+  if (receipt) return <section aria-label={t("Comprobante")} className={box} role="status">
+    <CheckCircle2 className="size-9 text-primary" aria-hidden="true" />
+    <h2 className="mt-2 font-display text-xl font-semibold">{t("¡Tus dólares están listos!")}</h2>
+    <p className="mt-1 text-sm text-foreground/85">{t("Ya puedes depositar en una bóveda o entrar a Sube/Baja.")}</p>
+    <dl className="mt-4 divide-y divide-border rounded-xl border border-border bg-card text-sm">
+      {[
+        [t("Convertido"), `${num(receipt.solIn, 9, 4)} SOL`],
+        [t("Recibes (aprox.)"), `${num(receipt.usdcOut, 6, 2)} USDC`],
+        ...(receipt.minimum !== null ? [[t("Mínimo garantizado"), `${num(receipt.minimum, 6, 2)} USDC`]] : []),
+        [t("Comisión BÓVEDA"), "0.00 USDC"],
+        [t("Reservado para costos de red"), `${num(receipt.kept, 9, 4)} SOL`],
+        [t("Comprobante"), `${receipt.signature.slice(0, 6)}…${receipt.signature.slice(-6)}`],
+      ].map(([k, v]) => <div key={k} className="flex justify-between gap-3 px-4 py-2.5"><dt className="text-muted-foreground">{k}</dt><dd className="font-semibold">{v}</dd></div>)}
+    </dl>
+    <p className="mt-2 text-xs text-muted-foreground">{t("Tu saldo se actualizará en unos segundos.")}</p>
+    <Button className="mt-4 w-full" onClick={() => setReceipt(null)}>{t("Listo")}</Button>
+  </section>;
+
   if (!q.data || !address) return null;
   const step = onboardingStep(q.data.sol, q.data.usdc);
   if (!step) return null;
-  const steps = [t("Añade saldo inicial"), t("Convierte a USDC"), t("Elige tu bóveda")];
-  const current = step === "sol" ? 0 : 1;
-  return <section aria-label={t("Guía de inicio")} className={`rounded-2xl border border-primary/40 bg-primary/10 p-5 ${className ?? ""}`}>
-    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Sparkles size={14} />{t("Guía de inicio")}</p>
-    <ol className="mt-3 grid grid-cols-3 gap-2 text-xs">{steps.map((s, i) => <li key={s} className={`flex items-center gap-2 rounded-xl border px-2 py-2 ${i === current ? "border-primary bg-primary/15 font-semibold text-foreground" : i < current ? "border-primary/30 text-foreground/80" : "border-border text-muted-foreground"}`}>
-      <span className={`grid size-6 shrink-0 place-items-center rounded-full text-[11px] font-bold ${i <= current ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{i < current ? <Check size={12} /> : i + 1}</span>{s}</li>)}</ol>
-    {step === "sol" ? <>
-      <h2 className="mt-4 font-display text-xl font-semibold">{t("Paso 1: añade tu saldo inicial con tarjeta")}</h2>
-      <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Compra SOL con tarjeta. El mínimo de compra es 0.19 SOL (unos $35). Una parte pequeña paga los costos de red por meses y el resto lo conviertes a USDC (dólares) en el paso 2, sin comisión.")}</p>
-      <p className="mt-2 inline-block rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">{t("Ya viene fijado en 0.19 SOL · es la cantidad en SOL, no en dólares")}</p>
-      <div className="mt-4"><BuyUsdc only="SOL" /></div>
-    </> : <>
-      <h2 className="mt-4 font-display text-xl font-semibold">{t("Paso 2: convierte tus fondos a USDC")}</h2>
-      <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Ya tienes saldo. Los USDC son dólares digitales: es lo que depositas en una bóveda. Cambia la parte que quieras usar; siempre guardamos un poco de SOL para tus costos de red.")}</p>
-      <div className="mt-4 flex flex-wrap gap-2"><Button onClick={() => onSwap ? onSwap() : window.location.assign("/wallet?swap=SOL")}><ArrowLeftRight size={16} />{t("Cambiar SOL a USDC")}</Button></div>
-      <p className="mt-3 text-xs text-muted-foreground">{t("Paso 3: con tus USDC, elige una bóveda o entra a Sube/Baja.")}</p>
-    </>}
+
+  if (step === "sol") return <section aria-label={t("Añadir fondos")} className={box}>
+    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Sparkles size={14} />{t("Empieza aquí")}</p>
+    <h2 className="mt-2 font-display text-xl font-semibold">{t("Añade fondos con tu tarjeta")}</h2>
+    <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Pagas con tarjeta en una pasarela segura y el dinero llega solo a tu cuenta. Luego lo activamos en dólares con un toque.")}</p>
+    <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck size={14} className="text-primary" />{t("Solo tú controlas tus fondos. BÓVEDA no puede moverlos sin tu firma.")}</p>
+    {session.buySol && <Button className="mt-4 w-full" onClick={() => { setError(null); session.buySol!().catch((e) => setError(e instanceof Error ? e.message : String(e))); }}><CreditCard size={16} />{t("Añadir fondos")}</Button>}
+    {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}
+  </section>;
+
+  const quote: SwapQuote | undefined = preview.data;
+  const usd = quote ? Number(quote.outAmount) / 1e6 : 0;
+  if (convertible <= 0n || (quote && usd < SOL_EXCESS_MIN_USD)) return null;
+  async function activate() {
+    if (!address) return;
+    setBusy(true); setError(null);
+    try {
+      const fresh = await quoteSwap("SOL", "USDC", convertible);
+      const signature = await session.signAndSend(await buildSwap(address, fresh));
+      setReceipt({ solIn: convertible, usdcOut: BigInt(fresh.outAmount), minimum: fresh.minimum ? BigInt(fresh.minimum) : null, kept: q.data!.sol - convertible, signature });
+      void queryClient.invalidateQueries();
+    } catch (e) { setError(e instanceof Error ? e.message : String(e)); } finally { setBusy(false); }
+  }
+  return <section aria-label={t("Activa tus dólares")} className={box}>
+    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><CheckCircle2 size={14} />{t("Fondos recibidos")}</p>
+    <h2 className="mt-2 font-display text-xl font-semibold">{t("Activa tus dólares")}</h2>
+    <p className="mt-1 text-sm leading-6 text-foreground/85">{quote ? t("Convertimos tu saldo a ~${usd} USDC sin comisión y guardamos un poco para costos de red.", { usd: usd.toFixed(2) }) : t("Calculando tu saldo en dólares…")}</p>
+    <Button className="mt-4 w-full" disabled={busy || !quote} onClick={() => void activate()}>{busy ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}{busy ? t("Activando…") : t("Activar mis dólares")}</Button>
+    <p className="mt-2 text-xs text-muted-foreground">{t("Reservamos {sol} SOL para costos de red. Confirmarás con tu firma.", { sol: num(GAS_KEEP_LAMPORTS, 9, 3) })}</p>
+    {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}
   </section>;
 }

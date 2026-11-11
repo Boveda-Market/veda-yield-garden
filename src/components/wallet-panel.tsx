@@ -14,7 +14,7 @@ import { WalletSwap } from "@/components/wallet-swap";
 import { solanaAddressSchema } from "@/lib/solana-data";
 import { decimalToUnits } from "@/lib/onboarding";
 import { StartGuide } from "@/components/start-guide";
-import { SolExcessCard } from "@/components/sol-excess-card";
+
 import { BuyUsdc } from "@/components/buy-usdc";
 import { InstallAppBanner } from "@/components/install-app";
 import { PendingClaims } from "@/components/pending-claims";
@@ -115,8 +115,8 @@ export function WalletPanel() {
   return <div className="mx-auto max-w-2xl space-y-5">
     <InstallAppBanner />
     <PendingClaims />
-    <SolExcessCard sol={balances.data?.sol} usdc={balances.data?.usdc} solPrice={prices.data?.["SOL"]} onConvert={(a) => openSwap("SOL", a)} />
-    <StartGuide onSwap={() => openSwap("SOL")} />
+
+    <StartGuide />
     <section className="rounded-3xl border border-border bg-card p-6">
       <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{t("Balance total")}</p><Button variant="ghost" size="sm" onClick={() => { void balances.refetch(); void extra.refetch(); void prices.refetch(); void queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); void queryClient.invalidateQueries({ queryKey: ["predict-positions", address] }); }} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
       <p className="mt-1 font-display text-4xl">{total !== undefined ? `$${fmt(total)}` : "—"}</p>

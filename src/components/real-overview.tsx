@@ -16,7 +16,6 @@ import { BuyUsdc } from "@/components/buy-usdc";
 import { RealPositions, PortfolioEmpty } from "@/components/real-positions";
 import { OpenPositionsMini } from "@/components/open-positions-mini";
 import { StartGuide } from "@/components/start-guide";
-import { SolConvertShortcut } from "@/components/sol-convert-shortcut";
 import { VaultSteps } from "@/components/vault-steps";
 import { OpenPredictions, useOpenPredictions } from "@/components/open-predictions";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -59,7 +58,6 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <p className="mt-3 max-w-2xl text-sm leading-6 text-foreground/80">{t("Deposita entre 1 y 10,000 USDC en las bóvedas SOL y MET. Cosecha comisiones o liquida tus posiciones compatibles de SOL y MET, revisando los importes antes de firmar. Las posiciones bloqueadas no se pueden liquidar.")}</p>
       {walletAddress && <div className="mt-4 flex flex-wrap items-center gap-3"><p className="min-w-0 break-all text-xs text-muted-foreground">{t("Wallet conectada:")}{" "}{walletAddress}</p><Button variant="outline" size="icon" title={t("Actualizar saldo y posiciones")} aria-label={t("Actualizar saldo y posiciones")} disabled={query.isFetching} onClick={() => void query.refetch()}><RefreshCw size={16} className={query.isFetching ? "animate-spin motion-reduce:animate-none" : ""} /></Button></div>}
       {!portfolioOnly && <StartGuide className="mt-4" />}
-      {!portfolioOnly && <SolConvertShortcut className="mt-4" />}
       <BuyUsdc className="mt-4" />
       {query.data && !query.data.success && <p role="alert" className="mt-3 text-sm text-destructive">{query.data.error}</p>}
       {query.isError && <p role="alert" className="mt-3 text-sm text-destructive">{t("No se pudo consultar la red. Inténtalo de nuevo.")}</p>}

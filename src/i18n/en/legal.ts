@@ -63,5 +63,6 @@ export const legal: Record<string, string> = {
   "Vigente desde el": "Effective from",
   "Actualizado el": "Updated on",
   "8 de noviembre de 2026": "November 8, 2026",
-  "Preguntas frecuentes": "Frequently asked questions"
+  "Preguntas frecuentes": "Frequently asked questions",
+  "«Añadir fondos» abre una pasarela de pago externa que compra SOL (mínimo de la pasarela: 0.19 SOL) y lo envía a la wallet del usuario. «Activar mis dólares» prepara un cambio SOL→USDC a través de Jupiter, sin comisión de BÓVEDA, que convierte todo el saldo de SOL por encima de una reserva de 0.02 SOL para costos de red de Solana; el usuario lo firma y el cambio se envía con un mínimo garantizado. BÓVEDA nunca firma ni mueve fondos por el usuario.": "«Add funds» opens an external checkout that buys SOL (checkout minimum: 0.19 SOL) and sends it to the user's wallet. «Activate my dollars» prepares a SOL→USDC swap through Jupiter, with no BÓVEDA fee, converting all SOL above a 0.02 SOL reserve for Solana network costs; the user signs it and it is sent with a guaranteed minimum. BÓVEDA never signs or moves funds on the user's behalf.",
 };
