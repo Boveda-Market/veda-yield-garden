@@ -3,6 +3,7 @@ import { useState } from "react";
 import { CreditCard, Fuel } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
+import { QuickSwapButton } from "@/components/quick-swap";
 
 /** Card/exchange purchase buttons for USDC and SOL. */
 export function BuyUsdc({ className, only }: { className?: string; only?: "SOL" | "USDC" }) {
@@ -15,6 +16,7 @@ export function BuyUsdc({ className, only }: { className?: string; only?: "SOL" 
     <div className="flex flex-wrap gap-2">
       {only !== "SOL" && session.buyUsdc && <Button onClick={() => open(session.buyUsdc)}><CreditCard size={16} />{t("Comprar USDC")}</Button>}
       {only !== "USDC" && session.buySol && <Button variant={only === "SOL" ? "default" : "outline"} onClick={() => open(session.buySol)}><Fuel size={16} />{t("Comprar SOL")}</Button>}
+      {!only && <QuickSwapButton />}
     </div>
     {!only && <p className="mt-2 text-xs text-muted-foreground">{t("Compra con tarjeta o desde un exchange. Llegan a tu wallet en unos minutos. El SOL paga los costos de red; los USDC son lo que pones a trabajar.")}</p>}
     {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}
