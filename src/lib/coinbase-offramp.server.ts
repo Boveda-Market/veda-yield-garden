@@ -7,8 +7,8 @@ const fromB64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 const randomHex = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), (x) => x.toString(16).padStart(2, "0")).join("");
 
 async function cdpJwt(method: string, path: string) {
-  const keyId = process.env.CDP_API_KEY_ID;
-  const secret = process.env.CDP_API_KEY_SECRET?.replace(/\\n/g, "\n").trim();
+  const keyId = process.env["CDP_API_KEY_ID"];
+  const secret = process.env["CDP_API_KEY_SECRET"]?.replace(/\\n/g, "\n").trim();
   if (!keyId || !secret) throw new Error("Coinbase no está configurado.");
   const now = Math.floor(Date.now() / 1000);
   const payload = { sub: keyId, iss: "cdp", nbf: now, exp: now + 120, uri: `${method} ${HOST}${path}` };
