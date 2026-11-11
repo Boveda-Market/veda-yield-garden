@@ -6,7 +6,7 @@ import { useT } from "@/lib/i18n";
 import { SOL_RESERVE_LAMPORTS } from "@/lib/wallet-actions";
 import { MIN_USDC_MICRO, SOL_CONVERT_PERCENTS, SOL_EXCESS_MIN_USD, solConvertLamports, unitsToDecimal } from "@/lib/onboarding";
 
-type Props = { sol?: bigint; usdc?: bigint; solPrice?: number; onConvert: (amount: string) => void };
+type Props = { sol: bigint | undefined; usdc: bigint | undefined; solPrice: number | undefined; onConvert: (amount: string) => void };
 
 /** Suggests converting extra SOL to USDC with percent chips; the network reserve always stays. */
 export function SolExcessCard({ sol, usdc, solPrice, onConvert }: Props) {
