@@ -86,5 +86,10 @@ export const VIP_MAX_BPS = 9000;
 export const VIP_CODE_MAX_USES = 1;
 export const createVipCodeRequest = z.object({ token, code: z.string().regex(/^[A-Z0-9]{4,16}$/), shareBps: z.number().int().min(VIP_MIN_BPS).max(VIP_MAX_BPS) }).strict();
 export const toggleVipCodeRequest = z.object({ token, code: z.string().regex(/^[A-Z0-9]{4,16}$/), active: z.boolean() }).strict();
+const vipCode = z.string().regex(/^[A-Z0-9]{4,16}$/);
+export const updateVipCodeRequest = z.object({ token, code: vipCode, newCode: vipCode, shareBps: z.number().int().min(VIP_MIN_BPS).max(VIP_MAX_BPS) }).strict();
+export const deleteVipCodeRequest = z.object({ token, code: vipCode }).strict();
+/** Operator override of an affiliate's own rate: base 50% up to the 90% cap. */
+export const setAffiliateShareRequest = z.object({ token, code: z.string().min(1).max(32), shareBps: z.number().int().min(AFFILIATE_SHARE_BPS).max(VIP_MAX_BPS) }).strict();
 export type VipCode = { code: string; shareBps: number; used: boolean; active: boolean; createdAt: string; redeemedAt: string | null; redeemedBy: string | null };
 export type AffiliateRow = { code: string; shareBps: number; referred: number; pendingRaw: string; paidRaw: string; createdAt: string };

@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue, type PayoutRecent, claimRequest, claimFinalizeRequest, claimNet, type AffiliateKind, createVipCodeRequest, toggleVipCodeRequest, VIP_CODE_MAX_USES, type VipCode, type AffiliateRow } from "./affiliate";
+import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue, type PayoutRecent, claimRequest, claimFinalizeRequest, claimNet, type AffiliateKind, createVipCodeRequest, toggleVipCodeRequest, updateVipCodeRequest, deleteVipCodeRequest, setAffiliateShareRequest, VIP_CODE_MAX_USES, type VipCode, type AffiliateRow } from "./affiliate";
 import { proofIsFresh, walletProofMessage, walletProofRequest } from "./wallet-proof";
 
 type Fail = { success: false; error: string };
@@ -346,4 +346,43 @@ export const listAffiliateDirectory = createServerFn({ method: "POST" })
       });
       return { success: true, affiliates: rows };
     } catch { return { success: false, error: "No se pudo cargar el directorio." }; }
+  });
+
+/** Edits only unredeemed codes so redemption history stays auditable. */
+export const updateVipCode = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => updateVipCodeRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: true } | Fail> => {
+    try {
+      const { db } = await payoutAdmin(data.token);
+      if (data.newCode !== data.code) {
+        const { data: clash } = await db.from("affiliates").select("code").eq("code", data.newCode).maybeSingle();
+        if (clash) return { success: false, error: "Ese código ya lo usa un afiliado. Elige otro." };
+      }
+      const { data: rows, error } = await db.from("affiliate_upgrade_codes").update({ code: data.newCode, share_bps: data.shareBps }).eq("code", data.code).eq("times_used", 0).select("code");
+      if (error) return { success: false, error: "Ese código ya existe." };
+      if (!rows?.length) return { success: false, error: "Solo puedes editar códigos sin canjear." };
+      return { success: true };
+    } catch { return { success: false, error: "No se pudo actualizar el código." }; }
+  });
+
+export const deleteVipCode = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => deleteVipCodeRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: true } | Fail> => {
+    try {
+      const { db } = await payoutAdmin(data.token);
+      const { data: rows, error } = await db.from("affiliate_upgrade_codes").delete().eq("code", data.code).eq("times_used", 0).select("code");
+      if (error || !rows?.length) return { success: false, error: "Solo puedes eliminar códigos sin canjear." };
+      return { success: true };
+    } catch { return { success: false, error: "No se pudo eliminar el código." }; }
+  });
+
+export const setAffiliateShare = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => setAffiliateShareRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: true } | Fail> => {
+    try {
+      const { db } = await payoutAdmin(data.token);
+      const { data: rows, error } = await db.from("affiliates").update({ share_bps: data.shareBps }).eq("code", data.code).select("code");
+      if (error || !rows?.length) return { success: false, error: "No se pudo actualizar la comisión." };
+      return { success: true };
+    } catch { return { success: false, error: "No se pudo actualizar la comisión." }; }
   });

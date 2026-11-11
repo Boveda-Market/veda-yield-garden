@@ -30,3 +30,9 @@ describe("VIP codes", () => {
   it("are single-use", () => expect(VIP_CODE_MAX_USES).toBe(1));
   it("accept 60%–90%", () => { expect(createVipCodeRequest.safeParse({ token: tk, code: "PARTNER80", shareBps: 8000 }).success).toBe(true); expect(createVipCodeRequest.safeParse({ token: tk, code: "PARTNER95", shareBps: 9500 }).success).toBe(false); expect(createVipCodeRequest.safeParse({ token: tk, code: "LOW50", shareBps: 5000 }).success).toBe(false); });
 });
+
+import { setAffiliateShareRequest } from "./affiliate";
+describe("operator affiliate rate", () => {
+  const tk = "x".repeat(30);
+  it("allows 50%–90% only", () => { expect(setAffiliateShareRequest.safeParse({ token: tk, code: "ABC", shareBps: 5000 }).success).toBe(true); expect(setAffiliateShareRequest.safeParse({ token: tk, code: "ABC", shareBps: 9500 }).success).toBe(false); expect(setAffiliateShareRequest.safeParse({ token: tk, code: "ABC", shareBps: 4000 }).success).toBe(false); });
+});
