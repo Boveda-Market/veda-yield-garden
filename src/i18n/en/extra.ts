@@ -535,4 +535,6 @@ export const extra: Record<string, string> = {
   "¿Sigues ahí?": "Are you still there?",
   "Por tu seguridad cerraremos tu sesión por inactividad en": "For your security we will sign you out for inactivity in",
   "Mantener sesión abierta": "Stay signed in",
+  'Las comisiones se registran solo cuando la red confirma la operación. Al acumular al menos 10 USDC, el afiliado puede cobrarlas cuando quiera con «Cobrar comisiones»: recibe el importe completo en USDC en su wallet de destino y paga la tarifa de red con su propio SOL (≈0.003 SOL). Si cancela la firma, las comisiones vuelven a quedar pendientes.': "Commissions are recorded only once the network confirms the operation. Once at least 10 USDC accumulates, the affiliate can collect them anytime with “Collect commissions”: the full amount arrives in USDC at their payout wallet and they pay the network fee with their own SOL (≈0.003 SOL). If they cancel the signature, commissions return to pending.",
+  'Las comisiones se registran cuando la red confirma la operación. Desde 10 USDC las cobras tú mismo, completas, pagando la tarifa de red con tu SOL.': "Commissions are recorded once the network confirms the operation. From 10 USDC you collect them yourself, in full, paying the network fee with your SOL.",
 };
