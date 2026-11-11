@@ -57,6 +57,7 @@ export function WalletPanel() {
     }));
     return out;
   } });
+  useEffect(() => { const f = new URLSearchParams(window.location.search).get("swap"); if (f === "SOL" || f === "USDC") { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from: f, amount: "" })); window.history.replaceState(null, "", "/wallet"); setTimeout(() => actionsRef.current?.scrollIntoView({ behavior: "smooth" }), 300); } }, []);
   useEffect(() => { const c = new URLSearchParams(window.location.search).get("convert"); if (c && /^\d+(\.\d+)?$/.test(c)) { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from: "SOL", amount: c })); window.history.replaceState(null, "", "/wallet"); setTimeout(() => actionsRef.current?.scrollIntoView({ behavior: "smooth" }), 300); } }, []);
   useEffect(() => { if (!receiveOpen || !address || qr) return; void import("qrcode").then((m) => m.toDataURL(address, { width: 448, margin: 1 })).then(setQr).catch(() => setQr(null)); }, [receiveOpen, address, qr]);
 
