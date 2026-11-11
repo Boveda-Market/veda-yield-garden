@@ -1,6 +1,6 @@
 export const FEE_PERCENT = 1;
 export const DEPOSIT_FEE_PERCENT = 0.5;
-export const FEE_WALLET = "5YhN1yeEKS9NgqQEezMyt8u7mDEdvsQbD9j1KZ35EHce";
+export const FEE_WALLET = "93bF1K1dWMJseMuf15WLaNt1diVGACQ9gUFA7szsSbs7";
 const SCALE = 1_000_000;
 
 /** First 10 USDC of every fee-bearing operation is free. */

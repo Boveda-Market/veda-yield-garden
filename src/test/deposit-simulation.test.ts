@@ -8,7 +8,7 @@ describe("read-only deposit simulation", () => {
     expect(simulationAmounts("2")).toEqual({ gross: 2_000_000n, fee: 0n, net: 2_000_000n });
   });
   it("keeps the specified fee recipient", () => {
-    expect(FEE_WALLET).toBe("5YhN1yeEKS9NgqQEezMyt8u7mDEdvsQbD9j1KZ35EHce");
+    expect(FEE_WALLET).toBe("93bF1K1dWMJseMuf15WLaNt1diVGACQ9gUFA7szsSbs7");
   });
   it("allows only the selected pilot amounts and exact known vaults", () => {
     expect(() => simulationAmounts("0.99")).toThrow();
