@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { usePredictPositions } from "@/lib/predict-positions-query";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useT } from "@/lib/i18n";
 import type { PredictPosition } from "@/lib/predict";
-import { executePredict, getPredictPositions, preparePredictSell } from "@/lib/predict.functions";
+import { executePredict, preparePredictSell } from "@/lib/predict.functions";
 import { annotateRecord } from "@/lib/predict-history";
 import { PredictPositionCard } from "@/components/predict-position-card";
 
@@ -13,12 +15,10 @@ const toB64 = (b: Uint8Array) => btoa(Array.from(b, (x) => String.fromCharCode(x
 export function useOpenPredictions() {
   const session = useBovedaSession();
   const wallet = session.walletAddress;
-  const [items, setItems] = useState<PredictPosition[]>([]);
-  const refresh = useCallback(async () => {
-    if (!wallet) return;
-    try { const r = await getPredictPositions({ data: { wallet } }); if (r.success) setItems(r.positions.filter((p) => p.status === "open")); } catch {}
-  }, [wallet]);
-  useEffect(() => { void refresh(); const id = setInterval(refresh, 20_000); return () => clearInterval(id); }, [refresh]);
+  const qc = useQueryClient();
+  const q = usePredictPositions(wallet);
+  const items = (q.data ?? []).filter((p) => p.status === "open");
+  const refresh = useCallback(async () => { await qc.invalidateQueries({ queryKey: ["predict-positions", wallet] }); }, [qc, wallet]);
   return { items, refresh, session, wallet };
 }
 

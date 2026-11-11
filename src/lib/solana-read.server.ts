@@ -25,15 +25,19 @@ export async function readRealWallet(apiKey: string, address: string): Promise<R
   try {
     // The SDK discovers position NFTs actually owned by this address, not local records.
     const owned = await cp.getPositionsByUser(wallet);
-    const states = new Map<string, Awaited<ReturnType<typeof cp.fetchPoolState>>>();
+    // Fetch each relevant pool state and its token mint once, in parallel, instead of sequentially per position.
+    const poolIds = [...new Set(owned.map((p) => p.positionState.pool.toBase58()))].filter((id) => CHAIN_POOLS.some((c) => c.pool === id));
+    const fetched = await Promise.all(poolIds.map(async (id) => {
+      const pool = await cp.fetchPoolState(new PublicKey(id));
+      const mint = await getMint(connection, pool.tokenAMint, "confirmed", getTokenProgram(pool.tokenAFlag));
+      return [id, { pool, mint }] as const;
+    }));
+    const states = new Map(fetched);
     for (const p of owned) {
       const config = CHAIN_POOLS.find((pool) => pool.pool === p.positionState.pool.toBase58());
       if (!config) continue;
-      const previous = states.get(config.pool);
-      const pool = previous ?? await cp.fetchPoolState(new PublicKey(config.pool));
-      states.set(config.pool, pool);
+      const { pool, mint } = states.get(config.pool)!;
       if (pool.tokenAMint.toBase58() !== config.mint || pool.tokenBMint.toBase58() !== USDC_MINT) throw new Error("Tokens del pool no válidos");
-      const mint = await getMint(connection, pool.tokenAMint, "confirmed", getTokenProgram(pool.tokenAFlag));
       const locked = !p.positionState.vestedLiquidity.isZero() || !p.positionState.permanentLockedLiquidity.isZero();
       let token: string | null = null;
       let usdcValue: string | null = null;
