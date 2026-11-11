@@ -49,7 +49,7 @@ export async function coinbaseSellUrl(wallet: string, privyUserId: string, clien
 
 export async function coinbasePendingSell(privyUserId: string) {
   const r = await cdp("GET", `/onramp/v1/sell/user/${await partnerId(privyUserId)}/transactions?page_size=5`);
-  const list: Array<Record<string, any>> = r.transactions ?? [];
+  const list: Array<any> = r.transactions ?? [];
   const t = list.find((x) => x.status === "TRANSACTION_STATUS_STARTED" && String(x.asset).toUpperCase() === "USDC" && String(x.network).toLowerCase() === "solana" && x.to_address);
   if (!t) return null;
   return { id: String(t.transaction_id ?? ""), toAddress: String(t.to_address), amount: String(t.sell_amount?.value ?? ""), fiat: t.total?.value ? `${t.total.value} ${t.total.currency ?? ""}`.trim() : null };
