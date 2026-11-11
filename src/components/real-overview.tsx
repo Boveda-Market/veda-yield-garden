@@ -52,7 +52,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   const unavailable = query.isFetching ? t("Consultando…") : t("No disponible");
   return <>
     <section aria-label={t("Estado del modo Real")} className="border-y border-border py-8">
-      <div className="flex items-center gap-3"><ShieldAlert className="shrink-0 text-primary" size={24} /><h1 className="font-display text-2xl font-semibold">{portfolioOnly ? t("Tu portafolio") : t("BÓVEDA")}</h1></div>
+      <div className="flex items-center gap-3"><ShieldAlert className="shrink-0 text-primary" size={24} /><h1 className="font-display text-2xl font-semibold">{portfolioOnly ? t("Tu portafolio") : t("Bóvedas")}</h1></div>
       {!portfolioOnly && <VaultSteps className="mt-4" />}
       <p className="mt-3 max-w-2xl text-sm leading-6 text-foreground/80">{t("Deposita entre 1 y 10,000 USDC en las bóvedas SOL y MET. Cosecha comisiones o liquida tus posiciones compatibles de SOL y MET, revisando los importes antes de firmar. Las posiciones bloqueadas no se pueden liquidar.")}</p>
       {walletAddress && <div className="mt-4 flex flex-wrap items-center gap-3"><p className="min-w-0 break-all text-xs text-muted-foreground">{t("Wallet conectada:")}{" "}{walletAddress}</p><Button variant="outline" size="icon" title={t("Actualizar saldo y posiciones")} aria-label={t("Actualizar saldo y posiciones")} disabled={query.isFetching} onClick={() => void query.refetch()}><RefreshCw size={16} className={query.isFetching ? "animate-spin motion-reduce:animate-none" : ""} /></Button></div>}

@@ -119,6 +119,7 @@ export function WalletPanel() {
   ] as const;
 
   return <div className="mx-auto max-w-2xl space-y-5">
+    <h1 className="font-display text-3xl font-semibold">{t("Mi wallet")}</h1>
     <InstallAppBanner />
     <PendingClaims />
 

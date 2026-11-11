@@ -25,6 +25,7 @@ export const app: Record<string, string> = {
   "Estado del modo Prueba": "Trial mode status",
   "Tu portafolio · Prueba": "Your portfolio · Trial",
   "BÓVEDA · Prueba": "BÓVEDA · Trial",
+  "Bóvedas · Prueba": "Vaults · Trial",
   "Créditos ficticios · sin dinero real": "Simulated credits · no real money",
   "0% de entrada y 1% ficticio de salida, en cosechas y liquidaciones. Un crédito simula un USDC; no se puede retirar ni convertir en dinero.": "0% entry fee and a simulated 1% exit fee on harvests and liquidations. One credit simulates one USDC; it cannot be withdrawn or converted into money.",
   "Wallet conectada:": "Connected wallet:",
