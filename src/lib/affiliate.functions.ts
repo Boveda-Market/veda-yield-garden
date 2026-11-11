@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue, claimRequest, claimNet } from "./affiliate";
+import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue, type PayoutRecent, claimRequest, claimNet } from "./affiliate";
 import { proofIsFresh, walletProofMessage, walletProofRequest } from "./wallet-proof";
 
 type Fail = { success: false; error: string };
@@ -180,17 +180,22 @@ async function payoutAdmin(token: string) {
 
 export const listAffiliatePayouts = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => payoutAdminRequest.parse(input))
-  .handler(async ({ data }): Promise<{ success: true; due: PayoutDue[]; paidRaw: string } | Fail> => {
+  .handler(async ({ data }): Promise<{ success: true; due: PayoutDue[]; paidRaw: string; pendingAllRaw: string; recent: PayoutRecent[] } | Fail> => {
     try {
       const { db } = await payoutAdmin(data.token);
-      const { data: rows } = await db.from("affiliate_earnings").select("affiliate_privy_id, commission_raw, status").in("status", ["pending", "paid"]).limit(10000);
+      const { data: rows } = await db.from("affiliate_earnings").select("affiliate_privy_id, commission_raw, status, payout_signature, paid_at").in("status", ["pending", "paid"]).limit(10000);
+      const pendingAllRaw = (rows ?? []).filter((r) => r.status === "pending").reduce((a, r) => a + BigInt(r.commission_raw), 0n).toString();
+      const bySig = new Map<string, { aff: string; raw: bigint; at: string }>();
+      for (const r of rows ?? []) if (r.status === "paid" && r.payout_signature) { const e = bySig.get(r.payout_signature) ?? { aff: r.affiliate_privy_id, raw: 0n, at: r.paid_at ?? "" }; e.raw += BigInt(r.commission_raw); bySig.set(r.payout_signature, e); }
+      const recentRaw = [...bySig].sort((a, b) => b[1].at.localeCompare(a[1].at)).slice(0, 20);
       const pending = (rows ?? []).filter((r) => r.status === "pending");
       const paidRaw = (rows ?? []).filter((r) => r.status === "paid").reduce((a, r) => a + BigInt(r.commission_raw), 0n).toString();
       const due = payoutsDue(pending);
-      const ids = due.map((d) => d.affiliate);
+      const ids = [...new Set([...due.map((d) => d.affiliate), ...recentRaw.map(([, v]) => v.aff)])];
       const { data: affs } = ids.length ? await db.from("affiliates").select("privy_user_id, code, payout_wallet").in("privy_user_id", ids) : { data: [] };
-      return { success: true, paidRaw, due: due.map((d) => { const a = (affs ?? []).find((x) => x.privy_user_id === d.affiliate); return { affiliate: d.affiliate, code: a?.code ?? "—", wallet: a?.payout_wallet ?? null, pendingRaw: d.raw.toString(), count: d.count }; }) };
-    } catch { return { success: false, error: "Solo la wallet de pagos verificada puede ver este panel." }; }
+      const recent = recentRaw.map(([signature, v]) => { const a = (affs ?? []).find((x) => x.privy_user_id === v.aff); return { code: a?.code ?? "—", wallet: a?.payout_wallet ?? null, amountRaw: v.raw.toString(), signature, paidAt: v.at }; });
+      return { success: true, paidRaw, pendingAllRaw, recent, due: due.map((d) => { const a = (affs ?? []).find((x) => x.privy_user_id === d.affiliate); return { affiliate: d.affiliate, code: a?.code ?? "—", wallet: a?.payout_wallet ?? null, pendingRaw: d.raw.toString(), count: d.count }; }) };
+    } catch { return { success: false, error: "Solo la wallet de tesorería verificada puede ver este panel." }; }
   });
 
 export const markAffiliatePaid = createServerFn({ method: "POST" })

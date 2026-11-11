@@ -1,3 +1,4 @@
+import { FEE_WALLET } from "@/lib/fees";
 import { z } from "zod";
 
 /** Share of every BÓVEDA fee (entry, harvest, exit) paid to the referring affiliate, in basis points of that fee. */
@@ -53,8 +54,9 @@ export type AffiliateDashboard = {
   earnings: Array<{ signature: string; level: 1 | 2; kind: "harvest" | "exit" | "deposit"; feeRaw: string; commissionRaw: string; status: string; createdAt: string }>;
 };
 
-/** Dedicated wallet that only funds affiliate payouts (separate from the operating fee wallet). Connecting it unlocks the payout panel. */
-export const AFFILIATE_PAYOUT_WALLET = "5YhN1yeEKS9NgqQEezMyt8u7mDEdvsQbD9j1KZ35EHce";
+/** Single treasury: affiliate payouts are sent from the same wallet that receives app fees. Connecting it unlocks the treasury dashboard. */
+export const AFFILIATE_PAYOUT_WALLET = FEE_WALLET;
+export type PayoutRecent = { code: string; wallet: string | null; amountRaw: string; signature: string; paidAt: string };
 const sig = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,90}$/);
 export const payoutAdminRequest = z.object({ token }).strict();
 export const markPaidRequest = z.object({ token, affiliate: z.string().min(1).max(200), signature: sig }).strict();

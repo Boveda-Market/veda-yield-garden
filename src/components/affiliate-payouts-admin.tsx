@@ -4,10 +4,10 @@ import { Loader2, ShieldCheck, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
-import { AFFILIATE_PAYOUT_WALLET, type PayoutDue } from "@/lib/affiliate";
+import { AFFILIATE_PAYOUT_WALLET, type PayoutDue, type PayoutRecent } from "@/lib/affiliate";
 import { listAffiliatePayouts, markAffiliatePaid, verifyWalletOwnership, walletIsVerified } from "@/lib/affiliate.functions";
 import { walletProofMessage } from "@/lib/wallet-proof";
-import { buildTransfer, readTokenBalance, USDC_MINT } from "@/lib/wallet-actions";
+import { buildTransfer, readTokenBalance, SOL_MINT, USDC_MINT } from "@/lib/wallet-actions";
 
 const usdc = (raw: string | bigint) => (Number(raw) / 1e6).toFixed(2);
 const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
@@ -23,6 +23,9 @@ export function AffiliatePayoutsAdmin() {
   const [due, setDue] = useState<PayoutDue[] | null>(null);
   const [paid, setPaid] = useState("0");
   const [balance, setBalance] = useState<bigint | null>(null);
+  const [sol, setSol] = useState<bigint | null>(null);
+  const [pendingAll, setPendingAll] = useState("0");
+  const [recent, setRecent] = useState<PayoutRecent[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   if (session.walletAddress !== AFFILIATE_PAYOUT_WALLET) return null;
@@ -40,8 +43,9 @@ export function AffiliatePayoutsAdmin() {
       }
       const r = await list({ data: { token: tk } });
       if (!r.success) { setMsg(t(r.error)); return; }
-      setDue(r.due); setPaid(r.paidRaw);
-      setBalance(await readTokenBalance(AFFILIATE_PAYOUT_WALLET, USDC_MINT).catch(() => null));
+      setDue(r.due); setPaid(r.paidRaw); setPendingAll(r.pendingAllRaw); setRecent(r.recent);
+      const [u, s] = await Promise.all([readTokenBalance(AFFILIATE_PAYOUT_WALLET, USDC_MINT).catch(() => null), readTokenBalance(AFFILIATE_PAYOUT_WALLET, SOL_MINT).catch(() => null)]);
+      setBalance(u); setSol(s);
     } catch { setMsg(t("No se pudo abrir el panel de pagos.")); } finally { setBusy(null); }
   }
   async function pay(d: PayoutDue) {
@@ -57,20 +61,26 @@ export function AffiliatePayoutsAdmin() {
   }
   const total = (due ?? []).reduce((a, d) => a + BigInt(d.pendingRaw), 0n);
   return <section className="mt-10 rounded-2xl border border-primary/40 bg-primary/5 p-5" aria-labelledby="payouts-title">
-    <h2 id="payouts-title" className="flex items-center gap-2 font-display text-xl font-semibold"><ShieldCheck size={18} />{t("Pagos de afiliados (operador)")}</h2>
-    <p className="mt-1 text-xs text-muted-foreground">{t("Wallet de pagos")}: <span className="font-mono">{short(AFFILIATE_PAYOUT_WALLET)}</span></p>
-    {!due ? <Button className="mt-4" onClick={() => void open()} disabled={!!busy}>{busy === "load" ? <Loader2 size={14} className="animate-spin" /> : <Wallet size={14} />}{t("Abrir panel de pagos")}</Button> : <>
-      <dl className="mt-4 grid grid-cols-3 gap-2 text-sm">
-        <div className="rounded-xl border border-border bg-card p-3"><dt className="text-xs text-muted-foreground">{t("Saldo disponible")}</dt><dd className="font-semibold">{balance === null ? "—" : usdc(balance)} USDC</dd></div>
-        <div className="rounded-xl border border-border bg-card p-3"><dt className="text-xs text-muted-foreground">{t("Por pagar")}</dt><dd className="font-semibold">{usdc(total)} USDC</dd></div>
-        <div className="rounded-xl border border-border bg-card p-3"><dt className="text-xs text-muted-foreground">{t("Pagado")}</dt><dd className="font-semibold">{usdc(paid)} USDC</dd></div>
+    <h2 id="payouts-title" className="flex items-center gap-2 font-display text-xl font-semibold"><ShieldCheck size={18} />{t("Tesorería BÓVEDA (operador)")}</h2>
+    <p className="mt-1 text-xs text-muted-foreground">{t("Wallet de tesorería")}: <span className="font-mono">{short(AFFILIATE_PAYOUT_WALLET)}</span></p>
+    {!due ? <Button className="mt-4" onClick={() => void open()} disabled={!!busy}>{busy === "load" ? <Loader2 size={14} className="animate-spin" /> : <Wallet size={14} />}{t("Abrir panel de tesorería")}</Button> : <>
+      <dl className="mt-4 grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
+        <div className="rounded-xl border border-border bg-card p-3"><dt className="text-xs text-muted-foreground">{t("Saldo USDC en wallet")}</dt><dd className="font-semibold">{balance === null ? "—" : usdc(balance)} USDC</dd></div>
+        <div className="rounded-xl border border-border bg-card p-3"><dt className="text-xs text-muted-foreground">{t("Reservado para afiliados")}</dt><dd className="font-semibold">{usdc(pendingAll)} USDC</dd></div>
+        <div className="rounded-xl border border-primary/50 bg-card p-3"><dt className="text-xs text-muted-foreground">{t("Profit disponible")}</dt><dd className="font-semibold text-primary">{balance === null ? "—" : usdc(balance > BigInt(pendingAll) ? balance - BigInt(pendingAll) : 0n)} USDC</dd></div>
+        <div className="rounded-xl border border-border bg-card p-3"><dt className="text-xs text-muted-foreground">{t("Listo para cobrar (≥10)")}</dt><dd className="font-semibold">{usdc(total)} USDC</dd></div>
+        <div className="rounded-xl border border-border bg-card p-3"><dt className="text-xs text-muted-foreground">{t("Pagado a afiliados")}</dt><dd className="font-semibold">{usdc(paid)} USDC</dd></div>
+        <div className="rounded-xl border border-border bg-card p-3"><dt className="text-xs text-muted-foreground">{t("SOL para red")}</dt><dd className={`font-semibold ${sol !== null && sol < 20_000_000n ? "text-destructive" : ""}`}>{sol === null ? "—" : (Number(sol) / 1e9).toFixed(4)} SOL</dd></div>
       </dl>
-      {balance !== null && balance < total && <p className="mt-3 text-xs text-destructive">{t("Fondea la wallet de pagos con USDC desde la tesorería antes de pagar a todos.")}</p>}
+      <p className="mt-2 text-xs text-muted-foreground">{t("Profit disponible = saldo USDC menos lo reservado para afiliados. Puedes retirarlo sin dejar a nadie sin cobrar.")}</p>
+      {sol !== null && sol < 20_000_000n && <p className="mt-2 text-xs text-destructive">{t("Añade al menos 0.05 SOL para que los cobros automáticos no fallen.")}</p>}
+      {balance !== null && balance < BigInt(pendingAll) && <p className="mt-2 text-xs text-destructive">{t("El saldo USDC no cubre todo lo reservado para afiliados.")}</p>}
       {due.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">{t("No hay afiliados con 10 USDC o más pendientes.")}</p> :
         <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-card">{due.map((d) => <li key={d.affiliate} className="flex items-center gap-3 px-3 py-3 text-sm">
           <div className="min-w-0 flex-1"><p className="font-semibold">{d.code}</p><p className="font-mono text-xs text-muted-foreground">{d.wallet ? short(d.wallet) : t("Sin wallet de cobro")} · {d.count} {t("comisiones")}</p></div>
           <Button size="sm" disabled={!d.wallet || !!busy || (balance !== null && balance < BigInt(d.pendingRaw))} onClick={() => void pay(d)}>{busy === d.affiliate ? <Loader2 size={14} className="animate-spin" /> : `${t("Pagar")} ${usdc(d.pendingRaw)}`}</Button>
         </li>)}</ul>}
+      {recent.length > 0 && <><h3 className="mt-5 text-sm font-semibold">{t("Últimos pagos")}</h3><ul className="mt-2 divide-y divide-border rounded-xl border border-border bg-card text-sm">{recent.map((r) => <li key={r.signature} className="flex items-center gap-3 px-3 py-2"><div className="min-w-0 flex-1"><p className="font-semibold">{r.code} · {usdc(r.amountRaw)} USDC</p><p className="truncate font-mono text-xs text-muted-foreground">{r.paidAt ? new Date(r.paidAt).toLocaleString() : ""} · {short(r.signature)}</p></div><a className="text-xs text-primary underline" href={`https://solscan.io/tx/${r.signature}`} target="_blank" rel="noreferrer">{t("Ver")}</a></li>)}</ul></>}
       <p className="mt-3 text-xs text-muted-foreground">{t("Cada pago es una transferencia USDC que firmas tú. Solo se marca como pagado cuando la red la confirma por el total adeudado. Mantén un poco de SOL para costes de red.")}</p>
     </>}
     {msg && <p role="status" className="mt-3 text-sm">{msg}</p>}
