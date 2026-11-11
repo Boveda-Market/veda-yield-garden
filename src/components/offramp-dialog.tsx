@@ -11,6 +11,7 @@ import { solanaAddressSchema } from "@/lib/solana-data";
 import { USDC_MINT, buildTransfer, readTokenBalance, toBaseUnits } from "@/lib/wallet-actions";
 import { withdrawFee } from "@/lib/fees";
 import { CashAppBtc } from "@/components/cashapp-btc";
+import { CoinbaseSell } from "@/components/coinbase-sell";
 
 type Provider = "bank" | "cashapp";
 
@@ -71,6 +72,8 @@ export function OfframpButton({ wallet, trial, trigger }: { wallet: string | nul
         : provider === "cashapp" ? <CashAppBtc wallet={wallet} />
         : sig ? <div role="status" className="grid gap-2 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm"><p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} />{t("¡Enviado! Tus USDC ya están en camino a tu exchange.")}</p><a className="text-xs underline" href={`https://orbmarkets.io/tx/${sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}</a><Button size="sm" variant="outline" onClick={() => { setSig(null); setAmount(""); setChecked(false); }}>{t("Hacer otro retiro")}</Button></div>
         : <div className="grid gap-3">
+          <CoinbaseSell wallet={wallet} />
+          <p className="pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("O envía manualmente a tu exchange")}</p>
           <label className="grid gap-1 text-sm"><span className="font-medium">{t("Dirección USDC de tu exchange (red Solana)")}</span><div className="flex gap-2"><Input value={to} onChange={(e) => setTo(e.target.value.trim())} placeholder="Ej. 7xKX…" disabled={busy} autoComplete="off" spellCheck={false} /><Button type="button" variant="outline" size="sm" className="h-10" onClick={() => void paste()} disabled={busy}><ClipboardPaste size={16} />{t("Pegar")}</Button></div></label>
           {wrongNetwork && <p role="alert" className="flex gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-2 text-xs"><TriangleAlert size={14} className="mt-0.5 shrink-0 text-destructive" />{wrongNetwork === "evm" ? t("Esta dirección es de otra red (Ethereum/Base/Polygon). En tu exchange elige la red Solana o perderás el dinero.") : t("Esta es una dirección de Bitcoin. Para enviar a Bitcoin usa la opción Cash App.")}</p>}
           {to && !addressOk && !wrongNetwork && <p className="text-xs text-destructive">{t("Dirección no válida")}</p>}
