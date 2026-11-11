@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown } from "lucide-react";
+import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, Plus } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
@@ -46,7 +46,7 @@ export function WalletPanel() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [buyOpen, setBuyOpen] = useState(false);
+  const [buyOpen, setBuyOpen] = useState(0);
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [qr, setQr] = useState<string | null>(null);
   const actionsRef = useRef<HTMLElement>(null);
@@ -106,7 +106,7 @@ export function WalletPanel() {
   const decimals = asset === "SOL" ? 9 : 6;
   const setPct = (pct: bigint) => setAmount((Number((max * pct) / 100n) / 10 ** decimals).toString());
   const quick = [
-    { icon: CreditCard, label: t("Añadir fondos"), on: () => setBuyOpen((v) => !v) },
+    { icon: CreditCard, label: t("Añadir fondos"), on: () => setBuyOpen((v) => v + 1) },
     { icon: ArrowLeftRight, label: t("Cambiar"), on: () => openSwap("USDC") },
     { icon: Send, label: t("Enviar"), on: () => openSend("USDC") },
     { icon: QrCode, label: t("Recibir"), on: () => setReceiveOpen(true) },
@@ -122,7 +122,7 @@ export function WalletPanel() {
       <p className="mt-1 font-display text-4xl">{total !== undefined ? `$${fmt(total)}` : "—"}</p>
       <button type="button" onClick={() => setReceiveOpen(true)} className="mt-2 inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground hover:text-foreground"><code>{address.slice(0, 4)}…{address.slice(-4)}</code><Copy size={12} /></button>
       <div className="mt-5 grid grid-cols-4 gap-2">{quick.map((q) => <button key={q.label} type="button" onClick={q.on} className="flex flex-col items-center gap-1.5 text-xs"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"><q.icon size={20} /></span>{q.label}</button>)}</div>
-      {buyOpen && <BuyUsdc className="mt-5" />}
+      {buyOpen ? <BuyUsdc className="mt-5" auto={buyOpen} /> : null}
       {balances.error && <p className="mt-2 text-sm text-destructive">{(balances.error as Error).message}</p>}
     </section>
 
@@ -135,6 +135,7 @@ export function WalletPanel() {
         <TokenIcon symbol={a.symbol} size={40} />
         <div className="min-w-0 flex-1"><p className="font-medium">{a.symbol}</p><p className="text-xs text-muted-foreground">{a.label}</p></div>
         <div className="text-right"><p className="font-medium">{a.amt !== undefined ? fmt(a.amt, a.symbol === "USDC" ? 2 : 4) : "—"}</p><p className="text-xs text-muted-foreground">{a.usd !== undefined ? `$${fmt(a.usd)}` : "—"}</p></div>
+        {a.symbol === "USDC" && <Button size="icon" variant="ghost" aria-label={t("Añadir fondos")} onClick={() => setBuyOpen((v) => v + 1)}><Plus size={16} /></Button>}
         <Button size="icon" variant="ghost" aria-label={t("Cambiar")} onClick={() => openSwap(a.symbol)}><ArrowLeftRight size={16} /></Button>
         {(a.symbol === "USDC" || a.symbol === "SOL") && <Button size="icon" variant="ghost" aria-label={t("Enviar")} onClick={() => openSend(a.symbol as WalletAsset)}><Send size={16} /></Button>}
       </li>)}</ul>

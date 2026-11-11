@@ -1,5 +1,5 @@
 import { useT } from "@/lib/i18n";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, CreditCard, Loader2 } from "lucide-react";
@@ -13,7 +13,7 @@ type Receipt = { added: bigint; total: bigint };
 const usdc = (v: bigint) => (Number(v) / 1e6).toFixed(2);
 
 /** One "Add funds" button: users with network reserve buy USDC directly; others get the starter card purchase (auto-activated by StartGuide). */
-export function BuyUsdc({ className }: { className?: string; only?: "SOL" | "USDC" }) {
+export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" | "USDC"; auto?: number }) {
   const t = useT();
   const session = useBovedaSession();
   const read = useServerFn(getRealWallet);
@@ -22,6 +22,8 @@ export function BuyUsdc({ className }: { className?: string; only?: "SOL" | "USD
   const [waiting, setWaiting] = useState(false);
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const address = session.walletAddress;
+  // One tap: when the parent bumps `auto`, open checkout immediately.
+  useEffect(() => { if (auto) void add(); }, [auto]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!session.authenticated || !address) return null;
 
   async function balances() {
@@ -49,10 +51,10 @@ export function BuyUsdc({ className }: { className?: string; only?: "SOL" | "USD
   }
 
   return <div className={className}>
-    <div className="flex flex-wrap gap-2">
+    {auto ? waiting && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 size={16} className="animate-spin" />{t("Esperando tus dólares…")}</p> : <div className="flex flex-wrap gap-2">
       <Button onClick={() => void add()} disabled={waiting}>{waiting ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}{waiting ? t("Esperando tus dólares…") : t("Añadir fondos")}</Button>
       <QuickSwapButton />
-    </div>
+    </div>}
     {receipt && <div role="status" className="mt-3 rounded-xl border border-primary/40 bg-primary/10 p-4 text-sm">
       <p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} className="text-primary" />{t("¡Fondos añadidos!")}</p>
       <dl className="mt-2 divide-y divide-border">
