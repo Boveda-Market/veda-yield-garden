@@ -47,12 +47,13 @@ export async function sendAffiliateClaim(apiKey: string, secret: string, payoutW
   const kp = await payoutSigner(secret, payoutWallet);
   const conn = heliusConnection(apiKey);
   const to = new PublicKey(recipient);
-  const fromAta = getAssociatedTokenAddressSync(USDC_MINT, kp.publicKey);
-  const toAta = getAssociatedTokenAddressSync(USDC_MINT, to, true);
+  const mint = new PublicKey(USDC_MINT.toString());
+  const fromAta = getAssociatedTokenAddressSync(mint, kp.publicKey);
+  const toAta = getAssociatedTokenAddressSync(mint, to, true);
   const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash("confirmed");
   const tx = new Transaction({ feePayer: kp.publicKey, blockhash, lastValidBlockHeight }).add(
-    createAssociatedTokenAccountIdempotentInstruction(kp.publicKey, toAta, to, USDC_MINT),
-    createTransferCheckedInstruction(fromAta, USDC_MINT, toAta, kp.publicKey, amount, 6),
+    createAssociatedTokenAccountIdempotentInstruction(kp.publicKey, toAta, to, mint),
+    createTransferCheckedInstruction(fromAta, mint, toAta, kp.publicKey, amount, 6),
   );
   tx.sign(kp);
   const sim = await conn.simulateTransaction(tx);
