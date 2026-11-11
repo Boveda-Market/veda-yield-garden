@@ -47,3 +47,14 @@ export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPre
     <div className="grid gap-3 md:grid-cols-2">{items.map((p) => <PredictPositionCard key={p.pubkey} p={p} onSell={() => void sell(p)} selling={busy === p.pubkey} disabled={!!busy} />)}</div>
   </div>;
 }
+
+/** Mi wallet: open Sube/Baja rounds; renders nothing when there are none. */
+export function WalletOpenPredictions() {
+  const t = useT();
+  const state = useOpenPredictions();
+  if (state.items.length === 0) return null;
+  return <section aria-label={t("Predicciones abiertas")} className="rounded-2xl border border-border bg-card p-4">
+    <h3 className="mb-3 font-display text-lg">{t("Predicciones abiertas")}</h3>
+    <OpenPredictions state={state} />
+  </section>;
+}

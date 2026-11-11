@@ -19,6 +19,7 @@ import { BuyUsdc } from "@/components/buy-usdc";
 import { InstallAppBanner } from "@/components/install-app";
 import { PendingClaims } from "@/components/pending-claims";
 import { WalletPositions } from "@/components/wallet-positions";
+import { WalletOpenPredictions } from "@/components/open-predictions";
 
 
 export function WalletPanel() {
@@ -126,6 +127,7 @@ export function WalletPanel() {
     </section>
 
     <WalletPositions wallet={address} />
+    <WalletOpenPredictions />
 
     <section className="rounded-2xl border border-border bg-card p-2">
       <h3 className="px-3 pt-3 pb-1 font-display text-lg">{t("Tus activos")}</h3>
