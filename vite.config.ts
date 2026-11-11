@@ -24,16 +24,19 @@ export default defineConfig({
     optimizeDeps: { include: ["buffer", "bs58", "@solana/kit", "@privy-io/react-auth", "@privy-io/react-auth/solana", "@privy-io/react-auth/ui"] },
     define: { "process.env.ANCHOR_BROWSER": "true" },
     plugins: [{
+      // WalletConnect imports Node's events. Without this, the client build
+      // emits an empty browser stub and its EventEmitter constructor fails.
+      // A per-environment resolve.alias is not applied to these imports.
+      name: "client-browser-events",
+      enforce: "pre",
+      applyToEnvironment: (environment) => environment.name === "client",
+      resolveId: { filter: { id: /^(node:)?events$/ }, handler: () => browserEvents },
+    }, {
       name: "solana-worker-browser-exports",
       // The final Nitro Worker bundle resolves packages separately from SSR.
       // These pure-JS Solana dependencies export browser/node, but not worker.
       // Use their Web-compatible implementation; never externalize them.
       configEnvironment(name, config) {
-        // WalletConnect imports Node's events. Vite otherwise emits an empty
-        // browser stub, making its EventEmitter constructor fail at startup.
-        if (name === "client") return { resolve: {
-          alias: [{ find: /^(node:)?events$/, replacement: browserEvents }],
-        } };
         if (name !== "nitro") return;
         const conditions = config.resolve?.conditions ?? ["workerd", "worker", "production", "wasm", "unwasm"];
         return { resolve: {

@@ -33,8 +33,6 @@ export function PortfolioPanel({ identity, wallet, invested, pending, positions,
   const visiblePoints = points.filter((point) => point.at >= periodStart(period, now));
   const visibleRows = rows.filter((row) => row.at >= periodStart(period, now) && (tab !== "history" || filter === "all" || row.kind === filter));
   function download() {
-  const t = useT();
-  const locale = useLocale();
     const lines = [t("fecha,tipo,boveda,bruto,cargo,neto,modo"), ...visibleRows.map((row) => `${new Date(row.at).toISOString()},${row.kind},${row.vaultId},${row.gross},${row.fee},${row.net},${t("Prueba")}`)];
     const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a"); link.href = url; link.download = "boveda-historial-prueba.csv"; link.click(); URL.revokeObjectURL(url);
