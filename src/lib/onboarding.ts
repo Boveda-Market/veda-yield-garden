@@ -49,3 +49,8 @@ export const GAS_KEEP_LAMPORTS = 20_000_000n;
 export function autoConvertLamports(balance: bigint): bigint {
   return balance > GAS_KEEP_LAMPORTS ? balance - GAS_KEEP_LAMPORTS : 0n;
 }
+
+/** "Add funds" route: wallets that already hold the network reserve buy USDC directly; others buy the starter card package. */
+export function fundingAction(solLamports: bigint): "usdc" | "starter" {
+  return solLamports >= MIN_SOL_LAMPORTS ? "usdc" : "starter";
+}

@@ -5,7 +5,7 @@ import { CheckCircle2, CreditCard, Loader2, ShieldCheck, Sparkles } from "lucide
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
-import { autoConvertLamports, decimalToUnits, GAS_KEEP_LAMPORTS, MIN_USDC_MICRO, onboardingStep, SOL_EXCESS_MIN_USD } from "@/lib/onboarding";
+import { autoConvertLamports, decimalToUnits, GAS_KEEP_LAMPORTS, onboardingStep, SOL_EXCESS_MIN_USD } from "@/lib/onboarding";
 import { buildSwap, quoteSwap, type SwapQuote } from "@/lib/wallet-actions";
 import { Button } from "@/components/ui/button";
 
@@ -28,7 +28,7 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   } });
   const convertible = q.data ? autoConvertLamports(q.data.sol) : 0n;
-  const preview = useQuery({ queryKey: ["auto-fund-quote", convertible.toString()], enabled: convertible > 0n && !!q.data && q.data.usdc < MIN_USDC_MICRO && !busy && !receipt, staleTime: 20_000, refetchInterval: 30_000, retry: false, queryFn: () => quoteSwap("SOL", "USDC", convertible) });
+  const preview = useQuery({ queryKey: ["auto-fund-quote", convertible.toString()], enabled: convertible > 0n && !!q.data && !busy && !receipt, staleTime: 20_000, refetchInterval: 30_000, retry: false, queryFn: () => quoteSwap("SOL", "USDC", convertible) });
 
   const box = `rounded-2xl border border-primary/40 bg-primary/10 p-5 ${className ?? ""}`;
   if (receipt) return <section aria-label={t("Comprobante")} className={box} role="status">
@@ -51,7 +51,7 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
 
   if (!q.data || !address) return null;
   const step = onboardingStep(q.data.sol, q.data.usdc);
-  if (!step) return null;
+  if (!step && convertible <= 0n) return null;
 
   if (step === "sol") return <section aria-label={t("Añadir fondos")} className={box}>
     <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Sparkles size={14} />{t("Empieza aquí")}</p>
