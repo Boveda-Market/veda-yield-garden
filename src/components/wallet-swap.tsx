@@ -12,17 +12,18 @@ const QUOTE_TTL = 30_000;
 type Props = {
   balances: Record<string, bigint | undefined>;
   initialFrom?: string;
+  initialAmount?: string;
   busy: boolean;
   onConfirm: (quote: SwapQuote) => Promise<unknown>;
 };
 
 /** Quote-only requests never sign; only the reviewed, current input can be confirmed. Any pair; fee always in USDC. */
-export function WalletSwap({ balances, initialFrom = "USDC", busy, onConfirm }: Props) {
+export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "", busy, onConfirm }: Props) {
   const t = useT();
   const [from, setFrom] = useState(initialFrom);
   const [to, setTo] = useState(initialFrom === "USDC" ? "SOL" : "USDC");
-  const [amount, setAmount] = useState("");
-  const [debounced, setDebounced] = useState("");
+  const [amount, setAmount] = useState(initialAmount);
+  const [debounced, setDebounced] = useState(initialAmount);
   const [now, setNow] = useState(0);
   const [done, setDone] = useState<SwapQuote | null>(null);
   const units = toTokenUnits(amount, from);

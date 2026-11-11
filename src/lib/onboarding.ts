@@ -20,3 +20,22 @@ export function onboardingStep(solLamports: bigint, usdcMicro: bigint): Onboardi
   if (usdcMicro < MIN_USDC_MICRO) return "usdc";
   return null;
 }
+
+/** Percent chips offered to convert extra SOL into USDC. 100 = everything above the network reserve. */
+export const SOL_CONVERT_PERCENTS = [25n, 50n, 75n, 100n] as const;
+/** Minimum convertible SOL value (USD) before suggesting the conversion card. */
+export const SOL_EXCESS_MIN_USD = 5;
+
+/** Lamports to convert for a percent of the spendable SOL (balance minus reserve); never touches the reserve. */
+export function solConvertLamports(balance: bigint, reserve: bigint, pct: bigint): bigint {
+  if (pct <= 0n || balance <= reserve) return 0n;
+  const p = pct > 100n ? 100n : pct;
+  return (balance - reserve) * p / 100n;
+}
+
+/** Formats integer base units as a plain decimal string (dot separator, trimmed). */
+export function unitsToDecimal(v: bigint, decimals: number): string {
+  const d = 10n ** BigInt(decimals);
+  const frac = (v % d).toString().padStart(decimals, "0").replace(/0+$/, "");
+  return frac ? `${v / d}.${frac}` : `${v / d}`;
+}
