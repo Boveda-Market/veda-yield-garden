@@ -79,3 +79,12 @@ export function claimNet(owedRaw: bigint) {
   if (owedRaw < PAYOUT_MIN_MICRO) return null;
   return owedRaw;
 }
+
+/** Operator-created VIP codes: always single-use so a partner cannot keep sharing the boosted rate. */
+export const VIP_MIN_BPS = 6000;
+export const VIP_MAX_BPS = 9000;
+export const VIP_CODE_MAX_USES = 1;
+export const createVipCodeRequest = z.object({ token, code: z.string().regex(/^[A-Z0-9]{4,16}$/), shareBps: z.number().int().min(VIP_MIN_BPS).max(VIP_MAX_BPS) }).strict();
+export const toggleVipCodeRequest = z.object({ token, code: z.string().regex(/^[A-Z0-9]{4,16}$/), active: z.boolean() }).strict();
+export type VipCode = { code: string; shareBps: number; used: boolean; active: boolean; createdAt: string; redeemedAt: string | null; redeemedBy: string | null };
+export type AffiliateRow = { code: string; shareBps: number; referred: number; pendingRaw: string; paidRaw: string; createdAt: string };

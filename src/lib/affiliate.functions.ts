@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue, type PayoutRecent, claimRequest, claimFinalizeRequest, claimNet, type AffiliateKind } from "./affiliate";
+import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue, type PayoutRecent, claimRequest, claimFinalizeRequest, claimNet, type AffiliateKind, createVipCodeRequest, toggleVipCodeRequest, VIP_CODE_MAX_USES, type VipCode, type AffiliateRow } from "./affiliate";
 import { proofIsFresh, walletProofMessage, walletProofRequest } from "./wallet-proof";
 
 type Fail = { success: false; error: string };
@@ -66,7 +66,7 @@ export const joinAffiliate = createServerFn({ method: "POST" })
         await getAffiliateRow(db, id);
         const { data: bps } = await db.rpc("redeem_affiliate_upgrade", { _code: data.code, _privy_user_id: id });
         if (typeof bps === "number") return { success: true, upgradedBps: bps };
-        return { success: false, error: "Ese código no existe o ya fue usado." };
+        return { success: false, error: "Este código ya fue canjeado o no es válido." };
       }
       if (owner.privy_user_id === id) return { success: false, error: "No puedes usar tu propio código." };
       const { error } = await db.from("referrals").insert({ referred_privy_id: id, affiliate_privy_id: owner.privy_user_id });
@@ -290,4 +290,60 @@ export const cancelAffiliateClaim = createServerFn({ method: "POST" })
     const { id, db } = await claimCtx(data.token);
     await db.from("affiliate_earnings").update({ status: "pending", paid_at: null }).eq("affiliate_privy_id", id).eq("status", "paid").is("payout_signature", null);
     return { success: true };
+  });
+
+export const listVipCodes = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => payoutAdminRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: true; codes: VipCode[] } | Fail> => {
+    try {
+      const { db } = await payoutAdmin(data.token);
+      const { data: codes } = await db.from("affiliate_upgrade_codes").select("code, share_bps, times_used, max_uses, is_active, created_at").order("created_at", { ascending: false }).limit(500);
+      const { data: reds } = await db.from("affiliate_upgrade_redemptions").select("code, privy_user_id, redeemed_at").limit(2000);
+      const ids = [...new Set((reds ?? []).map((r) => r.privy_user_id))];
+      const { data: affs } = ids.length ? await db.from("affiliates").select("privy_user_id, code").in("privy_user_id", ids) : { data: [] };
+      return { success: true, codes: (codes ?? []).map((c) => { const r = (reds ?? []).find((x) => x.code === c.code); return { code: c.code, shareBps: c.share_bps, used: c.times_used >= c.max_uses, active: c.is_active, createdAt: c.created_at, redeemedAt: r?.redeemed_at ?? null, redeemedBy: r ? ((affs ?? []).find((a) => a.privy_user_id === r.privy_user_id)?.code ?? "—") : null }; }) };
+    } catch { return { success: false, error: "No se pudieron cargar los códigos." }; }
+  });
+
+export const createVipCode = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => createVipCodeRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: true } | Fail> => {
+    try {
+      const { db } = await payoutAdmin(data.token);
+      const { data: clash } = await db.from("affiliates").select("code").eq("code", data.code).maybeSingle();
+      if (clash) return { success: false, error: "Ese código ya lo usa un afiliado. Elige otro." };
+      const { error } = await db.from("affiliate_upgrade_codes").insert({ code: data.code, share_bps: data.shareBps, max_uses: VIP_CODE_MAX_USES });
+      if (error) return { success: false, error: "Ese código ya existe." };
+      return { success: true };
+    } catch { return { success: false, error: "No se pudo crear el código." }; }
+  });
+
+export const toggleVipCode = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => toggleVipCodeRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: true } | Fail> => {
+    try {
+      const { db } = await payoutAdmin(data.token);
+      const { error } = await db.from("affiliate_upgrade_codes").update({ is_active: data.active }).eq("code", data.code);
+      if (error) return { success: false, error: "No se pudo actualizar el código." };
+      return { success: true };
+    } catch { return { success: false, error: "No se pudo actualizar el código." }; }
+  });
+
+export const listAffiliateDirectory = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => payoutAdminRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: true; affiliates: AffiliateRow[] } | Fail> => {
+    try {
+      const { db } = await payoutAdmin(data.token);
+      const [{ data: affs }, { data: refs }, { data: earns }] = await Promise.all([
+        db.from("affiliates").select("privy_user_id, code, share_bps, created_at").order("created_at", { ascending: false }).limit(1000),
+        db.from("referrals").select("affiliate_privy_id").limit(10000),
+        db.from("affiliate_earnings").select("affiliate_privy_id, commission_raw, status").limit(20000),
+      ]);
+      const rows = (affs ?? []).map((a) => {
+        let pending = 0n, paid = 0n;
+        for (const e of earns ?? []) if (e.affiliate_privy_id === a.privy_user_id) { if (e.status === "pending") pending += BigInt(e.commission_raw); else if (e.status === "paid") paid += BigInt(e.commission_raw); }
+        return { code: a.code, shareBps: a.share_bps, referred: (refs ?? []).filter((r) => r.affiliate_privy_id === a.privy_user_id).length, pendingRaw: pending.toString(), paidRaw: paid.toString(), createdAt: a.created_at };
+      });
+      return { success: true, affiliates: rows };
+    } catch { return { success: false, error: "No se pudo cargar el directorio." }; }
   });

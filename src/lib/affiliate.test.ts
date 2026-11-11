@@ -23,3 +23,10 @@ describe("payoutsDue", () => {
     expect(due).toEqual([{ affiliate: "a", raw: 10_000_000n, count: 2 }]);
   });
 });
+
+import { createVipCodeRequest, VIP_CODE_MAX_USES } from "./affiliate";
+describe("VIP codes", () => {
+  const tk = "x".repeat(30);
+  it("are single-use", () => expect(VIP_CODE_MAX_USES).toBe(1));
+  it("accept 60%–90%", () => { expect(createVipCodeRequest.safeParse({ token: tk, code: "PARTNER80", shareBps: 8000 }).success).toBe(true); expect(createVipCodeRequest.safeParse({ token: tk, code: "PARTNER95", shareBps: 9500 }).success).toBe(false); expect(createVipCodeRequest.safeParse({ token: tk, code: "LOW50", shareBps: 5000 }).success).toBe(false); });
+});
