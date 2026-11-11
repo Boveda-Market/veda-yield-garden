@@ -15,10 +15,11 @@ type Props = {
   initialAmount?: string;
   busy: boolean;
   onConfirm: (quote: SwapQuote) => Promise<unknown>;
+  compact?: boolean;
 };
 
 /** Quote-only requests never sign; only the reviewed, current input can be confirmed. Any pair; fee always in USDC. */
-export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "", busy, onConfirm }: Props) {
+export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "", busy, onConfirm, compact = false }: Props) {
   const t = useT();
   const [from, setFrom] = useState(initialFrom);
   const [to, setTo] = useState(initialFrom === "USDC" ? "SOL" : "USDC");
@@ -100,28 +101,28 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
     <Button className="w-full" onClick={() => setDone(null)}>{t("Hacer otro cambio")}</Button>
   </div></Dismissible>;
 
-  const select = (side: "from" | "to", value: string) => <div className="flex shrink-0 items-center gap-1.5"><TokenIcon symbol={value} size={28} /><select aria-label={side === "from" ? t("Moneda que pagas") : t("Moneda que recibes")} value={value} disabled={busy}
-    onChange={(e) => pick(side, e.target.value)} className="h-10 rounded-full border border-border bg-background px-3 font-semibold">
+  const select = (side: "from" | "to", value: string) => <div className="flex shrink-0 items-center gap-1.5"><TokenIcon symbol={value} size={compact ? 22 : 28} /><select aria-label={side === "from" ? t("Moneda que pagas") : t("Moneda que recibes")} value={value} disabled={busy}
+    onChange={(e) => pick(side, e.target.value)} className={`${compact ? "h-8 px-2 text-sm" : "h-10 px-3"} rounded-full border border-border bg-background font-semibold`}>
     {SWAP_TOKENS.map((x) => <option key={x.symbol} value={x.symbol}>{x.symbol}</option>)}
   </select></div>;
 
-  return <div className="mt-4 space-y-3" aria-busy={busy}>
-    <h3 className="font-display text-lg">{t("Cambiar monedas")}</h3>
+  return <div className={compact ? "space-y-2" : "mt-4 space-y-3"} aria-busy={busy}>
+    {!compact && <h3 className="font-display text-lg">{t("Cambiar monedas")}</h3>}
     <div className="relative space-y-1">
-      <div className="rounded-2xl bg-muted p-4">
+      <div className={`rounded-2xl bg-muted ${compact ? "p-3" : "p-4"}`}>
         <div className="flex items-center justify-between text-sm text-muted-foreground"><label htmlFor="swap-amount">{t("Pagas")}</label><span>{t("Disponible")}: {max === undefined ? "—" : format(max, from)}</span></div>
-        <div className="mt-2 flex items-center gap-2">
-          <input id="swap-amount" inputMode="decimal" placeholder="0.00" value={amount} disabled={busy} onChange={(e) => setAmount(sanitize(e.target.value))} className="min-w-0 flex-1 bg-transparent font-display text-3xl outline-none" />
+        <div className={`${compact ? "mt-1" : "mt-2"} flex items-center gap-2`}>
+          <input id="swap-amount" inputMode="decimal" placeholder="0.00" value={amount} disabled={busy} onChange={(e) => setAmount(sanitize(e.target.value))} className={`min-w-0 flex-1 bg-transparent font-display ${compact ? "text-2xl" : "text-3xl"} outline-none`} />
           {select("from", from)}
         </div>
         <p className="mt-1 h-4 text-xs text-muted-foreground">{current && !loading ? `≈ ${usd(current.usdcValue)}` : ""}</p>
         <div className="mt-2 flex gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={String(p)} size="sm" variant="outline" className="h-7 flex-1 rounded-full px-2 text-xs" disabled={busy || max === undefined || max <= 0n} onClick={() => setPercent(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
       </div>
       <div className="flex justify-center"><Button size="icon" variant="secondary" className="-my-4 z-10 rounded-full border-4 border-card" disabled={busy} aria-label={t("Invertir cambio")} title={t("Invertir cambio")} onClick={() => { setFrom(to); setTo(from); clear(); }}><ArrowUpDown /></Button></div>
-      <div className="rounded-2xl bg-muted p-4" aria-live="polite">
+      <div className={`rounded-2xl bg-muted ${compact ? "p-3" : "p-4"}`} aria-live="polite">
         <div className="text-sm text-muted-foreground">{t("Recibes aproximadamente")}</div>
-        <div className="mt-2 flex items-center gap-2">
-          <p className="min-w-0 flex-1 truncate font-display text-3xl text-primary">{loading ? t("Cotizando…") : current ? format(current.outAmount, to) : "0.00"}</p>
+        <div className={`${compact ? "mt-1" : "mt-2"} flex items-center gap-2`}>
+          <p className={`min-w-0 flex-1 truncate font-display ${compact ? "text-2xl" : "text-3xl"} text-primary`}>{loading ? t("Cotizando…") : current ? format(current.outAmount, to) : "0.00"}</p>
           {select("to", to)}
         </div>
         <p className="mt-1 h-4 text-xs text-muted-foreground">{current && !loading ? (from !== "USDC" && to !== "USDC" ? t("Comisión aparte en USDC") : t("Comisión ya descontada")) : ""}</p>
@@ -148,10 +149,10 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
     </>}
     {quote.isError && amount === debounced && <p role="alert" className="text-sm text-destructive">{t(quote.error.message)}</p>}
     {quote.isError && <Button variant="outline" className="w-full" disabled={busy || !units} onClick={() => void quote.refetch()}><RefreshCw />{t("Actualizar cotización")}</Button>}
-    <Button className="w-full" size="lg" disabled={busy || loading || !current || expired || insufficient || max === undefined} onClick={() => {
+    <Button className="w-full" size={compact ? "default" : "lg"} disabled={busy || loading || !current || expired || insufficient || max === undefined} onClick={() => {
       if (!current || Date.now() - quote.dataUpdatedAt >= QUOTE_TTL || insufficient || busy) return;
       void onConfirm(current).then(() => { setDone(current); clear(); }).catch(() => {});
     }}>{busy ? t("Procesando…") : t("Confirmar y firmar cambio")}</Button>
-    <p className="text-xs text-muted-foreground">{t("La cotización no mueve tus fondos. El costo de red se paga aparte en SOL y lo verás en tu wallet antes de firmar.")}</p>
+    {!compact && <p className="text-xs text-muted-foreground">{t("La cotización no mueve tus fondos. El costo de red se paga aparte en SOL y lo verás en tu wallet antes de firmar.")}</p>}
   </div>;
 }
