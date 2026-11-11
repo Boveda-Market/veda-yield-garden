@@ -3,7 +3,6 @@ import { PoweredBy } from "@/components/powered-by";
 import { TokenIcon } from "@/components/token-icon";
 import { LiveEarnings } from "./live-earnings";
 import { useT, useLocale } from "@/lib/i18n";
-import { OfframpButton } from "@/components/offramp-dialog";
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { ShieldAlert, ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, LayoutDashboard, PieChart, UserRound, Home, Gift, Zap, ArrowLeftRight } from "lucide-react";
@@ -145,7 +144,6 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
         {guest && <p className="mb-4 text-xs text-muted-foreground"><strong className="text-foreground">{t("Invitado · Prueba")}</strong> {t("· Sin dinero real")}</p>}
         {session.error && <p role="alert" className="mb-4 text-sm text-destructive">{t(session.error)}</p>}
 
-        {!guest && user && (activeView === "portfolio" || activeView === "vaults") && <div className="mb-4 flex justify-end"><OfframpButton trial={mode === "trial"} wallet={session.walletAddress} /></div>}
         {activeView === "markets" ? <>{!identity && session.ready && <section className="mb-4 rounded-2xl border border-primary/40 bg-primary/5 p-4"><p className="font-semibold">{t("Entra para predecir con el USDC de tu wallet")}</p><div className="mt-3 grid gap-2 sm:grid-cols-3"><Button onClick={() => session.login("google")}>{t("Continuar con Google")}</Button><Button variant="secondary" onClick={() => session.login("email")}>{t("Entrar con email")}</Button><Button variant="outline" onClick={() => session.login("wallet")}>Phantom / Jupiter Wallet</Button></div></section>}<MarketsPanel identity={identity ?? "anon"} /></> : activeView === "wallet" ? <><WalletPanel /><div className="mt-10 border-t border-border"><ActivityView trial={false} wallet={session.walletAddress} rows={[]} heading="Actividad del wallet" level={2} /></div></> : activeView === "invite" ? <div className="mx-auto max-w-3xl"><AffiliatePanel /><AffiliatePayoutsAdmin /><AffiliateVipAdmin /></div> : activeView === "account" ? <AccountSettings /> : activeView === "activity" ? <><ActivityView trial={mode === "trial"} wallet={session.walletAddress} rows={activities} /></> : mode === "real" && !guest ? <>{activeView === "portfolio" && <PendingClaims />}<RealOverview portfolioOnly={activeView === "portfolio"} walletAddress={session.walletAddress} onDetails={setDetailsFor} /></> : user ? (
           <>
             <section aria-label={t("Estado del modo Prueba")} className="border-y border-border py-8">

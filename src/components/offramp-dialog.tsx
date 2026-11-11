@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Banknote, CheckCircle2, LoaderCircle, Send, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,7 +15,7 @@ import { CashAppBtc } from "@/components/cashapp-btc";
 type Provider = "coinbase" | "paypal" | "cashapp";
 
 /** Withdraw-to-bank guide: send USDC to the user's own exchange, then cash out there. BÓVEDA charges nothing. */
-export function OfframpButton({ wallet, trial }: { wallet: string | null; trial: boolean }) {
+export function OfframpButton({ wallet, trial, trigger }: { wallet: string | null; trial: boolean; trigger?: (open: () => void) => ReactNode }) {
   const t = useT();
   const { signAndSend } = useBovedaSession();
   const reportAffiliate = useAffiliateReport();
@@ -60,7 +60,7 @@ export function OfframpButton({ wallet, trial }: { wallet: string | null; trial:
   };
 
   return <>
-    <Button size="sm" onClick={() => setOpen(true)}><Banknote size={16} />{t("Retirar a banco o tarjeta")}</Button>
+    {trigger ? trigger(() => setOpen(true)) : <Button size="sm" onClick={() => setOpen(true)}><Banknote size={16} />{t("Retirar a banco o tarjeta")}</Button>}
     <Dialog open={open} onOpenChange={(v) => { if (!busy) setOpen(v); }}><DialogContent className="max-h-[90vh] overflow-y-auto">
       <DialogHeader><DialogTitle>{t("Retirar a banco o tarjeta")}</DialogTitle><DialogDescription>{t("Envía tus USDC a tu cuenta de exchange y desde allí pásalos a tu banco o tarjeta. BÓVEDA cobra una comisión fija del 1%.")}</DialogDescription></DialogHeader>
       <div className="grid grid-cols-3 gap-2">{(Object.keys(guides) as Provider[]).map((p) => <Button key={p} size="sm" variant={provider === p ? "default" : "outline"} className={provider === p ? "h-auto flex-col gap-1 py-2 ring-2 ring-primary" : "h-auto flex-col gap-1 py-2"} onClick={() => setProvider(p)}><img src={`/brands/${p}.svg`} alt="" width={28} height={28} className="h-7 w-7 rounded-md" />{guides[p].label}</Button>)}</div>

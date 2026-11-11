@@ -1,5 +1,6 @@
 /** English strings for the homepage, wallet, portfolio, operation dialogs, affiliates and account redesigns. */
 export const extra: Record<string, string> = {
+  "Retirar": "Withdraw",
   // Wallet quick access cards
   "Accesos rápidos": "Quick access",
   "Genera rendimiento diario": "Earn daily yield",
