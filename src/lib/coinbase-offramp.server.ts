@@ -27,7 +27,7 @@ async function cdpJwt(method: string, path: string) {
 }
 
 async function cdp(method: "GET" | "POST", path: string, body?: unknown) {
-  const res = await fetch(`https://${HOST}${path}`, { method, headers: { Authorization: `Bearer ${await cdpJwt(method, path.split("?")[0])}`, "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+  const res = await fetch(`https://${HOST}${path}`, { method, headers: { Authorization: `Bearer ${await cdpJwt(method, path.split("?")[0]!)}`, "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : null });
   const text = await res.text();
   if (!res.ok) { console.error("[coinbase]", res.status, text.slice(0, 300)); throw new Error("Coinbase no respondió. Inténtalo de nuevo."); }
   return JSON.parse(text);
