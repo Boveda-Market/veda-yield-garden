@@ -1,4 +1,4 @@
-import { STARTER_USD } from "@/lib/onboarding";
+import { GAS_TOP_UP_SOL } from "@/lib/onboarding";
 import { useT } from "@/lib/i18n";
 import "@/lib/buffer-polyfill";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
@@ -127,8 +127,8 @@ function SessionBridge({ children }: { children: ReactNode }) {
     },
     buySol: async () => {
       if (!authenticated || !walletAddress) throw new Error(t("Primero entra a tu cuenta"));
-      // First purchase priced in dollars (like Coinbase): native SOL covers network costs; the extra is activated to USDC afterwards.
-      await addFunds({ destination: { address: walletAddress, chain: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", asset: "So11111111111111111111111111111111111111112" }, fiat: { defaultAmount: STARTER_USD, source: { defaultAsset: "usd" } } });
+      // Dedicated MoonPay route: unified addFunds also quotes Stripe, which rejects native SOL.
+      await fundWallet({ address: walletAddress, options: { chain: "solana:mainnet", asset: "native-currency", amount: GAS_TOP_UP_SOL, defaultFundingMethod: "card", card: { preferredProvider: "moonpay" } } });
     },
     logout: doLogout,
   }}>{children}<IdleLogout active={ready && authenticated} signedOut={ready && !authenticated} onLogout={doLogout} /></BovedaSessionContext.Provider>;
