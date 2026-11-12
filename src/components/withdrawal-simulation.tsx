@@ -9,12 +9,13 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { simulateRealWithdrawal, prepareRealWithdrawal } from "@/lib/withdrawal.functions";
 import { exitInput, EXIT_PERCENTS, type WithdrawalResult } from "@/lib/withdrawal";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
+import type { Vault } from "@/lib/vaults";
 import { ActionSuccess, ReceiveCard } from "@/components/action-success";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
-export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { wallet: string | null; position?: string; vaultId: "sol" | "met"; onClose: () => void }) {
+export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migrateTo, onMigrated }: { wallet: string | null; position?: string; vaultId: "sol" | "met"; onClose: () => void; migrateTo?: Vault; onMigrated?: (usdc: string) => void }) {
   const t = useT();
   const simulate = useServerFn(simulateRealWithdrawal);
   const prepare = useServerFn(prepareRealWithdrawal);
@@ -75,9 +76,10 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose }: { w
   return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
     <DialogTitle>{t("Retiro a USDC ·")}{" "}{vaultId === "sol" ? "SOL" : "MET"}</DialogTitle>
     <DialogDescription>{t("Elige cuánto retirar y recíbelo en USDC en tu wallet.")}</DialogDescription>
-    {!finished && !signature && <div role="radiogroup" aria-label={t("Cuánto retirar")} className="grid grid-cols-4 gap-2">{EXIT_PERCENTS.map((p) => <Button key={p} type="button" role="radio" aria-checked={percent === p} variant={percent === p ? "default" : "outline"} disabled={pending} onClick={() => { setPercent(p); setResult(null); setAccepted(false); setMessage(null); }}>{p === 100 ? t("Todo") : `${p}%`}</Button>)}</div>}
+    {!migrateTo && !finished && !signature && <div role="radiogroup" aria-label={t("Cuánto retirar")} className="grid grid-cols-4 gap-2">{EXIT_PERCENTS.map((p) => <Button key={p} type="button" role="radio" aria-checked={percent === p} variant={percent === p ? "default" : "outline"} disabled={pending} onClick={() => { setPercent(p); setResult(null); setAccepted(false); setMessage(null); }}>{p === 100 ? t("Todo") : `${p}%`}</Button>)}</div>}
     {!finished && !signature && <p className="text-xs text-muted-foreground">{percent === 100 ? t("Cierras la posición y recuperas el SOL de apertura.") : t("Retiras el {p}% y el resto sigue invirtiendo en la bóveda.", { p: String(percent) })}</p>}
-    {finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess title={t("¡Retiro completado!")} body={percent === 100 ? t("Tus USDC ya están en tu wallet. También recuperaste el SOL de apertura de la posición.") : t("Tus USDC ya están en tu wallet. El resto de tu posición sigue invertido.")} signature={signature} onClose={onClose} /></> : <>
+    {migrateTo && !finished && <p className="rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm">{t("Paso 1 de 2: cosechamos tus ganancias y cerramos esta bóveda. Luego depositas todo en {v}.", { v: t(migrateTo.name) })}</p>}
+    {finished && migrateTo && onMigrated ? <div role="status" className="grid gap-3"><p className="font-semibold">{t("Paso 1 listo: tus USDC están en tu wallet.")}</p><Button size="lg" onClick={() => onMigrated(result?.minimumNet ?? "")}>{t("Paso 2: depositar en {v}", { v: t(migrateTo.name) })}</Button></div> : finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess title={t("¡Retiro completado!")} body={percent === 100 ? t("Tus USDC ya están en tu wallet. También recuperaste el SOL de apertura de la posición.") : t("Tus USDC ya están en tu wallet. El resto de tu posición sigue invertido.")} signature={signature} onClose={onClose} /></> : <>
     {!prefilled && inputs}
     {(!result || !result.success) && <Button variant={result ? "outline" : "default"} disabled={pending || !input.success} onClick={() => void run()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <ReceiptText className="mr-2 h-4 w-4" />}{pending ? t("Calculando tu retiro…") : t("Revisar retiro")}</Button>}
     {result && <div role="status" className="grid gap-3 text-sm">

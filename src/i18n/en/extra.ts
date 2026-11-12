@@ -687,4 +687,11 @@ export const extra: Record<string, string> = {
   "Activar alertas": "Turn on alerts",
   "Alertas personales en Telegram": "Personal alerts on Telegram",
   "Conecta BÓVEDA Alertas (@bovedamarketbot) desde Tu cuenta y recibe avisos privados de cosechas, Sube/Baja, retiros y comisiones.": "Connect BÓVEDA Alertas (@bovedamarketbot) from Your account and get private alerts for harvests, Up/Down, withdrawals and commissions.",
+  "{v} rinde +{g}% APR más ahora": "{v} earns +{g}% APR more right now",
+  "Mueve todo (depósito y ganancias) en un toque. Comisión 1% al salir + 1% al depositar; se recupera en ≈ {d} días al ritmo actual.": "Move everything (deposit and earnings) in one tap. 1% fee to exit + 1% to deposit; recovered in ≈ {d} days at the current rate.",
+  "Mover a mayor APR": "Move to higher APR",
+  "Cosechar y reinvertir todo": "Harvest and reinvest all",
+  "Paso 1 de 2: cosechamos tus ganancias y cerramos esta bóveda. Luego depositas todo en {v}.": "Step 1 of 2: we harvest your earnings and close this vault. Then you deposit everything into {v}.",
+  "Paso 1 listo: tus USDC están en tu wallet.": "Step 1 done: your USDC is in your wallet.",
+  "Paso 2: depositar en {v}": "Step 2: deposit into {v}",
 };
