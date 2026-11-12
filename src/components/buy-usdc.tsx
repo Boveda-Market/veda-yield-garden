@@ -37,7 +37,7 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   }
   function add() { setError(null); setReceipt(null); setChoosing(true); }
-  async function pay(provider: "coinbase" | "card") {
+  async function pay(provider: "coinbase") {
     setChoosing(false); setError(null);
     // Open the Coinbase tab synchronously so pop-up blockers allow it.
     const tab = provider === "coinbase" ? window.open("", "_blank") : null;
@@ -50,9 +50,6 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
         if (!r.success) { tab?.close(); throw new Error(r.error); }
         if (tab) tab.location.href = r.url; else window.location.href = r.url;
         if (starter) return;
-      } else {
-        if (starter) { await session.buySol?.(); return; }
-        await session.buyUsdc?.();
       }
       setWaiting(true);
       // Watch for the purchased USDC to land (up to ~5 min) and show a receipt.
@@ -73,17 +70,12 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
       <QuickSwapButton />
     </div>}
     <Dialog open={choosing} onOpenChange={setChoosing}><DialogContent>
-      <DialogHeader><DialogTitle>{t("Añadir fondos")}</DialogTitle><DialogDescription>{t("Elige cómo quieres añadir dólares a tu cuenta")}</DialogDescription></DialogHeader>
+      <DialogHeader><DialogTitle>{t("Añadir fondos")}</DialogTitle><DialogDescription>{t("Compra con tu saldo de Coinbase, banco o tarjeta.")}</DialogDescription></DialogHeader>
       <div className="grid gap-3">
         <button type="button" onClick={() => void pay("coinbase")} className="flex items-start gap-3 rounded-xl border border-primary/50 bg-primary/10 p-4 text-left transition-colors hover:bg-primary/20">
           <img src="/brands/coinbase.svg" alt="" width={32} height={32} className="h-8 w-8 rounded-md" />
-          <span><span className="block font-semibold">Coinbase <span className="ml-1 rounded bg-primary px-1.5 py-0.5 text-[10px] text-primary-foreground">{t("Recomendado")}</span></span>
+          <span><span className="block font-semibold">Coinbase </span>
           <span className="text-xs text-muted-foreground">{t("Saldo de Coinbase, banco o tarjeta. Comisiones más bajas.")}</span></span>
-        </button>
-        <button type="button" onClick={() => void pay("card")} className="flex items-start gap-3 rounded-xl border border-border p-4 text-left transition-colors hover:bg-muted">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-muted"><CreditCard size={18} /></span>
-          <span><span className="block font-semibold">{t("Tarjeta / Apple Pay")}</span>
-          <span className="text-xs text-muted-foreground">{t("Compra al instante con tarjeta, Apple Pay o Google Pay.")}</span></span>
         </button>
       </div>
     </DialogContent></Dialog>

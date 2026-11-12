@@ -8,6 +8,8 @@ import { getRealWallet } from "@/lib/solana.functions";
 import { autoConvertLamports, decimalToUnits, GAS_KEEP_LAMPORTS, onboardingStep, SOL_EXCESS_MIN_USD } from "@/lib/onboarding";
 import { buildSwap, quoteSwap, type SwapQuote } from "@/lib/wallet-actions";
 import { Button } from "@/components/ui/button";
+import { startCoinbaseBuy } from "@/lib/coinbase-offramp.functions";
+import { holdSessionForExternalFlow } from "@/components/idle-logout";
 
 type Receipt = { solIn: bigint; usdcOut: bigint; minimum: bigint | null; kept: bigint; signature: string };
 const num = (v: bigint, d: number, max: number) => (Number(v) / 10 ** d).toLocaleString("en-US", { useGrouping: false, minimumFractionDigits: Math.min(2, max), maximumFractionDigits: max });
@@ -19,6 +21,17 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
   const queryClient = useQueryClient();
   const address = session.walletAddress;
   const read = useServerFn(getRealWallet);
+  const cbBuy = useServerFn(startCoinbaseBuy);
+  async function buyStarter() {
+    setError(null);
+    const tab = window.open("", "_blank");
+    const release = holdSessionForExternalFlow();
+    try {
+      const r = await cbBuy({ data: { wallet: address!, asset: "SOL", origin: window.location.origin } });
+      if (!r.success) { tab?.close(); throw new Error(r.error); }
+      if (tab) tab.location.href = r.url; else window.location.href = r.url;
+    } catch (e) { setError(e instanceof Error ? e.message : String(e)); release(); }
+  }
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<Receipt | null>(null);
@@ -55,10 +68,10 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
 
   if (step === "sol") return <section aria-label={t("Añadir fondos")} className={box}>
     <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Sparkles size={14} />{t("Empieza aquí")}</p>
-    <h2 className="mt-2 font-display text-xl font-semibold">{t("Añade fondos con tu tarjeta")}</h2>
-    <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Pagas con tarjeta en una pasarela segura y el dinero llega solo a tu cuenta. Luego lo activamos en dólares con un toque.")}</p>
+    <h2 className="mt-2 font-display text-xl font-semibold">{t("Añade fondos con Coinbase")}</h2>
+    <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Paga con tu saldo de Coinbase, banco o tarjeta y el dinero llega solo a tu cuenta. Luego lo activamos en dólares con un toque.")}</p>
     <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck size={14} className="text-primary" />{t("Solo tú controlas tus fondos. BÓVEDA no puede moverlos sin tu firma.")}</p>
-    {session.buySol && <Button className="mt-4 w-full" onClick={() => { setError(null); session.buySol!().catch((e) => setError(e instanceof Error ? e.message : String(e))); }}><CreditCard size={16} />{t("Añadir fondos")}</Button>}
+    <Button className="mt-4 w-full" onClick={() => void buyStarter()}><CreditCard size={16} />{t("Añadir fondos con Coinbase")}</Button>
     {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}
   </section>;
 
