@@ -1,3 +1,5 @@
+import { ShieldCheck } from "lucide-react";
+import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
 import { TokenIcon } from "@/components/token-icon";
 import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -141,6 +143,12 @@ export function WalletPanel() {
         <ChevronRight size={16} className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 sm:hidden" aria-hidden />
       </Link>)}
     </section>
+
+    {address === AFFILIATE_PAYOUT_WALLET && <Link to="/invita" hash="tesoreria" className="flex items-center gap-3 rounded-2xl border border-primary/40 bg-primary/10 p-4 hover:bg-primary/15">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground"><ShieldCheck size={20} aria-hidden /></span>
+      <span className="min-w-0 flex-1"><span className="block font-display text-base font-semibold">{t("Panel de Tesorería")}</span><span className="block text-xs text-muted-foreground">{t("Comisiones, pagos a afiliados, códigos VIP y Telegram")}</span></span>
+      <ChevronRight size={16} className="shrink-0 text-muted-foreground" aria-hidden />
+    </Link>}
 
     <WalletPositions wallet={address} />
     <WalletOpenPredictions />

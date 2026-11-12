@@ -7,6 +7,10 @@ import { useT } from "@/lib/i18n";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { LanguageMenu } from "./language-menu";
 import { NewsBell } from "./news-bell";
+import { useContext } from "react";
+import { ShieldCheck } from "lucide-react";
+import { BovedaSessionContext } from "@/hooks/use-boveda-session";
+import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
 
 export type AppView = "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" | "markets";
 
@@ -37,6 +41,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
   const [open, setOpen] = useState(false);
   const row = "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-secondary";
   const go = (v: AppView) => { setOpen(false); onSelect(v); };
+  const operator = useContext(BovedaSessionContext)?.walletAddress === AFFILIATE_PAYOUT_WALLET;
   return <>
     <span className="inline-flex items-center gap-2"><NewsBell />
     <button type="button" onClick={() => setOpen(true)} aria-label={t("Abrir menú")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card"><Menu size={18} /></button></span>
@@ -49,6 +54,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
             <button type="button" className={row} onClick={() => go("invite")}><Gift size={18} />{t("Invita y gana")}</button>
             <button type="button" className={row} onClick={() => go("account")}><UserRound size={18} />{t("Mi cuenta")}</button>
           </> : <>
+            {operator && <Link to="/invita" hash="tesoreria" className={`${row} border border-primary/40 bg-primary/10 font-semibold text-primary`} onClick={() => setOpen(false)}><ShieldCheck size={18} />{t("Panel de Tesorería")}</Link>}
             <Link to="/invita" className={row} onClick={() => setOpen(false)}><Gift size={18} />{t("Invita y gana")}</Link>
             <Link to="/actividad" className={row} onClick={() => setOpen(false)}><History size={18} />{t("Actividad")}</Link>
             <Link to="/cuenta" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Mi cuenta y seguridad")}</Link>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, ShieldCheck, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,9 @@ export function AffiliatePayoutsAdmin() {
   const [recent, setRecent] = useState<PayoutRecent[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
-  if (session.walletAddress !== AFFILIATE_PAYOUT_WALLET) return null;
+  const isOperator = session.walletAddress === AFFILIATE_PAYOUT_WALLET;
+  useEffect(() => { if (isOperator && window.location.hash === "#tesoreria") setTimeout(() => document.getElementById("tesoreria")?.scrollIntoView({ behavior: "smooth" }), 400); }, [isOperator]);
+  if (!isOperator) return null;
 
   async function token() { const v = await session.getAccessToken?.(); if (!v) throw new Error(); return v; }
   async function open() {
@@ -60,7 +62,7 @@ export function AffiliatePayoutsAdmin() {
     } catch { setMsg(t("Pago cancelado o fallido. No se marcó como pagado.")); } finally { setBusy(null); }
   }
   const total = (due ?? []).reduce((a, d) => a + BigInt(d.pendingRaw), 0n);
-  return <section className="mt-10 rounded-2xl border border-primary/40 bg-primary/5 p-5" aria-labelledby="payouts-title">
+  return <section id="tesoreria" className="mt-10 scroll-mt-20 rounded-2xl border border-primary/40 bg-primary/5 p-5" aria-labelledby="payouts-title">
     <h2 id="payouts-title" className="flex items-center gap-2 font-display text-xl font-semibold"><ShieldCheck size={18} />{t("Tesorería BÓVEDA (operador)")}</h2>
     <p className="mt-1 text-xs text-muted-foreground">{t("Wallet de tesorería")}: <span className="font-mono">{short(AFFILIATE_PAYOUT_WALLET)}</span></p>
     {!due ? <Button className="mt-4" onClick={() => void open()} disabled={!!busy}>{busy === "load" ? <Loader2 size={14} className="animate-spin" /> : <Wallet size={14} />}{t("Abrir panel de tesorería")}</Button> : <>

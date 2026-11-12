@@ -644,4 +644,6 @@ export const extra: Record<string, string> = {
   "Publica las novedades del app en @bovedaappsupport.": "Post app updates to @bovedaappsupport.",
   "Enviando…": "Sending…",
   "Publicar": "Post",
+  "Panel de Tesorería": "Treasury panel",
+  "Comisiones, pagos a afiliados, códigos VIP y Telegram": "Fees, affiliate payouts, VIP codes and Telegram",
 };
