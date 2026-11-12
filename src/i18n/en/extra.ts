@@ -60,6 +60,7 @@ export const extra: Record<string, string> = {
   "Comprar": "Buy",
   "Recibir": "Receive",
   "Balance total": "Total balance",
+  "Balance en USDC": "USDC balance",
   "Tus activos": "Your assets",
   "Pega la dirección aquí": "Paste the address here",
   "Dirección válida": "Valid address",
