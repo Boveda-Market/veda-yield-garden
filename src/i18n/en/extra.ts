@@ -373,6 +373,7 @@ export const extra: Record<string, string> = {
   "Si aciertas, el pago llega solo a tu wallet al cerrar la ronda.": "If you're right, the payout lands in your wallet automatically when the round closes.",
   "Si aciertas, ganas créditos de práctica al cerrar la ronda.": "If you're right, you win practice credits when the round closes.",
   "Abrir menú": "Open menu",
+  "Menú": "Menu",
   "Actividad": "Activity",
   "Mi cuenta y seguridad": "Account & security",
   "Ayúdanos a mejorar": "Help us improve",

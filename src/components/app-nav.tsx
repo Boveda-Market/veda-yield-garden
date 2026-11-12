@@ -49,7 +49,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
   const operator = useContext(BovedaSessionContext)?.walletAddress === AFFILIATE_PAYOUT_WALLET;
   return <>
     <span className="inline-flex items-center gap-2"><NewsBell />
-    <button type="button" onClick={() => setOpen(true)} aria-label={t("Abrir menú")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card"><Menu size={18} /></button></span>
+    <button type="button" onClick={() => setOpen(true)} aria-label={t("Abrir menú")} className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-medium hover:bg-secondary"><Menu size={18} />{t("Menú")}</button></span>
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent side="right" className="w-[85%] max-w-sm overflow-y-auto">
         <SheetTitle className="font-display">{guest ? t("Invitado · Prueba") : t("Mi cuenta")}</SheetTitle>
