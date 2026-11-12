@@ -12,7 +12,7 @@ import { holdSessionForExternalFlow } from "@/components/idle-logout";
 import { coinbaseSellStatus, startCoinbaseSell } from "@/lib/coinbase-offramp.functions";
 
 export const SELL_FLAG = "boveda:cb-sell-pending";
-export const sellFlagActive = () => { try { const v = Number(localStorage.getItem(SELL_FLAG)); return v > 0 && Date.now() - v < 45 * 60_000; } catch { return false; } };
+export const sellFlagActive = () => { try { const v = Number(localStorage.getItem(SELL_FLAG)); return v > 0 && Date.now() - v < 15 * 60_000; } catch { return false; } };
 const clearSellFlag = () => { try { localStorage.removeItem(SELL_FLAG); } catch { /* ignore */ } };
 const DISMISSED_KEY = "boveda:cb-sell-dismissed";
 const readDismissed = (): string[] => { try { const v = JSON.parse(localStorage.getItem(DISMISSED_KEY) ?? "[]"); return Array.isArray(v) ? v.filter((x) => typeof x === "string").slice(-20) : []; } catch { return []; } };

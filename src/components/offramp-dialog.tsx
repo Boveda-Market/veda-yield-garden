@@ -17,7 +17,6 @@ export function OfframpButton({ wallet, trial, trigger }: { wallet: string | nul
   useEffect(() => {
     if (trial || !wallet) return;
     const back = () => { if (document.visibilityState === "visible" && sellFlagActive()) { setProvider("bank"); setOpen(true); } };
-    back();
     document.addEventListener("visibilitychange", back); window.addEventListener("focus", back);
     return () => { document.removeEventListener("visibilitychange", back); window.removeEventListener("focus", back); };
   }, [trial, wallet]);
