@@ -42,7 +42,7 @@ export async function coinbaseSellUrl(wallet: string, privyUserId: string, clien
   const r = await cdp("POST", "/onramp/v1/token", { addresses: [{ address: wallet, blockchains: ["solana"] }], assets: ["USDC"], ...(clientIp ? { clientIp } : {}) });
   const token = r.token ?? r.data?.token;
   if (typeof token !== "string") throw new Error("Coinbase no respondió. Inténtalo de nuevo.");
-  const q = new URLSearchParams({ sessionToken: token, partnerUserId: await partnerId(privyUserId), defaultAsset: "USDC", defaultNetwork: "solana", redirectUrl, defaultCashoutMethod: "FIAT_WALLET", fiatCurrency: "USD" });
+  const q = new URLSearchParams({ sessionToken: token, partnerUserRef: await partnerId(privyUserId), defaultAsset: "USDC", defaultNetwork: "solana", redirectUrl });
   if (amount) q.set("presetCryptoAmount", amount);
   return `https://pay.coinbase.com/v3/sell/input?${q}`;
 }
