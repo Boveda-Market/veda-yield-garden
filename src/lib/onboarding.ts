@@ -43,10 +43,16 @@ export function unitsToDecimal(v: bigint, decimals: number): string {
 }
 
 /** Starting SOL card purchase, preset to ~$35 (BÓVEDA card minimum); extra converts to USDC. */
-export const GAS_TOP_UP_SOL = "0.33";
+export const GAS_TOP_UP_SOL = "0.75";
 /** Minimum and default card (MoonPay) purchase, in US dollars. */
 export const CARD_MIN_USD = "35";
-export const STARTER_USD = CARD_MIN_USD;
+/** Suggested first card purchase for new wallets, in US dollars. */
+export const STARTER_USD = "100";
+/** SOL amount for a dollar target at a given SOL price (MoonPay's first-purchase screen is SOL-denominated). */
+export function solForUsd(usd: number, price: number | null | undefined): string | null {
+  if (!price || !Number.isFinite(price) || price <= 0) return null;
+  return (Math.ceil((usd / price) * 100) / 100).toFixed(2);
+}
 
 /** SOL kept for network costs when auto-converting new funds (covers MIN_SOL_LAMPORTS plus headroom). */
 export const GAS_KEEP_LAMPORTS = 20_000_000n;

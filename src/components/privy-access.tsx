@@ -125,10 +125,10 @@ function SessionBridge({ children }: { children: ReactNode }) {
       // Solana mainnet CAIP-2 id and the official USDC mint.
       await addFunds({ destination: { address: walletAddress, chain: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", asset: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" }, fiat: { defaultAmount: CARD_MIN_USD, source: { defaultAsset: "usd" } } });
     },
-    buySol: async () => {
+    buySol: async (solAmount?: string) => {
       if (!authenticated || !walletAddress) throw new Error(t("Primero entra a tu cuenta"));
       // Dedicated MoonPay route: unified addFunds also quotes Stripe, which rejects native SOL.
-      await fundWallet({ address: walletAddress, options: { chain: "solana:mainnet", asset: "native-currency", amount: GAS_TOP_UP_SOL, defaultFundingMethod: "card", card: { preferredProvider: "moonpay" } } });
+      await fundWallet({ address: walletAddress, options: { chain: "solana:mainnet", asset: "native-currency", amount: solAmount ?? GAS_TOP_UP_SOL, defaultFundingMethod: "card", card: { preferredProvider: "moonpay" } } });
     },
     logout: doLogout,
   }}>{children}<IdleLogout active={ready && authenticated} signedOut={ready && !authenticated} onLogout={doLogout} /></BovedaSessionContext.Provider>;

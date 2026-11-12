@@ -716,6 +716,12 @@ export const extra: Record<string, string> = {
   "Listo: revisa tu chat con @bovedamarketbot.": "Done: check your chat with @bovedamarketbot.",
   "No pudimos enviar el aviso. Vuelve a conectar Telegram e inténtalo de nuevo.": "We couldn't send the alert. Reconnect Telegram and try again.",
   "Tarjeta o Apple Pay": "Card or Apple Pay",
+  "Antes de pagar con tarjeta": "Before paying by card",
+  "Monto sugerido: ${usd} (mínimo ${min}).": "Suggested amount: ${usd} (minimum ${min}).",
+  "Verás primero la cantidad en SOL (≈ {sol} SOL = ${usd}).": "You'll first see the amount in SOL (≈ {sol} SOL = ${usd}).",
+  "Para ver o escribir el monto en dólares, pulsa las flechas (⇄) dentro de MoonPay.": "To see or type the amount in dollars, tap the arrows (⇄) inside MoonPay.",
+  "Tus fondos llegan a tu wallet y luego activas tus dólares con un toque.": "Your funds reach your wallet, then you activate your dollars with one tap.",
+  "Continuar a MoonPay": "Continue to MoonPay",
   "Compra rápida de USDC vía MoonPay.": "Quick USDC purchase via MoonPay.",
   "Pago con tarjeta no disponible": "Card payment unavailable",
 };
