@@ -7,7 +7,7 @@ export type WithdrawalInput = z.infer<typeof withdrawalInput>;
 export const WITHDRAWAL_PILOT = { wallet: "GZ3wFmrMdXJAigwooa8GTginE6tLeTzgGLbXhgYTp7HR", position: "2pugCpz54EYthPuCma2C7XBViHWeYWBrA5QALiPaXhvV", nft: "HRsmPKBacA87JcnvLiHhXsnFUJariZmsTzoANydrVZUv", vaultId: "sol" } as const;
 /** Exit share of unlocked liquidity: 100 closes the position, 1–99 keeps it open. */
 export const EXIT_PERCENTS = [25, 50, 75, 100] as const;
-export const exitInput = withdrawalInput.extend({ percent: z.number().int().min(1).max(100).default(100) }).strict();
+export const exitInput = withdrawalInput.extend({ percent: z.number().int().min(1).max(100).default(100), migrate: z.literal(true).optional() }).strict();
 export type ExitInput = z.infer<typeof exitInput>;
 /** Floor share of liquidity (u128-safe bigint). */
 export function partialLiquidity(liquidity: bigint, percent: number) {
@@ -35,8 +35,8 @@ export type WithdrawalResult = {
 };
 
 /** Fixed fee on the enforced gross USDC minimum; refundable SOL rent is excluded. */
-export function withdrawalAmounts(minimumGross: bigint) {
+export function withdrawalAmounts(minimumGross: bigint, migrate = false) {
   if (minimumGross < 0n) throw new Error("Importe inválido");
-  const fee = progressiveFee(minimumGross);
+  const fee = migrate ? 0n : progressiveFee(minimumGross);
   return { gross: minimumGross, fee, net: minimumGross - fee };
 }

@@ -36,8 +36,8 @@ async function jupiter(path: string, body?: unknown) {
 export async function simulateDeposit(apiKey: string, input: SimulationInput, options: { preparePilot?: boolean } = {}): Promise<SimulationResult & { prepared?: PreparedPilot }> {
   // Validate the amount and eligible vaults again at the signing boundary.
   if (options.preparePilot) pilotInput.parse(input);
-  const amounts = simulationAmounts(input.amount);
-  const display = simulationDisplay(input.amount);
+  const amounts = simulationAmounts(input.amount, input.migrate === true);
+  const display = simulationDisplay(input.amount, input.migrate === true);
   let stage: SimulationStage = "pool";
   let bytes: number | undefined;
   const result = (success: boolean, message: string): SimulationResult => ({ success, stage, message, ...display, sent: false, bytes });

@@ -29,6 +29,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   const [addTo, setAddTo] = useState<string | null>(null);
   const [withdrawal, setWithdrawal] = useState<{ position?: string; vaultId: "sol" | "met"; migrateTo?: Vault } | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
+  const [migrating, setMigrating] = useState(false);
   const migrate = (p: import("@/lib/solana-data").ChainPosition, target: Vault) => { if (walletAddress && (p.vaultId === "sol" || p.vaultId === "met") && !p.locked) setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target }); };
   const [harvest, setHarvest] = useState<{ position: string; vaultId: "sol" | "met"; compound?: boolean } | null>(null);
   const [unavailableAction, setUnavailableAction] = useState<"harvest" | "exit" | null>(null);
@@ -88,9 +89,9 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <Button variant="secondary" className="mt-2 w-full" disabled={!walletAddress || (vault.id !== "sol" && vault.id !== "met")} onClick={() => { setAddTo(null); setSimulationVault(vault); }}>{t("Depositar USDC")}</Button>
 
     </article>)}</div></>}
-    {simulationVault && <DepositSimulation key={`${simulationVault.id}-${addTo ?? "new"}`} vault={simulationVault} wallet={walletAddress} {...(addTo ? { position: addTo } : {})} initialAmount={depositAmount} onClose={() => { setSimulationVault(null); setAddTo(null); setDepositAmount(""); }} />}
+    {simulationVault && <DepositSimulation key={`${simulationVault.id}-${addTo ?? "new"}`} vault={simulationVault} wallet={walletAddress} {...(addTo ? { position: addTo } : {})} initialAmount={depositAmount} migrate={migrating} onClose={() => { setSimulationVault(null); setAddTo(null); setDepositAmount(""); setMigrating(false); }} />}
     {harvest && walletAddress && <HarvestDialog wallet={walletAddress} position={harvest.position} vaultId={harvest.vaultId} onClose={() => setHarvest(null)} compound={harvest.compound} />}
-    {withdrawal && <WithdrawalSimulation wallet={walletAddress} {...withdrawal} onClose={() => setWithdrawal(null)} onMigrated={(usdc) => { const target = withdrawal.migrateTo; setWithdrawal(null); if (target) { setAddTo(null); setDepositAmount(usdc); setSimulationVault(target); } }} />}
+    {withdrawal && <WithdrawalSimulation wallet={walletAddress} {...withdrawal} onClose={() => setWithdrawal(null)} onMigrated={(usdc) => { const target = withdrawal.migrateTo; setWithdrawal(null); if (target) { setAddTo(null); setDepositAmount(usdc); setMigrating(true); setSimulationVault(target); } }} />}
     <Dialog open={unavailableAction !== null} onOpenChange={(open) => { if (!open) setUnavailableAction(null); }}>
       <DialogContent>
         <DialogTitle>{unavailableAction === "harvest" ? t("Cosechar Ganancias") : t("Cerrar y Liquidar")}</DialogTitle>

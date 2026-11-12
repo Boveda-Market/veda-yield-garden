@@ -11,6 +11,8 @@ export const simulationInput = z.object({
   vaultId: z.enum(["sol", "met", "rwa"]),
   amount: depositAmountSchema,
   position: solanaAddressSchema.optional(),
+  /** Moving between vaults: no BÓVEDA entry fee. */
+  migrate: z.literal(true).optional(),
 }).strict();
 export type SimulationInput = z.infer<typeof simulationInput>;
 export type SimulationStage = "pool" | "jupiter" | "composition" | "simulation";
@@ -28,17 +30,17 @@ export type SimulationResult = {
   checks?: { fee: boolean; position: boolean };
 };
 
-export function simulationAmounts(amount: string) {
+export function simulationAmounts(amount: string, migrate = false) {
   depositAmountSchema.parse(amount);
   const [whole, fraction = ""] = amount.split(".");
   if (!whole) throw new Error("Importe inválido");
   const gross = BigInt(whole) * 1_000_000n + BigInt(fraction.padEnd(6, "0"));
   if (gross < 1_000_000n || gross > 10_000_000_000n) throw new Error("Introduce entre 1 y 10,000 USDC");
-  const fee = depositFee(gross);
+  const fee = migrate ? 0n : depositFee(gross);
   return { gross, fee, net: gross - fee };
 }
 
-export function simulationDisplay(amount: string) {
-  const values = simulationAmounts(amount);
+export function simulationDisplay(amount: string, migrate = false) {
+  const values = simulationAmounts(amount, migrate);
   return { gross: tokenAmount(values.gross.toString(), 6), fee: tokenAmount(values.fee.toString(), 6), net: tokenAmount(values.net.toString(), 6) };
 }
