@@ -9,6 +9,7 @@ import { defaultProfile, profileSchema, type AccountProfile } from "@/lib/accoun
 import { getAccountProfile, saveAccountProfile } from "@/lib/account-profile.functions";
 import { AccountSecuritySettings } from "./account-security";
 import { LanguageMenu } from "./language-menu";
+import { SuggestionBox } from "./suggestion-box";
 
 const avatars = [{ id: "leaf", label: "Hoja", Icon: Leaf }, { id: "sun", label: "Sol", Icon: Sun }, { id: "gem", label: "Gema", Icon: Gem }, { id: "waves", label: "Olas", Icon: Waves }] as const;
 const card = "rounded-2xl border border-border bg-card p-6";
@@ -93,6 +94,8 @@ export function AccountSettings() {
       </ul>
       <p className="mt-3 text-xs text-muted-foreground">Boveda Technologies LLC</p>
     </div>
+
+    <SuggestionBox className={card} />
 
     <Button variant="outline" className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => void (async () => { await session.logout(); window.location.assign("/"); })()}><LogOut size={16} />{t("Cerrar sesión")}</Button>
   </section>;

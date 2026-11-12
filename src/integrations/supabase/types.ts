@@ -278,6 +278,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_suggestions: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          message: string
+          privy_user_id: string
+          status: string
+          wallet: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          message: string
+          privy_user_id: string
+          status?: string
+          wallet?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          message?: string
+          privy_user_id?: string
+          status?: string
+          wallet?: string | null
+        }
+        Relationships: []
+      }
       verified_wallets: {
         Row: {
           privy_user_id: string

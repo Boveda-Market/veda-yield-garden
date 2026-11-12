@@ -401,3 +401,26 @@ export const publishAnnouncementToTelegram = createServerFn({ method: "POST" })
     const tg = await import("./telegram.server");
     return (await tg.sendTelegram(tg.TELEGRAM_CHANNEL, tg.announcementPost(a))) ? { success: true } : { success: false, error: "Telegram no aceptó el mensaje. Revisa que el bot sea administrador del canal." };
   });
+
+/** Operator-only: read community suggestions (newest first). */
+export const listSuggestions = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => payoutAdminRequest.parse(input))
+  .handler(async ({ data }): Promise<{ success: true; items: import("./suggestions").Suggestion[] } | Fail> => {
+    try {
+      const { db } = await payoutAdmin(data.token);
+      const { data: rows, error } = await db.from("user_suggestions").select("id, category, message, wallet, status, created_at").order("created_at", { ascending: false }).limit(200);
+      if (error) return { success: false, error: "No se pudieron cargar las sugerencias." };
+      return { success: true, items: (rows ?? []).map((r) => ({ id: r.id, category: r.category as "idea", message: r.message, wallet: r.wallet, status: r.status as "unread", createdAt: r.created_at })) };
+    } catch { return { success: false, error: "Solo la wallet de tesorería verificada puede ver las sugerencias." }; }
+  });
+
+/** Operator-only: mark a suggestion read/unread. */
+export const setSuggestionStatus = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => z.object({ token: z.string().min(1).max(4096), id: z.string().uuid(), status: z.enum(["unread", "reviewed"]) }).strict().parse(input))
+  .handler(async ({ data }): Promise<{ success: true } | Fail> => {
+    try {
+      const { db } = await payoutAdmin(data.token);
+      const { error } = await db.from("user_suggestions").update({ status: data.status }).eq("id", data.id);
+      return error ? { success: false, error: "No se pudo actualizar." } : { success: true };
+    } catch { return { success: false, error: "No se pudo actualizar." }; }
+  });
