@@ -77,7 +77,7 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
     catch (e) { setError(e instanceof Error ? e.message : t("No se pudo completar la operación.")); setPhase("ready"); }
   }
 
-  if (phase === "done" && sig) return <div role="status" className="grid gap-2 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm"><p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} />{t("¡Listo! Coinbase enviará el dinero a tu banco o tarjeta.")}</p><a className="text-xs underline" href={`https://orbmarkets.io/tx/${sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}</a></div>;
+  if (phase === "done" && sig) return <div role="status" className="grid gap-2 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm"><p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} />{t("¡Listo! El dinero llegará a tu saldo de Coinbase.")}</p><a className="text-xs underline" href={`https://orbmarkets.io/tx/${sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}</a></div>;
 
   if ((phase === "ready" || phase === "sending") && sell && units) return <div className="grid gap-3">
     <div className="grid gap-1 rounded-lg border p-3 text-xs">
@@ -85,7 +85,7 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
       <div className="flex justify-between"><span>{t("Comisión de BÓVEDA (1%)")}</span><span>{fmt(fee)} USDC</span></div>
       <div className="flex justify-between"><span>{t("Costo de red")}</span><span>{"< $0.01"}</span></div>
       <div className="flex justify-between text-sm"><span>{t("Sale de tu wallet")}</span><b>{fmt(total)} USDC</b></div>
-      {sell.fiat && <div className="flex justify-between text-sm"><span>{t("Recibes en tu banco")}</span><b>{sell.fiat}</b></div>}
+      {sell.fiat && <div className="flex justify-between text-sm"><span>{t("Recibes en tu saldo de Coinbase")}</span><b>{sell.fiat}</b></div>}
     </div>
     {short && <p className="text-xs text-destructive">{t("Saldo insuficiente")}</p>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
@@ -94,8 +94,8 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
   </div>;
 
   return <div className="grid gap-2">
-    <Button onClick={() => void open()} disabled={phase === "opening" || phase === "waiting"}>{phase === "idle" ? <ExternalLink size={16} /> : <LoaderCircle className="animate-spin" size={16} />}{phase === "waiting" ? t("Termina en Coinbase y vuelve aquí…") : t("Retirar a mi banco con Coinbase")}</Button>
-    <p className="text-xs text-muted-foreground">{t("Elige tu banco o tarjeta y el monto en Coinbase. Vuelve a BÓVEDA y confirma con un toque. Sin copiar ni pegar direcciones.")}</p>
+    <Button onClick={() => void open()} disabled={phase === "opening" || phase === "waiting"}>{phase === "idle" ? <ExternalLink size={16} /> : <LoaderCircle className="animate-spin" size={16} />}{phase === "waiting" ? t("Termina en Coinbase y vuelve aquí…") : t("Retirar a mi saldo de Coinbase")}</Button>
+    <p className="text-xs text-muted-foreground">{t("Tu saldo de Coinbase ya viene elegido: el dinero queda disponible al instante. Vuelve a BÓVEDA y confirma con un toque.")}</p>
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
   </div>;
 }
