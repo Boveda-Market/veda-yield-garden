@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, CreditCard, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { QuickSwapButton } from "@/components/quick-swap";
 import { getRealWallet } from "@/lib/solana.functions";
@@ -69,20 +70,21 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
       <Button onClick={() => void add()} disabled={waiting}>{waiting ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}{waiting ? t("Esperando tus dólares…") : t("Añadir fondos")}</Button>
       <QuickSwapButton />
     </div>}
-    {choosing && <div className="mt-3 rounded-xl border border-border bg-card p-3 text-sm">
-      <p className="mb-2 font-semibold">{t("¿Cómo quieres pagar?")}</p>
-      <div className="grid gap-2 sm:grid-cols-2">
-        <button type="button" onClick={() => void pay("coinbase")} className="rounded-lg border border-primary/50 bg-primary/10 p-3 text-left hover:bg-primary/20">
-          <span className="block font-semibold">Coinbase <span className="ml-1 rounded bg-primary px-1.5 py-0.5 text-[10px] text-primary-foreground">{t("Recomendado")}</span></span>
-          <span className="text-xs text-muted-foreground">{t("Saldo de Coinbase, banco o tarjeta. Comisiones más bajas.")}</span>
+    <Dialog open={choosing} onOpenChange={setChoosing}><DialogContent>
+      <DialogHeader><DialogTitle>{t("Añadir fondos")}</DialogTitle><DialogDescription>{t("Elige cómo quieres añadir dólares a tu cuenta")}</DialogDescription></DialogHeader>
+      <div className="grid gap-3">
+        <button type="button" onClick={() => void pay("coinbase")} className="flex items-start gap-3 rounded-xl border border-primary/50 bg-primary/10 p-4 text-left transition-colors hover:bg-primary/20">
+          <img src="/brands/coinbase.svg" alt="" width={32} height={32} className="h-8 w-8 rounded-md" />
+          <span><span className="block font-semibold">Coinbase <span className="ml-1 rounded bg-primary px-1.5 py-0.5 text-[10px] text-primary-foreground">{t("Recomendado")}</span></span>
+          <span className="text-xs text-muted-foreground">{t("Saldo de Coinbase, banco o tarjeta. Comisiones más bajas.")}</span></span>
         </button>
-        <button type="button" onClick={() => void pay("card")} className="rounded-lg border border-border p-3 text-left hover:bg-muted">
-          <span className="block font-semibold">{t("Tarjeta / Apple Pay")}</span>
-          <span className="text-xs text-muted-foreground">{t("Compra al instante con tarjeta, Apple Pay o Google Pay.")}</span>
+        <button type="button" onClick={() => void pay("card")} className="flex items-start gap-3 rounded-xl border border-border p-4 text-left transition-colors hover:bg-muted">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-muted"><CreditCard size={18} /></span>
+          <span><span className="block font-semibold">{t("Tarjeta / Apple Pay")}</span>
+          <span className="text-xs text-muted-foreground">{t("Compra al instante con tarjeta, Apple Pay o Google Pay.")}</span></span>
         </button>
       </div>
-      <Button size="sm" variant="ghost" className="mt-2" onClick={() => setChoosing(false)}>{t("Cancelar")}</Button>
-    </div>}
+    </DialogContent></Dialog>
     {receipt && <div role="status" className="mt-3 rounded-xl border border-primary/40 bg-primary/10 p-4 text-sm">
       <p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} className="text-primary" />{t("¡Fondos añadidos!")}</p>
       <dl className="mt-2 divide-y divide-border">

@@ -596,6 +596,7 @@ export const extra: Record<string, string> = {
   "Reservado para costos de red": "Kept for network costs",
   "Añadir fondos": "Add funds",
   "Esperando tus dólares…": "Waiting for your dollars…",
+  "Elige cómo quieres añadir dólares a tu cuenta": "Choose how you want to add dollars to your account",
   "Recomendado": "Recommended",
   "¿Cómo quieres pagar?": "How do you want to pay?",
   "Saldo de Coinbase, banco o tarjeta. Comisiones más bajas.": "Coinbase balance, bank or card. Lowest fees.",
