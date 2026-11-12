@@ -12,7 +12,7 @@ const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", curren
 
 export function TierBadge({ index, name }: { index: number; name: string }) {
   const t = useT();
-  const { Icon, cls } = styles[index] ?? styles[0];
+  const { Icon, cls } = styles[index] ?? styles[0]!;
   return <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${cls}`}><Icon size={14} />{t("Nivel")} {name}</span>;
 }
 
