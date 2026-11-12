@@ -8,6 +8,16 @@ export const IDLE_WARN_MS = 60 * 1000;
 const KEY = "boveda.lastActivity";
 const EVENTS = ["pointerdown", "keydown", "scroll", "touchstart", "mousemove"] as const;
 
+// Flows that send the user to another tab (e.g. Coinbase) keep the session alive until they finish.
+let externalBusy = 0;
+/** Marks an external flow as running; returns a release function (safe to call more than once). */
+export function holdSessionForExternalFlow(): () => void {
+  externalBusy++;
+  let done = false;
+  return () => { if (!done) { done = true; externalBusy = Math.max(0, externalBusy - 1); try { localStorage.setItem(KEY, String(Date.now())); } catch {} } };
+}
+export const isExternalFlowActive = () => externalBusy > 0;
+
 /** Signs the user out after 5 min (also when the app was closed or in background that long) without activity, warning 60 s before. Activity is shared across tabs. */
 export function IdleLogout({ active, signedOut, onLogout }: { active: boolean; signedOut?: boolean; onLogout: () => Promise<void> }) {
   const t = useT();
@@ -24,6 +34,7 @@ export function IdleLogout({ active, signedOut, onLogout }: { active: boolean; s
     last.current = Date.now(); try { localStorage.setItem(KEY, String(last.current)); } catch {}
     const onStorage = (e: StorageEvent) => { if (e.key === KEY && e.newValue) last.current = Math.max(last.current, Number(e.newValue)); };
     const tick = () => {
+      if (externalBusy > 0) { last.current = Date.now(); try { localStorage.setItem(KEY, String(last.current)); } catch {} setLeft(null); return; }
       try { last.current = Math.max(last.current, Number(localStorage.getItem(KEY) ?? 0)); } catch {}
       const remaining = IDLE_LIMIT_MS - (Date.now() - last.current);
       if (remaining <= 0) { expire(); return; }

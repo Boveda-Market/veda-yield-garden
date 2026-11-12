@@ -9,6 +9,7 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { QuickSwapButton } from "@/components/quick-swap";
 import { getRealWallet } from "@/lib/solana.functions";
 import { decimalToUnits, fundingAction } from "@/lib/onboarding";
+import { holdSessionForExternalFlow } from "@/components/idle-logout";
 import { startCoinbaseBuy } from "@/lib/coinbase-offramp.functions";
 
 type Receipt = { added: bigint; total: bigint };
@@ -40,6 +41,7 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
     setChoosing(false); setError(null);
     // Open the Coinbase tab synchronously so pop-up blockers allow it.
     const tab = provider === "coinbase" ? window.open("", "_blank") : null;
+    const release = provider === "coinbase" ? holdSessionForExternalFlow() : () => {};
     try {
       const before = await balances();
       const starter = fundingAction(before.sol) === "starter";
@@ -62,7 +64,7 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
     } catch (e) {
       const m = e instanceof Error ? e.message : String(e);
       if (!/exit|clos|cancel/i.test(m)) setError(t("No se pudo abrir la compra: {message}", { message: t(m) }));
-    } finally { setWaiting(false); }
+    } finally { setWaiting(false); release(); }
   }
 
   return <div className={className}>

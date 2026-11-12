@@ -8,6 +8,7 @@ import { useT } from "@/lib/i18n";
 import { solanaAddressSchema } from "@/lib/solana-data";
 import { USDC_MINT, buildTransfer, readTokenBalance, toBaseUnits } from "@/lib/wallet-actions";
 import { withdrawFee } from "@/lib/fees";
+import { holdSessionForExternalFlow } from "@/components/idle-logout";
 import { coinbaseSellStatus, startCoinbaseSell } from "@/lib/coinbase-offramp.functions";
 
 type Sell = { id: string; toAddress: string; amount: string; fiat: string | null };
@@ -26,19 +27,23 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
   const timer = useRef<number | null>(null);
-  useEffect(() => () => { if (timer.current) window.clearInterval(timer.current); }, []);
+  const release = useRef<(() => void) | null>(null);
+  const hold = () => { release.current?.(); release.current = holdSessionForExternalFlow(); };
+  const unhold = () => { release.current?.(); release.current = null; };
+  useEffect(() => () => { if (timer.current) window.clearInterval(timer.current); release.current?.(); }, []);
   useEffect(() => { readTokenBalance(wallet, USDC_MINT).then(setBalance).catch(() => setBalance(null)); }, [wallet, sig]);
 
   async function open() {
     setError(null); setPhase("opening");
     const popup = window.open("", "_blank");
+    hold();
     const r = await startFn({ data: { wallet, origin: window.location.origin } });
-    if (!r.success) { popup?.close(); setError(t(r.error)); setPhase("idle"); return; }
+    if (!r.success) { popup?.close(); unhold(); setError(t(r.error)); setPhase("idle"); return; }
     if (popup) popup.location.href = r.url; else window.location.href = r.url;
     setPhase("waiting");
     let n = 0;
     timer.current = window.setInterval(async () => {
-      if (++n > 120) { window.clearInterval(timer.current!); setPhase("idle"); return; }
+      if (++n > 120) { window.clearInterval(timer.current!); unhold(); setPhase("idle"); return; }
       const s = await statusFn().catch(() => null);
       if (s?.success && s.sell && solanaAddressSchema.safeParse(s.sell.toAddress).success && toBaseUnits(s.sell.amount, "USDC")) { window.clearInterval(timer.current!); setSell(s.sell); setPhase("ready"); }
     }, 5000);
@@ -52,7 +57,7 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
   async function send() {
     if (!sell || !units) return;
     setPhase("sending"); setError(null);
-    try { const s = await signAndSend(await buildTransfer({ from: wallet, to: sell.toAddress, asset: "USDC", amount: units, fee })); setSig(s); setPhase("done"); if (fee > 0n) void reportAffiliate(s, "withdraw"); }
+    try { const s = await signAndSend(await buildTransfer({ from: wallet, to: sell.toAddress, asset: "USDC", amount: units, fee })); setSig(s); setPhase("done"); unhold(); if (fee > 0n) void reportAffiliate(s, "withdraw"); }
     catch (e) { setError(e instanceof Error ? e.message : t("No se pudo completar la operación.")); setPhase("ready"); }
   }
 
