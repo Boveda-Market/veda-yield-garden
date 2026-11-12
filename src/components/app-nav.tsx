@@ -61,7 +61,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
             <Link to="/cuenta" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Mi cuenta y seguridad")}</Link>
           </>}
           <InstallAppButton className={row} />
-          <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className={row}><Send size={18} />{t("Soporte y sugerencias")}</a>
+          <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className={row}><Send size={18} />{t("Soporte")}</a>
           <Link to="/faq" className={row}><HelpCircle size={18} />{t("Preguntas frecuentes")}</Link>
           <Link to="/terminos" className={row}><FileText size={18} />{t("Términos y condiciones")}</Link>
           <Link to="/privacidad" className={row}><Shield size={18} />{t("Política de privacidad")}</Link>
