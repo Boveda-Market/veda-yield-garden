@@ -1,7 +1,7 @@
 import type { Announcement } from "./announcements";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/telegram";
-export const TELEGRAM_CHANNEL = "@bovedaappsupport";
+export const TELEGRAM_CHANNEL = "@bovedamarket";
 const SITE = "https://bovedamarket.app";
 const HEAD: Record<Announcement["kind"], string> = { vault: "🏦 NUEVA BÓVEDA", market: "⚡ NUEVO MERCADO", policy: "📜 AVISO IMPORTANTE", update: "🚀 NOVEDAD EN BÓVEDA" };
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

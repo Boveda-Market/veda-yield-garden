@@ -641,7 +641,7 @@ export const extra: Record<string, string> = {
   "Publicado en Telegram": "Posted to Telegram",
   "No se pudo publicar.": "Could not post.",
   "Canal de Telegram": "Telegram channel",
-  "Publica las novedades del app en @bovedaappsupport.": "Post app updates to @bovedaappsupport.",
+  "Publica las novedades del app en @bovedamarket.": "Post app updates to @bovedamarket.",
   "Enviando…": "Sending…",
   "Publicar": "Post",
   "Panel de Tesorería": "Treasury panel",

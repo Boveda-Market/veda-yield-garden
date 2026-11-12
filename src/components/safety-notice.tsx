@@ -1,7 +1,7 @@
 import { ShieldCheck, Send } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
-export const SUPPORT_URL = "https://t.me/bovedaappsupport";
+export const SUPPORT_URL = "https://t.me/bovedamarket";
 
 export function SafetyNotice({ className = "" }: { className?: string }) {
   const t = useT();
