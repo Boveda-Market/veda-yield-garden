@@ -7,6 +7,7 @@ import { useT } from "@/lib/i18n";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { LanguageMenu } from "./language-menu";
 import { NewsBell } from "./news-bell";
+import { SecurityWhyDialog } from "./security-why";
 import { useContext } from "react";
 import { ShieldCheck } from "lucide-react";
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
@@ -57,6 +58,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
             {operator && <Link to="/invita" hash="tesoreria" className={`${row} border border-primary/40 bg-primary/10 font-semibold text-primary`} onClick={() => setOpen(false)}><ShieldCheck size={18} />{t("Panel de Tesorería")}</Link>}
             <Link to="/wallet" className={row} onClick={() => setOpen(false)}><Wallet size={18} />{t("Mi wallet")}</Link>
             <Link to="/invita" className={row} onClick={() => setOpen(false)}><Gift size={18} />{t("Invita y gana")}</Link>
+            <SecurityWhyDialog trigger={(o) => <button type="button" className={`${row} w-full text-left`} onClick={o}><ShieldCheck size={18} />{t("¿Por qué tus fondos están seguros?")}</button>} />
             <Link to="/actividad" className={row} onClick={() => setOpen(false)}><History size={18} />{t("Actividad")}</Link>
             <Link to="/cuenta" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Mi cuenta y seguridad")}</Link>
           </>}

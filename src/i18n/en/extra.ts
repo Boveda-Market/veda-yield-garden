@@ -1,5 +1,18 @@
 /** English strings for the homepage, wallet, portfolio, operation dialogs, affiliates and account redesigns. */
 export const extra: Record<string, string> = {
+  "¿Por qué tus fondos están seguros?": "Why are your funds safe?",
+  "Otras apps han fallado por guardar el dinero de sus usuarios. BÓVEDA funciona distinto.": "Other apps failed because they held their users' money. BÓVEDA works differently.",
+  "Guardan tu dinero en sus propias cuentas.": "They keep your money in their own accounts.",
+  "Tu dinero está siempre en tu propia wallet. Solo tú tienes la llave.": "Your money always stays in your own wallet. Only you hold the key.",
+  "Necesitas su aprobación para retirar y pueden congelar retiros.": "You need their approval to withdraw, and they can freeze withdrawals.",
+  "Retiras cuando quieras, sin pedir permiso a nadie.": "Withdraw whenever you want, without asking anyone.",
+  "Prometen rendimientos fijos que no explican.": "They promise fixed returns they never explain.",
+  "Las ganancias vienen de comisiones reales y verificables; nunca garantizadas.": "Earnings come from real, verifiable fees; never guaranteed.",
+  "Si la empresa cae, tu dinero cae con ella.": "If the company fails, your money goes with it.",
+  "BÓVEDA nunca toca tu dinero: no puede perderlo ni bloquearlo.": "BÓVEDA never touches your money: it can't lose or lock it.",
+  "Ganamos solo un 1% en operaciones con comisión. Nunca te pediremos tu frase secreta ni tu llave privada.": "We only earn 1% on fee-bearing operations. We will never ask for your secret phrase or private key.",
+  "¿En qué se diferencia BÓVEDA de otras apps que han fallado?": "How is BÓVEDA different from apps that have failed?",
+  "Otras apps guardaban el dinero en sus propias cuentas, pedían aprobación para retirar y prometían rendimientos fijos. En BÓVEDA tu dinero está siempre en tu propia wallet, retiras cuando quieras sin pedir permiso y las ganancias vienen de comisiones reales, nunca garantizadas. BÓVEDA nunca toca tu dinero y solo gana un 1% en operaciones con comisión.": "Other apps kept money in their own accounts, required approval to withdraw and promised fixed returns. With BÓVEDA your money always stays in your own wallet, you withdraw whenever you want without asking, and earnings come from real fees, never guaranteed. BÓVEDA never touches your money and only earns 1% on fee-bearing operations.",
   "Mantente al día con BÓVEDA": "Stay up to date with BÓVEDA",
   "Recibe avisos oficiales de nuevas bóvedas, mercados, cambios de comisiones y alertas de seguridad.": "Get official notices about new vaults, markets, fee changes and security alerts.",
   "Activar avisos en Telegram": "Turn on Telegram alerts",
