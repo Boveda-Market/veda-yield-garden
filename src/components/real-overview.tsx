@@ -27,10 +27,10 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   const t = useT();
   const [simulationVault, setSimulationVault] = useState<Vault | null>(null);
   const [addTo, setAddTo] = useState<string | null>(null);
-  const [withdrawal, setWithdrawal] = useState<{ position?: string; vaultId: "sol" | "met"; migrateTo?: Vault } | null>(null);
+  const [withdrawal, setWithdrawal] = useState<{ position?: string; vaultId: "sol" | "met"; migrateTo?: Vault; rotate?: boolean } | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
   const [migrating, setMigrating] = useState(false);
-  const migrate = (p: import("@/lib/solana-data").ChainPosition, target: Vault) => { if (walletAddress && (p.vaultId === "sol" || p.vaultId === "met") && !p.locked) setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target }); };
+  const migrate = (p: import("@/lib/solana-data").ChainPosition, target: Vault, rotate = false) => { if (walletAddress && (p.vaultId === "sol" || p.vaultId === "met") && !p.locked) setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target, ...(rotate ? { rotate: true } : {}) }); };
   const [harvest, setHarvest] = useState<{ position: string; vaultId: "sol" | "met"; compound?: boolean } | null>(null);
   const [unavailableAction, setUnavailableAction] = useState<"harvest" | "exit" | null>(null);
   function openPositionAction(position: import("@/lib/solana-data").ChainPosition, action: "harvest" | "exit" | "compound") {
@@ -76,7 +76,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
     </section>}
     {portfolioOnly && (() => { const nv = data?.positions.length ?? 0, np = predictions.items.length; const tabs = [{ id: "all", label: t("Todas"), n: nv + np }, { id: "vaults", label: t("Bóvedas"), n: nv }, { id: "predict", label: t("Sube / Baja"), n: np }] as const; return <div role="tablist" aria-label={t("Posiciones abiertas")} className="mt-8 flex gap-2 overflow-x-auto">{tabs.map((x) => <button key={x.id} role="tab" aria-selected={tab === x.id} onClick={() => setTab(x.id)} className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${tab === x.id ? "border-primary bg-primary text-primary-foreground shadow-md" : "border-border bg-card text-foreground hover:bg-secondary"}`}>{x.label}<span className={`rounded-full px-2 text-xs ${tab === x.id ? "bg-primary-foreground/20" : "bg-muted"}`}>{x.n}</span></button>)}</div>; })()}
     {portfolioOnly && tab !== "vaults" && <section aria-label={t("Predicciones abiertas")} className="border-b border-border py-8"><h2 className="mb-4 font-display text-lg font-semibold">{t("Predicciones abiertas")}</h2><OpenPredictions state={predictions} /></section>}
-    {portfolioOnly && tab !== "predict" && data && data.positions.length > 0 && <RealPositions showHarvestBanner={false} positions={data.positions} onAction={openPositionAction} onMigrate={migrate} onDeposit={(p) => { const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) { setAddTo(p.address); setSimulationVault(v); } }} />}
+    {portfolioOnly && tab !== "predict" && data && data.positions.length > 0 && <RealPositions showHarvestBanner={false} positions={data.positions} onAction={openPositionAction} onMigrate={migrate} onRotate={(p, v) => migrate(p, v, true)} onDeposit={(p) => { const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) { setAddTo(p.address); setSimulationVault(v); } }} />}
     {portfolioOnly && <Suspense fallback={<p role="status">{t("Cargando portafolio…")}</p>}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
     {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && tab !== "predict" && <PortfolioEmpty />}
     {!portfolioOnly && <><div className="mb-4 mt-10 flex flex-wrap items-center justify-between gap-2"><h2 className="font-display text-lg font-semibold">{t("Bóvedas disponibles")}</h2><PoweredBy brand="meteora" /></div>

@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { solanaAddressSchema } from "@/lib/solana-data";
-import { progressiveFee } from "@/lib/fees";
+import { progressiveFee, rotateFee } from "@/lib/fees";
 
 export const withdrawalInput = z.object({ wallet: solanaAddressSchema, position: solanaAddressSchema, vaultId: z.enum(["sol", "met"]) }).strict();
 export type WithdrawalInput = z.infer<typeof withdrawalInput>;
 export const WITHDRAWAL_PILOT = { wallet: "GZ3wFmrMdXJAigwooa8GTginE6tLeTzgGLbXhgYTp7HR", position: "2pugCpz54EYthPuCma2C7XBViHWeYWBrA5QALiPaXhvV", nft: "HRsmPKBacA87JcnvLiHhXsnFUJariZmsTzoANydrVZUv", vaultId: "sol" } as const;
 /** Exit share of unlocked liquidity: 100 closes the position, 1–99 keeps it open. */
 export const EXIT_PERCENTS = [25, 50, 75, 100] as const;
-export const exitInput = withdrawalInput.extend({ percent: z.number().int().min(1).max(100).default(100), migrate: z.literal(true).optional() }).strict();
+export const exitInput = withdrawalInput.extend({ percent: z.number().int().min(1).max(100).default(100), migrate: z.literal(true).optional(), rotate: z.literal(true).optional() }).strict();
 export type ExitInput = z.infer<typeof exitInput>;
 /** Floor share of liquidity (u128-safe bigint). */
 export function partialLiquidity(liquidity: bigint, percent: number) {
@@ -35,8 +35,11 @@ export type WithdrawalResult = {
 };
 
 /** Fixed fee on the enforced gross USDC minimum; refundable SOL rent is excluded. */
-export function withdrawalAmounts(minimumGross: bigint, migrate = false) {
+export type ExitFeeMode = boolean | "rotate";
+/** Offer move (migrate) = 0%; voluntary vault change (rotate) = reduced fee; otherwise the normal exit fee. */
+export function exitFeeMode(input: { migrate?: true | undefined; rotate?: true | undefined }): ExitFeeMode { return input.rotate === true ? "rotate" : input.migrate === true; }
+export function withdrawalAmounts(minimumGross: bigint, migrate: ExitFeeMode = false) {
   if (minimumGross < 0n) throw new Error("Importe inválido");
-  const fee = migrate ? 0n : progressiveFee(minimumGross);
+  const fee = migrate === "rotate" ? rotateFee(minimumGross) : migrate ? 0n : progressiveFee(minimumGross);
   return { gross: minimumGross, fee, net: minimumGross - fee };
 }
