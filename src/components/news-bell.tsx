@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Bell } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { SUPPORT_URL } from "@/components/safety-notice";
 import { ANNOUNCEMENTS, SEEN_KEY, latestAnnouncementId, type AnnouncementKind } from "@/lib/announcements";
 
 const LABEL: Record<AnnouncementKind, string> = { vault: "Nueva bóveda", market: "Nuevo mercado", policy: "Aviso legal", update: "Novedad" };
@@ -39,6 +40,7 @@ export function NewsBell() {
             {a.href && a.cta && <Link to={a.href} onClick={() => setOpen(false)} className="mt-3 inline-block text-sm font-medium text-primary">{t(a.cta)} →</Link>}
           </li>)}
         </ul>
+        <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className="mt-2 block rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground">{t("Únete a nuestro canal de Telegram para enterarte primero")}</a>
       </DialogContent>
     </Dialog>
   </>;

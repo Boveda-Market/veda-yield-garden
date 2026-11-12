@@ -636,4 +636,5 @@ export const extra: Record<string, string> = {
   "Comisión simple del 1%": "Simple 1% fee",
   "Depósitos, cosechas, cierres y retiros tienen 1%. Cambios, envíos y entradas a Sube/Baja son gratis.": "Deposits, harvests, exits and withdrawals are 1%. Swaps, transfers and Up/Down entries are free.",
   "Ver términos": "View terms",
+  "Únete a nuestro canal de Telegram para enterarte primero": "Join our Telegram channel to hear first",
 };
