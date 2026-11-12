@@ -6,5 +6,8 @@ import { Buffer } from "buffer";
 // before those libraries are evaluated.
 const scope = globalThis as typeof globalThis & { Buffer?: typeof Buffer };
 if (!scope.Buffer) scope.Buffer = Buffer;
+// Some CommonJS deps read require("buffer").Buffer; make the nested alias exist too.
+const B = scope.Buffer as typeof Buffer & { Buffer?: typeof Buffer };
+if (!B.Buffer) B.Buffer = B;
 
 export {};

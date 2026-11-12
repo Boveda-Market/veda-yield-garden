@@ -34,22 +34,33 @@ export const sendInput = z.object({ from: solanaAddressSchema, to: solanaAddress
 export async function buildTransfer(input: z.infer<typeof sendInput>): Promise<Uint8Array> {
   const { from, to, asset, amount, fee } = sendInput.parse(input);
   if (fee && asset !== "USDC") throw new Error("Comisión solo en USDC");
-  const { PublicKey, SystemProgram, TransactionMessage, VersionedTransaction } = await import("@solana/web3.js");
-  const owner = new PublicKey(from), dest = new PublicKey(to);
-  const instructions = [];
-  if (asset === "SOL") instructions.push(SystemProgram.transfer({ fromPubkey: owner, toPubkey: dest, lamports: amount }));
-  else {
-    const spl = await import("@solana/spl-token");
-    const mint = new PublicKey(USDC_MINT);
-    const source = spl.getAssociatedTokenAddressSync(mint, owner);
-    const target = spl.getAssociatedTokenAddressSync(mint, dest, true);
-    instructions.push(spl.createAssociatedTokenAccountIdempotentInstruction(owner, target, dest, mint));
-    instructions.push(spl.createTransferCheckedInstruction(source, mint, target, owner, amount, 6));
-    if (fee && fee > 0n) instructions.push(spl.createTransferCheckedInstruction(source, mint, new PublicKey(FEE_USDC_ACCOUNT), owner, fee, 6));
+  // Built with @solana/kit only: the legacy web3.js/spl-token path needs Node's Buffer and crashed in browsers.
+  const kit = await import("@solana/kit");
+  const { address, AccountRole, pipe, createTransactionMessage, setTransactionMessageFeePayer, setTransactionMessageLifetimeUsingBlockhash, appendTransactionMessageInstructions, compileTransaction, getTransactionEncoder, blockhash: toBlockhash } = kit;
+  const owner = address(from), dest = address(to);
+  const signer = { address: owner, role: AccountRole.WRITABLE_SIGNER } as never;
+  const authority = { address: owner, role: AccountRole.READONLY_SIGNER } as never;
+  const instructions: Parameters<typeof appendTransactionMessageInstructions>[0][number][] = [];
+  if (asset === "SOL") {
+    const system = await import("@solana-program/system");
+    instructions.push(system.getTransferSolInstruction({ source: signer, destination: dest, amount }));
+  } else {
+    const token = await import("@solana-program/token");
+    const mint = address(USDC_MINT), tokenProgram = address("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+    const [source] = await token.findAssociatedTokenPda({ mint, owner, tokenProgram });
+    const [target] = await token.findAssociatedTokenPda({ mint, owner: dest, tokenProgram });
+    instructions.push(await token.getCreateAssociatedTokenIdempotentInstructionAsync({ payer: signer, owner: dest, mint, tokenProgram, ata: target }));
+    instructions.push(token.getTransferCheckedInstruction({ source, mint, destination: target, authority, amount, decimals: 6 }));
+    if (fee && fee > 0n) instructions.push(token.getTransferCheckedInstruction({ source, mint, destination: address(FEE_USDC_ACCOUNT), authority, amount: fee, decimals: 6 }));
   }
   const { blockhash } = await txContext([]);
-  const message = new TransactionMessage({ payerKey: owner, recentBlockhash: blockhash, instructions }).compileToV0Message();
-  return new VersionedTransaction(message).serialize();
+  const message = pipe(
+    createTransactionMessage({ version: 0 }),
+    (m) => setTransactionMessageFeePayer(owner, m),
+    (m) => setTransactionMessageLifetimeUsingBlockhash({ blockhash: toBlockhash(blockhash), lastValidBlockHeight: 0n }, m),
+    (m) => appendTransactionMessageInstructions(instructions, m),
+  );
+  return new Uint8Array(getTransactionEncoder().encode(compileTransaction(message)));
 }
 
 /** BÓVEDA's existing USDC account for the fee wallet; every swap fee is paid in USDC here. */
