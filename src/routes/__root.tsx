@@ -114,10 +114,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+const CHUNK_GUARD = `(function(){var K="boveda-chunk-reload",R=/Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Loading chunk .* failed|No factory registered for module/i;function h(e){var m=e&&(e.reason||e.error||e);m=m&&m.message?m.message:String(e&&e.message||m||"");if(!R.test(m))return;try{var l=Number(sessionStorage.getItem(K)||0);if(Date.now()-l<30000)return;sessionStorage.setItem(K,String(Date.now()))}catch(_){}location.reload()}addEventListener("unhandledrejection",h);addEventListener("error",h,true)})();`;
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
       <head>
+        {/* Runs before the app bundle: if an outdated page asks for files from a previous build (blank screen), refresh once. */}
+        <script dangerouslySetInnerHTML={{ __html: CHUNK_GUARD }} />
         <HeadContent />
       </head>
       <body>
