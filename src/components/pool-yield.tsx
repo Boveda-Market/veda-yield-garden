@@ -29,6 +29,6 @@ export function PoolYield({ address }: { address: string }) {
       <div className="flex flex-wrap justify-between gap-1"><dt className="text-muted-foreground">{t("Volumen · 24 h · DexScreener")}</dt><dd>{stats.isPending ? t("Consultando…") : money(stats.data?.volume24h)}</dd></div>
     </dl>
     {stats.isError && <p role="status" className="mt-2 text-xs text-muted-foreground">{t("No se pudo actualizar el volumen de DexScreener.")}</p>}
-    <p className="mt-3 text-xs leading-5 text-muted-foreground">Comisiones de 24 h ÷ TVL actual × 365 × 100. Proyección anual sin reinversión, no APY ni ganancias garantizadas.&nbsp;</p>
+    <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("Comisiones de 24 h ÷ TVL actual × 365 × 100. Proyección anual sin reinversión, no APY ni ganancias garantizadas.")}</p>
   </div>;
 }
