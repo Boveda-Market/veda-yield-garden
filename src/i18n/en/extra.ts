@@ -676,7 +676,7 @@ export const extra: Record<string, string> = {
   "Obtener mi enlace": "Get my link",
   "Avisos de tu cuenta en Telegram": "Account alerts on Telegram",
   "Conectado": "Connected",
-  "Recibe un mensaje privado cuando ganes comisiones de tus invitados o completes un cobro.": "Get a private message when you earn commissions from invitees or complete a payout.",
+  "Recibe un mensaje privado con tus cosechas, ganancias de Sube/Baja, retiros y comisiones de invitados.": "Get a private message for your harvests, Up/Down winnings, withdrawals and invitee commissions.",
   "Recibir avisos": "Receive alerts",
   "Desconectar Telegram": "Disconnect Telegram",
   "Esperando confirmación en Telegram…": "Waiting for confirmation in Telegram…",

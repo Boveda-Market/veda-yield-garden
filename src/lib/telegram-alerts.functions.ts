@@ -53,3 +53,23 @@ export const setTelegramAlerts = createServerFn({ method: "POST" })
       return { success: !error };
     } catch { return { success: false }; }
   });
+
+const ACTION_TEXT = {
+  harvest: "🌾 <b>Cosecha completada</b>\nTus ganancias de la bóveda llegaron a tu wallet. Tu posición sigue abierta.",
+  exit: "🏁 <b>Bóveda cerrada</b>\nTu capital y ganancias se liquidaron a USDC en tu wallet.",
+  withdraw: "🏧 <b>Retiro enviado</b>\nTu retiro está en camino a tu banco, tarjeta o Cash App.",
+  predict: "⚡ <b>Ganancias de Sube/Baja cobradas</b>\nTu premio ya está en USDC en tu wallet.",
+  deposit: "🏦 <b>Depósito confirmado</b>\nTu dinero ya está trabajando en la bóveda.",
+} as const;
+
+/** Personal alert for the signed-in user's own confirmed action; only ever reaches that user's linked chat. */
+export const notifyMyAction = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => req.extend({ kind: z.enum(["harvest", "exit", "withdraw", "predict", "deposit"]), signature: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,90}$/) }).parse(i))
+  .handler(async ({ data }): Promise<{ success: boolean }> => {
+    try {
+      const { id } = await admin(data.token);
+      const tg = await import("./telegram.server");
+      await tg.userAlert(id, `${ACTION_TEXT[data.kind]}\n<a href="https://orbmarkets.io/tx/${data.signature}">Ver comprobante</a>`);
+      return { success: true };
+    } catch { return { success: false }; }
+  });
