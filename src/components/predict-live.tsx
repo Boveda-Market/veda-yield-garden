@@ -215,10 +215,10 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
           <Button size="sm" variant="outline" className="mt-3" onClick={() => dismissLost(p.pubkey)}>{t("Entendido")}</Button>
         </div>)}
       </section>}
-      {positions.length > 0 && <section className="space-y-2">
-        <h2 className="font-display text-lg font-semibold">{t("Tus predicciones en vivo")}</h2>
-        {positions.map((p) => <PredictPositionCard key={p.pubkey} p={p} onSell={() => sell(p)} onClaim={() => claim(p)} claiming={busy === p.pubkey} selling={busy === p.pubkey} disabled={!!busy} />)}
-      </section>}
+      {positions.length > 0 && (() => { const here = round ? positions.filter((p) => p.marketId === round.marketId || p.marketId === round.downMarketId || p.eventId === round.eventId) : []; const stake = here.reduce((n, p) => n + BigInt(p.costMicro || "0"), 0n); return <section role="status" className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-primary/40 bg-primary/5 p-4 text-sm">
+        <p>{here.length > 0 ? t("Tienes una predicción activa en esta ronda: {v} USDC en {s}", { v: usdc(stake), s: here[0]?.side === "up" ? t("Sube") : t("Baja") }) : t("Tienes {n} predicciones abiertas", { n: positions.length })}</p>
+        <Link to="/portfolio" className="font-semibold text-primary underline">{t("Ver en Portafolio")}</Link>
+      </section>; })()}
       <p className="text-xs text-muted-foreground">{t("Las predicciones en vivo se operan en un mercado externo con USDC real; BÓVEDA no es la contraparte. El pago ganador se acredita automáticamente.")}</p>
     </div>
   );

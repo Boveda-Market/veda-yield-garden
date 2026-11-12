@@ -68,15 +68,14 @@ export function MarketsPanel(_: { identity: string }) {
 
   return (
     <div className="space-y-4">
-      <header className="flex flex-wrap items-center gap-2">
-        <Zap className="text-primary" size={20} /><h1 className="font-display text-2xl font-bold">{t("Predicciones")}</h1>
-        <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />{t("En vivo")}</span>
-        <PoweredBy brand="polymarket" className="ml-auto" />
+      <header className="space-y-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <Zap className="text-primary" size={20} /><h1 className="font-display text-2xl font-bold">{t("Sube o Baja")}</h1>
+          <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />{t("En vivo")}</span>
+          <PoweredBy brand="polymarket" className="ml-auto" />
+        </div>
+        <div className="flex flex-wrap items-center gap-2"><p className="text-sm text-muted-foreground">{t("Predice el precio en rondas de 5 min, 15 min o diarias. Si aciertas, cobras al cerrar la ronda.")}</p><PredictHow /></div>
       </header>
-      <ol className="grid grid-cols-3 gap-2" aria-label={t("Cómo jugar")}>
-        {[["1", t("Elige tu cripto y tu ronda")], ["2", t("¿Sube o baja? ¡Tú decides!")], ["3", t("¡Acierta y cobra al cerrar la ronda!")]].map(([n, txt]) => <li key={n} className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 p-2 text-xs font-semibold text-foreground"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{n}</span>{txt}</li>)}
-      </ol>
-      <PredictHow />
 
       <div className="grid grid-cols-3 gap-2" role="tablist" aria-label={t("Mercado")}>
         {MARKETS.map((m) => {
@@ -113,7 +112,7 @@ export function MarketsPanel(_: { identity: string }) {
       {!loaded ? <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin" size={16} />{t("Buscando rondas en vivo…")}</p>
         : !round && <div role="status" className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/10 p-3 text-sm"><Loader2 className="mt-0.5 shrink-0 animate-spin text-primary" size={16} /><p><strong>{t("Esperando la próxima ronda de {m} ({w})…", { m: name, w: WIN_LABEL[win] })}</strong><br /><span className="text-muted-foreground">{t("Abre en breve. Mientras tanto puedes probar otra duración o cripto arriba.")}</span></p></div>}
       <PredictLive round={round} />
-      <PredictResults asset={market} window={win} />
+      <details className="rounded-2xl border border-border bg-card p-4"><summary className="cursor-pointer text-sm font-semibold">{t("Rondas recientes de {m}", { m: name })}</summary><div className="mt-3"><PredictResults asset={market} window={win} /></div></details>
     </div>
   );
 }
