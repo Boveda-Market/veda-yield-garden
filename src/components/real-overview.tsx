@@ -1,7 +1,8 @@
 import { PoweredBy } from "@/components/powered-by";
 import { TokenIcon } from "@/components/token-icon";
 import { useT } from "@/lib/i18n";
-import { RefreshCw, ShieldAlert } from "lucide-react";
+import { RefreshCw } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -65,29 +66,23 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       {!walletAddress && <p className="mt-3 text-sm text-muted-foreground">{t("Conecta tu wallet para ver tu portafolio.")}</p>}
       {errors}
       {walletAddress && <Suspense fallback={<div className="mt-6 h-28" />}><PortfolioSummary wallet={walletAddress} positions={data?.positions ?? []} positionsComplete={Boolean(data?.positionsComplete)} predictionsMicro={predictionsMicro} onHarvest={(p) => openPositionAction(p, "harvest")} /></Suspense>}
-    </section> : <section aria-label={t("Estado del modo Real")} className="border-y border-border py-8">
-      <div className="flex items-center gap-3"><ShieldAlert className="shrink-0 text-primary" size={24} /><h1 className="font-display text-2xl font-semibold">{t("Bóvedas")}</h1></div>
-      <VaultSteps className="mt-4" />
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-foreground/80">{t("Deposita entre 1 y 10,000 USDC en las bóvedas SOL y MET. Cosecha comisiones o liquida tus posiciones compatibles de SOL y MET, revisando los importes antes de firmar. Las posiciones bloqueadas no se pueden liquidar.")}</p>
-      {walletAddress && <div className="mt-4 flex flex-wrap items-center gap-3"><p className="min-w-0 break-all text-xs text-muted-foreground">{t("Wallet conectada:")}{" "}{walletAddress}</p>{refresh}</div>}
-      <StartGuide className="mt-4" />
+    </section> : <section aria-label={t("Bóvedas de rendimiento")} className="border-y border-border py-8">
+      <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Bóvedas de rendimiento")}</h1>{refresh}</div>
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Elige una bóveda para poner a trabajar tus USDC. Revisas los importes antes de firmar.")}</p>
+      {!(data && data.positions.length > 0) && <><VaultSteps className="mt-4" /><StartGuide className="mt-4" /></>}
       <BuyUsdc className="mt-4" />
       {errors}
-      <dl className="mt-6 grid gap-5">
-        <div><dt className="text-sm text-muted-foreground">{t("Posiciones en estos pools")}</dt><dd className="mt-1 font-display text-xl">{data?.positionsComplete ? data.positions.length : walletAddress ? unavailable : t("Conecta tu wallet")}</dd></div>
-      </dl>
-      {data && <p className="mt-4 text-xs text-muted-foreground">{t("Lectura confirmada en la red ·")}{" "}{new Date(data.checkedAt).toLocaleTimeString("es-MX")} {t("· no autoriza movimientos")}</p>}
     </section>}
     {portfolioOnly && (() => { const nv = data?.positions.length ?? 0, np = predictions.items.length; const tabs = [{ id: "all", label: t("Todas"), n: nv + np }, { id: "vaults", label: t("Bóvedas"), n: nv }, { id: "predict", label: t("Sube / Baja"), n: np }] as const; return <div role="tablist" aria-label={t("Posiciones abiertas")} className="mt-8 flex gap-2 overflow-x-auto">{tabs.map((x) => <button key={x.id} role="tab" aria-selected={tab === x.id} onClick={() => setTab(x.id)} className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${tab === x.id ? "border-primary bg-primary text-primary-foreground shadow-md" : "border-border bg-card text-foreground hover:bg-secondary"}`}>{x.label}<span className={`rounded-full px-2 text-xs ${tab === x.id ? "bg-primary-foreground/20" : "bg-muted"}`}>{x.n}</span></button>)}</div>; })()}
     {portfolioOnly && tab !== "vaults" && <section aria-label={t("Predicciones abiertas")} className="border-b border-border py-8"><h2 className="mb-4 font-display text-lg font-semibold">{t("Predicciones abiertas")}</h2><OpenPredictions state={predictions} /></section>}
     {portfolioOnly && tab !== "predict" && data && data.positions.length > 0 && <RealPositions showHarvestBanner={false} positions={data.positions} onAction={openPositionAction} onMigrate={migrate} onDeposit={(p) => { const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) { setAddTo(p.address); setSimulationVault(v); } }} />}
     {portfolioOnly && <Suspense fallback={<p role="status">{t("Cargando portafolio…")}</p>}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
     {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && tab !== "predict" && <PortfolioEmpty />}
-    {!portfolioOnly && data && data.positions.length > 0 && <RealPositions positions={data.positions} onAction={openPositionAction} onMigrate={migrate} onDeposit={(p) => { const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) { setAddTo(p.address); setSimulationVault(v); } }} />}
     {!portfolioOnly && <><div className="mb-4 mt-10 flex flex-wrap items-center justify-between gap-2"><h2 className="font-display text-lg font-semibold">{t("Bóvedas disponibles")}</h2><PoweredBy brand="meteora" /></div>
     <div className="grid gap-4 md:grid-cols-2">{VAULTS.map((vault) => <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"><span>{t("Pool de liquidez")}</span><span>{t("Riesgo")}{" "}{t(vault.risk)}</span></div><h3 className="mt-4 flex items-center gap-2 font-display text-xl font-semibold"><TokenIcon symbol={vault.pair.split("/")[0] ?? ""} size={28} />{t(vault.name)}</h3><p className="mt-1 text-sm text-muted-foreground">{vault.pair}</p>
       <PoolYield address={vault.pool} />
+      {(() => { const n = data?.positions.filter((p) => p.vaultId === vault.id).length ?? 0; return n > 0 ? <Link to="/portfolio" className="mt-3 inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{t("Tienes capital aquí · Ver en Portafolio")} →</Link> : null; })()}
       <p className="mt-5 flex-1 text-sm leading-6 text-muted-foreground">{t(vault.blurb)}</p>
       <Button variant="outline" className="mt-4 w-full" onClick={() => onDetails(vault)}>{t("Detalles del pool")}</Button>
       <Button variant="secondary" className="mt-2 w-full" disabled={!walletAddress || (vault.id !== "sol" && vault.id !== "met")} onClick={() => { setAddTo(null); setSimulationVault(vault); }}>{t("Depositar USDC")}</Button>
