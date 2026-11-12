@@ -61,7 +61,14 @@ export async function simulateHarvest(apiKey: string, input: WithdrawalInput, op
     const tokenClaimed = amount(claimed.accounts[1], pool.tokenAMint, owner) - aBefore;
     if (usdcClaimed < 0n || tokenClaimed < 0n) return fail("La cosecha consumiría saldos previos; no se autoriza ninguna firma.");
     if (usdcClaimed === 0n && tokenClaimed === 0n) return fail("Esta posición aún no tiene comisiones acumuladas para cosechar.");
-    const breakdown = harvestAmounts(usdcClaimed);
+    // Tier by capital invested: value the unlocked liquidity in USDC at the pool price (token A converted via sqrtPrice², raw units).
+    let positionUsdc = 0n;
+    try {
+      const q = cp.getWithdrawQuote({ liquidityDelta: state.unlockedLiquidity, sqrtPrice: pool.sqrtPrice, minSqrtPrice: pool.sqrtMinPrice, maxSqrtPrice: pool.sqrtMaxPrice, collectFeeMode: pool.collectFeeMode, tokenAAmount: pool.tokenAAmount, tokenBAmount: pool.tokenBAmount, liquidity: pool.liquidity });
+      const sp = BigInt(pool.sqrtPrice.toString());
+      positionUsdc = BigInt(q.outAmountB.toString()) + ((BigInt(q.outAmountA.toString()) * sp * sp) >> 128n);
+    } catch { positionUsdc = 0n; } // unvalued position falls back to the claim-based tier (never cheaper)
+    const breakdown = harvestAmounts(usdcClaimed, positionUsdc);
     if (options.prepare && (options.maximumFeeRaw === undefined || breakdown.fee > BigInt(options.maximumFeeRaw))) return fail("Las comisiones cambiaron: revisa de nuevo antes de firmar.");
     const instructions = [...claimIxs];
     if (breakdown.fee > 0n) {

@@ -20,9 +20,9 @@ export type HarvestResult = {
   checks?: { position: boolean; usdc: boolean; fee: boolean; token: boolean };
 };
 
-/** Tiered harvest fee (floored, integer micro-USDC) on claimed USDC earnings. */
-export function harvestAmounts(claimedUsdc: bigint) {
-  if (claimedUsdc < 0n) throw new Error("Importe inválido");
-  const fee = harvestFee(claimedUsdc);
+/** Tiered harvest fee (tier by position value when larger) (floored, integer micro-USDC) on claimed USDC earnings. */
+export function harvestAmounts(claimedUsdc: bigint, positionUsdc = 0n) {
+  if (claimedUsdc < 0n || positionUsdc < 0n) throw new Error("Importe inválido");
+  const fee = harvestFee(claimedUsdc, positionUsdc);
   return { gross: claimedUsdc, fee, net: claimedUsdc - fee };
 }

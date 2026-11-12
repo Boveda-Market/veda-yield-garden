@@ -18,8 +18,8 @@ export function tieredFee(units: bigint, kind: FeeKind) { return units > 0n ? (u
 
 /** Vault exit / liquidation fee in micro-USDC (progressive tier), floored. (Name kept for callers.) */
 export function progressiveFee(units: bigint) { return tieredFee(units, "exit"); }
-/** Harvest fee in micro-USDC on claimed USDC (progressive tier), floored. */
-export function harvestFee(units: bigint) { return tieredFee(units, "harvest"); }
+/** Harvest fee in micro-USDC on claimed USDC, floored; the tier comes from the larger of the claim and the position value (capital invested). */
+export function harvestFee(units: bigint, positionUnits = 0n) { const basis = positionUnits > units ? positionUnits : units; return units > 0n ? (units * tierBps(basis, "harvest")) / 10_000n : 0n; }
 /** Deposit fee in micro-USDC (progressive tier), floored. */
 export function depositFee(units: bigint) { return tieredFee(units, "deposit"); }
 
