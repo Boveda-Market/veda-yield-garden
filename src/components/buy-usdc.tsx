@@ -1,4 +1,5 @@
 import { useT } from "@/lib/i18n";
+import { CARD_MIN_USD } from "@/lib/onboarding";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -93,8 +94,8 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
         </button>
         {session.buyUsdc && <button type="button" onClick={() => void pay("card")} className="flex items-start gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:bg-muted">
           <CreditCard size={24} className="mt-0.5 text-muted-foreground" />
-          <span><span className="block text-sm font-medium">{t("Tarjeta o Apple Pay")}</span>
-          <span className="text-xs text-muted-foreground">{t("Compra rápida de USDC vía MoonPay.")}</span></span>
+          <span><span className="block text-sm font-medium">{t("Tarjeta o Apple Pay")} · {t("Mínimo")} ${CARD_MIN_USD}</span>
+          <span className="text-xs text-muted-foreground">{t("Compra rápida vía MoonPay. Usa las flechas para ver el monto en dólares.")}</span></span>
         </button>}
       </div>
     </DialogContent></Dialog>

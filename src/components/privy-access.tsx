@@ -1,4 +1,4 @@
-import { GAS_TOP_UP_SOL } from "@/lib/onboarding";
+import { CARD_MIN_USD, GAS_TOP_UP_SOL } from "@/lib/onboarding";
 import { useT } from "@/lib/i18n";
 import "@/lib/buffer-polyfill";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
@@ -123,7 +123,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
     buyUsdc: async () => {
       if (!authenticated || !walletAddress) throw new Error(t("Primero entra a tu cuenta"));
       // Solana mainnet CAIP-2 id and the official USDC mint.
-      await addFunds({ destination: { address: walletAddress, chain: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", asset: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" }, fiat: { defaultAmount: "50", source: { defaultAsset: "usd" } } });
+      await addFunds({ destination: { address: walletAddress, chain: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", asset: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" }, fiat: { defaultAmount: CARD_MIN_USD, source: { defaultAsset: "usd" } } });
     },
     buySol: async () => {
       if (!authenticated || !walletAddress) throw new Error(t("Primero entra a tu cuenta"));
