@@ -12,6 +12,9 @@ import { useContext } from "react";
 import { ShieldCheck } from "lucide-react";
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
 import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
+import { Lightbulb } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { SuggestionBox } from "./suggestion-box";
 
 export type AppView = "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" | "markets";
 
@@ -40,6 +43,7 @@ export function BottomNav({ active, guest, onSelect }: { active: AppView; guest:
 export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string | null; guest: boolean; onSelect: (v: AppView) => void; onLogout: () => void }) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  const [ideas, setIdeas] = useState(false);
   const row = "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-secondary";
   const go = (v: AppView) => { setOpen(false); onSelect(v); };
   const operator = useContext(BovedaSessionContext)?.walletAddress === AFFILIATE_PAYOUT_WALLET;
@@ -62,6 +66,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
             <Link to="/actividad" className={row} onClick={() => setOpen(false)}><History size={18} />{t("Actividad")}</Link>
             <Link to="/cuenta" hash="notificaciones" className={row} onClick={() => setOpen(false)}><Bell size={18} />{t("Notificaciones")}</Link>
             <Link to="/cuenta" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Mi cuenta y seguridad")}</Link>
+            <button type="button" className={`${row} text-left`} onClick={() => { setOpen(false); setIdeas(true); }}><Lightbulb size={18} />{t("Ayúdanos a mejorar")}</button>
           </>}
           <InstallAppButton className={row} />
           <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className={row}><Send size={18} />{t("Soporte")}</a>
@@ -76,5 +81,8 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
         </div>
       </SheetContent>
     </Sheet>
+    <Dialog open={ideas} onOpenChange={setIdeas}>
+      <DialogContent className="max-w-md"><DialogTitle className="sr-only">{t("Ayúdanos a mejorar")}</DialogTitle><SuggestionBox className="" /></DialogContent>
+    </Dialog>
   </>;
 }

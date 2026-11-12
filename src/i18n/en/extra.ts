@@ -374,6 +374,7 @@ export const extra: Record<string, string> = {
   "Abrir menú": "Open menu",
   "Actividad": "Activity",
   "Mi cuenta y seguridad": "Account & security",
+  "Ayúdanos a mejorar": "Help us improve",
   "Estilo de gráfica": "Chart style",
   "Línea": "Line",
   "Velas": "Candles",

@@ -24,7 +24,7 @@ export function SuggestionBox({ className }: { className: string }) {
     } catch { setMsg(t("No se pudo enviar la sugerencia.")); } finally { setBusy(false); }
   }
   return <div className={className}>
-    <h2 className="flex items-center gap-2 font-display text-xl font-semibold"><Lightbulb size={20} className="text-primary" />{t("Buzón de sugerencias")}</h2>
+    <h2 className="flex items-center gap-2 font-display text-xl font-semibold"><Lightbulb size={20} className="text-primary" />{t("Ayúdanos a mejorar")}</h2>
     <p className="mt-1 text-sm text-muted-foreground">{t("Cuéntanos qué mejorarías. Lo lee directamente el equipo.")}</p>
     <form className="mt-4 space-y-3" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
       <div className="flex flex-wrap gap-2">{SUGGESTION_CATEGORIES.map((c) => <Button key={c} type="button" size="sm" variant={category === c ? "default" : "outline"} aria-pressed={category === c} onClick={() => setCategory(c)}>{t(CATEGORY_LABEL[c])}</Button>)}</div>
