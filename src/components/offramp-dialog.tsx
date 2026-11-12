@@ -16,6 +16,9 @@ export function OfframpButton({ wallet, trial, trigger }: { wallet: string | nul
   // Coming back from Coinbase: reopen the withdraw dialog so the signature request appears on its own.
   useEffect(() => {
     if (trial || !wallet) return;
+    // Coinbase redirect lands on /wallet?cb_sell=1: open straight to the signature card.
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("cb_sell") === "1") { q.delete("cb_sell"); window.history.replaceState(null, "", window.location.pathname + (q.size ? `?${q}` : "")); setProvider("bank"); setOpen(true); }
     const back = () => { if (document.visibilityState === "visible" && sellFlagActive()) { setProvider("bank"); setOpen(true); } };
     document.addEventListener("visibilitychange", back); window.addEventListener("focus", back);
     return () => { document.removeEventListener("visibilitychange", back); window.removeEventListener("focus", back); };

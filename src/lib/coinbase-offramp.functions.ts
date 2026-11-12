@@ -14,7 +14,7 @@ export const startCoinbaseSell = createServerFn({ method: "POST" })
       const { coinbaseSellUrl } = await import("@/lib/coinbase-offramp.server");
       const back = ORIGINS.includes(data.origin) ? data.origin : ORIGINS[0];
       const ip = getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for")?.split(",")[0]?.trim();
-      return { success: true as const, url: await coinbaseSellUrl(data.wallet, context.privyUserId, ip, data.amount, `${back}/wallet`) };
+      return { success: true as const, url: await coinbaseSellUrl(data.wallet, context.privyUserId, ip, data.amount, `${back}/wallet?cb_sell=1`) };
     } catch (e) { return { success: false as const, error: e instanceof Error ? e.message : "Coinbase no respondió." }; }
   });
 

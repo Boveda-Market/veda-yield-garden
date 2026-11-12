@@ -50,10 +50,13 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
     return false;
   }
   useEffect(() => {
-    void check();
+    // Coinbase may take a few seconds to register the order after redirect: retry briefly.
+    let tries = 0; let stop = false;
+    const poll = async () => { if (stop || ++tries > 8) return; if (!(await check()) && sellFlagActive()) window.setTimeout(poll, 3000); };
+    void poll();
     const onBack = () => { if (document.visibilityState === "visible") void check(); };
     document.addEventListener("visibilitychange", onBack); window.addEventListener("focus", onBack);
-    return () => { document.removeEventListener("visibilitychange", onBack); window.removeEventListener("focus", onBack); };
+    return () => { document.removeEventListener("visibilitychange", onBack); window.removeEventListener("focus", onBack); stop = true; };
   }, []);
   useEffect(() => { readTokenBalance(wallet, USDC_MINT).then(setBalance).catch(() => setBalance(null)); }, [wallet, sig]);
 
