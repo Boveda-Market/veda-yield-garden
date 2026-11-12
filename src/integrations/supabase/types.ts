@@ -235,6 +235,7 @@ export type Database = {
           created_at: string
           link_code: string | null
           linked_at: string | null
+          muted_kinds: string[]
           privy_user_id: string
           username: string | null
         }
@@ -245,6 +246,7 @@ export type Database = {
           created_at?: string
           link_code?: string | null
           linked_at?: string | null
+          muted_kinds?: string[]
           privy_user_id: string
           username?: string | null
         }
@@ -255,6 +257,7 @@ export type Database = {
           created_at?: string
           link_code?: string | null
           linked_at?: string | null
+          muted_kinds?: string[]
           privy_user_id?: string
           username?: string | null
         }
