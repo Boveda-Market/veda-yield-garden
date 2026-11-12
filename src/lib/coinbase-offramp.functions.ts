@@ -38,3 +38,23 @@ export const startCoinbaseBuy = createServerFn({ method: "POST" })
       return { success: true as const, url: await coinbaseBuyUrl(data.wallet, data.asset, ip, `${back}/wallet`) };
     } catch (e) { return { success: false as const, error: e instanceof Error ? e.message : "Coinbase no respondió." }; }
   });
+
+/** Whether this account already completed a Coinbase onramp (unlocks the secondary card option). */
+export const coinbaseOnrampStatus = createServerFn({ method: "POST" })
+  .middleware([requirePrivyAuth])
+  .handler(async ({ context }) => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data } = await supabaseAdmin.from("coinbase_onramps").select("privy_user_id").eq("privy_user_id", context.privyUserId).maybeSingle();
+      return { done: !!data };
+    } catch { return { done: false }; }
+  });
+
+/** Records the first confirmed Coinbase purchase for this account. */
+export const recordCoinbaseOnramp = createServerFn({ method: "POST" })
+  .middleware([requirePrivyAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("coinbase_onramps").upsert({ privy_user_id: context.privyUserId }, { onConflict: "privy_user_id", ignoreDuplicates: true });
+    return { ok: true };
+  });

@@ -10,7 +10,7 @@ import { QuickSwapButton } from "@/components/quick-swap";
 import { getRealWallet } from "@/lib/solana.functions";
 import { decimalToUnits, fundingAction } from "@/lib/onboarding";
 import { holdSessionForExternalFlow } from "@/components/idle-logout";
-import { startCoinbaseBuy } from "@/lib/coinbase-offramp.functions";
+import { coinbaseOnrampStatus, recordCoinbaseOnramp, startCoinbaseBuy } from "@/lib/coinbase-offramp.functions";
 
 type Receipt = { added: bigint; total: bigint };
 const usdc = (v: bigint) => (Number(v) / 1e6).toFixed(2);
@@ -26,6 +26,10 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const [choosing, setChoosing] = useState(false);
   const cbBuy = useServerFn(startCoinbaseBuy);
+  const cbStatus = useServerFn(coinbaseOnrampStatus);
+  const cbRecord = useServerFn(recordCoinbaseOnramp);
+  const [cardUnlocked, setCardUnlocked] = useState(false);
+  useEffect(() => { if (session.authenticated) void cbStatus().then((r) => setCardUnlocked(r.done)).catch(() => {}); }, [session.authenticated]); // eslint-disable-line react-hooks/exhaustive-deps
   const address = session.walletAddress;
   // One tap: when the parent bumps `auto`, open checkout immediately.
   useEffect(() => { if (auto) void add(); }, [auto]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -37,7 +41,7 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   }
   function add() { setError(null); setReceipt(null); setChoosing(true); }
-  async function pay(provider: "coinbase") {
+  async function pay(provider: "coinbase" | "card") {
     setChoosing(false); setError(null);
     // Open the Coinbase tab synchronously so pop-up blockers allow it.
     const tab = provider === "coinbase" ? window.open("", "_blank") : null;
@@ -50,13 +54,16 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
         if (!r.success) { tab?.close(); throw new Error(r.error); }
         if (tab) tab.location.href = r.url; else window.location.href = r.url;
         if (starter) return;
+      } else {
+        if (!session.buyUsdc) throw new Error("Pago con tarjeta no disponible");
+        await session.buyUsdc();
       }
       setWaiting(true);
       // Watch for the purchased USDC to land (up to ~5 min) and show a receipt.
       for (let i = 0; i < 60; i++) {
         await new Promise((r) => setTimeout(r, 5000));
         const now = await balances().catch(() => null);
-        if (now && now.usdc > before.usdc) { setReceipt({ added: now.usdc - before.usdc, total: now.usdc }); void queryClient.invalidateQueries(); break; }
+        if (now && now.usdc > before.usdc) { setReceipt({ added: now.usdc - before.usdc, total: now.usdc }); void queryClient.invalidateQueries(); if (provider === "coinbase") { void cbRecord().then(() => setCardUnlocked(true)).catch(() => {}); } break; }
       }
     } catch (e) {
       const m = e instanceof Error ? e.message : String(e);
@@ -77,6 +84,11 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
           <span><span className="block font-semibold">Coinbase </span>
           <span className="text-xs text-muted-foreground">{t("Saldo de Coinbase, banco o tarjeta. Comisiones más bajas.")}</span></span>
         </button>
+        {cardUnlocked && <button type="button" onClick={() => void pay("card")} className="flex items-start gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:bg-muted">
+          <CreditCard size={24} className="mt-0.5 text-muted-foreground" />
+          <span><span className="block text-sm font-medium">{t("Tarjeta o Apple Pay")}</span>
+          <span className="text-xs text-muted-foreground">{t("Compra rápida de USDC vía MoonPay.")}</span></span>
+        </button>}
       </div>
     </DialogContent></Dialog>
     {receipt && <div role="status" className="mt-3 rounded-xl border border-primary/40 bg-primary/10 p-4 text-sm">

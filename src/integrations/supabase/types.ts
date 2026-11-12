@@ -182,6 +182,21 @@ export type Database = {
         }
         Relationships: []
       }
+      coinbase_onramps: {
+        Row: {
+          first_at: string
+          privy_user_id: string
+        }
+        Insert: {
+          first_at?: string
+          privy_user_id: string
+        }
+        Update: {
+          first_at?: string
+          privy_user_id?: string
+        }
+        Relationships: []
+      }
       email_submissions: {
         Row: {
           consent_version: string

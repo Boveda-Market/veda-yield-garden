@@ -712,4 +712,7 @@ export const extra: Record<string, string> = {
   "Enviar aviso de prueba": "Send test alert",
   "Listo: revisa tu chat con @bovedamarketbot.": "Done: check your chat with @bovedamarketbot.",
   "No pudimos enviar el aviso. Vuelve a conectar Telegram e inténtalo de nuevo.": "We couldn't send the alert. Reconnect Telegram and try again.",
+  "Tarjeta o Apple Pay": "Card or Apple Pay",
+  "Compra rápida de USDC vía MoonPay.": "Quick USDC purchase via MoonPay.",
+  "Pago con tarjeta no disponible": "Card payment unavailable",
 };
