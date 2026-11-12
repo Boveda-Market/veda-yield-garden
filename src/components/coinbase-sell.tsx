@@ -11,6 +11,9 @@ import { withdrawFee } from "@/lib/fees";
 import { holdSessionForExternalFlow } from "@/components/idle-logout";
 import { coinbaseSellStatus, startCoinbaseSell } from "@/lib/coinbase-offramp.functions";
 
+export const SELL_FLAG = "boveda:cb-sell-pending";
+export const sellFlagActive = () => { try { const v = Number(localStorage.getItem(SELL_FLAG)); return v > 0 && Date.now() - v < 45 * 60_000; } catch { return false; } };
+const clearSellFlag = () => { try { localStorage.removeItem(SELL_FLAG); } catch { /* ignore */ } };
 type Sell = { id: string; toAddress: string; amount: string; fiat: string | null };
 const fmt = (v: bigint) => (Number(v) / 1e6).toFixed(2);
 
@@ -32,13 +35,14 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
   const unhold = () => { release.current?.(); release.current = null; };
   useEffect(() => () => { if (timer.current) window.clearInterval(timer.current); release.current?.(); }, []);
   const dismissed = useRef<string | null>(null);
+  const autoSign = useRef<string | null>(null);
   const phaseRef = useRef(phase); phaseRef.current = phase;
   async function check() {
     if (phaseRef.current !== "idle" && phaseRef.current !== "waiting") return false;
     const s = await statusFn().catch(() => null);
     if (s?.success && s.sell && s.sell.id !== dismissed.current && solanaAddressSchema.safeParse(s.sell.toAddress).success && toBaseUnits(s.sell.amount, "USDC")) {
       if (timer.current) window.clearInterval(timer.current);
-      setSell(s.sell); setPhase("ready"); return true;
+      setSell(s.sell); setPhase("ready"); autoSign.current = s.sell.id; return true;
     }
     return false;
   }
@@ -52,6 +56,7 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
 
   async function open() {
     setError(null); setPhase("opening");
+    try { localStorage.setItem(SELL_FLAG, String(Date.now())); } catch { /* ignore */ }
     const popup = window.open("", "_blank");
     hold();
     const r = await startFn({ data: { wallet, origin: window.location.origin } });
@@ -73,9 +78,14 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
   async function send() {
     if (!sell || !units) return;
     setPhase("sending"); setError(null);
-    try { const s = await signAndSend(await buildTransfer({ from: wallet, to: sell.toAddress, asset: "USDC", amount: units, fee })); setSig(s); setPhase("done"); unhold(); if (fee > 0n) void reportAffiliate(s, "withdraw"); }
+    try { const s = await signAndSend(await buildTransfer({ from: wallet, to: sell.toAddress, asset: "USDC", amount: units, fee })); setSig(s); setPhase("done"); clearSellFlag(); unhold(); if (fee > 0n) void reportAffiliate(s, "withdraw"); }
     catch (e) { setError(e instanceof Error ? e.message : t("No se pudo completar la operación.")); setPhase("ready"); }
   }
+
+  // Pop the wallet signature automatically once per pending sell (review details stay visible).
+  useEffect(() => {
+    if (phase === "ready" && sell && units && !short && balance != null && autoSign.current === sell.id) { autoSign.current = null; void send(); }
+  }, [phase, sell, balance]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (phase === "done" && sig) return <div role="status" className="grid gap-2 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm"><p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} />{t("¡Listo! El dinero llegará a tu saldo de Coinbase.")}</p><a className="text-xs underline" href={`https://orbmarkets.io/tx/${sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}</a></div>;
 
@@ -90,7 +100,7 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
     {short && <p className="text-xs text-destructive">{t("Saldo insuficiente")}</p>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     <Button disabled={short || phase === "sending"} onClick={() => void send()}>{phase === "sending" ? <LoaderCircle className="animate-spin" size={16} /> : <Send size={16} />}{phase === "sending" ? t("Firma en tu wallet…") : t("Confirmar retiro")}</Button>
-    <Button variant="ghost" size="sm" disabled={phase === "sending"} onClick={() => { dismissed.current = sell.id; setSell(null); setPhase("idle"); unhold(); }}>{t("Descartar y empezar de nuevo")}</Button>
+    <Button variant="ghost" size="sm" disabled={phase === "sending"} onClick={() => { dismissed.current = sell.id; clearSellFlag(); setSell(null); setPhase("idle"); unhold(); }}>{t("Descartar y empezar de nuevo")}</Button>
   </div>;
 
   return <div className="grid gap-2">

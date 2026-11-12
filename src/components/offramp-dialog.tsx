@@ -1,10 +1,10 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Banknote, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useT } from "@/lib/i18n";
 import { CashAppBtc } from "@/components/cashapp-btc";
-import { CoinbaseSell } from "@/components/coinbase-sell";
+import { CoinbaseSell, sellFlagActive } from "@/components/coinbase-sell";
 
 type Provider = "bank" | "cashapp";
 
@@ -13,6 +13,14 @@ export function OfframpButton({ wallet, trial, trigger }: { wallet: string | nul
   const t = useT();
   const [open, setOpen] = useState(false);
   const [provider, setProvider] = useState<Provider>("bank");
+  // Coming back from Coinbase: reopen the withdraw dialog so the signature request appears on its own.
+  useEffect(() => {
+    if (trial || !wallet) return;
+    const back = () => { if (document.visibilityState === "visible" && sellFlagActive()) { setProvider("bank"); setOpen(true); } };
+    back();
+    document.addEventListener("visibilitychange", back); window.addEventListener("focus", back);
+    return () => { document.removeEventListener("visibilitychange", back); window.removeEventListener("focus", back); };
+  }, [trial, wallet]);
   const options: Record<Provider, { icon: string; label: string; perk: string }> = {
     bank: { icon: "/brands/coinbase.svg", label: "Coinbase", perk: t("A tu saldo de Coinbase · al instante") },
     cashapp: { icon: "/brands/cashapp.svg", label: "Cash App", perk: t("Se convierte a Bitcoin · 15 a 30 min") },
