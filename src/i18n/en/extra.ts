@@ -297,6 +297,7 @@ export const extra: Record<string, string> = {
   "Ganancia gratis hasta 10 créditos y cargo ficticio de 1.25% sobre el resto. Con multiplicadores tan altos, movimientos mínimos pueden hacerte perder toda la apuesta.": "Profit is free up to 10 credits, then a fictitious 1.25% on the rest. With multipliers this high, tiny moves can lose your whole stake.",
   "Reiniciar créditos de práctica": "Reset practice credits",
   "¡Ganaste!": "You won!",
+  "Canal oficial de Telegram": "Official Telegram channel",
   "Esta vez no": "Not this time",
   "Recibes {v} créditos": "You receive {v} credits",
   "cargo ficticio": "fictitious fee",
