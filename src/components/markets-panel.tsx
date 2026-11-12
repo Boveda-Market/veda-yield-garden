@@ -77,18 +77,6 @@ export function MarketsPanel(_: { identity: string }) {
         <div className="flex flex-wrap items-center gap-2"><p className="text-sm text-muted-foreground">{t("Predice el precio en rondas de 5 min, 15 min o diarias. Si aciertas, cobras al cerrar la ronda.")}</p><PredictHow /></div>
       </header>
 
-      <div className="grid grid-cols-3 gap-2" role="tablist" aria-label={t("Mercado")}>
-        {MARKETS.map((m) => {
-          const on = market === m.id, p = prices[m.id];
-          return <button key={m.id} role="tab" aria-selected={on} onClick={() => setMarket(m.id)} className={`rounded-2xl border p-2.5 text-left transition ${on ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
-            <span className="flex items-center gap-1.5 text-sm font-bold"><TokenIcon symbol={m.id} size={24} />{m.id}</span>
-            <span className="mt-1 block font-display text-sm font-semibold tabular-nums text-muted-foreground">{p ? short(p) : "—"}</span>
-          </button>;
-        })}
-      </div>
-      <div className="grid grid-cols-3 gap-1.5 rounded-2xl border border-border bg-muted p-1.5" role="tablist" aria-label={t("Duración de la ronda")}>
-        {PREDICT_WINDOWS.map((w) => <button key={w} role="tab" aria-selected={win === w} onClick={() => setWin(w)} className={`rounded-xl border py-2.5 text-sm font-bold transition ${win === w ? "border-primary bg-primary text-primary-foreground shadow-md" : "border-border bg-card text-foreground hover:border-primary/60"}`}>{t(WIN_LABEL[w])}</button>)}
-      </div>
 
       <section className="overflow-hidden rounded-3xl border border-border bg-card">
         <div className="px-5 pt-5">
@@ -108,6 +96,18 @@ export function MarketsPanel(_: { identity: string }) {
         </div>
         <div className="mt-3 pb-3"><PriceChart market={market} points={series[market]} price={price} reference={strike} referenceLabel={t("A batir")} /></div>
       </section>
+      <div className="grid grid-cols-3 gap-2" role="tablist" aria-label={t("Mercado")}>
+        {MARKETS.map((m) => {
+          const on = market === m.id, p = prices[m.id];
+          return <button key={m.id} role="tab" aria-selected={on} onClick={() => setMarket(m.id)} className={`flex items-center justify-center rounded-full border px-2 py-1.5 transition ${on ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold"><TokenIcon symbol={m.id} size={18} />{m.id}</span>
+            <span className="ml-1 font-display text-xs font-semibold tabular-nums text-muted-foreground">{p ? short(p) : "—"}</span>
+          </button>;
+        })}
+      </div>
+      <div className="grid grid-cols-3 gap-1.5 rounded-full border border-border bg-muted p-1" role="tablist" aria-label={t("Duración de la ronda")}>
+        {PREDICT_WINDOWS.map((w) => <button key={w} role="tab" aria-selected={win === w} onClick={() => setWin(w)} className={`rounded-full border py-1.5 text-sm font-bold transition ${win === w ? "border-primary bg-primary text-primary-foreground shadow-md" : "border-border bg-card text-foreground hover:border-primary/60"}`}>{t(WIN_LABEL[w])}</button>)}
+      </div>
 
       {!loaded ? <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin" size={16} />{t("Buscando rondas en vivo…")}</p>
         : !round && <div role="status" className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/10 p-3 text-sm"><Loader2 className="mt-0.5 shrink-0 animate-spin text-primary" size={16} /><p><strong>{t("Esperando la próxima ronda de {m} ({w})…", { m: name, w: WIN_LABEL[win] })}</strong><br /><span className="text-muted-foreground">{t("Abre en breve. Mientras tanto puedes probar otra duración o cripto arriba.")}</span></p></div>}
