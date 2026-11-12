@@ -244,6 +244,7 @@ export const realOps: Record<string, string> = {
   "Sale de tu wallet": "Leaves your wallet",
   "Recibes en tu banco": "You receive in your bank",
   "Confirmar retiro": "Confirm withdrawal",
+  "Descartar y empezar de nuevo": "Discard and start over",
   "Termina en Coinbase y vuelve aquí…": "Finish on Coinbase and come back…",
   "Retirar con Coinbase": "Withdraw with Coinbase",
   "Inicia sesión en Coinbase, elige tu banco o tarjeta y el monto. Luego vuelve y confirma con un toque. Sin copiar direcciones.": "Sign in to Coinbase, choose your bank or card and the amount. Then come back and confirm with one tap. No copying addresses.",

@@ -31,6 +31,23 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
   const hold = () => { release.current?.(); release.current = holdSessionForExternalFlow(); };
   const unhold = () => { release.current?.(); release.current = null; };
   useEffect(() => () => { if (timer.current) window.clearInterval(timer.current); release.current?.(); }, []);
+  const dismissed = useRef<string | null>(null);
+  const phaseRef = useRef(phase); phaseRef.current = phase;
+  async function check() {
+    if (phaseRef.current !== "idle" && phaseRef.current !== "waiting") return false;
+    const s = await statusFn().catch(() => null);
+    if (s?.success && s.sell && s.sell.id !== dismissed.current && solanaAddressSchema.safeParse(s.sell.toAddress).success && toBaseUnits(s.sell.amount, "USDC")) {
+      if (timer.current) window.clearInterval(timer.current);
+      setSell(s.sell); setPhase("ready"); return true;
+    }
+    return false;
+  }
+  useEffect(() => {
+    void check();
+    const onBack = () => { if (document.visibilityState === "visible") void check(); };
+    document.addEventListener("visibilitychange", onBack); window.addEventListener("focus", onBack);
+    return () => { document.removeEventListener("visibilitychange", onBack); window.removeEventListener("focus", onBack); };
+  }, []);
   useEffect(() => { readTokenBalance(wallet, USDC_MINT).then(setBalance).catch(() => setBalance(null)); }, [wallet, sig]);
 
   async function open() {
@@ -44,8 +61,7 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
     let n = 0;
     timer.current = window.setInterval(async () => {
       if (++n > 120) { window.clearInterval(timer.current!); unhold(); setPhase("idle"); return; }
-      const s = await statusFn().catch(() => null);
-      if (s?.success && s.sell && solanaAddressSchema.safeParse(s.sell.toAddress).success && toBaseUnits(s.sell.amount, "USDC")) { window.clearInterval(timer.current!); setSell(s.sell); setPhase("ready"); }
+      await check();
     }, 5000);
   }
 
@@ -74,6 +90,7 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
     {short && <p className="text-xs text-destructive">{t("Saldo insuficiente")}</p>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     <Button disabled={short || phase === "sending"} onClick={() => void send()}>{phase === "sending" ? <LoaderCircle className="animate-spin" size={16} /> : <Send size={16} />}{phase === "sending" ? t("Firma en tu wallet…") : t("Confirmar retiro")}</Button>
+    <Button variant="ghost" size="sm" disabled={phase === "sending"} onClick={() => { dismissed.current = sell.id; setSell(null); setPhase("idle"); unhold(); }}>{t("Descartar y empezar de nuevo")}</Button>
   </div>;
 
   return <div className="grid gap-2">
