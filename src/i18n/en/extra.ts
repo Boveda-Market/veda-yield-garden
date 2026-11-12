@@ -42,6 +42,13 @@ export const extra: Record<string, string> = {
   // Account
   "Tu perfil": "Your profile",
   "Cuenta activa": "Active account",
+  "Nivel": "Level",
+  "Tu nivel": "Your level",
+  "Según tu saldo total en BÓVEDA:": "Based on your total BÓVEDA balance:",
+  "Te faltan": "You need",
+  "para el nivel": "more to reach",
+  "y comisiones más bajas.": "and lower fees.",
+  "Tienes las comisiones más bajas de BÓVEDA.": "You have BÓVEDA's lowest fees.",
   "Copiar dirección": "Copy address",
   "Perfil": "Profile",
   "Comunicaciones oficiales": "Official updates",

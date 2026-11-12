@@ -9,6 +9,8 @@ import { defaultProfile, profileSchema, type AccountProfile } from "@/lib/accoun
 import { getAccountProfile, saveAccountProfile } from "@/lib/account-profile.functions";
 import { AccountSecuritySettings } from "./account-security";
 import { LanguageMenu } from "./language-menu";
+import { TierBadge, TierCard } from "./tier-badge";
+import { useAccountTier } from "@/hooks/use-account-tier";
 
 const avatars = [{ id: "leaf", label: "Hoja", Icon: Leaf }, { id: "sun", label: "Sol", Icon: Sun }, { id: "gem", label: "Gema", Icon: Gem }, { id: "waves", label: "Olas", Icon: Waves }] as const;
 const card = "rounded-2xl border border-border bg-card p-6";
@@ -50,6 +52,7 @@ export function AccountSettings() {
   }
   const AvatarIcon = avatars.find(a => a.id === profile.avatar)?.Icon ?? UserRound;
   const wallet = session.walletAddress;
+  const tier = useAccountTier(wallet);
   const copy = () => { if (!wallet) return; void navigator.clipboard.writeText(wallet).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }); };
 
   return <section className="mx-auto max-w-3xl space-y-6 py-8">
@@ -62,6 +65,7 @@ export function AccountSettings() {
         <p className="mt-1 break-all text-sm text-muted-foreground">{session.label}</p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"><ShieldCheck size={14} />{t("Cuenta activa")}</span>
+          {tier && <TierBadge index={tier.index} name={tier.name} />}
           {wallet && <button type="button" onClick={copy} className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 font-mono text-xs hover:bg-muted" aria-label={t("Copiar dirección")}>{wallet.slice(0, 4)}…{wallet.slice(-4)}{copied ? <Check size={12} /> : <Copy size={12} />}</button>}
         </div>
       </div>
@@ -70,6 +74,8 @@ export function AccountSettings() {
         <Button asChild variant="outline" size="sm"><Link to="/invita"><Gift size={16} />{t("Invita y gana")}</Link></Button>
       </div>
     </div>
+
+    <TierCard wallet={wallet} />
 
     <div className={card}>
       <h2 className="flex items-center gap-2 font-display text-xl font-semibold"><UserRound size={20} className="text-primary" />{t("Perfil")}</h2>
