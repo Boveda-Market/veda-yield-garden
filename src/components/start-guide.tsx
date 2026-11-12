@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, CreditCard, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
-import { autoConvertLamports, decimalToUnits, GAS_KEEP_LAMPORTS, onboardingStep, SOL_EXCESS_MIN_USD } from "@/lib/onboarding";
+import { autoConvertLamports, decimalToUnits, GAS_KEEP_LAMPORTS, onboardingStep, ACTIVATE_MIN_USD } from "@/lib/onboarding";
 import { buildSwap, quoteSwap, type SwapQuote } from "@/lib/wallet-actions";
 import { Button } from "@/components/ui/button";
 import { startCoinbaseBuy } from "@/lib/coinbase-offramp.functions";
@@ -41,7 +41,7 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   } });
   const convertible = q.data ? autoConvertLamports(q.data.sol) : 0n;
-  const preview = useQuery({ queryKey: ["auto-fund-quote", convertible.toString()], enabled: convertible > 0n && !!q.data && !busy && !receipt, staleTime: 20_000, refetchInterval: 30_000, retry: false, queryFn: () => quoteSwap("SOL", "USDC", convertible) });
+  const preview = useQuery({ queryKey: ["auto-fund-quote", convertible.toString()], enabled: convertible > 0n && !!q.data && !busy && !receipt, staleTime: 20_000, refetchInterval: 30_000, retry: 2, placeholderData: keepPreviousData, queryFn: () => quoteSwap("SOL", "USDC", convertible) });
 
   const box = `rounded-2xl border border-primary/40 bg-primary/10 p-5 ${className ?? ""}`;
   if (receipt) return <section aria-label={t("Comprobante")} className={box} role="status">
@@ -77,7 +77,7 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
 
   const quote: SwapQuote | undefined = preview.data;
   const usd = quote ? Number(quote.outAmount) / 1e6 : 0;
-  if (convertible <= 0n || (quote && usd < SOL_EXCESS_MIN_USD)) return null;
+  if (convertible <= 0n || (!quote && !preview.isError) || (quote && usd < ACTIVATE_MIN_USD)) return null;
   async function activate() {
     if (!address) return;
     setBusy(true); setError(null);

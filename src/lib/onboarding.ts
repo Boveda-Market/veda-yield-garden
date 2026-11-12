@@ -25,6 +25,8 @@ export function onboardingStep(solLamports: bigint, usdcMicro: bigint): Onboardi
 export const SOL_CONVERT_PERCENTS = [25n, 50n, 75n, 100n] as const;
 /** Minimum convertible SOL value (USD) before suggesting the conversion card. */
 export const SOL_EXCESS_MIN_USD = 5;
+/** Minimum USDC value for the one-tap "Activate my dollars" card after funding. */
+export const ACTIVATE_MIN_USD = 0.5;
 
 /** Lamports to convert for a percent of the spendable SOL (balance minus reserve); never touches the reserve. */
 export function solConvertLamports(balance: bigint, reserve: bigint, pct: bigint): bigint {
