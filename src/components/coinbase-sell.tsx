@@ -14,6 +14,9 @@ import { coinbaseSellStatus, startCoinbaseSell } from "@/lib/coinbase-offramp.fu
 export const SELL_FLAG = "boveda:cb-sell-pending";
 export const sellFlagActive = () => { try { const v = Number(localStorage.getItem(SELL_FLAG)); return v > 0 && Date.now() - v < 45 * 60_000; } catch { return false; } };
 const clearSellFlag = () => { try { localStorage.removeItem(SELL_FLAG); } catch { /* ignore */ } };
+const DISMISSED_KEY = "boveda:cb-sell-dismissed";
+const readDismissed = (): string[] => { try { const v = JSON.parse(localStorage.getItem(DISMISSED_KEY) ?? "[]"); return Array.isArray(v) ? v.filter((x) => typeof x === "string").slice(-20) : []; } catch { return []; } };
+const addDismissed = (id: string) => { try { localStorage.setItem(DISMISSED_KEY, JSON.stringify([...readDismissed().filter((x) => x !== id), id].slice(-20))); } catch { /* ignore */ } };
 type Sell = { id: string; toAddress: string; amount: string; fiat: string | null };
 const fmt = (v: bigint) => (Number(v) / 1e6).toFixed(2);
 
@@ -40,7 +43,7 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
   async function check() {
     if (phaseRef.current !== "idle" && phaseRef.current !== "waiting") return false;
     const s = await statusFn().catch(() => null);
-    if (s?.success && s.sell && s.sell.id !== dismissed.current && solanaAddressSchema.safeParse(s.sell.toAddress).success && toBaseUnits(s.sell.amount, "USDC")) {
+    if (s?.success && s.sell && s.sell.id !== dismissed.current && !readDismissed().includes(s.sell.id) && solanaAddressSchema.safeParse(s.sell.toAddress).success && toBaseUnits(s.sell.amount, "USDC")) {
       if (timer.current) window.clearInterval(timer.current);
       setSell(s.sell); setPhase("ready"); autoSign.current = s.sell.id; return true;
     }
@@ -100,7 +103,7 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
     {short && <p className="text-xs text-destructive">{t("Saldo insuficiente")}</p>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     <Button disabled={short || phase === "sending"} onClick={() => void send()}>{phase === "sending" ? <LoaderCircle className="animate-spin" size={16} /> : <Send size={16} />}{phase === "sending" ? t("Firma en tu wallet…") : t("Confirmar retiro")}</Button>
-    <Button variant="ghost" size="sm" disabled={phase === "sending"} onClick={() => { dismissed.current = sell.id; clearSellFlag(); setSell(null); setPhase("idle"); unhold(); }}>{t("Descartar y empezar de nuevo")}</Button>
+    <Button variant="ghost" size="sm" disabled={phase === "sending"} onClick={() => { dismissed.current = sell.id; addDismissed(sell.id); autoSign.current = null; if (timer.current) window.clearInterval(timer.current); clearSellFlag(); setSell(null); setError(null); setPhase("idle"); unhold(); }}>{t("Descartar y empezar de nuevo")}</Button>
   </div>;
 
   return <div className="grid gap-2">
