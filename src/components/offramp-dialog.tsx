@@ -50,8 +50,8 @@ export function OfframpButton({ wallet, trial, trigger }: { wallet: string | nul
   }
 
   const options: Record<Provider, { icon: string; label: string; perk: string }> = {
-    bank: { icon: "/brands/coinbase.svg", label: t("Banco o tarjeta"), perk: t("Llega en segundos · vía Coinbase o tu exchange") },
-    cashapp: { icon: "/brands/cashapp.svg", label: "Cash App", perk: t("Automático a Bitcoin · 15 a 30 min") },
+    bank: { icon: "/brands/coinbase.svg", label: t("Banco o tarjeta"), perk: t("Directo con Coinbase · o a tu exchange") },
+    cashapp: { icon: "/brands/cashapp.svg", label: "Cash App", perk: t("Se convierte a Bitcoin · 15 a 30 min") },
   };
   const bankSteps = [
     t("En Coinbase (o tu exchange) toca «Recibir» y elige USDC."),
@@ -62,18 +62,18 @@ export function OfframpButton({ wallet, trial, trigger }: { wallet: string | nul
   return <>
     {trigger ? trigger(() => setOpen(true)) : <Button size="sm" onClick={() => setOpen(true)}><Banknote size={16} />{t("Retirar a banco o tarjeta")}</Button>}
     <Dialog open={open} onOpenChange={(v) => { if (!busy) setOpen(v); }}><DialogContent className="max-h-[90vh] overflow-y-auto">
-      <DialogHeader><DialogTitle>{t("Retirar a banco o tarjeta")}</DialogTitle><DialogDescription>{t("Envía tus USDC a tu cuenta de exchange y desde allí pásalos a tu banco o tarjeta. BÓVEDA cobra una comisión fija del 1%.")}</DialogDescription></DialogHeader>
+      <DialogHeader><DialogTitle>{t("Retirar a banco o tarjeta")}</DialogTitle><DialogDescription>{t("Pasa tus USDC a tu banco o tarjeta con Coinbase, o conviértelos a Bitcoin para Cash App. Comisión fija del 1%, siempre visible antes de firmar.")}</DialogDescription></DialogHeader>
       <div className="grid grid-cols-2 gap-2">{(Object.keys(options) as Provider[]).map((p) => <button key={p} type="button" onClick={() => setProvider(p)} aria-pressed={provider === p} className={`flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-colors ${provider === p ? "border-primary bg-primary/10 ring-2 ring-primary" : "border-border hover:border-primary/50"}`}><img src={options[p].icon} alt="" width={28} height={28} className="h-7 w-7 rounded-md" /><span className="text-sm font-semibold">{options[p].label}</span><span className="text-xs text-muted-foreground">{options[p].perk}</span></button>)}</div>
       {provider === "bank" && <ol className="space-y-2">{bankSteps.map((s, i) => <li key={s} className="flex gap-3 text-sm"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">{i + 1}</span><span className="pt-0.5">{s}</span></li>)}</ol>}
       {provider === "bank" && <p className="text-xs text-muted-foreground">{t("¿Usas PayPal? Retira primero a Coinbase y desde allí pásalo a PayPal.")}</p>}
-      {provider === "cashapp" && <p className="flex gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs"><TriangleAlert size={14} className="mt-0.5 shrink-0 text-destructive" />{t("Cash App solo recibe Bitcoin. Aquí convertimos tus USDC automáticamente; nunca envíes USDC directo a Cash App.")}</p>}
+      {provider === "cashapp" && <p className="flex gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs"><TriangleAlert size={14} className="mt-0.5 shrink-0 text-destructive" />{t("Cash App solo recibe Bitcoin. Convertimos tus USDC por ti; nunca envíes USDC directo a Cash App.")}</p>}
       {trial ? <p role="status" className="text-sm">{t("En Prueba los créditos son ficticios y no se pueden retirar. Cambia a Real para usar esta opción.")}</p>
         : !wallet ? <p role="status" className="text-sm">{t("Conecta tu wallet para retirar.")}</p>
         : provider === "cashapp" ? <CashAppBtc wallet={wallet} />
         : sig ? <div role="status" className="grid gap-2 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm"><p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} />{t("¡Enviado! Tus USDC ya están en camino a tu exchange.")}</p><a className="text-xs underline" href={`https://orbmarkets.io/tx/${sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}</a><Button size="sm" variant="outline" onClick={() => { setSig(null); setAmount(""); setChecked(false); }}>{t("Hacer otro retiro")}</Button></div>
         : <div className="grid gap-3">
           <CoinbaseSell wallet={wallet} />
-          <p className="pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("O envía manualmente a tu exchange")}</p>
+          <p className="pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("O transfiere a tu exchange (Coinbase, Kraken, Binance)")}</p>
           <label className="grid gap-1 text-sm"><span className="font-medium">{t("Dirección USDC de tu exchange (red Solana)")}</span><div className="flex gap-2"><Input value={to} onChange={(e) => setTo(e.target.value.trim())} placeholder="Ej. 7xKX…" disabled={busy} autoComplete="off" spellCheck={false} /><Button type="button" variant="outline" size="sm" className="h-10" onClick={() => void paste()} disabled={busy}><ClipboardPaste size={16} />{t("Pegar")}</Button></div></label>
           {wrongNetwork && <p role="alert" className="flex gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-2 text-xs"><TriangleAlert size={14} className="mt-0.5 shrink-0 text-destructive" />{wrongNetwork === "evm" ? t("Esta dirección es de otra red (Ethereum/Base/Polygon). En tu exchange elige la red Solana o perderás el dinero.") : t("Esta es una dirección de Bitcoin. Para enviar a Bitcoin usa la opción Cash App.")}</p>}
           {to && !addressOk && !wrongNetwork && <p className="text-xs text-destructive">{t("Dirección no válida")}</p>}

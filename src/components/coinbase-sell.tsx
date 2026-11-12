@@ -72,8 +72,8 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
   </div>;
 
   return <div className="grid gap-2">
-    <Button onClick={() => void open()} disabled={phase === "opening" || phase === "waiting"}>{phase === "idle" ? <ExternalLink size={16} /> : <LoaderCircle className="animate-spin" size={16} />}{phase === "waiting" ? t("Termina en Coinbase y vuelve aquí…") : t("Retirar con Coinbase")}</Button>
-    <p className="text-xs text-muted-foreground">{t("Inicia sesión en Coinbase, elige tu banco o tarjeta y el monto. Luego vuelve y confirma con un toque. Sin copiar direcciones.")}</p>
+    <Button onClick={() => void open()} disabled={phase === "opening" || phase === "waiting"}>{phase === "idle" ? <ExternalLink size={16} /> : <LoaderCircle className="animate-spin" size={16} />}{phase === "waiting" ? t("Termina en Coinbase y vuelve aquí…") : t("Retirar a mi banco con Coinbase")}</Button>
+    <p className="text-xs text-muted-foreground">{t("Elige tu banco o tarjeta y el monto en Coinbase. Vuelve a BÓVEDA y confirma con un toque. Sin copiar ni pegar direcciones.")}</p>
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
   </div>;
 }

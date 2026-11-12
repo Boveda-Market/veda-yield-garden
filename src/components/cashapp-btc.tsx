@@ -86,7 +86,7 @@ export function CashAppBtc({ wallet }: { wallet: string }) {
   }
 
   return <div className="grid gap-3">
-    <p className="text-xs text-muted-foreground">{t("Convierte tus USDC a Bitcoin y lo enviamos directo a tu Cash App. Solo firmas una vez.")}</p>
+    <p className="text-xs text-muted-foreground">{t("Convertimos tus USDC a Bitcoin y lo enviamos directo a tu Cash App. Solo firmas una vez.")}</p>
     <label className="grid gap-1 text-sm"><span className="font-medium">{t("Monto en USDC")}</span><Input value={amount} onChange={(e) => setAmount(e.target.value.replace(",", "."))} inputMode="decimal" placeholder={`${BTC_OFFRAMP_MIN_USDC}.00`} disabled={busy} /></label>
     <div className="flex items-center justify-between text-xs text-muted-foreground"><span>{t("Disponible")}: {balance == null ? "…" : `${balance.toFixed(2)} USDC`}</span></div>
     <div className="grid grid-cols-4 gap-2">{[[0.25,"25%"],[0.5,"50%"],[0.75,"75%"],[1,t("Máx")]].map(([f,l]) => <Button key={String(l)} type="button" size="sm" variant="outline" disabled={busy || !balance} onClick={() => pick(f as number)}>{l}</Button>)}</div>
