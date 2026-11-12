@@ -84,7 +84,7 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
           <span><span className="block font-semibold">Coinbase </span>
           <span className="text-xs text-muted-foreground">{t("Saldo de Coinbase, banco o tarjeta. Comisiones más bajas.")}</span></span>
         </button>
-        {cardUnlocked && <button type="button" onClick={() => void pay("card")} className="flex items-start gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:bg-muted">
+        {session.buyUsdc && <button type="button" onClick={() => void pay("card")} className="flex items-start gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:bg-muted">
           <CreditCard size={24} className="mt-0.5 text-muted-foreground" />
           <span><span className="block text-sm font-medium">{t("Tarjeta o Apple Pay")}</span>
           <span className="text-xs text-muted-foreground">{t("Compra rápida de USDC vía MoonPay.")}</span></span>
