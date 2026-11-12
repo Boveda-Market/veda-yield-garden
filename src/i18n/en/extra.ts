@@ -682,4 +682,9 @@ export const extra: Record<string, string> = {
   "Esperando confirmación en Telegram…": "Waiting for confirmation in Telegram…",
   "Conectar Telegram": "Connect Telegram",
   "Se abrirá el bot oficial @bovedamarketbot: solo toca «Iniciar». No compartimos tu número.": "The official @bovedamarketbot will open: just tap \"Start\". We never share your number.",
+  "Novedades: Coinbase y alertas en Telegram": "New: Coinbase and Telegram alerts",
+  "Añade fondos y retira a tu banco con Coinbase, y recibe avisos de tus ganancias en Telegram.": "Add funds and withdraw to your bank with Coinbase, and get alerts about your earnings on Telegram.",
+  "Activar alertas": "Turn on alerts",
+  "Alertas personales en Telegram": "Personal alerts on Telegram",
+  "Conecta BÓVEDA Alertas (@bovedamarketbot) desde Tu cuenta y recibe avisos privados de cosechas, Sube/Baja, retiros y comisiones.": "Connect BÓVEDA Alertas (@bovedamarketbot) from Your account and get private alerts for harvests, Up/Down, withdrawals and commissions.",
 };

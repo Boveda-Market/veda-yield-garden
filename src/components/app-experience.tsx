@@ -24,6 +24,7 @@ import { SUPPORT_URL } from "./safety-notice";
 import { TelegramPublishAdmin } from "./telegram-publish-admin";
 import { AffiliatePayoutsAdmin } from "@/components/affiliate-payouts-admin";
 import { StayUpdated } from "./stay-updated";
+import { LaunchBanner } from "./launch-banner";
 import { TelegramAlerts } from "./telegram-alerts";
 import { SecurityGuarantees } from "./security-why";
 import { WalletPanel } from "./wallet-panel";
@@ -148,6 +149,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
 
       <main className="mx-auto max-w-5xl px-5 pb-28">
         {guest && <p className="mb-4 text-xs text-muted-foreground"><strong className="text-foreground">{t("Invitado · Prueba")}</strong> {t("· Sin dinero real")}</p>}
+        {user && !guest && <LaunchBanner />}
         {session.error && <p role="alert" className="mb-4 text-sm text-destructive">{t(session.error)}</p>}
 
         {activeView === "markets" ? <>{!identity && session.ready && <section className="mb-4 rounded-2xl border border-primary/40 bg-primary/5 p-4"><p className="font-semibold">{t("Entra para predecir con el USDC de tu wallet")}</p><div className="mt-3 grid gap-2 sm:grid-cols-3"><Button onClick={() => session.login("google")}>{t("Continuar con Google")}</Button><Button variant="secondary" onClick={() => session.login("email")}>{t("Entrar con email")}</Button><Button variant="outline" onClick={() => session.login("wallet")}>Phantom / Jupiter Wallet</Button></div></section>}<MarketsPanel identity={identity ?? "anon"} /></> : activeView === "wallet" ? <><WalletPanel /><div className="mt-10 border-t border-border"><ActivityView trial={false} wallet={session.walletAddress} rows={[]} heading="Actividad del wallet" level={2} /></div></> : activeView === "invite" ? <div className="mx-auto max-w-3xl"><AffiliatePanel /><AffiliatePayoutsAdmin /><AffiliateVipAdmin /><TelegramPublishAdmin /></div> : activeView === "account" ? <><TelegramAlerts /><StayUpdated /><section className="mb-6 rounded-2xl border border-border bg-card p-4"><h2 className="mb-3 font-display text-lg font-semibold">{t("¿Por qué tus fondos están seguros?")}</h2><SecurityGuarantees /></section><AccountSettings /></> : activeView === "activity" ? <><ActivityView trial={mode === "trial"} wallet={session.walletAddress} rows={activities} /></> : mode === "real" && !guest ? <>{activeView === "vaults" && <StayUpdated dismissible />}{activeView === "portfolio" && <PendingClaims />}<RealOverview portfolioOnly={activeView === "portfolio"} walletAddress={session.walletAddress} onDetails={setDetailsFor} /></> : user ? (
