@@ -8,6 +8,7 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { QuickSwapButton } from "@/components/quick-swap";
 import { getRealWallet } from "@/lib/solana.functions";
 import { decimalToUnits, fundingAction } from "@/lib/onboarding";
+import { startCoinbaseBuy } from "@/lib/coinbase-offramp.functions";
 
 type Receipt = { added: bigint; total: bigint };
 const usdc = (v: bigint) => (Number(v) / 1e6).toFixed(2);
@@ -21,6 +22,8 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
   const [error, setError] = useState<string | null>(null);
   const [waiting, setWaiting] = useState(false);
   const [receipt, setReceipt] = useState<Receipt | null>(null);
+  const [choosing, setChoosing] = useState(false);
+  const cbBuy = useServerFn(startCoinbaseBuy);
   const address = session.walletAddress;
   // One tap: when the parent bumps `auto`, open checkout immediately.
   useEffect(() => { if (auto) void add(); }, [auto]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -31,15 +34,26 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
     if (!r.success) throw new Error(r.error);
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   }
-  async function add() {
-    setError(null); setReceipt(null);
+  function add() { setError(null); setReceipt(null); setChoosing(true); }
+  async function pay(provider: "coinbase" | "card") {
+    setChoosing(false); setError(null);
+    // Open the Coinbase tab synchronously so pop-up blockers allow it.
+    const tab = provider === "coinbase" ? window.open("", "_blank") : null;
     try {
       const before = await balances();
-      if (fundingAction(before.sol) === "starter") { await session.buySol?.(); return; }
-      await session.buyUsdc?.();
+      const starter = fundingAction(before.sol) === "starter";
+      if (provider === "coinbase") {
+        const r = await cbBuy({ data: { wallet: address!, asset: starter ? "SOL" : "USDC", origin: window.location.origin } });
+        if (!r.success) { tab?.close(); throw new Error(r.error); }
+        if (tab) tab.location.href = r.url; else window.location.href = r.url;
+        if (starter) return;
+      } else {
+        if (starter) { await session.buySol?.(); return; }
+        await session.buyUsdc?.();
+      }
       setWaiting(true);
-      // Watch for the purchased USDC to land (up to ~3 min) and show a receipt.
-      for (let i = 0; i < 36; i++) {
+      // Watch for the purchased USDC to land (up to ~5 min) and show a receipt.
+      for (let i = 0; i < 60; i++) {
         await new Promise((r) => setTimeout(r, 5000));
         const now = await balances().catch(() => null);
         if (now && now.usdc > before.usdc) { setReceipt({ added: now.usdc - before.usdc, total: now.usdc }); void queryClient.invalidateQueries(); break; }
@@ -54,6 +68,20 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
     {auto ? waiting && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 size={16} className="animate-spin" />{t("Esperando tus dólares…")}</p> : <div className="flex flex-wrap gap-2">
       <Button onClick={() => void add()} disabled={waiting}>{waiting ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}{waiting ? t("Esperando tus dólares…") : t("Añadir fondos")}</Button>
       <QuickSwapButton />
+    </div>}
+    {choosing && <div className="mt-3 rounded-xl border border-border bg-card p-3 text-sm">
+      <p className="mb-2 font-semibold">{t("¿Cómo quieres pagar?")}</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <button type="button" onClick={() => void pay("coinbase")} className="rounded-lg border border-primary/50 bg-primary/10 p-3 text-left hover:bg-primary/20">
+          <span className="block font-semibold">Coinbase <span className="ml-1 rounded bg-primary px-1.5 py-0.5 text-[10px] text-primary-foreground">{t("Recomendado")}</span></span>
+          <span className="text-xs text-muted-foreground">{t("Saldo de Coinbase, banco o tarjeta. Comisiones más bajas.")}</span>
+        </button>
+        <button type="button" onClick={() => void pay("card")} className="rounded-lg border border-border p-3 text-left hover:bg-muted">
+          <span className="block font-semibold">{t("Tarjeta / Apple Pay")}</span>
+          <span className="text-xs text-muted-foreground">{t("Compra al instante con tarjeta, Apple Pay o Google Pay.")}</span>
+        </button>
+      </div>
+      <Button size="sm" variant="ghost" className="mt-2" onClick={() => setChoosing(false)}>{t("Cancelar")}</Button>
     </div>}
     {receipt && <div role="status" className="mt-3 rounded-xl border border-primary/40 bg-primary/10 p-4 text-sm">
       <p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} className="text-primary" />{t("¡Fondos añadidos!")}</p>
