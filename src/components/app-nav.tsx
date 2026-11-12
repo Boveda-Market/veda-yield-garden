@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, Home, History, Send } from "lucide-react";
+import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, Home, History, Send, Bell } from "lucide-react";
 import { SUPPORT_URL } from "./safety-notice";
 import { InstallAppButton } from "./install-app";
 import { useState } from "react";
@@ -60,6 +60,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
             <Link to="/invita" className={row} onClick={() => setOpen(false)}><Gift size={18} />{t("Invita y gana")}</Link>
             <SecurityWhyDialog trigger={(o) => <button type="button" className={`${row} w-full text-left`} onClick={o}><ShieldCheck size={18} />{t("¿Por qué tus fondos están seguros?")}</button>} />
             <Link to="/actividad" className={row} onClick={() => setOpen(false)}><History size={18} />{t("Actividad")}</Link>
+            <Link to="/cuenta" hash="notificaciones" className={row} onClick={() => setOpen(false)}><Bell size={18} />{t("Notificaciones")}</Link>
             <Link to="/cuenta" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Mi cuenta y seguridad")}</Link>
           </>}
           <InstallAppButton className={row} />

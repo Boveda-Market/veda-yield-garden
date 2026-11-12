@@ -8,6 +8,23 @@ import { ANNOUNCEMENTS, SEEN_KEY, latestAnnouncementId, type AnnouncementKind } 
 
 const LABEL: Record<AnnouncementKind, string> = { vault: "Nueva bóveda", market: "Nuevo mercado", policy: "Aviso legal", update: "Novedad" };
 
+/** Announcement history, shared by the bell dialog and the Notifications section. */
+export function NewsList({ onNavigate }: { onNavigate?: () => void }) {
+  const t = useT();
+  return <ul className="mt-2 space-y-3">
+    {ANNOUNCEMENTS.length === 0 && <li className="text-sm text-muted-foreground">{t("No hay novedades por ahora.")}</li>}
+    {ANNOUNCEMENTS.map((a) => <li key={a.id} className="rounded-xl border border-border bg-secondary/40 p-4">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span className="rounded-full bg-primary/15 px-2 py-0.5 font-medium text-primary">{t(LABEL[a.kind])}</span>
+        <time dateTime={a.date}>{a.date}</time>
+      </div>
+      <p className="mt-2 font-semibold">{t(a.title)}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{t(a.body)}</p>
+      {a.href && a.cta && <Link to={a.href} onClick={onNavigate} className="mt-3 inline-block text-sm font-medium text-primary">{t(a.cta)} →</Link>}
+    </li>)}
+  </ul>;
+}
+
 export function NewsBell() {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -28,18 +45,7 @@ export function NewsBell() {
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogTitle className="font-display">{t("Novedades")}</DialogTitle>
         <DialogDescription>{t("Nuevas bóvedas, mercados y cambios importantes.")}</DialogDescription>
-        <ul className="mt-2 space-y-3">
-          {ANNOUNCEMENTS.length === 0 && <li className="text-sm text-muted-foreground">{t("No hay novedades por ahora.")}</li>}
-          {ANNOUNCEMENTS.map((a) => <li key={a.id} className="rounded-xl border border-border bg-secondary/40 p-4">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span className="rounded-full bg-primary/15 px-2 py-0.5 font-medium text-primary">{t(LABEL[a.kind])}</span>
-              <time dateTime={a.date}>{a.date}</time>
-            </div>
-            <p className="mt-2 font-semibold">{t(a.title)}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{t(a.body)}</p>
-            {a.href && a.cta && <Link to={a.href} onClick={() => setOpen(false)} className="mt-3 inline-block text-sm font-medium text-primary">{t(a.cta)} →</Link>}
-          </li>)}
-        </ul>
+        <NewsList onNavigate={() => setOpen(false)} />
         <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className="mt-2 block rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground">{t("Únete a nuestro canal de Telegram para enterarte primero")}</a>
       </DialogContent>
     </Dialog>

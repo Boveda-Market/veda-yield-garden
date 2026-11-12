@@ -64,6 +64,13 @@
       "when": 1794500000001,
       "tag": "0008_telegram_alerts",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794500000002,
+      "tag": "0009_telegram_alert_kinds",
+      "breakpoints": true
     }
   ]
 }

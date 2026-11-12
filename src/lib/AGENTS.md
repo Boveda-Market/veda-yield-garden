@@ -6,4 +6,4 @@
 - Up/Down claim fee (1% of total payout) rides on the wallet-signed JupUSD→USDC conversion after the venue claim (the venue-built claim tx is never modified); affiliates are credited from that signature like any other fee.
 - Operator VIP codes (affiliate-vip-admin.tsx) are always single-use, 60–90%, gated server-side by payoutAdmin (verified treasury wallet owner).
 - Telegram: channel posts and operator alerts go server-side through the Telegram connector (telegram.server.ts); publishing is gated by payoutAdmin and alerts never block payments.
-- Personal Telegram alerts: users link via one-time t.me/bovedamarketbot?start=code (10 min) handled by /api/public/telegram/webhook (secret-token verified); telegram_links is service-role only; userAlert is best-effort and never blocks.
+- Personal Telegram alerts: users link via one-time t.me/bovedamarketbot?start=code (10 min) handled by /api/public/telegram/webhook (secret-token verified); telegram_links is service-role only; userAlert is best-effort and never blocks; each alert passes its kind (alert-kinds.ts) and is skipped when muted (all kinds on by default).

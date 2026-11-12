@@ -1,3 +1,4 @@
+import { alertAllowed, parseMuted, type AlertKind } from "./alert-kinds";
 import type { Announcement } from "./announcements";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/telegram";
@@ -31,11 +32,13 @@ export async function treasuryAlert(html: string) {
 }
 export const usdcText = (raw: bigint | number | string) => (Number(raw) / 1e6).toFixed(2);
 
-/** Personal account alert to a linked, enabled user; never throws or blocks the caller. */
-export async function userAlert(privyUserId: string, html: string) {
+/** Personal account alert to a linked, enabled user (skipped when that kind is muted); never throws or blocks the caller. */
+export async function userAlert(privyUserId: string, html: string, kind?: AlertKind) {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin.from("telegram_links").select("chat_id, alerts_enabled").eq("privy_user_id", privyUserId).maybeSingle();
-    if (data?.chat_id && data.alerts_enabled) await sendTelegram(String(data.chat_id), `${html}\n\n🛡️ BÓVEDA nunca te pedirá claves ni frases secretas.`);
+    // "*" keeps alerts working even before the muted_kinds column exists.
+    const { data } = await supabaseAdmin.from("telegram_links").select("*").eq("privy_user_id", privyUserId).maybeSingle();
+    const row = data as { chat_id: number | null; alerts_enabled: boolean; muted_kinds?: unknown } | null;
+    if (row?.chat_id && alertAllowed(row.alerts_enabled, parseMuted(row.muted_kinds), kind)) await sendTelegram(String(row.chat_id), `${html}\n\n🛡️ BÓVEDA nunca te pedirá claves ni frases secretas.`);
   } catch { /* alerts are best-effort */ }
 }

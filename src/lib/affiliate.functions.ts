@@ -166,7 +166,7 @@ export const recordAffiliateFee = createServerFn({ method: "POST" })
           fee_raw: Number(transfer.feeRaw), share_bps: subBps, commission_raw: Number(affiliateCommission(transfer.feeRaw, subBps)) });
       }
       const { error } = await db.from("affiliate_earnings").insert(rows);
-      if (!error) { const tg = await import("./telegram.server"); await tg.treasuryAlert(`💰 <b>Comisión recibida</b> (${data.kind})\nTesorería: +${tg.usdcText(transfer.feeRaw)} USDC\nAfiliados: ${rows.map((r) => `N${r.level} ${tg.usdcText(r.commission_raw)}`).join(" · ")} USDC`); for (const r of rows) await tg.userAlert(r.affiliate_privy_id, `💰 <b>¡Ganaste una comisión!</b>\nUn invitado${r.level === 2 ? " de tu red" : ""} usó BÓVEDA: +${tg.usdcText(r.commission_raw)} USDC para ti.\nCóbrala en Invita y gana.`); }
+      if (!error) { const tg = await import("./telegram.server"); await tg.treasuryAlert(`💰 <b>Comisión recibida</b> (${data.kind})\nTesorería: +${tg.usdcText(transfer.feeRaw)} USDC\nAfiliados: ${rows.map((r) => `N${r.level} ${tg.usdcText(r.commission_raw)}`).join(" · ")} USDC`); for (const r of rows) await tg.userAlert(r.affiliate_privy_id, `💰 <b>¡Ganaste una comisión!</b>\nUn invitado${r.level === 2 ? " de tu red" : ""} usó BÓVEDA: +${tg.usdcText(r.commission_raw)} USDC para ti.\nCóbrala en Invita y gana.`, "commission"); }
       return { success: !error };
     } catch { return { success: false }; }
   });
@@ -282,7 +282,7 @@ export const finalizeAffiliateClaim = createServerFn({ method: "POST" })
     for (let i = 0; i < 8 && received === null; i++) { received = await confirmedPayoutTransfer(key, data.signature, AFFILIATE_PAYOUT_WALLET, wallet); if (received === null) await new Promise((r) => setTimeout(r, 2000)); }
     if (received === null || received < owed) return { success: false, error: "Aún no vemos tu cobro confirmado en la red. Revisa tu wallet en unos minutos." };
     for (const r of locked) await db.from("affiliate_earnings").update({ payout_signature: data.signature }).eq("signature", r.signature).eq("level", r.level).eq("affiliate_privy_id", id).is("payout_signature", null);
-    { const tg = await import("./telegram.server"); await tg.treasuryAlert(`📤 <b>Afiliado cobró</b>\n${tg.usdcText(received)} USDC enviados desde la tesorería.\nhttps://solscan.io/tx/${data.signature}`); await tg.userAlert(id, `📤 <b>Cobro completado</b>\n${tg.usdcText(received)} USDC de comisiones llegaron a tu wallet.`); }
+    { const tg = await import("./telegram.server"); await tg.treasuryAlert(`📤 <b>Afiliado cobró</b>\n${tg.usdcText(received)} USDC enviados desde la tesorería.\nhttps://solscan.io/tx/${data.signature}`); await tg.userAlert(id, `📤 <b>Cobro completado</b>\n${tg.usdcText(received)} USDC de comisiones llegaron a tu wallet.`, "commission"); }
     return { success: true };
   });
 

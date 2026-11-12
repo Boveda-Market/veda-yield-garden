@@ -1,9 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { ALERT_KINDS, parseMuted, toggleMuted, type AlertKind } from "./alert-kinds";
 
 export const TELEGRAM_BOT = "bovedamarketbot";
 const req = z.object({ token: z.string().min(20).max(12000) });
-export type TelegramLinkStatus = { linked: boolean; enabled: boolean; username: string | null };
+export type TelegramLinkStatus = { linked: boolean; enabled: boolean; username: string | null; muted: AlertKind[] };
 
 async function admin(token: string) {
   const { verifiedPrivyId } = await import("./account-profile.server");
@@ -17,9 +18,10 @@ export const telegramLinkStatus = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<TelegramLinkStatus> => {
     try {
       const { id, db } = await admin(data.token);
-      const { data: row } = await db.from("telegram_links").select("chat_id, username, alerts_enabled").eq("privy_user_id", id).maybeSingle();
-      return { linked: !!row?.chat_id, enabled: row?.alerts_enabled ?? true, username: row?.username ?? null };
-    } catch { return { linked: false, enabled: false, username: null }; }
+      const { data: found } = await db.from("telegram_links").select("*").eq("privy_user_id", id).maybeSingle();
+      const row = found as { chat_id: number | null; username: string | null; alerts_enabled: boolean; muted_kinds?: unknown } | null;
+      return { linked: !!row?.chat_id, enabled: row?.alerts_enabled ?? true, username: row?.username ?? null, muted: parseMuted(row?.muted_kinds) };
+    } catch { return { linked: false, enabled: false, username: null, muted: [] }; }
   });
 
 /** One-time code (10 min) embedded in the t.me deep link; the webhook binds it to the chat. */
@@ -54,6 +56,34 @@ export const setTelegramAlerts = createServerFn({ method: "POST" })
     } catch { return { success: false }; }
   });
 
+/** Mutes or unmutes one alert kind for the caller's own link. */
+export const setTelegramAlertKind = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => req.extend({ kind: z.enum(ALERT_KINDS), on: z.boolean() }).parse(i))
+  .handler(async ({ data }): Promise<{ success: boolean }> => {
+    try {
+      const { id, db } = await admin(data.token);
+      const { data: cur } = await db.from("telegram_links").select("*").eq("privy_user_id", id).maybeSingle();
+      if (!cur) return { success: false };
+      const muted = toggleMuted(parseMuted((cur as { muted_kinds?: unknown }).muted_kinds), data.kind, data.on);
+      const { error } = await db.from("telegram_links").update({ muted_kinds: muted } as never).eq("privy_user_id", id);
+      return { success: !error };
+    } catch { return { success: false }; }
+  });
+
+/** Sends a test message to the caller's own linked chat so they can confirm alerts arrive. */
+export const sendTelegramTest = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => req.parse(i))
+  .handler(async ({ data }): Promise<{ success: boolean }> => {
+    try {
+      const { id, db } = await admin(data.token);
+      const { data: row } = await db.from("telegram_links").select("chat_id").eq("privy_user_id", id).maybeSingle();
+      if (!row?.chat_id) return { success: false };
+      const tg = await import("./telegram.server");
+      const ok = await tg.sendTelegram(String(row.chat_id), "✅ <b>Aviso de prueba</b>\nTus alertas de BÓVEDA funcionan. Aquí recibirás tus cosechas, retiros, Sube/Baja y comisiones.\n\n🛡️ BÓVEDA nunca te pedirá claves ni frases secretas.");
+      return { success: ok };
+    } catch { return { success: false }; }
+  });
+
 const ACTION_TEXT = {
   harvest: "🌾 <b>Cosecha completada</b>\nTus ganancias de la bóveda llegaron a tu wallet. Tu posición sigue abierta.",
   exit: "🏁 <b>Bóveda cerrada</b>\nTu capital y ganancias se liquidaron a USDC en tu wallet.",
@@ -69,7 +99,7 @@ export const notifyMyAction = createServerFn({ method: "POST" })
     try {
       const { id } = await admin(data.token);
       const tg = await import("./telegram.server");
-      await tg.userAlert(id, `${ACTION_TEXT[data.kind]}\n<a href="https://orbmarkets.io/tx/${data.signature}">Ver comprobante</a>`);
+      await tg.userAlert(id, `${ACTION_TEXT[data.kind]}\n<a href="https://orbmarkets.io/tx/${data.signature}">Ver comprobante</a>`, data.kind);
       return { success: true };
     } catch { return { success: false }; }
   });
