@@ -55,6 +55,13 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
         if (tab) tab.location.href = r.url; else window.location.href = r.url;
         if (starter) return;
       } else {
+        if (starter) {
+          // New wallets: buy in dollars, receive SOL for network costs; the start guide then activates the rest to USDC.
+          if (!session.buySol) throw new Error("Pago con tarjeta no disponible");
+          await session.buySol();
+          void queryClient.invalidateQueries();
+          return;
+        }
         if (!session.buyUsdc) throw new Error("Pago con tarjeta no disponible");
         await session.buyUsdc();
       }

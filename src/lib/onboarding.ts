@@ -44,6 +44,8 @@ export function unitsToDecimal(v: bigint, decimals: number): string {
 
 /** Starting SOL card purchase, preset to the card provider minimum (0.19 SOL); extra converts to USDC. */
 export const GAS_TOP_UP_SOL = "0.19";
+/** Suggested first card purchase, in US dollars (card providers require ~$20 minimum). */
+export const STARTER_USD = "20";
 
 /** SOL kept for network costs when auto-converting new funds (covers MIN_SOL_LAMPORTS plus headroom). */
 export const GAS_KEEP_LAMPORTS = 20_000_000n;
