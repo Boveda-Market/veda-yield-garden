@@ -1,5 +1,9 @@
 /** English strings for the homepage, wallet, portfolio, operation dialogs, affiliates and account redesigns. */
 export const extra: Record<string, string> = {
+  "Mantente al día con BÓVEDA": "Stay up to date with BÓVEDA",
+  "Recibe avisos oficiales de nuevas bóvedas, mercados, cambios de comisiones y alertas de seguridad.": "Get official notices about new vaults, markets, fee changes and security alerts.",
+  "Activar avisos en Telegram": "Turn on Telegram alerts",
+  "También verás cada novedad en la campanita de arriba. Nunca te escribiremos primero por privado.": "You'll also see every update in the bell above. We will never message you first in private.",
   "Retirar": "Withdraw",
   // Withdraw
   "Banco o tarjeta": "Bank or card",
