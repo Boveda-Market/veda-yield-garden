@@ -5,7 +5,7 @@ import { LiveEarnings } from "./live-earnings";
 import { useT, useLocale } from "@/lib/i18n";
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { ShieldAlert, ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, LayoutDashboard, PieChart, UserRound, Home, Gift, Zap, ArrowLeftRight } from "lucide-react";
+import { ShieldAlert, ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, LayoutDashboard, PieChart, UserRound, Home, Gift, Zap } from "lucide-react";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { demoSessionKey, readDemoSession } from "@/lib/demo-session";
 import { VAULTS, accrued, type Position, type Vault } from "@/lib/vaults";
@@ -19,6 +19,7 @@ import { canUseTrial, type AppMode } from "@/lib/app-mode";
 import { AccountSettings } from "@/components/account-settings";
 import { AffiliatePanel } from "./affiliate-panel";
 import { AffiliateVipAdmin } from "./affiliate-vip-admin";
+import { SUPPORT_URL } from "./safety-notice";
 import { TelegramPublishAdmin } from "./telegram-publish-admin";
 import { AffiliatePayoutsAdmin } from "@/components/affiliate-payouts-admin";
 import { WalletPanel } from "./wallet-panel";
@@ -138,7 +139,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground"><VaultIcon size={18} /></span>
           BÓVEDA
         </Link>
-        {user && <div className="flex items-center gap-2">{!guest && <Link to="/wallet" aria-label={t("Cambiar monedas")} title={t("Cambiar monedas")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-primary hover:bg-secondary"><ArrowLeftRight size={18} /></Link>}<ProfileMenu user={user} guest={guest} onSelect={(v) => { if (guest) setGuestView(v as typeof guestView); }} onLogout={signOut} /><button type="button" onClick={signOut} aria-label={guest ? t("Salir de la prueba") : t("Cerrar sesión")} title={guest ? t("Salir de la prueba") : t("Cerrar sesión")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-destructive hover:bg-destructive/10"><LogOut size={18} /></button></div>}
+        {user && <div className="flex items-center gap-2"><a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" aria-label="Telegram" title="Telegram" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-primary hover:bg-secondary"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden><path d="M9.78 15.27 9.6 19.3c.39 0 .56-.17.76-.37l1.83-1.75 3.79 2.78c.7.38 1.19.18 1.38-.64l2.5-11.74c.24-1.04-.39-1.45-1.07-1.2L4.1 11.98c-1 .39-.99.95-.17 1.2l3.76 1.17 8.72-5.5c.41-.25.79-.11.48.17z"/></svg></a><ProfileMenu user={user} guest={guest} onSelect={(v) => { if (guest) setGuestView(v as typeof guestView); }} onLogout={signOut} /><button type="button" onClick={signOut} aria-label={guest ? t("Salir de la prueba") : t("Cerrar sesión")} title={guest ? t("Salir de la prueba") : t("Cerrar sesión")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-destructive hover:bg-destructive/10"><LogOut size={18} /></button></div>}
       </header>
 
       <main className="mx-auto max-w-5xl px-5 pb-28">
