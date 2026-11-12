@@ -1,10 +1,11 @@
 import { useT } from "@/lib/i18n";
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { lazyWithReload } from "@/lib/lazy-reload";
 import { Button } from "./ui/button";
 import { portfolioHistoryKey, readBalancePoints, recordBalance, periodStart, type BalancePoint, type PortfolioPeriod } from "@/lib/portfolio";
 import type { RealWalletData } from "@/lib/solana-data";
 import { MeteoraPortfolio } from "./meteora-portfolio";
-const PortfolioChart = lazy(() => import("./portfolio-chart").then((module) => ({ default: module.PortfolioChart })));
+const PortfolioChart = lazyWithReload(() => import("./portfolio-chart").then((module) => ({ default: module.PortfolioChart })));
 
 export function RealPortfolioPanel({ data, wallet }: { data: RealWalletData | null; wallet: string | null }) {
   const t = useT();

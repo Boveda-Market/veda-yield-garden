@@ -16,6 +16,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { isChunkLoadError, reloadForNewVersion } from "../lib/lazy-reload";
 import { LanguageProvider } from "../lib/i18n";
 import { LanguageMenu } from "../components/language-menu";
 import { REF_STORAGE_KEY, normalizeCode } from "../lib/affiliate";
@@ -46,6 +47,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
+    if (isChunkLoadError(error) && reloadForNewVersion()) return;
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
@@ -132,6 +134,12 @@ function RootComponent() {
   useEffect(() => {
     const code = normalizeCode(new URLSearchParams(window.location.search).get("ref"));
     if (code) localStorage.setItem(REF_STORAGE_KEY, code);
+  }, []);
+  useEffect(() => {
+    // After an app update, old pages may request files that no longer exist: refresh once to get the new version.
+    const onPreloadError = (event: Event) => { if (reloadForNewVersion()) event.preventDefault(); };
+    window.addEventListener("vite:preloadError", onPreloadError);
+    return () => window.removeEventListener("vite:preloadError", onPreloadError);
   }, []);
 
   return (

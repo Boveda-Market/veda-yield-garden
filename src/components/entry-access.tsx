@@ -1,11 +1,12 @@
 import { useT } from "@/lib/i18n";
-import { lazy, Suspense, useState } from "react";
+import { Suspense, useState } from "react";
+import { lazyWithReload } from "@/lib/lazy-reload";
 import { ClientOnly, Link } from "@tanstack/react-router";
 import { Wallet, ArrowRight, Fingerprint } from "lucide-react";
 import { Button } from "./ui/button";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { SafetyNotice } from "./safety-notice";
-const PrivyAccess = lazy(() => import("./privy-access"));
+const PrivyAccess = lazyWithReload(() => import("./privy-access"));
 
 function EntryButtons() {
   const t = useT();

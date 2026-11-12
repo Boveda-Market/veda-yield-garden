@@ -1,5 +1,6 @@
 import { useT, useLocale } from "@/lib/i18n";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { lazyWithReload } from "@/lib/lazy-reload";
 import { ArrowDownToLine, ChartNoAxesCombined, History, PieChart } from "lucide-react";
 import { Button } from "./ui/button";
 import { ActivityView } from "./activity-view";
@@ -7,7 +8,7 @@ import { portfolioHistoryKey, readBalancePoints, recordBalance, trialPortfolioMe
 import { trialHarvestSummary, type TrialActivity } from "@/lib/trial-activity";
 import { VAULTS, type Position } from "@/lib/vaults";
 
-const PortfolioChart = lazy(() => import("./portfolio-chart").then((module) => ({ default: module.PortfolioChart })));
+const PortfolioChart = lazyWithReload(() => import("./portfolio-chart").then((module) => ({ default: module.PortfolioChart })));
 function Metric({ label, value, note, loss = false }: { label: string; value: string; note: string; loss?: boolean }) {
   const t = useT();
   return <div className="min-w-0 border-b border-border py-5"><p className="text-xs text-muted-foreground">{t(label)}</p><p className={`mt-2 break-words font-display text-xl font-semibold ${loss ? "text-destructive" : "text-foreground"}`}>{value}</p><p className="mt-2 text-xs leading-5 text-muted-foreground">{note}</p></div>;

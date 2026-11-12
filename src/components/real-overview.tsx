@@ -7,7 +7,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { VAULTS, type Vault } from "@/lib/vaults";
 import { getRealWallet } from "@/lib/solana.functions";
-import { lazy, Suspense, useState } from "react";
+import { Suspense, useState } from "react";
+import { lazyWithReload } from "@/lib/lazy-reload";
 import { DepositSimulation } from "@/components/deposit-simulation";
 import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
 import { PoolYield } from "@/components/pool-yield";
@@ -18,7 +19,7 @@ import { StartGuide } from "@/components/start-guide";
 import { VaultSteps } from "@/components/vault-steps";
 import { OpenPredictions, useOpenPredictions } from "@/components/open-predictions";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-const RealPortfolioPanel = lazy(() => import("./real-portfolio-panel").then((module) => ({ default: module.RealPortfolioPanel })));
+const RealPortfolioPanel = lazyWithReload(() => import("./real-portfolio-panel").then((module) => ({ default: module.RealPortfolioPanel })));
 
 export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }: { walletAddress: string | null; onDetails: (vault: Vault) => void; portfolioOnly?: boolean }) {
   const t = useT();

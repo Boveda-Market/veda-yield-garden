@@ -56,3 +56,5 @@ use the editor.
 - Revalidate SDK-discovered position NFT accounts with shared live mint/owner/amount/program checks before composing harvest or liquidation; only the wallet signs and post-confirmation refresh includes portfolio history.
 - Credit affiliates automatically after confirmation, server-side, from the fee-wallet USDC delta paid by a wallet the referred account proved by fresh signed message (one wallet, one account); unique signatures, manual payouts.
 - Compute limit = simulated units +25%, low fixed priority (compute-budget.ts).
+
+- Lazy-loaded components use lazyWithReload (src/lib/lazy-reload.ts) and the root listens for vite:preloadError: stale chunks after a new build trigger one guarded reload instead of a blank screen.

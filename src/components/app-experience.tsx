@@ -4,7 +4,8 @@ import { TokenIcon } from "@/components/token-icon";
 import { LiveEarnings } from "./live-earnings";
 import { useT, useLocale } from "@/lib/i18n";
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { lazyWithReload } from "@/lib/lazy-reload";
 import { ShieldAlert, ArrowDownToLine, LogOut, Sprout, Vault as VaultIcon, Wallet, LayoutDashboard, PieChart, UserRound, Home, Gift, Zap } from "lucide-react";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { demoSessionKey, readDemoSession } from "@/lib/demo-session";
@@ -32,9 +33,9 @@ import { ActivityView } from "@/components/activity-view";
 import { guestDemoKey, readTrialActivity, trialActivityKey, trialHarvestSummary, type TrialActivity } from "@/lib/trial-activity";
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-const PortfolioPanel = lazy(() => import("@/components/portfolio-panel").then((module) => ({ default: module.PortfolioPanel })));
+const PortfolioPanel = lazyWithReload(() => import("@/components/portfolio-panel").then((module) => ({ default: module.PortfolioPanel })));
 
-const PrivyAccess = lazy(() => import("@/components/privy-access"));
+const PrivyAccess = lazyWithReload(() => import("@/components/privy-access"));
 
 function AccessLoading() {
   const t = useT();
