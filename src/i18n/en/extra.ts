@@ -637,4 +637,11 @@ export const extra: Record<string, string> = {
   "Depósitos, cosechas, cierres y retiros tienen 1%. Cambios, envíos y entradas a Sube/Baja son gratis.": "Deposits, harvests, exits and withdrawals are 1%. Swaps, transfers and Up/Down entries are free.",
   "Ver términos": "View terms",
   "Únete a nuestro canal de Telegram para enterarte primero": "Join our Telegram channel to hear first",
+  "¿Publicar este aviso en el canal de Telegram?": "Post this update to the Telegram channel?",
+  "Publicado en Telegram": "Posted to Telegram",
+  "No se pudo publicar.": "Could not post.",
+  "Canal de Telegram": "Telegram channel",
+  "Publica las novedades del app en @bovedaappsupport.": "Post app updates to @bovedaappsupport.",
+  "Enviando…": "Sending…",
+  "Publicar": "Post",
 };

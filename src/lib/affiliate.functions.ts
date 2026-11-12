@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { AFFILIATE_SHARE_BPS, subAffiliateShare, affiliateCommission, affiliateRequest, customizeCodeRequest, joinRequest, payoutRequest, recordRequest, type AffiliateDashboard, payoutAdminRequest, markPaidRequest, payoutsDue, type PayoutDue, type PayoutRecent, claimRequest, claimFinalizeRequest, claimNet, type AffiliateKind, createVipCodeRequest, toggleVipCodeRequest, updateVipCodeRequest, deleteVipCodeRequest, setAffiliateShareRequest, VIP_CODE_MAX_USES, type VipCode, type AffiliateRow } from "./affiliate";
 import { proofIsFresh, walletProofMessage, walletProofRequest } from "./wallet-proof";
 
@@ -165,6 +166,7 @@ export const recordAffiliateFee = createServerFn({ method: "POST" })
           fee_raw: Number(transfer.feeRaw), share_bps: subBps, commission_raw: Number(affiliateCommission(transfer.feeRaw, subBps)) });
       }
       const { error } = await db.from("affiliate_earnings").insert(rows);
+      if (!error) { const tg = await import("./telegram.server"); await tg.treasuryAlert(`💰 <b>Comisión recibida</b> (${data.kind})\nTesorería: +${tg.usdcText(transfer.feeRaw)} USDC\nAfiliados: ${rows.map((r) => `N${r.level} ${tg.usdcText(r.commission_raw)}`).join(" · ")} USDC`); }
       return { success: !error };
     } catch { return { success: false }; }
   });
@@ -280,6 +282,7 @@ export const finalizeAffiliateClaim = createServerFn({ method: "POST" })
     for (let i = 0; i < 8 && received === null; i++) { received = await confirmedPayoutTransfer(key, data.signature, AFFILIATE_PAYOUT_WALLET, wallet); if (received === null) await new Promise((r) => setTimeout(r, 2000)); }
     if (received === null || received < owed) return { success: false, error: "Aún no vemos tu cobro confirmado en la red. Revisa tu wallet en unos minutos." };
     for (const r of locked) await db.from("affiliate_earnings").update({ payout_signature: data.signature }).eq("signature", r.signature).eq("level", r.level).eq("affiliate_privy_id", id).is("payout_signature", null);
+    { const tg = await import("./telegram.server"); await tg.treasuryAlert(`📤 <b>Afiliado cobró</b>\n${tg.usdcText(received)} USDC enviados desde la tesorería.\nhttps://solscan.io/tx/${data.signature}`); }
     return { success: true };
   });
 
@@ -385,4 +388,16 @@ export const setAffiliateShare = createServerFn({ method: "POST" })
       if (error || !rows?.length) return { success: false, error: "No se pudo actualizar la comisión." };
       return { success: true };
     } catch { return { success: false, error: "No se pudo actualizar la comisión." }; }
+  });
+
+/** Operator-only: posts one in-app announcement to the official Telegram channel. */
+export const publishAnnouncementToTelegram = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => z.object({ token: z.string().min(1).max(4096), id: z.string().min(1).max(80) }).strict().parse(input))
+  .handler(async ({ data }): Promise<{ success: true } | Fail> => {
+    try { await payoutAdmin(data.token); } catch { return { success: false, error: "Solo la wallet de tesorería verificada puede publicar." }; }
+    const { ANNOUNCEMENTS } = await import("./announcements");
+    const a = ANNOUNCEMENTS.find((x) => x.id === data.id);
+    if (!a) return { success: false, error: "Aviso no encontrado." };
+    const tg = await import("./telegram.server");
+    return (await tg.sendTelegram(tg.TELEGRAM_CHANNEL, tg.announcementPost(a))) ? { success: true } : { success: false, error: "Telegram no aceptó el mensaje. Revisa que el bot sea administrador del canal." };
   });
