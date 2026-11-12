@@ -3,9 +3,9 @@ import { Link } from "@tanstack/react-router";
 import { ArrowDownToLine, Plus, Repeat, Copy, ExternalLink, Sprout, Vault as VaultIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
-import { fetchPoolStats } from "@/lib/pool-stats";
 import { VAULTS } from "@/lib/vaults";
-import { estimateUsd, formatUsd } from "@/lib/position-value";
+import { formatUsd } from "@/lib/position-value";
+import { usePositionRows } from "@/hooks/use-position-rows";
 import type { ChainPosition } from "@/lib/solana-data";
 import { Button } from "./ui/button";
 import { useMemo } from "react";
@@ -17,25 +17,15 @@ import { bestUpgrade, breakEvenDays } from "@/lib/migrate";
 import type { Vault } from "@/lib/vaults";
 import { Zap } from "lucide-react";
 
-export function RealPositions({ positions, onAction, onDeposit, onMigrate }: { positions: ChainPosition[]; onAction: (p: ChainPosition, a: "harvest" | "exit" | "compound") => void; onDeposit?: (p: ChainPosition) => void; onMigrate?: (p: ChainPosition, target: Vault) => void }) {
+export function RealPositions({ positions, onAction, onDeposit, onMigrate, showHarvestBanner = true }: { positions: ChainPosition[]; onAction: (p: ChainPosition, a: "harvest" | "exit" | "compound") => void; onDeposit?: (p: ChainPosition) => void; onMigrate?: (p: ChainPosition, target: Vault) => void; showHarvestBanner?: boolean }) {
   const t = useT();
-  const pools = positions.map((p) => VAULTS.find((v) => v.id === p.vaultId)?.pool ?? null);
-  const stats = useQueries({ queries: pools.map((pool) => ({ queryKey: ["dexscreener-pool-stats", pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(pool as string, signal), enabled: Boolean(pool), staleTime: 60_000, retry: 1 })) });
-  const yields = useQueries({ queries: pools.map((pool) => ({ ...poolYieldOptions(pool ?? ""), enabled: Boolean(pool) })) });
+  const { rows, totalFees, top } = usePositionRows(positions);
   const vaultYields = useQueries({ queries: VAULTS.map((v) => poolYieldOptions(v.pool)) });
   const aprs = Object.fromEntries(VAULTS.map((v, i) => [v.id, vaultYields[i]?.data?.apr ?? null]));
   const since = useMemo(() => Date.now(), [positions]);
-  const rows = positions.map((p, i) => {
-    const s = stats[i]?.data;
-    const price = s && s.baseSymbol.toUpperCase().includes(p.symbol.toUpperCase()) ? s.price : null;
-    return { p, value: estimateUsd(p.tokenAmount, p.usdcAmount, price), fees: estimateUsd(p.feeTokenAmount, p.feeUsdcAmount, price), apr: yields[i]?.data?.apr ?? null };
-  });
-  const ready = rows.filter((r) => r.fees !== null && r.fees > 0 && (r.p.vaultId === "sol" || r.p.vaultId === "met"));
-  const totalFees = ready.reduce((sum, r) => sum + (r.fees ?? 0), 0);
-  const top = [...ready].sort((a, b) => (b.fees ?? 0) - (a.fees ?? 0))[0];
   const copy = (address: string) => { void navigator.clipboard?.writeText(address).then(() => toast.success(t("Identificador copiado"))); };
   return <section aria-label={t("Posiciones reales")} className="border-b border-border py-8">
-    {top && <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-primary/40 bg-primary/10 p-5"><div><p className="text-sm text-muted-foreground">{t("Ganancias listas para cosechar")}</p><p className="mt-1 font-display text-2xl font-semibold text-primary">≈ {formatUsd(totalFees)}</p><p className="mt-1 text-xs text-muted-foreground">{t("Envíalas a tu wallet sin tocar tu depósito.")}</p></div><Button onClick={() => onAction(top.p, "harvest")}><Sprout size={16} />{t("Cosechar ahora")}</Button></div>}
+    {showHarvestBanner && top && <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-primary/40 bg-primary/10 p-5"><div><p className="text-sm text-muted-foreground">{t("Ganancias listas para cosechar")}</p><p className="mt-1 font-display text-2xl font-semibold text-primary">≈ {formatUsd(totalFees)}</p><p className="mt-1 text-xs text-muted-foreground">{t("Envíalas a tu wallet sin tocar tu depósito.")}</p></div><Button onClick={() => onAction(top.p, "harvest")}><Sprout size={16} />{t("Cosechar ahora")}</Button></div>}
     <h2 className="font-display text-lg font-semibold">{t("Mis posiciones")}</h2>
     <div className="mt-4 grid gap-4 md:grid-cols-2">{rows.map(({ p, value, fees, apr }) => {
       const vault = VAULTS.find((v) => v.id === p.vaultId);
@@ -45,14 +35,12 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate }: { p
         <p className="mt-4 text-xs text-muted-foreground">{t("Valor estimado")}</p>
         <p className="font-display text-3xl font-semibold">{value === null ? t("No disponible") : `≈ ${formatUsd(value)}`}</p>
         <p className="mt-1 break-all text-xs text-muted-foreground">{p.tokenAmount === null ? "" : `${p.tokenAmount} ${p.symbol} + ${p.usdcAmount} USDC`}</p>
-        {apr !== null && !p.locked && <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-          <div className="rounded-md border border-border bg-muted/40 p-2"><p className="text-muted-foreground">{t("Tasa estimada (24h)")}</p><p className="mt-0.5 font-display text-base font-semibold tabular-nums text-primary">{apr.toFixed(2)}% APR</p><p className="tabular-nums text-muted-foreground">≈ +{(apr / 365).toFixed(3)}% / {t("día")}</p></div>
-          <div className="rounded-md border border-border bg-muted/40 p-2"><p className="text-muted-foreground">{t("Estimado próximas 24h")}</p><p className="mt-0.5 font-display text-base font-semibold tabular-nums text-primary">{value === null ? "—" : `≈ +$${(value * apr / 36500).toFixed(2)}`}</p><p className="text-muted-foreground">{t("con el ritmo reciente")}</p></div>
-        </div>}
+        {apr !== null && !p.locked && <p className="mt-3 text-xs tabular-nums text-muted-foreground"><span className="font-semibold text-primary">{apr.toFixed(2)}% APR</span> {t("estimado (24h)")} · {value === null ? "—" : `≈ +$${(value * apr / 36500).toFixed(2)}`} {t("próximas 24h")}</p>}
         {fees !== null && <LiveEarnings base={fees} ratePerMs={p.locked ? 0 : earningRatePerMs(value, apr)} since={since} label={t("Ganancias por cosechar · estimado en vivo")} />}
         {p.locked && <p className="mt-2 text-xs text-muted-foreground">{t("Incluye liquidez bloqueada; no toda la posición es retirable.")}</p>}
-        {(() => { const up = onMigrate && !p.locked && (p.vaultId === "sol" || p.vaultId === "met") ? bestUpgrade(p.vaultId, aprs) : null; const target = up ? VAULTS.find((v) => v.id === up.id) : null; if (!up || !target) return null; const days = breakEvenDays(up.gain); return <div className="mt-4 rounded-lg border border-primary/40 bg-primary/10 p-3"><p className="text-sm font-semibold">{t("{v} rinde +{g}% APR más ahora", { v: t(target.name), g: up.gain.toFixed(1) })}</p><p className="mt-1 text-xs text-muted-foreground">{t("Mueve todo (depósito y ganancias) en un toque. Comisión 1% al salir + 1% al depositar; se recupera en ≈ {d} días al ritmo actual.", { d: String(days ?? "—") })}</p><Button className="mt-2 w-full" onClick={() => onMigrate?.(p, target)}><Zap size={16} />{t("Mover a mayor APR")}</Button></div>; })()}
-        <div className="mt-4 flex flex-wrap gap-2">{onDeposit && (p.vaultId === "sol" || p.vaultId === "met") && <Button onClick={() => onDeposit(p)}><Plus size={16} />{t("Depositar más")}</Button>}<Button variant="secondary" onClick={() => onAction(p, "harvest")}><Sprout size={16} />{t("Cosechar Ganancias")}</Button><Button variant="secondary" onClick={() => onAction(p, "compound")}><Repeat size={16} />{t("Cosechar y reinvertir todo")}</Button><Button variant="outline" onClick={() => onAction(p, "exit")}><ArrowDownToLine size={16} />{t("Retirar o liquidar")}</Button></div>
+        {(() => { const up = onMigrate && !p.locked && (p.vaultId === "sol" || p.vaultId === "met") ? bestUpgrade(p.vaultId, aprs) : null; const target = up ? VAULTS.find((v) => v.id === up.id) : null; if (!up || !target) return null; const days = breakEvenDays(up.gain); return <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2"><p className="text-xs" title={t("Mueve todo (depósito y ganancias) en un toque. Comisión 1% al salir + 1% al depositar; se recupera en ≈ {d} días al ritmo actual.", { d: String(days ?? "—") })}><Zap size={12} className="mr-1 inline text-primary" />{t("{v} rinde +{g}% APR más ahora", { v: t(target.name), g: up.gain.toFixed(1) })}</p><Button size="sm" variant="ghost" onClick={() => onMigrate?.(p, target)}>{t("Mover a mayor APR")}</Button></div>; })()}
+        <Button className="mt-4 w-full" onClick={() => onAction(p, "harvest")}><Sprout size={16} />{t("Cosechar Ganancias")}</Button>
+        <div className="mt-2 grid grid-cols-2 gap-2">{onDeposit && (p.vaultId === "sol" || p.vaultId === "met") && <Button size="sm" variant="secondary" onClick={() => onDeposit(p)}><Plus size={14} />{t("Depositar más")}</Button>}<Button size="sm" variant="secondary" onClick={() => onAction(p, "compound")}><Repeat size={14} />{t("Cosechar y reinvertir todo")}</Button><Button size="sm" variant="outline" className="col-span-2" onClick={() => onAction(p, "exit")}><ArrowDownToLine size={14} />{t("Retirar o liquidar")}</Button></div>
         {p.vaultId !== "sol" && p.vaultId !== "met" && <p className="mt-3 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
       </article>;
     })}</div>

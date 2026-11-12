@@ -19,6 +19,7 @@ import { StartGuide } from "@/components/start-guide";
 import { VaultSteps } from "@/components/vault-steps";
 import { OpenPredictions, useOpenPredictions } from "@/components/open-predictions";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+const PortfolioSummary = lazyWithReload(() => import("./portfolio-summary").then((module) => ({ default: module.PortfolioSummary })));
 const RealPortfolioPanel = lazyWithReload(() => import("./real-portfolio-panel").then((module) => ({ default: module.RealPortfolioPanel })));
 
 export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }: { walletAddress: string | null; onDetails: (vault: Vault) => void; portfolioOnly?: boolean }) {
@@ -53,25 +54,33 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   });
   const data = query.data?.success ? query.data.data : null;
   const unavailable = query.isFetching ? t("Consultando…") : t("No disponible");
-  return <>
-    <section aria-label={t("Estado del modo Real")} className="border-y border-border py-8">
-      <div className="flex items-center gap-3"><ShieldAlert className="shrink-0 text-primary" size={24} /><h1 className="font-display text-2xl font-semibold">{portfolioOnly ? t("Tu portafolio") : t("Bóvedas")}</h1></div>
-      {!portfolioOnly && <VaultSteps className="mt-4" />}
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-foreground/80">{t("Deposita entre 1 y 10,000 USDC en las bóvedas SOL y MET. Cosecha comisiones o liquida tus posiciones compatibles de SOL y MET, revisando los importes antes de firmar. Las posiciones bloqueadas no se pueden liquidar.")}</p>
-      {walletAddress && <div className="mt-4 flex flex-wrap items-center gap-3"><p className="min-w-0 break-all text-xs text-muted-foreground">{t("Wallet conectada:")}{" "}{walletAddress}</p><Button variant="outline" size="icon" title={t("Actualizar saldo y posiciones")} aria-label={t("Actualizar saldo y posiciones")} disabled={query.isFetching} onClick={() => void query.refetch()}><RefreshCw size={16} className={query.isFetching ? "animate-spin motion-reduce:animate-none" : ""} /></Button></div>}
-      {!portfolioOnly && <StartGuide className="mt-4" />}
-      <BuyUsdc className="mt-4" />
-      {query.data && !query.data.success && <p role="alert" className="mt-3 text-sm text-destructive">{query.data.error}</p>}
+  const predictionsMicro = predictions.items.every((x) => x.valueMicro !== null) ? predictions.items.reduce((sum, x) => sum + BigInt(x.valueMicro ?? "0"), 0n) : null;
+  const refresh = walletAddress && <Button variant="outline" size="icon" title={data ? `${t("Actualizar saldo y posiciones")} · ${t("Lectura confirmada en la red ·")} ${new Date(data.checkedAt).toLocaleTimeString("es-MX")}` : t("Actualizar saldo y posiciones")} aria-label={t("Actualizar saldo y posiciones")} disabled={query.isFetching} onClick={() => void query.refetch()}><RefreshCw size={16} className={query.isFetching ? "animate-spin motion-reduce:animate-none" : ""} /></Button>;
+  const errors = <>{query.data && !query.data.success && <p role="alert" className="mt-3 text-sm text-destructive">{query.data.error}</p>}
       {query.isError && <p role="alert" className="mt-3 text-sm text-destructive">{t("No se pudo consultar la red. Inténtalo de nuevo.")}</p>}
+      {data && !data.positionsComplete && <p role="status" className="mt-3 text-sm text-muted-foreground">{t("La consulta de posiciones está incompleta. No se puede concluir que no tengas posiciones.")}</p>}</>;
+  return <>
+    {portfolioOnly ? <section aria-label={t("Resumen del portafolio")} className="border-y border-border py-8">
+      <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Tu portafolio")}</h1>{refresh}</div>
+      {!walletAddress && <p className="mt-3 text-sm text-muted-foreground">{t("Conecta tu wallet para ver tu portafolio.")}</p>}
+      {errors}
+      {walletAddress && <Suspense fallback={<div className="mt-6 h-28" />}><PortfolioSummary wallet={walletAddress} positions={data?.positions ?? []} positionsComplete={Boolean(data?.positionsComplete)} predictionsMicro={predictionsMicro} onHarvest={(p) => openPositionAction(p, "harvest")} /></Suspense>}
+    </section> : <section aria-label={t("Estado del modo Real")} className="border-y border-border py-8">
+      <div className="flex items-center gap-3"><ShieldAlert className="shrink-0 text-primary" size={24} /><h1 className="font-display text-2xl font-semibold">{t("Bóvedas")}</h1></div>
+      <VaultSteps className="mt-4" />
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-foreground/80">{t("Deposita entre 1 y 10,000 USDC en las bóvedas SOL y MET. Cosecha comisiones o liquida tus posiciones compatibles de SOL y MET, revisando los importes antes de firmar. Las posiciones bloqueadas no se pueden liquidar.")}</p>
+      {walletAddress && <div className="mt-4 flex flex-wrap items-center gap-3"><p className="min-w-0 break-all text-xs text-muted-foreground">{t("Wallet conectada:")}{" "}{walletAddress}</p>{refresh}</div>}
+      <StartGuide className="mt-4" />
+      <BuyUsdc className="mt-4" />
+      {errors}
       <dl className="mt-6 grid gap-5">
         <div><dt className="text-sm text-muted-foreground">{t("Posiciones en estos pools")}</dt><dd className="mt-1 font-display text-xl">{data?.positionsComplete ? data.positions.length : walletAddress ? unavailable : t("Conecta tu wallet")}</dd></div>
       </dl>
       {data && <p className="mt-4 text-xs text-muted-foreground">{t("Lectura confirmada en la red ·")}{" "}{new Date(data.checkedAt).toLocaleTimeString("es-MX")} {t("· no autoriza movimientos")}</p>}
-      {data && !data.positionsComplete && <p role="status" className="mt-3 text-sm text-muted-foreground">{t("La consulta de posiciones está incompleta. No se puede concluir que no tengas posiciones.")}</p>}
-    </section>
+    </section>}
     {portfolioOnly && (() => { const nv = data?.positions.length ?? 0, np = predictions.items.length; const tabs = [{ id: "all", label: t("Todas"), n: nv + np }, { id: "vaults", label: t("Bóvedas"), n: nv }, { id: "predict", label: t("Sube / Baja"), n: np }] as const; return <div role="tablist" aria-label={t("Posiciones abiertas")} className="mt-8 flex gap-2 overflow-x-auto">{tabs.map((x) => <button key={x.id} role="tab" aria-selected={tab === x.id} onClick={() => setTab(x.id)} className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${tab === x.id ? "border-primary bg-primary text-primary-foreground shadow-md" : "border-border bg-card text-foreground hover:bg-secondary"}`}>{x.label}<span className={`rounded-full px-2 text-xs ${tab === x.id ? "bg-primary-foreground/20" : "bg-muted"}`}>{x.n}</span></button>)}</div>; })()}
     {portfolioOnly && tab !== "vaults" && <section aria-label={t("Predicciones abiertas")} className="border-b border-border py-8"><h2 className="mb-4 font-display text-lg font-semibold">{t("Predicciones abiertas")}</h2><OpenPredictions state={predictions} /></section>}
-    {portfolioOnly && tab !== "predict" && data && data.positions.length > 0 && <RealPositions positions={data.positions} onAction={openPositionAction} onMigrate={migrate} onDeposit={(p) => { const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) { setAddTo(p.address); setSimulationVault(v); } }} />}
+    {portfolioOnly && tab !== "predict" && data && data.positions.length > 0 && <RealPositions showHarvestBanner={false} positions={data.positions} onAction={openPositionAction} onMigrate={migrate} onDeposit={(p) => { const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) { setAddTo(p.address); setSimulationVault(v); } }} />}
     {portfolioOnly && <Suspense fallback={<p role="status">{t("Cargando portafolio…")}</p>}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
     {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && tab !== "predict" && <PortfolioEmpty />}
     {!portfolioOnly && data && data.positions.length > 0 && <RealPositions positions={data.positions} onAction={openPositionAction} onMigrate={migrate} onDeposit={(p) => { const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) { setAddTo(p.address); setSimulationVault(v); } }} />}
