@@ -7,7 +7,7 @@ import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
 import { solanaAddressSchema } from "@/lib/solana-data";
 import { USDC_MINT, buildTransfer, readTokenBalance, toBaseUnits } from "@/lib/wallet-actions";
-import { withdrawFee } from "@/lib/fees";
+import { tierPercent, withdrawFee } from "@/lib/fees";
 import { holdSessionForExternalFlow } from "@/components/idle-logout";
 import { coinbaseSellStatus, startCoinbaseSell } from "@/lib/coinbase-offramp.functions";
 
@@ -20,7 +20,7 @@ const addDismissed = (id: string) => { try { localStorage.setItem(DISMISSED_KEY,
 type Sell = { id: string; toAddress: string; amount: string; fiat: string | null };
 const fmt = (v: bigint) => (Number(v) / 1e6).toFixed(2);
 
-/** Coinbase-hosted sell: user picks bank/card at Coinbase, then signs one USDC transfer (+1% fee) to Coinbase's deposit address. */
+/** Coinbase-hosted sell: user picks bank/card at Coinbase, then signs one USDC transfer (+tiered fee) to Coinbase's deposit address. */
 export function CoinbaseSell({ wallet }: { wallet: string }) {
   const t = useT();
   const { signAndSend } = useBovedaSession();
@@ -98,7 +98,7 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
   if ((phase === "ready" || phase === "sending") && sell && units) return <div className="grid gap-3">
     <div className="grid gap-1 rounded-lg border p-3 text-xs">
       <div className="flex justify-between"><span>{t("Vendes en Coinbase")}</span><span>{fmt(units)} USDC</span></div>
-      <div className="flex justify-between"><span>{t("Comisión de BÓVEDA (1%)")}</span><span>{fmt(fee)} USDC</span></div>
+      <div className="flex justify-between"><span>{t("Comisión de BÓVEDA ({p}%)", { p: String(tierPercent(units || 0n, "withdraw")) })}</span><span>{fmt(fee)} USDC</span></div>
       <div className="flex justify-between"><span>{t("Costo de red")}</span><span>{"< $0.01"}</span></div>
       <div className="flex justify-between text-sm"><span>{t("Sale de tu wallet")}</span><b>{fmt(total)} USDC</b></div>
       {sell.fiat && <div className="flex justify-between text-sm"><span>{t("Recibes en tu saldo de Coinbase")}</span><b>{sell.fiat}</b></div>}

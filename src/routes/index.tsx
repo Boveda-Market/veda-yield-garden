@@ -24,14 +24,14 @@ const FAQS = [
   { q: "¿Necesito dinero para usar BÓVEDA?", a: "No para empezar. Toca «Probar como invitado» y recibe 1,000 créditos ficticios para explorar sin registro ni wallet. Los créditos no se pueden retirar ni convertir en dinero." },
   { q: "¿Cómo se generan las ganancias?", a: "Tu depósito se suma a una bóveda que cobra comisiones cada vez que otras personas cambian monedas en ella. Esas comisiones se reparten entre quienes aportan. Las tasas son estimaciones, cambian y puedes perder dinero." },
   { q: "¿Cuándo puedo retirar?", a: "Puedes cosechar tus ganancias o cerrar tu posición cuando quieras, sin plazos de permanencia. Cada operación se revisa antes de firmar con tu wallet." },
-  { q: "¿Qué comisiones cobra BÓVEDA?", a: "Enviar y cambiar monedas es gratis, y entrar a Sube/Baja también. Al depositar, cosechar, cerrar o retirar se cobra 1%. En Sube/Baja solo pagas 1% de lo que ganes al reclamar. Los costes de red se pagan aparte." },
+  { q: "¿Qué comisiones cobra BÓVEDA?", a: "Enviar y cambiar monedas es gratis, y entrar a Sube/Baja también. Al depositar, cosechar, cerrar o retirar pagas una comisión progresiva: mientras más mueves, menor el porcentaje (de 3% a 0.40%). En Sube/Baja pagas 2% de lo que cobres al reclamar. Los costes de red se pagan aparte." },
 ];
 
 const LEARN: [string, string][] = [
   ["¿Qué es USDC?", "Una moneda digital que busca valer 1 dólar. Tu saldo, tus predicciones y tus retiros se manejan en USDC para que no dependan de monedas que suben y bajan."],
   ["¿Cómo funciona Sube/Baja?", "No compras cripto: predices si el precio de BTC, ETH o SOL termina arriba o abajo al cerrar la ronda. Cada contrato ganador paga 1.00 USDC y nunca pierdes más de lo que pusiste."],
   ["¿Cómo se generan las comisiones en las bóvedas?", "Tu aporte se suma a una bóveda que cobra comisiones cuando otras personas cambian monedas. Las tasas son estimadas, cambian y puedes perder dinero."],
-  ["¿Cuánto cuesta retirar?", "BÓVEDA cobra una comisión fija del 1% en retiros a banco o Cash App, que ves antes de firmar. Para Cash App hay un mínimo de 25 USDC para que el costo de la red no se coma tu dinero."],
+  ["¿Cuánto cuesta retirar?", "BÓVEDA cobra de 2% a 0.50% en retiros a banco o Cash App según el monto, y lo ves antes de firmar. Para Cash App hay un mínimo de 25 USDC para que el costo de la red no se coma tu dinero."],
 ];
 
 const GUARANTEES = [

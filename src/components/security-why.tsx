@@ -20,7 +20,7 @@ export function SecurityGuarantees() {
           <p className="mt-2 flex gap-2 font-medium"><Check size={16} className="mt-0.5 shrink-0 text-primary" />{t(good)}</p>
         </div>
       ))}
-      <p className="text-xs text-muted-foreground">{t("Ganamos solo un 1% en operaciones con comisión. Nunca te pediremos tu frase secreta ni tu llave privada.")}</p>
+      <p className="text-xs text-muted-foreground">{t("Solo ganamos una pequeña comisión (0.40% a 3%) en operaciones con comisión. Nunca te pediremos tu frase secreta ni tu llave privada.")}</p>
     </div>
   );
 }

@@ -6,9 +6,9 @@ const usdc = (n: number) => BigInt(Math.round(n * 1e6));
 const earn = (gross: number) => affiliateCommission(progressiveFee(usdc(gross)), AFFILIATE_SHARE_BPS);
 
 describe("affiliate economics", () => {
-  it("earns from the first dollar: 50% of the flat 1% fee", () => {
-    expect(earn(10)).toBe(usdc(0.05));
-    expect(earn(1000)).toBe(usdc(5));
+  it("earns from the first dollar: 50% of the tiered exit fee", () => {
+    expect(earn(10)).toBe(usdc(0.075));
+    expect(earn(1000)).toBe(usdc(3.75));
   });
   it("payout requires 10 USDC accumulated", () => {
     expect(payoutProgress(usdc(4.5))).toEqual({ pct: 45, ready: false, missingRaw: usdc(5.5) });

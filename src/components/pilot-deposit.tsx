@@ -70,7 +70,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange,
   return <section aria-labelledby="pilot-title" className="grid gap-3 text-sm">
     <h3 id="pilot-title" className="sr-only">{t("Confirmar depósito")}</h3>
     {!walletAddress ? <p className="text-xs text-muted-foreground">{t("Inicia sesión con una wallet para firmar.")}</p> : <>
-      <label className="flex items-start gap-3 text-xs leading-5 text-muted-foreground"><Checkbox checked={accepted} disabled={busy || !valid.success} onCheckedChange={(value) => setAccepted(value === true)} aria-label={t("Acepto el depósito real")} /><span>{t("Revisé el importe y entiendo que el depósito no se puede revertir; retirar o cosechar tiene una comisión del 1%.")}</span></label>
+      <label className="flex items-start gap-3 text-xs leading-5 text-muted-foreground"><Checkbox checked={accepted} disabled={busy || !valid.success} onCheckedChange={(value) => setAccepted(value === true)} aria-label={t("Acepto el depósito real")} /><span>{t("Revisé el importe y entiendo que el depósito no se puede revertir; retirar o cosechar tiene una comisión según el monto.")}</span></label>
       <Button size="lg" disabled={!accepted || busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? labels[step] : t("Confirmar y depositar")}</Button>
       {!busy && <p className="text-center text-xs text-muted-foreground">{t("Tu wallet te pedirá aprobar la operación.")}</p>}
     </>}

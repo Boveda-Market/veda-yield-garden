@@ -16,7 +16,7 @@ const ixSchema = z.object({ programId: solanaAddressSchema, accounts: z.array(z.
 const swapSchema = z.object({ setupInstructions: z.array(ixSchema), otherInstructions: z.array(ixSchema).optional(), tokenLedgerInstruction: ixSchema.optional(), swapInstruction: ixSchema, cleanupInstruction: ixSchema.nullable().optional(), addressLookupTableAddresses: z.array(solanaAddressSchema).max(16) });
 const quoteSchema = z.object({ inputMint: z.string(), outputMint: z.string(), inAmount: z.string().regex(/^\d+$/), otherAmountThreshold: z.string().regex(/^\d+$/), swapMode: z.literal("ExactIn"), routePlan: z.array(z.object({ swapInfo: z.object({ ammKey: z.string() }).passthrough() }).passthrough()) }).passthrough();
 
-/** Atomic owner-verified close: fixed 1% fee on on-chain minima, delta-only conversion, owner signs only. */
+/** Atomic owner-verified close: tiered exit fee on on-chain minima, delta-only conversion, owner signs only. */
 export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput & { percent?: number | undefined; migrate?: true | undefined; rotate?: true | undefined }, options: { prepare?: boolean; maximumFeeRaw?: string; minimumNetRaw?: string } = {}): Promise<WithdrawalResult> {
   const startedAt = Date.now();
   let stage = "Lectura de posición";

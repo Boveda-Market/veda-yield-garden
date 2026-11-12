@@ -11,7 +11,7 @@ import { computeBudgetIxs, computeLimit } from "@/lib/compute-budget";
 import { harvestAmounts, type HarvestResult } from "@/lib/harvest";
 import { type WithdrawalInput } from "@/lib/withdrawal";
 
-/** Owner-verified fee claim: liquidity untouched, 1% of the claimed USDC goes to the fee wallet atomically. */
+/** Owner-verified fee claim: liquidity untouched, the tiered harvest fee on claimed USDC goes to the fee wallet atomically. */
 export async function simulateHarvest(apiKey: string, input: WithdrawalInput, options: { prepare?: boolean; maximumFeeRaw?: string } = {}): Promise<HarvestResult> {
   const startedAt = Date.now();
   let stage = "Lectura de posición";
@@ -82,7 +82,7 @@ export async function simulateHarvest(apiKey: string, input: WithdrawalInput, op
       gross: tokenAmount(usdcClaimed.toString(), 6), fee: tokenAmount(feeDelta.toString(), 6), net: tokenAmount(netDelta.toString(), 6), feeRaw: breakdown.fee.toString(), netRaw: netDelta.toString(), tokenRaw: tokenClaimed.toString(),
       tokenSymbol: config.symbol, tokenAmount: tokenAmount(tokenClaimed.toString(), pool.tokenAMint.equals(NATIVE_MINT) ? 9 : 6),
       ...(success && options.prepare ? { prepared: { transaction: Buffer.from(final.tx.serialize()).toString("base64"), expiresAt: startedAt + 45_000, wallet: input.wallet, position: input.position } } : {}),
-      message: success ? "Cosecha verificada en simulación. La liquidez principal no se retira. Comisión del 1% sobre los USDC cosechados; la parte en el otro token se entrega sin convertir en esta operación. Solo tu wallet puede firmar y enviar." : "La cosecha no superó todas las comprobaciones. No se autoriza ninguna firma.",
+      message: success ? "Cosecha verificada en simulación. La liquidez principal no se retira. Comisión por niveles sobre los USDC cosechados; la parte en el otro token se entrega sin convertir en esta operación. Solo tu wallet puede firmar y enviar." : "La cosecha no superó todas las comprobaciones. No se autoriza ninguna firma.",
     };
   } catch {
     return fail(`No se pudo validar la cosecha. Etapa: ${stage}. No se firmó ni envió nada.`);

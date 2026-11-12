@@ -9,7 +9,7 @@ import { CHAIN_POOLS, USDC_MINT } from "@/lib/solana-data";
 import { getTransactionDecoder, getTransactionEncoder } from "@solana/kit";
 import { ed25519 } from "@noble/curves/ed25519.js";
 
-// Plumbing tests: 1 USDC deposits stay fee-free here; the flat 1% rule itself is covered in fees tests.
+// Plumbing tests: 1 USDC deposits stay fee-free here; the progressive fee tiers itself is covered in fees tests.
 vi.mock("@/lib/fees", async (orig) => { const m = await orig<typeof import("@/lib/fees")>(); return { ...m, depositFee: (u: bigint) => (u <= 2_000_000n ? 0n : m.depositFee(u)) }; });
 const mocks = vi.hoisted(() => ({ connection: { getGenesisHash: vi.fn(), getBalance: vi.fn(), getLatestBlockhash: vi.fn(), getAddressLookupTable: vi.fn(), simulateTransaction: vi.fn(), sendRawTransaction: vi.fn() }, getAccount: vi.fn(), pool: vi.fn(), deposit: vi.fn(), decode: vi.fn() }));
 vi.mock("@/lib/solana-read.server", () => ({ heliusConnection: () => mocks.connection }));
@@ -127,18 +127,18 @@ describe("unsigned composed deposit simulation", () => {
     await expect(simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "10000.000001" }, { preparePilot: true })).rejects.toThrow();
     expect(mocks.connection.simulateTransaction).not.toHaveBeenCalled();
   });
-  it("charges 1% on a verified 10,000 USDC deposit without sending", async () => {
+  it("charges the 0.40% VIP fee on a verified 10,000 USDC deposit without sending", async () => {
     mocks.getAccount.mockReset();
     mocks.getAccount.mockResolvedValue({ amount: 10_000_000_000n });
     const fee = Buffer.alloc(AccountLayout.span);
-    AccountLayout.encode({ mint: usdc, owner: new PublicKey(FEE_WALLET), amount: 10_100_000_000n, delegateOption: 0, delegate: PublicKey.default, state: 1, isNativeOption: 0, isNative: 0n, delegatedAmount: 0n, closeAuthorityOption: 0, closeAuthority: PublicKey.default }, fee);
+    AccountLayout.encode({ mint: usdc, owner: new PublicKey(FEE_WALLET), amount: 10_040_000_000n, delegateOption: 0, delegate: PublicKey.default, state: 1, isNativeOption: 0, isNative: 0n, delegatedAmount: 0n, closeAuthorityOption: 0, closeAuthority: PublicKey.default }, fee);
     const base = await mocks.connection.simulateTransaction();
     mocks.connection.simulateTransaction.mockResolvedValue({ ...base, value: { ...base.value, accounts: [...base.value.accounts, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [fee.toString("base64"), "base64"] }] } });
     const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "10000" }, { preparePilot: true });
     expect(result.success).toBe(true);
     expect(result.prepared).toBeDefined();
-    expect(result.fee).toBe("100");
-    expect(result.net).toBe("9900");
+    expect(result.fee).toBe("40");
+    expect(result.net).toBe("9960");
     expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
   });
   it("does not prepare 10,000 USDC when the wallet only has 2 USDC", async () => {

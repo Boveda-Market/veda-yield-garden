@@ -3,8 +3,8 @@ import { withdrawalAmounts, withdrawalInput, prepareWithdrawalInput } from "@/li
 import { FEE_WALLET } from "@/lib/fees";
 
 describe("withdrawal rules", () => {
-  it("charges a flat 1% of the protected minimum", () => {
-    expect(withdrawalAmounts(10_000_000n).fee).toBe(100_000n);
+  it("charges the tiered exit fee on the protected minimum", () => {
+    expect(withdrawalAmounts(10_000_000n).fee).toBe(150_000n);
     expect(withdrawalAmounts(110_000_000n)).toEqual({ gross: 110_000_000n, fee: 1_100_000n, net: 108_900_000n });
   });
   it("accepts supported wallets without a pilot allowlist and bounds reviewed integer amounts", () => {
