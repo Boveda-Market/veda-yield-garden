@@ -618,6 +618,7 @@ export const extra: Record<string, string> = {
   "Activar mis dólares": "Activate my dollars",
   "Reservamos {sol} SOL para costos de red. Confirmarás con tu firma.": "We keep {sol} SOL for network costs. You'll confirm with your signature.",
   "Infraestructura y seguridad": "Infrastructure and security",
+  "Tecnología e infraestructura:": "Technology and infrastructure:",
   "Añade fondos y retira a tu banco con Coinbase Pay.": "Add funds and withdraw to your bank with Coinbase Pay.",
   "Acceso seguro con huella, Face ID o Google, sin frases en papel.": "Secure sign-in with fingerprint, Face ID or Google, no paper phrases.",
   "Mercados de predicción con precios en tiempo real.": "Prediction markets with real-time prices.",

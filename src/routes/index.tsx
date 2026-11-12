@@ -1,6 +1,5 @@
 import { Fingerprint, TrendingUp, Landmark } from "lucide-react";
 import { Lock } from "lucide-react";
-import { PoweredBy } from "@/components/powered-by";
 import { allowTrialEntry } from "@/lib/trial-entry";
 import { useT } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -41,12 +40,6 @@ const GUARANTEES = [
   { icon: Lock, title: "Seguridad moderna", body: "Entra con huella, Face ID o email cifrado, sin frases secretas escritas en papel." },
 ];
 
-const PARTNERS = [
-  { name: "Coinbase", src: "/brands/coinbase.svg", body: "Añade fondos y retira a tu banco con Coinbase Pay." },
-  { name: "Privy", src: "/brands/privy-mark.png", body: "Acceso seguro con huella, Face ID o Google, sin frases en papel." },
-  { name: "Polymarket", src: "/brands/polymarket-mark.svg", body: "Mercados de predicción con precios en tiempo real." },
-  { name: "Meteora", src: "/brands/meteora.svg", body: "Bóvedas que generan comisiones en USDC." },
-];
 
 function Landing() {
   const t = useT();
@@ -61,7 +54,7 @@ function Landing() {
       <section className="grid items-center gap-10 pb-12 pt-6 md:grid-cols-2 md:pt-12">
         <div className="text-center md:text-left">
           <h1 className="font-display text-4xl font-bold leading-tight sm:text-5xl">{t("Tus monedas generando comisiones, día a día.")}</h1>
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 md:justify-start [&>p]:justify-start"><PoweredBy brand="meteora" /><PoweredBy brand="polymarket" /><PoweredBy brand="coinbase" /></div>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground md:justify-start"><span>{t("Tecnología e infraestructura:")}</span>{[["Coinbase","/brands/coinbase.svg"],["Polymarket","/brands/polymarket-mark.svg"],["Meteora","/brands/meteora.svg"]].map(([n,src]) => <span key={n} className="flex items-center gap-1.5 opacity-60 grayscale transition hover:opacity-100 hover:grayscale-0"><img src={src} alt="" className="h-3.5 w-3.5 rounded-full" loading="lazy" /><span className="font-medium">{n}</span></span>)}</div>
           <p className="mt-5 text-lg leading-7 text-muted-foreground">{t("Con la simplicidad de una cuenta digital. Revisa tu saldo, tus ganancias y cada movimiento.")}</p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs md:justify-start">
             {["Prueba gratis con 1,000 créditos"].map((b) => <li key={b} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"><ShieldCheck size={13} className="text-primary" />{t(b)}</li>)}
@@ -73,13 +66,6 @@ function Landing() {
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span></p>
           <ul className="mt-3 flex flex-wrap justify-center gap-2 text-[11px]">{["Tú tienes el control total", "Sin plazos de permanencia"].map((b) => <li key={b} className="flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 font-medium text-foreground"><ShieldCheck size={12} className="text-primary" />{t(b)}</li>)}</ul>
         </div>
-      </section>
-
-      <section aria-labelledby="partners" className="mb-12 rounded-3xl border border-border bg-card p-6">
-        <h2 id="partners" className="text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("Infraestructura y seguridad")}</h2>
-        <ul className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{PARTNERS.map((p) => <li key={p.name} className="flex items-start gap-3">
-          <img src={p.src} alt="" className="h-8 w-8 shrink-0 rounded-full" loading="lazy" />
-          <div><p className="font-display text-sm font-semibold">{p.name}</p><p className="mt-0.5 text-xs leading-5 text-muted-foreground">{t(p.body)}</p></div></li>)}</ul>
       </section>
 
       <section className="rounded-3xl border border-primary/30 bg-primary/5 p-6 sm:p-8">
