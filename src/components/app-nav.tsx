@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useT } from "@/lib/i18n";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { LanguageMenu } from "./language-menu";
+import { NewsBell } from "./news-bell";
 
 export type AppView = "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" | "markets";
 
@@ -37,7 +38,8 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
   const row = "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-secondary";
   const go = (v: AppView) => { setOpen(false); onSelect(v); };
   return <>
-    <button type="button" onClick={() => setOpen(true)} aria-label={t("Abrir menú")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card"><Menu size={18} /></button>
+    <span className="inline-flex items-center gap-2"><NewsBell />
+    <button type="button" onClick={() => setOpen(true)} aria-label={t("Abrir menú")} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card"><Menu size={18} /></button></span>
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent side="right" className="w-[85%] max-w-sm overflow-y-auto">
         <SheetTitle className="font-display">{guest ? t("Invitado · Prueba") : t("Mi cuenta")}</SheetTitle>
