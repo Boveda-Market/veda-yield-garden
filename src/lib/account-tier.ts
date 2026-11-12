@@ -5,7 +5,7 @@ export function accountTier(usd: number) {
   const units = BigInt(Math.max(0, Math.floor(usd * 1_000_000)));
   let i = 0;
   FEE_TIERS.forEach((t, k) => { if (units >= t.min) i = k; });
-  const tier = FEE_TIERS[i];
+  const tier = FEE_TIERS[i] ?? FEE_TIERS[0];
   const next = FEE_TIERS[i + 1] ?? null;
   const from = Number(tier.min) / 1_000_000;
   const to = next ? Number(next.min) / 1_000_000 : null;

@@ -197,7 +197,6 @@ export const extra: Record<string, string> = {
   // Affiliates
   "Próximo pago": "Next payout",
   "¡Listo! Tu pago se incluirá en el próximo desembolso.": "Done! Your payment will be included in the next payout.",
-  "Te faltan": "You need",
   "para tu próximo pago.": "more for your next payout.",
   "Recibes el": "You receive",
   "de las comisiones de tus invitados.": "of your invitees' fees.",
