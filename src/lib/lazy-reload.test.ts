@@ -5,6 +5,7 @@ describe("isChunkLoadError", () => {
   it("detects a missing chunk after an app update", () => {
     expect(isChunkLoadError(new TypeError("Failed to fetch dynamically imported module: https://x/@oj-start/privy-access-DRSBSBgv.js"))).toBe(true);
     expect(isChunkLoadError(new TypeError("Importing a module script failed."))).toBe(true);
+    expect(isChunkLoadError(new Error("No factory registered for module src/components/privy-access.tsx"))).toBe(true);
   });
   it("ignores ordinary errors so real bugs still surface", () => {
     expect(isChunkLoadError(new Error("Invitado solo puede usar Prueba"))).toBe(false);

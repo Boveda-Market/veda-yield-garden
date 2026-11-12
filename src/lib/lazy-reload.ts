@@ -6,7 +6,7 @@ const RELOAD_WINDOW_MS = 30_000;
 /** True when a dynamic import failed because the chunk no longer exists (app was updated). */
 export function isChunkLoadError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
-  return /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Loading chunk .* failed/i.test(message);
+  return /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Loading chunk .* failed|No factory registered for module/i.test(message);
 }
 
 /** Reload once to pick up the new build; refuses to loop if a reload just happened. */
