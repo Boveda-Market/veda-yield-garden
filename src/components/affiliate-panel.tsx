@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Copy, Users, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
+import { ShareButtons } from "@/components/invite-share";
 import { AffiliateHow } from "@/components/affiliate-how";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { AFFILIATE_SHARE_BPS, SUB_AFFILIATE_SHARE_BPS, PAYOUT_MIN_MICRO, payoutProgress, REF_STORAGE_KEY, normalizeCode, type AffiliateDashboard } from "@/lib/affiliate";
@@ -80,6 +81,7 @@ export function AffiliatePanel() {
         <p className="mt-3 text-xs text-muted-foreground">{t("Tu código")}</p>
         <p className="font-mono text-lg font-semibold">{dash.code}</p>
         <div className="mt-3 flex gap-2"><input readOnly value={link} aria-label={t("Tu enlace")} className="min-w-0 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-xs" /><Button size="sm" variant="outline" onClick={() => { void navigator.clipboard.writeText(link); setMessage(t("Enlace copiado.")); }}><Copy size={14} />{t("Copiar")}</Button></div>
+        <div className="mt-3"><ShareButtons link={link} onCopied={() => setMessage(t("Enlace copiado."))} /></div>
       </div>
       <form className="mt-4" onSubmit={(e) => { e.preventDefault(); const value = normalizeCode(customCode); if (!value) { setMessage(t("Usa de 4 a 16 letras o números, sin espacios.")); return; } if (preview) { setDash({ ...dash, code: value }); setMessage(t("Enlace de ejemplo actualizado. Inicia sesión para guardar el tuyo.")); return; } void act(async () => saveCode({ data: { token: await token(), code: value } }), "Tu enlace se actualizó."); }}>
         <label className="block text-sm">{t("Personaliza tu enlace")}<input value={customCode} minLength={4} maxLength={16} required onChange={(e) => setCustomCode(e.target.value)} className={field} /></label>

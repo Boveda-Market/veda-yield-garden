@@ -22,6 +22,7 @@ import { StartGuide } from "@/components/start-guide";
 
 import { BuyUsdc } from "@/components/buy-usdc";
 import { InstallAppBanner } from "@/components/install-app";
+import { InvitePromoCard } from "@/components/invite-share";
 import { PendingClaims } from "@/components/pending-claims";
 import { WalletPositions } from "@/components/wallet-positions";
 import { WalletOpenPredictions } from "@/components/open-predictions";
@@ -149,6 +150,8 @@ export function WalletPanel() {
       <span className="min-w-0 flex-1"><span className="block font-display text-base font-semibold">{t("Panel de Tesorería")}</span><span className="block text-xs text-muted-foreground">{t("Comisiones, pagos a afiliados, códigos VIP y Telegram")}</span></span>
       <ChevronRight size={16} className="shrink-0 text-muted-foreground" aria-hidden />
     </Link>}
+
+    <InvitePromoCard />
 
     <WalletPositions wallet={address} />
     <WalletOpenPredictions />

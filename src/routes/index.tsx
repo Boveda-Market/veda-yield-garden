@@ -1,5 +1,5 @@
 import { Fingerprint, TrendingUp, Landmark } from "lucide-react";
-import { Lock } from "lucide-react";
+import { Lock, Gift } from "lucide-react";
 import { allowTrialEntry } from "@/lib/trial-entry";
 import { useT } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -95,6 +95,20 @@ function Landing() {
         <ul className="mt-6 grid gap-4 sm:grid-cols-3">{GUARANTEES.map(({ icon: Icon, title, body }) => <li key={title} className="rounded-2xl border border-border bg-card p-5">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={18} /></span>
           <p className="mt-4 font-display font-semibold">{t(title)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(body)}</p></li>)}</ul>
+      </section>
+
+      <section className="py-12">
+        <div className="rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card p-6 sm:p-8">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground"><Gift size={20} /></span>
+          <h2 className="mt-4 font-display text-2xl font-bold">{t("Invita y gana: genera más compartiendo BÓVEDA")}</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Cualquier usuario puede ser socio. Comparte tu enlace y recibe en USDC una parte de la comisión de cada operación de tus invitados, sin costo extra para ellos.")}</p>
+          <ul className="mt-5 grid gap-3 sm:grid-cols-3">
+            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">50%</p><p className="text-sm text-muted-foreground">{t("de las comisiones de tus invitados directos")}</p></li>
+            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">10%</p><p className="text-sm text-muted-foreground">{t("de los invitados de tus invitados")}</p></li>
+            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">10 USDC</p><p className="text-sm text-muted-foreground">{t("para cobrar tú mismo, directo a tu wallet")}</p></li>
+          </ul>
+          <Button asChild className="mt-5"><Link to="/invita">{t("Obtener mi enlace")}<ArrowRight size={16} /></Link></Button>
+        </div>
       </section>
 
       <section className="py-12">
