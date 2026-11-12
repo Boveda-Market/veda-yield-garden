@@ -1,5 +1,6 @@
 const BRANDS = {
   polymarket: { src: "/brands/polymarket-mark.svg", name: "Polymarket", wide: false },
+  coinbase: { src: "/brands/coinbase.svg", name: "Coinbase", wide: false },
   meteora: { src: "/brands/meteora.svg", name: "Meteora", wide: false },
 } as const;
 
