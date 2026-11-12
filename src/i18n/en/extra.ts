@@ -674,4 +674,12 @@ export const extra: Record<string, string> = {
   "de los invitados de tus invitados": "from your invitees' invitees",
   "para cobrar tú mismo, directo a tu wallet": "to claim yourself, straight to your wallet",
   "Obtener mi enlace": "Get my link",
+  "Avisos de tu cuenta en Telegram": "Account alerts on Telegram",
+  "Conectado": "Connected",
+  "Recibe un mensaje privado cuando ganes comisiones de tus invitados o completes un cobro.": "Get a private message when you earn commissions from invitees or complete a payout.",
+  "Recibir avisos": "Receive alerts",
+  "Desconectar Telegram": "Disconnect Telegram",
+  "Esperando confirmación en Telegram…": "Waiting for confirmation in Telegram…",
+  "Conectar Telegram": "Connect Telegram",
+  "Se abrirá el bot oficial @bovedamarketbot: solo toca «Iniciar». No compartimos tu número.": "The official @bovedamarketbot will open: just tap \"Start\". We never share your number.",
 };

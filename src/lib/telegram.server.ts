@@ -30,3 +30,12 @@ export async function treasuryAlert(html: string) {
   if (chat) await sendTelegram(chat, html);
 }
 export const usdcText = (raw: bigint | number | string) => (Number(raw) / 1e6).toFixed(2);
+
+/** Personal account alert to a linked, enabled user; never throws or blocks the caller. */
+export async function userAlert(privyUserId: string, html: string) {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin.from("telegram_links").select("chat_id, alerts_enabled").eq("privy_user_id", privyUserId).maybeSingle();
+    if (data?.chat_id && data.alerts_enabled) await sendTelegram(String(data.chat_id), `${html}\n\n🛡️ BÓVEDA nunca te pedirá claves ni frases secretas.`);
+  } catch { /* alerts are best-effort */ }
+}

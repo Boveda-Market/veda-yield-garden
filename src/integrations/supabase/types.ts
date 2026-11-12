@@ -227,6 +227,39 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_links: {
+        Row: {
+          alerts_enabled: boolean
+          chat_id: number | null
+          code_expires_at: string | null
+          created_at: string
+          link_code: string | null
+          linked_at: string | null
+          privy_user_id: string
+          username: string | null
+        }
+        Insert: {
+          alerts_enabled?: boolean
+          chat_id?: number | null
+          code_expires_at?: string | null
+          created_at?: string
+          link_code?: string | null
+          linked_at?: string | null
+          privy_user_id: string
+          username?: string | null
+        }
+        Update: {
+          alerts_enabled?: boolean
+          chat_id?: number | null
+          code_expires_at?: string | null
+          created_at?: string
+          link_code?: string | null
+          linked_at?: string | null
+          privy_user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
       verified_wallets: {
         Row: {
           privy_user_id: string
