@@ -171,6 +171,7 @@ export const extra: Record<string, string> = {
   "Tu dinero puede empezar a generar rendimientos": "Your money can start earning",
   "Aún no tienes bóvedas abiertas. Elige una, deposita USDC y mira aquí cómo crecen tus ganancias.": "You don't have any open vaults yet. Pick one, deposit USDC and watch your earnings grow here.",
   "Hacer mi primer depósito": "Make my first deposit",
+  "Depositar en bóveda": "Deposit in a vault",
   "BÓVEDA": "BÓVEDA",
   // Compound
   "No se pudo preparar la reinversión. No se firmó ni envió nada.": "Couldn't prepare the reinvestment. Nothing was signed or sent.",
