@@ -98,7 +98,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
       </span>
     </div>
     {open && asset && <LivePositionStats p={p} price={live.price} strike={strike} />}
-    {open && asset && <div className="mt-4 overflow-hidden rounded-xl border border-border bg-background/40 py-2"><PriceChart market={asset as MarketId} points={live.points} price={live.price} reference={strike} referenceLabel={t("A batir")} /></div>}
+    {open && asset && mmss && <div className="mt-4 overflow-hidden rounded-xl border border-border bg-background/40 py-2"><PriceChart market={asset as MarketId} points={live.points} price={live.price} reference={strike} referenceLabel={t("A batir")} /></div>}
     <p className="mt-4 text-xs text-muted-foreground">{t("Premio si aciertas")}</p>
     <p className="font-display text-3xl font-semibold text-primary tabular-nums">{usdcText(payout)} USDC</p>
     <p className="mt-1 text-xs text-muted-foreground tabular-nums">{t("Invertido")}: {usdcText(cost)} USDC · {t("Ganancia posible")} +{usdcText(profit)}{cost > 0n ? ` (${(Number(payout) / Number(cost)).toFixed(2)}×)` : ""}</p>
