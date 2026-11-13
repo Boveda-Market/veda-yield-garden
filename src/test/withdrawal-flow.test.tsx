@@ -10,6 +10,7 @@ vi.mock("@/lib/withdrawal.functions", () => ({ simulateRealWithdrawal: mocks.pre
 vi.mock("@/hooks/use-affiliate-report", () => ({ useAffiliateReport: () => async () => undefined }));
 vi.mock("@/lib/pilot-deposit.functions", () => ({ pilotDepositStatus: mocks.status }));
 vi.mock("@tanstack/react-query", () => ({ useQueryClient: () => ({ invalidateQueries: mocks.invalidate }) }));
+vi.mock("@/lib/sweep-leftovers", () => ({ leftoverSymbols: async () => [], sweepLeftovers: async () => ({ usdc: 0n, converted: 0, failed: [] }) }));
 import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
 
 beforeEach(() => { vi.clearAllMocks(); });
