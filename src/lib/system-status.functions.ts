@@ -31,7 +31,11 @@ export const getSystemStatus = createServerFn({ method: "GET" }).handler(async (
   const jupKey = process.env["JUPITER_API_KEY"];
   const [services, mTvl, mFees, pTvl, pVol] = await Promise.all([
     Promise.all([
-      probe("network", okFetch("https://api.mainnet-beta.solana.com", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getHealth" }) })),
+      probe("network", async (s) => {
+        try { const r = await fetch("https://status.solana.com/api/v2/status.json", { signal: s }); if (r.ok) { const j = await r.json() as { status?: { indicator?: string } }; return j.status?.indicator === "none" || j.status?.indicator === "minor"; } } catch { /* fallback */ }
+        const r = await fetch("https://solana-rpc.publicnode.com", { method: "POST", signal: s, headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getHealth" }) });
+        return r.ok;
+      }),
       probe("vaults", okFetch("https://damm-v2.datapi.meteora.ag/pools?page=1&limit=1")),
       probe("predict", okFetch("https://api.jup.ag/prediction/v1/events?provider=polymarket&category=crypto&filter=live&start=0&end=1", jupKey ? { headers: { "x-api-key": jupKey } } : undefined)),
       probe("markets", okFetch("https://gamma-api.polymarket.com/events?limit=1")),
