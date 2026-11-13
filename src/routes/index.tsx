@@ -1,4 +1,4 @@
-import { Fingerprint, TrendingUp, Landmark } from "lucide-react";
+import { Fingerprint, Landmark } from "lucide-react";
 import { Lock, Gift, Search, Star, MessageSquare, Send, Activity } from "lucide-react";
 import { allowTrialEntry } from "@/lib/trial-entry";
 import { useT } from "@/lib/i18n";
@@ -26,13 +26,6 @@ const FAQS = [
   { q: "¿Cómo se generan las ganancias?", a: "Tu depósito se suma a una bóveda que cobra comisiones cada vez que otras personas cambian monedas en ella. Esas comisiones se reparten entre quienes aportan. Las tasas son estimaciones, cambian y puedes perder dinero." },
   { q: "¿Cuándo puedo retirar?", a: "Puedes cosechar tus ganancias o cerrar tu posición cuando quieras, sin plazos de permanencia. Cada operación se revisa antes de firmar con tu wallet." },
   { q: "¿Qué comisiones cobra BÓVEDA?", a: "Enviar y cambiar monedas es gratis, y entrar a Sube/Baja también. Depositar en una bóveda es gratis. Al cosechar, cerrar o retirar pagas una comisión progresiva: mientras más mueves, menor el porcentaje (de 3% a 0.40%). En Sube/Baja pagas 2% de lo que cobres al reclamar. Los costes de red se pagan aparte." },
-];
-
-const LEARN: [string, string][] = [
-  ["¿Qué es USDC?", "Una moneda digital que busca valer 1 dólar. Tu saldo, tus predicciones y tus retiros se manejan en USDC para que no dependan de monedas que suben y bajan."],
-  ["¿Cómo funciona Sube/Baja?", "No compras cripto: predices si el precio de BTC, ETH o SOL termina arriba o abajo al cerrar la ronda. Cada contrato ganador paga 1.00 USDC y nunca pierdes más de lo que pusiste."],
-  ["¿Cómo se generan las comisiones en las bóvedas?", "Tu aporte se suma a una bóveda que cobra comisiones cuando otras personas cambian monedas. Las tasas son estimadas, cambian y puedes perder dinero."],
-  ["¿Cuánto cuesta retirar?", "BÓVEDA cobra de 2% a 0.50% en retiros a banco o Cash App según el monto, y lo ves antes de firmar. Para Cash App hay un mínimo de 25 USDC para que el costo de la red no se coma tu dinero."],
 ];
 
 const GUARANTEES = [
@@ -70,11 +63,6 @@ const PRICING: [string, string][] = [
 
 function Landing() {
   const t = useT();
-  const steps = [
-    { icon: Fingerprint, title: "Entra en segundos con un toque", body: "Inicia sesión con Google, email o tu huella o Face ID. Tu cuenta queda lista al instante." },
-    { icon: TrendingUp, title: "Genera saldo a tu ritmo", body: "Predice si el precio sube o baja en rondas de 5 min, 15 min o diarias, o recibe comisiones con las bóvedas." },
-    { icon: Landmark, title: "Retira cuando quieras", body: "Envía tus USDC a Coinbase o PayPal para tu banco, o recibe Bitcoin automático en tu Cash App." },
-  ];
   const [compact, setCompact] = useState(false);
   useEffect(() => { setCompact(isReturning()); }, []);
   if (compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-10 text-foreground">
@@ -141,17 +129,6 @@ function Landing() {
             <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t("Recibe 1,000 créditos ficticios para depositar, cosechar ganancias y hacer cambios. Sin registro, sin wallet y sin mover dinero.")}</p></div>
           <Button asChild className="h-12 shrink-0"><Link to="/prueba" onClick={allowTrialEntry}>{t("Probar como invitado")}<ArrowRight size={16} /></Link></Button>
         </div>
-      </section>
-
-      <section className="border-t border-border py-12">
-        <h2 className="font-display text-2xl font-bold">{t("Cómo funciona")}</h2>
-        <ol className="mt-6 grid gap-4 sm:grid-cols-3">{steps.map(({ icon: Icon, title, body }, i) => <li key={title} className="rounded-2xl border border-border bg-card p-5">
-          <div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={18} /></span><span className="text-xs text-muted-foreground">{t("Paso")} {i + 1}</span></div>
-          <p className="mt-4 font-display font-semibold">{t(title)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(body)}</p></li>)}</ol>
-        <details className="group mt-5 rounded-2xl border border-border bg-card">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 font-display text-sm font-semibold text-primary [&::-webkit-details-marker]:hidden"><span>{t("Conoce los detalles a fondo")}</span><ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" /></summary>
-          <dl className="grid gap-4 px-4 pb-5 sm:grid-cols-2">{LEARN.map(([h, d]) => <div key={h}><dt className="font-display text-sm font-semibold">{t(h)}</dt><dd className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</dd></div>)}</dl>
-        </details>
       </section>
 
       <section className="border-t border-border py-12">
