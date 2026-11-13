@@ -5,3 +5,9 @@ describe("roundSeconds", () => {
   it("5m across noon", () => expect(roundSeconds("Bitcoin Up or Down - November 13, 11:55AM-12:00PM ET")).toBe(300));
   it("daily", () => expect(roundSeconds("Bitcoin Up or Down on November 13?")).toBe(86400));
 });
+
+import { roundWindowText } from "@/components/predict-position-card";
+describe("roundWindowText", () => {
+  // Real round "1:50PM-1:55PM ET" (closeTime 1794596100) must read 2:50–2:55 PM in Puerto Rico.
+  it("local time zone", () => expect(roundWindowText("Bitcoin Up or Down - November 13, 1:50PM-1:55PM ET", 1794596100, "en-US", "America/Puerto_Rico")).toBe("Nov 13 · 2:50 PM – 2:55 PM"));
+});

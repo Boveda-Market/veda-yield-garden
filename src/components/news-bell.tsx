@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Bell, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { roundWindowText } from "@/components/predict-position-card";
+import { assetOfTitle } from "@/lib/predict";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { SUPPORT_URL } from "@/components/safety-notice";
 import { usePredictAlerts, type PredictAlert } from "@/hooks/use-predict-alerts";
@@ -46,7 +48,7 @@ export function NewsList({ onNavigate, predict = [] }: { onNavigate?: () => void
         {a.outcome === "lost" && <button type="button" onClick={() => dismiss(a.id)} aria-label={t("Borrar notificación")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={14} /></button>}
         <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">{t("Sube y Baja")}</span>
         <p className="mt-2 font-semibold">{a.outcome === "won" ? `🏆 ${t("Ganaste en Sube y Baja")}` : t("No acertaste en Sube y Baja")}</p>
-        {a.p.title && <p className="mt-1 text-xs text-muted-foreground">{a.p.title}</p>}
+        {a.p.title && <p className="mt-1 text-xs text-muted-foreground">{assetOfTitle(a.p.title) ?? ""} · {roundWindowText(a.p.title, a.p.closeTime)}</p>}
         <p className="mt-1 text-sm text-muted-foreground">{a.outcome === "won" ? t("Tu premio de {v} USDC está listo para reclamar.", { v: (Number(a.p.payoutMicro) / 1e6).toFixed(2) }) : t("La ronda terminó en tu contra. Invertiste {v} USDC.", { v: (Number(a.p.costMicro) / 1e6).toFixed(2) })}</p>
         {a.outcome === "won" && <Link to="/portfolio" onClick={onNavigate} className="mt-3 inline-block text-sm font-medium text-primary">{t("Reclamar premio")} →</Link>}
       </li>)}

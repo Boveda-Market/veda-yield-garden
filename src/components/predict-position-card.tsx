@@ -22,6 +22,16 @@ export function roundSeconds(title: string): number | null {
   return / Up or Down on /i.test(title) ? 86400 : null;
 }
 
+/** Round window in the viewer's own time zone (titles are in US Eastern time, which confuses other regions). */
+export function roundWindowText(title: string, closeTime: number | null, locale?: string, timeZone?: string): string {
+  const dur = roundSeconds(title);
+  if (!closeTime || !dur) return title.split(" - ")[1] ?? "";
+  const end = new Date(closeTime * 1000), start = new Date((closeTime - dur) * 1000);
+  const day = (d: Date) => d.toLocaleDateString(locale, { day: "numeric", month: "short", timeZone });
+  const hm = (d: Date) => d.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit", timeZone });
+  return dur >= 86400 ? `${day(start)} ${hm(start)} – ${day(end)} ${hm(end)}` : `${day(end)} · ${hm(start)} – ${hm(end)}`;
+}
+
 /** Opening price of the round (price to beat), retried until the opening candle is published. */
 export function useStrike(asset: MarketId | null, openMs: number | null) {
   const [v, setV] = useState<number | undefined>();
@@ -72,7 +82,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
   const t = useT(); const locale = useLocale(); const now = useNow();
   const open = p.status === "open";
   const asset = assetOfTitle(p.title);
-  const when = p.title.split(" - ")[1] ?? "";
+  const when = roundWindowText(p.title, p.closeTime, locale);
   const pnl = p.pnlMicro ? BigInt(p.pnlMicro) : null;
   const cost = BigInt(p.costMicro || "0"), payout = BigInt(p.payoutMicro || "0");
   const profit = payout - cost;
