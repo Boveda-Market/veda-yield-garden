@@ -937,4 +937,11 @@ export const extra: Record<string, string> = {
   "La wallet de tesorería no puede depositar, predecir ni retirar en BÓVEDA. Tu panel de control está en Invita y gana → Tesorería.": "The treasury wallet cannot deposit, predict or withdraw on BÓVEDA. Your control panel is in Invite & earn → Treasury.",
   "Con una wallet externa puedes ver la app, pero no operar. Para operar, entra con Google, email o passkey y usa tu billetera protegida de BÓVEDA.": "With an external wallet you can browse the app but not trade. To trade, sign in with Google, email or passkey and use your protected BÓVEDA wallet.",
   "Entrar con Google": "Sign in with Google",
+  "Seguridad y acceso": "Security and access",
+  "Bloquear operaciones con wallets externas": "Block operations from external wallets",
+  "Si lo activas, Phantom, Jupiter y otras wallets externas solo podrán ver la app. Las billeteras de BÓVEDA (Google, email o passkey) siguen operando.": "When on, Phantom, Jupiter and other external wallets can only view the app. BÓVEDA wallets (Google, email or passkey) keep operating.",
+  "Wallets externas bloqueadas: ahora solo pueden ver la app.": "External wallets blocked: they can only view the app now.",
+  "Wallets externas desbloqueadas: ya pueden operar.": "External wallets unblocked: they can operate now.",
+  "No se pudo cambiar el ajuste. Abre primero el panel de pagos para verificar la tesorería.": "Couldn't change the setting. Open the payouts panel first to verify the treasury.",
+  "Solo la wallet de tesorería verificada puede cambiar este ajuste.": "Only the verified treasury wallet can change this setting.",
 };

@@ -172,7 +172,7 @@ export const recordAffiliateFee = createServerFn({ method: "POST" })
   });
 
 /** Only the account that proved ownership of the dedicated payout wallet may manage payouts. */
-async function payoutAdmin(token: string) {
+export async function payoutAdmin(token: string) {
   const { AFFILIATE_PAYOUT_WALLET } = await import("./affiliate");
   const ctx = await admin(token);
   const { data } = await ctx.db.from("verified_wallets").select("privy_user_id").eq("wallet", AFFILIATE_PAYOUT_WALLET).maybeSingle();

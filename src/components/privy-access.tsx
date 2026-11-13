@@ -14,6 +14,8 @@ import { useQueryClient } from "@tanstack/react-query";
 const solanaRpcs = { "solana:mainnet": { rpc: createSolanaRpc("https://solana-mainnet.rpc.privy.systems?privyAppId=cmw6ftcf900ge0hl0jyw3rc75"), rpcSubscriptions: createSolanaRpcSubscriptions("wss://solana-mainnet.rpc.privy.systems?privyAppId=cmw6ftcf900ge0hl0jyw3rc75"), blockExplorerUrl: "https://orbmarkets.io" } };
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
 import { FEE_WALLET } from "@/lib/fees";
+import { useQuery } from "@tanstack/react-query";
+import { getWalletPolicy } from "@/lib/wallet-policy.functions";
 import { IdleLogout } from "@/components/idle-logout";
 
 // Privy only authorizes the official domains; preview/other hosts can never finish loading it.
@@ -46,7 +48,9 @@ function SessionBridge({ children }: { children: ReactNode }) {
   });
   const walletAddress = wallets[0]?.address ?? null;
   const embedded = !!walletAddress && !!user?.linkedAccounts.some(a => a.type === "wallet" && a.address === walletAddress && (a.walletClientType === "privy" || a.walletClientType === "privy-v2"));
-  const tradeBlock: "external" | "treasury" | null = !walletAddress ? null : walletAddress === FEE_WALLET ? "treasury" : embedded ? null : "external";
+  const policy = useQuery({ queryKey: ["wallet-policy"], queryFn: () => getWalletPolicy(), staleTime: 30_000, refetchInterval: 60_000 });
+  const blockExternal = policy.data?.blockExternal ?? false;
+  const tradeBlock: "external" | "treasury" | null = !walletAddress ? null : walletAddress === FEE_WALLET ? "treasury" : embedded || !blockExternal ? null : "external";
   // If Privy never reports ready (blocked iframe, shields, slow network), stop waiting after 4s so buttons and screens never freeze.
   const [stalled, setStalled] = useState(false);
   useEffect(() => { if (ready) { setStalled(false); return; } const id = setTimeout(() => setStalled(true), 4000); return () => clearTimeout(id); }, [ready]);

@@ -26,5 +26,6 @@ export async function assertTradingWallet(privyUserId: string, wallet: string) {
   if (wallet === FEE_WALLET) throw new Error("Modo operador: la wallet de tesorería no puede operar en BÓVEDA.");
   const reason = tradeBlockReason(wallet, FEE_WALLET, await linkedWallets(privyUserId));
   if (reason === "treasury") throw new Error("Modo operador: la wallet de tesorería no puede operar en BÓVEDA.");
+  if (reason === "external") { const { externalWalletsBlocked } = await import("@/lib/wallet-policy.server"); if (!(await externalWalletsBlocked())) return; }
   if (reason) throw new Error("Modo solo consulta: para operar, entra con Google, email o passkey y usa tu billetera protegida de BÓVEDA.");
 }
