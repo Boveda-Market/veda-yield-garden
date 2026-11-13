@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useT } from "@/lib/i18n";
 import { BackButton } from "./back-button";
 
-export function LegalLayout({ title, children, legal = true, backHash }: { title: string; children: ReactNode; legal?: boolean; backHash?: string }) {
+export function LegalLayout({ title, children, legal = true, backHash }: { title: string; children: ReactNode; legal?: boolean; backHash?: string | undefined }) {
   const t = useT();
   return <main className="mx-auto min-h-screen max-w-3xl px-5 py-8 text-foreground">
     <BackButton fallback="/" homeHash={backHash} />
