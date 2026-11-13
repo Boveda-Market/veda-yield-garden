@@ -16,9 +16,9 @@ import { CompactOpenPredictions } from "@/components/open-predictions";
 const num = (n: number, d = 2) => n.toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 const digits = (p: number) => (p >= 1000 ? 2 : 3);
 const short = (p: number) => p >= 1000 ? `$${(p / 1000).toFixed(1)}k` : `$${p.toFixed(2)}`;
-const WIN_LABEL: Record<PredictWindow, string> = { "5m": "5 min", "15m": "15 min", "1d": "Diaria" };
+const WIN_LABEL: Record<PredictWindow, string> = { "5m": "5 min", "15m": "15 min", "4h": "4 horas" };
 
-/** Live-only Up/Down rounds: BTC, ETH and SOL in 5 min, 15 min and daily. */
+/** Live-only Up/Down rounds: BTC, ETH and SOL in 5 min, 15 min and 4 hours. */
 export function MarketsPanel(_: { identity: string }) {
   const t = useT();
   const [prices, setPrices] = useState<Partial<Record<MarketId, number>>>({});

@@ -38,7 +38,7 @@ export function HomePredict() {
       <h2 className="font-display text-2xl font-bold">{t("Predice el mercado en minutos. ¿Sube o baja?")}</h2>
       <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />{t("En vivo")}</span>
     </div>
-    <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Rondas de 5 min, 15 min y diarias en Bitcoin, Ethereum y Solana. No compras la cripto: solo predices hacia dónde va el precio y cobras en USDC si aciertas.")}</p>
+    <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Rondas de 5 min, 15 min y de 4 horas en Bitcoin, Ethereum y Solana. No compras la cripto: solo predices hacia dónde va el precio y cobras en USDC si aciertas.")}</p>
     <PoweredBy brand="polymarket" className="mt-2" />
     <div className="mt-5 overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
       <div className="grid grid-cols-3 gap-2 p-4" role="tablist" aria-label={t("Mercado")}>

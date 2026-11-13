@@ -7,7 +7,7 @@ export function PredictHow() {
   const t = useT();
   const points: [string, string][] = [
     [t("Ganas en ambas direcciones"), t("Tanto si el mercado sube como si cae, tú eliges hacia dónde va el precio. No compras la cripto: tu dinero sigue en USDC.")],
-    [t("Tiempo definido"), t("Cada ronda dura 5 minutos, 15 minutos o un día. Al terminar, se compara el precio final con el precio de inicio.")],
+    [t("Tiempo definido"), t("Cada ronda dura 5 minutos, 15 minutos o 4 horas. Al terminar, se compara el precio final con el precio de inicio.")],
     [t("Se cierra sola"), t("Cuando el tiempo expira, la posición se cierra automáticamente. Si ganas, aparece tu premio para reclamar. Si pierdes, desaparece de tus posiciones.")],
     [t("Reclama tu premio cuando quieras"), t("Cada contrato ganador paga 1.00 USDC y lo reclamas cuando quieras. También puedes vender antes del cierre al precio del momento.")],
     [t("Riesgo claro"), t("Nunca pierdes más de lo que pusiste. Sin préstamos ni liquidaciones.")],

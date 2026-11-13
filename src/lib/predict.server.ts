@@ -1,5 +1,5 @@
 import { parsePastRound, type PastRound } from "@/lib/predict";
-import { MARKET_ID_RE, assetOfTitle, windowOfTags, type LiveRound, type PredictPosition, type PredictQuote } from "@/lib/predict";
+import { MARKET_ID_RE, assetOfTitle, windowOfDuration, windowOfSlug, windowOfTags, type LiveRound, type PredictPosition, type PredictQuote } from "@/lib/predict";
 import { USDC_MINT } from "@/lib/wallet-actions";
 
 const API = "https://api.jup.ag/prediction/v1";
@@ -15,27 +15,31 @@ async function jup<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 type PolyMarket = { marketId: string; status: string; title?: string; closeTime: number; pricing?: { buyYesPriceUsd?: number; sellYesPriceUsd?: number; buyNoPriceUsd?: number; volume?: number } };
-type PolyRaw = { eventId: string; isActive?: boolean; tags?: string[]; beginAt?: string; volumeUsd?: string | number; metadata?: { title?: string }; markets?: PolyMarket[] };
+type PolyRaw = { eventId: string; isActive?: boolean; tags?: string[]; beginAt?: string; volumeUsd?: string | number; metadata?: { title?: string; slug?: string }; markets?: PolyMarket[] };
 
 let cache: { at: number; rounds: LiveRound[] } | null = null;
 const pr = (v: unknown) => { const n = Number(v); return Number.isFinite(n) && n > 0 && n < 1e6 ? n / 1e6 : null; };
 
-/** Current BTC/ETH/SOL Up or Down rounds (5m, 15m, daily) with real order-book prices; one per asset and window. */
+/** Current BTC/ETH/SOL Up or Down rounds (5m, 15m, 4h) with real order-book prices; one per asset and window. */
 export async function listRounds(): Promise<LiveRound[]> {
   if (cache && Date.now() - cache.at < 8_000) return cache.rounds;
   const now = Math.floor(Date.now() / 1000);
   const paths = [0, 50].map((s) => `/events?provider=polymarket&category=crypto&filter=live&includeMarkets=true&start=${s}&end=${s + 50}`);
-  paths.push("/events?provider=polymarket&category=crypto&tags=daily&includeMarkets=true");
+  // 4 h rounds carry no tag and never show up under filter=live: read the unfiltered crypto pages instead.
+  paths.push("/events?provider=polymarket&category=crypto&includeMarkets=true&start=0&end=100");
+  paths.push("/events?provider=polymarket&category=crypto&includeMarkets=true&start=100&end=200");
   const pages = await Promise.all(paths.map((path) => jup<{ data: PolyRaw[] }>(path).catch(() => ({ data: [] as PolyRaw[] }))));
   const best = new Map<string, LiveRound>();
   for (const e of pages.flatMap((p) => p.data ?? [])) {
     if (!e.eventId?.startsWith("POLY-") || e.isActive === false) continue;
-    const asset = assetOfTitle(e.metadata?.title ?? ""), window = windowOfTags(e.tags ?? []);
+    const asset = assetOfTitle(e.metadata?.title ?? "");
     // Polymarket Up/Down events expose two markets ("Up" and "Down"); each side is bought as YES on its own market.
     const m = e.markets?.find((x) => x.title === "Up"), d = e.markets?.find((x) => x.title === "Down");
-    if (!asset || !window || !m || !d || m.status !== "open" || d.status !== "open" || !MARKET_ID_RE.test(m.marketId) || !MARKET_ID_RE.test(d.marketId)) continue;
+    if (!asset || !m || !d || m.status !== "open" || d.status !== "open" || !MARKET_ID_RE.test(m.marketId) || !MARKET_ID_RE.test(d.marketId)) continue;
     const openTime = Number(e.beginAt), closeTime = m.closeTime;
     if (!(openTime <= now && now < closeTime)) continue;
+    const window = windowOfSlug(e.metadata?.slug ?? "") ?? windowOfTags(e.tags ?? []) ?? windowOfDuration(closeTime - openTime);
+    if (!window) continue;
     const upPrice = pr(m.pricing?.buyYesPriceUsd);
     const downPrice = pr(d.pricing?.buyYesPriceUsd);
     if (upPrice === null || downPrice === null || upPrice >= 1 || downPrice >= 1) continue;

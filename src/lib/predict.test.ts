@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MARKET_ID_RE, assetOfTitle, potentialProfit, validPredictAmount, windowOfTags } from "./predict";
+import { MARKET_ID_RE, assetOfTitle, potentialProfit, validPredictAmount, windowOfDuration, windowOfSlug, windowOfTags } from "./predict";
 
 describe("live prediction rules", () => {
   it("accepts 5 to 250 USDC only", () => {
@@ -17,10 +17,17 @@ describe("live prediction rules", () => {
     expect(assetOfTitle("XRP Up or Down - November 9")).toBeNull();
     expect(assetOfTitle("What price will Bitcoin hit in November?")).toBeNull();
   });
-  it("only 5m, 15m and daily windows", () => {
+  it("only 5m, 15m and 4h windows", () => {
     expect(windowOfTags(["crypto", "5m"])).toBe("5m");
-    expect(windowOfTags(["crypto", "daily"])).toBe("1d");
-    expect(windowOfTags(["crypto", "4h"])).toBeNull();
+    expect(windowOfTags(["crypto", "4h"])).toBe("4h");
+    expect(windowOfTags(["crypto", "daily"])).toBeNull();
+    // 4 h rounds reach the app untagged: the slug and the exact round length identify them instead.
+    expect(windowOfSlug("btc-updown-4h-1794603600")).toBe("4h");
+    expect(windowOfSlug("sol-updown-15m-1794610800")).toBe("15m");
+    expect(windowOfSlug("solana-up-or-down-on-november-14-2026")).toBeNull();
+    expect(windowOfDuration(14400)).toBe("4h");
+    expect(windowOfDuration(300)).toBe("5m");
+    expect(windowOfDuration(86400)).toBeNull();
   });
   it("profit is contracts minus cost", () => expect(potentialProfit({ contractsMicro: "19000000", costMicro: "10000000" })).toBe(9_000_000n));
 });
@@ -48,6 +55,8 @@ describe("prediction results", () => {
   it("parses only resolved BTC/ETH/SOL rounds", () => {
     const m = [{ outcomes: '["Up","Down"]', outcomePrices: '["0","1"]' }];
     expect(parsePastRound({ slug: "btc-updown-5m-1", title: "Bitcoin Up or Down - November 9, 7:55PM-8:00PM ET", endDate: "2026-11-10T01:00:00Z", markets: m })?.winner).toBe("down");
+    expect(parsePastRound({ slug: "eth-updown-4h-1", title: "Ethereum Up or Down - November 9, 4:00PM-8:00PM ET", endDate: "2026-11-10T01:00:00Z", markets: m })?.window).toBe("4h");
+    expect(parsePastRound({ slug: "solana-up-or-down-on-november-9-2026", title: "Solana Up or Down on November 9?", endDate: "2026-11-10T01:00:00Z", markets: m })).toBeNull();
     expect(parsePastRound({ slug: "xrp-updown-5m-1", title: "XRP Up or Down - November 9", endDate: "2026-11-10T01:00:00Z", markets: m })).toBeNull();
     expect(parsePastRound({ slug: "btc-updown-5m-1", title: "Bitcoin Up or Down - x", endDate: "2026-11-10T01:00:00Z", markets: [{ outcomes: '["Up","Down"]', outcomePrices: '["0.5","0.5"]' }] })).toBeNull();
   });
