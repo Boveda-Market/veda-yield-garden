@@ -61,3 +61,29 @@ export async function buildAffiliateClaim(apiKey: string, secret: string, payout
   if (sim.value.err) throw new Error("simulation failed");
   return Buffer.from(tx.serialize()).toString("base64");
 }
+
+/**
+ * Network-reserve refill: the treasury pays the network fee and sends `lamports` SOL; in the same transaction
+ * the user's wallet pays `charge` USDC to the treasury. Pre-signed by the treasury and simulated; the user co-signs.
+ */
+export async function buildGasRefill(apiKey: string, secret: string, treasury: string, user: string, lamports: bigint, charge: bigint) {
+  const { PublicKey, SystemProgram, TransactionMessage, VersionedTransaction } = await import("@solana/web3.js");
+  const { createTransferCheckedInstruction, getAssociatedTokenAddressSync } = await import("@solana/spl-token");
+  const { heliusConnection } = await import("@/lib/solana-read.server");
+  const kp = await payoutSigner(secret, treasury);
+  const conn = heliusConnection(apiKey);
+  const owner = new PublicKey(user);
+  const mint = new PublicKey(USDC_MINT.toString());
+  const fromAta = getAssociatedTokenAddressSync(mint, owner, true);
+  const toAta = getAssociatedTokenAddressSync(mint, kp.publicKey);
+  const { blockhash } = await conn.getLatestBlockhash("confirmed");
+  const message = new TransactionMessage({ payerKey: kp.publicKey, recentBlockhash: blockhash, instructions: [
+    createTransferCheckedInstruction(fromAta, mint, toAta, owner, charge, 6),
+    SystemProgram.transfer({ fromPubkey: kp.publicKey, toPubkey: owner, lamports: Number(lamports) }),
+  ] }).compileToV0Message();
+  const tx = new VersionedTransaction(message);
+  tx.sign([kp]);
+  const sim = await conn.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: false });
+  if (sim.value.err) throw new Error("simulation failed");
+  return Buffer.from(tx.serialize()).toString("base64");
+}
