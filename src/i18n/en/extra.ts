@@ -877,4 +877,5 @@ export const extra: Record<string, string> = {
   "Se cierra sola al expirar el tiempo. Si ganas, aparece tu premio para reclamar; si pierdes, desaparece.": "Closes on its own when time expires. If you win, your prize appears to claim; if you lose, it disappears.",
   "Cerrar y vender ahora · ≈ {v} USDC": "Close and sell now · ≈ {v} USDC",
   "Reclamar premio · {v} USDC": "Claim prize · {v} USDC",
+  "Historial de rondas recientes de {m}": "Recent rounds history for {m}",
 };
