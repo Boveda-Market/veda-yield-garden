@@ -117,7 +117,6 @@ function Landing() {
       </section>
 
       <section id="opiniones" className="scroll-mt-4 py-12">
-        <p className="mb-3 inline-flex max-w-full items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs"><span className="flex shrink-0 items-center gap-1 font-semibold text-foreground"><Star size={12} className="fill-current text-primary" aria-hidden="true" /></span><span className="text-muted-foreground">·</span><span className="font-medium text-foreground"></span></p>
         <h2 className="font-display text-2xl font-bold">{t("Lo que dice la comunidad")}</h2>
         <p className="mt-1 text-xs text-muted-foreground">{t("Opiniones ilustrativas de la experiencia")}</p>
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{REVIEWS.map(({ stars, name, text, photo, title, tag }) => <li key={name} className={`relative flex flex-col rounded-2xl border bg-card p-5 ${stars === 5 ? "border-primary/40 bg-gradient-to-br from-primary/10 to-card" : "border-border"}`}>
