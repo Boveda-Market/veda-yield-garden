@@ -114,6 +114,8 @@ export const extra: Record<string, string> = {
   "Iniciar sesión": "Log in",
   "Crear cuenta": "Sign up",
   "¿Usas wallet externa? Conectar Phantom o Jupiter": "Using an external wallet? Connect Phantom or Jupiter",
+  "¿Usas wallet externa? Phantom, Jupiter u otras": "Using an external wallet? Phantom, Jupiter or others",
+  "Billetera externa (Phantom, Jupiter…)": "External wallet (Phantom, Jupiter…)",
   // Portfolio
   "Hoy": "Today",
   "Ayer": "Yesterday",
