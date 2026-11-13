@@ -4,7 +4,7 @@ import { guestDemoKey, trialActivityKey, readTrialActivity } from "@/lib/trial-a
 import { demoSessionKey } from "@/lib/demo-session";
 describe("optional account personalization", () => {
   it("permits an empty optional name and a selected avatar", () => {
-    expect(profileSchema.parse({ displayName: "", avatar: "sun" })).toEqual({ displayName: "", avatar: "sun" });
+    expect(profileSchema.parse({ displayName: "", avatar: "sun" })).toEqual({ displayName: "", avatar: "sun", photo: "" });
   });
   it("rejects unsupported avatar values and overlong names", () => {
     expect(profileSchema.safeParse({ displayName: "a".repeat(61), avatar: "sun" }).success).toBe(false);

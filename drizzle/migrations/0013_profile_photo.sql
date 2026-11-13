@@ -1,0 +1,1 @@
+ALTER TABLE public.account_profiles ADD COLUMN photo text NOT NULL DEFAULT '' CHECK (length(photo) <= 140000);

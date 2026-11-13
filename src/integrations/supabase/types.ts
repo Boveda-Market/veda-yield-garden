@@ -19,6 +19,7 @@ export type Database = {
           avatar: string
           created_at: string
           display_name: string
+          photo: string
           privy_user_id: string
           updated_at: string
         }
@@ -26,6 +27,7 @@ export type Database = {
           avatar?: string
           created_at?: string
           display_name?: string
+          photo?: string
           privy_user_id: string
           updated_at?: string
         }
@@ -33,6 +35,7 @@ export type Database = {
           avatar?: string
           created_at?: string
           display_name?: string
+          photo?: string
           privy_user_id?: string
           updated_at?: string
         }
