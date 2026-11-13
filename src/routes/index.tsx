@@ -146,7 +146,7 @@ function Landing() {
           <ul className="mt-5 grid gap-3 sm:grid-cols-3">
             <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">50%</p><p className="text-sm text-muted-foreground">{t("de las comisiones de tus invitados directos")}</p></li>
             <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">10%</p><p className="text-sm text-muted-foreground">{t("de los invitados de tus invitados")}</p></li>
-            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">10 USDC</p><p className="text-sm text-muted-foreground">{t("para cobrar tú mismo, directo a tu wallet")}</p></li>
+            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">{"\n"}</p><p className="text-sm text-muted-foreground">{t("\n")}</p></li>
           </ul>
           <Button asChild className="mt-5"><Link to="/invita">{t("Obtener mi enlace")}<ArrowRight size={16} /></Link></Button>
         </div>
