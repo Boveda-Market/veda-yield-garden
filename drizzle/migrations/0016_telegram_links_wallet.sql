@@ -1,0 +1,1 @@
+ALTER TABLE public.telegram_links ADD COLUMN IF NOT EXISTS wallet text;

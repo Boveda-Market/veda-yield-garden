@@ -112,9 +112,11 @@ export const notifyPredictResults = createServerFn({ method: "POST" })
       const { id, db } = await admin(data.token);
       const { listPositions } = await import("./predict.server");
       const { resolvedOutcome, predictAlertText } = await import("./predict-alerts");
+      const t = db as unknown as { from: (x: string) => any };
+      // Remember the wallet so the background job can alert even when the app is closed.
+      await t.from("telegram_links").update({ wallet: data.wallet }).eq("privy_user_id", id);
       const live = await listPositions(data.wallet);
       const tg = await import("./telegram.server");
-      const t = db as unknown as { from: (x: string) => any };
       for (const p of live.filter((x) => data.positions.includes(x.pubkey))) {
         const o = resolvedOutcome(p);
         if (!o) continue;

@@ -43,6 +43,21 @@ export const Route = createFileRoute("/api/public/jobs/check-system-status")({
             if (ok) await db.from("system_service_status").upsert({ service: "apr_gap", first_down_at: new Date(now).toISOString(), operator_alerted: false, public_alerted: false, updated_at: new Date(now).toISOString() }, { onConflict: "service" });
           }
         } catch { /* best-effort; never blocks status checks */ }
+        try {
+          // Sube/Baja results for linked users even while their app is closed; dedup shared with notifyPredictResults.
+          const { listPositions } = await import("@/lib/predict.server");
+          const { resolvedOutcome, predictAlertText } = await import("@/lib/predict-alerts");
+          const { data: links } = await db.from("telegram_links").select("privy_user_id, wallet").not("chat_id", "is", null).not("wallet", "is", null).eq("alerts_enabled", true).limit(200);
+          for (const l of (links ?? []) as { privy_user_id: string; wallet: string }[]) {
+            const live = await listPositions(l.wallet).catch(() => []);
+            for (const p of live) {
+              const o = resolvedOutcome(p);
+              if (!o) continue;
+              const { data: ins, error } = await db.from("predict_result_alerts").upsert({ privy_user_id: l.privy_user_id, position: p.pubkey, outcome: o }, { onConflict: "privy_user_id,position", ignoreDuplicates: true }).select("position");
+              if (!error && ins?.length) await tg.userAlert(l.privy_user_id, predictAlertText(p, o), "predict");
+            }
+          }
+        } catch { /* best-effort */ }
         return Response.json({ ok: true, down: checks.filter((c) => c.state === "down").map((c) => c.id) });
       },
     },

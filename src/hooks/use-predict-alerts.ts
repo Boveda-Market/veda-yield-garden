@@ -8,6 +8,7 @@ import type { PredictPosition } from "@/lib/predict";
 export type PredictAlert = { id: string; outcome: PredictOutcome; p: PredictPosition };
 const SEEN = (w: string) => `boveda:predict-seen:${w}`;
 const SENT = (w: string) => `boveda:predict-sent:${w}`;
+const REG = (w: string) => `boveda:predict-reg:${w}`;
 const read = (k: string): string[] => { try { const v = JSON.parse(localStorage.getItem(k) ?? "[]"); return Array.isArray(v) ? v.filter((x) => typeof x === "string").slice(-300) : []; } catch { return []; } };
 const write = (k: string, v: string[]) => { try { localStorage.setItem(k, JSON.stringify(v.slice(-300))); } catch { /* ignore */ } };
 
@@ -23,15 +24,18 @@ export function usePredictAlerts() {
     const seen = read(SEEN(wallet));
     setUnread(alerts.some((a) => !seen.includes(a.id)));
     const sent = read(SENT(wallet));
-    const fresh = alerts.filter((a) => !sent.includes(a.p.pubkey)).map((a) => a.p.pubkey).slice(0, 20);
+    let fresh = alerts.filter((a) => !sent.includes(a.p.pubkey)).map((a) => a.p.pubkey).slice(0, 20);
+    // Register the wallet once (any position works) so closed-app alerts reach Telegram.
+    const reg = (() => { try { return localStorage.getItem(REG(wallet)) === "1"; } catch { return true; } })();
+    if (fresh.length === 0 && !reg && (q.data ?? []).length) fresh = [(q.data ?? [])[0]!.pubkey];
     if (fresh.length === 0 || !session?.getAccessToken) return;
     void (async () => {
       const token = await session.getAccessToken?.().catch(() => null);
       if (!token) return;
       const r = await notifyPredictResults({ data: { token, wallet, positions: fresh } }).catch(() => null);
-      if (r?.success) write(SENT(wallet), [...sent, ...fresh]);
+      if (r?.success) { write(SENT(wallet), [...sent, ...fresh.filter((f) => alerts.some((a) => a.p.pubkey === f))]); try { localStorage.setItem(REG(wallet), "1"); } catch { /* ignore */ } }
     })();
-  }, [alerts, wallet, session]);
+  }, [alerts, wallet, session, q.data]);
   const markSeen = () => { if (wallet) { write(SEEN(wallet), [...new Set([...read(SEEN(wallet)), ...alerts.map((a) => a.id)])]); setUnread(false); } };
   return { alerts, unread, markSeen };
 }

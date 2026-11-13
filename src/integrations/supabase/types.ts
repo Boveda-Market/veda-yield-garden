@@ -301,6 +301,7 @@ export type Database = {
           muted_kinds: string[]
           privy_user_id: string
           username: string | null
+          wallet: string | null
         }
         Insert: {
           alerts_enabled?: boolean
@@ -312,6 +313,7 @@ export type Database = {
           muted_kinds?: string[]
           privy_user_id: string
           username?: string | null
+          wallet?: string | null
         }
         Update: {
           alerts_enabled?: boolean
@@ -323,6 +325,7 @@ export type Database = {
           muted_kinds?: string[]
           privy_user_id?: string
           username?: string | null
+          wallet?: string | null
         }
         Relationships: []
       }
