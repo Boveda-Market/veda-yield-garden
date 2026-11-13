@@ -70,18 +70,30 @@ export function MarketsPanel(_: { identity: string }) {
 
   return (
     <div className="space-y-4">
-      <header className="space-y-1">
+      <header className="space-y-0.5">
         <div className="flex flex-wrap items-center gap-2">
           <Zap className="text-primary" size={20} /><h1 className="font-display text-2xl font-bold">{t("Sube o Baja")}</h1>
           <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />{t("En vivo")}</span>
           <PoweredBy brand="polymarket" className="ml-auto" />
         </div>
-        <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-semibold text-primary">{t("Ganas si sube, ganas si baja · Reclama tu premio cuando quieras")}</p><p className="w-full text-sm text-muted-foreground">{t("Rondas en vivo de 5 min, 15 min y diarias en BTC, ETH y SOL. Al terminar el tiempo la ronda se cierra sola: si ganas, aparece tu premio para reclamar; si pierdes, desaparece.")}</p><PredictHow /></div>
+        <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-semibold text-primary">{t("Ganas si sube, ganas si baja · Reclama tu premio cuando quieras")}</p><PredictHow /></div>
       </header>
 
+      <div className="grid grid-cols-3 gap-2" role="tablist" aria-label={t("Mercado")}>
+        {MARKETS.map((m) => {
+          const on = market === m.id, p = prices[m.id];
+          return <button key={m.id} role="tab" aria-selected={on} onClick={() => setMarket(m.id)} className={`flex items-center justify-center rounded-full border px-2 py-1.5 transition ${on ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold"><TokenIcon symbol={m.id} size={18} />{m.id}</span>
+            <span className="ml-1 font-display text-xs font-semibold tabular-nums text-muted-foreground">{p ? short(p) : "—"}</span>
+          </button>;
+        })}
+      </div>
+      <div className="grid grid-cols-3 gap-1.5 rounded-full border border-border bg-muted p-1" role="tablist" aria-label={t("Duración de la ronda")}>
+        {PREDICT_WINDOWS.map((w) => <button key={w} role="tab" aria-selected={win === w} onClick={() => setWin(w)} className={`rounded-full border py-1.5 text-sm font-bold transition ${win === w ? "border-primary bg-primary text-primary-foreground shadow-md" : "border-border bg-card text-foreground hover:border-primary/60"}`}>{t(WIN_LABEL[w])}</button>)}
+      </div>
 
       <section className="overflow-hidden rounded-3xl border border-border bg-card">
-        <div className="px-5 pt-5">
+        <div className="px-4 py-3">
           <div className="flex items-center justify-between gap-2">
             <h2 className="flex items-center gap-2 font-display text-lg font-bold"><TokenIcon symbol={market} size={22} />{t("{m} Sube o Baja {w}", { m: name, w: WIN_LABEL[win] })}</h2>
             {round && <span className="text-xs tabular-nums text-muted-foreground">{new Date(round.openTime * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} – {new Date(round.closeTime * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>}
@@ -96,24 +108,10 @@ export function MarketsPanel(_: { identity: string }) {
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-secondary"><div className={`h-full transition-all ${ahead === false ? "bg-destructive" : "bg-primary"}`} style={{ width: `${progress * 100}%` }} /></div>
           {ahead !== null && <p className={`mt-2 text-xs font-semibold ${ahead ? "text-primary" : "text-destructive"}`}>{t(ahead ? "Ahora mismo va ganando Sube" : "Ahora mismo va ganando Baja")}</p>}
         </div>
-        <div className="mt-3 pb-3"><PriceChart market={market} points={series[market]} price={price} reference={strike} referenceLabel={t("A batir")} /></div>
       </section>
-      <div className="grid grid-cols-3 gap-2" role="tablist" aria-label={t("Mercado")}>
-        {MARKETS.map((m) => {
-          const on = market === m.id, p = prices[m.id];
-          return <button key={m.id} role="tab" aria-selected={on} onClick={() => setMarket(m.id)} className={`flex items-center justify-center rounded-full border px-2 py-1.5 transition ${on ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
-            <span className="inline-flex items-center gap-1.5 text-sm font-bold"><TokenIcon symbol={m.id} size={18} />{m.id}</span>
-            <span className="ml-1 font-display text-xs font-semibold tabular-nums text-muted-foreground">{p ? short(p) : "—"}</span>
-          </button>;
-        })}
-      </div>
-      <div className="grid grid-cols-3 gap-1.5 rounded-full border border-border bg-muted p-1" role="tablist" aria-label={t("Duración de la ronda")}>
-        {PREDICT_WINDOWS.map((w) => <button key={w} role="tab" aria-selected={win === w} onClick={() => setWin(w)} className={`rounded-full border py-1.5 text-sm font-bold transition ${win === w ? "border-primary bg-primary text-primary-foreground shadow-md" : "border-border bg-card text-foreground hover:border-primary/60"}`}>{t(WIN_LABEL[w])}</button>)}
-      </div>
-
       {!loaded ? <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin" size={16} />{t("Buscando rondas en vivo…")}</p>
         : !round && <div role="status" className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/10 p-3 text-sm"><Loader2 className="mt-0.5 shrink-0 animate-spin text-primary" size={16} /><p><strong>{t("Esperando la próxima ronda de {m} ({w})…", { m: name, w: WIN_LABEL[win] })}</strong><br /><span className="text-muted-foreground">{t("Abre en breve. Mientras tanto puedes probar otra duración o cripto arriba.")}</span></p></div>}
-      <PredictLive round={round} />
+      <PredictLive round={round} chart={<div className="overflow-hidden rounded-3xl border border-border bg-card py-3"><PriceChart market={market} points={series[market]} price={price} reference={strike} referenceLabel={t("A batir")} /></div>} />
       <PendingClaims />
       <WalletOpenPredictions />
       <details className="rounded-2xl border border-border bg-card p-4"><summary className="cursor-pointer text-sm font-semibold">{t("Historial de rondas recientes de {m}", { m: name })}</summary><div className="mt-3"><PredictResults asset={market} window={win} /></div></details>

@@ -1,5 +1,5 @@
 import { Dismissible } from "@/components/dismissible";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -24,7 +24,7 @@ const dismissedLost = (wallet: string) => { try { const v = JSON.parse(localStor
 const toB64 = (b: Uint8Array) => btoa(Array.from(b, (x) => String.fromCharCode(x)).join(""));
 
 /** Order ticket for the selected live Up/Down round. Wallet USDC only; BÓVEDA is never the counterparty. */
-export function PredictLive({ round }: { round: LiveRound | null }) {
+export function PredictLive({ round, chart }: { round: LiveRound | null; chart?: ReactNode }) {
   const t = useT();
   const session = useBovedaSession();
   const reportAffiliate = useAffiliateReport();
@@ -180,6 +180,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
         })}
       </div>
 
+      {chart}
       <section className="rounded-2xl border border-border bg-card p-4" aria-label={t("Tu orden")}>
         <div className="flex items-center justify-between"><label htmlFor="predict-amount" className="text-sm font-semibold">{t("Estás poniendo (USDC)")}</label><span className="text-xs text-muted-foreground">{t("Disponible")}: <strong className="text-foreground tabular-nums">{!wallet ? "—" : balance === null ? "…" : usdc(balance)} USDC</strong></span></div>
         <input id="predict-amount" inputMode="decimal" value={amount} onChange={(e) => { setAmount(e.target.value.replace(/[^0-9.]/g, "")); setReview(null); }} className="mt-2 h-12 w-full rounded-xl border border-input bg-background px-4 font-display text-xl font-bold" />
