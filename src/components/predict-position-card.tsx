@@ -3,7 +3,7 @@ import { useLivePrice } from "@/hooks/use-live-price";
 import { fetchPriceAt, type MarketId } from "@/lib/markets";
 import { TokenIcon } from "@/components/token-icon";
 import { PoweredBy } from "@/components/powered-by";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowDownRight, ArrowUpRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT, useLocale } from "@/lib/i18n";
@@ -23,7 +23,7 @@ export function roundSeconds(title: string): number | null {
 }
 
 /** Opening price of the round (price to beat), retried until the opening candle is published. */
-function useStrike(asset: MarketId | null, openMs: number | null) {
+export function useStrike(asset: MarketId | null, openMs: number | null) {
   const [v, setV] = useState<number | undefined>();
   useEffect(() => {
     if (!asset || !openMs) return;
@@ -36,6 +36,36 @@ function useStrike(asset: MarketId | null, openMs: number | null) {
 }
 
 function useNow() { const [n, setN] = useState(() => Date.now()); useEffect(() => { const id = setInterval(() => setN(Date.now()), 1000); return () => clearInterval(id); }, []); return n; }
+
+/** Text that flashes green/red whenever its numeric value ticks up/down. */
+function Tick({ value, children, className = "" }: { value: number | undefined; children: React.ReactNode; className?: string }) {
+  const prev = useRef<number | undefined>(value); const [dir, setDir] = useState<0 | 1 | -1>(0);
+  useEffect(() => { if (value === undefined) return; const p = prev.current; prev.current = value; if (p === undefined || p === value) return; setDir(value > p ? 1 : -1); const id = setTimeout(() => setDir(0), 700); return () => clearTimeout(id); }, [value]);
+  return <span className={`rounded px-1 tabular-nums transition-colors duration-500 ${dir === 1 ? "bg-primary/25 text-primary" : dir === -1 ? "bg-destructive/25 text-destructive" : ""} ${className}`}>{children}</span>;
+}
+
+const money = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+/** Live trading strip: principal, live asset price vs price to beat and current profit if the round closed now. */
+export function LivePositionStats({ p, price, strike, compact }: { p: PredictPosition; price: number | undefined; strike: number | undefined; compact?: boolean }) {
+  const t = useT();
+  const cost = Number(p.costMicro || "0") / 1e6, payout = Number(p.payoutMicro || "0") / 1e6;
+  const diff = price !== undefined && strike ? price - strike : null;
+  const winning = diff === null ? null : p.side === "up" ? diff >= 0 : diff < 0;
+  const gain = winning === null ? null : winning ? payout - cost : -cost;
+  const gainTxt = gain === null ? "—" : `${gain >= 0 ? "+" : "-"}${Math.abs(gain).toFixed(2)} USDC`;
+  const tone = winning === null ? "" : winning ? "text-primary" : "text-destructive";
+  if (compact) return <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[11px] text-muted-foreground">
+    <span>{t("Inv.")} <span className="font-semibold text-foreground tabular-nums">{cost.toFixed(2)}</span></span>·
+    <span className="inline-flex items-center gap-1"><span className="relative flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" /></span><Tick value={price} className="font-semibold text-foreground">{price !== undefined ? money(price) : "—"}</Tick></span>·
+    <Tick value={gain ?? undefined} className={`font-bold ${tone}`}>{gainTxt}</Tick>
+  </p>;
+  return <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl border border-border bg-background/40 p-3 text-center">
+    <div><p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t("Invertido")}</p><p className="font-display text-sm font-semibold tabular-nums">{cost.toFixed(2)} USDC</p></div>
+    <div><p className="flex items-center justify-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />{t("Precio en vivo")}</p><Tick value={price} className="font-display text-sm font-semibold">{price !== undefined ? money(price) : "—"}</Tick>{diff !== null && <p className={`text-[10px] font-bold tabular-nums ${diff >= 0 ? "text-primary" : "text-destructive"}`}>{diff >= 0 ? "▲ +" : "▼ -"}{money(Math.abs(diff)).slice(1)}</p>}</div>
+    <div><p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t("Ganancia actual")}</p><Tick value={gain ?? undefined} className={`font-display text-sm font-bold ${tone}`}>{gainTxt}</Tick><p className="text-[10px] text-muted-foreground">{winning === null ? "" : winning ? t("Vas ganando") : t("Vas perdiendo")}</p></div>
+  </div>;
+}
 
 /** Transparent detail card for one prediction position: side, contracts, price, stake, live value, payout, countdown and result. */
 export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, claiming }: { p: PredictPosition; onSell?: () => void; selling?: boolean; disabled?: boolean; onClaim?: () => void; claiming?: boolean }) {
@@ -67,6 +97,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
         {open ? (mmss ? `⏱ ${t("Cierra en {v}", { v: mmss })}` : t("Resolviendo…")) : won === null ? t("Cerrada") : won ? t("Acertaste") : t("No acertaste")}
       </span>
     </div>
+    {open && asset && <LivePositionStats p={p} price={live.price} strike={strike} />}
     {open && asset && <div className="mt-4 overflow-hidden rounded-xl border border-border bg-background/40 py-2"><PriceChart market={asset as MarketId} points={live.points} price={live.price} reference={strike} referenceLabel={t("A batir")} /></div>}
     <p className="mt-4 text-xs text-muted-foreground">{t("Premio si aciertas")}</p>
     <p className="font-display text-3xl font-semibold text-primary tabular-nums">{usdcText(payout)} USDC</p>
