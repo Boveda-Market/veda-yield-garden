@@ -142,19 +142,6 @@ function Landing() {
       </section>
 
       <section className="py-12">
-        <div className="rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card p-6 sm:p-8">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground"><Gift size={20} /></span>
-          <h2 className="mt-4 font-display text-2xl font-bold">{t("Invita y gana: genera más compartiendo BÓVEDA")}</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Cualquier usuario puede ser socio. Comparte tu enlace y recibe en USDC una parte de la comisión de cada operación de tus invitados, sin costo extra para ellos.")}</p>
-          <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">50%</p><p className="text-sm text-muted-foreground">{t("de las comisiones de tus invitados directos")}</p></li>
-            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">10%</p><p className="text-sm text-muted-foreground">{t("de los invitados de tus invitados")}</p></li>
-          </ul>
-          <Button asChild className="mt-5"><Link to="/invita">{t("Obtener mi enlace")}<ArrowRight size={16} /></Link></Button>
-        </div>
-      </section>
-
-      <section className="py-12">
         <h2 className="font-display text-2xl font-bold">{t("Lo que dice la comunidad")}</h2>
         <p className="mt-1 text-xs text-muted-foreground">{t("Opiniones ilustrativas de la experiencia")}</p>
         <ul className="mt-6 grid gap-4 sm:grid-cols-3">{REVIEWS.map(({ stars, name, text, photo, title, tag }) => <li key={name} className={`relative flex flex-col rounded-2xl border bg-card p-5 ${stars === 5 ? "border-primary/40 bg-gradient-to-br from-primary/10 to-card" : "border-border"}`}>
@@ -168,6 +155,19 @@ function Landing() {
           <div><p className="flex items-center gap-2 font-display font-semibold"><MessageSquare size={16} className="text-primary" />{t("¿Qué te gusta y qué no? Cuéntanos")}</p>
             <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">{t("Envía sugerencias, críticas o tu reseña desde ☰ Menú → «Ayúdanos a mejorar». Leemos cada mensaje para mejorar BÓVEDA.")}</p></div>
           <Button asChild variant="outline" className="shrink-0"><a href="#acceso">{t("Entrar y opinar")}</a></Button>
+        </div>
+      </section>
+
+      <section className="py-12">
+        <div className="rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card p-6 sm:p-8">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground"><Gift size={20} /></span>
+          <h2 className="mt-4 font-display text-2xl font-bold">{t("Invita y gana: genera más compartiendo BÓVEDA")}</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Cualquier usuario puede ser socio. Comparte tu enlace y recibe en USDC una parte de la comisión de cada operación de tus invitados, sin costo extra para ellos.")}</p>
+          <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">50%</p><p className="text-sm text-muted-foreground">{t("de las comisiones de tus invitados directos")}</p></li>
+            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">10%</p><p className="text-sm text-muted-foreground">{t("de los invitados de tus invitados")}</p></li>
+          </ul>
+          <Button asChild className="mt-5"><Link to="/invita">{t("Obtener mi enlace")}<ArrowRight size={16} /></Link></Button>
         </div>
       </section>
 
