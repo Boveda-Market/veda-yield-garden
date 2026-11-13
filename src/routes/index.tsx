@@ -53,6 +53,21 @@ const REVIEWS = [
   { stars: 5, name: "Marisol T.", photo: reviewMarisol, title: "Un equipo que sí responde", tag: "Canal de Telegram · Mi wallet", text: "Envié una sugerencia y el equipo me respondió rápido. Las notificaciones me avisan de cada cosecha y del estado del sistema en Telegram: siento que hay personas reales detrás." },
 ];
 
+function TrustTicker() {
+  const t = useT();
+  const [i, setI] = useState(0);
+  const [paused, setPaused] = useState(false);
+  useEffect(() => { if (paused) return; const id = setInterval(() => setI((n) => (n + 1) % REVIEWS.length), 4500); return () => clearInterval(id); }, [paused]);
+  const r = REVIEWS[i] ?? REVIEWS[0]!;
+  return <a href="#opiniones" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} className="mx-auto mt-4 flex w-full max-w-md items-center gap-3 rounded-full border border-primary/30 bg-primary/5 py-1.5 pl-1.5 pr-4 text-left md:mx-0" aria-label={t("Lo que dice la comunidad")}>
+    <span className="flex shrink-0 -space-x-2">{REVIEWS.map((x, n) => <img key={x.name} src={x.photo} alt="" width={28} height={28} className={`h-7 w-7 rounded-full border-2 object-cover transition-transform duration-500 ${n === i ? "z-10 scale-110 border-primary" : "border-background"}`} />)}</span>
+    <span className="min-w-0 flex-1">
+      <span className="flex items-center gap-1 text-[11px] font-semibold text-foreground"><span className="flex text-primary">{[1,2,3,4,5].map((n) => <Star key={n} size={10} className="fill-current" />)}</span>4.8 / 5</span>
+      <span key={i} className="block truncate text-xs text-muted-foreground animate-in fade-in slide-in-from-bottom-1 duration-500">«{t(r.title)}» — {r.name}</span>
+    </span>
+  </a>;
+}
+
 const TRUST = [
   { icon: Fingerprint, title: "Tus fondos, tu control", body: "Wallet de autocustodia con Face ID o huella, protegida por Privy. Nadie mueve tu dinero sin tu aprobación digital." },
   { icon: Landmark, title: "1 USDC = $1 siempre", body: "Nada de monedas locas que hoy suben y mañana se desploman. Tu saldo se mantiene estable mientras genera comisiones reales." },
@@ -82,11 +97,11 @@ function Landing() {
     <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-6 sm:px-6"><Link to="/" className="flex min-w-0 shrink-0 items-center gap-2 font-display text-lg font-bold sm:gap-3"><img src="/icon-512.png" alt="" className="h-9 w-9 shrink-0 rounded-lg" />BÓVEDA</Link><div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><Link to="/prueba" onClick={allowTrialEntry} className="flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/40 bg-primary/10 px-2.5 sm:px-3 text-xs font-semibold text-primary"><Sparkles size={13} />{t("Demo sin riesgo")}</Link></div></header>
     <main className="mx-auto max-w-5xl px-6">
       <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">
-        <div className="order-1 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(" Nada de monedas locas. Genera ganancias reales.")}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t("Tus fondos siempre bajo tu control. $0 para entrar  y retira todo en cualquier momento garantizado.")}</p></div>
+        <div className="order-1 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(" Nada de monedas locas. Genera ganancias reales.")}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t("Tus fondos siempre bajo tu control. $0 para entrar  y retira todo en cualquier momento garantizado.")}</p><TrustTicker /></div>
         <div className="order-3 text-center md:order-1 md:text-left">
           <p className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"><ShieldCheck size={13} />{t("100% autocustodia · Nadie custodia tus fondos")}</p>
           <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(" Nada de monedas locas. Genera ganancias reales.")}</h1>
-          <p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t("Tus fondos siempre bajo tu control. $0 para entrar  y retira todo en cualquier momento garantizado.")}</p>
+          <p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t("Tus fondos siempre bajo tu control. $0 para entrar  y retira todo en cualquier momento garantizado.")}</p><div className="hidden md:block"><TrustTicker /></div>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground md:justify-start">{[["Powered by","Coinbase","/brands/coinbase.svg"],["Secured by","Privy","/brands/privy-mark.png"],["Network","Solana","/brands/solana.svg"]].map(([l,n,src]) => <span key={n} className="flex items-center gap-1.5"><span>{l}</span><img src={src} alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-medium text-foreground">{n}</span>{n === "Solana" && <span className="ml-1 flex items-center gap-1 font-semibold text-primary"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_var(--color-primary)]" /></span>{t("Online")}</span>}</span>)}</div>
           <p className="mt-5 text-base leading-7 text-muted-foreground">{t("BÓVEDA no es un banco ni un fondo que pueda congelar tu dinero. Es una interfaz segura, protegida contra hackers, donde solo tú apruebas cada movimiento con tu huella o Face ID.")}</p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs md:justify-start">
@@ -101,7 +116,7 @@ function Landing() {
         </div>
       </section>
 
-      <section className="py-12">
+      <section id="opiniones" className="scroll-mt-4 py-12">
         <p className="mb-3 inline-flex max-w-full items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs"><span className="flex shrink-0 items-center gap-1 font-semibold text-foreground"><Star size={12} className="fill-current text-primary" aria-hidden="true" />4.8 / 5</span><span className="text-muted-foreground">·</span><span className="font-medium text-foreground">«{t("Retiros instantáneos y un equipo que sí te contesta")}»</span></p>
         <h2 className="font-display text-2xl font-bold">{t("Lo que dice la comunidad")}</h2>
         <p className="mt-1 text-xs text-muted-foreground">{t("Opiniones ilustrativas de la experiencia")}</p>
