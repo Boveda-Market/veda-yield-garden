@@ -67,7 +67,8 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
 
   const quote: SwapQuote | undefined = preview.data;
   const usd = quote ? Number(quote.outAmount) / 1e6 : 0;
-  if (convertible <= 0n || (quote && usd < ACTIVATE_MIN_USD)) return null;
+  // Only show once a quote proves the convertible SOL is worth at least the minimum; dust (e.g. rent refunded by a liquidation) never flashes the card.
+  if (convertible <= 0n || !quote || usd < ACTIVATE_MIN_USD) return null;
   async function activate() {
     if (!address) return;
     setBusy(true); setError(null);
@@ -81,8 +82,8 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
   return <section aria-label={t("Activa tus dólares")} className={box}>
     <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><CheckCircle2 size={14} />{t("Fondos recibidos")}</p>
     <h2 className="mt-2 font-display text-xl font-semibold">{t("Activa tus dólares")}</h2>
-    <p className="mt-1 text-sm leading-6 text-foreground/85">{quote ? t("Convertimos tu saldo a ~${usd} USDC sin comisión y guardamos un poco para costos de red.", { usd: usd.toFixed(2) }) : <span className="inline-flex items-center gap-2"><Loader2 size={14} className="animate-spin" />{t("¡Fondos recibidos! Calculando tus dólares con el mejor tipo de cambio…")}</span>}</p>
-    <Button className="mt-4 w-full" disabled={busy || !quote} onClick={() => void activate()}>{busy ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}{busy ? t("Activando…") : t("Activar mis dólares")}</Button>
+    <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Convertimos tu saldo a ~${usd} USDC sin comisión y guardamos un poco para costos de red.", { usd: usd.toFixed(2) })}</p>
+    <Button className="mt-4 w-full" disabled={busy} onClick={() => void activate()}>{busy ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}{busy ? t("Activando…") : t("Activar mis dólares")}</Button>
     <p className="mt-2 text-xs text-muted-foreground">{t("Reservamos {sol} SOL para costos de red. Confirmarás con tu firma.", { sol: num(GAS_KEEP_LAMPORTS, 9, 3) })}</p>
     {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}
   </section>;
