@@ -124,7 +124,7 @@ function Landing() {
           <p className="mt-2 text-sm leading-6 text-muted-foreground">“{t(text)}”</p></li>)}</ul>
         <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div><p className="flex items-center gap-2 font-display font-semibold"><MessageSquare size={16} className="text-primary" />{t("¿Qué te gusta y qué no? Cuéntanos")}</p>
-            <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">{t("Envía sugerencias, críticas o tu reseña desde ☰ Menú → «Ayúdanos a mejorar». Leemos cada mensaje para mejorar BÓVEDA.")}</p></div>
+            <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">{t("Envía sugerencias, críticas o tu reseña. Leemos cada mensaje para mejorar BÓVEDA.")}</p></div>
           <Button asChild variant="outline" className="shrink-0"><a href="#acceso" onClick={() => { try { sessionStorage.setItem("boveda:open-ideas", "1"); } catch { /* ignore */ } }}>{t("Entrar y opinar")}</a></Button>
         </div>
       </section>
