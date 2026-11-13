@@ -810,4 +810,12 @@ export const extra: Record<string, string> = {
   "Ver portada completa": "See full homepage",
   "Abriendo tu cuenta…": "Opening your account…",
   "Online": "Online",
+  "Tus fondos siempre bajo tu control. $0 para entrar  y retira todo en cualquier momento garantizado.": "Your funds always under your control. $0 to get in and withdraw everything anytime, guaranteed.",
+  "Opiniones ilustrativas de la experiencia": "Illustrative opinions of the experience",
+  "Retiré a Coinbase en minutos sin pedir permiso": "Withdrew to Coinbase in minutes, no permission needed",
+  "Acceso con Google · Bóvedas": "Google sign-in · Vaults",
+  "Paz mental al revisar cada firma": "Peace of mind reviewing every signature",
+  "Acceso con Google · Hace 2 semanas": "Google sign-in · 2 weeks ago",
+  "Sin humo: practica primero con la demo": "No hype: practice first with the demo",
+  "Acceso con huella · Sube o Baja": "Fingerprint sign-in · Up or Down",
 };
