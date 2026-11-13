@@ -885,4 +885,5 @@ export const extra: Record<string, string> = {
   "Cerrar y vender ahora · ≈ {v} USDC": "Close and sell now · ≈ {v} USDC",
   "Reclamar premio · {v} USDC": "Claim prize · {v} USDC",
   "Historial de rondas recientes de {m}": "Recent rounds history for {m}",
+  "Ganancias": "Earnings",
 };
