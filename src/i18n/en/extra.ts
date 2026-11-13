@@ -815,6 +815,7 @@ export const extra: Record<string, string> = {
   "Online": "Online",
   "Tus fondos siempre bajo tu control. $0 para entrar  y retira todo en cualquier momento garantizado.": "Your funds always under your control. $0 to get in and withdraw everything anytime, guaranteed.",
   "Opiniones ilustrativas de la experiencia": "Illustrative opinions of the experience",
+  "Retiros instantáneos y un equipo que sí te contesta": "Instant withdrawals and a team that actually answers",
   "Retiré a Coinbase en minutos sin pedir permiso": "Withdrew to Coinbase in minutes, no permission needed",
   "Acceso con Google · Bóvedas": "Google sign-in · Vaults",
   "Paz mental al revisar cada firma": "Peace of mind reviewing every signature",
