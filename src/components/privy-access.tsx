@@ -30,7 +30,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const [securityMessage, setSecurityMessage] = useState<string | null>(null);
   const { linkEmail, linkPasskey } = useLinkAccount({
     onSuccess: () => setSecurityMessage(t("Método vinculado y verificado.")),
-    onError: () => setSecurityMessage(t("No se pudo vincular el método. Revisa la compatibilidad de tu dispositivo y que esté habilitado en Privy.")),
+    onError: () => setSecurityMessage(t("No se pudo vincular el método. Revisa que tu dispositivo sea compatible e inténtalo de nuevo.")),
   });
   const { update } = useUpdateEmail();
   const { showMfaEnrollmentModal } = useMfaEnrollment();
@@ -44,7 +44,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const { login } = useLogin({
     onComplete: () => setError(null),
-    onError: () => setError(t("No se pudo iniciar sesión. Revisa los métodos y dominios permitidos en Privy e inténtalo de nuevo.")),
+    onError: () => setError(t("No se pudo iniciar sesión. Inténtalo de nuevo o prueba con otro método (Google, email o billetera).")),
   });
   const walletAddress = wallets[0]?.address ?? null;
   const embedded = !!walletAddress && !!user?.linkedAccounts.some(a => a.type === "wallet" && a.address === walletAddress && (a.walletClientType === "privy" || a.walletClientType === "privy-v2"));
@@ -91,11 +91,12 @@ function SessionBridge({ children }: { children: ReactNode }) {
     if (tradeBlock === "treasury") throw new Error(t("Modo operador: la wallet de tesorería no puede operar en BÓVEDA."));
     if (tradeBlock === "external") throw new Error(t("Modo solo consulta: para operar, entra con Google, email o passkey y usa tu billetera protegida de BÓVEDA."));
   };
-  const doLogout = useCallback(async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError("No se pudo cerrar sesión. Inténtalo de nuevo."); } }, [queryClient, logout]);
+  const doLogout = useCallback(async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError(t("No se pudo cerrar sesión. Inténtalo de nuevo.")); } }, [queryClient, logout]);
   return <BovedaSessionContext.Provider value={{
     ready: ready || stalled, authenticated, userId: authenticated ? user?.id ?? null : null,
     label: user?.email?.address ?? user?.google?.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : t("Mi cuenta")),
     walletAddress, error: error ?? (pendingMethod && !ready ? t("Conectando el acceso seguro…") : stalled && !ready && !isOfficialHost() ? t("Para entrar, abre bovedamarket.app. En esta vista previa el acceso seguro no está disponible.") : null), getAccessToken,
+    clearError: () => setError(null),
     exportWallet: user?.linkedAccounts.some(account => account.type === "wallet" && account.address === walletAddress && (account.walletClientType === "privy" || account.walletClientType === "privy-v2")) ? async () => { await exportWallet({ address: walletAddress! }); } : undefined,
     security: {
       email: user?.email?.address ?? null,

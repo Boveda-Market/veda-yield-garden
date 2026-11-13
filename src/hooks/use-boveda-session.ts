@@ -20,6 +20,8 @@ export type BovedaSession = {
   label: string;
   walletAddress: string | null;
   error: string | null;
+  /** Hides the current sign-in message. */
+  clearError?: () => void;
   login: (method: "email" | "google" | "wallet" | "passkey") => void;
   logout: () => Promise<void>;
   /** Asks the connected wallet to sign and send; resolves to the base58 signature. */

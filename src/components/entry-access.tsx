@@ -1,3 +1,4 @@
+import { LoginAlert } from "@/components/login-alert";
 import { useT } from "@/lib/i18n";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { lazyWithReload } from "@/lib/lazy-reload";
@@ -35,7 +36,7 @@ function EntryButtons() {
     {!signup && <Button disabled={!session.ready} variant="outline" className="h-auto w-full flex-col gap-1 py-3" onClick={() => session.login("passkey")}><span className="flex items-center gap-2"><Fingerprint size={20} className="text-primary" />{t("Entrar con huella o Face ID")}</span><span className="text-xs font-normal text-muted-foreground">{t("Touch ID, Face ID o PIN de tu dispositivo")}</span></Button>}
     <button type="button" disabled={!session.ready} onClick={() => session.login("wallet")} className="flex w-full items-center justify-center gap-2 pt-1 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline disabled:opacity-50"><Wallet size={14} />{t("¿Usas wallet externa? Phantom, Jupiter u otras")}</button>
     {signup && <p className="text-xs leading-5 text-muted-foreground">{t("Tu primer acceso crea tu cuenta con Privy. Después puedes elegir tu nombre y avatar.")}</p>}
-    {session.error && <p role="alert" className="text-sm text-destructive">{session.error}</p>}
+    {session.error && <LoginAlert message={session.error} onDismiss={() => session.clearError?.()} />}
     <p className="pt-2 text-xs leading-5 text-muted-foreground">{t("Al continuar, aceptas los")}{" "}<Link className="underline" to="/terminos">{t("términos")}</Link> {t("y conoces la")}{" "}<Link className="underline" to="/privacidad">{t("política de privacidad")}</Link>.</p>
   </div>;
 }
