@@ -10,7 +10,7 @@ export function LegalLayout({ title, children, legal = true }: { title: string; 
     <Link to="/" aria-label={t("BÓVEDA · Ir al inicio")} className="mt-10 flex items-center gap-3 font-display text-lg font-bold"><img src="/icon-512.png" alt="" className="h-9 w-9 rounded-lg" />BÓVEDA</Link>
     <p className="mt-2 text-xs text-muted-foreground">Boveda Technologies LLC</p>
     <h1 className="mt-3 font-display text-3xl font-bold">{title}</h1>
-    <p className="mt-3 text-sm text-muted-foreground">{legal ? t("Vigente desde el") : t("Actualizado el")} {t("8 de noviembre de 2026")}</p>
+    {legal && <p className="mt-3 text-sm text-muted-foreground">{t("Vigente desde el")} {t("8 de noviembre de 2026")}</p>}
     <article className="mt-8 space-y-8 text-sm leading-7 text-muted-foreground">{children}</article>
     <nav className="mt-10 flex flex-wrap gap-5 border-t border-border pt-5 text-sm text-primary"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to="/terminos">{t("Términos y condiciones")}</Link><Link to="/privacidad">{t("Política de privacidad")}</Link></nav>
   </main>;
