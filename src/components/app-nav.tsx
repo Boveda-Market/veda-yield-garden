@@ -47,6 +47,9 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
   const t = useT();
   const [open, setOpen] = useState(false);
   const [ideas, setIdeas] = useState(false);
+  useEffect(() => {
+    try { if (sessionStorage.getItem("boveda:open-ideas")) { sessionStorage.removeItem("boveda:open-ideas"); setIdeas(true); } } catch { /* ignore */ }
+  }, []);
   const row = "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-secondary";
   const go = (v: AppView) => { setOpen(false); onSelect(v); };
   const operator = useContext(BovedaSessionContext)?.walletAddress === AFFILIATE_PAYOUT_WALLET;
