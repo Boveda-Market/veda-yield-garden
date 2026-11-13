@@ -67,8 +67,6 @@ const PRICING: [string, string][] = [
   ["Depositar en una bóveda", "Gratis"],
   ["Cambiar y enviar monedas", "Gratis"],
   ["Entrar a Sube o Baja", "Gratis"],
-  ["Cosechar ganancias", "3% a 1% de lo cosechado"],
-  ["Cobrar una ronda ganada", "2% de lo cobrado"],
 ];
 
 function Landing() {
