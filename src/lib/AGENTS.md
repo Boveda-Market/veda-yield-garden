@@ -8,3 +8,4 @@
 - Telegram: channel posts and operator alerts go server-side through the Telegram connector (telegram.server.ts); publishing is gated by payoutAdmin and alerts never block payments.
 - Personal Telegram alerts: users link via one-time t.me/bovedamarketbot?start=code (10 min) handled by /api/public/telegram/webhook (secret-token verified); telegram_links is service-role only; userAlert is best-effort and never blocks; each alert passes its kind (alert-kinds.ts) and is skipped when muted (all kinds on by default).
 - Suggestions: signed-in users submit via requirePrivyAuth (3/day, 500 chars, suggestions.ts); user_suggestions is service-role only; operator reads/marks in Tesorería gated by payoutAdmin; treasuryAlert notifies best-effort.
+- System status (/status) uses public health probes and DefiLlama global metrics via one cached (60s) server function so visitors cannot amplify upstream calls; never private Helius.

@@ -1,0 +1,22 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useT } from "@/lib/i18n";
+import { LegalLayout } from "@/components/legal-layout";
+import { SystemStatusView } from "@/components/system-status";
+
+export const Route = createFileRoute("/status")({ staticData: { sitemap: true },
+  head: () => ({ meta: [
+    { title: "Estado del sistema — BÓVEDA" },
+    { name: "description", content: "Comprueba en vivo que los servicios de BÓVEDA están operativos, con la liquidez y comisiones globales de bóvedas y predicciones." },
+    { property: "og:title", content: "Estado del sistema — BÓVEDA" },
+    { property: "og:description", content: "Servicios en vivo, liquidez total y comisiones pagadas, actualizados cada minuto." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { property: "og:url", content: "https://bovedamarket.app/status" },
+  ], links: [{ rel: "canonical", href: "https://bovedamarket.app/status" }] }),
+  component: StatusPage,
+});
+
+function StatusPage() {
+  const t = useT();
+  return <LegalLayout title={t("Estado del sistema")} legal={false}><SystemStatusView /></LegalLayout>;
+}

@@ -22,6 +22,7 @@ import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as PruebaRouteImport } from './routes/prueba'
 import { Route as SeguridadRouteImport } from './routes/seguridad'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
@@ -91,6 +92,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TerminosRoute = TerminosRouteImport.update({
   id: '/terminos',
   path: '/terminos',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/prueba': typeof PruebaRoute
   '/seguridad': typeof SeguridadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -140,6 +147,7 @@ export interface FileRoutesByTo {
   '/prueba': typeof PruebaRoute
   '/seguridad': typeof SeguridadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/prueba': typeof PruebaRoute
   '/seguridad': typeof SeguridadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/prueba'
     | '/seguridad'
     | '/sitemap.xml'
+    | '/status'
     | '/terminos'
     | '/wallet'
     | '/api/public/telegram/webhook'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/prueba'
     | '/seguridad'
     | '/sitemap.xml'
+    | '/status'
     | '/terminos'
     | '/wallet'
     | '/api/public/telegram/webhook'
@@ -215,6 +226,7 @@ export interface FileRouteTypes {
     | '/prueba'
     | '/seguridad'
     | '/sitemap.xml'
+    | '/status'
     | '/terminos'
     | '/wallet'
     | '/api/public/telegram/webhook'
@@ -234,6 +246,7 @@ export interface RootRouteChildren {
   PruebaRoute: typeof PruebaRoute
   SeguridadRoute: typeof SeguridadRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StatusRoute: typeof StatusRoute
   TerminosRoute: typeof TerminosRoute
   WalletRoute: typeof WalletRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
@@ -332,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terminos': {
       id: '/terminos'
       path: '/terminos'
@@ -370,6 +390,7 @@ const rootRouteChildren: RootRouteChildren = {
   PruebaRoute: PruebaRoute,
   SeguridadRoute: SeguridadRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StatusRoute: StatusRoute,
   TerminosRoute: TerminosRoute,
   WalletRoute: WalletRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,

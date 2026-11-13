@@ -16,6 +16,8 @@ import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
 import { Lightbulb } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { SuggestionBox } from "./suggestion-box";
+import { StatusDot, useSystemState } from "./system-status";
+import { Activity } from "lucide-react";
 
 export type AppView = "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets";
 
@@ -80,6 +82,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
           <Link to="/terminos" className={row}><FileText size={18} />{t("Términos y condiciones")}</Link>
           <Link to="/privacidad" className={row}><Shield size={18} />{t("Política de privacidad")}</Link>
           <Link to="/faq" className={row}><HelpCircle size={18} />{t("Preguntas frecuentes")}</Link>
+          <StatusRow className={row} />
           {!guest && <>
             <button type="button" className={`${row} text-left`} onClick={() => { setOpen(false); setIdeas(true); }}><Lightbulb size={18} />{t("Ayúdanos a mejorar")}</button>
             <SecurityWhyDialog trigger={(o) => <button type="button" className={`${row} w-full text-left`} onClick={o}><ShieldCheck size={18} />{t("¿Por qué tus fondos están seguros?")}</button>} />
@@ -97,4 +100,10 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
       <DialogContent className="max-w-md"><DialogTitle className="sr-only">{t("Ayúdanos a mejorar")}</DialogTitle><SuggestionBox className="" /></DialogContent>
     </Dialog>
   </>;
+}
+
+function StatusRow({ className }: { className: string }) {
+  const t = useT();
+  const state = useSystemState();
+  return <Link to="/status" className={className}><Activity size={18} /><span className="flex-1">{t("Estado del sistema")}</span><StatusDot state={state} /></Link>;
 }
