@@ -42,7 +42,7 @@ const GUARANTEES = [
 
 
 const TRUST = [
-  { icon: Fingerprint, title: "Tus fondos, tu control", body: "Wallet de autocustodia con Face ID o huella, protegida por Privy. Nadie mueve tu dinero sin tu firma." },
+  { icon: Fingerprint, title: "Tus fondos, tu control", body: "Wallet de autocustodia con Face ID o huella, protegida por Privy. Nadie mueve tu dinero sin tu firma digital." },
   { icon: Landmark, title: "USDC 1:1 con el dólar", body: "Dólar digital de Circle respaldado por reservas en efectivo y bonos del Tesoro de EE. UU." },
   { icon: Search, title: "Revisas antes de firmar", body: "Cada operación se simula primero: ves exactamente qué entra, qué sale y el cargo." },
   { icon: ShieldCheck, title: "Sin cargos ocultos", body: "Recargas y retiros con Coinbase. Cargos de servicio reducidos y progresivos." },
