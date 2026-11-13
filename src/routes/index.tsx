@@ -153,7 +153,7 @@ function Landing() {
 
       <section className="py-12">
         <h2 className="font-display text-2xl font-bold">{t("Lo que dice la comunidad")}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">{t("Opiniones ilustrativas de la experiencia; publicaremos reseñas reales a medida que lleguen.")}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t("Opiniones ilustrativas de la experiencia")}</p>
         <ul className="mt-6 grid gap-4 sm:grid-cols-3">{REVIEWS.map(({ stars, name, text }) => <li key={name} className="rounded-2xl border border-border bg-card p-5">
           <div className="flex gap-0.5 text-primary" aria-label={`${stars}/5`}>{[1,2,3,4,5].map((n) => <Star key={n} size={15} className={n <= stars ? "fill-current" : "text-muted-foreground/40"} />)}</div>
           <p className="mt-3 text-sm leading-6">“{t(text)}”</p><p className="mt-3 text-xs font-semibold text-muted-foreground">{name}</p></li>)}</ul>
