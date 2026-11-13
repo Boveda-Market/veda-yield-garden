@@ -81,14 +81,13 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
     {portfolioOnly && <Suspense fallback={<p role="status">{t("Cargando portafolio…")}</p>}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
     {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && tab !== "predict" && <PortfolioEmpty />}
     {!portfolioOnly && <><div className="mb-2 mt-3 flex justify-end"><PoweredBy brand="meteora" /></div>
-    <div className="grid gap-4 md:grid-cols-2">{VAULTS.map((vault) => <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"><span>{t("Pool de liquidez")}</span><span>{t("Riesgo")}{" "}{t(vault.risk)}</span></div><h3 className="mt-4 flex items-center gap-2 font-display text-xl font-semibold"><TokenIcon symbol={vault.pair.split("/")[0] ?? ""} size={28} />{t(vault.name)}</h3><p className="mt-1 text-sm text-muted-foreground">{vault.pair}</p>
-      <PoolYield address={vault.pool} />
+    <div className="grid gap-3 md:grid-cols-2">{VAULTS.map((vault) => <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-4">
+      <div className="flex items-center justify-between gap-2"><h3 className="flex min-w-0 items-center gap-2 font-display text-lg font-semibold"><TokenIcon symbol={vault.pair.split("/")[0] ?? ""} size={24} />{t(vault.name)}<span className="text-xs font-normal text-muted-foreground">{vault.pair}</span></h3><span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{t("Riesgo")}{" "}{t(vault.risk)}</span></div>
+      <PoolYield compact address={vault.pool} />
       {(() => { const n = data?.positions.filter((p) => p.vaultId === vault.id).length ?? 0; return n > 0 ? <Link to="/portfolio" className="mt-3 inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{t("Tienes capital aquí · Ver en Portafolio")} →</Link> : null; })()}
-      <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground">{t(vault.blurb)}</p>
-      <Button variant="outline" className="mt-4 w-full" onClick={() => onDetails(vault)}>{t("Detalles del pool")}</Button>
-      <Button variant="secondary" className="mt-2 w-full" disabled={!walletAddress || (vault.id !== "sol" && vault.id !== "met")} onClick={() => { const own = data?.positions.find((p) => p.vaultId === vault.id && !p.locked); setAddTo(own?.address ?? null); setSimulationVault(vault); }}>{data?.positions.some((p) => p.vaultId === vault.id && !p.locked) ? <><Plus size={14} />{t("Añadir más")}</> : t("Depositar USDC")}</Button>
-
+      <p className="mt-2 flex-1 text-xs leading-5 text-muted-foreground">{t(vault.blurb)}</p>
+      <div className="mt-3 grid grid-cols-2 gap-2"><Button variant="outline" size="sm" className="w-full" onClick={() => onDetails(vault)}>{t("Detalles del pool")}</Button>
+      <Button variant="secondary" size="sm" className="w-full" disabled={!walletAddress || (vault.id !== "sol" && vault.id !== "met")} onClick={() => { const own = data?.positions.find((p) => p.vaultId === vault.id && !p.locked); setAddTo(own?.address ?? null); setSimulationVault(vault); }}>{data?.positions.some((p) => p.vaultId === vault.id && !p.locked) ? <><Plus size={14} />{t("Añadir más")}</> : t("Depositar USDC")}</Button></div>
     </article>)}</div>{!(data && data.positions.length > 0) && <><VaultSteps className="mt-6" /><StartGuide className="mt-4" /></>}</>}
     {simulationVault && <DepositSimulation key={`${simulationVault.id}-${addTo ?? "new"}`} vault={simulationVault} wallet={walletAddress} {...(addTo ? { position: addTo } : {})} initialAmount={depositAmount} migrate={migrating} onClose={() => { setSimulationVault(null); setAddTo(null); setDepositAmount(""); setMigrating(false); }} />}
     {harvest && walletAddress && <HarvestDialog wallet={walletAddress} position={harvest.position} vaultId={harvest.vaultId} onClose={() => setHarvest(null)} compound={harvest.compound} />}

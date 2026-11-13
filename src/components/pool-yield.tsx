@@ -7,7 +7,7 @@ import { fetchPoolStats } from "@/lib/pool-stats";
 
 const money = (value: number | null | undefined) => value == null ? "—" : `$${value.toLocaleString("es-MX", { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`;
 
-export function PoolYield({ address }: { address: string }) {
+export function PoolYield({ address, compact = false }: { address: string; compact?: boolean }) {
   const t = useT();
   const query = useQuery(poolYieldOptions(address));
   const stats = useQuery({
@@ -16,6 +16,10 @@ export function PoolYield({ address }: { address: string }) {
     staleTime: 60_000, refetchInterval: 60_000, retry: 1,
   });
   const apr = query.data?.apr;
+  if (compact) return <div className="mt-2 flex items-baseline gap-2" aria-label={t("Rendimiento del pool")}>
+    <p className="font-display text-3xl font-bold text-primary">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 2, minimumFractionDigits: 2 })}%`}</p>
+    <p className="text-xs text-muted-foreground">{query.isPending ? t("Consultando el pool…") : t("APR estimado · comisiones 24 h")}</p>
+  </div>;
   return <div className="mt-5" aria-label={t("Rendimiento del pool")}>
     <div className="flex items-center justify-between gap-2">
       <p className="min-w-0 break-words font-display text-4xl font-bold text-primary">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 2, minimumFractionDigits: 2 })}%`}</p>
