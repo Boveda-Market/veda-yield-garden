@@ -110,6 +110,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
     </div>
     {open && <p className="mt-3 text-xs text-muted-foreground">{t("Se cierra sola al expirar el tiempo. Si ganas, aparece tu premio para reclamar; si pierdes, desaparece.")}</p>}
     {open && onSell && <Button className="mt-4 w-full" variant="outline" disabled={disabled} onClick={onSell}>{selling ? <Loader2 className="animate-spin" size={16} /> : p.valueMicro ? t("Cerrar y vender ahora · ≈ {v} USDC", { v: usdcText(p.valueMicro) }) : t("Cerrar ahora")}</Button>}
+    {open && onSell && <p className="mt-2 text-[11px] font-semibold text-foreground">{t("Para cerrar firmarás dos transacciones: 1) vender la posición y 2) cambiarlo a USDC. Cerrar antes de tiempo no tiene comisión.")}</p>}
     {!open && won && <div className="mt-4 rounded-xl bg-primary/10 p-3"><p className="text-xs text-muted-foreground">{t("Cantidad final para tu wallet")}</p><p className="font-display text-xl font-bold text-primary tabular-nums">{usdcText(payout)} USDC</p><p className="text-xs text-muted-foreground">{t("Ganancia neta")} +{usdcText(profit)} USDC</p>
       {onClaim && <Button className="mt-2 w-full" disabled={disabled} onClick={onClaim}>{claiming ? <Loader2 className="animate-spin" size={16} /> : t("Reclamar premio · {v} USDC", { v: usdcText(payout) })}</Button>}
       {onClaim && <p className="mt-2 text-[11px] font-semibold text-foreground">{t("Para reclamar firmarás dos transacciones: 1) cobrar el pago y 2) cambiarlo a USDC.")}</p>}

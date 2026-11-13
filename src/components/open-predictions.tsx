@@ -6,6 +6,7 @@ import { useT } from "@/lib/i18n";
 import type { PredictPosition } from "@/lib/predict";
 import { executePredict, preparePredictSell } from "@/lib/predict.functions";
 import { annotateRecord } from "@/lib/predict-history";
+import { buildSwap, JUPUSD_MINT, quoteSwap, readTokenBalance } from "@/lib/wallet-actions";
 import { PredictPositionCard, usdcText, LivePositionStats, useStrike, roundSeconds } from "@/components/predict-position-card";
 import { useLivePrice } from "@/hooks/use-live-price";
 import type { MarketId } from "@/lib/markets";
@@ -38,13 +39,21 @@ export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPre
     if (!wallet) return; setBusy(p.pubkey); setMsg(null);
     try {
       if (!session.signOnly) throw new Error(t("Tu wallet no admite esta operación."));
+      const before = await readTokenBalance(wallet, JUPUSD_MINT).catch(() => 0n);
       const r = await preparePredictSell({ data: { wallet, position: p.pubkey } });
       if (!r.success) throw new Error(r.error);
       const signed = await session.signOnly(fromB64(r.transaction));
       const x = await executePredict({ data: { wallet, signed: toB64(signed), context: r.context } });
       if (!x.success) throw new Error(x.error);
       annotateRecord(wallet, p.pubkey, { soldMicro: p.valueMicro ?? "0", sellSig: x.signature });
-      setMsg({ ok: true, text: t("Venta confirmada. El USDC está en tu wallet.") });
+      setMsg({ ok: true, text: t("Firma 1 de 2 lista: posición cerrada. Ahora firma la 2 de 2 para cambiarlo a USDC…") });
+      // Closing early is free: convert only the JupUSD received from this sale to USDC (no BÓVEDA fee).
+      try {
+        let got = 0n;
+        for (let i = 0; i < 4 && got <= 0n; i++) { await new Promise((res) => setTimeout(res, 2000)); got = (await readTokenBalance(wallet, JUPUSD_MINT)) - before; }
+        if (got > 0n) { const q = await quoteSwap("JupUSD", "USDC", got, { feeUsdc: 0n }); await session.signAndSend(await buildSwap(wallet, q)); setMsg({ ok: true, text: t("Posición cerrada. {v} USDC llegaron a tu wallet.", { v: usdcText(q.outAmount) }) }); }
+        else setMsg({ ok: true, text: t("Venta confirmada. El USDC está en tu wallet.") });
+      } catch { setMsg({ ok: true, text: t("Posición cerrada, pero falta el cambio a USDC. Hazlo en Mi Billetera → Cambiar (JupUSD → USDC).") }); }
       setTimeout(() => void refresh(), 3000);
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };
