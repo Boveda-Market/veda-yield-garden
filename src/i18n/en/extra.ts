@@ -852,4 +852,10 @@ export const extra: Record<string, string> = {
   "Adjuntamos tu dirección pública y tipo de dispositivo. Nunca te pediremos claves ni códigos.": "We attach your public address and device type. We'll never ask for keys or codes.",
   "Enviar reporte": "Send report",
   "Reportar": "Report",
+  "Depositar en Bóvedas": "Deposit in Vaults",
+  "Rendimiento diario en USDC": "Daily yield in USDC",
+  "Jugar Sube/Baja": "Play Up/Down",
+  "Rondas en BTC, ETH y SOL": "Rounds on BTC, ETH and SOL",
+  "Manejar posiciones": "Manage positions",
+  "Cosecha ganancias y retira capital": "Harvest earnings and withdraw capital",
 };

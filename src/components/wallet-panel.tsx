@@ -126,9 +126,9 @@ export function WalletPanel() {
     { icon: QrCode, label: t("Recibir"), on: () => setReceiveOpen(true) },
   ];
   const shortcuts = [
-    { to: "/app", icon: LayoutDashboard, title: t("Bóvedas"), sub: t("Genera rendimiento diario") },
-    { to: "/mercados", icon: TrendingUp, title: t("Sube/Baja"), sub: t("Predicciones BTC, ETH, SOL") },
-    { to: "/portfolio", icon: PieChart, title: t("Portafolio"), sub: t("Tus ganancias y estadísticas") },
+    { to: "/app", icon: LayoutDashboard, title: t("Depositar en Bóvedas"), sub: t("Rendimiento diario en USDC") },
+    { to: "/mercados", icon: TrendingUp, title: t("Jugar Sube/Baja"), sub: t("Rondas en BTC, ETH y SOL") },
+    { to: "/portfolio", icon: PieChart, title: t("Manejar posiciones"), sub: t("Cosecha ganancias y retira capital") },
   ] as const;
 
   return <div className="mx-auto max-w-2xl space-y-5">
