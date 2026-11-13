@@ -48,7 +48,7 @@ export function NewsList({ onNavigate, predict = [] }: { onNavigate?: () => void
         <p className="mt-2 font-semibold">{a.outcome === "won" ? `🏆 ${t("Ganaste en Sube y Baja")}` : t("No acertaste en Sube y Baja")}</p>
         {a.p.title && <p className="mt-1 text-xs text-muted-foreground">{a.p.title}</p>}
         <p className="mt-1 text-sm text-muted-foreground">{a.outcome === "won" ? t("Tu premio de {v} USDC está listo para reclamar.", { v: (Number(a.p.payoutMicro) / 1e6).toFixed(2) }) : t("La ronda terminó en tu contra. Invertiste {v} USDC.", { v: (Number(a.p.costMicro) / 1e6).toFixed(2) })}</p>
-        {a.outcome === "won" && <Link to="/mercados" onClick={onNavigate} className="mt-3 inline-block text-sm font-medium text-primary">{t("Reclamar premio")} →</Link>}
+        {a.outcome === "won" && <Link to="/portfolio" onClick={onNavigate} className="mt-3 inline-block text-sm font-medium text-primary">{t("Reclamar premio")} →</Link>}
       </li>)}
       {items.length === 0 && personal.length === 0 && <li className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
         {ANNOUNCEMENTS.length === 0 ? t("No hay novedades por ahora.") : t("No tienes notificaciones pendientes.")}
