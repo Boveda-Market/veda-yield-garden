@@ -12,7 +12,6 @@ export const extra: Record<string, string> = {
   "Nunca te pediremos pagar para poder retirar. Retiras a Coinbase, tu banco o Cash App cuando tú decidas.": "We'll never ask you to pay to withdraw. Withdraw to Coinbase, your bank or Cash App whenever you decide.",
   "Cero firmas a ciegas": "Zero blind signing",
   "Cada operación se simula antes de firmar: ves qué sale, qué entra y el cargo exacto. Así te proteges de hackers.": "Every operation is simulated before you sign: you see what goes out, what comes in and the exact fee. That protects you from hackers.",
-  "Canal oficial de Telegram": "Official Telegram channel",
   "Transparencia total, en vivo": "Full transparency, live",
   "Únete a @bovedamarket: recibe alertas automáticas del estado de la red y de la app, avisos de seguridad y cada mejora en cuanto sale.": "Join @bovedamarket: get automatic network and app status alerts, security notices and every improvement as it ships.",
   "Unirme a @bovedamarket": "Join @bovedamarket",
