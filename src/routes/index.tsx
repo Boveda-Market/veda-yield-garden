@@ -58,7 +58,7 @@ const REVIEWS = [
 
 const TRUST = [
   { icon: Fingerprint, title: "Tus fondos, tu control", body: "Wallet de autocustodia con Face ID o huella, protegida por Privy. Nadie mueve tu dinero sin tu aprobación digital." },
-  { icon: Landmark, title: "USDC 1:1 con el dólar", body: "Dólar digital de Circle respaldado por reservas en efectivo y bonos del Tesoro de EE. UU." },
+  { icon: Landmark, title: "1 USDC = $1 siempre", body: "Nada de monedas locas que hoy suben y mañana se desploman. Tu saldo se mantiene estable mientras genera comisiones reales." },
   { icon: Search, title: "Revisas antes de aprobar", body: "Cada operación se simula primero: ves exactamente qué entra, qué sale y el cargo." },
   { icon: ShieldCheck, title: "Sin cargos ocultos", body: "Recargas y retiros con Coinbase. Cargos de servicio reducidos y progresivos." },
 ];
@@ -92,11 +92,11 @@ function Landing() {
     <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6"><Link to="/" className="flex items-center gap-3 font-display text-lg font-bold"><img src="/icon-512.png" alt="" className="h-9 w-9 rounded-lg" />BÓVEDA</Link><div className="flex items-center gap-2"><a href="#acceso" className="flex h-8 shrink-0 items-center whitespace-nowrap rounded-full bg-primary px-3 text-xs font-semibold text-primary-foreground">{t("Iniciar sesión")}</a><Link to="/prueba" onClick={allowTrialEntry} className="flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/40 bg-primary/10 px-3 text-xs font-semibold text-primary"><Sparkles size={13} />{t("Prueba gratis")}</Link></div></header>
     <main className="mx-auto max-w-5xl px-6">
       <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">
-        <div className="order-1 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t("Tus fondos nunca salen de tu control.")}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t("Pon tus dólares a trabajar. $0 por empezar.")}</p></div>
+        <div className="order-1 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t("Genera ganancias reales. Nada de monedas locas.")}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t("Tus fondos siempre bajo tu control. $0 por empezar y retiras cuando quieras.")}</p></div>
         <div className="order-3 text-center md:order-1 md:text-left">
           <p className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"><ShieldCheck size={13} />{t("100% autocustodia · Nadie custodia tus fondos")}</p>
-          <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t("Tus fondos nunca salen de tu control.")}</h1>
-          <p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t("Pon tus dólares a trabajar. $0 por empezar.")}</p>
+          <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t("Genera ganancias reales. Nada de monedas locas.")}</h1>
+          <p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t("Tus fondos siempre bajo tu control. $0 por empezar y retiras cuando quieras.")}</p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground md:justify-start">{[["Powered by","Coinbase","/brands/coinbase.svg"],["Secured by","Privy","/brands/privy-mark.png"],["Network","Solana","/brands/solana.svg"]].map(([l,n,src]) => <span key={n} className="flex items-center gap-1.5"><span>{l}</span><img src={src} alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-medium text-foreground">{n}</span>{n === "Solana" && <span className="ml-1 flex items-center gap-1 font-semibold text-primary"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_var(--color-primary)]" /></span>{t("Online")}</span>}</span>)}</div>
           <p className="mt-5 text-base leading-7 text-muted-foreground">{t("BÓVEDA no es un banco ni un fondo que pueda congelar tu dinero. Es una interfaz segura, protegida contra hackers, donde solo tú apruebas cada movimiento con tu huella o Face ID.")}</p>
           <p className="mt-3 text-base leading-7 text-muted-foreground">{t("Depositar, cambiar y enviar es gratis. Solo cobramos un pequeño cargo cuando tú cosechas ganancias o cobras una ronda ganada: solo ganamos cuando tú ganas.")}</p>
