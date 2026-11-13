@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 
 export type ServiceState = "up" | "degraded" | "down";
 export type ServiceCheck = { id: string; state: ServiceState; ms: number | null };
-export type GlobalMetric = { tvl: number | null; fees24h: number | null; feesAll: number | null; volume24h: number | null; volumeAll: number | null };
+export type GlobalMetric = { tvl: number | null; fees24h: number | null; feesAll: number | null; volume24h: number | null; volumeAll: number | null; openInterest: number | null };
 export type SystemStatus = { checkedAt: number; services: ServiceCheck[]; meteora: GlobalMetric; polymarket: GlobalMetric };
 
 const num = (v: unknown) => { const n = Number(v); return Number.isFinite(n) && n >= 0 ? n : null; };
@@ -29,7 +29,7 @@ let cache: { at: number; data: SystemStatus } | null = null;
 export const getSystemStatus = createServerFn({ method: "GET" }).handler(async (): Promise<SystemStatus> => {
   if (cache && Date.now() - cache.at < 60_000) return cache.data;
   const jupKey = process.env["JUPITER_API_KEY"];
-  const [services, mTvl, mFees, pTvl, pVol] = await Promise.all([
+  const [services, mTvl, mFees, pTvl, pVol, pOi] = await Promise.all([
     Promise.all([
       probe("network", async (s) => {
         try { const r = await fetch("https://status.solana.com/api/v2/status.json", { signal: s }); if (r.ok) { const j = await r.json() as { status?: { indicator?: string } }; return j.status?.indicator === "none" || j.status?.indicator === "minor"; } } catch { /* fallback */ }
@@ -46,11 +46,12 @@ export const getSystemStatus = createServerFn({ method: "GET" }).handler(async (
     json(`https://api.llama.fi/summary/fees/meteora?dataType=dailyFees&${SUM}`),
     tvl("polymarket"),
     json(`https://api.llama.fi/summary/dexs/polymarket?${SUM}`),
+    json(`https://api.llama.fi/summary/open-interest/polymarket?${SUM}`),
   ]);
   const data: SystemStatus = {
     checkedAt: Date.now(), services,
-    meteora: { tvl: mTvl, fees24h: num(mFees?.["total24h"]), feesAll: num(mFees?.["totalAllTime"]), volume24h: null, volumeAll: null },
-    polymarket: { tvl: pTvl, fees24h: null, feesAll: null, volume24h: num(pVol?.["total24h"]), volumeAll: num(pVol?.["totalAllTime"]) },
+    meteora: { tvl: mTvl, fees24h: num(mFees?.["total24h"]), feesAll: num(mFees?.["totalAllTime"]), volume24h: null, volumeAll: null, openInterest: null },
+    polymarket: { tvl: pTvl, fees24h: null, feesAll: null, volume24h: num(pVol?.["total24h"]), volumeAll: num(pVol?.["totalAllTime"]), openInterest: num(pOi?.["total24h"]) },
   };
   cache = { at: Date.now(), data };
   return data;
