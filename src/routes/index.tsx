@@ -132,7 +132,7 @@ function Landing() {
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t("Cuentas claras")}</p>
         <h2 className="mt-2 font-display text-2xl font-bold">{t("Solo ganamos cuando tú ganas")}</h2>
         <ul className="mt-5 divide-y divide-border">{PRICING.map(([a, b]) => <li key={a} className="flex items-center justify-between gap-4 py-3 text-sm"><span>{t(a)}</span><span className="text-right font-semibold text-primary">{t(b)}</span></li>)}</ul>
-        <p className="mt-4 text-xs text-muted-foreground">{t("Mientras más mueves, menor el porcentaje. Siempre ves el cargo exacto antes de firmar. Los costos de red se pagan aparte.")} <Link to="/terminos" className="text-primary underline">{t("Ver detalle")}</Link></p>
+        <p className="mt-4 text-xs text-muted-foreground">{t("Mientras más mueves, menor el porcentaje. Siempre ves el cargo exacto antes de firmar. Los costos de red se pagan aparte.")} <Link to="/terminos" hash="comisiones" className="text-primary underline">{t("Ver detalle")}</Link></p>
       </section>
 
       <section className="rounded-3xl border border-primary/30 bg-primary/5 p-6 sm:p-8">
