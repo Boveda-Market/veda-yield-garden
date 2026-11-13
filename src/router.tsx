@@ -8,7 +8,7 @@ if (typeof window !== "undefined") installDomGuard();
 
 export const getRouter = () => {
   // One client per request: a module-level QueryClient leaks cached data between SSR requests.
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 10_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false, retry: 1 } } });
 
   const router = createRouter({
     routeTree,
@@ -16,6 +16,9 @@ export const getRouter = () => {
     scrollRestoration: true,
     // Lets Query own freshness; set caching defaults on the QueryClient, not the router.
     defaultPreloadStaleTime: 0,
+    // Start loading the next screen as soon as a finger/pointer touches a link.
+    defaultPreload: "intent",
+    defaultPreloadDelay: 50,
   });
 
   return router;
