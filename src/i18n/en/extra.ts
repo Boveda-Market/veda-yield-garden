@@ -1,5 +1,7 @@
 /** English strings for the homepage, wallet, portfolio, operation dialogs, affiliates and account redesigns. */
 export const extra: Record<string, string> = {
+  "Tus fondos siempre bajo tu control. $0 para entrar\xa0 y retira todo en cualquier momento. Garantizado.": "Your funds always under your control. $0 to get in and withdraw everything anytime. Guaranteed.",
+  "Conoce más": "Learn more",
   "100% autocustodia · Nadie custodia tus fondos": "100% self-custody · No one holds your funds",
   "Tus fondos nunca salen de tu control.": "Your funds never leave your control.",
   "BÓVEDA no es un banco ni un fondo que pueda congelar tu dinero. Es una interfaz segura, protegida contra hackers, donde solo tú apruebas cada movimiento con tu huella o Face ID.": "BÓVEDA is not a bank or a fund that can freeze your money. It's a secure, hacker-resistant interface where only you approve each move with your fingerprint or Face ID.",
