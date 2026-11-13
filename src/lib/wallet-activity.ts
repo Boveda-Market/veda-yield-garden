@@ -1,4 +1,4 @@
-export type ActivityKind = "swap" | "predict_claim" | "predict_buy" | "predict_close" | "vault_deposit" | "vault_harvest" | "vault_exit" | "transfer" | "other";
+export type ActivityKind = "swap" | "predict_claim" | "predict_buy" | "predict_fill" | "predict_sell" | "predict_close" | "vault_deposit" | "vault_harvest" | "vault_exit" | "transfer" | "other";
 export type WalletActivity = { signature: string; at: number | null; failed: boolean; status: string; kind: ActivityKind };
 
 const PREDICT = "3ZZuTbwC6aJbvteyVxXUS7gtFYdf7AuXeitx6VyvjvUp";
@@ -18,7 +18,9 @@ export function classifyActivity(logs: string[]): ActivityKind {
   const has = (re: RegExp) => ix.some((n) => re.test(n));
   if (programs.has(PREDICT)) {
     if (has(/^ClaimPayout/)) return "predict_claim";
-    if (has(/BuyOrder|CreateOrder/)) return "predict_buy";
+    if (has(/SellOrder/)) return "predict_sell";
+    if (has(/^CreateOrder/)) return "predict_buy";
+    if (has(/^FillBuyOrder/)) return "predict_fill";
     return "predict_close";
   }
   if (programs.has(VAULT)) {
@@ -33,9 +35,11 @@ export function classifyActivity(logs: string[]): ActivityKind {
 
 export const ACTIVITY_LABEL: Record<ActivityKind, string> = {
   swap: "Cambio (swap)",
-  predict_claim: "Reclamo de predicción",
-  predict_buy: "Predicción Sube/Baja",
-  predict_close: "Cierre de predicción",
+  predict_claim: "Sube/Baja · premio reclamado",
+  predict_buy: "Sube/Baja · predicción enviada",
+  predict_fill: "Sube/Baja · predicción abierta",
+  predict_sell: "Sube/Baja · posición vendida",
+  predict_close: "Sube/Baja · posición cerrada",
   vault_deposit: "Depósito en bóveda",
   vault_harvest: "Cosecha de ganancias",
   vault_exit: "Cierre y liquidación",
