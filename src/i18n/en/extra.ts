@@ -770,4 +770,5 @@ export const extra: Record<string, string> = {
   "Ver historial completo": "View full history",
   "Borrar notificación": "Delete notification",
   "Prueba gratis": "Free trial",
+  "Coinbase y Privy son marcas registradas de sus respectivos titulares y operan como proveedores independientes de BÓVEDA (compra y retiro de fondos, y acceso con autocustodia). El uso de sus nombres y logotipos no implica patrocinio ni respaldo directo.": "Coinbase and Privy are registered trademarks of their respective owners and act as independent providers to BÓVEDA (buying and withdrawing funds, and self-custody sign-in). Use of their names and logos does not imply sponsorship or direct endorsement.",
 };
