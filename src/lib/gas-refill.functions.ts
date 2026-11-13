@@ -8,7 +8,8 @@ type Fail = { success: false; error: string };
 export const prepareGasRefill = createServerFn({ method: "POST" })
   .middleware([requirePrivyAuth])
   .inputValidator((d: unknown) => gasRefillInput.parse(d))
-  .handler(async ({ data }): Promise<{ success: true; transaction: string; lamports: string; chargeMicro: string } | Fail> => {
+  .handler(async ({ data, context }): Promise<{ success: true; transaction: string; lamports: string; chargeMicro: string } | Fail> => {
+    { const { assertTradingWallet } = await import("@/lib/trade-guard.server"); await assertTradingWallet(context.privyUserId, data.wallet); }
     const key = process.env["HELIUS_API_KEY"];
     const secret = process.env["AFFILIATE_PAYOUT_SECRET_KEY"];
     if (!key || !secret) return { success: false, error: "La recarga de reserva no está disponible ahora. Usa Cambiar de USDC a SOL." };

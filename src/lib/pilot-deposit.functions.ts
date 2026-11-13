@@ -4,8 +4,10 @@ import { pilotInput, signatureInput, type PilotStatus } from "@/lib/pilot-deposi
 
 /** Re-simulates the chosen deposit and returns it only when budget and position verify. */
 export const preparePilotDeposit = createServerFn({ method: "POST" })
+  .middleware([requirePrivyAuth])
   .inputValidator((input: unknown) => pilotInput.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    { const { assertTradingWallet } = await import("@/lib/trade-guard.server"); await assertTradingWallet(context.privyUserId, data.wallet); }
     const key = process.env["HELIUS_API_KEY"];
     if (!key) throw new Error("La conexión de Solana no está configurada.");
     const { simulateDeposit } = await import("@/lib/deposit-simulation.server");

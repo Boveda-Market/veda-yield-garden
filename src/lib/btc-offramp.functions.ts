@@ -16,7 +16,8 @@ export const quoteBtcWithdraw = createServerFn({ method: "POST" })
 export const createBtcWithdraw = createServerFn({ method: "POST" })
   .middleware([requirePrivyAuth])
   .inputValidator((d) => z.object({ quoteId: z.string().uuid(), btcAddress: z.string().max(100), wallet: solanaAddressSchema }).parse(d))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    { const { assertTradingWallet } = await import("@/lib/trade-guard.server"); await assertTradingWallet(context.privyUserId, data.wallet); }
     if (!isBtcAddress(data.btcAddress)) throw new Error("La dirección de Bitcoin no es válida.");
     const { sideshiftCreate } = await import("@/lib/btc-offramp.server");
     return sideshiftCreate(data.quoteId, data.btcAddress.trim(), data.wallet);

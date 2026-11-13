@@ -10,6 +10,7 @@ export const startCoinbaseSell = createServerFn({ method: "POST" })
   .middleware([requirePrivyAuth])
   .inputValidator((d) => z.object({ wallet: solanaAddressSchema, amount: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(), origin: z.string().url() }).parse(d))
   .handler(async ({ data, context }) => {
+    { const { assertTradingWallet } = await import("@/lib/trade-guard.server"); await assertTradingWallet(context.privyUserId, data.wallet); }
     try {
       const { coinbaseSellUrl } = await import("@/lib/coinbase-offramp.server");
       const back = ORIGINS.includes(data.origin) ? data.origin : ORIGINS[0];
