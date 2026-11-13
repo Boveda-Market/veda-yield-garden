@@ -24,29 +24,32 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
   const mmss = left !== null && left > 0 ? `${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")}` : null;
   const won = open ? null : positionWon(p);
   const Up = p.side === "up";
-  const Row = ({ k, v, tone }: { k: string; v: string; tone?: string }) => <div className="flex justify-between gap-2"><span className="text-muted-foreground">{k}</span><span className={`font-medium ${tone ?? ""}`}>{v}</span></div>;
-  return <article className="rounded-xl border border-border bg-card p-4 text-sm">
+  const Row = ({ k, v, tone }: { k: string; v: string; tone?: string }) => <div className="flex justify-between gap-2"><span className="text-muted-foreground">{k}</span><span className={`font-medium tabular-nums ${tone ?? ""}`}>{v}</span></div>;
+  return <article className="rounded-lg border border-border bg-card p-5">
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
-        <p className="flex items-center gap-2 font-semibold">{Up ? <ArrowUpRight size={16} className="text-primary" /> : <ArrowDownRight size={16} className="text-destructive" />}{asset && <TokenIcon symbol={asset} size={18} />}{asset ?? "—"} · {t(Up ? "Sube" : "Baja")}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">{when}</p>
+        <h3 className="flex items-center gap-2 font-display text-lg font-semibold">{asset && <TokenIcon symbol={asset} size={22} />}{asset ?? "—"}
+          <span className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-bold ${Up ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{Up ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}{t(Up ? "Sube" : "Baja")}</span></h3>
+        <p className="mt-1 text-xs text-muted-foreground">{when}</p>
         <PoweredBy brand="polymarket" className="mt-1 !justify-start" />
       </div>
-      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${open ? (pnl !== null && pnl < 0n ? "bg-destructive/15 text-destructive" : "bg-primary/15 text-primary") : won ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
-        {open ? (mmss ? t("Cierra en {v}", { v: mmss }) : t("Resolviendo…")) : won === null ? t("Cerrada") : won ? t("Acertaste") : t("No acertaste")}
+      <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums ${open ? (pnl !== null && pnl < 0n ? "bg-destructive/15 text-destructive" : "bg-primary/15 text-primary") : won ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
+        {open ? (mmss ? `⏱ ${t("Cierra en {v}", { v: mmss })}` : t("Resolviendo…")) : won === null ? t("Cerrada") : won ? t("Acertaste") : t("No acertaste")}
       </span>
     </div>
-    <div className="mt-3 space-y-1.5 text-xs">
-      <Row k={t("Invertido")} v={`${usdcText(cost)} USDC`} />
-      <Row k={t("Contratos")} v={`${(Number(p.contractsMicro) / 1e6).toLocaleString(locale, { maximumFractionDigits: 2 })}${ppc !== null ? ` · ${(ppc * 100).toFixed(1)}¢ ${t("c/u")}` : ""}`} />
-      <Row k={t("Pago si aciertas")} v={`${usdcText(payout)} USDC (+${usdcText(profit)}${cost > 0n ? ` · ${(Number(payout) / Number(cost)).toFixed(2)}×` : ""})`} tone="text-primary" />
+    <p className="mt-4 text-xs text-muted-foreground">{t("Premio si aciertas")}</p>
+    <p className="font-display text-3xl font-semibold text-primary tabular-nums">{usdcText(payout)} USDC</p>
+    <p className="mt-1 text-xs text-muted-foreground tabular-nums">{t("Invertido")}: {usdcText(cost)} USDC · {t("Ganancia posible")} +{usdcText(profit)}{cost > 0n ? ` (${(Number(payout) / Number(cost)).toFixed(2)}×)` : ""}</p>
+    <div className="mt-4 space-y-1.5 rounded-xl bg-secondary/50 p-3 text-sm">
       {open && <Row k={t("Valor si vendes ahora")} v={p.valueMicro ? `${usdcText(p.valueMicro)} USDC` : t("No disponible")} />}
       {pnl !== null && <Row k={open ? t("Resultado actual") : t("Resultado")} v={`${pnl >= 0n ? "+" : ""}${usdcText(pnl)} USDC`} tone={pnl >= 0n ? "text-primary" : "text-destructive"} />}
+      <Row k={t("Contratos")} v={`${(Number(p.contractsMicro) / 1e6).toLocaleString(locale, { maximumFractionDigits: 2 })}${ppc !== null ? ` · ${(ppc * 100).toFixed(1)}¢ ${t("c/u")}` : ""}`} />
       {p.closeTime && <Row k={t("Cierre de la ronda")} v={new Date(p.closeTime * 1000).toLocaleString(locale, { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" })} />}
     </div>
-    {open && onSell && <Button className="mt-3 w-full" size="sm" variant="outline" disabled={disabled} onClick={onSell}>{selling ? <Loader2 className="animate-spin" size={14} /> : t("Cerrar ahora")}</Button>}
-    {!open && won && <div className="mt-3 rounded-xl bg-primary/10 p-3"><p className="text-xs text-muted-foreground">{t("Cantidad final para tu wallet")}</p><p className="font-display text-xl font-bold text-primary tabular-nums">{usdcText(payout)} USDC</p><p className="text-xs text-muted-foreground">{t("Ganancia neta")} +{usdcText(profit)} USDC</p>
-      {onClaim && <Button className="mt-2 w-full" size="sm" disabled={disabled} onClick={onClaim}>{claiming ? <Loader2 className="animate-spin" size={14} /> : t("Reclamar ganancias")}</Button>}
+    {open && <p className="mt-3 text-xs text-muted-foreground">{t("Se cierra sola al expirar el tiempo. Si ganas, aparece tu premio para reclamar; si pierdes, desaparece.")}</p>}
+    {open && onSell && <Button className="mt-4 w-full" variant="outline" disabled={disabled} onClick={onSell}>{selling ? <Loader2 className="animate-spin" size={16} /> : p.valueMicro ? t("Cerrar y vender ahora · ≈ {v} USDC", { v: usdcText(p.valueMicro) }) : t("Cerrar ahora")}</Button>}
+    {!open && won && <div className="mt-4 rounded-xl bg-primary/10 p-3"><p className="text-xs text-muted-foreground">{t("Cantidad final para tu wallet")}</p><p className="font-display text-xl font-bold text-primary tabular-nums">{usdcText(payout)} USDC</p><p className="text-xs text-muted-foreground">{t("Ganancia neta")} +{usdcText(profit)} USDC</p>
+      {onClaim && <Button className="mt-2 w-full" disabled={disabled} onClick={onClaim}>{claiming ? <Loader2 className="animate-spin" size={16} /> : t("Reclamar premio · {v} USDC", { v: usdcText(payout) })}</Button>}
       {onClaim && <p className="mt-2 text-[11px] font-semibold text-foreground">{t("Para reclamar firmarás dos transacciones: 1) cobrar el pago y 2) cambiarlo a USDC.")}</p>}
       <p className="mt-2 text-[11px] text-muted-foreground">{t("Normalmente se acredita solo. Si aún no lo ves en tu wallet, reclámalo aquí.")}</p></div>}
   </article>;

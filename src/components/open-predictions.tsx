@@ -44,7 +44,7 @@ export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPre
   if (items.length === 0) return <p className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">{t("No tienes predicciones abiertas ahora mismo.")}</p>;
   return <div className="space-y-3">
     {msg && <p role="status" className={`text-sm ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text}</p>}
-    <div className="grid gap-3 md:grid-cols-2">{items.map((p) => <PredictPositionCard key={p.pubkey} p={p} onSell={() => void sell(p)} selling={busy === p.pubkey} disabled={!!busy} />)}</div>
+    <div className="grid gap-4 md:grid-cols-2">{items.map((p) => <PredictPositionCard key={p.pubkey} p={p} onSell={() => void sell(p)} selling={busy === p.pubkey} disabled={!!busy} />)}</div>
   </div>;
 }
 

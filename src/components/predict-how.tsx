@@ -6,10 +6,11 @@ import { useT } from "@/lib/i18n";
 export function PredictHow() {
   const t = useT();
   const points: [string, string][] = [
-    [t("No compras cripto"), t("No compras Bitcoin, ETH ni SOL. Tu dinero sigue en USDC: solo predices si el precio subirá o bajará durante el tiempo de la ronda.")],
+    [t("Ganas en ambas direcciones"), t("Tanto si el mercado sube como si cae, tú eliges hacia dónde va el precio. No compras la cripto: tu dinero sigue en USDC.")],
     [t("Tiempo definido"), t("Cada ronda dura 5 minutos, 15 minutos o un día. Al terminar, se compara el precio final con el precio de inicio.")],
-    [t("Cómo ganas"), t("Cada contrato ganador paga 1.00 USDC. Si lo compraste a 0.55 y aciertas, ganas 0.45 por contrato.")],
-    [t("Riesgo claro"), t("Nunca pierdes más de lo que pusiste. Si no aciertas, el contrato vence sin valor. Sin préstamos ni liquidaciones.")],
+    [t("Se cierra sola"), t("Cuando el tiempo expira, la posición se cierra automáticamente. Si ganas, aparece tu premio para reclamar. Si pierdes, desaparece de tus posiciones.")],
+    [t("Reclama tu premio cuando quieras"), t("Cada contrato ganador paga 1.00 USDC y lo reclamas cuando quieras. También puedes vender antes del cierre al precio del momento.")],
+    [t("Riesgo claro"), t("Nunca pierdes más de lo que pusiste. Sin préstamos ni liquidaciones.")],
   ];
   return (
     <Dialog>

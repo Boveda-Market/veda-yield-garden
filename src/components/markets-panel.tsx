@@ -74,7 +74,7 @@ export function MarketsPanel(_: { identity: string }) {
           <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />{t("En vivo")}</span>
           <PoweredBy brand="polymarket" className="ml-auto" />
         </div>
-        <div className="flex flex-wrap items-center gap-2"><p className="text-sm text-muted-foreground">{t("Predice el precio en rondas de 5 min, 15 min o diarias. Si aciertas, cobras al cerrar la ronda.")}</p><PredictHow /></div>
+        <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-semibold text-primary">{t("Ganas si sube, ganas si baja · Reclama tu premio cuando quieras")}</p><p className="w-full text-sm text-muted-foreground">{t("Rondas en vivo de 5 min, 15 min y diarias en BTC, ETH y SOL. Al terminar el tiempo la ronda se cierra sola: si ganas, aparece tu premio para reclamar; si pierdes, desaparece.")}</p><PredictHow /></div>
       </header>
 
 
