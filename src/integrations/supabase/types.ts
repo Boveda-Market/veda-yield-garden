@@ -245,6 +245,30 @@ export type Database = {
         }
         Relationships: []
       }
+      system_service_status: {
+        Row: {
+          first_down_at: string | null
+          operator_alerted: boolean
+          public_alerted: boolean
+          service: string
+          updated_at: string
+        }
+        Insert: {
+          first_down_at?: string | null
+          operator_alerted?: boolean
+          public_alerted?: boolean
+          service: string
+          updated_at?: string
+        }
+        Update: {
+          first_down_at?: string | null
+          operator_alerted?: boolean
+          public_alerted?: boolean
+          service?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       telegram_links: {
         Row: {
           alerts_enabled: boolean

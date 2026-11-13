@@ -23,14 +23,9 @@ async function json(url: string): Promise<Record<string, unknown> | null> {
 async function tvl(slug: string) { try { const r = await fetch(`https://api.llama.fi/tvl/${slug}`, { signal: AbortSignal.timeout(10_000) }); return r.ok ? num(await r.text()) : null; } catch { return null; } }
 const SUM = "excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true";
 
-let cache: { at: number; data: SystemStatus } | null = null;
-
-/** Public health checks + global protocol metrics (public DefiLlama data); cached 60s so visitors can't amplify upstream calls. */
-export const getSystemStatus = createServerFn({ method: "GET" }).handler(async (): Promise<SystemStatus> => {
-  if (cache && Date.now() - cache.at < 60_000) return cache.data;
-  const jupKey = process.env["JUPITER_API_KEY"];
-  const [services, mTvl, mFees, pTvl, pVol, pOi] = await Promise.all([
-    Promise.all([
+/** Runs every public service probe (shared by /status and the background monitor). */
+export function probeServices(jupKey?: string): Promise<ServiceCheck[]> {
+  return Promise.all([
       probe("network", async (s) => {
         try { const r = await fetch("https://status.solana.com/api/v2/status.json", { signal: s }); if (r.ok) { const j = await r.json() as { status?: { indicator?: string } }; return j.status?.indicator === "none" || j.status?.indicator === "minor"; } } catch { /* fallback */ }
         const r = await fetch("https://solana-rpc.publicnode.com", { method: "POST", signal: s, headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getHealth" }) });
@@ -41,7 +36,17 @@ export const getSystemStatus = createServerFn({ method: "GET" }).handler(async (
       probe("markets", okFetch("https://gamma-api.polymarket.com/events?limit=1")),
       probe("wallets", (s) => fetch("https://auth.privy.io/", { signal: s }).then((r) => r.status < 500)),
       probe("funding", okFetch("https://api.coinbase.com/v2/time")),
-    ]),
+    ]);
+}
+
+let cache: { at: number; data: SystemStatus } | null = null;
+
+/** Public health checks + global protocol metrics (public DefiLlama data); cached 60s so visitors can't amplify upstream calls. */
+export const getSystemStatus = createServerFn({ method: "GET" }).handler(async (): Promise<SystemStatus> => {
+  if (cache && Date.now() - cache.at < 60_000) return cache.data;
+  const jupKey = process.env["JUPITER_API_KEY"];
+  const [services, mTvl, mFees, pTvl, pVol, pOi] = await Promise.all([
+    probeServices(jupKey),
     tvl("meteora"),
     json(`https://api.llama.fi/summary/fees/meteora?dataType=dailyFees&${SUM}`),
     tvl("polymarket"),
