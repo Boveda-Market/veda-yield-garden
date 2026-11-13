@@ -55,9 +55,14 @@ export function MarketsPanel(_: { identity: string }) {
   const skey = round ? `${market}:${round.openTime}` : "";
   useEffect(() => {
     if (!round || strikes[skey]) return;
-    let alive = true;
-    void fetchPriceAt(market, round.openTime * 1000).then((v) => { if (alive && v) setStrikes((o) => ({ ...o, [skey]: v })); });
-    return () => { alive = false; };
+    // The opening candle may not be published yet right after a 5 min round starts: retry until it is.
+    let alive = true, timer: ReturnType<typeof setTimeout> | undefined;
+    const tryLoad = () => void fetchPriceAt(market, round.openTime * 1000).then((v) => {
+      if (!alive) return;
+      if (v) setStrikes((o) => ({ ...o, [skey]: v })); else timer = setTimeout(tryLoad, 4_000);
+    });
+    tryLoad();
+    return () => { alive = false; if (timer) clearTimeout(timer); };
   }, [skey]); // eslint-disable-line react-hooks/exhaustive-deps
   const strike = strikes[skey];
   const price = prices[market];
