@@ -123,7 +123,9 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
     setBusy("sign");
     try {
       const sig = await sign(review.tx, review.context);
-      setReview(null);
+      // Order placed: clear the side so the 15s quote loop stops and the screen returns to normal.
+      seq.current++; jumped.current = true; setSide(null); setReview(null); setQuoteErr(null);
+      requestAnimationFrame(() => sidesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
       const spent = toBaseUnits(amount, "USDC") ?? 0n;
       setBalance((b) => b === null ? b : b > spent ? b - spent : 0n);
       setMsg({ ok: true, text: t("Predicción confirmada. Si aciertas, el pago llega solo a tu wallet al cerrar la ronda."), sig });
