@@ -1,8 +1,9 @@
+import { IN_APP_FLAG, OPEN_MENU_EVENT, OPEN_MENU_FLAG } from "./back-button";
 import { Link } from "@tanstack/react-router";
 import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, Home, History, Send, Bell } from "lucide-react";
 import { SUPPORT_URL } from "./safety-notice";
 import { InstallAppButton } from "./install-app";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { LanguageMenu } from "./language-menu";
@@ -47,6 +48,13 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
   const row = "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-secondary";
   const go = (v: AppView) => { setOpen(false); onSelect(v); };
   const operator = useContext(BovedaSessionContext)?.walletAddress === AFFILIATE_PAYOUT_WALLET;
+  useEffect(() => {
+    if (guest) return;
+    const openMenu = () => setOpen(true);
+    try { sessionStorage.setItem(IN_APP_FLAG, "1"); if (sessionStorage.getItem(OPEN_MENU_FLAG) === "1") { sessionStorage.removeItem(OPEN_MENU_FLAG); setOpen(true); } } catch { /* ignore */ }
+    window.addEventListener(OPEN_MENU_EVENT, openMenu);
+    return () => window.removeEventListener(OPEN_MENU_EVENT, openMenu);
+  }, [guest]);
   return <>
     <span className="inline-flex items-center gap-2"><NewsBell />
     <button type="button" onClick={() => setOpen(true)} aria-label={t("Abrir menú")} className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-medium hover:bg-secondary"><Menu size={18} />{t("Menú")}</button></span>
@@ -81,7 +89,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
         <div className="mt-6 flex items-center justify-between border-t border-border pt-4 text-sm"><span>{t("Idioma")}</span><LanguageMenu /></div>
         <div className="mt-4 border-t border-border pt-4">
           {guest ? <Link to="/" className={row}><Home size={18} />{t("Crear cuenta o entrar")}</Link>
-            : <button type="button" className={`${row} text-destructive`} onClick={() => { setOpen(false); onLogout(); }}><LogOut size={18} />{t("Cerrar sesión")}</button>}
+            : <button type="button" className={`${row} text-destructive`} onClick={() => { setOpen(false); try { sessionStorage.removeItem(IN_APP_FLAG); } catch { /* ignore */ } onLogout(); }}><LogOut size={18} />{t("Cerrar sesión")}</button>}
         </div>
       </SheetContent>
     </Sheet>
