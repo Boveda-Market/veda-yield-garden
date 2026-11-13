@@ -113,7 +113,7 @@ export const more: Record<string, string> = {
   "Rondas ya resueltas para esta moneda y duración.": "Already resolved rounds for this coin and duration.",
   "Cambiar SOL ⇄ USDC": "Swap SOL ⇄ USDC",
   "Bóvedas de rendimiento": "Yield vaults",
-  "Elige una bóveda para poner a trabajar tus USDC. Revisas los importes antes de firmar.": "Choose a vault to put your USDC to work. You review the amounts before signing.",
+  "Pon tus USDC a generar comisiones diarias. Retiras o cosechas cuando quieras.": "Put your USDC to work earning daily fees. Withdraw or harvest anytime.",
   "Tienes capital aquí · Ver en Portafolio": "You have capital here · View in Portfolio",
   "Puedes operar posiciones compatibles de SOL y MET con su wallet propietaria. La liquidez bloqueada no se puede liquidar. No se ha solicitado ninguna firma ni se ha movido dinero.": "You can operate compatible SOL and MET positions with their owner wallet. Locked liquidity can't be liquidated. No signature has been requested and no money has moved.",
   "Convierte tu SOL a USDC": "Convert your SOL to USDC",
