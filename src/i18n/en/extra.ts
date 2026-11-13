@@ -22,6 +22,7 @@ export const extra: Record<string, string> = {
   "Cada operación se simula antes de firmar: ves qué sale, qué entra y el cargo exacto. Así te proteges de hackers.": "Every operation is simulated before you sign: you see what goes out, what comes in and the exact fee. That protects you from hackers.",
   "Transparencia total, en vivo": "Full transparency, live",
   "Únete a @bovedamarket: recibe alertas automáticas del estado de la red y de la app, avisos de seguridad y cada mejora en cuanto sale.": "Join @bovedamarket: get automatic network and app status alerts, security notices and every improvement as it ships.",
+  "Nadie de BÓVEDA te escribirá primero por privado. Nunca te pediremos claves, frases de recuperación, códigos ni dinero para retirar. Si alguien lo hace, es una estafa.": "No one from BÓVEDA will ever message you first privately. We will never ask for keys, recovery phrases, codes or money to withdraw. If someone does, it is a scam.",
   "Unirme a @bovedamarket": "Join @bovedamarket",
   "Ver estado del sistema": "View system status",
   "Lo que dice la comunidad": "What the community says",

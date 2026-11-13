@@ -137,7 +137,8 @@ function Landing() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Send size={14} />{t("Canal oficial de Telegram")}</p>
             <h2 className="mt-2 font-display text-2xl font-bold">{t("Transparencia total, en vivo")}</h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t("Únete a @bovedamarket: recibe alertas automáticas del estado de la red y de la app, avisos de seguridad y cada mejora en cuanto sale.")}</p></div>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t("Únete a @bovedamarket: recibe alertas automáticas del estado de la red y de la app, avisos de seguridad y cada mejora en cuanto sale.")}</p>
+            <p className="mt-4 flex max-w-xl items-start gap-2 rounded-xl border border-border bg-background/60 p-3 text-xs leading-5 text-muted-foreground"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-primary" /><span>{t("Nadie de BÓVEDA te escribirá primero por privado. Nunca te pediremos claves, frases de recuperación, códigos ni dinero para retirar. Si alguien lo hace, es una estafa.")}</span></p></div>
           <div className="flex shrink-0 flex-col gap-2"><Button asChild className="h-12"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer">{t("Unirme a @bovedamarket")}<ArrowRight size={16} /></a></Button><Link to="/status" search={{ from: "transparencia" }} className="flex items-center justify-center gap-1.5 text-sm text-primary underline"><Activity size={14} />{t("Ver estado del sistema")}</Link></div>
         </div>
       </section>
