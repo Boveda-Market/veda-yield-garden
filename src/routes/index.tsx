@@ -59,7 +59,7 @@ function TrustTicker() {
   const [paused, setPaused] = useState(false);
   useEffect(() => { if (paused) return; const id = setInterval(() => setI((n) => (n + 1) % REVIEWS.length), 4500); return () => clearInterval(id); }, [paused]);
   const r = REVIEWS[i] ?? REVIEWS[0]!;
-  return <a href="#opiniones" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} className="mx-auto mt-4 flex w-full max-w-md items-center gap-3 rounded-full border border-primary/30 bg-primary/5 py-1.5 pl-1.5 pr-4 text-left md:mx-0" aria-label={t("Lo que dice la comunidad")}>
+  return <a href="#opiniones" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} className="mx-auto mt-4 flex w-full min-w-0 max-w-full sm:max-w-md items-center gap-3 rounded-full border border-primary/30 bg-primary/5 py-1.5 pl-1.5 pr-4 text-left md:mx-0" aria-label={t("Lo que dice la comunidad")}>
     <span className="flex shrink-0 -space-x-2">{REVIEWS.map((x, n) => <img key={x.name} src={x.photo} alt="" width={28} height={28} className={`h-7 w-7 rounded-full border-2 object-cover transition-transform duration-500 ${n === i ? "z-10 scale-110 border-primary" : "border-background"}`} />)}</span>
     <span className="min-w-0 flex-1">
       <span className="flex items-center gap-1 text-[11px] font-semibold text-foreground"><span className="flex text-primary">{[1,2,3,4,5].map((n) => <Star key={n} size={10} className="fill-current" />)}</span>4.8 / 5</span>
@@ -97,8 +97,8 @@ function Landing() {
     <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-6 sm:px-6"><Link to="/" className="flex min-w-0 shrink-0 items-center gap-2 font-display text-lg font-bold sm:gap-3"><img src="/icon-512.png" alt="" className="h-9 w-9 shrink-0 rounded-lg" />BÓVEDA</Link><div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><Link to="/prueba" onClick={allowTrialEntry} className="flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/40 bg-primary/10 px-2.5 sm:px-3 text-xs font-semibold text-primary"><Sparkles size={13} />{t("Demo sin riesgo")}</Link></div></header>
     <main className="mx-auto max-w-5xl px-6">
       <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">
-        <div className="order-1 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(" Nada de monedas locas. Genera ganancias reales.")}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t("Todo siempre bajo tu control. $0 para entrar, retira en cualquier momento. Garantizado.")}</p><TrustTicker /></div>
-        <div className="order-3 text-center md:order-1 md:text-left">
+        <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(" Nada de monedas locas. Genera ganancias reales.")}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t("Todo siempre bajo tu control. $0 para entrar, retira en cualquier momento. Garantizado.")}</p><TrustTicker /></div>
+        <div className="order-3 min-w-0 text-center md:order-1 md:text-left">
           <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(" Nada de monedas locas. Genera ganancias reales.")}</h1>
           <p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t("Todo siempre bajo tu control. $0 para entrar, retira en cualquier momento. Garantizado.")}</p><div className="hidden md:block"><TrustTicker /></div>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground md:justify-start"><span className="flex items-center gap-1.5"><span>Powered by</span><img src="/brands/coinbase.svg" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-medium text-foreground">Coinbase</span></span><span className="flex items-center gap-1.5"><span>Network:</span><span className="flex items-center gap-1 font-semibold text-primary"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_var(--color-primary)]" /></span>{t("Online")}</span></span></div>
@@ -107,7 +107,7 @@ function Landing() {
             {["$0 por depositar", "Sin plazos forzosos", "Retiras cuando quieras", "Prueba gratis con 1,000 créditos"].map((b) => <li key={b} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"><ShieldCheck size={13} className="text-primary" />{t(b)}</li>)}
           </ul>
         </div>
-        <div id="acceso" className="order-2 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
+        <div id="acceso" className="order-2 min-w-0 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
           <EntryAccess />
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span><span aria-hidden="true">·</span><a href="https://www.privy.io/security" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground underline-offset-2 hover:text-primary hover:underline">{t("Conoce más")} ↗</a></p>
         </div>
