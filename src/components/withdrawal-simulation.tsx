@@ -1,3 +1,4 @@
+import { ServiceFeeLabel } from "@/components/service-fee-label";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
 import { useEffect, useState } from "react";
@@ -88,7 +89,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
         <ReceiveCard label={t("Recibes aproximadamente")} amount={result.net ?? "—"} unit="USDC" sub={result.minimumNet ? `${t("Mínimo garantizado:")} ${result.minimumNet} USDC${percent === 100 ? ` · + ${result.rentSol} SOL ${t("de vuelta")}` : ""}` : undefined} />
         <dl className="grid gap-2 rounded-xl border border-border p-4">
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Valor de tu posición")}</dt><dd>{result.gross} USDC</dd></div>
-          <div className="flex justify-between gap-3"><dt className="text-muted-foreground" title={t("Cubre los servicios avanzados de BÓVEDA: simulación de seguridad antes de firmar, mejor ruta, protección contra deslizamiento y automatización de la bóveda.")}>{t("Servicio BÓVEDA")} ⓘ</dt><dd>−{result.fee} USDC</dd></div>
+          <div className="flex justify-between gap-3"><dt><ServiceFeeLabel t={t} /></dt><dd>−{result.fee} USDC</dd></div>
           {percent === 100 && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("SOL de apertura devuelto")}</dt><dd>{result.rentSol} SOL</dd></div>}
         </dl>
       </>}
