@@ -1,5 +1,5 @@
 import { Fingerprint, TrendingUp, Landmark } from "lucide-react";
-import { Lock, Gift } from "lucide-react";
+import { Lock, Gift, Search } from "lucide-react";
 import { allowTrialEntry } from "@/lib/trial-entry";
 import { useT } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -41,6 +41,21 @@ const GUARANTEES = [
 ];
 
 
+const TRUST = [
+  { icon: Fingerprint, title: "Tus fondos, tu control", body: "Wallet de autocustodia con Face ID o huella, protegida por Privy. Nadie mueve tu dinero sin tu firma." },
+  { icon: Landmark, title: "USDC 1:1 con el dólar", body: "Dólar digital de Circle respaldado por reservas en efectivo y bonos del Tesoro de EE. UU." },
+  { icon: Search, title: "Revisas antes de firmar", body: "Cada operación se simula primero: ves exactamente qué entra, qué sale y el cargo." },
+  { icon: ShieldCheck, title: "Sin cargos ocultos", body: "Recargas y retiros con Coinbase. Cargos de servicio reducidos y progresivos." },
+];
+
+const PRICING: [string, string][] = [
+  ["Depositar en una bóveda", "Gratis"],
+  ["Cambiar y enviar monedas", "Gratis"],
+  ["Entrar a Sube o Baja", "Gratis"],
+  ["Cosechar ganancias", "3% a 1% de lo cosechado"],
+  ["Cobrar una ronda ganada", "2% de lo cobrado"],
+];
+
 function Landing() {
   const t = useT();
   const steps = [
@@ -53,11 +68,11 @@ function Landing() {
     <main className="mx-auto max-w-5xl px-6">
       <section className="grid items-center gap-10 pb-12 pt-6 md:grid-cols-2 md:pt-12">
         <div className="text-center md:text-left">
-          <h1 className="font-display text-4xl font-bold leading-tight sm:text-5xl">{t("Tus monedas generando comisiones, día a día.")}</h1>
+          <h1 className="font-display text-4xl font-bold leading-tight sm:text-5xl">{t("Pon tus dólares a trabajar. $0 por empezar.")}</h1>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground md:justify-start"><span>{t("Powered by:")}</span>{[["Coinbase","/brands/coinbase.svg"],["Polymarket","/brands/polymarket-mark.svg"],["Meteora","/brands/meteora.svg"]].map(([n,src]) => <span key={n} className="flex items-center gap-1.5 text-foreground"><img src={src} alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-medium">{n}</span></span>)}</div>
-          <p className="mt-5 text-lg leading-7 text-muted-foreground">{t("Con la simplicidad de una cuenta digital. Revisa tu saldo, tus ganancias y cada movimiento.")}</p>
+          <p className="mt-5 text-lg leading-7 text-muted-foreground">{t("Depositar, cambiar y enviar es gratis. Solo cobramos un pequeño cargo cuando tú cosechas ganancias o cobras una ronda ganada: solo ganamos cuando tú ganas.")}</p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs md:justify-start">
-            {["Prueba gratis con 1,000 créditos"].map((b) => <li key={b} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"><ShieldCheck size={13} className="text-primary" />{t(b)}</li>)}
+            {["$0 por depositar", "Sin plazos forzosos", "Retiras cuando quieras", "Prueba gratis con 1,000 créditos"].map((b) => <li key={b} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"><ShieldCheck size={13} className="text-primary" />{t(b)}</li>)}
           </ul>
           <p className="mt-4 text-xs text-muted-foreground">{t("Las ganancias cambian y puedes perder dinero.")}</p>
         </div>
@@ -66,6 +81,17 @@ function Landing() {
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span></p>
           <ul className="mt-3 flex flex-wrap justify-center gap-2 text-[11px]">{["Tú tienes el control total", "Sin plazos de permanencia"].map((b) => <li key={b} className="flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 font-medium text-foreground"><ShieldCheck size={12} className="text-primary" />{t(b)}</li>)}</ul>
         </div>
+      </section>
+
+      <section aria-label={t("Seguridad")} className="mb-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {TRUST.map(({ icon: Icon, title, body }) => <div key={title} className="rounded-2xl border border-border bg-card p-4"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={16} /></span><p className="mt-3 font-display text-sm font-semibold">{t(title)}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{t(body)}</p></div>)}
+      </section>
+
+      <section className="mb-12 rounded-3xl border border-border bg-card p-6 sm:p-8">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t("Cuentas claras")}</p>
+        <h2 className="mt-2 font-display text-2xl font-bold">{t("Solo ganamos cuando tú ganas")}</h2>
+        <ul className="mt-5 divide-y divide-border">{PRICING.map(([a, b]) => <li key={a} className="flex items-center justify-between gap-4 py-3 text-sm"><span>{t(a)}</span><span className="text-right font-semibold text-primary">{t(b)}</span></li>)}</ul>
+        <p className="mt-4 text-xs text-muted-foreground">{t("Mientras más mueves, menor el porcentaje. Siempre ves el cargo exacto antes de firmar. Los costos de red se pagan aparte.")} <Link to="/terminos" className="text-primary underline">{t("Ver detalle")}</Link></p>
       </section>
 
       <section className="rounded-3xl border border-primary/30 bg-primary/5 p-6 sm:p-8">
