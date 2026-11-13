@@ -28,6 +28,7 @@ import { PendingClaims } from "@/components/pending-claims";
 import { WalletPositions, useWalletVaults } from "@/components/wallet-positions";
 import { usePositionRows } from "@/hooks/use-position-rows";
 import { WalletOpenPredictions } from "@/components/open-predictions";
+import { ReportProblem } from "@/components/report-problem";
 
 
 export function WalletPanel() {
@@ -195,6 +196,8 @@ export function WalletPanel() {
       </div>}
       {message && <p role="status" className="mt-3 text-sm">{message}</p>}
     </section>
+
+    <ReportProblem />
 
     <details className="group rounded-2xl border border-border bg-card p-5">
       <summary className="flex cursor-pointer list-none items-center justify-between font-display text-lg"><span className="flex items-center gap-2"><ShieldAlert size={18} />{t("Avanzado")}</span><ChevronDown size={18} className="transition-transform group-open:rotate-180" /></summary>
