@@ -8,7 +8,6 @@ import { CheckCircle2, CreditCard, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
-import { QuickSwapButton } from "@/components/quick-swap";
 import { getRealWallet } from "@/lib/solana.functions";
 import { decimalToUnits, fundingAction } from "@/lib/onboarding";
 import { holdSessionForExternalFlow } from "@/components/idle-logout";
@@ -93,7 +92,6 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
   return <div className={className}>
     {auto ? waiting && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 size={16} className="animate-spin" />{t("Esperando tus dólares…")}</p> : <div className="flex flex-wrap gap-2">
       <Button onClick={() => void add()} disabled={waiting}>{waiting ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}{waiting ? t("Esperando tus dólares…") : t("Añadir fondos")}</Button>
-      <QuickSwapButton />
     </div>}
     <Dialog open={choosing} onOpenChange={setChoosing}><DialogContent>
       <DialogHeader><DialogTitle>{t("Añadir fondos")}</DialogTitle><DialogDescription>{t("Compra con tu saldo de Coinbase, banco o tarjeta.")}</DialogDescription></DialogHeader>
