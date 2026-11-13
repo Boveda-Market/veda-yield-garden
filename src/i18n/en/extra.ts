@@ -746,4 +746,9 @@ export const extra: Record<string, string> = {
   "¿Por qué el valor de mi bóveda sube o baja si estoy generando ganancias?": "Why does my vault's value go up or down if I'm earning?",
   "Tu depósito se divide entre dólares (USDC) y la otra moneda de la bóveda para que otras personas puedan hacer cambios. Cuando el precio de esa moneda cambia, la proporción de tu posición se ajusta sola. Ejemplo: depositas $100 (≈$50 en USDC y $50 en la moneda). Si la moneda baja 20%, tu posición tendrá más de esa moneda y valdrá unos $90 en vez de $100. Si sube con fuerza, tu posición crece, pero menos que si hubieras guardado las monedas por separado. A esto se le llama pérdida impermanente: es «impermanente» porque puede revertirse si el precio vuelve, y se vuelve real si retiras en ese momento. Las comisiones que cosechas son ganancias aparte que ayudan a compensarla, pero no garantizan cubrirla.": "Your deposit is split between dollars (USDC) and the vault's other coin so others can swap. When that coin's price changes, your position's mix adjusts on its own. Example: you deposit $100 (≈$50 in USDC and $50 in the coin). If the coin drops 20%, your position holds more of it and is worth about $90 instead of $100. If it rises sharply, your position grows, but less than if you had held the coins separately. This is called impermanent loss: it's \"impermanent\" because it can reverse if the price comes back, and it becomes real if you withdraw at that moment. The fees you harvest are separate earnings that help offset it, but aren't guaranteed to cover it.",
   "Añadir más": "Add more",
+  "Borrar todas": "Clear all",
+  "Ocultar historial": "Hide history",
+  "No tienes notificaciones pendientes.": "You have no pending notifications.",
+  "Ver historial completo": "View full history",
+  "Borrar notificación": "Delete notification",
 };

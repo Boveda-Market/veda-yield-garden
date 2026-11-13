@@ -13,3 +13,4 @@ export const ANNOUNCEMENTS: Announcement[] = [
 
 export const latestAnnouncementId = () => ANNOUNCEMENTS[0]?.id ?? "";
 export const SEEN_KEY = "boveda.news.seen";
+export const DISMISSED_KEY = "boveda.news.dismissed";

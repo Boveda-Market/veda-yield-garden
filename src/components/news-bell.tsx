@@ -1,28 +1,61 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Bell } from "lucide-react";
+import { Bell, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { SUPPORT_URL } from "@/components/safety-notice";
-import { ANNOUNCEMENTS, SEEN_KEY, latestAnnouncementId, type AnnouncementKind } from "@/lib/announcements";
+import { ANNOUNCEMENTS, DISMISSED_KEY, SEEN_KEY, latestAnnouncementId, type AnnouncementKind } from "@/lib/announcements";
 
 const LABEL: Record<AnnouncementKind, string> = { vault: "Nueva bóveda", market: "Nuevo mercado", policy: "Aviso legal", update: "Novedad" };
 
-/** Announcement history, shared by the bell dialog and the Notifications section. */
+const DISMISS_EVENT = "boveda:news-dismissed";
+function readDismissed(): string[] {
+  try { const v = JSON.parse(localStorage.getItem(DISMISSED_KEY) ?? "[]"); return Array.isArray(v) ? v.filter((x) => typeof x === "string") : []; } catch { return []; }
+}
+function writeDismissed(ids: string[]) {
+  try { localStorage.setItem(DISMISSED_KEY, JSON.stringify(ids)); } catch { /* ignore */ }
+  window.dispatchEvent(new Event(DISMISS_EVENT));
+}
+
+/** Announcement history, shared by the bell dialog and the Notifications section. Dismissals stay in this browser; new announcements still appear. */
 export function NewsList({ onNavigate }: { onNavigate?: () => void }) {
   const t = useT();
-  return <ul className="mt-2 space-y-3">
-    {ANNOUNCEMENTS.length === 0 && <li className="text-sm text-muted-foreground">{t("No hay novedades por ahora.")}</li>}
-    {ANNOUNCEMENTS.map((a) => <li key={a.id} className="rounded-xl border border-border bg-secondary/40 p-4">
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span className="rounded-full bg-primary/15 px-2 py-0.5 font-medium text-primary">{t(LABEL[a.kind])}</span>
-        <time dateTime={a.date}>{a.date}</time>
-      </div>
-      <p className="mt-2 font-semibold">{t(a.title)}</p>
-      <p className="mt-1 text-sm text-muted-foreground">{t(a.body)}</p>
-      {a.href && a.cta && <Link to={a.href} onClick={onNavigate} className="mt-3 inline-block text-sm font-medium text-primary">{t(a.cta)} →</Link>}
-    </li>)}
-  </ul>;
+  const [dismissed, setDismissed] = useState<string[]>([]);
+  const [showAll, setShowAll] = useState(false);
+  useEffect(() => {
+    const sync = () => setDismissed(readDismissed());
+    sync();
+    window.addEventListener(DISMISS_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => { window.removeEventListener(DISMISS_EVENT, sync); window.removeEventListener("storage", sync); };
+  }, []);
+  const items = showAll ? ANNOUNCEMENTS : ANNOUNCEMENTS.filter((a) => !dismissed.includes(a.id));
+  const dismiss = (id: string) => writeDismissed([...new Set([...dismissed, id])]);
+  const clearAll = () => { setShowAll(false); writeDismissed(ANNOUNCEMENTS.map((a) => a.id)); };
+  return <div className="mt-2">
+    {items.length > 0 && !showAll && <div className="mb-2 flex justify-end">
+      <button type="button" onClick={clearAll} className="text-xs font-medium text-muted-foreground hover:text-foreground">{t("Borrar todas")}</button>
+    </div>}
+    {showAll && <div className="mb-2 flex justify-end">
+      <button type="button" onClick={() => setShowAll(false)} className="text-xs font-medium text-muted-foreground hover:text-foreground">{t("Ocultar historial")}</button>
+    </div>}
+    <ul className="space-y-3">
+      {items.length === 0 && <li className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
+        {ANNOUNCEMENTS.length === 0 ? t("No hay novedades por ahora.") : t("No tienes notificaciones pendientes.")}
+        {ANNOUNCEMENTS.length > 0 && <button type="button" onClick={() => setShowAll(true)} className="mt-2 block w-full text-xs font-medium text-primary">{t("Ver historial completo")}</button>}
+      </li>}
+      {items.map((a) => <li key={a.id} className="relative rounded-xl border border-border bg-secondary/40 p-4">
+        {!showAll && <button type="button" onClick={() => dismiss(a.id)} aria-label={t("Borrar notificación")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={14} /></button>}
+        <div className="flex items-center justify-between pr-7 text-xs text-muted-foreground">
+          <span className="rounded-full bg-primary/15 px-2 py-0.5 font-medium text-primary">{t(LABEL[a.kind])}</span>
+          <time dateTime={a.date}>{a.date}</time>
+        </div>
+        <p className="mt-2 font-semibold">{t(a.title)}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t(a.body)}</p>
+        {a.href && a.cta && <Link to={a.href} onClick={onNavigate} className="mt-3 inline-block text-sm font-medium text-primary">{t(a.cta)} →</Link>}
+      </li>)}
+    </ul>
+  </div>;
 }
 
 export function NewsBell() {
