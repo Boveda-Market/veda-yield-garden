@@ -55,6 +55,6 @@ export function PortfolioEmpty() {
     <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/15 text-primary"><VaultIcon size={30} /></span>
     <h2 className="mt-5 font-display text-2xl font-semibold">{t("Tu dinero puede empezar a generar rendimientos")}</h2>
     <p className="mt-2 max-w-md text-sm text-muted-foreground">{t("Aún no tienes bóvedas abiertas. Elige una, deposita USDC y mira aquí cómo crecen tus ganancias.")}</p>
-    <Button asChild className="mt-6"><Link to="/app">{t("Hacer mi primer depósito")}</Link></Button>
+    <Button asChild className="mt-6"><Link to="/wallet">{t("Hacer mi primer depósito")}</Link></Button>
   </section>;
 }
