@@ -1,6 +1,10 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
+import { installDomGuard } from "./lib/dom-guard";
+
+// Client-only: keeps translator/extension DOM edits from crashing React with a blank screen.
+if (typeof window !== "undefined") installDomGuard();
 
 export const getRouter = () => {
   // One client per request: a module-level QueryClient leaks cached data between SSR requests.

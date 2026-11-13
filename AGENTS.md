@@ -58,3 +58,4 @@ use the editor.
 - Compute limit = simulated units +25%, low fixed priority (compute-budget.ts).
 
 - Lazy-loaded components use lazyWithReload (src/lib/lazy-reload.ts) and the root listens for vite:preloadError: stale chunks after a new build trigger one guarded reload instead of a blank screen.
+- src/lib/dom-guard.ts patches Node removeChild/insertBefore on the client (installed in router.tsx) so translator/extension/visual-editor DOM edits cannot crash React into a blank screen; keep it.
