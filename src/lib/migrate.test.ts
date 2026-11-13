@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { bestUpgrade, breakEvenDays } from "./migrate";
+import { bestUpgrade, breakEvenDays, gapAlertDue } from "./migrate";
 
 describe("migrate", () => {
   it("suggests a vault at least 5 points higher", () => expect(bestUpgrade("sol", { sol: 18, met: 34 })).toEqual({ id: "met", apr: 34, gain: 16 }));
@@ -14,5 +14,11 @@ describe("voluntary vault change fee", () => {
     expect(withdrawalAmounts(10_000_000_000n, "rotate").fee).toBe(10_000_000n);
     expect(withdrawalAmounts(10_000_000_000n, true).fee).toBe(0n);
     expect(withdrawalAmounts(10_000_000_000n).fee).toBe(40_000_000n);
+  });
+  it("posts the gap alert at most once per 24h", () => {
+    const now = Date.parse("2026-11-13T12:00:00Z");
+    expect(gapAlertDue(null, now)).toBe(true);
+    expect(gapAlertDue("2026-11-13T00:00:00Z", now)).toBe(false);
+    expect(gapAlertDue("2026-11-12T12:00:00Z", now)).toBe(true);
   });
 });

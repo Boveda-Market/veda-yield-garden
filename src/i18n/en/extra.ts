@@ -824,4 +824,12 @@ export const extra: Record<string, string> = {
   "Acceso con Google · Hace 2 semanas": "Google sign-in · 2 weeks ago",
   "Sin humo: practica primero con la demo": "No hype: practice first with the demo",
   "Acceso con huella · Sube o Baja": "Fingerprint sign-in · Up or Down",
+  "Traslado gratis · 0% comisión": "Free move · 0% fee",
+  "{v} rinde": "{v} earns",
+  "más que {f}": "more than {f}",
+  "Movemos tu capital y ganancias sin comisión de BÓVEDA al salir ni al depositar. Tú firmas cada paso.": "We move your capital and earnings with no BÓVEDA fee on exit or deposit. You sign every step.",
+  "Migrar a {v} gratis": "Move to {v} for free",
+  "Todo siempre bajo tu control. $0 para entrar, retira en cualquier momento. Garantizado.": "Always in your control. $0 to start, withdraw anytime. Guaranteed.",
+  "BÓVEDA  es una interfaz segura, protegida contra hackers, donde solo tú apruebas cada movimiento con tu huella o Face ID.": "BÓVEDA is a secure, hacker-protected interface where only you approve every move with your fingerprint or Face ID.",
+  "Envía sugerencias, críticas o tu reseña. Leemos cada mensaje para mejorar BÓVEDA.": "Send suggestions, critiques or your review. We read every message to improve BÓVEDA.",
 };

@@ -29,6 +29,20 @@ export const Route = createFileRoute("/api/public/jobs/check-system-status")({
           if (a.publicUp) await tg.sendTelegram(tg.TELEGRAM_CHANNEL, `🟢 <b>Servicio restablecido</b>\n\n${name} vuelve a operar con total normalidad.`);
           await db.from("system_service_status").upsert({ ...a.next, updated_at: new Date(now).toISOString() }, { onConflict: "service" });
         }
+        try {
+          const { VAULTS } = await import("@/lib/vaults");
+          const { fetchPoolYield } = await import("@/lib/pool-yield");
+          const { bestUpgrade, gapAlertDue } = await import("@/lib/migrate");
+          const ys = await Promise.all(VAULTS.map((v) => fetchPoolYield(v.pool).catch(() => null)));
+          const aprs = Object.fromEntries(VAULTS.map((v, i) => [v.id, ys[i]?.apr ?? null]));
+          const best = VAULTS.map((v) => ({ v, up: bestUpgrade(v.id, aprs) })).find((x) => x.up);
+          const last = rows.get("apr_gap")?.first_down_at;
+          if (best?.up && gapAlertDue(last, now)) {
+            const to = VAULTS.find((v) => v.id === best.up!.id);
+            const ok = await tg.sendTelegram(tg.TELEGRAM_CHANNEL, `⚡ <b>Traslado gratis disponible</b>\n\n${to?.name} rinde <b>+${best.up.gain.toFixed(1)}% APR</b> más que ${best.v.name} ahora mismo.\n\nSi tienes capital en ${best.v.name}, entra a tu Portafolio y toca «Migrar gratis»: 0% de comisión de BÓVEDA al salir y al depositar.\n\n🔗 <a href="https://bovedamarket.app/portfolio">Abrir Portafolio</a>`);
+            if (ok) await db.from("system_service_status").upsert({ service: "apr_gap", first_down_at: new Date(now).toISOString(), operator_alerted: false, public_alerted: false, updated_at: new Date(now).toISOString() }, { onConflict: "service" });
+          }
+        } catch { /* best-effort; never blocks status checks */ }
         return Response.json({ ok: true, down: checks.filter((c) => c.state === "down").map((c) => c.id) });
       },
     },

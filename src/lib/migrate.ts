@@ -20,3 +20,9 @@ export function bestUpgrade(currentId: string, aprs: Record<string, number | nul
 export function breakEvenDays(gain: number) {
   return gain > 0 ? Math.ceil((MIGRATE_FEE_PCT / gain) * 365) : null; // 0 = earns more from day one
 }
+
+/** Public channel posts about a free-move opportunity at most once per cooldown. */
+export const GAP_ALERT_COOLDOWN_MS = 24 * 3600_000;
+export function gapAlertDue(lastPostIso: string | null | undefined, now: number) {
+  return !lastPostIso || now - Date.parse(lastPostIso) >= GAP_ALERT_COOLDOWN_MS;
+}
