@@ -105,9 +105,11 @@ export function MarketsPanel(_: { identity: string }) {
               {price && strike && <p className={`text-[11px] font-semibold tabular-nums ${ahead ? "text-primary" : "text-destructive"}`}>{ahead ? "▲" : "▼"} ${num(Math.abs(price - strike), digits(price))}</p>}</div>
             <div className="flex gap-1 text-center">{(s >= 3600 ? [[Math.floor(s / 3600), t("HORAS")], [Math.floor(s / 60) % 60, t("MIN")], [s % 60, t("SEG")]] : [[Math.floor(s / 60), t("MIN")], [s % 60, t("SEG")]]).map(([v, l]) => <div key={String(l)} className={`min-w-11 rounded-lg px-1.5 py-1 ${round && remaining < 30_000 ? "bg-destructive/15 text-destructive" : "bg-secondary"}`}><p className="font-display text-xl font-bold tabular-nums">{round ? String(v).padStart(2, "0") : "--"}</p><p className="text-[9px] font-semibold text-muted-foreground">{l}</p></div>)}</div>
           </div>
-          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-secondary"><div className={`h-full transition-all ${ahead === false ? "bg-destructive" : "bg-primary"}`} style={{ width: `${progress * 100}%` }} /></div>
-          {ahead !== null && <p className={`mt-2 text-xs font-semibold ${ahead ? "text-primary" : "text-destructive"}`}>{t(ahead ? "Ahora mismo va ganando Sube" : "Ahora mismo va ganando Baja")}</p>}
-        </div>
+          {(() => { const up = price && strike ? 50 + Math.max(-45, Math.min(45, ((price - strike) / strike) / 0.002 * 45)) : 50; return <div className="mt-3" aria-label={t("Quién va ganando")}>
+            <div className="mb-1 flex justify-between text-[11px] font-bold"><span className="text-primary">▲ {t("Sube")} {Math.round(up)}%</span><span className="text-destructive">{Math.round(100 - up)}% {t("Baja")} ▼</span></div>
+            <div className="relative flex h-2.5 overflow-hidden rounded-full bg-secondary"><div className="h-full bg-primary transition-all duration-700" style={{ width: `${up}%` }} /><div className="h-full flex-1 bg-destructive transition-all duration-700" /><span className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-background" /></div>
+          </div>; })()}
+          </div>
       </section>
       {!loaded ? <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin" size={16} />{t("Buscando rondas en vivo…")}</p>
         : !round && <div role="status" className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/10 p-3 text-sm"><Loader2 className="mt-0.5 shrink-0 animate-spin text-primary" size={16} /><p><strong>{t("Esperando la próxima ronda de {m} ({w})…", { m: name, w: WIN_LABEL[win] })}</strong><br /><span className="text-muted-foreground">{t("Abre en breve. Mientras tanto puedes probar otra duración o cripto arriba.")}</span></p></div>}

@@ -340,6 +340,7 @@ export const extra: Record<string, string> = {
   "Multiplicador": "Multiplier",
   "Tus {stake} créditos se mueven como": "Your {stake} credits move like",
   "Un movimiento de {pct}% en contra pierde toda la apuesta.": "A {pct}% move against you loses the whole stake.",
+  "Quién va ganando": "Who is winning",
   "Sube": "Up",
   "Baja": "Down",
   "Posiciones abiertas": "Open positions",
