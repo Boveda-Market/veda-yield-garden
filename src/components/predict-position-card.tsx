@@ -1,6 +1,6 @@
 import { PriceChart } from "@/components/price-chart";
 import { useLivePrice } from "@/hooks/use-live-price";
-import type { MarketId } from "@/lib/markets";
+import { fetchPriceAt, type MarketId } from "@/lib/markets";
 import { TokenIcon } from "@/components/token-icon";
 import { PoweredBy } from "@/components/powered-by";
 import { useEffect, useState } from "react";
@@ -10,6 +10,30 @@ import { useT, useLocale } from "@/lib/i18n";
 import { assetOfTitle, positionWon, pricePerContract, type PredictPosition } from "@/lib/predict";
 
 export const usdcText = (micro: string | bigint | null) => micro === null ? "—" : (Number(micro) / 1e6).toFixed(2);
+
+/** Round length in seconds from the title ("1:15PM-1:30PM ET" → 900); daily rounds ("on …") last a day. */
+export function roundSeconds(title: string): number | null {
+  const m = /(\d{1,2})(?::(\d{2}))?(AM|PM)-(\d{1,2})(?::(\d{2}))?(AM|PM)/i.exec(title);
+  if (m) {
+    const min = (h: string, mm: string | undefined, ap: string) => ((Number(h) % 12) + (ap.toUpperCase() === "PM" ? 12 : 0)) * 60 + Number(mm ?? 0);
+    let d = min(m[4]!, m[5], m[6]!) - min(m[1]!, m[2], m[3]!); if (d <= 0) d += 1440;
+    return d * 60;
+  }
+  return / Up or Down on /i.test(title) ? 86400 : null;
+}
+
+/** Opening price of the round (price to beat), retried until the opening candle is published. */
+function useStrike(asset: MarketId | null, openMs: number | null) {
+  const [v, setV] = useState<number | undefined>();
+  useEffect(() => {
+    if (!asset || !openMs) return;
+    let alive = true, timer: ReturnType<typeof setTimeout> | undefined;
+    const load = () => void fetchPriceAt(asset, openMs).then((x) => { if (!alive) return; if (x) setV(x); else timer = setTimeout(load, 4_000); });
+    load();
+    return () => { alive = false; if (timer) clearTimeout(timer); };
+  }, [asset, openMs]);
+  return v;
+}
 
 function useNow() { const [n, setN] = useState(() => Date.now()); useEffect(() => { const id = setInterval(() => setN(Date.now()), 1000); return () => clearInterval(id); }, []); return n; }
 
@@ -28,6 +52,8 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
   const won = open ? null : positionWon(p);
   const Up = p.side === "up";
   const live = useLivePrice(open && asset ? (asset as MarketId) : null);
+  const dur = roundSeconds(p.title);
+  const strike = useStrike(open && asset ? (asset as MarketId) : null, p.closeTime && dur ? (p.closeTime - dur) * 1000 : null);
   const Row = ({ k, v, tone }: { k: string; v: string; tone?: string }) => <div className="flex justify-between gap-2"><span className="text-muted-foreground">{k}</span><span className={`font-medium tabular-nums ${tone ?? ""}`}>{v}</span></div>;
   return <article className="rounded-lg border border-border bg-card p-5">
     <div className="flex items-start justify-between gap-3">
@@ -41,7 +67,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
         {open ? (mmss ? `⏱ ${t("Cierra en {v}", { v: mmss })}` : t("Resolviendo…")) : won === null ? t("Cerrada") : won ? t("Acertaste") : t("No acertaste")}
       </span>
     </div>
-    {open && asset && <div className="mt-4 overflow-hidden rounded-xl border border-border bg-background/40 py-2"><PriceChart market={asset as MarketId} points={live.points} price={live.price} /></div>}
+    {open && asset && <div className="mt-4 overflow-hidden rounded-xl border border-border bg-background/40 py-2"><PriceChart market={asset as MarketId} points={live.points} price={live.price} reference={strike} referenceLabel={t("A batir")} /></div>}
     <p className="mt-4 text-xs text-muted-foreground">{t("Premio si aciertas")}</p>
     <p className="font-display text-3xl font-semibold text-primary tabular-nums">{usdcText(payout)} USDC</p>
     <p className="mt-1 text-xs text-muted-foreground tabular-nums">{t("Invertido")}: {usdcText(cost)} USDC · {t("Ganancia posible")} +{usdcText(profit)}{cost > 0n ? ` (${(Number(payout) / Number(cost)).toFixed(2)}×)` : ""}</p>
