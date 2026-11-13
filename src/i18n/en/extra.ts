@@ -849,4 +849,5 @@ export const extra: Record<string, string> = {
   "Contacto opcional": "Optional contact",
   "Adjuntamos tu dirección pública y tipo de dispositivo. Nunca te pediremos claves ni códigos.": "We attach your public address and device type. We'll never ask for keys or codes.",
   "Enviar reporte": "Send report",
+  "Reportar": "Report",
 };

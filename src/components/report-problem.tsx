@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { LifeBuoy, Send } from "lucide-react";
 import { Button } from "./ui/button";
@@ -12,8 +12,8 @@ import { SUGGESTION_MAX_CHARS } from "@/lib/suggestions";
 const TYPES = ["Depósito o compra de USDC", "Retiro o envío de fondos", "Bóvedas o cosecha de ganancias", "Fallo visual o error en la app", "Otro inconveniente"] as const;
 const TELEGRAM = "https://t.me/bovedamarket";
 
-/** Wallet-page problem report: stored as an "error" suggestion and alerted to the operator. */
-export function ReportProblem() {
+/** Wallet-page problem report: stored as an "error" suggestion and alerted to the operator. Pass `trigger` to render a compact opener instead of the full card. */
+export function ReportProblem({ trigger }: { trigger?: (open: () => void) => ReactNode }) {
   const t = useT();
   const session = useBovedaSession();
   const send = useServerFn(submitSuggestion);
@@ -35,14 +35,8 @@ export function ReportProblem() {
       if (r.success) { setDone(true); setText(""); setContact(""); } else setMsg(t(r.error));
     } catch { setMsg(t("No se pudo enviar el reporte.")); } finally { setBusy(false); }
   }
-  return <section className="rounded-2xl border border-border bg-card p-5">
-    <h3 className="flex items-center gap-2 font-display text-lg"><LifeBuoy size={18} className="text-primary" />{t("¿Tuviste un problema con tu cuenta o una transacción?")}</h3>
-    <p className="mt-1 text-sm text-muted-foreground">{t("Cuéntanos qué pasó y el equipo lo revisa directamente.")}</p>
-    <div className="mt-4 flex flex-wrap items-center gap-3">
-      <Button onClick={() => { setOpen(true); setDone(false); setMsg(""); }}><LifeBuoy size={16} />{t("Reportar un problema")}</Button>
-      <a href={TELEGRAM} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline">{t("¿Es urgente? Escríbenos en Telegram ↗")}</a>
-    </div>
-    <Dialog open={open} onOpenChange={setOpen}>
+  const openDialog = () => { setOpen(true); setDone(false); setMsg(""); };
+  const dialog = <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>{t("Reportar un problema")}</DialogTitle></DialogHeader>
         {done ? <div className="space-y-3">
@@ -58,6 +52,15 @@ export function ReportProblem() {
           {msg && <p role="status" className="text-sm text-destructive">{msg}</p>}
         </form>}
       </DialogContent>
-    </Dialog>
+    </Dialog>;
+  if (trigger) return <>{trigger(openDialog)}{dialog}</>;
+  return <section className="rounded-2xl border border-border bg-card p-5">
+    <h3 className="flex items-center gap-2 font-display text-lg"><LifeBuoy size={18} className="text-primary" />{t("¿Tuviste un problema con tu cuenta o una transacción?")}</h3>
+    <p className="mt-1 text-sm text-muted-foreground">{t("Cuéntanos qué pasó y el equipo lo revisa directamente.")}</p>
+    <div className="mt-4 flex flex-wrap items-center gap-3">
+      <Button onClick={openDialog}><LifeBuoy size={16} />{t("Reportar un problema")}</Button>
+      <a href={TELEGRAM} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline">{t("¿Es urgente? Escríbenos en Telegram ↗")}</a>
+    </div>
+    {dialog}
   </section>;
 }
