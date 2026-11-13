@@ -44,6 +44,7 @@ const GUARANTEES = [
 const ANTI_SCAM: [string, string][] = [
   ["Nadie custodia tu dinero", "En una estafa entregas tus fondos a alguien. En BÓVEDA tu saldo vive en tu propia wallet: nosotros no podemos tocarlo."],
   ["Sin «tarifas para descongelar»", "Nunca te pediremos pagar para poder retirar. Retiras a Coinbase, tu banco o Cash App cuando tú decidas."],
+  ["Sin contraseñas que te puedan robar", "Entra con Google (recomendado) o tu huella: tu acceso queda protegido por la verificación en 2 pasos y tu dispositivo. Nunca te pediremos contraseñas ni frases secretas."],
   ["Cero firmas a ciegas", "Cada operación se simula antes de firmar: ves qué sale, qué entra y el cargo exacto. Así te proteges de hackers."],
 ];
 
@@ -105,7 +106,7 @@ function Landing() {
       <section aria-label={t("Por qué BÓVEDA es diferente")} className="mb-12 rounded-3xl border border-border bg-card p-6 sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t("¿Te estafaron antes?")}</p>
         <h2 className="mt-2 font-display text-2xl font-bold">{t("Aquí no le entregas tu dinero a nadie")}</h2>
-        <ul className="mt-5 grid gap-4 sm:grid-cols-3">{ANTI_SCAM.map(([h, d]) => <li key={h} className="rounded-2xl border border-border bg-background p-4"><p className="font-display text-sm font-semibold">{t(h)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ul>
+        <ul className="mt-5 grid gap-4 sm:grid-cols-2">{ANTI_SCAM.map(([h, d]) => <li key={h} className="rounded-2xl border border-border bg-background p-4"><p className="font-display text-sm font-semibold">{t(h)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ul>
       </section>
 
       <section className="mb-12 rounded-3xl border border-primary/30 bg-primary/5 p-6 sm:p-8">
