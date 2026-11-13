@@ -6,6 +6,7 @@ import { decide, type MonitorRow } from "@/lib/status-monitor";
 const NAMES: Record<string, string> = { network: "Red y transacciones", vaults: "Bóvedas", predict: "Predicciones Sube o Baja", markets: "Mercados de predicción", wallets: "Billeteras e inicio de sesión", funding: "Compra y retiro de fondos" };
 
 export const Route = createFileRoute("/api/public/jobs/check-system-status")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {
