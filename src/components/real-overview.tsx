@@ -16,7 +16,6 @@ import { DepositSimulation } from "@/components/deposit-simulation";
 import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
 import { PoolYield } from "@/components/pool-yield";
 import { HarvestDialog } from "@/components/harvest-dialog";
-import { BuyUsdc } from "@/components/buy-usdc";
 import { RealPositions, PortfolioEmpty } from "@/components/real-positions";
 import { StartGuide } from "@/components/start-guide";
 import { VaultSteps } from "@/components/vault-steps";
@@ -73,7 +72,6 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Bóvedas de rendimiento")}</h1>{refresh}</div>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Elige una bóveda para poner a trabajar tus USDC. Revisas los importes antes de firmar.")}</p>
       {!(data && data.positions.length > 0) && <><VaultSteps className="mt-4" /><StartGuide className="mt-4" /></>}
-      <BuyUsdc className="mt-4" />
       {errors}
       {data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
     </section>}

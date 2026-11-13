@@ -11,7 +11,8 @@ import { PilotDeposit } from "@/components/pilot-deposit";
 import { getRealWallet } from "@/lib/solana.functions";
 import { decimalToUnits, MIN_SOL_LAMPORTS } from "@/lib/onboarding";
 import { poolYieldOptions } from "@/lib/pool-yield";
-import { BuyUsdc } from "@/components/buy-usdc";
+import { Link } from "@tanstack/react-router";
+import { Wallet } from "lucide-react";
 
 const MAX_MICRO = 10_000_000_000n;
 const microToText = (v: bigint) => { const w = v / 1_000_000n; const f = (v % 1_000_000n).toString().padStart(6, "0").replace(/0+$/, ""); return f ? `${w}.${f}` : `${w}`; };
@@ -45,15 +46,17 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
       <span className="font-display text-lg font-bold text-primary">{apr == null ? "—" : `${apr.toFixed(2)}% APR`}</span>
     </div>
     <div className="grid gap-2 rounded-xl border border-border p-4">
-      <div className="flex justify-between text-xs text-muted-foreground"><span>{t("Importe (USDC)")}</span><span>{t("Disponible:")} {usdc == null ? "—" : microToText(usdc)} USDC</span></div>
+      <button type="button" disabled={busy || !usdc} onClick={() => pick(100n)} className="flex items-center justify-between rounded-lg bg-primary/10 px-3 py-2 text-left disabled:cursor-default"><span className="flex items-center gap-2 text-xs font-medium text-muted-foreground"><Wallet size={14} className="text-primary" />{t("Disponible para depositar")}</span><span className="font-display text-lg font-bold tabular-nums text-foreground">{usdc == null ? "…" : microToText(usdc)} <span className="text-xs font-semibold text-muted-foreground">USDC</span></span></button>
+      <span className="text-xs text-muted-foreground">{t("Importe (USDC)")}</span>
       <Input aria-label={t("Importe (USDC)")} inputMode="decimal" placeholder="0.00" value={amount} maxLength={12} disabled={busy} className="border-0 px-0 font-display text-3xl shadow-none focus-visible:ring-0" onChange={(e) => setAmount(clean(e.target.value))} />
       <div className="grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={p.toString()} type="button" size="sm" variant="secondary" disabled={busy || !usdc} onClick={() => pick(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
       <p className="text-xs text-muted-foreground">{migrate ? t("Traslado entre bóvedas: sin comisión de BÓVEDA.") : t("Entre 1 y 10,000 USDC. Sin comisión de entrada.")}</p>
       {overBalance && <p role="alert" className="text-xs text-destructive">{t("No tienes suficientes USDC para este importe.")}</p>}
+      {(overBalance || usdc === 0n) && <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs"><span>{t("¿Necesitas fondos? Añádelos en Mi Billetera.")}</span><Button asChild size="sm" variant="outline"><Link to="/wallet">{t("Ir a Mi Billetera")} →</Link></Button></div>}
     </div>
     {lowSol && <div role="note" className="grid gap-2 rounded-xl border border-primary/40 bg-primary/10 p-3 text-xs leading-5">
       <p>{t("Necesitas unos 0.015 SOL para los costos de red antes de depositar.")}</p>
-      <BuyUsdc only="SOL" />
+      <Button asChild size="sm" variant="outline"><Link to="/wallet">{t("Ir a Mi Billetera")} →</Link></Button>
     </div>}
     {breakdown && <dl className="grid gap-2 rounded-xl bg-muted p-4 text-sm">
       <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Bóveda")}</dt><dd>{vault.pair}</dd></div>

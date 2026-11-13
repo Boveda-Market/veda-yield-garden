@@ -677,6 +677,8 @@ export const extra: Record<string, string> = {
   "Mínimo garantizado": "Guaranteed minimum",
   "Reservado para costos de red": "Kept for network costs",
   "Añadir fondos": "Add funds",
+  "Disponible para depositar": "Available to deposit",
+  "¿Necesitas fondos? Añádelos en Mi Billetera.": "Need funds? Add them in My wallet.",
   "Añade tus primeros fondos": "Add your first funds",
   "Elige Coinbase (saldo, banco o tarjeta) o tarjeta y Apple Pay. Tu primera compra incluye una pequeña reserva para costos de red y luego activas tus dólares con un toque.": "Choose Coinbase (balance, bank or card) or card and Apple Pay. Your first purchase includes a small network-cost reserve, then you activate your dollars with one tap.",
   "USDC es una moneda digital que busca valer 1 dólar. Puedes comprarla en Mi Billetera → «Añadir fondos» (Coinbase, tarjeta o Apple Pay) o cambiar otras monedas en Mi Billetera → Cambiar. No es un depósito bancario ni está asegurado.": "USDC is a digital currency that aims to be worth 1 dollar. Buy it in My wallet → “Add funds” (Coinbase, card or Apple Pay) or swap other coins in My wallet → Swap. It isn't a bank deposit or insured.",
