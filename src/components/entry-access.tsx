@@ -1,9 +1,9 @@
 import { useT } from "@/lib/i18n";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { lazyWithReload } from "@/lib/lazy-reload";
-import { ClientOnly, Link } from "@tanstack/react-router";
+import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
 import { Wallet, ArrowRight, Fingerprint } from "lucide-react";
-import { useHomePath } from "@/lib/preferences";
+import { isReturning, markReturning, useHomePath } from "@/lib/preferences";
 import { Button } from "./ui/button";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { SafetyNotice } from "./safety-notice";
@@ -14,6 +14,16 @@ function EntryButtons() {
   const [home] = useHomePath();
   const session = useBovedaSession();
   const [signup, setSignup] = useState(false);
+  const navigate = useNavigate();
+  const wasReturning = useRef<boolean | null>(null);
+  if (wasReturning.current === null && typeof window !== "undefined") wasReturning.current = isReturning();
+  useEffect(() => {
+    if (!session.ready || !session.authenticated) return;
+    markReturning();
+    // Returning users already saw the safety notice: go straight to their home screen.
+    if (wasReturning.current) void navigate({ to: home, replace: true });
+  }, [session.ready, session.authenticated, home, navigate]);
+  if (session.ready && session.authenticated && wasReturning.current) return <p role="status" className="mt-8 text-sm text-muted-foreground">{t("Abriendo tu cuenta…")}</p>;
   if (session.ready && session.authenticated) return <div role="dialog" aria-modal="true" aria-label={t("Protégete de estafas")} className="fixed inset-0 z-50 grid place-items-center bg-background/80 p-4 backdrop-blur-sm animate-in fade-in duration-200"><div className="w-full max-w-md rounded-xl bg-card shadow-lg"><SafetyNotice className="border-0" /><div className="px-4 pb-4"><Button asChild className="h-12 w-full"><Link to={home}>{t("Continuar al app")}<ArrowRight size={16} /></Link></Button></div></div></div>;
   return <div className="mt-8 w-full max-w-sm space-y-3">
     <div role="tablist" className="mb-4 grid grid-cols-2 rounded-xl bg-secondary p-1 text-sm font-medium">
@@ -26,7 +36,7 @@ function EntryButtons() {
     <button type="button" disabled={!session.ready} onClick={() => session.login("wallet")} className="flex w-full items-center justify-center gap-2 pt-1 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline disabled:opacity-50"><Wallet size={14} />{t("¿Usas wallet externa? Conectar Phantom o Jupiter")}</button>
     {signup && <p className="text-xs leading-5 text-muted-foreground">{t("Tu primer acceso crea tu cuenta con Privy. Después puedes elegir tu nombre y avatar.")}</p>}
     {session.error && <p role="alert" className="text-sm text-destructive">{session.error}</p>}
-    <p className="pt-2 text-xs leading-5 text-muted-foreground">{t("Al continuar, aceptas los")}{" "}<Link className="underline" to="/terminos">{t("términos")}</Link> {t("y conoces la")}{" "}<Link className="underline" to="/privacidad">{t("política de privacidad")}</Link>{t(".")}{"\u00a0"}</p>
+    <p className="pt-2 text-xs leading-5 text-muted-foreground">{t("Al continuar, aceptas los")}{" "}<Link className="underline" to="/terminos">{t("términos")}</Link> {t("y conoces la")}{" "}<Link className="underline" to="/privacidad">{t("política de privacidad")}</Link>.</p>
   </div>;
 }
 export function EntryAccess() {

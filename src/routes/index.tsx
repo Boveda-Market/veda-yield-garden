@@ -5,6 +5,8 @@ import { useT } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ShieldCheck, Sparkles, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { isReturning } from "@/lib/preferences";
 import { EntryAccess } from "@/components/entry-access";
 import { HomePredict } from "@/components/home-predict";
 
@@ -76,14 +78,25 @@ function Landing() {
     { icon: TrendingUp, title: "Genera saldo a tu ritmo", body: "Predice si el precio sube o baja en rondas de 5 min, 15 min o diarias, o recibe comisiones con las bóvedas." },
     { icon: Landmark, title: "Retira cuando quieras", body: "Envía tus USDC a Coinbase o PayPal para tu banco, o recibe Bitcoin automático en tu Cash App." },
   ];
+  const [compact, setCompact] = useState(false);
+  useEffect(() => { setCompact(isReturning()); }, []);
+  if (compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-10 text-foreground">
+    <img src="/icon-512.png" alt="" className="h-14 w-14 rounded-2xl" />
+    <h1 className="mt-4 text-center font-display text-3xl font-bold">{t("Bienvenido de nuevo")}</h1>
+    <p className="mt-2 text-center text-sm text-muted-foreground">{t("Entra para ver tu wallet y tus ganancias.")}</p>
+    <div className="mt-2 flex w-full max-w-sm flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0"><EntryAccess /></div>
+    <button type="button" onClick={() => setCompact(false)} className="mt-6 text-sm text-primary underline underline-offset-4">{t("Ver portada completa")}</button>
+    <Link to="/prueba" onClick={allowTrialEntry} className="mt-3 text-xs text-muted-foreground underline underline-offset-4">{t("Prueba gratis")}</Link>
+  </div>;
   return <div className="min-h-screen bg-background text-foreground">
-    <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6"><Link to="/" className="flex items-center gap-3 font-display text-lg font-bold"><img src="/icon-512.png" alt="" className="h-9 w-9 rounded-lg" />BÓVEDA</Link><Link to="/prueba" onClick={allowTrialEntry} className="flex h-8 items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 text-xs font-semibold text-primary"><Sparkles size={13} />{t("Prueba gratis")}</Link></header>
+    <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6"><Link to="/" className="flex items-center gap-3 font-display text-lg font-bold"><img src="/icon-512.png" alt="" className="h-9 w-9 rounded-lg" />BÓVEDA</Link><div className="flex items-center gap-2"><a href="#acceso" className="flex h-8 shrink-0 items-center whitespace-nowrap rounded-full bg-primary px-3 text-xs font-semibold text-primary-foreground">{t("Iniciar sesión")}</a><Link to="/prueba" onClick={allowTrialEntry} className="flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/40 bg-primary/10 px-3 text-xs font-semibold text-primary"><Sparkles size={13} />{t("Prueba gratis")}</Link></div></header>
     <main className="mx-auto max-w-5xl px-6">
-      <section className="grid items-center gap-10 pb-12 pt-6 md:grid-cols-2 md:pt-12">
-        <div className="text-center md:text-left">
+      <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">
+        <div className="order-1 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t("Tus fondos nunca salen de tu control.")}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t("Pon tus dólares a trabajar. $0 por empezar.")}</p></div>
+        <div className="order-3 text-center md:order-1 md:text-left">
           <p className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"><ShieldCheck size={13} />{t("100% autocustodia · Nadie custodia tus fondos")}</p>
-          <h1 className="font-display text-4xl font-bold leading-tight sm:text-5xl">{t("Tus fondos nunca salen de tu control.")}</h1>
-          <p className="mt-3 font-display text-xl font-semibold text-primary">{t("Pon tus dólares a trabajar. $0 por empezar.")}</p>
+          <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t("Tus fondos nunca salen de tu control.")}</h1>
+          <p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t("Pon tus dólares a trabajar. $0 por empezar.")}</p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground md:justify-start">{[["Powered by","Coinbase","/brands/coinbase.svg"],["Secured by","Privy","/brands/privy-mark.png"]].map(([l,n,src]) => <span key={n} className="flex items-center gap-1.5"><span>{l}</span><img src={src} alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-medium text-foreground">{n}</span></span>)}</div>
           <p className="mt-5 text-base leading-7 text-muted-foreground">{t("BÓVEDA no es un banco ni un fondo que pueda congelar tu dinero. Es una interfaz segura, protegida contra hackers, donde solo tú apruebas cada movimiento con tu huella o Face ID.")}</p>
           <p className="mt-3 text-base leading-7 text-muted-foreground">{t("Depositar, cambiar y enviar es gratis. Solo cobramos un pequeño cargo cuando tú cosechas ganancias o cobras una ronda ganada: solo ganamos cuando tú ganas.")}</p>
@@ -92,7 +105,7 @@ function Landing() {
           </ul>
           <p className="mt-4 text-xs text-muted-foreground">{t("Las ganancias cambian y puedes perder dinero.")}</p>
         </div>
-        <div id="acceso" className="flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
+        <div id="acceso" className="order-2 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
           <EntryAccess />
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span></p>
           <ul className="mt-3 flex flex-wrap justify-center gap-2 text-[11px]">{["Tú tienes el control total", "Sin plazos de permanencia"].map((b) => <li key={b} className="flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 font-medium text-foreground"><ShieldCheck size={12} className="text-primary" />{t(b)}</li>)}</ul>

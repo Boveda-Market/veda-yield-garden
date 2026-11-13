@@ -31,3 +31,8 @@ export function useContacts() {
   const list = useSyncExternalStore(subscribe, () => { const raw = read(KEYS.contacts); if (raw !== cache.raw) cache = { raw, list: parseContacts(raw) }; return cache.list; }, () => cache.list);
   return [list, (next: Contact[]) => write(KEYS.contacts, JSON.stringify(next.slice(0, 30)))] as const;
 }
+
+/** Device-local hint that this browser has signed in before (UI only, never trusted for access). */
+const RETURNING_KEY = "boveda:returning";
+export const markReturning = () => { try { localStorage.setItem(RETURNING_KEY, "1"); } catch { /* ignore */ } };
+export const isReturning = () => { try { return localStorage.getItem(RETURNING_KEY) === "1"; } catch { return false; } };
