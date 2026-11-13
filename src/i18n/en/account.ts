@@ -207,7 +207,7 @@ export const account: Record<string, string> = {
   "Revisar y firmar envío": "Review and sign transfer",
   "Recibirás aproximadamente": "You'll receive about",
   "Protección de precio 0.5%. La comisión del 1% se cobra en USDC y ya está descontada.": "0.5% price protection. The 1% fee is charged in USDC and already deducted.",
-  "Comisión BÓVEDA": "BÓVEDA fee",
+  "Servicio BÓVEDA": "BÓVEDA service",
   "Confirmar y firmar cambio": "Confirm and sign swap",
   "Cotizando…": "Getting quote…",
   "Ver cotización": "See quote",

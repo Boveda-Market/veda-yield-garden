@@ -73,7 +73,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
         <ReceiveCard label={t("Recibes")} amount={result.net ?? "—"} unit="USDC" sub={`+ ${result.tokenAmount} ${result.tokenSymbol}`} />
         <dl className="grid gap-2 rounded-xl border border-border p-4">
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en USDC")}</dt><dd>{result.gross}</dd></div>
-          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión BÓVEDA")}</dt><dd>−{result.fee} USDC</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-muted-foreground" title={t("Cubre los servicios avanzados de BÓVEDA: simulación de seguridad antes de firmar, mejor ruta, protección contra deslizamiento y automatización de la bóveda.")}>{t("Servicio BÓVEDA")} ⓘ</dt><dd>−{result.fee} USDC</dd></div>
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en")} {result.tokenSymbol}</dt><dd>{result.tokenAmount} · {t("sin comisión")}</dd></div>
         </dl>
       </>}

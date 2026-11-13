@@ -140,7 +140,7 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
       <details className="rounded-xl border border-border px-3 py-2 text-sm">
         <summary className="cursor-pointer text-muted-foreground">{t("Ver detalles")}</summary>
         <dl className="mt-2 space-y-2">
-          <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{t("Comisión BÓVEDA")}</dt><dd>{format(current.feeUsdc, "USDC")} USDC</dd></div>
+          <div className="flex justify-between gap-2"><dt className="text-muted-foreground" title={t("Cubre los servicios avanzados de BÓVEDA: simulación de seguridad antes de firmar, mejor ruta, protección contra deslizamiento y automatización de la bóveda.")}>{t("Servicio BÓVEDA")} ⓘ</dt><dd>{format(current.feeUsdc, "USDC")} USDC</dd></div>
           <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{t("Mínimo a recibir")}</dt><dd>{current.minimum ? `${format(current.minimum, to)} ${to}` : "—"}</dd></div>
           <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{t("Protección de precio")}</dt><dd>0.5%</dd></div>
         </dl>

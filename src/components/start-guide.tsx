@@ -42,7 +42,7 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
         [t("Convertido"), `${num(receipt.solIn, 9, 4)} SOL`],
         [t("Recibes (aprox.)"), `${num(receipt.usdcOut, 6, 2)} USDC`],
         ...(receipt.minimum !== null ? [[t("Mínimo garantizado"), `${num(receipt.minimum, 6, 2)} USDC`]] : []),
-        [t("Comisión BÓVEDA"), "0.00 USDC"],
+        [t("Servicio BÓVEDA"), "0.00 USDC"],
         [t("Reservado para costos de red"), `${num(receipt.kept, 9, 4)} SOL`],
         [t("Comprobante"), `${receipt.signature.slice(0, 6)}…${receipt.signature.slice(-6)}`],
       ].map(([k, v]) => <div key={k} className="flex justify-between gap-3 px-4 py-2.5"><dt className="text-muted-foreground">{k}</dt><dd className="font-semibold">{v}</dd></div>)}

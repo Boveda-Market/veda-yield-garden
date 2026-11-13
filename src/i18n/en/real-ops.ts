@@ -64,7 +64,7 @@ export const realOps: Record<string, string> = {
   "se entrega a tu wallet sin convertir ni cobrar comisión en esta operación.": "is sent to your wallet without conversion or a fee in this transaction.",
   "Resumen de tu cosecha": "Your harvest summary",
   "Cosecha no disponible": "Harvest unavailable",
-  "Comisión BÓVEDA": "BÓVEDA fee",
+  "Servicio BÓVEDA": "BÓVEDA service",
   "Posición sigue abierta": "Position stays open",
   "Comisión exacta": "Exact fee",
   "Comprobado antes de firmar": "Checked before signing",
