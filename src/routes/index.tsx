@@ -29,7 +29,7 @@ const FAQS = [
   { q: "¿Necesito dinero para usar BÓVEDA?", a: "No para empezar. Toca «Probar como invitado» y recibe 1,000 créditos ficticios para explorar sin registro ni wallet. Los créditos no se pueden retirar ni convertir en dinero." },
   { q: "¿Cómo se generan las ganancias?", a: "Tu depósito se suma a una bóveda que cobra comisiones cada vez que otras personas cambian monedas en ella. Esas comisiones se reparten entre quienes aportan. Las tasas son estimaciones, cambian y puedes perder dinero." },
   { q: "¿Cuándo puedo retirar?", a: "Puedes cosechar tus ganancias o cerrar tu posición cuando quieras, sin plazos de permanencia. Cada operación se revisa antes de firmar con tu wallet." },
-  { q: "¿Qué comisiones cobra BÓVEDA?", a: "Enviar y cambiar monedas es gratis, y entrar a Sube/Baja también. Depositar en una bóveda es gratis. Al cosechar, cerrar o retirar pagas una comisión progresiva: mientras más mueves, menor el porcentaje (de 3% a 0.40%). En Sube/Baja pagas 2% de lo que cobres al reclamar. Los costes de red se pagan aparte." },
+  { q: "¿Qué comisiones cobra BÓVEDA?", a: "Depositar, enviar, cambiar monedas y entrar a Sube/Baja es gratis. Cosechar, cerrar, retirar y reclamar premios tienen una pequeña comisión que siempre ves antes de firmar. El detalle está en Términos y condiciones." },
 ];
 
 const GUARANTEES = [
