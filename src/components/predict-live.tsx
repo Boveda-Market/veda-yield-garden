@@ -46,7 +46,11 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   useEffect(() => { setReview(null); }, [round?.marketId]);
   const confirmRef = useRef<HTMLDivElement>(null);
   const jumpConfirm = () => requestAnimationFrame(() => confirmRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
-  useEffect(() => { if (review) jumpConfirm(); }, [review?.tx]);
+  // Scroll once per selection; the 15s quote refresh must not keep pulling the screen.
+  const jumped = useRef(false);
+  useEffect(() => { if (review && !jumped.current) { jumped.current = true; jumpConfirm(); } }, [review?.tx]);
+  const sidesRef = useRef<HTMLDivElement>(null);
+  const cancelQuote = () => { jumped.current = true; setSide(null); setReview(null); requestAnimationFrame(() => sidesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })); };
   const refresh = useCallback(async () => {
     if (!wallet) return;
     const r = await getPredictPositions({ data: { wallet } });
@@ -166,11 +170,11 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
+      <div ref={sidesRef} className="grid grid-cols-2 gap-3 scroll-mt-24">
         {(["up", "down"] as const).map((s) => {
           const p = priceOf(s), on = side === s, up = s === "up";
           const Icon = up ? ArrowUpRight : ArrowDownRight;
-          return <button key={s} type="button" disabled={!p} aria-pressed={on} onClick={() => { setSide(s); setReview(null); jumpConfirm(); }}
+          return <button key={s} type="button" disabled={!p} aria-pressed={on} onClick={() => { if (on) { cancelQuote(); return; } jumped.current = false; setSide(s); setReview(null); jumpConfirm(); }}
             className={`relative overflow-hidden rounded-2xl border-2 p-4 text-left transition active:scale-[0.97] disabled:opacity-40 ${on ? (up ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "border-destructive bg-destructive text-destructive-foreground shadow-lg shadow-destructive/30") : up ? "border-primary/40 bg-primary/5 text-primary" : "border-destructive/40 bg-destructive/5 text-destructive"}`}>
             <span className="flex items-center justify-between"><span className="font-display text-xl font-bold">{t(up ? "Sube" : "Baja")}</span><Icon size={22} /></span>
             <span className="mt-2 block font-display text-3xl font-bold tabular-nums">{p ? `${Math.round(p * 100)}%` : "—"}</span>
@@ -200,6 +204,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
         {!wallet ? <p className="mt-3 rounded-xl bg-secondary p-3 text-center text-sm font-semibold">{t("Entra con tu cuenta para predecir en vivo con el USDC de tu wallet.")}</p>
           : !review && !short && <Button disabled className="mt-3 h-12 w-full rounded-xl text-base font-bold">{quoting ? <><Loader2 className="animate-spin" /> {t("Cotizando en la red…")}</> : side ? t(side === "up" ? "Predecir Sube" : "Predecir Baja") : t("Elige Sube o Baja")}</Button>}
         {quoteErr && <p className="mt-2 text-xs text-destructive">{t("No se pudo cotizar ahora mismo. Reintentando…")}</p>}
+        {side && !review && <Button type="button" variant="ghost" className="mt-2 w-full" onClick={cancelQuote}>{t("Cancelar cotización")}</Button>}
         {wallet && !review && <p className="mt-2 text-[11px] text-muted-foreground">{t("La cotización real aparece aquí, lista para firmar.")}</p>}
       </section>
 
@@ -211,6 +216,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
         <p className="flex justify-between"><span>{t("Ganancia posible")}</span><strong>+{usdc(potentialProfit(review.quote))} USDC</strong></p>
         <p className="text-xs text-muted-foreground">{t("Al expirar el tiempo la posición se cierra sola: si ganas, aparece tu premio para reclamar; si pierdes, desaparece. También puedes vender antes del cierre al precio del momento.")}</p>
         <Button className="w-full" disabled={busy === "sign"} onClick={confirm}>{busy === "sign" ? <Loader2 className="animate-spin" /> : t("Confirmar y firmar")}</Button>
+        <Button type="button" variant="outline" className="w-full" disabled={busy === "sign"} onClick={cancelQuote}>{t("Cancelar cotización")}</Button>
       </section>}
 
       {msg && <Dismissible key={msg.text} onDismiss={() => setMsg(null)} ms={msg.ok ? 6000 : 10000} className={`rounded-xl border p-3 pr-10 ${msg.ok ? "border-primary/30 bg-primary/10 text-primary" : "border-destructive/30 bg-destructive/10 text-destructive"}`}><p role="status" className="text-sm">{msg.text} {msg.wallet && <Link to="/wallet" className="underline">{t("Ver en tu wallet")}</Link>}{msg.sig && <a className="inline-flex items-center gap-1 underline" href={`https://orbmarkets.io/tx/${msg.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}<ExternalLink size={12} /></a>}</p></Dismissible>}
