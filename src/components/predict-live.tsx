@@ -31,7 +31,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
   const wallet = session.walletAddress;
   const qc = useQueryClient();
   const [side, setSide] = useState<PredictSide | null>(null);
-  const [amount, setAmount] = useState("10");
+  const [amount, setAmount] = useState("5");
   const [review, setReview] = useState<{ side: PredictSide; round: LiveRound; quote: PredictQuote; tx: string; context: string } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string; sig?: string; wallet?: boolean } | null>(null);
