@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { isReturning } from "@/lib/preferences";
 import { EntryAccess } from "@/components/entry-access";
-import { HomePredict } from "@/components/home-predict";
 
 export const Route = createFileRoute("/")({ staticData: { sitemap: true },
   head: () => ({ meta: [
@@ -143,8 +142,6 @@ function Landing() {
           <Button asChild className="h-12 shrink-0"><Link to="/prueba" onClick={allowTrialEntry}>{t("Probar como invitado")}<ArrowRight size={16} /></Link></Button>
         </div>
       </section>
-
-      <HomePredict />
 
       <section className="border-t border-border py-12">
         <h2 className="font-display text-2xl font-bold">{t("Cómo funciona")}</h2>
