@@ -40,3 +40,15 @@ export async function sweepLeftovers(wallet: string, signAndSend: (tx: Uint8Arra
   }
   return { usdc, converted: quoted.length - failed.length, failed };
 }
+
+/** Symbols in the wallet whose leftover is worth converting (read-only preview, used to announce the second signature). */
+export async function leftoverSymbols(wallet: string): Promise<string[]> {
+  const { quoteSwap, readTokenBalance } = await import("@/lib/wallet-actions");
+  const out: string[] = [];
+  for (const t of sweepTargets()) {
+    const amount = await readTokenBalance(wallet, t.mint).catch(() => 0n);
+    if (amount <= 0n) continue;
+    try { const q = await quoteSwap(t.symbol, "USDC", amount, { feeUsdc: 0n }); if (worthSweeping(BigInt(q.outAmount))) out.push(t.symbol); } catch { /* skip */ }
+  }
+  return out;
+}

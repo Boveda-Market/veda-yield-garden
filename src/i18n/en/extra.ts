@@ -907,4 +907,13 @@ export const extra: Record<string, string> = {
   "No se pudieron cambiar algunos sobrantes ({s}). Hazlo en Mi Billetera → Cambiar.": "Some leftovers couldn't be converted ({s}). Do it in My wallet → Swap.",
   "También cambiamos tus sobrantes a USDC: ~{v} USDC más, sin comisión.": "We also converted your leftovers to USDC: ~{v} more USDC, no fee.",
   "No se pudieron cambiar los sobrantes. Hazlo en Mi Billetera → Cambiar.": "Leftovers couldn't be converted. Do it in My wallet → Swap.",
+  "Firma 1 de 2: esperando firma en tu wallet…": "Signature 1 of 2: waiting for your wallet…",
+  "Firma 1 de 2 enviada: confirmando tu retiro en la red…": "Signature 1 of 2 sent: confirming your withdrawal…",
+  "Firma 1 de 2 lista: tu retiro ya está en tu wallet. Ahora firma la 2 de 2 para cambiar tus sobrantes de {s} a USDC ({i} de {n})…": "Signature 1 of 2 done: your withdrawal is in your wallet. Now sign 2 of 2 to convert your {s} leftovers to USDC ({i} of {n})…",
+  "Tu retiro de la bóveda ya está en tu wallet. El cambio de sobrantes ({s}) no se completó; puedes hacerlo cuando quieras en Mi Billetera → Cambiar.": "Your vault withdrawal is already in your wallet. The leftover conversion ({s}) didn't finish; you can do it anytime in My Wallet → Swap.",
+  "Esta operación tiene 2 pasos y 2 firmas": "This operation has 2 steps and 2 signatures",
+  "Paso 1: retiras tu posición de la bóveda a USDC.": "Step 1: withdraw your vault position to USDC.",
+  "Paso 2: cambiamos tus sobrantes de {s} a USDC, sin comisión de BÓVEDA.": "Step 2: convert your {s} leftovers to USDC, no BÓVEDA fee.",
+  "Si cancelas el paso 2, tu retiro ya queda seguro en tu wallet.": "If you cancel step 2, your withdrawal is already safe in your wallet.",
+  "Firmar paso 1 de 2: retirar bóveda": "Sign step 1 of 2: withdraw vault",
 };

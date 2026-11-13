@@ -15,7 +15,7 @@ import { ActionSuccess, ReceiveCard } from "@/components/action-success";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { sweepLeftovers } from "@/lib/sweep-leftovers";
+import { sweepLeftovers, leftoverSymbols } from "@/lib/sweep-leftovers";
 
 export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migrateTo, rotate = false, onMigrated }: { wallet: string | null; position?: string; vaultId: "sol" | "met"; onClose: () => void; migrateTo?: Vault; rotate?: boolean; onMigrated?: (usdc: string) => void }) {
   const t = useT();
@@ -36,6 +36,9 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
   const [message, setMessage] = useState<string | null>(null);
   const [finished, setFinished] = useState(false);
   const [sweepNote, setSweepNote] = useState<string | null>(null);
+  const [leftovers, setLeftovers] = useState<string[]>([]);
+  useEffect(() => { if (!migrateTo && address && result?.success) void leftoverSymbols(address).then(setLeftovers).catch(() => setLeftovers([])); }, [address, result?.success, migrateTo]);
+  const two = !migrateTo && leftovers.length > 0;
   const input = exitInput.safeParse({ wallet: address, position: positionAddress, vaultId, percent, ...(migrateTo ? { migrate: true } : {}), ...(migrateTo && rotate ? { rotate: true } : {}) });
   async function run() {
     if (!input.success || pending) return;
@@ -56,11 +59,11 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
       setResult(next);
       if (!next.success || !next.prepared) { setAccepted(false); const moved = next.message.includes("cotización cambió"); setMessage(moved ? t("El precio se movió. Actualizamos el resumen; toca «Firmar» de nuevo.") : next.message); if (moved) { try { setResult(await simulate({ data: input.data })); } catch { /* keep message */ } } return; }
       if (next.prepared.expiresAt <= Date.now() || next.prepared.wallet !== session.walletAddress || next.prepared.position !== positionAddress) { setMessage(t("La preparación caducó o la wallet cambió. Revisa nuevamente el retiro.")); return; }
-      setStep(t("Esperando firma en tu wallet…"));
+      setStep(two ? t("Firma 1 de 2: esperando firma en tu wallet…") : t("Esperando firma en tu wallet…"));
       let sig: string;
       try { sig = await session.signAndSend(Uint8Array.from(atob(next.prepared.transaction), (c) => c.charCodeAt(0))); }
       catch { setMessage(t("La wallet canceló o rechazó la solicitud. Si pudo enviarse, revisa su historial antes de reintentar.")); return; }
-      setSignature(sig); setStep(t("Esperando confirmación en la red…"));
+      setSignature(sig); setStep(two ? t("Firma 1 de 2 enviada: confirmando tu retiro en la red…") : t("Esperando confirmación en la red…"));
       for (let attempt = 0; attempt < 60; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó la transacción atómica: no se aplicaron el retiro ni la comisión; puede cobrarse el coste de red.")); return; }
@@ -69,8 +72,8 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
           // Convert leftover JupUSD / vault tokens to USDC too (free swaps, one signature each). The SOL network reserve stays.
           if (!migrateTo) {
             try {
-              const swept = await sweepLeftovers(address, session.signAndSend, (symbol, i, n) => setStep(t("Cambiando sobrantes de {s} a USDC ({i} de {n})…", { s: symbol, i: String(i), n: String(n) })));
-              if (swept.failed.length) setSweepNote(t("No se pudieron cambiar algunos sobrantes ({s}). Hazlo en Mi Billetera → Cambiar.", { s: swept.failed.join(", ") }));
+              const swept = await sweepLeftovers(address, session.signAndSend, (symbol, i, n) => setStep(t("Firma 1 de 2 lista: tu retiro ya está en tu wallet. Ahora firma la 2 de 2 para cambiar tus sobrantes de {s} a USDC ({i} de {n})…", { s: symbol, i: String(i), n: String(n) })));
+              if (swept.failed.length) setSweepNote(t("Tu retiro de la bóveda ya está en tu wallet. El cambio de sobrantes ({s}) no se completó; puedes hacerlo cuando quieras en Mi Billetera → Cambiar.", { s: swept.failed.join(", ") }));
               else if (swept.converted > 0) setSweepNote(t("También cambiamos tus sobrantes a USDC: ~{v} USDC más, sin comisión.", { v: (Number(swept.usdc) / 1e6).toFixed(2) }));
             } catch { setSweepNote(t("No se pudieron cambiar los sobrantes. Hazlo en Mi Billetera → Cambiar.")); }
           }
@@ -116,7 +119,8 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
       </details>}
     </div>}
     {result?.remainingTokenRaw && result.remainingTokenRaw !== "0" && <p role="alert" className="text-xs leading-5 text-destructive">{t("Diferencia de tokens tras la conversión:")}{" "}{result.remainingTokenRaw} {t("unidades mínimas. No es un importe en USD; la liquidación no está validada.")}</p>}
-    {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : percent === 100 ? t("Firmar liquidación a USDC") : t("Firmar retiro del {p}%", { p: String(percent) })}</Button><p className="text-center text-xs text-muted-foreground">{percent === 100 ? t("Al firmar cierras la posición; no se puede revertir.") : t("Al firmar retiras esta parte; no se puede revertir.")}</p></>}
+    {canSign && result?.success && !signature && two && <div role="note" className="grid gap-1 rounded-lg border border-primary/40 bg-primary/10 p-3 text-xs leading-5"><p className="font-semibold">{t("Esta operación tiene 2 pasos y 2 firmas")}</p><p>{t("Paso 1: retiras tu posición de la bóveda a USDC.")}</p><p>{t("Paso 2: cambiamos tus sobrantes de {s} a USDC, sin comisión de BÓVEDA.", { s: leftovers.join(", ") })}</p><p className="text-muted-foreground">{t("Si cancelas el paso 2, tu retiro ya queda seguro en tu wallet.")}</p></div>}
+    {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : two ? t("Firmar paso 1 de 2: retirar bóveda") : percent === 100 ? t("Firmar liquidación a USDC") : t("Firmar retiro del {p}%", { p: String(percent) })}</Button><p className="text-center text-xs text-muted-foreground">{percent === 100 ? t("Al firmar cierras la posición; no se puede revertir.") : t("Al firmar retiras esta parte; no se puede revertir.")}</p></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta liquidación. No hay movimientos hasta que firmes.")}</p>}
     {signature && pending && step && <p role="status" className="flex items-center gap-2 text-sm"><LoaderCircle className="h-4 w-4 animate-spin motion-reduce:animate-none" />{step}</p>}
     {message && <p role="alert" className="text-sm">{message}</p>}
