@@ -769,4 +769,5 @@ export const extra: Record<string, string> = {
   "No tienes notificaciones pendientes.": "You have no pending notifications.",
   "Ver historial completo": "View full history",
   "Borrar notificación": "Delete notification",
+  "Prueba gratis": "Free trial",
 };

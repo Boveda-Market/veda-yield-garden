@@ -64,7 +64,7 @@ function Landing() {
     { icon: Landmark, title: "Retira cuando quieras", body: "Envía tus USDC a Coinbase o PayPal para tu banco, o recibe Bitcoin automático en tu Cash App." },
   ];
   return <div className="min-h-screen bg-background text-foreground">
-    <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6"><Link to="/" className="flex items-center gap-3 font-display text-lg font-bold"><img src="/icon-512.png" alt="" className="h-9 w-9 rounded-lg" />BÓVEDA</Link></header>
+    <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6"><Link to="/" className="flex items-center gap-3 font-display text-lg font-bold"><img src="/icon-512.png" alt="" className="h-9 w-9 rounded-lg" />BÓVEDA</Link><Link to="/prueba" onClick={allowTrialEntry} className="flex h-8 items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 text-xs font-semibold text-primary"><Sparkles size={13} />{t("Prueba gratis")}</Link></header>
     <main className="mx-auto max-w-5xl px-6">
       <section className="grid items-center gap-10 pb-12 pt-6 md:grid-cols-2 md:pt-12">
         <div className="text-center md:text-left">
