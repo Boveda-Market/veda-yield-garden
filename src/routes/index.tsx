@@ -99,6 +99,23 @@ function Landing() {
         </div>
       </section>
 
+      <section className="py-12">
+        <h2 className="font-display text-2xl font-bold">{t("Lo que dice la comunidad")}</h2>
+        <p className="mt-1 text-xs text-muted-foreground">{t("Opiniones ilustrativas de la experiencia")}</p>
+        <ul className="mt-6 grid gap-4 sm:grid-cols-3">{REVIEWS.map(({ stars, name, text, photo, title, tag }) => <li key={name} className={`relative flex flex-col rounded-2xl border bg-card p-5 ${stars === 5 ? "border-primary/40 bg-gradient-to-br from-primary/10 to-card" : "border-border"}`}>
+          <Quote aria-hidden="true" size={28} className="absolute right-4 top-4 text-primary/15" />
+          <div className="flex items-center gap-3"><img src={photo} alt="" loading="lazy" width={48} height={48} className="h-12 w-12 rounded-full border-2 border-primary/30 object-cover" />
+            <div className="min-w-0"><p className="text-sm font-semibold">{name}</p><p className="truncate text-xs text-muted-foreground">{t(tag)}</p></div></div>
+          <div className="mt-3 flex gap-0.5 text-primary" aria-label={`${stars}/5`}>{[1,2,3,4,5].map((n) => <Star key={n} size={15} className={n <= stars ? "fill-current" : "text-muted-foreground/40"} />)}</div>
+          <p className="mt-2 font-display font-semibold leading-snug">{t(title)}</p>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">“{t(text)}”</p></li>)}</ul>
+        <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div><p className="flex items-center gap-2 font-display font-semibold"><MessageSquare size={16} className="text-primary" />{t("¿Qué te gusta y qué no? Cuéntanos")}</p>
+            <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">{t("Envía sugerencias, críticas o tu reseña desde ☰ Menú → «Ayúdanos a mejorar». Leemos cada mensaje para mejorar BÓVEDA.")}</p></div>
+          <Button asChild variant="outline" className="shrink-0"><a href="#acceso" onClick={() => { try { sessionStorage.setItem("boveda:open-ideas", "1"); } catch { /* ignore */ } }}>{t("Entrar y opinar")}</a></Button>
+        </div>
+      </section>
+
       <section aria-label={t("Seguridad")} className="mb-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {TRUST.map(({ icon: Icon, title, body }) => <div key={title} className="rounded-2xl border border-border bg-card p-4"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={16} /></span><p className="mt-3 font-display text-sm font-semibold">{t(title)}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{t(body)}</p></div>)}
       </section>
@@ -139,23 +156,6 @@ function Landing() {
         <ul className="mt-6 grid gap-4 sm:grid-cols-3">{GUARANTEES.map(({ icon: Icon, title, body }) => <li key={title} className="rounded-2xl border border-border bg-card p-5">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={18} /></span>
           <p className="mt-4 font-display font-semibold">{t(title)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(body)}</p></li>)}</ul>
-      </section>
-
-      <section className="py-12">
-        <h2 className="font-display text-2xl font-bold">{t("Lo que dice la comunidad")}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">{t("Opiniones ilustrativas de la experiencia")}</p>
-        <ul className="mt-6 grid gap-4 sm:grid-cols-3">{REVIEWS.map(({ stars, name, text, photo, title, tag }) => <li key={name} className={`relative flex flex-col rounded-2xl border bg-card p-5 ${stars === 5 ? "border-primary/40 bg-gradient-to-br from-primary/10 to-card" : "border-border"}`}>
-          <Quote aria-hidden="true" size={28} className="absolute right-4 top-4 text-primary/15" />
-          <div className="flex items-center gap-3"><img src={photo} alt="" loading="lazy" width={48} height={48} className="h-12 w-12 rounded-full border-2 border-primary/30 object-cover" />
-            <div className="min-w-0"><p className="text-sm font-semibold">{name}</p><p className="truncate text-xs text-muted-foreground">{t(tag)}</p></div></div>
-          <div className="mt-3 flex gap-0.5 text-primary" aria-label={`${stars}/5`}>{[1,2,3,4,5].map((n) => <Star key={n} size={15} className={n <= stars ? "fill-current" : "text-muted-foreground/40"} />)}</div>
-          <p className="mt-2 font-display font-semibold leading-snug">{t(title)}</p>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">“{t(text)}”</p></li>)}</ul>
-        <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div><p className="flex items-center gap-2 font-display font-semibold"><MessageSquare size={16} className="text-primary" />{t("¿Qué te gusta y qué no? Cuéntanos")}</p>
-            <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">{t("Envía sugerencias, críticas o tu reseña desde ☰ Menú → «Ayúdanos a mejorar». Leemos cada mensaje para mejorar BÓVEDA.")}</p></div>
-          <Button asChild variant="outline" className="shrink-0"><a href="#acceso" onClick={() => { try { sessionStorage.setItem("boveda:open-ideas", "1"); } catch { /* ignore */ } }}>{t("Entrar y opinar")}</a></Button>
-        </div>
       </section>
 
       <section className="py-12">
