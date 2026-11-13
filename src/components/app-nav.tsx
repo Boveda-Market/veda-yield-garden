@@ -73,7 +73,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
             <button type="button" className={row} onClick={() => go("account")}><UserRound size={18} />{t("Mi cuenta")}</button>
           </> : <>
             {operator && <Link to="/invita" hash="tesoreria" className={`${row} border border-primary/40 bg-primary/10 font-semibold text-primary`} onClick={() => setOpen(false)}><ShieldCheck size={18} />{t("Panel de Tesorería")}</Link>}
-            <Link to="/wallet" className={row} onClick={() => setOpen(false)}><Wallet size={18} />{t("Mi Billetera")}</Link>
+            <Link to="/wallet" className={row} onClick={() => setOpen(false)}><Home size={18} />{t("Inicio")}</Link>
             <Link to="/portfolio" className={row} onClick={() => setOpen(false)}><PieChart size={18} />{t("Portafolio")}</Link>
             <Link to="/notificaciones" className={row} onClick={() => setOpen(false)}><Bell size={18} />{t("Notificaciones")}</Link>
             <Link to="/cuenta" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Mi cuenta")}</Link>
