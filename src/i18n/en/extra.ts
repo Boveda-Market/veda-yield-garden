@@ -902,4 +902,8 @@ export const extra: Record<string, string> = {
   "Ganancia actual": "Current profit",
   "Ver posición": "View position",
   "Premio": "Prize",
+  "Cambiando sobrantes de {s} a USDC ({i} de {n})…": "Converting leftover {s} to USDC ({i} of {n})…",
+  "No se pudieron cambiar algunos sobrantes ({s}). Hazlo en Mi Billetera → Cambiar.": "Some leftovers couldn't be converted ({s}). Do it in My wallet → Swap.",
+  "También cambiamos tus sobrantes a USDC: ~{v} USDC más, sin comisión.": "We also converted your leftovers to USDC: ~{v} more USDC, no fee.",
+  "No se pudieron cambiar los sobrantes. Hazlo en Mi Billetera → Cambiar.": "Leftovers couldn't be converted. Do it in My wallet → Swap.",
 };

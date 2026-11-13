@@ -15,6 +15,7 @@ import { ActionSuccess, ReceiveCard } from "@/components/action-success";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { sweepLeftovers } from "@/lib/sweep-leftovers";
 
 export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migrateTo, rotate = false, onMigrated }: { wallet: string | null; position?: string; vaultId: "sol" | "met"; onClose: () => void; migrateTo?: Vault; rotate?: boolean; onMigrated?: (usdc: string) => void }) {
   const t = useT();
@@ -34,6 +35,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
   const [signature, setSignature] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [finished, setFinished] = useState(false);
+  const [sweepNote, setSweepNote] = useState<string | null>(null);
   const input = exitInput.safeParse({ wallet: address, position: positionAddress, vaultId, percent, ...(migrateTo ? { migrate: true } : {}), ...(migrateTo && rotate ? { rotate: true } : {}) });
   async function run() {
     if (!input.success || pending) return;
@@ -62,7 +64,20 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
       for (let attempt = 0; attempt < 60; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó la transacción atómica: no se aplicaron el retiro ni la comisión; puede cobrarse el coste de red.")); return; }
-        if (status.status !== "pending") { setFinished(true); setMessage(t("Liquidación confirmada en la red. Consulta los importes finales y la renta devuelta en Helius.")); if (!migrateTo) void reportAffiliate(sig, "exit"); await queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", address] }); return; }
+        if (status.status !== "pending") {
+          if (!migrateTo) void reportAffiliate(sig, "exit");
+          // Convert leftover JupUSD / vault tokens to USDC too (free swaps, one signature each). The SOL network reserve stays.
+          if (!migrateTo) {
+            try {
+              const swept = await sweepLeftovers(address, session.signAndSend, (symbol, i, n) => setStep(t("Cambiando sobrantes de {s} a USDC ({i} de {n})…", { s: symbol, i: String(i), n: String(n) })));
+              if (swept.failed.length) setSweepNote(t("No se pudieron cambiar algunos sobrantes ({s}). Hazlo en Mi Billetera → Cambiar.", { s: swept.failed.join(", ") }));
+              else if (swept.converted > 0) setSweepNote(t("También cambiamos tus sobrantes a USDC: ~{v} USDC más, sin comisión.", { v: (Number(swept.usdc) / 1e6).toFixed(2) }));
+            } catch { setSweepNote(t("No se pudieron cambiar los sobrantes. Hazlo en Mi Billetera → Cambiar.")); }
+          }
+          setFinished(true); setMessage(t("Liquidación confirmada en la red. Consulta los importes finales y la renta devuelta en Helius."));
+          for (const k of ["real-solana", "meteora-history", "my-wallet", "my-wallet-tokens", "start-guide"]) await queryClient.invalidateQueries({ queryKey: [k, address] });
+          return;
+        }
         await new Promise((resolve) => setTimeout(resolve, attempt < 10 ? 800 : 2_000));
       }
       setMessage(t("Confirmación pendiente. Revisa Helius antes de reintentar; no envíes una segunda liquidación."));
@@ -80,7 +95,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
     {!migrateTo && !finished && !signature && <div role="radiogroup" aria-label={t("Cuánto retirar")} className="grid grid-cols-4 gap-2">{EXIT_PERCENTS.map((p) => <Button key={p} type="button" role="radio" aria-checked={percent === p} variant={percent === p ? "default" : "outline"} disabled={pending} onClick={() => { setPercent(p); setResult(null); setAccepted(false); setMessage(null); }}>{p === 100 ? t("Todo") : `${p}%`}</Button>)}</div>}
     {!finished && !signature && <p className="text-xs text-muted-foreground">{percent === 100 ? t("Cierras la posición y recuperas el SOL de apertura.") : t("Retiras el {p}% y el resto sigue invirtiendo en la bóveda.", { p: String(percent) })}</p>}
     {migrateTo && !finished && <p className="rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm">{rotate ? t("Paso 1 de 2: cosechamos tus ganancias y cerramos esta bóveda. Luego depositas todo en {v}. Cambio voluntario: comisión reducida de 0.10% al salir y 0% al depositar.", { v: t(migrateTo.name) }) : t("Paso 1 de 2: cosechamos tus ganancias y cerramos esta bóveda. Luego depositas todo en {v}. Sin comisión de BÓVEDA en ningún paso.", { v: t(migrateTo.name) })}</p>}
-    {finished && migrateTo && onMigrated ? <div role="status" className="grid gap-3"><p className="font-semibold">{t("Paso 1 listo: tus USDC están en tu wallet.")}</p><Button size="lg" onClick={() => onMigrated(result?.minimumNet ?? "")}>{t("Paso 2: depositar en {v}", { v: t(migrateTo.name) })}</Button></div> : finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess title={t("¡Retiro completado!")} body={percent === 100 ? t("Tus USDC ya están en tu wallet. También recuperaste el SOL de apertura de la posición.") : t("Tus USDC ya están en tu wallet. El resto de tu posición sigue invertido.")} signature={signature} onClose={onClose} /></> : <>
+    {finished && migrateTo && onMigrated ? <div role="status" className="grid gap-3"><p className="font-semibold">{t("Paso 1 listo: tus USDC están en tu wallet.")}</p><Button size="lg" onClick={() => onMigrated(result?.minimumNet ?? "")}>{t("Paso 2: depositar en {v}", { v: t(migrateTo.name) })}</Button></div> : finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess title={t("¡Retiro completado!")} body={percent === 100 ? t("Tus USDC ya están en tu wallet. También recuperaste el SOL de apertura de la posición.") : t("Tus USDC ya están en tu wallet. El resto de tu posición sigue invertido.")} signature={signature} onClose={onClose} />{sweepNote && <p role="status" className="text-sm text-muted-foreground">{sweepNote}</p>}</> : <>
     {!prefilled && inputs}
     {(!result || !result.success) && <Button variant={result ? "outline" : "default"} disabled={pending || !input.success} onClick={() => void run()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <ReceiptText className="mr-2 h-4 w-4" />}{pending ? t("Calculando tu retiro…") : t("Revisar retiro")}</Button>}
     {result && <div role="status" className="grid gap-3 text-sm">
@@ -103,6 +118,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
     {result?.remainingTokenRaw && result.remainingTokenRaw !== "0" && <p role="alert" className="text-xs leading-5 text-destructive">{t("Diferencia de tokens tras la conversión:")}{" "}{result.remainingTokenRaw} {t("unidades mínimas. No es un importe en USD; la liquidación no está validada.")}</p>}
     {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : percent === 100 ? t("Firmar liquidación a USDC") : t("Firmar retiro del {p}%", { p: String(percent) })}</Button><p className="text-center text-xs text-muted-foreground">{percent === 100 ? t("Al firmar cierras la posición; no se puede revertir.") : t("Al firmar retiras esta parte; no se puede revertir.")}</p></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta liquidación. No hay movimientos hasta que firmes.")}</p>}
+    {signature && pending && step && <p role="status" className="flex items-center gap-2 text-sm"><LoaderCircle className="h-4 w-4 animate-spin motion-reduce:animate-none" />{step}</p>}
     {message && <p role="alert" className="text-sm">{message}</p>}
     {signature && <Link to="/wallet" onClick={onClose} className="text-xs underline">{t("Ver en tu wallet")}</Link>}
     </>}

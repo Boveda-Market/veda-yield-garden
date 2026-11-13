@@ -1,0 +1,15 @@
+import { describe, expect, it } from "vitest";
+import { sweepTargets, worthSweeping } from "@/lib/sweep-leftovers";
+
+describe("liquidation leftover sweep", () => {
+  it("converts JupUSD and MET leftovers but never the SOL network reserve", () => {
+    const symbols = sweepTargets().map((t) => t.symbol);
+    expect(symbols).toContain("JupUSD");
+    expect(symbols).toContain("MET");
+    expect(symbols).not.toContain("SOL");
+  });
+  it("skips leftovers worth less than 0.01 USDC", () => {
+    expect(worthSweeping(9_999n)).toBe(false);
+    expect(worthSweeping(10_000n)).toBe(true);
+  });
+});
