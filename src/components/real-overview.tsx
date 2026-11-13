@@ -1,5 +1,5 @@
 import { MigrateBanner } from "./migrate-banner";
-import { Plus } from "lucide-react";
+import { Plus, Sprout, Repeat, ArrowDownToLine } from "lucide-react";
 import { PoweredBy } from "@/components/powered-by";
 import { TokenIcon } from "@/components/token-icon";
 import { useT } from "@/lib/i18n";
@@ -85,6 +85,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <div className="flex items-center justify-between gap-2"><h3 className="flex min-w-0 items-center gap-2 font-display text-lg font-semibold"><TokenIcon symbol={vault.pair.split("/")[0] ?? ""} size={24} />{t(vault.name)}<span className="text-xs font-normal text-muted-foreground">{vault.pair}</span></h3><span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{t("Riesgo")}{" "}{t(vault.risk)}</span></div>
       <PoolYield compact address={vault.pool} />
       {(() => { const n = data?.positions.filter((p) => p.vaultId === vault.id).length ?? 0; return n > 0 ? <Link to="/portfolio" className="mt-3 inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{t("Tienes capital aquí · Ver en Portafolio")} →</Link> : null; })()}
+      {(() => { const own = data?.positions.find((p) => p.vaultId === vault.id); return own ? <div className="mt-2 grid grid-cols-3 gap-2"><Button size="sm" className="w-full px-2" onClick={() => openPositionAction(own, "harvest")}><Sprout size={14} />{t("Cosechar")}</Button><Button size="sm" variant="secondary" className="w-full px-2" onClick={() => openPositionAction(own, "compound")}><Repeat size={14} />{t("Reinvertir")}</Button><Button size="sm" variant="outline" className="w-full px-2" disabled={own.locked} onClick={() => openPositionAction(own, "exit")}><ArrowDownToLine size={14} />{t("Liquidar")}</Button></div> : null; })()}
       <p className="mt-2 flex-1 text-xs leading-5 text-muted-foreground">{t(vault.blurb)}</p>
       <div className="mt-3 grid grid-cols-2 gap-2"><Button variant="outline" size="sm" className="w-full" onClick={() => onDetails(vault)}>{t("Detalles del pool")}</Button>
       <Button variant="secondary" size="sm" className="w-full" disabled={!walletAddress || (vault.id !== "sol" && vault.id !== "met")} onClick={() => { const own = data?.positions.find((p) => p.vaultId === vault.id && !p.locked); setAddTo(own?.address ?? null); setSimulationVault(vault); }}>{data?.positions.some((p) => p.vaultId === vault.id && !p.locked) ? <><Plus size={14} />{t("Añadir más")}</> : t("Depositar USDC")}</Button></div>

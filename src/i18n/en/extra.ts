@@ -894,6 +894,8 @@ export const extra: Record<string, string> = {
   "Reclamar premio · {v} USDC": "Claim prize · {v} USDC",
   "Historial de rondas recientes de {m}": "Recent rounds history for {m}",
   "Ganancias": "Earnings",
+  "Cosechar": "Harvest",
+  "Liquidar": "Liquidate",
   "Firma 1 de 2 lista: posición cerrada. Ahora firma la 2 de 2 para cambiarlo a USDC…": "Signature 1 of 2 done: position closed. Now sign 2 of 2 to convert it to USDC…",
   "Posición cerrada. {v} USDC llegaron a tu wallet.": "Position closed. {v} USDC arrived in your wallet.",
   "Posición cerrada, pero falta el cambio a USDC. Hazlo en Mi Billetera → Cambiar (JupUSD → USDC).": "Position closed, but the USDC conversion is pending. Do it in My wallet → Swap (JupUSD → USDC).",
