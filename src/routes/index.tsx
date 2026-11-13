@@ -75,12 +75,6 @@ const TRUST = [
   { icon: ShieldCheck, title: "Sin cargos ocultos", body: "Recargas y retiros con Coinbase. Cargos de servicio reducidos y progresivos." },
 ];
 
-const PRICING: [string, string][] = [
-  ["Depositar en una bóveda", "Gratis"],
-  ["Cambiar y enviar monedas", "Gratis"],
-  ["Entrar a Sube o Baja", "Gratis"],
-];
-
 function Landing() {
   const t = useT();
   const [compact, setCompact] = useState(false);
@@ -146,13 +140,6 @@ function Landing() {
             <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t("Únete a @bovedamarket: recibe alertas automáticas del estado de la red y de la app, avisos de seguridad y cada mejora en cuanto sale.")}</p></div>
           <div className="flex shrink-0 flex-col gap-2"><Button asChild className="h-12"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer">{t("Unirme a @bovedamarket")}<ArrowRight size={16} /></a></Button><Link to="/status" search={{ from: "transparencia" }} className="flex items-center justify-center gap-1.5 text-sm text-primary underline"><Activity size={14} />{t("Ver estado del sistema")}</Link></div>
         </div>
-      </section>
-
-      <section className="mb-12 rounded-3xl border border-border bg-card p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t("Cuentas claras")}</p>
-        <h2 className="mt-2 font-display text-2xl font-bold">{t("Solo ganamos cuando tú ganas")}</h2>
-        <ul className="mt-5 divide-y divide-border">{PRICING.map(([a, b]) => <li key={a} className="flex items-center justify-between gap-4 py-3 text-sm"><span>{t(a)}</span><span className="text-right font-semibold text-primary">{t(b)}</span></li>)}</ul>
-        <p className="mt-4 text-xs text-muted-foreground">{t("Mientras más mueves, menor el porcentaje. Siempre ves el cargo exacto antes de firmar. Los costos de red se pagan aparte.")} <Link to="/terminos" hash="comisiones" className="text-primary underline">{t("Ver detalle")}</Link></p>
       </section>
 
       <section className="rounded-3xl border border-primary/30 bg-primary/5 p-6 sm:p-8">
