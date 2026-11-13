@@ -104,7 +104,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
     <p className="mt-1 text-xs text-muted-foreground tabular-nums">{t("Invertido")}: {usdcText(cost)} USDC · {t("Ganancia posible")} +{usdcText(profit)}{cost > 0n ? ` (${(Number(payout) / Number(cost)).toFixed(2)}×)` : ""}</p>
     <div className="mt-4 space-y-1.5 rounded-xl bg-secondary/50 p-3 text-sm">
       {open && <Row k={t("Valor si vendes ahora")} v={p.valueMicro ? `${usdcText(p.valueMicro)} USDC` : t("No disponible")} />}
-      {pnl !== null && <Row k={open ? t("Resultado actual") : t("Resultado")} v={`${pnl >= 0n ? "+" : ""}${usdcText(pnl)} USDC`} tone={pnl >= 0n ? "text-primary" : "text-destructive"} />}
+      {!open && pnl !== null && <Row k={t("Resultado")} v={`${pnl >= 0n ? "+" : ""}${usdcText(pnl)} USDC`} tone={pnl >= 0n ? "text-primary" : "text-destructive"} />}
       <Row k={t("Contratos")} v={`${(Number(p.contractsMicro) / 1e6).toLocaleString(locale, { maximumFractionDigits: 2 })}${ppc !== null ? ` · ${(ppc * 100).toFixed(1)}¢ ${t("c/u")}` : ""}`} />
       {p.closeTime && <Row k={t("Cierre de la ronda")} v={new Date(p.closeTime * 1000).toLocaleString(locale, { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" })} />}
     </div>
