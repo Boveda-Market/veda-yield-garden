@@ -860,4 +860,5 @@ export const extra: Record<string, string> = {
   "Rondas en BTC, ETH y SOL": "Rounds on BTC, ETH and SOL",
   "Manejar posiciones": "Manage positions",
   "Cosecha ganancias y retira capital": "Harvest earnings and withdraw capital",
+  "Ganas si sube, ganas si baja · Cobra cuando quieras": "Win if it rises, win if it falls · Claim anytime",
 };

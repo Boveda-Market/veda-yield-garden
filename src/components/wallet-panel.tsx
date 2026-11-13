@@ -127,7 +127,7 @@ export function WalletPanel() {
   ];
   const shortcuts = [
     { to: "/app", icon: LayoutDashboard, title: t("Depositar en Bóvedas"), sub: t("Rendimiento diario en USDC") },
-    { to: "/mercados", icon: TrendingUp, title: t("Jugar Sube/Baja"), sub: t("Rondas en BTC, ETH y SOL") },
+    { to: "/mercados", icon: TrendingUp, title: t("Jugar Sube/Baja"), sub: t("Ganas si sube, ganas si baja · Cobra cuando quieras") },
     { to: "/portfolio", icon: PieChart, title: t("Manejar posiciones"), sub: t("Cosecha ganancias y retira capital") },
   ] as const;
 
