@@ -44,6 +44,9 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
   const lostRef = useRef(new Set<string>());
 
   useEffect(() => { setReview(null); }, [round?.marketId]);
+  const confirmRef = useRef<HTMLDivElement>(null);
+  const jumpConfirm = () => requestAnimationFrame(() => confirmRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  useEffect(() => { if (review) jumpConfirm(); }, [review?.tx]);
   const refresh = useCallback(async () => {
     if (!wallet) return;
     const r = await getPredictPositions({ data: { wallet } });
@@ -167,7 +170,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
         {(["up", "down"] as const).map((s) => {
           const p = priceOf(s), on = side === s, up = s === "up";
           const Icon = up ? ArrowUpRight : ArrowDownRight;
-          return <button key={s} type="button" disabled={!p} aria-pressed={on} onClick={() => { setSide(s); setReview(null); }}
+          return <button key={s} type="button" disabled={!p} aria-pressed={on} onClick={() => { setSide(s); setReview(null); jumpConfirm(); }}
             className={`relative overflow-hidden rounded-2xl border-2 p-4 text-left transition active:scale-[0.97] disabled:opacity-40 ${on ? (up ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "border-destructive bg-destructive text-destructive-foreground shadow-lg shadow-destructive/30") : up ? "border-primary/40 bg-primary/5 text-primary" : "border-destructive/40 bg-destructive/5 text-destructive"}`}>
             <span className="flex items-center justify-between"><span className="font-display text-xl font-bold">{t(up ? "Sube" : "Baja")}</span><Icon size={22} /></span>
             <span className="mt-2 block font-display text-3xl font-bold tabular-nums">{p ? `${Math.round(p * 100)}%` : "—"}</span>
@@ -199,7 +202,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
         {wallet && !review && <p className="mt-2 text-[11px] text-muted-foreground">{t("La cotización real aparece aquí, lista para firmar.")}</p>}
       </section>
 
-      {review && <section className="space-y-2 rounded-2xl border-2 border-primary/50 bg-primary/5 p-4 text-sm" aria-label={t("Revisión")}>
+      <div ref={confirmRef} className="scroll-mt-24" />{review && <section className="space-y-2 rounded-2xl border-2 border-primary/50 bg-primary/5 p-4 text-sm" aria-label={t("Revisión")}>
         <p className="flex items-center justify-between font-semibold"><span>{t("Cotización real")} · {t(review.side === "up" ? "Sube" : "Baja")}</span>{quoting && <Loader2 size={14} className="animate-spin text-muted-foreground" />}</p>
         <p className="text-[11px] text-muted-foreground">{t("Transacción simulada en la red; se actualiza cada 15 s.")}</p>
         <p className="flex justify-between"><span>{t("Pagas")}</span><strong>{usdc(review.quote.costMicro)} USDC</strong></p>
