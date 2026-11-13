@@ -62,6 +62,8 @@ export function WalletPanel() {
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [qr, setQr] = useState<string | null>(null);
   const actionsRef = useRef<HTMLElement>(null);
+  const [hidden, setHidden] = useHideBalances();
+  const [contacts] = useContacts();
   const prices = useQuery({ queryKey: ["wallet-prices"], staleTime: 60_000, queryFn: async () => {
     const out: Record<string, number> = Object.fromEntries(STABLE_SYMBOLS.map((s) => [s, 1]));
     await Promise.all(SWAP_TOKENS.filter((x) => !STABLE_SYMBOLS.includes(x.symbol)).map(async (x) => {
@@ -83,8 +85,6 @@ export function WalletPanel() {
   const max = balance === undefined ? 0n : spendable(balance, asset);
   const amountError = amount && (!units ? t("Monto no válido") : units > max ? t("Saldo insuficiente") : null);
   const toError = tab === "send" && to && !solanaAddressSchema.safeParse(to).success ? t("Dirección no válida") : null;
-  const [hidden, setHidden] = useHideBalances();
-  const [contacts] = useContacts();
   const reset = () => { setAmount(""); setTo(""); };
   const done = (sig: string) => { setMessage(t("Listo. Operación enviada: {sig}", { sig: `${sig.slice(0, 8)}…` })); reset(); setTimeout(() => { void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] }); void queryClient.invalidateQueries({ queryKey: ["my-wallet-tokens", address] }); }, 4000); };
   const fail = (e: unknown) => setMessage(e instanceof Error ? e.message : t("No se pudo completar la operación."));
