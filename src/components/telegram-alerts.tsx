@@ -9,7 +9,7 @@ import { sendTelegramTest, setTelegramAlertKind, setTelegramAlerts, startTelegra
 import { ALERT_KINDS, ALERT_LABEL, toggleMuted, type AlertKind } from "@/lib/alert-kinds";
 
 /** Personal account alerts through the official bot; linking uses a one-time deep link. */
-export function TelegramAlerts() {
+export function TelegramAlerts({ onLinkedChange }: { onLinkedChange?: (linked: boolean) => void } = {}) {
   const t = useT();
   const session = useBovedaSession();
   const status = useServerFn(telegramLinkStatus), start = useServerFn(startTelegramLink), set = useServerFn(setTelegramAlerts);
@@ -26,6 +26,15 @@ export function TelegramAlerts() {
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [waiting, s?.linked]);
+  useEffect(() => { if (s) onLinkedChange?.(s.linked); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [s?.linked]);
+  // Re-check when returning to the tab so a disconnect made in Telegram brings the invite card back.
+  useEffect(() => {
+    if (!session.authenticated) return;
+    const onVis = () => { if (document.visibilityState === "visible") void refresh().catch(() => undefined); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session.authenticated]);
   if (!session.authenticated || !s) return null;
   const connect = async () => {
     const tab = window.open("", "_blank");
