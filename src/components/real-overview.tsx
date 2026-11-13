@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { PoweredBy } from "@/components/powered-by";
 import { TokenIcon } from "@/components/token-icon";
 import { useT } from "@/lib/i18n";
@@ -86,7 +87,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       {(() => { const n = data?.positions.filter((p) => p.vaultId === vault.id).length ?? 0; return n > 0 ? <Link to="/portfolio" className="mt-3 inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{t("Tienes capital aquí · Ver en Portafolio")} →</Link> : null; })()}
       <p className="mt-5 flex-1 text-sm leading-6 text-muted-foreground">{t(vault.blurb)}</p>
       <Button variant="outline" className="mt-4 w-full" onClick={() => onDetails(vault)}>{t("Detalles del pool")}</Button>
-      <Button variant="secondary" className="mt-2 w-full" disabled={!walletAddress || (vault.id !== "sol" && vault.id !== "met")} onClick={() => { setAddTo(null); setSimulationVault(vault); }}>{t("Depositar USDC")}</Button>
+      <Button variant="secondary" className="mt-2 w-full" disabled={!walletAddress || (vault.id !== "sol" && vault.id !== "met")} onClick={() => { const own = data?.positions.find((p) => p.vaultId === vault.id && !p.locked); setAddTo(own?.address ?? null); setSimulationVault(vault); }}>{data?.positions.some((p) => p.vaultId === vault.id && !p.locked) ? <><Plus size={14} />{t("Añadir más")}</> : t("Depositar USDC")}</Button>
 
     </article>)}</div></>}
     {simulationVault && <DepositSimulation key={`${simulationVault.id}-${addTo ?? "new"}`} vault={simulationVault} wallet={walletAddress} {...(addTo ? { position: addTo } : {})} initialAmount={depositAmount} migrate={migrating} onClose={() => { setSimulationVault(null); setAddTo(null); setDepositAmount(""); setMigrating(false); }} />}

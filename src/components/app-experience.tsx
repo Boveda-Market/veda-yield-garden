@@ -182,7 +182,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
               <p className="mt-2 text-xs text-muted-foreground">{t("Ejemplo de simulación · no es una tasa verificada del pool.")}</p>
               <p className="mt-5 flex-1 text-sm leading-6 text-muted-foreground">{t(v.blurb)}</p>
               <Button variant="outline" className="mt-4 w-full" onClick={() => setDetailsFor(v)}>{t("Detalles del pool")}</Button>
-              <Button variant="secondary" className="mt-2 w-full" onClick={() => { setAddToId(null); setDepositFor(v); }}>{t("Depositar créditos")}</Button>
+              <Button variant="secondary" className="mt-2 w-full" onClick={() => { setAddToId(positions.find((x) => x.vaultId === v.id)?.id ?? null); setDepositFor(v); }}>{positions.some((x) => x.vaultId === v.id) ? t("Añadir más") : t("Depositar créditos")}</Button>
             </article>)}</div></>}
           </>
         ) : null}
