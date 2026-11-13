@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { AppExperience } from "@/components/app-experience";
+export const Route = createFileRoute("/seguridad")({ staticData: { sitemap: false }, head: () => ({ meta: [{ title: "Seguridad — BÓVEDA" }, { name: "description", content: "Administra tu correo de acceso, huella o Face ID y la doble verificación de tu cuenta BÓVEDA." }, { property: "og:title", content: "Seguridad — BÓVEDA" }, { property: "og:description", content: "Administra tu correo de acceso, huella o Face ID y la doble verificación de tu cuenta BÓVEDA." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: () => <AppExperience view="security" /> });

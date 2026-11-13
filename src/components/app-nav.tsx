@@ -16,7 +16,7 @@ import { Lightbulb } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { SuggestionBox } from "./suggestion-box";
 
-export type AppView = "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" | "markets";
+export type AppView = "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets";
 
 const MAIN = [
   { key: "vaults", label: "Bóvedas", icon: LayoutDashboard, to: "/app" },
@@ -62,8 +62,9 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
             {operator && <Link to="/invita" hash="tesoreria" className={`${row} border border-primary/40 bg-primary/10 font-semibold text-primary`} onClick={() => setOpen(false)}><ShieldCheck size={18} />{t("Panel de Tesorería")}</Link>}
             <Link to="/wallet" className={row} onClick={() => setOpen(false)}><Wallet size={18} />{t("Mi wallet")}</Link>
             <Link to="/portfolio" className={row} onClick={() => setOpen(false)}><PieChart size={18} />{t("Portafolio")}</Link>
-            <Link to="/cuenta" hash="notificaciones" className={row} onClick={() => setOpen(false)}><Bell size={18} />{t("Notificaciones")}</Link>
-            <Link to="/cuenta" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Mi cuenta y seguridad")}</Link>
+            <Link to="/notificaciones" className={row} onClick={() => setOpen(false)}><Bell size={18} />{t("Notificaciones")}</Link>
+            <Link to="/cuenta" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Mi cuenta")}</Link>
+            <Link to="/seguridad" className={row} onClick={() => setOpen(false)}><ShieldCheck size={18} />{t("Seguridad")}</Link>
             <Link to="/actividad" className={row} onClick={() => setOpen(false)}><History size={18} />{t("Actividad")}</Link>
             <Link to="/invita" className={row} onClick={() => setOpen(false)}><Gift size={18} />{t("Invita y gana")}</Link>
           </>}

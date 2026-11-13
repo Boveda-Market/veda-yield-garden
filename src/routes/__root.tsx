@@ -11,7 +11,7 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 
-const APP_PATHS = ["/app", "/portfolio", "/mercados", "/wallet", "/invita", "/cuenta", "/actividad", "/prueba"];
+const APP_PATHS = ["/app", "/portfolio", "/mercados", "/wallet", "/invita", "/cuenta", "/seguridad", "/notificaciones", "/actividad", "/prueba"];
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";

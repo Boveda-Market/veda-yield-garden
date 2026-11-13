@@ -2,12 +2,11 @@ import { useT } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
-import { Leaf, Sun, Gem, Waves, Check, LogOut, Copy, Wallet, Gift, UserRound, Scale, ChevronRight, ShieldCheck, Languages } from "lucide-react";
+import { Leaf, Sun, Gem, Waves, Check, LogOut, Copy, Wallet, Gift, UserRound, Scale, ChevronRight, ShieldCheck, Languages, Bell } from "lucide-react";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { Button } from "./ui/button";
 import { defaultProfile, profileSchema, type AccountProfile } from "@/lib/account-profile";
 import { getAccountProfile, saveAccountProfile } from "@/lib/account-profile.functions";
-import { AccountSecuritySettings } from "./account-security";
 import { LanguageMenu } from "./language-menu";
 import { TierBadge, TierCard } from "./tier-badge";
 import { useAccountTier } from "@/hooks/use-account-tier";
@@ -90,7 +89,12 @@ export function AccountSettings() {
       <p className="mt-5 text-xs leading-5 text-muted-foreground">{t("Tu avatar no verifica tu identidad ni autoriza movimientos. Nunca te pediremos tu frase semilla.")}</p>
     </div>
 
-    <div className={`${card} [&>section]:mt-0 [&>section]:border-t-0 [&>section]:pt-0`}><AccountSecuritySettings /></div>
+    <div className={card}>
+      <ul className="divide-y divide-border">
+        <li><Link to="/seguridad" className="flex items-center justify-between py-3 text-sm hover:text-primary"><span className="flex items-center gap-2"><ShieldCheck size={18} className="text-primary" />{t("Seguridad")}</span><ChevronRight size={16} /></Link></li>
+        <li><Link to="/notificaciones" className="flex items-center justify-between py-3 text-sm hover:text-primary"><span className="flex items-center gap-2"><Bell size={18} className="text-primary" />{t("Notificaciones")}</span><ChevronRight size={16} /></Link></li>
+      </ul>
+    </div>
 
     <div className={card}>
       <h2 className="flex items-center gap-2 font-display text-xl font-semibold"><Scale size={20} className="text-primary" />{t("Legal y ayuda")}</h2>

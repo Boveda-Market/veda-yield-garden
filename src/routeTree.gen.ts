@@ -16,9 +16,11 @@ import { Route as CuentaRouteImport } from './routes/cuenta'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as InvitaRouteImport } from './routes/invita'
 import { Route as MercadosRouteImport } from './routes/mercados'
+import { Route as NotificacionesRouteImport } from './routes/notificaciones'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as PruebaRouteImport } from './routes/prueba'
+import { Route as SeguridadRouteImport } from './routes/seguridad'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as WalletRouteImport } from './routes/wallet'
@@ -59,6 +61,11 @@ const MercadosRoute = MercadosRouteImport.update({
   path: '/mercados',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificacionesRoute = NotificacionesRouteImport.update({
+  id: '/notificaciones',
+  path: '/notificaciones',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortfolioRoute = PortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
@@ -72,6 +79,11 @@ const PrivacidadRoute = PrivacidadRouteImport.update({
 const PruebaRoute = PruebaRouteImport.update({
   id: '/prueba',
   path: '/prueba',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeguridadRoute = SeguridadRouteImport.update({
+  id: '/seguridad',
+  path: '/seguridad',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -104,9 +116,11 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/invita': typeof InvitaRoute
   '/mercados': typeof MercadosRoute
+  '/notificaciones': typeof NotificacionesRoute
   '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
+  '/seguridad': typeof SeguridadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
@@ -120,9 +134,11 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/invita': typeof InvitaRoute
   '/mercados': typeof MercadosRoute
+  '/notificaciones': typeof NotificacionesRoute
   '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
+  '/seguridad': typeof SeguridadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
@@ -137,9 +153,11 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/invita': typeof InvitaRoute
   '/mercados': typeof MercadosRoute
+  '/notificaciones': typeof NotificacionesRoute
   '/portfolio': typeof PortfolioRoute
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
+  '/seguridad': typeof SeguridadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
@@ -155,9 +173,11 @@ export interface FileRouteTypes {
     | '/faq'
     | '/invita'
     | '/mercados'
+    | '/notificaciones'
     | '/portfolio'
     | '/privacidad'
     | '/prueba'
+    | '/seguridad'
     | '/sitemap.xml'
     | '/terminos'
     | '/wallet'
@@ -171,9 +191,11 @@ export interface FileRouteTypes {
     | '/faq'
     | '/invita'
     | '/mercados'
+    | '/notificaciones'
     | '/portfolio'
     | '/privacidad'
     | '/prueba'
+    | '/seguridad'
     | '/sitemap.xml'
     | '/terminos'
     | '/wallet'
@@ -187,9 +209,11 @@ export interface FileRouteTypes {
     | '/faq'
     | '/invita'
     | '/mercados'
+    | '/notificaciones'
     | '/portfolio'
     | '/privacidad'
     | '/prueba'
+    | '/seguridad'
     | '/sitemap.xml'
     | '/terminos'
     | '/wallet'
@@ -204,9 +228,11 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   InvitaRoute: typeof InvitaRoute
   MercadosRoute: typeof MercadosRoute
+  NotificacionesRoute: typeof NotificacionesRoute
   PortfolioRoute: typeof PortfolioRoute
   PrivacidadRoute: typeof PrivacidadRoute
   PruebaRoute: typeof PruebaRoute
+  SeguridadRoute: typeof SeguridadRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TerminosRoute: typeof TerminosRoute
   WalletRoute: typeof WalletRoute
@@ -264,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MercadosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notificaciones': {
+      id: '/notificaciones'
+      path: '/notificaciones'
+      fullPath: '/notificaciones'
+      preLoaderRoute: typeof NotificacionesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/portfolio': {
       id: '/portfolio'
       path: '/portfolio'
@@ -283,6 +316,13 @@ declare module '@tanstack/react-router' {
       path: '/prueba'
       fullPath: '/prueba'
       preLoaderRoute: typeof PruebaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seguridad': {
+      id: '/seguridad'
+      path: '/seguridad'
+      fullPath: '/seguridad'
+      preLoaderRoute: typeof SeguridadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -324,9 +364,11 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   InvitaRoute: InvitaRoute,
   MercadosRoute: MercadosRoute,
+  NotificacionesRoute: NotificacionesRoute,
   PortfolioRoute: PortfolioRoute,
   PrivacidadRoute: PrivacidadRoute,
   PruebaRoute: PruebaRoute,
+  SeguridadRoute: SeguridadRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TerminosRoute: TerminosRoute,
   WalletRoute: WalletRoute,

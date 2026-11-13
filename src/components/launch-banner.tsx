@@ -19,7 +19,7 @@ export function LaunchBanner() {
       <p className="mt-0.5 text-muted-foreground">{t("Añade fondos y retira a tu banco con Coinbase, y recibe avisos de tus ganancias en Telegram.")}</p>
       <div className="mt-2 flex flex-wrap gap-3 text-xs font-semibold text-primary">
         <Link to="/wallet" onClick={close} className="hover:underline">{t("Ir a Mi wallet")}</Link>
-        <Link to="/cuenta" onClick={close} className="hover:underline">{t("Activar alertas")}</Link>
+        <Link to="/notificaciones" onClick={close} className="hover:underline">{t("Activar alertas")}</Link>
       </div>
     </div>
     <button type="button" onClick={close} aria-label={t("Cerrar")} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"><X size={16} /></button>

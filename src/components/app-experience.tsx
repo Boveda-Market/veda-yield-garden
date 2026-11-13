@@ -28,6 +28,7 @@ import { StayUpdated } from "./stay-updated";
 import { LaunchBanner } from "./launch-banner";
 import { NotificationsCenter } from "./notifications-center";
 import { SecurityGuarantees } from "./security-why";
+import { AccountSecuritySettings } from "./account-security";
 import { WalletPanel } from "./wallet-panel";
 import { MarketsPanel } from "./markets-panel";
 import { PendingClaims } from "./pending-claims";
@@ -50,13 +51,13 @@ function AccessLoading() {
   </div></div>;
 }
 
-export function AppExperience({ guest = false, view = "vaults" }: { guest?: boolean; view?: "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" | "markets" }) {
+export function AppExperience({ guest = false, view = "vaults" }: { guest?: boolean; view?: "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets" }) {
   const t = useT();
   return <ClientOnly fallback={<AccessLoading />}><Suspense fallback={<AccessLoading />}>{guest ? <BovedaSessionContext.Provider value={{ ready: true, authenticated: false, userId: null, label: t("Invitado"), walletAddress: null, error: null, login: () => {}, logout: async () => {}, signAndSend: async () => { throw new Error(t("Invitado solo puede usar Prueba")); } }}><SessionPage guest view={view} /></BovedaSessionContext.Provider> : <PrivyAccess><SessionPage view={view} /></PrivyAccess>}</Suspense></ClientOnly>;
 }
-const VIEW_TITLES = { vaults: "Bóvedas", portfolio: "Tu portafolio", activity: "Tu actividad", account: "Tu cuenta", invite: "Invita y gana", wallet: "Mi wallet", markets: "Predicciones" } as const;
+const VIEW_TITLES = { vaults: "Bóvedas", portfolio: "Tu portafolio", activity: "Tu actividad", account: "Tu cuenta", security: "Seguridad", notifications: "Notificaciones", invite: "Invita y gana", wallet: "Mi wallet", markets: "Predicciones" } as const;
 
-function SessionPage({ guest = false, view }: { guest?: boolean; view: "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" | "markets" }) {
+function SessionPage({ guest = false, view }: { guest?: boolean; view: "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets" }) {
   const t = useT();
   const session = useBovedaSession();
   const [mode, setMode] = useState<AppMode>("real");
@@ -67,7 +68,7 @@ function SessionPage({ guest = false, view }: { guest?: boolean; view: "vaults" 
   return <Dashboard key={`${session.userId ?? "guest"}:${guest ? "trial" : mode}`} mode={guest ? "trial" : mode} guest={guest} view={view} onModeChange={(value) => { if (guest) return; setMode(value); try { sessionStorage.setItem("boveda-mode", value); } catch {} }} />;
 }
 
-function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeChange: (mode: AppMode) => void; guest: boolean; view: "vaults" | "portfolio" | "activity" | "account" | "invite" | "wallet" | "markets" }) {
+function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeChange: (mode: AppMode) => void; guest: boolean; view: "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets" }) {
   const t = useT();
   const locale = useLocale();
   const fmt = (n: number, d = 2) => n.toLocaleString(locale, { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -153,7 +154,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
         {user && !guest && <LaunchBanner />}
         {session.error && <p role="alert" className="mb-4 text-sm text-destructive">{t(session.error)}</p>}
 
-        {activeView === "markets" ? <>{!identity && session.ready && <section className="mb-4 rounded-2xl border border-primary/40 bg-primary/5 p-4"><p className="font-semibold">{t("Entra para predecir con el USDC de tu wallet")}</p><div className="mt-3 grid gap-2 sm:grid-cols-3"><Button onClick={() => session.login("google")}>{t("Continuar con Google")}</Button><Button variant="secondary" onClick={() => session.login("email")}>{t("Entrar con email")}</Button><Button variant="outline" onClick={() => session.login("wallet")}>Phantom / Jupiter Wallet</Button></div></section>}<MarketsPanel identity={identity ?? "anon"} /></> : activeView === "wallet" ? <><WalletPanel /><div className="mt-10 border-t border-border"><ActivityView trial={false} wallet={session.walletAddress} rows={[]} heading="Actividad del wallet" level={2} /></div></> : activeView === "invite" ? <div className="mx-auto max-w-3xl"><AffiliatePanel /><AffiliatePayoutsAdmin /><AffiliateVipAdmin /><TelegramPublishAdmin /><SuggestionsAdmin /></div> : activeView === "account" ? <><NotificationsCenter /><section className="mb-6 rounded-2xl border border-border bg-card p-4"><h2 className="mb-3 font-display text-lg font-semibold">{t("¿Por qué tus fondos están seguros?")}</h2><SecurityGuarantees /></section><AccountSettings /></> : activeView === "activity" ? <><ActivityView trial={mode === "trial"} wallet={session.walletAddress} rows={activities} /></> : mode === "real" && !guest ? <>{activeView === "vaults" && <StayUpdated dismissible />}{activeView === "portfolio" && <PendingClaims />}<RealOverview portfolioOnly={activeView === "portfolio"} walletAddress={session.walletAddress} onDetails={setDetailsFor} /></> : user ? (
+        {activeView === "markets" ? <>{!identity && session.ready && <section className="mb-4 rounded-2xl border border-primary/40 bg-primary/5 p-4"><p className="font-semibold">{t("Entra para predecir con el USDC de tu wallet")}</p><div className="mt-3 grid gap-2 sm:grid-cols-3"><Button onClick={() => session.login("google")}>{t("Continuar con Google")}</Button><Button variant="secondary" onClick={() => session.login("email")}>{t("Entrar con email")}</Button><Button variant="outline" onClick={() => session.login("wallet")}>Phantom / Jupiter Wallet</Button></div></section>}<MarketsPanel identity={identity ?? "anon"} /></> : activeView === "wallet" ? <><WalletPanel /><div className="mt-10 border-t border-border"><ActivityView trial={false} wallet={session.walletAddress} rows={[]} heading="Actividad del wallet" level={2} /></div></> : activeView === "invite" ? <div className="mx-auto max-w-3xl"><AffiliatePanel /><AffiliatePayoutsAdmin /><AffiliateVipAdmin /><TelegramPublishAdmin /><SuggestionsAdmin /></div> : activeView === "account" ? <AccountSettings /> : activeView === "notifications" ? <div className="mx-auto max-w-3xl py-8"><h1 className="mb-6 font-display text-3xl font-semibold">{t("Notificaciones")}</h1><NotificationsCenter /></div> : activeView === "security" ? <div className="mx-auto max-w-3xl space-y-6 py-8"><h1 className="font-display text-3xl font-semibold">{t("Seguridad")}</h1><div className="rounded-2xl border border-border bg-card p-6 [&>section]:mt-0 [&>section]:border-t-0 [&>section]:pt-0"><AccountSecuritySettings /></div><section className="rounded-2xl border border-border bg-card p-6"><h2 className="mb-3 font-display text-lg font-semibold">{t("¿Por qué tus fondos están seguros?")}</h2><SecurityGuarantees /></section></div> : activeView === "activity" ? <><ActivityView trial={mode === "trial"} wallet={session.walletAddress} rows={activities} /></> : mode === "real" && !guest ? <>{activeView === "vaults" && <StayUpdated dismissible />}{activeView === "portfolio" && <PendingClaims />}<RealOverview portfolioOnly={activeView === "portfolio"} walletAddress={session.walletAddress} onDetails={setDetailsFor} /></> : user ? (
           <>
             <section aria-label={t("Estado del modo Prueba")} className="border-y border-border py-8">
               <div className="flex items-center gap-3"><ShieldAlert className="shrink-0 text-primary" size={24} /><h1 className="font-display text-2xl font-semibold">{activeView === "portfolio" ? t("Tu portafolio · Prueba") : t("Bóvedas · Prueba")}</h1></div>
