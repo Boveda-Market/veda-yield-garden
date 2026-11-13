@@ -15,6 +15,7 @@ export const app: Record<string, string> = {
   "Cerrar sesión": "Sign out",
   "· Cerrar sesión": "· Sign out",
   "Volver al inicio": "Back to home",
+  "Volver": "Back",
   "Invitado · Prueba": "Guest · Trial",
   "· Sin dinero real": "· No real money",
   "Crear cuenta o entrar": "Create an account or sign in",
