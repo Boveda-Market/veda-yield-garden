@@ -2,6 +2,7 @@ import { Fingerprint, Landmark } from "lucide-react";
 import reviewCarlos from "@/assets/review-carlos.jpg";
 import reviewValeria from "@/assets/review-valeria.jpg";
 import reviewDavid from "@/assets/review-david.jpg";
+import reviewMarisol from "@/assets/review-marisol.jpg";
 import { Lock, Gift, Search, Star, Quote, MessageSquare, Send, Activity } from "lucide-react";
 import { allowTrialEntry } from "@/lib/trial-entry";
 import { useT } from "@/lib/i18n";
@@ -49,6 +50,7 @@ const REVIEWS = [
   { stars: 5, name: "Carlos M.", photo: reviewCarlos, title: "Retiré a Coinbase en minutos sin pedir permiso", tag: "Acceso con Google · Bóvedas", text: "Perdí dinero en plataformas que prometían 20% mensual y luego bloquearon los retiros. Aquí mi dinero está en mi wallet y retiré a Coinbase en minutos sin pedir permiso." },
   { stars: 4, name: "Valeria R.", photo: reviewValeria, title: "Paz mental al revisar cada firma", tag: "Acceso con Google · Hace 2 semanas", text: "La revisión antes de firmar me da paz. Le doy 4 porque a veces la red tarda unos segundos más, pero saber que nadie toca mis USDC vale la pena." },
   { stars: 3, name: "David S.", photo: reviewDavid, title: "Sin humo: practica primero con la demo", tag: "Acceso con huella · Sube o Baja", text: "Perdí mi primera ronda de Sube o Baja por no entender los tiempos. Me gusta que no venden humo: recomiendo practicar primero con la prueba gratis." },
+  { stars: 5, name: "Marisol T.", photo: reviewMarisol, title: "Un equipo que sí responde", tag: "Canal de Telegram · Mi wallet", text: "Envié una sugerencia y el equipo me respondió rápido. Las notificaciones me avisan de cada cosecha y del estado del sistema en Telegram: siento que hay personas reales detrás." },
 ];
 
 const TRUST = [
@@ -102,7 +104,7 @@ function Landing() {
       <section className="py-12">
         <h2 className="font-display text-2xl font-bold">{t("Lo que dice la comunidad")}</h2>
         <p className="mt-1 text-xs text-muted-foreground">{t("Opiniones ilustrativas de la experiencia")}</p>
-        <ul className="mt-6 grid gap-4 sm:grid-cols-3">{REVIEWS.map(({ stars, name, text, photo, title, tag }) => <li key={name} className={`relative flex flex-col rounded-2xl border bg-card p-5 ${stars === 5 ? "border-primary/40 bg-gradient-to-br from-primary/10 to-card" : "border-border"}`}>
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{REVIEWS.map(({ stars, name, text, photo, title, tag }) => <li key={name} className={`relative flex flex-col rounded-2xl border bg-card p-5 ${stars === 5 ? "border-primary/40 bg-gradient-to-br from-primary/10 to-card" : "border-border"}`}>
           <Quote aria-hidden="true" size={28} className="absolute right-4 top-4 text-primary/15" />
           <div className="flex items-center gap-3"><img src={photo} alt="" loading="lazy" width={48} height={48} className="h-12 w-12 rounded-full border-2 border-primary/30 object-cover" />
             <div className="min-w-0"><p className="text-sm font-semibold">{name}</p><p className="truncate text-xs text-muted-foreground">{t(tag)}</p></div></div>
