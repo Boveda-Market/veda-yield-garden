@@ -63,7 +63,7 @@ function TrustTicker() {
     <span className="flex shrink-0 -space-x-2">{REVIEWS.map((x, n) => <img key={x.name} src={x.photo} alt="" width={28} height={28} className={`h-7 w-7 rounded-full border-2 object-cover transition-transform duration-500 ${n === i ? "z-10 scale-110 border-primary" : "border-background"}`} />)}</span>
     <span className="min-w-0 flex-1">
       <span className="flex items-center gap-1 text-[11px] font-semibold text-foreground"><span className="flex text-primary">{[1,2,3,4,5].map((n) => <Star key={n} size={10} className="fill-current" />)}</span>4.8 / 5</span>
-      <span key={i} className="block truncate text-xs text-muted-foreground animate-in fade-in slide-in-from-bottom-1 duration-500">«{t(r.title)}» — {r.name}</span>
+      <span key={i} className="block truncate text-xs text-muted-foreground animate-in fade-in slide-in-from-bottom-1 duration-500">{`«${t(r.title)}» — ${r.name}`}</span>
     </span>
   </a>;
 }
