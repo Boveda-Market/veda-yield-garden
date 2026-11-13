@@ -1,5 +1,5 @@
 import { Fingerprint, TrendingUp, Landmark } from "lucide-react";
-import { Lock, Gift, Search } from "lucide-react";
+import { Lock, Gift, Search, Star, MessageSquare, Send, Activity } from "lucide-react";
 import { allowTrialEntry } from "@/lib/trial-entry";
 import { useT } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -41,6 +41,18 @@ const GUARANTEES = [
 ];
 
 
+const ANTI_SCAM: [string, string][] = [
+  ["Nadie custodia tu dinero", "En una estafa entregas tus fondos a alguien. En BÓVEDA tu saldo vive en tu propia wallet: nosotros no podemos tocarlo."],
+  ["Sin «tarifas para descongelar»", "Nunca te pediremos pagar para poder retirar. Retiras a Coinbase, tu banco o Cash App cuando tú decidas."],
+  ["Cero firmas a ciegas", "Cada operación se simula antes de firmar: ves qué sale, qué entra y el cargo exacto. Así te proteges de hackers."],
+];
+
+const REVIEWS = [
+  { stars: 5, name: "Carlos M.", text: "Perdí dinero en plataformas que prometían 20% mensual y luego bloquearon los retiros. Aquí mi dinero está en mi wallet y retiré a Coinbase en minutos sin pedir permiso." },
+  { stars: 4, name: "Valeria R.", text: "La revisión antes de firmar me da paz. Le doy 4 porque a veces la red tarda unos segundos más, pero saber que nadie toca mis USDC vale la pena." },
+  { stars: 3, name: "David S.", text: "Perdí mi primera ronda de Sube o Baja por no entender los tiempos. Me gusta que no venden humo: recomiendo practicar primero con la prueba gratis." },
+];
+
 const TRUST = [
   { icon: Fingerprint, title: "Tus fondos, tu control", body: "Wallet de autocustodia con Face ID o huella, protegida por Privy. Nadie mueve tu dinero sin tu aprobación digital." },
   { icon: Landmark, title: "USDC 1:1 con el dólar", body: "Dólar digital de Circle respaldado por reservas en efectivo y bonos del Tesoro de EE. UU." },
@@ -68,9 +80,12 @@ function Landing() {
     <main className="mx-auto max-w-5xl px-6">
       <section className="grid items-center gap-10 pb-12 pt-6 md:grid-cols-2 md:pt-12">
         <div className="text-center md:text-left">
-          <h1 className="font-display text-4xl font-bold leading-tight sm:text-5xl">{t("Pon tus dólares a trabajar. $0 por empezar.")}</h1>
+          <p className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"><ShieldCheck size={13} />{t("100% autocustodia · Nadie custodia tus fondos")}</p>
+          <h1 className="font-display text-4xl font-bold leading-tight sm:text-5xl">{t("Tus fondos nunca salen de tu control.")}</h1>
+          <p className="mt-3 font-display text-xl font-semibold text-primary">{t("Pon tus dólares a trabajar. $0 por empezar.")}</p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground md:justify-start">{[["Powered by","Coinbase","/brands/coinbase.svg"],["Secured by","Privy","/brands/privy-mark.png"]].map(([l,n,src]) => <span key={n} className="flex items-center gap-1.5"><span>{l}</span><img src={src} alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-medium text-foreground">{n}</span></span>)}</div>
-          <p className="mt-5 text-lg leading-7 text-muted-foreground">{t("Depositar, cambiar y enviar es gratis. Solo cobramos un pequeño cargo cuando tú cosechas ganancias o cobras una ronda ganada: solo ganamos cuando tú ganas.")}</p>
+          <p className="mt-5 text-base leading-7 text-muted-foreground">{t("BÓVEDA no es un banco ni un fondo que pueda congelar tu dinero. Es una interfaz segura, protegida contra hackers, donde solo tú apruebas cada movimiento con tu huella o Face ID.")}</p>
+          <p className="mt-3 text-base leading-7 text-muted-foreground">{t("Depositar, cambiar y enviar es gratis. Solo cobramos un pequeño cargo cuando tú cosechas ganancias o cobras una ronda ganada: solo ganamos cuando tú ganas.")}</p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs md:justify-start">
             {["$0 por depositar", "Sin plazos forzosos", "Retiras cuando quieras", "Prueba gratis con 1,000 créditos"].map((b) => <li key={b} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"><ShieldCheck size={13} className="text-primary" />{t(b)}</li>)}
           </ul>
@@ -85,6 +100,21 @@ function Landing() {
 
       <section aria-label={t("Seguridad")} className="mb-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {TRUST.map(({ icon: Icon, title, body }) => <div key={title} className="rounded-2xl border border-border bg-card p-4"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={16} /></span><p className="mt-3 font-display text-sm font-semibold">{t(title)}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{t(body)}</p></div>)}
+      </section>
+
+      <section aria-label={t("Por qué BÓVEDA es diferente")} className="mb-12 rounded-3xl border border-border bg-card p-6 sm:p-8">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t("¿Te estafaron antes?")}</p>
+        <h2 className="mt-2 font-display text-2xl font-bold">{t("Aquí no le entregas tu dinero a nadie")}</h2>
+        <ul className="mt-5 grid gap-4 sm:grid-cols-3">{ANTI_SCAM.map(([h, d]) => <li key={h} className="rounded-2xl border border-border bg-background p-4"><p className="font-display text-sm font-semibold">{t(h)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ul>
+      </section>
+
+      <section className="mb-12 rounded-3xl border border-primary/30 bg-primary/5 p-6 sm:p-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Send size={14} />{t("Canal oficial de Telegram")}</p>
+            <h2 className="mt-2 font-display text-2xl font-bold">{t("Transparencia total, en vivo")}</h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t("Únete a @bovedamarket: recibe alertas automáticas del estado de la red y de la app, avisos de seguridad y cada mejora en cuanto sale.")}</p></div>
+          <div className="flex shrink-0 flex-col gap-2"><Button asChild className="h-12"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer">{t("Unirme a @bovedamarket")}<ArrowRight size={16} /></a></Button><Link to="/status" className="flex items-center justify-center gap-1.5 text-sm text-primary underline"><Activity size={14} />{t("Ver estado del sistema")}</Link></div>
+        </div>
       </section>
 
       <section className="mb-12 rounded-3xl border border-border bg-card p-6 sm:p-8">
@@ -134,6 +164,19 @@ function Landing() {
             <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">10 USDC</p><p className="text-sm text-muted-foreground">{t("para cobrar tú mismo, directo a tu wallet")}</p></li>
           </ul>
           <Button asChild className="mt-5"><Link to="/invita">{t("Obtener mi enlace")}<ArrowRight size={16} /></Link></Button>
+        </div>
+      </section>
+
+      <section className="py-12">
+        <h2 className="font-display text-2xl font-bold">{t("Lo que dice la comunidad")}</h2>
+        <p className="mt-1 text-xs text-muted-foreground">{t("Opiniones ilustrativas de la experiencia; publicaremos reseñas reales a medida que lleguen.")}</p>
+        <ul className="mt-6 grid gap-4 sm:grid-cols-3">{REVIEWS.map(({ stars, name, text }) => <li key={name} className="rounded-2xl border border-border bg-card p-5">
+          <div className="flex gap-0.5 text-primary" aria-label={`${stars}/5`}>{[1,2,3,4,5].map((n) => <Star key={n} size={15} className={n <= stars ? "fill-current" : "text-muted-foreground/40"} />)}</div>
+          <p className="mt-3 text-sm leading-6">“{t(text)}”</p><p className="mt-3 text-xs font-semibold text-muted-foreground">{name}</p></li>)}</ul>
+        <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div><p className="flex items-center gap-2 font-display font-semibold"><MessageSquare size={16} className="text-primary" />{t("¿Qué te gusta y qué no? Cuéntanos")}</p>
+            <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">{t("Envía sugerencias, críticas o tu reseña desde ☰ Menú → «Ayúdanos a mejorar». Leemos cada mensaje para mejorar BÓVEDA.")}</p></div>
+          <Button asChild variant="outline" className="shrink-0"><a href="#acceso">{t("Entrar y opinar")}</a></Button>
         </div>
       </section>
 
