@@ -224,6 +224,27 @@ export type Database = {
         }
         Relationships: []
       }
+      predict_result_alerts: {
+        Row: {
+          outcome: string
+          position: string
+          privy_user_id: string
+          sent_at: string
+        }
+        Insert: {
+          outcome: string
+          position: string
+          privy_user_id: string
+          sent_at?: string
+        }
+        Update: {
+          outcome?: string
+          position?: string
+          privy_user_id?: string
+          sent_at?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           affiliate_privy_id: string

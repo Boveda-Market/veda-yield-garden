@@ -103,3 +103,24 @@ export const notifyMyAction = createServerFn({ method: "POST" })
       return { success: true };
     } catch { return { success: false }; }
   });
+
+/** Telegram alert when the caller's Sube/Baja rounds resolve (won → prize to claim, lost). Outcomes are re-read server-side; each round alerts once per account. */
+export const notifyPredictResults = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => req.extend({ wallet: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/), positions: z.array(z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/)).min(1).max(20) }).parse(i))
+  .handler(async ({ data }): Promise<{ success: boolean }> => {
+    try {
+      const { id, db } = await admin(data.token);
+      const { listPositions } = await import("./predict.server");
+      const { resolvedOutcome, predictAlertText } = await import("./predict-alerts");
+      const live = await listPositions(data.wallet);
+      const tg = await import("./telegram.server");
+      const t = db as unknown as { from: (x: string) => any };
+      for (const p of live.filter((x) => data.positions.includes(x.pubkey))) {
+        const o = resolvedOutcome(p);
+        if (!o) continue;
+        const { data: ins, error } = await t.from("predict_result_alerts").upsert({ privy_user_id: id, position: p.pubkey, outcome: o }, { onConflict: "privy_user_id,position", ignoreDuplicates: true }).select("position");
+        if (!error && ins?.length) await tg.userAlert(id, predictAlertText(p, o), "predict");
+      }
+      return { success: true };
+    } catch { return { success: false }; }
+  });

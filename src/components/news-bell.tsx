@@ -4,6 +4,7 @@ import { Bell, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { SUPPORT_URL } from "@/components/safety-notice";
+import { usePredictAlerts, type PredictAlert } from "@/hooks/use-predict-alerts";
 import { ANNOUNCEMENTS, DISMISSED_KEY, SEEN_KEY, latestAnnouncementId, type AnnouncementKind } from "@/lib/announcements";
 
 const LABEL: Record<AnnouncementKind, string> = { vault: "Nueva bóveda", market: "Nuevo mercado", policy: "Aviso legal", update: "Novedad" };
@@ -18,7 +19,7 @@ function writeDismissed(ids: string[]) {
 }
 
 /** Announcement history, shared by the bell dialog and the Notifications section. Dismissals stay in this browser; new announcements still appear. */
-export function NewsList({ onNavigate }: { onNavigate?: () => void }) {
+export function NewsList({ onNavigate, predict = [] }: { onNavigate?: () => void; predict?: PredictAlert[] }) {
   const t = useT();
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [showAll, setShowAll] = useState(false);
@@ -29,6 +30,7 @@ export function NewsList({ onNavigate }: { onNavigate?: () => void }) {
     window.addEventListener("storage", sync);
     return () => { window.removeEventListener(DISMISS_EVENT, sync); window.removeEventListener("storage", sync); };
   }, []);
+  const personal = predict.filter((a) => a.outcome === "won" || !dismissed.includes(a.id));
   const items = showAll ? ANNOUNCEMENTS : ANNOUNCEMENTS.filter((a) => !dismissed.includes(a.id));
   const dismiss = (id: string) => writeDismissed([...new Set([...dismissed, id])]);
   const clearAll = () => { setShowAll(false); writeDismissed(ANNOUNCEMENTS.map((a) => a.id)); };
@@ -40,7 +42,15 @@ export function NewsList({ onNavigate }: { onNavigate?: () => void }) {
       <button type="button" onClick={() => setShowAll(false)} className="text-xs font-medium text-muted-foreground hover:text-foreground">{t("Ocultar historial")}</button>
     </div>}
     <ul className="space-y-3">
-      {items.length === 0 && <li className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
+      {personal.map((a) => <li key={a.id} className={`relative rounded-xl border p-4 ${a.outcome === "won" ? "border-primary/40 bg-primary/10" : "border-border bg-secondary/40"}`}>
+        {a.outcome === "lost" && <button type="button" onClick={() => dismiss(a.id)} aria-label={t("Borrar notificación")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={14} /></button>}
+        <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">{t("Sube y Baja")}</span>
+        <p className="mt-2 font-semibold">{a.outcome === "won" ? `🏆 ${t("Ganaste en Sube y Baja")}` : t("No acertaste en Sube y Baja")}</p>
+        {a.p.title && <p className="mt-1 text-xs text-muted-foreground">{a.p.title}</p>}
+        <p className="mt-1 text-sm text-muted-foreground">{a.outcome === "won" ? t("Tu premio de {v} USDC está listo para reclamar.", { v: (Number(a.p.payoutMicro) / 1e6).toFixed(2) }) : t("La ronda terminó en tu contra. Invertiste {v} USDC.", { v: (Number(a.p.costMicro) / 1e6).toFixed(2) })}</p>
+        {a.outcome === "won" && <Link to="/mercados" onClick={onNavigate} className="mt-3 inline-block text-sm font-medium text-primary">{t("Reclamar premio")} →</Link>}
+      </li>)}
+      {items.length === 0 && personal.length === 0 && <li className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
         {ANNOUNCEMENTS.length === 0 ? t("No hay novedades por ahora.") : t("No tienes notificaciones pendientes.")}
         {ANNOUNCEMENTS.length > 0 && <button type="button" onClick={() => setShowAll(true)} className="mt-2 block w-full text-xs font-medium text-primary">{t("Ver historial completo")}</button>}
       </li>}
@@ -62,23 +72,24 @@ export function NewsBell() {
   const t = useT();
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(false);
+  const predict = usePredictAlerts();
   useEffect(() => {
     try { setUnread(ANNOUNCEMENTS.length > 0 && localStorage.getItem(SEEN_KEY) !== latestAnnouncementId()); } catch { /* ignore */ }
   }, []);
   const show = () => {
-    setOpen(true); setUnread(false);
+    setOpen(true); setUnread(false); predict.markSeen();
     try { localStorage.setItem(SEEN_KEY, latestAnnouncementId()); } catch { /* ignore */ }
   };
   return <>
     <button type="button" onClick={show} aria-label={t("Novedades")} className="relative grid h-10 w-10 place-items-center rounded-full border border-border bg-card">
       <Bell size={18} />
-      {unread && <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />}
+      {(unread || predict.unread) && <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />}
     </button>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogTitle className="font-display">{t("Novedades")}</DialogTitle>
         <DialogDescription>{t("Nuevas bóvedas, mercados y cambios importantes.")}</DialogDescription>
-        <NewsList onNavigate={() => setOpen(false)} />
+        <NewsList onNavigate={() => setOpen(false)} predict={predict.alerts} />
         <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className="mt-2 block rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground">{t("Únete a nuestro canal de Telegram para enterarte primero")}</a>
       </DialogContent>
     </Dialog>

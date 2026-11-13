@@ -7,7 +7,7 @@ export const ALERT_LABEL: Record<AlertKind, string> = {
   exit: "Cierres de bóveda",
   deposit: "Depósitos",
   withdraw: "Retiros",
-  predict: "Ganancias de Sube/Baja",
+  predict: "Resultados y premios de Sube/Baja",
   commission: "Comisiones de afiliado",
 };
 
