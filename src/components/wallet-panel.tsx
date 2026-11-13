@@ -25,7 +25,8 @@ import { BuyUsdc } from "@/components/buy-usdc";
 import { InstallAppBanner } from "@/components/install-app";
 import { InvitePromoCard } from "@/components/invite-share";
 import { PendingClaims } from "@/components/pending-claims";
-import { WalletPositions } from "@/components/wallet-positions";
+import { WalletPositions, useWalletVaults } from "@/components/wallet-positions";
+import { usePositionRows } from "@/hooks/use-position-rows";
 import { WalletOpenPredictions } from "@/components/open-predictions";
 
 
@@ -35,6 +36,10 @@ export function WalletPanel() {
   const address = session.walletAddress;
   const readWallet = useServerFn(getRealWallet);
   const queryClient = useQueryClient();
+  const vaults = useWalletVaults(address ?? "");
+  const vaultPositions = vaults.data?.success ? vaults.data.data.positions : [];
+  const { capital } = usePositionRows(vaultPositions);
+  const working = vaultPositions.length > 0 ? capital : 0;
   const balances = useQuery({ queryKey: ["my-wallet", address], enabled: !!address, queryFn: async () => {
     if (!address) throw new Error(t("Todavía no hay una wallet conectada a tu cuenta."));
     const r = await readWallet({ data: { wallet: address } });
@@ -132,8 +137,10 @@ export function WalletPanel() {
 
     <StartGuide />
     <section className="rounded-3xl border border-border bg-card p-6">
-      <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{t("Balance en USDC")}</p><Button variant="ghost" size="sm" onClick={() => { void balances.refetch(); void extra.refetch(); void prices.refetch(); void queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); void queryClient.invalidateQueries({ queryKey: ["predict-positions", address] }); }} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
-      <div className="mt-1 flex items-center gap-2"><p className="font-display text-4xl">{balances.data?.usdc !== undefined ? (hidden ? MASK : `$${fmt(Number(balances.data.usdc) / 1e6)}`) : "—"}</p><button type="button" onClick={() => setHidden(!hidden)} aria-label={hidden ? t("Mostrar saldos") : t("Ocultar saldos")} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{hidden ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
+      <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{vaultPositions.length > 0 ? t("Balance total") : t("Balance en USDC")}</p><Button variant="ghost" size="sm" onClick={() => { void balances.refetch(); void extra.refetch(); void prices.refetch(); void queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); void queryClient.invalidateQueries({ queryKey: ["predict-positions", address] }); }} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
+      <div className="mt-1 flex items-center gap-2"><p className="font-display text-4xl">{balances.data?.usdc !== undefined ? (hidden ? MASK : `$${fmt((Number(balances.data.usdc) / 1e6) + (working ?? 0))}`) : "—"}</p><button type="button" onClick={() => setHidden(!hidden)} aria-label={hidden ? t("Mostrar saldos") : t("Ocultar saldos")} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{hidden ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
+      {vaultPositions.length > 0 && balances.data?.usdc !== undefined && <div className="mt-2 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{t("Disponible")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(Number(balances.data.usdc) / 1e6)}`}</span></span><Link to="/portfolio" className="rounded-full bg-primary/10 px-3 py-1 text-primary"><span>{t("Trabajando")}:</span> <span className="font-medium">{hidden ? MASK : working === null ? "…" : `$${fmt(working)}`}</span></Link></div>}
+      {vaultPositions.length > 0 && working === null && <p className="mt-1 text-xs text-muted-foreground">{t("Calculando el valor de tus bóvedas…")}</p>}
       <button type="button" onClick={() => setReceiveOpen(true)} className="mt-2 inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground hover:text-foreground"><code>{address.slice(0, 4)}…{address.slice(-4)}</code><Copy size={12} /></button>
       <div className="mt-5 grid grid-cols-5 gap-1 sm:gap-2">{quick.slice(0, 1).concat([]).map((q) => <button key={q.label} type="button" onClick={q.on} className="flex flex-col items-center gap-1.5 text-center text-xs"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"><q.icon size={20} /></span>{q.label}</button>)}<OfframpButton wallet={address} trial={false} trigger={(open) => <button type="button" onClick={open} className="flex flex-col items-center gap-1.5 text-center text-xs"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"><Banknote size={20} /></span>{t("Retirar")}</button>} />{quick.slice(1).map((q) => <button key={q.label} type="button" onClick={q.on} className="flex flex-col items-center gap-1.5 text-center text-xs"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"><q.icon size={20} /></span>{q.label}</button>)}</div>
       {buyOpen ? <BuyUsdc className="mt-5" auto={buyOpen} /> : null}

@@ -16,6 +16,8 @@ export const account: Record<string, string> = {
   "Invertir cambio": "Reverse swap",
   "Pagas": "You pay",
   "Disponible": "Available",
+  "Trabajando": "Working",
+  "Calculando el valor de tus bóvedas…": "Calculating your vaults' value…",
   "Recibes aproximadamente": "You receive approximately",
   "Comisión ya descontada": "Fee already deducted",
   "Tipo de cambio estimado": "Estimated exchange rate",

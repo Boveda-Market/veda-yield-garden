@@ -24,16 +24,22 @@ import type { RealWalletResult } from "@/lib/solana-data";
 type Supported = "sol" | "met";
 const supported = (id: string): id is Supported => id === "sol" || id === "met";
 
-/** Compact open-vault cards for Mi wallet; renders nothing without open positions. */
-export function WalletPositions({ wallet }: { wallet: string }) {
-  const t = useT();
+/** Shared cached read of the wallet's open vault positions (same cache as WalletPositions). */
+export function useWalletVaults(wallet: string) {
   const readWallet = useServerFn(getRealWallet);
   const query = useQuery({ queryKey: ["real-solana", wallet], queryFn: async () => {
     const r = await readWallet({ data: { wallet } });
     // Keep the last good positions on screen instead of blanking on a transient read failure.
     if (!r.success || !r.data.positionsComplete) throw new Error("positions unavailable");
     writeCache(`vaults:${wallet}`, r); return r;
-  }, placeholderData: (prev) => prev ?? readCache<Extract<RealWalletResult, { success: true }>>(`vaults:${wallet}`), staleTime: 30_000, retry: 2 });
+  }, placeholderData: (prev) => prev ?? readCache<Extract<RealWalletResult, { success: true }>>(`vaults:${wallet}`), enabled: !!wallet, staleTime: 30_000, retry: 2 });
+  return query;
+}
+
+/** Compact open-vault cards for Mi wallet; renders nothing without open positions. */
+export function WalletPositions({ wallet }: { wallet: string }) {
+  const t = useT();
+  const query = useWalletVaults(wallet);
   const positions: ChainPosition[] = query.data?.success ? query.data.data.positions : [];
   const pools = positions.map((p) => VAULTS.find((v) => v.id === p.vaultId)?.pool ?? null);
   const stats = useQueries({ queries: pools.map((pool) => ({ queryKey: ["dexscreener-pool-stats", pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(pool as string, signal), enabled: Boolean(pool), staleTime: 60_000, retry: 1 })) });
