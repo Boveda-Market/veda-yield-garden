@@ -115,7 +115,6 @@ function Landing() {
 
       <section id="opiniones" className="scroll-mt-4 py-12">
         <h2 className="font-display text-2xl font-bold">{t("Lo que dice la comunidad")}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">{t("Opiniones ilustrativas de la experiencia")}</p>
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{REVIEWS.map(({ stars, name, text, photo, title, tag }) => <li key={name} className={`relative flex flex-col rounded-2xl border bg-card p-5 ${stars === 5 ? "border-primary/40 bg-gradient-to-br from-primary/10 to-card" : "border-border"}`}>
           <Quote aria-hidden="true" size={28} className="absolute right-4 top-4 text-primary/15" />
           <div className="flex items-center gap-3"><img src={photo} alt="" loading="lazy" width={48} height={48} className="h-12 w-12 rounded-full border-2 border-primary/30 object-cover" />
