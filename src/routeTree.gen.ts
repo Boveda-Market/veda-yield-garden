@@ -25,7 +25,6 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as WalletRouteImport } from './routes/wallet'
-import { Route as ZzDebugBarRouteImport } from './routes/zz-debug-bar'
 import { Route as ApiPublicJobsCheckSystemStatusRouteImport } from './routes/api/public/jobs/check-system-status'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 
@@ -109,11 +108,6 @@ const WalletRoute = WalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ZzDebugBarRoute = ZzDebugBarRouteImport.update({
-  id: '/zz-debug-bar',
-  path: '/zz-debug-bar',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicJobsCheckSystemStatusRoute =
   ApiPublicJobsCheckSystemStatusRouteImport.update({
     id: '/api/public/jobs/check-system-status',
@@ -144,7 +138,6 @@ export interface FileRoutesByFullPath {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
-  '/zz-debug-bar': typeof ZzDebugBarRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
@@ -165,7 +158,6 @@ export interface FileRoutesByTo {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
-  '/zz-debug-bar': typeof ZzDebugBarRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
@@ -187,7 +179,6 @@ export interface FileRoutesById {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
-  '/zz-debug-bar': typeof ZzDebugBarRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
@@ -210,7 +201,6 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
-    | '/zz-debug-bar'
     | '/api/public/jobs/check-system-status'
     | '/api/public/telegram/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -231,7 +221,6 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
-    | '/zz-debug-bar'
     | '/api/public/jobs/check-system-status'
     | '/api/public/telegram/webhook'
   id:
@@ -252,7 +241,6 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
-    | '/zz-debug-bar'
     | '/api/public/jobs/check-system-status'
     | '/api/public/telegram/webhook'
   fileRoutesById: FileRoutesById
@@ -274,7 +262,6 @@ export interface RootRouteChildren {
   StatusRoute: typeof StatusRoute
   TerminosRoute: typeof TerminosRoute
   WalletRoute: typeof WalletRoute
-  ZzDebugBarRoute: typeof ZzDebugBarRoute
   ApiPublicJobsCheckSystemStatusRoute: typeof ApiPublicJobsCheckSystemStatusRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
 }
@@ -393,13 +380,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WalletRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/zz-debug-bar': {
-      id: '/zz-debug-bar'
-      path: '/zz-debug-bar'
-      fullPath: '/zz-debug-bar'
-      preLoaderRoute: typeof ZzDebugBarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/jobs/check-system-status': {
       id: '/api/public/jobs/check-system-status'
       path: '/api/public/jobs/check-system-status'
@@ -434,7 +414,6 @@ const rootRouteChildren: RootRouteChildren = {
   StatusRoute: StatusRoute,
   TerminosRoute: TerminosRoute,
   WalletRoute: WalletRoute,
-  ZzDebugBarRoute: ZzDebugBarRoute,
   ApiPublicJobsCheckSystemStatusRoute: ApiPublicJobsCheckSystemStatusRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
 }
