@@ -805,4 +805,5 @@ export const extra: Record<string, string> = {
   "Entra para ver tu wallet y tus ganancias.": "Sign in to see your wallet and earnings.",
   "Ver portada completa": "See full homepage",
   "Abriendo tu cuenta…": "Opening your account…",
+  "Online": "Online",
 };
