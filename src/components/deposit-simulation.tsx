@@ -48,7 +48,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
       <div className="flex justify-between text-xs text-muted-foreground"><span>{t("Importe (USDC)")}</span><span>{t("Disponible:")} {usdc == null ? "—" : microToText(usdc)} USDC</span></div>
       <Input aria-label={t("Importe (USDC)")} inputMode="decimal" placeholder="0.00" value={amount} maxLength={12} disabled={busy} className="border-0 px-0 font-display text-3xl shadow-none focus-visible:ring-0" onChange={(e) => setAmount(clean(e.target.value))} />
       <div className="grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={p.toString()} type="button" size="sm" variant="secondary" disabled={busy || !usdc} onClick={() => pick(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
-      <p className="text-xs text-muted-foreground">{migrate ? t("Traslado entre bóvedas: sin comisión de BÓVEDA.") : t("Entre 1 y 10,000 USDC. Comisión de 0.40% a 2% según el monto.")}</p>
+      <p className="text-xs text-muted-foreground">{migrate ? t("Traslado entre bóvedas: sin comisión de BÓVEDA.") : t("Entre 1 y 10,000 USDC. Sin comisión de entrada.")}</p>
       {overBalance && <p role="alert" className="text-xs text-destructive">{t("No tienes suficientes USDC para este importe.")}</p>}
     </div>
     {lowSol && <div role="note" className="grid gap-2 rounded-xl border border-primary/40 bg-primary/10 p-3 text-xs leading-5">
@@ -60,7 +60,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
       <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Importe")}</dt><dd>{breakdown.gross} USDC</dd></div>
       <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión de entrada")}</dt><dd className="font-semibold text-primary">{breakdown.fee} USDC</dd></div>
       <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Invertido neto")}</dt><dd className="font-semibold">{breakdown.net} USDC</dd></div>
-      <p className="text-xs text-muted-foreground">{migrate ? t("Traslado entre bóvedas: sin comisión de BÓVEDA.") : t("Comisión de entrada según tu nivel: 2% (menos de $100), 1.25% ($100+), 0.75% ($500+), 0.40% ($2,500+).")}</p>
+      <p className="text-xs text-muted-foreground">{migrate ? t("Traslado entre bóvedas: sin comisión de BÓVEDA.") : t("Depositar es gratis: 0% de comisión de entrada en todos los niveles.")}</p>
     </dl>}
     <p className="text-xs leading-5 text-muted-foreground">{t("Parte de tus USDC se convierte automáticamente al otro token de la bóveda. Los costos de red se pagan aparte en SOL.")}</p>
     <p role="note" className="rounded-xl border border-border p-3 text-xs leading-5 text-muted-foreground">{t("Tu capital se combina con la otra moneda de la bóveda y su valor fluctuará con el precio de mercado, mientras acumulas comisiones en cada operación.")} <a href="/faq#vaults-fluctuation" className="underline">{t("¿Por qué cambia mi balance?")}</a></p>
