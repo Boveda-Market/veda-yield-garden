@@ -4,7 +4,7 @@ import type { ChainPosition } from "@/lib/solana-data";
 import { useMeteoraHistory } from "@/hooks/use-meteora-history";
 import { MASK, useHideBalances } from "@/lib/preferences";
 
-/** Harvested-earnings card shown after open positions (capital and pending live in Mi wallet / each position). */
+/** Harvested-earnings card shown after open positions (capital and pending live in Mi Billetera / each position). */
 export function PortfolioSummary({ wallet }: { wallet: string | null; positions: ChainPosition[]; positionsComplete: boolean; predictionsMicro: bigint | null; onHarvest: (p: ChainPosition) => void }) {
   const t = useT();
   const [hidden] = useHideBalances();

@@ -3,7 +3,7 @@ import { parseContacts, parseHome, validContact } from "@/lib/preferences";
 import { AVATAR_MIN_TIER, profileSchema } from "@/lib/account-profile";
 
 describe("account customization", () => {
-  it("falls back to Mi wallet for unknown start screens", () => { expect(parseHome("/portfolio")).toBe("/portfolio"); expect(parseHome("/evil")).toBe("/wallet"); });
+  it("falls back to Mi Billetera for unknown start screens", () => { expect(parseHome("/portfolio")).toBe("/portfolio"); expect(parseHome("/evil")).toBe("/wallet"); });
   it("keeps only valid contacts", () => {
     const good = { name: "Mi Coinbase", address: "So11111111111111111111111111111111111111112" };
     expect(validContact(good)).toBe(true);

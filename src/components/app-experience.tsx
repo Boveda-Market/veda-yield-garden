@@ -56,7 +56,7 @@ export function AppExperience({ guest = false, view = "vaults" }: { guest?: bool
   const t = useT();
   return <ClientOnly fallback={<AccessLoading />}><Suspense fallback={<AccessLoading />}>{guest ? <BovedaSessionContext.Provider value={{ ready: true, authenticated: false, userId: null, label: t("Invitado"), walletAddress: null, error: null, login: () => {}, logout: async () => {}, signAndSend: async () => { throw new Error(t("Invitado solo puede usar Prueba")); } }}><SessionPage guest view={view} /></BovedaSessionContext.Provider> : <PrivyAccess><SessionPage view={view} /></PrivyAccess>}</Suspense></ClientOnly>;
 }
-const VIEW_TITLES = { vaults: "Bóvedas", portfolio: "Tu portafolio", activity: "Tu actividad", account: "Tu cuenta", security: "Seguridad", notifications: "Notificaciones", invite: "Invita y gana", wallet: "Mi wallet", markets: "Predicciones" } as const;
+const VIEW_TITLES = { vaults: "Bóvedas", portfolio: "Tu portafolio", activity: "Tu actividad", account: "Tu cuenta", security: "Seguridad", notifications: "Notificaciones", invite: "Invita y gana", wallet: "Mi Billetera", markets: "Predicciones" } as const;
 
 function SessionPage({ guest = false, view }: { guest?: boolean; view: "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets" }) {
   const t = useT();

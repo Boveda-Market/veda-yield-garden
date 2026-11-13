@@ -50,7 +50,7 @@ const REVIEWS = [
   { stars: 5, name: "Carlos M.", photo: reviewCarlos, title: "Retiré a Coinbase en minutos sin pedir permiso", tag: "Acceso con Google · Bóvedas", text: "Perdí dinero en plataformas que prometían 20% mensual y luego bloquearon los retiros. Aquí mi dinero está en mi wallet y retiré a Coinbase en minutos sin pedir permiso." },
   { stars: 4, name: "Valeria R.", photo: reviewValeria, title: "Paz mental al revisar cada firma", tag: "Acceso con Google · Hace 2 semanas", text: "La revisión antes de firmar me da paz. Le doy 4 porque a veces la red tarda unos segundos más, pero saber que nadie toca mis USDC vale la pena." },
   { stars: 3, name: "David S.", photo: reviewDavid, title: "Sin humo: practica primero con la demo", tag: "Acceso con huella · Sube o Baja", text: "Perdí mi primera ronda de Sube o Baja por no entender los tiempos. Me gusta que no venden humo: recomiendo practicar primero con la prueba gratis." },
-  { stars: 5, name: "Marisol T.", photo: reviewMarisol, title: "Un equipo que sí responde", tag: "Canal de Telegram · Mi wallet", text: "Envié una sugerencia y el equipo me respondió rápido. Las notificaciones me avisan de cada cosecha y del estado del sistema en Telegram: siento que hay personas reales detrás." },
+  { stars: 5, name: "Marisol T.", photo: reviewMarisol, title: "Un equipo que sí responde", tag: "Canal de Telegram · Mi Billetera", text: "Envié una sugerencia y el equipo me respondió rápido. Las notificaciones me avisan de cada cosecha y del estado del sistema en Telegram: siento que hay personas reales detrás." },
 ];
 
 function TrustTicker() {

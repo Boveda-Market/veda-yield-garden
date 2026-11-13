@@ -3,7 +3,7 @@ import { getPredictPositions } from "@/lib/predict.functions";
 import type { PredictPosition } from "@/lib/predict";
 import { readCache, writeCache } from "@/lib/cached-query";
 
-/** One shared, cached query for a wallet's prediction positions (Mi wallet, Portafolio, pending claims). */
+/** One shared, cached query for a wallet's prediction positions (Mi Billetera, Portafolio, pending claims). */
 export function usePredictPositions(wallet: string | null | undefined) {
   return useQuery({
     queryKey: ["predict-positions", wallet],

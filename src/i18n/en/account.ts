@@ -186,7 +186,7 @@ export const account: Record<string, string> = {
   "Conecta tu wallet para retirar.": "Connect your wallet to withdraw.",
   "Muy pronto: estamos activando el proveedor de retiros.": "Coming soon: we're activating the withdrawal provider.",
   "Continuar al retiro seguro": "Continue to secure withdrawal",
-  "Mi wallet": "My wallet",
+  "Mi Billetera": "My wallet",
   "Inicia sesión para ver tu wallet.": "Sign in to see your wallet.",
   "Todavía no hay una wallet conectada a tu cuenta.": "There's no wallet connected to your account yet.",
   "Monto no válido": "Invalid amount",

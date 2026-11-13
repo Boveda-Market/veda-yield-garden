@@ -36,7 +36,7 @@ export function useWalletVaults(wallet: string) {
   return query;
 }
 
-/** Compact open-vault cards for Mi wallet; renders nothing without open positions. */
+/** Compact open-vault cards for Mi Billetera; renders nothing without open positions. */
 export function WalletPositions({ wallet }: { wallet: string }) {
   const t = useT();
   const query = useWalletVaults(wallet);

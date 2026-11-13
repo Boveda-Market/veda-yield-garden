@@ -25,7 +25,7 @@ export function ShareButtons({ link, onCopied }: { link: string; onCopied?: () =
   </div>;
 }
 
-/** Highlighted "Invite and earn" card for Mi wallet. */
+/** Highlighted "Invite and earn" card for Mi Billetera. */
 export function InvitePromoCard() {
   const t = useT();
   const session = useBovedaSession();

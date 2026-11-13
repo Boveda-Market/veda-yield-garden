@@ -5,7 +5,7 @@ export const solanaAddressSchema = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44
 export const realWalletInput = z.object({ wallet: solanaAddressSchema }).strict();
 
 // Independent of the illustrative APYs used only in Prueba.
-// `swapDecimals` marks a validated classic SPL token that Mi wallet may swap against USDC; omit it until validated.
+// `swapDecimals` marks a validated classic SPL token that Mi Billetera may swap against USDC; omit it until validated.
 export const CHAIN_POOLS = [
   { id: "sol", pool: "8Pm2kZpnxD3hoMmt4bjStX2Pw2Z9abpbHzZxMPqxPmie", mint: "So11111111111111111111111111111111111111112", symbol: "SOL", swapDecimals: 9 },
   { id: "met", pool: "BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1", mint: "METvsvVRapdj9cFLzq4Tr43xK4tAjQfwX76z3n6mWQL", symbol: "MET", swapDecimals: 6 },

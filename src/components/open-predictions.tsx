@@ -48,7 +48,7 @@ export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPre
   </div>;
 }
 
-/** Mi wallet: open Sube/Baja rounds; renders nothing when there are none. */
+/** Mi Billetera: open Sube/Baja rounds; renders nothing when there are none. */
 export function WalletOpenPredictions() {
   const t = useT();
   const state = useOpenPredictions();

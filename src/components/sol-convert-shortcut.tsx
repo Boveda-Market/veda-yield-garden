@@ -6,7 +6,7 @@ import { decimalToUnits } from "@/lib/onboarding";
 import { SWAP_TOKENS } from "@/lib/wallet-actions";
 import { SolExcessCard } from "@/components/sol-excess-card";
 
-/** SOL→USDC percent shortcut for Bóvedas and Sube / Baja; opens Mi wallet's swap prefilled for review. */
+/** SOL→USDC percent shortcut for Bóvedas and Sube / Baja; opens Mi Billetera's swap prefilled for review. */
 export function SolConvertShortcut({ className = "" }: { className?: string }) {
   const session = useBovedaSession();
   const wallet = session.walletAddress;

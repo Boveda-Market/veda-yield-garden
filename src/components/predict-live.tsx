@@ -151,7 +151,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
           if (BigInt(q.feeUsdc) > 0n) void reportAffiliate(swapSig, "predict");
           setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(q.outAmount) }), wallet: true });
         } else setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(p.payoutMicro) }), wallet: true });
-      } catch { setMsg({ ok: true, text: t("Pago cobrado, pero falta el cambio a USDC. Hazlo en Mi wallet → Cambiar (JupUSD → USDC)."), sig }); }
+      } catch { setMsg({ ok: true, text: t("Pago cobrado, pero falta el cambio a USDC. Hazlo en Mi Billetera → Cambiar (JupUSD → USDC)."), sig }); }
       setTimeout(() => { void refresh(); void loadBalance(); }, 3000);
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };

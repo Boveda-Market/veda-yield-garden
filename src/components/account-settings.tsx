@@ -14,7 +14,7 @@ import { TierBadge, TierCard } from "./tier-badge";
 import { useAccountTier } from "@/hooks/use-account-tier";
 
 const avatars = [{ id: "leaf", label: "Hoja", Icon: Leaf }, { id: "sun", label: "Sol", Icon: Sun }, { id: "gem", label: "Gema", Icon: Gem }, { id: "waves", label: "Olas", Icon: Waves }, { id: "vault", label: "Bóveda", Icon: Vault }, { id: "shield", label: "Escudo", Icon: Shield }, { id: "zap", label: "Rayo", Icon: Zap }, { id: "flame", label: "Fénix", Icon: Flame }, { id: "star", label: "Estrella Plus", Icon: Star }, { id: "diamond", label: "Diamante Pro", Icon: Diamond }, { id: "crown", label: "Corona VIP", Icon: Crown }] as const;
-const homeLabels: Record<HomePath, string> = { "/wallet": "Mi wallet", "/portfolio": "Portafolio", "/app": "Bóvedas" };
+const homeLabels: Record<HomePath, string> = { "/wallet": "Mi Billetera", "/portfolio": "Portafolio", "/app": "Bóvedas" };
 
 /** Center-crops and compresses a picked image to a small square WebP data URL in the browser. */
 async function toAvatarPhoto(file: File): Promise<string> {
@@ -97,7 +97,7 @@ export function AccountSettings() {
         </div>
       </div>
       <div className="flex gap-2 sm:flex-col">
-        <Button asChild variant="outline" size="sm"><Link to="/wallet"><Wallet size={16} />{t("Mi wallet")}</Link></Button>
+        <Button asChild variant="outline" size="sm"><Link to="/wallet"><Wallet size={16} />{t("Mi Billetera")}</Link></Button>
         <Button asChild variant="outline" size="sm"><Link to="/invita"><Gift size={16} />{t("Invita y gana")}</Link></Button>
       </div>
     </div>
