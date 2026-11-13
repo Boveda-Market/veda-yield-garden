@@ -106,7 +106,6 @@ function Landing() {
           <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs md:justify-start">
             {["$0 por depositar", "Sin plazos forzosos", "Retiras cuando quieras", "Prueba gratis con 1,000 créditos"].map((b) => <li key={b} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"><ShieldCheck size={13} className="text-primary" />{t(b)}</li>)}
           </ul>
-          <p className="mt-4 text-xs text-muted-foreground">{t("Las ganancias cambian y puedes perder dinero.")}</p>
         </div>
         <div id="acceso" className="order-2 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
           <EntryAccess />
