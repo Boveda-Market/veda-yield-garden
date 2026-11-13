@@ -13,6 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 // Privy-hosted mainnet RPC accepts browser requests (the public endpoint returns 403); the private Helius key stays server-only.
 const solanaRpcs = { "solana:mainnet": { rpc: createSolanaRpc("https://solana-mainnet.rpc.privy.systems?privyAppId=cmw6ftcf900ge0hl0jyw3rc75"), rpcSubscriptions: createSolanaRpcSubscriptions("wss://solana-mainnet.rpc.privy.systems?privyAppId=cmw6ftcf900ge0hl0jyw3rc75"), blockExplorerUrl: "https://orbmarkets.io" } };
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
+import { FEE_WALLET } from "@/lib/fees";
 import { IdleLogout } from "@/components/idle-logout";
 
 // Privy only authorizes the official domains; preview/other hosts can never finish loading it.
@@ -44,6 +45,8 @@ function SessionBridge({ children }: { children: ReactNode }) {
     onError: () => setError(t("No se pudo iniciar sesión. Revisa los métodos y dominios permitidos en Privy e inténtalo de nuevo.")),
   });
   const walletAddress = wallets[0]?.address ?? null;
+  const embedded = !!walletAddress && !!user?.linkedAccounts.some(a => a.type === "wallet" && a.address === walletAddress && (a.walletClientType === "privy" || a.walletClientType === "privy-v2"));
+  const tradeBlock: "external" | "treasury" | null = !walletAddress ? null : walletAddress === FEE_WALLET ? "treasury" : embedded ? null : "external";
   // If Privy never reports ready (blocked iframe, shields, slow network), stop waiting after 4s so buttons and screens never freeze.
   const [stalled, setStalled] = useState(false);
   useEffect(() => { if (ready) { setStalled(false); return; } const id = setTimeout(() => setStalled(true), 4000); return () => clearTimeout(id); }, [ready]);
@@ -59,6 +62,31 @@ function SessionBridge({ children }: { children: ReactNode }) {
     setPrivyTokenGetter(authenticated ? getAccessToken : null);
     return () => setPrivyTokenGetter(null);
   }, [authenticated, getAccessToken]);
+  const sendRaw = async (transaction: Uint8Array): Promise<string> => {
+      const wallet = wallets[0];
+      if (!authenticated || !wallet) throw new Error(t("Conecta una wallet de Solana"));
+      // Sign first, then broadcast from the browser, so each stage fails with its own clear message.
+      let signed: Uint8Array;
+      try {
+        ({ signedTransaction: signed } = await signTransaction({ transaction, wallet, chain: "solana:mainnet" }));
+      } catch (e) {
+        console.error("[BÓVEDA] wallet signing failed", e);
+        if (e instanceof Error && /reject|cancel|exited/i.test(e.message)) throw new Error(t("Cancelaste la firma."));
+        throw new Error(`${t("La wallet no pudo firmar")}: ${e instanceof Error ? e.message : String(e)}`);
+      }
+      try {
+        const base64 = btoa(Array.from(signed, (b) => String.fromCharCode(b)).join("")) as Base64EncodedWireTransaction;
+        const sig = await solanaRpcs["solana:mainnet"].rpc.sendTransaction(base64, { encoding: "base64", preflightCommitment: "confirmed" }).send();
+        return String(sig);
+      } catch (e) {
+        console.error("[BÓVEDA] broadcast failed", e);
+        throw new Error(`${t("La red rechazó la operación")}: ${e instanceof Error ? e.message : String(e)}`);
+      }
+  };
+  const guard = () => {
+    if (tradeBlock === "treasury") throw new Error(t("Modo operador: la wallet de tesorería no puede operar en BÓVEDA."));
+    if (tradeBlock === "external") throw new Error(t("Modo solo consulta: para operar, entra con Google, email o passkey y usa tu billetera protegida de BÓVEDA."));
+  };
   const doLogout = useCallback(async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError("No se pudo cerrar sesión. Inténtalo de nuevo."); } }, [queryClient, logout]);
   return <BovedaSessionContext.Provider value={{
     ready: ready || stalled, authenticated, userId: authenticated ? user?.id ?? null : null,
@@ -84,28 +112,14 @@ function SessionBridge({ children }: { children: ReactNode }) {
       }
       setError(null); login({ loginMethods: [method] });
     },
+    tradeBlock,
+    signAndSendAdmin: walletAddress === FEE_WALLET ? (transaction) => sendRaw(transaction) : undefined,
     signAndSend: async (transaction) => {
-      const wallet = wallets[0];
-      if (!authenticated || !wallet) throw new Error(t("Conecta una wallet de Solana"));
-      // Sign first, then broadcast from the browser, so each stage fails with its own clear message.
-      let signed: Uint8Array;
-      try {
-        ({ signedTransaction: signed } = await signTransaction({ transaction, wallet, chain: "solana:mainnet" }));
-      } catch (e) {
-        console.error("[BÓVEDA] wallet signing failed", e);
-        if (e instanceof Error && /reject|cancel|exited/i.test(e.message)) throw new Error(t("Cancelaste la firma."));
-        throw new Error(`${t("La wallet no pudo firmar")}: ${e instanceof Error ? e.message : String(e)}`);
-      }
-      try {
-        const base64 = btoa(Array.from(signed, (b) => String.fromCharCode(b)).join("")) as Base64EncodedWireTransaction;
-        const sig = await solanaRpcs["solana:mainnet"].rpc.sendTransaction(base64, { encoding: "base64", preflightCommitment: "confirmed" }).send();
-        return String(sig);
-      } catch (e) {
-        console.error("[BÓVEDA] broadcast failed", e);
-        throw new Error(`${t("La red rechazó la operación")}: ${e instanceof Error ? e.message : String(e)}`);
-      }
+      guard();
+      return sendRaw(transaction);
     },
     signOnly: async (transaction) => {
+      guard();
       const wallet = wallets[0];
       if (!authenticated || !wallet) throw new Error(t("Conecta una wallet de Solana"));
       try { return (await signTransaction({ transaction, wallet, chain: "solana:mainnet" })).signedTransaction; }

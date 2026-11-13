@@ -930,4 +930,11 @@ export const extra: Record<string, string> = {
   "La recarga de reserva no está disponible ahora. Usa Cambiar de USDC a SOL.": "Reserve refill isn't available right now. Use Swap from USDC to SOL.",
   "Tu reserva para costos de red ya está bien.": "Your network cost reserve is already fine.",
   "No se pudo preparar la recarga. Revisa que tengas suficientes USDC e inténtalo de nuevo.": "Couldn't prepare the refill. Check you have enough USDC and try again.",
+  "Modo operador: la wallet de tesorería no puede operar en BÓVEDA.": "Operator mode: the treasury wallet cannot trade on BÓVEDA.",
+  "Modo solo consulta: para operar, entra con Google, email o passkey y usa tu billetera protegida de BÓVEDA.": "View-only mode: to trade, sign in with Google, email or passkey and use your protected BÓVEDA wallet.",
+  "Modo operador activo": "Operator mode active",
+  "Modo solo consulta": "View-only mode",
+  "La wallet de tesorería no puede depositar, predecir ni retirar en BÓVEDA. Tu panel de control está en Invita y gana → Tesorería.": "The treasury wallet cannot deposit, predict or withdraw on BÓVEDA. Your control panel is in Invite & earn → Treasury.",
+  "Con una wallet externa puedes ver la app, pero no operar. Para operar, entra con Google, email o passkey y usa tu billetera protegida de BÓVEDA.": "With an external wallet you can browse the app but not trade. To trade, sign in with Google, email or passkey and use your protected BÓVEDA wallet.",
+  "Entrar con Google": "Sign in with Google",
 };

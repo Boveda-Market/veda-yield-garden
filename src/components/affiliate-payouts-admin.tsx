@@ -55,7 +55,7 @@ export function AffiliatePayoutsAdmin() {
     setBusy(d.affiliate); setMsg(null);
     try {
       const tx = await buildTransfer({ from: AFFILIATE_PAYOUT_WALLET, to: d.wallet, asset: "USDC", amount: BigInt(d.pendingRaw) });
-      const signature = await session.signAndSend(tx);
+      const signature = await (session.signAndSendAdmin ?? session.signAndSend)(tx);
       const r = await mark({ data: { token: await token(), affiliate: d.affiliate, signature } });
       setMsg(r.success ? t("Pago enviado y registrado.") : t(r.error));
       await open();
