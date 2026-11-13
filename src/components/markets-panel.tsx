@@ -11,7 +11,7 @@ import { MARKETS, fetchPriceAt, fetchPrices, type MarketId } from "@/lib/markets
 import { PREDICT_WINDOWS, type LiveRound, type PredictWindow } from "@/lib/predict";
 import { getLiveRounds } from "@/lib/predict.functions";
 import { PendingClaims } from "@/components/pending-claims";
-import { WalletOpenPredictions } from "@/components/open-predictions";
+import { CompactOpenPredictions } from "@/components/open-predictions";
 
 const num = (n: number, d = 2) => n.toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 const digits = (p: number) => (p >= 1000 ? 2 : 3);
@@ -113,7 +113,7 @@ export function MarketsPanel(_: { identity: string }) {
         : !round && <div role="status" className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/10 p-3 text-sm"><Loader2 className="mt-0.5 shrink-0 animate-spin text-primary" size={16} /><p><strong>{t("Esperando la próxima ronda de {m} ({w})…", { m: name, w: WIN_LABEL[win] })}</strong><br /><span className="text-muted-foreground">{t("Abre en breve. Mientras tanto puedes probar otra duración o cripto arriba.")}</span></p></div>}
       <PredictLive round={round} chart={<div className="overflow-hidden rounded-3xl border border-border bg-card py-3"><PriceChart market={market} points={series[market]} price={price} reference={strike} referenceLabel={t("A batir")} /></div>} />
       <PendingClaims />
-      <WalletOpenPredictions />
+      <CompactOpenPredictions />
       <details className="rounded-2xl border border-border bg-card p-4"><summary className="cursor-pointer text-sm font-semibold">{t("Historial de rondas recientes de {m}", { m: name })}</summary><div className="mt-3"><PredictResults asset={market} window={win} /></div></details>
     </div>
   );

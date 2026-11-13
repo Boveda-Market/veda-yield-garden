@@ -886,4 +886,6 @@ export const extra: Record<string, string> = {
   "Reclamar premio · {v} USDC": "Claim prize · {v} USDC",
   "Historial de rondas recientes de {m}": "Recent rounds history for {m}",
   "Ganancias": "Earnings",
+  "Ver posición": "View position",
+  "Premio": "Prize",
 };

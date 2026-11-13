@@ -1,3 +1,6 @@
+import { PriceChart } from "@/components/price-chart";
+import { useLivePrice } from "@/hooks/use-live-price";
+import type { MarketId } from "@/lib/markets";
 import { TokenIcon } from "@/components/token-icon";
 import { PoweredBy } from "@/components/powered-by";
 import { useEffect, useState } from "react";
@@ -24,6 +27,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
   const mmss = left !== null && left > 0 ? `${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")}` : null;
   const won = open ? null : positionWon(p);
   const Up = p.side === "up";
+  const live = useLivePrice(open && asset ? (asset as MarketId) : null);
   const Row = ({ k, v, tone }: { k: string; v: string; tone?: string }) => <div className="flex justify-between gap-2"><span className="text-muted-foreground">{k}</span><span className={`font-medium tabular-nums ${tone ?? ""}`}>{v}</span></div>;
   return <article className="rounded-lg border border-border bg-card p-5">
     <div className="flex items-start justify-between gap-3">
@@ -37,6 +41,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
         {open ? (mmss ? `⏱ ${t("Cierra en {v}", { v: mmss })}` : t("Resolviendo…")) : won === null ? t("Cerrada") : won ? t("Acertaste") : t("No acertaste")}
       </span>
     </div>
+    {open && asset && <div className="mt-4 overflow-hidden rounded-xl border border-border bg-background/40 py-2"><PriceChart market={asset as MarketId} points={live.points} price={live.price} /></div>}
     <p className="mt-4 text-xs text-muted-foreground">{t("Premio si aciertas")}</p>
     <p className="font-display text-3xl font-semibold text-primary tabular-nums">{usdcText(payout)} USDC</p>
     <p className="mt-1 text-xs text-muted-foreground tabular-nums">{t("Invertido")}: {usdcText(cost)} USDC · {t("Ganancia posible")} +{usdcText(profit)}{cost > 0n ? ` (${(Number(payout) / Number(cost)).toFixed(2)}×)` : ""}</p>
