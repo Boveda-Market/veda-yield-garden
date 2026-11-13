@@ -198,7 +198,7 @@ export const app: Record<string, string> = {
   "Fondos depositados": "Funds deposited",
   "Volumen negociado (24h)": "Volume traded (24h)",
   "Volumen negociado (histórico)": "Volume traded (all time)",
-  "Las cifras globales son datos públicos de cada protocolo (vía DefiLlama), no fondos de BÓVEDA ni de sus usuarios. Un dato no disponible se muestra como —. Estos protocolos no publican un conteo de usuarios conectados en vivo; el interés abierto refleja la participación activa.": "Global figures are public data from each protocol (via DefiLlama), not funds of BÓVEDA or its users. Unavailable data shows as —. These protocols don't publish a live count of connected users; open interest reflects active participation.",
+  "Las cifras globales son datos públicos de cada protocolo (vía DefiLlama), no fondos de BÓVEDA ni de sus usuarios. Un dato no disponible se muestra como —.": "Global figures are public data from each protocol (via DefiLlama), not funds of BÓVEDA or its users. Unavailable data shows as —.",
   "Interés abierto": "Open interest",
   "Dinero en predicciones abiertas ahora": "Money in open predictions right now",
   "En contratos inteligentes": "In smart contracts",
