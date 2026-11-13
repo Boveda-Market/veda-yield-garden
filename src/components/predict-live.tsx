@@ -1,5 +1,6 @@
 import { Dismissible } from "@/components/dismissible";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
   const session = useBovedaSession();
   const reportAffiliate = useAffiliateReport();
   const wallet = session.walletAddress;
+  const qc = useQueryClient();
   const [side, setSide] = useState<PredictSide | null>(null);
   const [amount, setAmount] = useState("10");
   const [review, setReview] = useState<{ side: PredictSide; round: LiveRound; quote: PredictQuote; tx: string; context: string } | null>(null);
@@ -76,6 +78,8 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
   const maxMicro = balance === null ? null : (balance < BigInt(PREDICT_MAX_USDC * 1e6) ? balance : BigInt(PREDICT_MAX_USDC * 1e6));
   const amt = units ? Number(units) / 1e6 : 0;
 
+  // Fast follow-up refreshes after a signed order so balances and cards update in about a second.
+  const sync = () => { for (const ms of [600, 1500, 4000]) setTimeout(() => { void refresh(); void loadBalance(); for (const k of ["predict-positions", "my-wallet", "my-wallet-tokens"]) void qc.invalidateQueries({ queryKey: [k, wallet] }); }, ms); };
   const sign = async (tx: string, context: string) => {
     if (!session.signOnly) throw new Error(t("Tu wallet no admite esta operación."));
     const signed = await session.signOnly(fromB64(tx));
@@ -113,8 +117,10 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
     try {
       const sig = await sign(review.tx, review.context);
       setReview(null);
+      const spent = toBaseUnits(amount, "USDC") ?? 0n;
+      setBalance((b) => b === null ? b : b > spent ? b - spent : 0n);
       setMsg({ ok: true, text: t("Predicción confirmada. Si aciertas, el pago llega solo a tu wallet al cerrar la ronda."), sig });
-      setTimeout(() => { void refresh(); void loadBalance(); }, 3000);
+      sync();
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };
   const sell = async (p: PredictPosition) => {
@@ -127,7 +133,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
       if (profit > 0n) setWin(usdc(profit));
       doneRef.current.add(p.pubkey); annotateRecord(wallet, p.pubkey, { soldMicro: p.valueMicro ?? "0", sellSig: sig });
       setMsg({ ok: true, text: t("Venta confirmada. El USDC está en tu wallet."), sig });
-      setTimeout(() => { void refresh(); void loadBalance(); }, 3000);
+      sync();
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };
 
@@ -151,7 +157,7 @@ export function PredictLive({ round }: { round: LiveRound | null }) {
           setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(q.outAmount) }), wallet: true });
         } else setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(p.payoutMicro) }), wallet: true });
       } catch { setMsg({ ok: true, text: t("Pago cobrado, pero falta el cambio a USDC. Hazlo en Mi Billetera → Cambiar (JupUSD → USDC)."), sig }); }
-      setTimeout(() => { void refresh(); void loadBalance(); }, 3000);
+      sync();
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };
 

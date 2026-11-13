@@ -1,6 +1,7 @@
 import { useT } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, LoaderCircle, PenLine } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange,
   const prepare = useServerFn(preparePilotDeposit);
   const reportAffiliate = useAffiliateReport();
   const readStatus = useServerFn(pilotDepositStatus);
+  const queryClient = useQueryClient();
   const [accepted, setAccepted] = useState(false);
   const [step, setStep] = useState<Step>("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -47,12 +49,13 @@ export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange,
         setStep("error"); setMessage(`La firma se canceló o la wallet rechazó la transacción. No se envió nada desde BÓVEDA.${detail ? ` Detalle: ${detail}` : ""}`); return;
       }
       setSignature(sig); setStep("confirming");
-      for (let attempt = 0; attempt < 30; attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      for (let attempt = 0; attempt < 40; attempt++) {
         const { status: next } = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as PilotStatus }));
         setStatus(next);
         if (next === "failed") { setStep("error"); setMessage(t("La red rechazó la transacción; al ser atómica, no se aplicaron ni la comisión ni el depósito (solo el coste de red).")); return; }
-        if (next !== "pending") { setStep("done"); void reportAffiliate(sig, "deposit"); return; }
-        await new Promise((resolve) => setTimeout(resolve, 2_000));
+        if (next !== "pending") { setStep("done"); void reportAffiliate(sig, "deposit"); for (const k of ["real-solana", "my-wallet", "my-wallet-tokens", "meteora-history", "start-guide"]) void queryClient.invalidateQueries({ queryKey: [k, walletAddress] }); return; }
+        await new Promise((resolve) => setTimeout(resolve, attempt < 3 ? 400 : attempt < 8 ? 800 : 2_000));
       }
       setStep("error"); setMessage(t("La confirmación tarda más de lo habitual. Revisa el estado en Helius antes de reintentar."));
     } catch { setStep("error"); setMessage(t("No se pudo preparar el depósito. No se pidió ninguna firma.")); }
