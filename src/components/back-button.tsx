@@ -8,11 +8,12 @@ export const IN_APP_FLAG = "boveda:in-app";
 
 /** Visible "Back" pill that returns to the main menu (☰ Menú). Inside the app it opens the menu in place;
  *  on pages without it (legal/FAQ) it goes to the app and opens the menu there, or to `fallback` for visitors. */
-export function BackButton({ fallback = "/", inApp = false, className = "" }: { fallback?: string; inApp?: boolean; className?: string }) {
+export function BackButton({ fallback = "/", inApp = false, className = "", homeHash }: { fallback?: string; inApp?: boolean; className?: string; homeHash?: string }) {
   const t = useT();
   const router = useRouter();
   const back = () => {
     if (inApp) { window.dispatchEvent(new Event(OPEN_MENU_EVENT)); return; }
+    if (homeHash) { void router.navigate({ to: "/", hash: homeHash }); return; }
     let signedIn = false;
     try { signedIn = sessionStorage.getItem(IN_APP_FLAG) === "1"; if (signedIn) sessionStorage.setItem(OPEN_MENU_FLAG, "1"); } catch { /* ignore */ }
     void router.navigate({ to: signedIn ? "/wallet" : fallback });

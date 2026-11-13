@@ -4,6 +4,7 @@ import { LegalLayout } from "@/components/legal-layout";
 import { SystemStatusView } from "@/components/system-status";
 
 export const Route = createFileRoute("/status")({ staticData: { sitemap: true },
+  validateSearch: (s: Record<string, unknown>): { from?: "transparencia" } => (s.from === "transparencia" ? { from: "transparencia" } : {}),
   head: () => ({ meta: [
     { title: "Estado del sistema — BÓVEDA" },
     { name: "description", content: "Comprueba en vivo que los servicios de BÓVEDA están operativos, con la liquidez y comisiones globales de bóvedas y predicciones." },
@@ -18,5 +19,6 @@ export const Route = createFileRoute("/status")({ staticData: { sitemap: true },
 
 function StatusPage() {
   const t = useT();
-  return <LegalLayout title={t("Estado del sistema")} legal={false}><SystemStatusView /></LegalLayout>;
+  const { from } = Route.useSearch();
+  return <LegalLayout title={t("Estado del sistema")} legal={false} backHash={from}><SystemStatusView /></LegalLayout>;
 }

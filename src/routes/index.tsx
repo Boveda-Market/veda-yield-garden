@@ -139,12 +139,12 @@ function Landing() {
         <ul className="mt-5 grid gap-4 sm:grid-cols-2">{ANTI_SCAM.map(([h, d]) => <li key={h} className="rounded-2xl border border-border bg-background p-4"><p className="font-display text-sm font-semibold">{t(h)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ul>
       </section>
 
-      <section className="mb-12 rounded-3xl border border-primary/30 bg-primary/5 p-6 sm:p-8">
+      <section id="transparencia" className="mb-12 scroll-mt-6 rounded-3xl border border-primary/30 bg-primary/5 p-6 sm:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Send size={14} />{t("Canal oficial de Telegram")}</p>
             <h2 className="mt-2 font-display text-2xl font-bold">{t("Transparencia total, en vivo")}</h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t("Únete a @bovedamarket: recibe alertas automáticas del estado de la red y de la app, avisos de seguridad y cada mejora en cuanto sale.")}</p></div>
-          <div className="flex shrink-0 flex-col gap-2"><Button asChild className="h-12"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer">{t("Unirme a @bovedamarket")}<ArrowRight size={16} /></a></Button><Link to="/status" className="flex items-center justify-center gap-1.5 text-sm text-primary underline"><Activity size={14} />{t("Ver estado del sistema")}</Link></div>
+          <div className="flex shrink-0 flex-col gap-2"><Button asChild className="h-12"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer">{t("Unirme a @bovedamarket")}<ArrowRight size={16} /></a></Button><Link to="/status" search={{ from: "transparencia" }} className="flex items-center justify-center gap-1.5 text-sm text-primary underline"><Activity size={14} />{t("Ver estado del sistema")}</Link></div>
         </div>
       </section>
 
