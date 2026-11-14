@@ -3,9 +3,11 @@ import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 
-export const IDLE_LIMIT_MS = 5 * 60 * 1000;
+export const IDLE_LIMIT_MS = 15 * 60 * 1000;
 export const IDLE_WARN_MS = 60 * 1000;
 const KEY = "boveda.lastActivity";
+// Never wait on a slow network after waking the phone: give logout 2 s, then always leave to the login.
+const leave = (onLogout: () => Promise<void>) => { void Promise.race([onLogout().catch(() => {}), new Promise((r) => setTimeout(r, 2000))]).finally(() => window.location.replace("/")); };
 const EVENTS = ["pointerdown", "keydown", "scroll", "touchstart", "mousemove"] as const;
 
 // Flows that send the user to another tab (e.g. Coinbase) keep the session alive until they finish.
@@ -18,7 +20,7 @@ export function holdSessionForExternalFlow(): () => void {
 }
 export const isExternalFlowActive = () => externalBusy > 0;
 
-/** Signs the user out after 5 min (also when the app was closed or in background that long) without activity, warning 60 s before. Activity is shared across tabs. */
+/** Signs the user out after 15 min (also when the app was closed or in background that long) without activity, warning 60 s before. Activity is shared across tabs. */
 export function IdleLogout({ active, signedOut, onLogout }: { active: boolean; signedOut?: boolean; onLogout: () => Promise<void> }) {
   const t = useT();
   const [left, setLeft] = useState<number | null>(null);
@@ -27,7 +29,7 @@ export function IdleLogout({ active, signedOut, onLogout }: { active: boolean; s
   useEffect(() => {
     if (!active) { setLeft(null); return; }
     const mark = () => { const now = Date.now(); if (now - last.current < 5000) return; last.current = now; try { localStorage.setItem(KEY, String(now)); } catch {} };
-    const expire = () => { setLeft(null); try { localStorage.removeItem(KEY); } catch {} void (async () => { await onLogout(); window.location.assign("/"); })(); };
+    const expire = () => { setLeft(null); try { localStorage.removeItem(KEY); } catch {} leave(onLogout); };
     // On reopen, a stored timestamp older than the limit means the app sat closed too long.
     let stored = 0; try { stored = Number(localStorage.getItem(KEY) ?? 0); } catch {}
     if (stored && Date.now() - stored >= IDLE_LIMIT_MS) { expire(); return; }
@@ -56,7 +58,7 @@ export function IdleLogout({ active, signedOut, onLogout }: { active: boolean; s
       <p className="mt-2 text-sm text-muted-foreground">{t("Por tu seguridad cerraremos tu sesión por inactividad en")} <span className="font-semibold text-foreground">{left}s</span>.</p>
       <div className="mt-5 grid gap-2">
         <Button onClick={stay}>{t("Mantener sesión abierta")}</Button>
-        <Button variant="ghost" onClick={() => void (async () => { await onLogout(); window.location.assign("/"); })()}>{t("Cerrar sesión")}</Button>
+        <Button variant="ghost" onClick={() => leave(onLogout)}>{t("Cerrar sesión")}</Button>
       </div>
     </div>
   </div>;

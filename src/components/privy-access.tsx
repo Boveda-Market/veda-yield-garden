@@ -66,6 +66,13 @@ function SessionBridge({ children }: { children: ReactNode }) {
     setPrivyTokenGetter(authenticated ? getAccessToken : null);
     return () => setPrivyTokenGetter(null);
   }, [authenticated, getAccessToken]);
+  // Waking the phone: wait a moment for the network, then refresh live data instead of showing stale/empty screens.
+  useEffect(() => {
+    let id: ReturnType<typeof setTimeout> | undefined;
+    const onVis = () => { if (document.visibilityState !== "visible" || !authenticated) return; clearTimeout(id); id = setTimeout(() => { void queryClient.invalidateQueries(); }, 1200); };
+    document.addEventListener("visibilitychange", onVis); window.addEventListener("pageshow", onVis);
+    return () => { clearTimeout(id); document.removeEventListener("visibilitychange", onVis); window.removeEventListener("pageshow", onVis); };
+  }, [authenticated, queryClient]);
   const sendRaw = async (transaction: Uint8Array): Promise<string> => {
       const wallet = wallets[0];
       if (!authenticated || !wallet) throw new Error(t("Conecta una wallet de Solana"));
