@@ -15,13 +15,14 @@ import { EntryAccess } from "@/components/entry-access";
 
 export const Route = createFileRoute("/")({ staticData: { sitemap: true },
   head: () => ({ meta: [
-    { title: "BÓVEDA — Pon tus monedas a trabajar" },
-    { name: "description", content: "Entra a tu cuenta o prueba gratis con 1,000 créditos ficticios. Mira rendimientos estimados, cómo funciona y las comisiones antes de empezar." },
-    { property: "og:title", content: "BÓVEDA — Pon tus monedas a trabajar" },
-    { property: "og:description", content: "Bóvedas que generan comisiones en USDC y predicciones Sube/Baja de BTC, ETH y SOL. Pruébalo gratis sin registro con 1,000 créditos ficticios." },
+    { title: "BÓVEDA — Billetera en dólares digitales (USDC) con rendimiento" },
+    { name: "description", content: "Guarda dólares digitales (USDC), genera rendimiento y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Prueba gratis." },
+    { property: "og:title", content: "BÓVEDA — Billetera en dólares digitales (USDC) con rendimiento" },
+    { property: "og:description", content: "Guarda dólares digitales (USDC), genera rendimiento y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Prueba gratis." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
     { property: "og:url", content: "https://bovedamarket.app/" },
-  ], links: [{ rel: "canonical", href: "https://bovedamarket.app/" }] }), component: Landing,
+  ], links: [{ rel: "canonical", href: "https://bovedamarket.app/" }],
+  scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"BÓVEDA","url":"https://bovedamarket.app/","logo":"https://bovedamarket.app/favicon.ico","email":"admin@bovedamarket.app"},{"@type":"WebApplication","name":"BÓVEDA","url":"https://bovedamarket.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"es","description":"Guarda dólares digitales (USDC), genera rendimiento y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Prueba gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}]}) }] }), component: Landing,
 });
 
 const FAQS = [
