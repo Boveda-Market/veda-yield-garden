@@ -13,16 +13,16 @@ export function PredictPromo() {
       <div className="relative mt-2 h-32">
         <svg viewBox="0 0 200 100" className="h-full w-full" preserveAspectRatio="none">
           <line x1="0" y1="55" x2="200" y2="55" className="stroke-muted-foreground" strokeDasharray="4 4" strokeWidth="1" />
-          <path className="pp-up" d="M0 62 L25 58 L50 64 L75 56 L100 60 L125 46 L150 40 L175 30 L200 22" fill="none" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" />
-          <path className="pp-down" d="M0 48 L25 52 L50 46 L75 54 L100 50 L125 64 L150 70 L175 80 L200 88" fill="none" stroke="var(--destructive)" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+          <path className="pp-up" d="M0 62 L25 58 L50 64 L75 56 L100 60 L125 46 L150 40 L175 30 L200 22" fill="none" stroke="var(--primary)" strokeWidth="2" opacity="0.6" strokeLinecap="round" />
+          <path className="pp-down" d="M0 48 L25 52 L50 46 L75 54 L100 50 L125 64 L150 70 L175 80 L200 88" fill="none" stroke="var(--destructive)" strokeWidth="3" strokeLinecap="round" />
         </svg>
-        <span className="pp-badge absolute right-1 top-0 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">▲ +$85</span>
+        <span className="pp-badge absolute right-1 bottom-0 rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] font-bold text-destructive">▼ −$85</span>
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <span className="pp-sube rounded-xl bg-primary py-2.5 text-center text-sm font-bold text-primary-foreground">▲ {t("SUBE")}</span>
-        <span className="rounded-xl bg-destructive/15 py-2.5 text-center text-sm font-bold text-destructive">▼ {t("BAJA")}</span>
+        <span className="rounded-xl bg-primary/15 py-2.5 text-center text-sm font-bold text-primary">▲ {t("SUBE")}</span>
+        <span className="pp-sube rounded-xl bg-destructive py-2.5 text-center text-sm font-bold text-destructive-foreground">▼ {t("BAJA")}</span>
       </div>
-      <span className="pp-tap pointer-events-none absolute bottom-6 left-[24%] h-10 w-10 rounded-full bg-foreground/30" />
+      <span className="pp-tap pointer-events-none absolute bottom-6 left-[62%] h-10 w-10 rounded-full bg-foreground/30" />
       <div className="pp-win absolute inset-0 flex flex-col items-center justify-center bg-primary text-primary-foreground">
         <span className="font-display text-3xl font-black">{t("¡Acertaste!")}</span>
         <span className="mt-1 font-display text-2xl font-bold">+$9.80</span>
