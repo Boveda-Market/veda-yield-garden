@@ -1,4 +1,5 @@
 import { Dismissible } from "@/components/dismissible";
+import { notify } from "@/lib/notify";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2 } from "lucide-react";
@@ -124,6 +125,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
       const spent = toBaseUnits(amount, "USDC") ?? 0n;
       setBalance((b) => b === null ? b : b > spent ? b - spent : 0n);
       setMsg({ ok: true, text: t("Predicción confirmada. Si aciertas, el pago llega solo a tu wallet al cerrar la ronda."), sig });
+      notify("round", t("Predicción confirmada"), t("Te avisamos al cerrar la ronda"));
       sync();
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };
@@ -137,6 +139,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
       if (profit > 0n) setWin(usdc(profit));
       doneRef.current.add(p.pubkey); annotateRecord(wallet, p.pubkey, { soldMicro: p.valueMicro ?? "0", sellSig: sig });
       setMsg({ ok: true, text: t("Venta confirmada. El USDC está en tu wallet."), sig });
+      notify("success", t("Posición cerrada"), t("El USDC está en tu billetera"));
       sync();
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };

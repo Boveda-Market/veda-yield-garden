@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { notify } from "@/lib/notify";
 import { CheckCircle2, Fuel, Loader2, Sparkles } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ export function GasRefillCard({ sol, usdc, onDone }: Props) {
       const r = await prepare({ data: { wallet: session.walletAddress } });
       if (!r.success) throw new Error(r.error);
       await session.signAndSend(Uint8Array.from(atob(r.transaction), (c) => c.charCodeAt(0)));
+      notify("success", t("Reserva recargada"), t("Ya puedes seguir operando"));
       setMsg({ ok: true, text: t("Listo: recargaste {sol} SOL por {usdc} USDC. Ya puedes seguir operando.", { sol: unitsToDecimal(BigInt(r.lamports), 9), usdc: unitsToDecimal(BigInt(r.chargeMicro), 6) }) });
       setTimeout(() => onDone?.(), 3000);
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? t(e.message) : t("No se pudo completar la recarga.") }); }

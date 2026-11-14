@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { notify } from "@/lib/notify";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
 import { LoaderCircle, Repeat, PenLine } from "lucide-react";
@@ -44,7 +45,7 @@ export function CompoundStep({ wallet, position, vaultId, usdcRaw, tokenRaw }: {
       for (let attempt = 0; attempt < 30; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó la reinversión; tus monedas siguen en tu wallet.")); return; }
-        if (status.status !== "pending") { setDone(true); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", wallet] }); return; }
+        if (status.status !== "pending") { notify("success", t("Ganancias reinvertidas"), t("Se sumaron a tu posición")); setDone(true); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", wallet] }); return; }
         await new Promise((r) => setTimeout(r, 2_000));
       }
       setMessage(t("Confirmación pendiente. Revisa el comprobante antes de reintentar."));

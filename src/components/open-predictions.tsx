@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { notify } from "@/lib/notify";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePredictPositions } from "@/lib/predict-positions-query";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
@@ -51,7 +52,7 @@ export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPre
       try {
         let got = 0n;
         for (let i = 0; i < 4 && got <= 0n; i++) { await new Promise((res) => setTimeout(res, 2000)); got = (await readTokenBalance(wallet, JUPUSD_MINT)) - before; }
-        if (got > 0n) { const q = await quoteSwap("JupUSD", "USDC", got, { feeUsdc: 0n }); await session.signAndSend(await buildSwap(wallet, q)); setMsg({ ok: true, text: t("Posición cerrada. {v} USDC llegaron a tu wallet.", { v: usdcText(q.outAmount) }) }); }
+        if (got > 0n) { const q = await quoteSwap("JupUSD", "USDC", got, { feeUsdc: 0n }); await session.signAndSend(await buildSwap(wallet, q)); setMsg({ ok: true, text: t("Posición cerrada. {v} USDC llegaron a tu wallet.", { v: usdcText(q.outAmount) }) }); notify("success", t("Posición cerrada"), t("{v} USDC en tu billetera", { v: usdcText(q.outAmount) })); }
         else setMsg({ ok: true, text: t("Venta confirmada. El USDC está en tu wallet.") });
       } catch { setMsg({ ok: true, text: t("Posición cerrada, pero falta el cambio a USDC. Hazlo en Mi Billetera → Cambiar (JupUSD → USDC).") }); }
       setTimeout(() => void refresh(), 3000);

@@ -1,7 +1,7 @@
 import { useQueries } from "@tanstack/react-query";
+import { notify } from "@/lib/notify";
 import { Link } from "@tanstack/react-router";
 import { ArrowDownToLine, Plus, Repeat, Copy, ExternalLink, Sprout, Vault as VaultIcon } from "lucide-react";
-import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { VAULTS } from "@/lib/vaults";
 import { formatUsd } from "@/lib/position-value";
@@ -23,7 +23,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
   const vaultYields = useQueries({ queries: VAULTS.map((v) => poolYieldOptions(v.pool)) });
   const aprs = Object.fromEntries(VAULTS.map((v, i) => [v.id, vaultYields[i]?.data?.apr ?? null]));
   const since = useMemo(() => Date.now(), [positions]);
-  const copy = (address: string) => { void navigator.clipboard?.writeText(address).then(() => toast.success(t("Identificador copiado"))); };
+  const copy = (address: string) => { void navigator.clipboard?.writeText(address).then(() => notify("success", t("Identificador copiado"))); };
   return <section aria-label={t("Posiciones reales")} className="border-b border-border py-8">
     {showHarvestBanner && top && <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-primary/40 bg-primary/10 p-5"><div><p className="text-sm text-muted-foreground">{t("Ganancias listas para cosechar")}</p><p className="mt-1 font-display text-2xl font-semibold text-primary">≈ {formatUsd(totalFees)}</p><p className="mt-1 text-xs text-muted-foreground">{t("Envíalas a tu wallet sin tocar tu depósito.")}</p></div><Button onClick={() => onAction(top.p, "harvest")}><Sprout size={16} />{t("Cosechar ahora")}</Button></div>}
     <h2 className="font-display text-lg font-semibold">{t("Mis posiciones")}</h2>

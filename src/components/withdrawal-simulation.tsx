@@ -12,6 +12,7 @@ import { exitInput, EXIT_PERCENTS, type WithdrawalResult } from "@/lib/withdrawa
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import type { Vault } from "@/lib/vaults";
 import { ActionSuccess, ReceiveCard } from "@/components/action-success";
+import { notify } from "@/lib/notify";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -63,7 +64,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
       let sig: string;
       try { sig = await session.signAndSend(Uint8Array.from(atob(next.prepared.transaction), (c) => c.charCodeAt(0))); }
       catch { setMessage(t("La wallet canceló o rechazó la solicitud. Si pudo enviarse, revisa su historial antes de reintentar.")); return; }
-      setSignature(sig); setStep(two ? t("Firma 1 de 2 enviada: confirmando tu retiro en la red…") : t("Esperando confirmación en la red…"));
+      setSignature(sig); notify("secure", t("Firma aprobada"), t("Confirmando en la red…")); setStep(two ? t("Firma 1 de 2 enviada: confirmando tu retiro en la red…") : t("Esperando confirmación en la red…"));
       for (let attempt = 0; attempt < 60; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó la transacción atómica: no se aplicaron el retiro ni la comisión; puede cobrarse el coste de red.")); return; }
@@ -77,6 +78,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
               else if (swept.converted > 0) setSweepNote(t("También cambiamos tus sobrantes a USDC: ~{v} USDC más, sin comisión.", { v: (Number(swept.usdc) / 1e6).toFixed(2) }));
             } catch { setSweepNote(t("No se pudieron cambiar los sobrantes. Hazlo en Mi Billetera → Cambiar.")); }
           }
+          notify("success", t("Retiro confirmado"), t("Tus USDC ya están en tu billetera"));
           setFinished(true); setMessage(t("Liquidación confirmada en la red. Consulta los importes finales y la renta devuelta en Helius."));
           for (const k of ["real-solana", "meteora-history", "my-wallet", "my-wallet-tokens", "start-guide"]) await queryClient.invalidateQueries({ queryKey: [k, address] });
           return;
@@ -98,7 +100,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
     {!migrateTo && !finished && !signature && <div role="radiogroup" aria-label={t("Cuánto retirar")} className="grid grid-cols-4 gap-2">{EXIT_PERCENTS.map((p) => <Button key={p} type="button" role="radio" aria-checked={percent === p} variant={percent === p ? "default" : "outline"} disabled={pending} onClick={() => { setPercent(p); setResult(null); setAccepted(false); setMessage(null); }}>{p === 100 ? t("Todo") : `${p}%`}</Button>)}</div>}
     {!finished && !signature && <p className="text-xs text-muted-foreground">{percent === 100 ? t("Cierras la posición y recuperas el SOL de apertura.") : t("Retiras el {p}% y el resto sigue invirtiendo en la bóveda.", { p: String(percent) })}</p>}
     {migrateTo && !finished && <p className="rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm">{rotate ? t("Paso 1 de 2: cosechamos tus ganancias y cerramos esta bóveda. Luego depositas todo en {v}. Cambio voluntario: comisión reducida de 0.10% al salir y 0% al depositar.", { v: t(migrateTo.name) }) : t("Paso 1 de 2: cosechamos tus ganancias y cerramos esta bóveda. Luego depositas todo en {v}. Sin comisión de BÓVEDA en ningún paso.", { v: t(migrateTo.name) })}</p>}
-    {finished && migrateTo && onMigrated ? <div role="status" className="grid gap-3"><p className="font-semibold">{t("Paso 1 listo: tus USDC están en tu wallet.")}</p><Button size="lg" onClick={() => onMigrated(result?.minimumNet ?? "")}>{t("Paso 2: depositar en {v}", { v: t(migrateTo.name) })}</Button></div> : finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess destination="/wallet" title={t("¡Retiro completado!")} body={percent === 100 ? t("Tus USDC ya están en tu wallet. También recuperaste el SOL de apertura de la posición.") : t("Tus USDC ya están en tu wallet. El resto de tu posición sigue invertido.")} signature={signature} onClose={onClose} />{sweepNote && <p role="status" className="text-sm text-muted-foreground">{sweepNote}</p>}</> : <>
+    {finished && migrateTo && onMigrated ? <div role="status" className="grid gap-3"><p className="font-semibold">{t("Paso 1 listo: tus USDC están en tu wallet.")}</p><Button size="lg" onClick={() => onMigrated(result?.minimumNet ?? "")}>{t("Paso 2: depositar en {v}", { v: t(migrateTo.name) })}</Button></div> : finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess destination="/wallet" title={t("¡Retiro completado!")} amount={result?.net ? { value: result.net, unit: "USDC", label: "≈" } : undefined} details={[{ label: t("Operación"), value: percent === 100 ? t("Retiro total de bóveda") : t("Retiro del {p}% de bóveda", { p: String(percent) }) }, { label: t("Origen"), value: t("Bóveda {v}", { v: vaultId === "sol" ? "SOL" : "MET" }) }, { label: t("Destino"), value: t("Tu billetera") }]} body={percent === 100 ? t("Tus USDC ya están en tu wallet. También recuperaste el SOL de apertura de la posición.") : t("Tus USDC ya están en tu wallet. El resto de tu posición sigue invertido.")} signature={signature} onClose={onClose} />{sweepNote && <p role="status" className="text-sm text-muted-foreground">{sweepNote}</p>}</> : <>
     {!prefilled && inputs}
     {(!result || !result.success) && <Button variant={result ? "outline" : "default"} disabled={pending || !input.success} onClick={() => void run()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <ReceiptText className="mr-2 h-4 w-4" />}{pending ? t("Calculando tu retiro…") : t("Revisar retiro")}</Button>}
     {result && <div role="status" className="grid gap-3 text-sm">

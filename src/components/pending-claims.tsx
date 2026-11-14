@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { notify } from "@/lib/notify";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePredictPositions } from "@/lib/predict-positions-query";
 import { Gift, Loader2 } from "lucide-react";
@@ -48,6 +49,7 @@ export function PendingClaims() {
         const feeUsdc = predictClaimFee(BigInt(p.payoutMicro || "0"), BigInt(p.costMicro || "0"));
         const out = bal > 0n ? (await (async () => { const q = await quoteSwap("JupUSD", "USDC", bal, { feeUsdc }); const s = await session.signAndSend(await buildSwap(wallet, q)); if (BigInt(q.feeUsdc) > 0n) void reportAffiliate(s, "predict"); return q.outAmount; })()) : p.payoutMicro;
         setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(out) }) });
+        notify("success", t("Premio cobrado"), t("{v} USDC en tu billetera", { v: usdc(out) }));
       } catch { setMsg({ ok: true, text: t("Pago cobrado, pero falta el cambio a USDC. Hazlo en Mi Billetera → Cambiar (JupUSD → USDC).") }); }
       setClaimed((l) => [...l, p.pubkey]);
       setTimeout(() => void refresh(), 3000);

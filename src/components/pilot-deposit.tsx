@@ -2,11 +2,11 @@ import { useT } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, LoaderCircle, PenLine } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { LoaderCircle, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dismissible } from "@/components/dismissible";
+import { ActionSuccess } from "@/components/action-success";
+import { notify } from "@/lib/notify";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { pilotDepositStatus, preparePilotDeposit } from "@/lib/pilot-deposit.functions";
@@ -48,13 +48,13 @@ export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange,
         console.error("[pilot-deposit] wallet", detail);
         setStep("error"); setMessage(`La firma se canceló o la wallet rechazó la transacción. No se envió nada desde BÓVEDA.${detail ? ` Detalle: ${detail}` : ""}`); return;
       }
-      setSignature(sig); setStep("confirming");
+      setSignature(sig); setStep("confirming"); notify("secure", t("Firma aprobada"), t("Confirmando en la red…"));
       await new Promise((resolve) => setTimeout(resolve, 400));
       for (let attempt = 0; attempt < 40; attempt++) {
         const { status: next } = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as PilotStatus }));
         setStatus(next);
         if (next === "failed") { setStep("error"); setMessage(t("La red rechazó la transacción; al ser atómica, no se aplicaron ni la comisión ni el depósito (solo el coste de red).")); return; }
-        if (next !== "pending") { setStep("done"); void reportAffiliate(sig, "deposit"); for (const k of ["real-solana", "my-wallet", "my-wallet-tokens", "meteora-history", "start-guide"]) void queryClient.invalidateQueries({ queryKey: [k, walletAddress] }); return; }
+        if (next !== "pending") { setStep("done"); notify("success", t("Depósito confirmado"), t("Tus dólares ya están rindiendo")); void reportAffiliate(sig, "deposit"); for (const k of ["real-solana", "my-wallet", "my-wallet-tokens", "meteora-history", "start-guide"]) void queryClient.invalidateQueries({ queryKey: [k, walletAddress] }); return; }
         await new Promise((resolve) => setTimeout(resolve, attempt < 3 ? 400 : attempt < 8 ? 800 : 2_000));
       }
       setStep("error"); setMessage(t("La confirmación tarda más de lo habitual. Revisa el estado en Helius antes de reintentar."));
@@ -62,14 +62,10 @@ export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange,
   }
 
   if (!eligible) return <p className="border-t border-border pt-4 text-xs text-muted-foreground">{t("Los depósitos no están disponibles para esta bóveda.")}</p>;
-  if (step === "done") return <Dismissible onDismiss={() => { if (onClose) onClose(); else setStep("idle"); }} className="rounded-xl bg-primary/10 text-primary"><section className="grid justify-items-center gap-3 p-6 text-center text-sm text-foreground">
-    <CheckCircle2 className="h-12 w-12 text-primary motion-safe:animate-in motion-safe:zoom-in" aria-hidden />
-    <h3 className="font-display text-xl font-bold">{t("¡Depósito exitoso!")}</h3><p className="mt-2 flex items-center justify-center gap-2 text-sm text-primary"><span className="h-2 w-2 animate-pulse rounded-full bg-primary" />{t("Tu depósito ya está en marcha y empezó a acumular ganancias. Míralas crecer en tu Portafolio.")}</p>
+  if (step === "done") return <>
     <p role="status" className="sr-only">{t("Depósito confirmado en la red (")}{status === "finalized" ? "finalizado" : "confirmado"}).</p>
-    <p className="text-muted-foreground">{t("Tu posición ya está generando comisiones. Puedes cosecharlas cuando quieras desde tu Portafolio.")}</p>
-    <Button asChild className="w-full"><Link to="/portfolio" onClick={onClose}>{t("Ver en mi Portafolio")}</Link></Button>
-    <Link to="/wallet" onClick={onClose} className="text-xs underline">{t("Ver en tu wallet")}</Link>
-  </section></Dismissible>;
+    <ActionSuccess title={t("¡Depósito exitoso!")} body={t("Tu posición ya está generando comisiones. Puedes cosecharlas cuando quieras desde tu Portafolio.")} amount={{ value: amount, unit: "USDC" }} details={[{ label: t("Operación"), value: t("Depósito en bóveda") }, { label: t("Destino"), value: t("Bóveda {v}", { v: vaultId.toUpperCase() }) }]} signature={signature} onClose={() => { if (onClose) onClose(); else setStep("idle"); }} />
+  </>;
   return <section aria-labelledby="pilot-title" className="grid gap-3 text-sm">
     <h3 id="pilot-title" className="sr-only">{t("Confirmar depósito")}</h3>
     {!walletAddress ? <p className="text-xs text-muted-foreground">{t("Inicia sesión con una wallet para firmar.")}</p> : <>

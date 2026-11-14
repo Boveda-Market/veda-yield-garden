@@ -1,19 +1,43 @@
-import { CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { Check } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { useT } from "@/lib/i18n";
+import { useLocale, useT } from "@/lib/i18n";
 import { Dismissible } from "@/components/dismissible";
 
-/** Shared confirmation screen after a vault operation is confirmed on-chain. */
-export function ActionSuccess({ title, body, signature, onClose, destination = "/portfolio" }: { title: string; body: string; signature: string | null; onClose: () => void; destination?: "/portfolio" | "/wallet" }) {
+export type ReceiptRow = { label: string; value: string };
+
+/**
+ * Shared "operation receipt" after a confirmed operation (Robinhood / Coinbase style):
+ * calm animated check, the amount, a few detail lines with date and time, and a single main "Done" button.
+ */
+export function ActionSuccess({ title, body, signature, onClose, destination = "/portfolio", amount, details = [], doneLabel }: {
+  title: string; body: string; signature: string | null; onClose: () => void;
+  destination?: "/portfolio" | "/wallet" | null;
+  amount?: { value: string; unit: string; label?: string } | undefined;
+  details?: ReceiptRow[];
+  doneLabel?: string;
+}) {
   const t = useT();
-  return <Dismissible onDismiss={onClose} className="rounded-xl bg-primary/10 text-primary"><section className="grid justify-items-center gap-3 p-6 text-center text-sm text-foreground">
-    <CheckCircle2 className="h-12 w-12 text-primary motion-safe:animate-in motion-safe:zoom-in" aria-hidden />
-    <h3 className="font-display text-xl font-bold">{title}</h3>
+  const locale = useLocale();
+  const [at] = useState(() => new Date());
+  const rows: ReceiptRow[] = [...details, { label: t("Fecha y hora"), value: at.toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" }) }];
+  return <Dismissible onDismiss={onClose} ms={Infinity} className="rounded-2xl bg-card text-primary"><section role="status" className="grid justify-items-center gap-4 p-6 text-center text-sm text-foreground">
+    <span className="relative grid size-16 place-items-center" aria-hidden>
+      <span className="absolute inset-0 rounded-full bg-primary/15 motion-safe:animate-ping motion-safe:[animation-iteration-count:1] motion-safe:[animation-duration:900ms]" />
+      <span className="grid size-16 place-items-center rounded-full bg-primary text-primary-foreground motion-safe:animate-in motion-safe:zoom-in-50 motion-safe:duration-500"><Check className="size-8" strokeWidth={3} /></span>
+    </span>
+    <div className="grid gap-1">
+      <h3 className="font-display text-xl font-bold">{title}</h3>
+      {amount && <p className="font-display text-3xl font-bold tabular-nums motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">{amount.label && <span className="mr-1 text-base font-semibold text-muted-foreground">{amount.label}</span>}{amount.value} <span className="text-base font-semibold text-muted-foreground">{amount.unit}</span></p>}
+    </div>
     <p className="text-muted-foreground">{body}</p>
-    <Button asChild className="w-full"><Link to={destination} onClick={onClose}>{t(destination === "/wallet" ? "Ver en Wallet" : "Ver en mi Portafolio")}</Link></Button>
-    <Button variant="ghost" className="w-full" onClick={onClose}>{t("Listo")}</Button>
-    {signature && destination !== "/wallet" && <Link to="/wallet" onClick={onClose} className="text-xs underline">{t("Ver en tu wallet")}</Link>}
+    <dl className="grid w-full gap-2 rounded-xl border border-border bg-background/60 p-4 text-left">
+      {rows.map((r) => <div key={r.label} className="flex justify-between gap-3"><dt className="text-muted-foreground">{r.label}</dt><dd className="text-right font-medium">{r.value}</dd></div>)}
+      {signature && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comprobante")}</dt><dd><a href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noopener noreferrer" className="font-mono text-xs underline">{signature.slice(0, 6)}…{signature.slice(-4)}</a></dd></div>}
+    </dl>
+    <Button className="w-full active:scale-[0.98]" size="lg" onClick={onClose}>{doneLabel ?? t("Listo")}</Button>
+    {destination && <Link to={destination} onClick={onClose} className="text-xs font-medium underline">{t(destination === "/wallet" ? "Ver en billetera" : "Ver en mi Portafolio")}</Link>}
   </section></Dismissible>;
 }
 

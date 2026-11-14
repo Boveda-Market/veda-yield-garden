@@ -1,9 +1,10 @@
 import { ServiceFeeLabel } from "@/components/service-fee-label";
-import { Dismissible } from "@/components/dismissible";
+import { notify } from "@/lib/notify";
+import { ActionSuccess } from "@/components/action-success";
 import { TokenIcon } from "@/components/token-icon";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpDown, CheckCircle2, RefreshCw } from "lucide-react";
+import { ArrowUpDown, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { quoteSwap, SWAP_TOKENS, swapSpendable, swapToken, toTokenUnits, type SwapQuote } from "@/lib/wallet-actions";
@@ -94,13 +95,7 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
     setAmount(frac ? `${v / 10n ** d}.${frac}` : `${v / 10n ** d}`);
   };
 
-  if (done) return <Dismissible onDismiss={() => setDone(null)} className="mt-4 rounded-2xl bg-muted text-primary"><div className="space-y-4 p-5 text-center text-foreground" role="status">
-    <CheckCircle2 className="mx-auto size-10 text-primary" aria-hidden="true" />
-    <p className="font-display text-xl">{t("Cambio enviado")}</p>
-    <p className="text-sm text-muted-foreground">{t("Cambiaste {a} por aproximadamente {b}.", { a: `${format(done.amount, done.from)} ${done.from}`, b: `${format(done.outAmount, done.to)} ${done.to}` })}</p>
-    <p className="text-xs text-muted-foreground">{t("Tu saldo se actualizará en unos segundos.")}</p>
-    <Button className="w-full" onClick={() => setDone(null)}>{t("Hacer otro cambio")}</Button>
-  </div></Dismissible>;
+  if (done) return <div className="mt-4"><ActionSuccess destination={null} title={t("Cambio enviado")} amount={{ value: format(done.outAmount, done.to), unit: done.to, label: "≈" }} body={`${t("Cambiaste {a} por aproximadamente {b}.", { a: `${format(done.amount, done.from)} ${done.from}`, b: `${format(done.outAmount, done.to)} ${done.to}` })} ${t("Tu saldo se actualizará en unos segundos.")}`} details={[{ label: t("Operación"), value: t("Cambio de moneda") }, { label: t("Pagaste"), value: `${format(done.amount, done.from)} ${done.from}` }, { label: t("Destino"), value: t("Tu billetera") }]} signature={null} doneLabel={t("Hacer otro cambio")} onClose={() => setDone(null)} /></div>;
 
   const select = (side: "from" | "to", value: string) => <div className="flex shrink-0 items-center gap-1.5"><TokenIcon symbol={value} size={compact ? 22 : 28} /><select aria-label={side === "from" ? t("Moneda que pagas") : t("Moneda que recibes")} value={value} disabled={busy}
     onChange={(e) => pick(side, e.target.value)} className={`${compact ? "h-8 px-2 text-sm" : "h-10 px-3"} rounded-full border border-border bg-background font-semibold`}>
@@ -152,7 +147,7 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
     {quote.isError && <Button variant="outline" className="w-full" disabled={busy || !units} onClick={() => void quote.refetch()}><RefreshCw />{t("Actualizar cotización")}</Button>}
     <Button className="w-full" size={compact ? "default" : "lg"} disabled={busy || loading || !current || expired || insufficient || max === undefined} onClick={() => {
       if (!current || Date.now() - quote.dataUpdatedAt >= QUOTE_TTL || insufficient || busy) return;
-      void onConfirm(current).then(() => { setDone(current); clear(); }).catch(() => {});
+      void onConfirm(current).then(() => { notify("success", t("Cambio enviado"), `${format(current.amount, current.from)} ${current.from} → ${current.to}`); setDone(current); clear(); }).catch(() => {});
     }}>{busy ? t("Procesando…") : t("Confirmar y firmar cambio")}</Button>
     {!compact && <p className="text-xs text-muted-foreground">{t("La cotización no mueve tus fondos. El costo de red se paga aparte en SOL y lo verás en tu wallet antes de firmar.")}</p>}
   </div>;

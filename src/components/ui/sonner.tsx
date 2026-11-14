@@ -2,10 +2,16 @@ import { Toaster as Sonner } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
+/** Mounted once in __root: floating pills at the top center (see src/lib/notify.tsx). */
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       className="toaster group"
+      position="top-center"
+      offset={12}
+      mobileOffset={{ top: "calc(env(safe-area-inset-top) + 8px)" }}
+      visibleToasts={3}
+      gap={8}
       toastOptions={{
         classNames: {
           toast:

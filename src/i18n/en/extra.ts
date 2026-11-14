@@ -1054,4 +1054,15 @@ export const extra: Record<string, string> = {
   "Escríbenos a admin@bovedamarket.app, consulta el canal oficial de Telegram o revisa los términos y la política de privacidad.": "Email us at admin@bovedamarket.app, check the official Telegram channel or review the terms and privacy policy.",
   "Guías": "Guides",
   "Leer la guía completa": "Read the full guide",
+  // Floating pill notifications and operation receipts
+  "Bóveda {v}": "{v} vault", "Cambio de moneda": "Currency swap", "Confirmando en la red…": "Confirming on the network…",
+  "Depósito confirmado": "Deposit confirmed", "El USDC está en tu billetera": "The USDC is in your wallet", "Fecha y hora": "Date and time",
+  "Firma aprobada": "Signature approved", "Ganancias cosechadas": "Earnings harvested", "Ganancias reinvertidas": "Earnings reinvested",
+  "Operación": "Operation", "Origen": "From", "Pagaste": "You paid", "Predicción confirmada": "Prediction confirmed",
+  "Premio cobrado": "Prize collected", "Reserva recargada": "Reserve refilled", "Retiro confirmado": "Withdrawal confirmed",
+  "Retiro del {p}% de bóveda": "{p}% vault withdrawal", "Retiro total de bóveda": "Full vault withdrawal",
+  "Se sumaron a tu posición": "Added to your position", "Te avisamos al cerrar la ronda": "We'll let you know when the round closes",
+  "Tu billetera": "Your wallet", "Tus USDC ya están en tu billetera": "Your USDC is now in your wallet",
+  "Tus dólares ya están rindiendo": "Your dollars are now earning", "Ya están en tu billetera": "They're now in your wallet",
+  "Ya puedes seguir operando": "You can keep going", "{v} USDC en tu billetera": "{v} USDC in your wallet", "Ver en billetera": "View in wallet",
 };

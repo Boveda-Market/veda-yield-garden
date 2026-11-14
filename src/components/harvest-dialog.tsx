@@ -12,6 +12,7 @@ import { simulateRealHarvest, prepareRealHarvest } from "@/lib/harvest.functions
 import type { HarvestResult } from "@/lib/harvest";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { ActionSuccess, ReceiveCard } from "@/components/action-success";
+import { notify } from "@/lib/notify";
 import { CompoundStep } from "@/components/compound-step";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 
@@ -51,11 +52,11 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
       let sig: string;
       try { sig = await session.signAndSend(Uint8Array.from(atob(next.prepared.transaction), (c) => c.charCodeAt(0))); }
       catch { setMessage(t("La wallet canceló o rechazó la solicitud. Si pudo enviarse, revisa su historial antes de reintentar.")); return; }
-      setSignature(sig); setStep(t("Esperando confirmación en la red…"));
+      setSignature(sig); notify("secure", t("Firma aprobada"), t("Confirmando en la red…")); setStep(t("Esperando confirmación en la red…"));
       for (let attempt = 0; attempt < 30; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó la transacción: no se aplicaron la cosecha ni la comisión; puede cobrarse el coste de red.")); return; }
-        if (status.status !== "pending") { setFinished(true); setMessage(t("Cosecha confirmada en la red. Tu posición sigue abierta.")); void reportAffiliate(sig, "harvest"); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", wallet] }); return; }
+        if (status.status !== "pending") { notify("success", t("Ganancias cosechadas"), t("Ya están en tu billetera")); setFinished(true); setMessage(t("Cosecha confirmada en la red. Tu posición sigue abierta.")); void reportAffiliate(sig, "harvest"); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", wallet] }); return; }
         await new Promise((resolve) => setTimeout(resolve, 2_000));
       }
       setMessage(t("Confirmación pendiente. Revisa Helius antes de reintentar."));
@@ -66,7 +67,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
   return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
     <DialogTitle>{compound ? t("Reinvertir ganancias ·") : t("Cosechar Ganancias ·")}{" "}{coin}</DialogTitle>
     <DialogDescription>{compound ? t("Dos pasos: primero cosechas tus ganancias y luego sumas los USDC y el otro token cosechados a esta misma posición. Firmas cada paso por separado.") : t("Recibe las ganancias acumuladas. Tu depósito sigue en la bóveda generando más.")}</DialogDescription>
-    {finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess title={t("¡Ganancias cosechadas!")} body={t("Las ganancias ya están en tu wallet y tu depósito sigue generando.")} signature={signature} onClose={onClose} />{compound && result?.netRaw && result.tokenRaw && <CompoundStep wallet={wallet} position={position} vaultId={vaultId} usdcRaw={result.netRaw} tokenRaw={result.tokenRaw} />}</> : <>
+    {finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess title={t("¡Ganancias cosechadas!")} amount={result?.net ? { value: result.net, unit: "USDC" } : undefined} details={[{ label: t("Operación"), value: t("Cosecha de ganancias") }, { label: t("Origen"), value: t("Bóveda {v}", { v: vaultId === "sol" ? "SOL" : "MET" }) }, { label: t("Destino"), value: t("Tu billetera") }]} body={t("Las ganancias ya están en tu wallet y tu depósito sigue generando.")} signature={signature} onClose={onClose} />{compound && result?.netRaw && result.tokenRaw && <CompoundStep wallet={wallet} position={position} vaultId={vaultId} usdcRaw={result.netRaw} tokenRaw={result.tokenRaw} />}</> : <>
     {!result?.success && <Button variant={result ? "outline" : "default"} disabled={pending} onClick={() => void run()}>{pending && !step ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <ReceiptText className="mr-2 h-4 w-4" />}{pending && !step ? t("Calculando tus ganancias…") : t("Revisar cosecha")}</Button>}
     {result && <div role="status" className="grid gap-3 text-sm">
       {!result.success && <><p className="font-semibold">{t("Cosecha no disponible")}</p><p className="leading-6 text-muted-foreground">{result.message}</p></>}
