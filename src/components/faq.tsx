@@ -120,10 +120,11 @@ export function Faq({ preview = false }: { preview?: boolean }) {
 }
 
 function Item({ q, t, open }: { q: Q; t: (s: string) => string; open?: boolean }) {
+  const guide = GUIDES[q.id];
   return <details id={`faq-${q.id}`} open={open || undefined} className="group border-b border-border">
     <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-display text-sm font-medium text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
       <span>{t(q.question)}</span><ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none" />
     </summary>
-    <div className="max-w-2xl pb-4 text-sm leading-7 text-muted-foreground">{t(q.answer)}{GUIDES[q.id] && <> <Link to={GUIDES[q.id]} className="text-primary underline">{t("Leer la guía completa")}</Link></>}</div>
+    <div className="max-w-2xl pb-4 text-sm leading-7 text-muted-foreground">{t(q.answer)}{guide && <> <Link to={guide} className="text-primary underline">{t("Leer la guía completa")}</Link></>}</div>
   </details>;
 }
