@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { isReturning } from "@/lib/preferences";
 import { EntryAccess } from "@/components/entry-access";
+import { PredictPromo } from "@/components/predict-promo";
 
 export const Route = createFileRoute("/")({ staticData: { sitemap: true },
   head: () => ({ meta: [
@@ -108,6 +109,10 @@ function Landing() {
         </div>
       </section>
 
+      <section aria-label={t("Sube y Baja")} className="mb-4 grid items-center gap-6 py-8 md:grid-cols-2">
+        <div className="text-center md:text-left"><p className="text-xs font-bold uppercase tracking-widest text-primary">{t("Sube y Baja")}</p><h2 className="mt-2 font-display text-3xl font-bold">{t("¿Sube o baja? Decide en un toque.")}</h2><p className="mt-3 text-muted-foreground">{t("Elige, confirma con tu huella y mira el resultado en minutos.")}</p></div>
+        <PredictPromo />
+      </section>
       <section id="opiniones" className="scroll-mt-4 py-12">
         <h2 className="font-display text-2xl font-bold">{t("Lo que dice la comunidad")}</h2>
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{REVIEWS.map(({ stars, name, text, photo, title, tag }) => <li key={name} className={`relative flex flex-col rounded-2xl border bg-card p-5 ${stars === 5 ? "border-primary/40 bg-gradient-to-br from-primary/10 to-card" : "border-border"}`}>
