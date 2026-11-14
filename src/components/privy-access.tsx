@@ -48,7 +48,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   });
   const walletAddress = wallets[0]?.address ?? null;
   const embedded = !!walletAddress && !!user?.linkedAccounts.some(a => a.type === "wallet" && a.address === walletAddress && (a.walletClientType === "privy" || a.walletClientType === "privy-v2"));
-  const policy = useQuery({ queryKey: ["wallet-policy"], queryFn: () => getWalletPolicy(), staleTime: 30_000, refetchInterval: 60_000 });
+  const policy = useQuery({ queryKey: ["wallet-policy"], queryFn: () => getWalletPolicy().catch(() => ({ blockExternal: false })), staleTime: 30_000, refetchInterval: 60_000 });
   const blockExternal = policy.data?.blockExternal ?? false;
   const tradeBlock: "external" | "treasury" | null = !walletAddress ? null : walletAddress === FEE_WALLET ? "treasury" : embedded || !blockExternal ? null : "external";
   // If Privy never reports ready (blocked iframe, shields, slow network), stop waiting after 4s so buttons and screens never freeze.
