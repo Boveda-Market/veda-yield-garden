@@ -29,8 +29,8 @@ export function TelegramPublishAdmin() {
   return <section className="mt-6 rounded-2xl border border-border bg-card p-5">
     <h2 className="font-display text-lg font-semibold">{t("Canal de Telegram")}</h2>
     <p className="mt-1 text-sm text-muted-foreground">{t("Publica las novedades del app en @bovedamarket.")}</p>
-    <ul className="mt-4 space-y-2">{ANNOUNCEMENTS.map((a) => <li key={a.id} className="flex items-center justify-between gap-3 rounded-xl border border-border p-3">
-      <div className="min-w-0"><p className="truncate text-sm font-medium">{a.title}</p><p className="text-xs text-muted-foreground">{a.date}{msg[a.id] ? ` · ${msg[a.id]}` : ""}</p></div>
+    <ul className="mt-4 space-y-2">{ANNOUNCEMENTS.map((a, i) => <li key={a.id} className={`flex items-center justify-between gap-3 rounded-xl border p-3 ${i === 0 ? "border-primary bg-primary/5" : "border-border"}`}>
+      <div className="min-w-0"><p className="truncate text-sm font-medium">{i === 0 && <span className="mr-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">{t("Nuevo")}</span>}{a.title}</p><p className="text-xs text-muted-foreground">{a.date}{msg[a.id] ? ` · ${msg[a.id]}` : ""}</p></div>
       <Button size="sm" variant="secondary" disabled={busy !== null} onClick={() => send(a.id)}><Send size={14} />{busy === a.id ? t("Enviando…") : t("Publicar")}</Button>
     </li>)}</ul>
   </section>;
