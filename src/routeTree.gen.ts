@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActividadRouteImport } from './routes/actividad'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as CuentaRouteImport } from './routes/cuenta'
 import { Route as FaqRouteImport } from './routes/faq'
@@ -39,6 +40,11 @@ const IndexRoute = IndexRouteImport.update({
 const ActividadRoute = ActividadRouteImport.update({
   id: '/actividad',
   path: '/actividad',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -143,6 +149,7 @@ const LovableEmailTransactionalPreviewRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/actividad': typeof ActividadRoute
+  '/admin': typeof AdminRoute
   '/app': typeof AppRoute
   '/cuenta': typeof CuentaRoute
   '/faq': typeof FaqRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/actividad': typeof ActividadRoute
+  '/admin': typeof AdminRoute
   '/app': typeof AppRoute
   '/cuenta': typeof CuentaRoute
   '/faq': typeof FaqRoute
@@ -190,6 +198,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/actividad': typeof ActividadRoute
+  '/admin': typeof AdminRoute
   '/app': typeof AppRoute
   '/cuenta': typeof CuentaRoute
   '/faq': typeof FaqRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/actividad'
+    | '/admin'
     | '/app'
     | '/cuenta'
     | '/faq'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/actividad'
+    | '/admin'
     | '/app'
     | '/cuenta'
     | '/faq'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/actividad'
+    | '/admin'
     | '/app'
     | '/cuenta'
     | '/faq'
@@ -285,6 +297,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActividadRoute: typeof ActividadRoute
+  AdminRoute: typeof AdminRoute
   AppRoute: typeof AppRoute
   CuentaRoute: typeof CuentaRoute
   FaqRoute: typeof FaqRoute
@@ -320,6 +333,13 @@ declare module '@tanstack/react-router' {
       path: '/actividad'
       fullPath: '/actividad'
       preLoaderRoute: typeof ActividadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -461,6 +481,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActividadRoute: ActividadRoute,
+  AdminRoute: AdminRoute,
   AppRoute: AppRoute,
   CuentaRoute: CuentaRoute,
   FaqRoute: FaqRoute,

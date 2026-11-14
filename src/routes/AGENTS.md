@@ -1,1 +1,2 @@
 - Every route sets staticData.sitemap (router-derived /sitemap.xml via src/lib/sitemap.ts): true only for public marketing/legal/trial pages, false for signed-in app views, so private screens never reach search.
+- Operator tools live only in the /admin Control Panel (admin-dashboard.tsx, tabbed, FEE_WALLET-gated client-side; each tool still re-verifies payoutAdmin server-side); /invita stays user-only with a link for the operator.

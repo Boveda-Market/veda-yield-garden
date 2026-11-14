@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { AppExperience } from "@/components/app-experience";
+export const Route = createFileRoute("/admin")({ staticData: { sitemap: false }, head: () => ({ meta: [{ title: "Panel de Control — BÓVEDA" }, { name: "description", content: "Panel privado del operador de BÓVEDA." }, { name: "robots", content: "noindex, nofollow" }, { property: "og:title", content: "Panel de Control — BÓVEDA" }, { property: "og:description", content: "Panel privado del operador de BÓVEDA." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: () => <AppExperience view="admin" /> });

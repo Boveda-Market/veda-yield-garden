@@ -19,7 +19,7 @@ import { SuggestionBox } from "./suggestion-box";
 import { StatusDot, useSystemState } from "./system-status";
 import { Activity } from "lucide-react";
 
-export type AppView = "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets";
+export type AppView = "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets" | "admin";
 
 const MAIN = [
   { key: "vaults", label: "Bóvedas", icon: LayoutDashboard, to: "/app" },
@@ -72,7 +72,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
             <button type="button" className={row} onClick={() => go("invite")}><Gift size={18} />{t("Invita y gana")}</button>
             <button type="button" className={row} onClick={() => go("account")}><UserRound size={18} />{t("Mi cuenta")}</button>
           </> : <>
-            {operator && <Link to="/invita" hash="tesoreria" className={`${row} border border-primary/40 bg-primary/10 font-semibold text-primary`} onClick={() => setOpen(false)}><ShieldCheck size={18} />{t("Panel de Tesorería")}</Link>}
+            {operator && <Link to="/admin" className={`${row} border border-primary/40 bg-primary/10 font-semibold text-primary`} onClick={() => setOpen(false)}><ShieldCheck size={18} />{t("Panel de Control")}</Link>}
             <Link to="/wallet" className={row} onClick={() => setOpen(false)}><Home size={18} />{t("Inicio")}</Link>
             <Link to="/portfolio" className={row} onClick={() => setOpen(false)}><PieChart size={18} />{t("Ganancias")}</Link>
             <Link to="/notificaciones" className={row} onClick={() => setOpen(false)}><Bell size={18} />{t("Notificaciones")}</Link>
