@@ -19,7 +19,7 @@ export function PredictPromo() {
     const id = setInterval(() => setI((n) => (n + 1) % SCENES.length), 5000);
     return () => clearInterval(id);
   }, []);
-  const s = SCENES[i];
+  const s = SCENES[i] ?? SCENES[0]!;
   const pickUp = s.pick === "up";
   return (
     <div key={i} className="pp relative mx-auto w-full max-w-xs overflow-hidden rounded-[2rem] border border-border bg-card p-4 shadow-xl" aria-hidden="true">
