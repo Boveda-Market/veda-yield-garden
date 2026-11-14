@@ -71,7 +71,12 @@ export function fundingAction(solLamports: bigint): "usdc" | "starter" {
 export const PAYOUT_MOVE_MIN_USD = 0.5;
 /** Smallest SOL excess (USD) above the network reserve offered for one-tap "Move to available". */
 export const SOL_EXCESS_MOVE_MIN_USD = 2;
-/** Lamports above the network reserve (MIN_SOL_LAMPORTS) that can move to available dollars; never touches the reserve. */
-export function solExcessLamports(balance: bigint): bigint {
-  return balance > MIN_SOL_LAMPORTS ? balance - MIN_SOL_LAMPORTS : 0n;
+/** Dynamic SOL reserve: 0.03 base + 0.01 per open vault (capped at 2) so users can always open more vaults. */
+export function solReserveLamports(openVaults: number): bigint {
+  return 30_000_000n + 10_000_000n * BigInt(Math.min(Math.max(0, Math.floor(openVaults)), 2));
+}
+/** Lamports above the dynamic network reserve that can move to available dollars; never touches the reserve. */
+export function solExcessLamports(balance: bigint, openVaults = 0): bigint {
+  const r = solReserveLamports(openVaults);
+  return balance > r ? balance - r : 0n;
 }
