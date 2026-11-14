@@ -858,7 +858,7 @@ export const extra: Record<string, string> = {
   "Movemos tu capital y ganancias sin comisión de BÓVEDA al salir ni al depositar. Tú firmas cada paso.": "We move your capital and earnings with no BÓVEDA fee on exit or deposit. You sign every step.",
   "Migrar a {v} gratis": "Move to {v} for free",
   "Todo siempre bajo tu control. $0 para entrar, retira en cualquier momento. Garantizado.": "Always in your control. $0 to start, withdraw anytime. Guaranteed.",
-  "BÓVEDA  es una interfaz segura, protegida contra hackers, donde solo tú apruebas cada movimiento con tu huella o Face ID.": "Your money, your rules. BÓVEDA shields your capital with cryptographic security: no one can freeze your funds, and every cent moves only with your fingerprint or Face ID.",
+  "Tu dinero, tus reglas. BÓVEDA blinda tu capital con seguridad criptográfica: nadie puede congelar tus fondos y cada centavo se mueve únicamente con tu huella o Face ID.": "Your money, your rules. BÓVEDA shields your capital with cryptographic security: no one can freeze your funds, and every cent moves only with your fingerprint or Face ID.",
   "Envía sugerencias, críticas o tu reseña. Leemos cada mensaje para mejorar BÓVEDA.": "Send suggestions, critiques or your review. We read every message to improve BÓVEDA.",
   "Depósito o compra de USDC": "USDC deposit or purchase",
   "Retiro o envío de fondos": "Withdrawal or sending funds",
