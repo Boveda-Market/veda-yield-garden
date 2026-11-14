@@ -149,12 +149,19 @@ function LiveLine({ points, sec, reference, referenceLabel }: { points: number[]
         <defs><linearGradient id="pc-grad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="currentColor" stopOpacity="0.35" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient></defs>
         <path d={`${d} L${end[0]},${H} L${first[0]},${H} Z`} fill="url(#pc-grad)" />
         <path d={d} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-        {refY !== null && <line x1="0" x2={W} y1={refY} y2={refY} className="text-muted-foreground" stroke="currentColor" strokeDasharray="4 3" strokeWidth="1" vectorEffect="non-scaling-stroke" />}
+        {refY !== null && <line x1="0" x2={W} y1={refY} y2={refY} className="text-chart-4" stroke="currentColor" strokeDasharray="6 3" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}
+        <line x1="0" x2={W} y1={end[1]} y2={end[1]} stroke="currentColor" strokeOpacity="0.35" strokeDasharray="2 3" strokeWidth="1" vectorEffect="non-scaling-stroke" />
       </svg>
+      {(() => { const hi = Math.max(...visible), lo = Math.min(...visible); return <>
+        <span className="pointer-events-none absolute left-1 top-0.5 font-mono text-[9px] tabular-nums text-muted-foreground">H {fmt(hi)}</span>
+        <span className="pointer-events-none absolute bottom-0.5 left-1 font-mono text-[9px] tabular-nums text-muted-foreground">L {fmt(lo)}</span>
+      </>; })()}
+      {reference && refY !== null && <span className="pointer-events-none absolute right-1 -translate-y-1/2 rounded-sm bg-chart-4 px-1 py-0.5 text-[9px] font-semibold tabular-nums text-background" style={{ top: `${(refY / H) * 100}%` }}>{fmt(reference)}</span>}
+      {reference && <span className={`pointer-events-none absolute right-4 -translate-y-[130%] rounded-sm px-1 py-0.5 text-[10px] font-bold tabular-nums ${upL ? "bg-primary text-primary-foreground" : "bg-destructive text-destructive-foreground"}`} style={{ top: `${(end[1] / H) * 100}%` }}>{head >= reference ? "▲ +" : "▼ -"}${fmt(Math.abs(head - reference))}</span>}
       <span className={`pointer-events-none absolute right-0 h-2.5 w-2.5 -translate-y-1/2 translate-x-1/2 rounded-full ${upL ? "bg-primary" : "bg-destructive"}`} style={{ top: `${(end[1] / H) * 100}%`, right: "4px" }}>
         <span className={`absolute inset-0 animate-ping rounded-full ${upL ? "bg-primary" : "bg-destructive"} opacity-60`} />
       </span>
-      {reference && refY !== null && <div className="pointer-events-none absolute left-1 -translate-y-1/2 rounded bg-secondary px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-secondary-foreground" style={{ top: `${(refY / H) * 100}%` }}>{referenceLabel} ${fmt(reference)}</div>}
+      {reference && refY !== null && <div className="pointer-events-none absolute left-1 -translate-y-1/2 rounded bg-chart-4 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-background" style={{ top: `${(refY / H) * 100}%` }}>🎯 {referenceLabel}</div>}
       {hv !== undefined && <>
         <div className="pointer-events-none absolute inset-y-0 w-px bg-foreground/40" style={{ left: `${hx}%` }} />
         <div className="pointer-events-none absolute -top-2 rounded-md bg-foreground px-2 py-0.5 text-xs font-semibold tabular-nums text-background" style={{ left: `clamp(0px, calc(${hx}% - 40px), calc(100% - 90px))` }}>${fmt(hv)}</div>
@@ -182,6 +189,10 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
   const bodyW = Math.max(2, step * 0.62);
   const last = candles[n - 1]!;
   const refY = reference ? y(reference) : null;
+  const ema: number[] = []; const kE = 2 / (9 + 1);
+  candles.forEach((c, i) => ema.push(i ? c.c * kE + ema[i - 1]! * (1 - kE) : c.c));
+  const emaD = ema.map((v, i) => `${i ? "L" : "M"}${cx(i)},${y(v)}`).join(" ");
+  const hiI = candles.reduce((b, c, i) => (c.h > candles[b]!.h ? i : b), 0), loI = candles.reduce((b, c, i) => (c.l < candles[b]!.l ? i : b), 0);
   const grid = [0.1, 0.3, 0.5, 0.7, 0.9].map((f) => max - f * span);
   const timeIdx = [...new Set(Array.from({ length: 7 }, (_, k) => Math.round(((n - 1) * k) / 6)))];
 
@@ -226,14 +237,18 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
             </g>;
           })}
           <line x1="0" x2={PW} y1={y(last.c)} y2={y(last.c)} className={last.c >= last.o ? "text-primary" : "text-destructive"} stroke="currentColor" strokeDasharray="2 2" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-          {refY !== null && <line x1="0" x2={PW} y1={refY} y2={refY} className="text-muted-foreground" stroke="currentColor" strokeDasharray="4 3" strokeWidth="1" vectorEffect="non-scaling-stroke" />}
+          <path d={emaD} fill="none" className="text-chart-2" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.9" vectorEffect="non-scaling-stroke" />
+          {refY !== null && <line x1="0" x2={PW} y1={refY} y2={refY} className="text-chart-4" stroke="currentColor" strokeDasharray="6 3" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}
         </svg>
         {grid.map((g) => <span key={g} className="pointer-events-none absolute right-1 -translate-y-1/2 text-[9px] tabular-nums text-muted-foreground" style={{ top: pct(g) }}>{fmt(g)}</span>)}
         {reference && refY !== null && <>
-          <div className="pointer-events-none absolute left-1 -translate-y-1/2 rounded bg-secondary px-1.5 py-0.5 text-[10px] font-semibold text-secondary-foreground" style={{ top: pct(reference) }}>{referenceLabel}</div>
-          <span className={`${tag} bg-muted-foreground text-background`} style={{ top: pct(reference) }}>{fmt(reference)}</span>
+          <div className="pointer-events-none absolute left-1 -translate-y-1/2 rounded bg-chart-4 px-1.5 py-0.5 text-[10px] font-semibold text-background" style={{ top: pct(reference) }}>🎯 {referenceLabel}</div>
+          <span className={`${tag} bg-chart-4 text-background`} style={{ top: pct(reference) }}>{fmt(reference)}</span>
         </>}
         <span className={`${tag} ${last.c >= last.o ? "bg-primary text-primary-foreground" : "bg-destructive text-destructive-foreground"}`} style={{ top: pct(last.c) }}>{fmt(last.c)}</span>
+        <span className="pointer-events-none absolute -translate-x-1/2 -translate-y-full font-mono text-[9px] tabular-nums text-muted-foreground" style={{ left: `${(cx(hiI) / W) * 100}%`, top: pct(candles[hiI]!.h) }}>H {fmt(candles[hiI]!.h)}</span>
+        <span className="pointer-events-none absolute -translate-x-1/2 font-mono text-[9px] tabular-nums text-muted-foreground" style={{ left: `${(cx(loI) / W) * 100}%`, top: pct(candles[loI]!.l) }}>L {fmt(candles[loI]!.l)}</span>
+        <span className="pointer-events-none absolute left-1 top-1 flex items-center gap-1 text-[9px] font-semibold text-chart-2"><span className="h-0.5 w-3 rounded bg-chart-2" />EMA 9 {fmt(hc ? ema[hover!]! : ema[n - 1]!)}</span>
         {hc && hy !== null && <>
           <div className="pointer-events-none absolute inset-y-0 border-l border-dashed border-foreground/50" style={{ left: `${(cx(hover!) / W) * 100}%` }} />
           <div className="pointer-events-none absolute inset-x-0 border-t border-dashed border-foreground/50" style={{ top: `${hy * 100}%` }} />
