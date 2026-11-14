@@ -72,10 +72,9 @@ export function AffiliatePayoutsAdmin() {
         <div className="rounded-xl border border-primary/50 bg-card p-3"><dt className="text-xs text-muted-foreground">{t("Profit disponible")}</dt><dd className="font-semibold text-primary">{balance === null ? "—" : usdc(balance > BigInt(pendingAll) ? balance - BigInt(pendingAll) : 0n)} USDC</dd></div>
         <div className="rounded-xl border border-border bg-card p-3"><dt className="text-xs text-muted-foreground">{t("Listo para cobrar (≥10)")}</dt><dd className="font-semibold">{usdc(total)} USDC</dd></div>
         <div className="rounded-xl border border-border bg-card p-3"><dt className="text-xs text-muted-foreground">{t("Pagado a afiliados")}</dt><dd className="font-semibold">{usdc(paid)} USDC</dd></div>
-        <div className="rounded-xl border border-border bg-card p-3"><dt className="text-xs text-muted-foreground">{t("SOL para red")}</dt><dd className={`font-semibold ${sol !== null && sol < 20_000_000n ? "text-destructive" : ""}`}>{sol === null ? "—" : (Number(sol) / 1e9).toFixed(4)} SOL</dd></div>
+        <div className="rounded-xl border border-border bg-card p-3"><dt className="text-xs text-muted-foreground">{t("SOL para red")}</dt><dd className={`font-semibold ${sol !== null && sol < 3_000_000n ? "text-destructive" : ""}`}>{sol === null ? "—" : (Number(sol) / 1e9).toFixed(4)} SOL</dd></div>
       </dl>
       <p className="mt-2 text-xs text-muted-foreground">{t("Profit disponible = saldo USDC menos lo reservado para afiliados. Puedes retirarlo sin dejar a nadie sin cobrar.")}</p>
-      {sol !== null && sol < 20_000_000n && <p className="mt-2 text-xs text-destructive">{t("Añade al menos 0.05 SOL para que los cobros automáticos no fallen.")}</p>}
       {balance !== null && balance < BigInt(pendingAll) && <p className="mt-2 text-xs text-destructive">{t("El saldo USDC no cubre todo lo reservado para afiliados.")}</p>}
       {due.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">{t("No hay afiliados con 10 USDC o más pendientes.")}</p> :
         <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-card">{due.map((d) => <li key={d.affiliate} className="flex items-center gap-3 px-3 py-3 text-sm">

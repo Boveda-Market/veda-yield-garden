@@ -1,6 +1,6 @@
 /** Treasury SOL reserve thresholds: below LOW, sponsored account activations fail; alert clears at RESTORED. */
-export const TREASURY_SOL_LOW = 50_000_000n; // 0.05 SOL
-export const TREASURY_SOL_RESTORED = 100_000_000n; // 0.10 SOL
+export const TREASURY_SOL_LOW = 3_000_000n; // 0.003 SOL
+export const TREASURY_SOL_RESTORED = 6_000_000n; // 0.006 SOL
 
 /** Decides the operator alert transition given the previous alerted flag. */
 export function treasuryReserveAlert(lamports: bigint, alerted: boolean): "low" | "restored" | null {

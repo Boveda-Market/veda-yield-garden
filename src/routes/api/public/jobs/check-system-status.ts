@@ -78,7 +78,7 @@ export const Route = createFileRoute("/api/public/jobs/check-system-status")({
             const prev = rows.get("treasury_sol");
             const a = treasuryReserveAlert(lamports, !!prev?.operator_alerted);
             const sol = (Number(lamports) / 1e9).toFixed(4);
-            if (a === "low") await tg.treasuryAlert(`⛽ <b>Reserva de red de la tesorería baja</b>\nSaldo: ${sol} SOL\nLas activaciones automáticas de cuentas nuevas fallarán hasta recargarla (recomendado 0.2–0.5 SOL).\n<code>${FEE_WALLET}</code>`);
+            if (a === "low") await tg.treasuryAlert(`⛽ <b>Reserva de red de la tesorería baja</b>\nSaldo: ${sol} SOL\nLas activaciones automáticas de cuentas nuevas fallarán hasta recargarla.\n<code>${FEE_WALLET}</code>`);
             if (a === "restored") await tg.treasuryAlert(`🟢 <b>Reserva de tesorería restablecida</b>\nSaldo: ${sol} SOL`);
             if (a) await db.from("system_service_status").upsert({ service: "treasury_sol", first_down_at: a === "low" ? new Date(now).toISOString() : null, operator_alerted: a === "low", public_alerted: false, updated_at: new Date(now).toISOString() }, { onConflict: "service" });
           }
