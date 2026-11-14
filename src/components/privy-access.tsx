@@ -1,6 +1,6 @@
 import { CARD_MIN_USD, GAS_TOP_UP_SOL } from "@/lib/onboarding";
 import { useT } from "@/lib/i18n";
-import "@/lib/buffer-polyfill";
+import { installBufferPolyfill } from "@/lib/buffer-polyfill";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { setPrivyTokenGetter } from "@/lib/privy-token";
 import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useMfaEnrollment, usePrivy } from "@privy-io/react-auth";
@@ -136,6 +136,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
     signMessage: async (message) => {
       const wallet = wallets[0];
       if (!authenticated || !wallet) throw new Error(t("Conecta una wallet de Solana"));
+      installBufferPolyfill();
       const { signature } = await signWalletMessage({ message: new TextEncoder().encode(message), wallet });
       return bs58.encode(signature);
     },

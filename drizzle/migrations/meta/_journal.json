@@ -120,6 +120,13 @@
       "when": 1794590022760,
       "tag": "0016_telegram_links_wallet",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794615458689,
+      "tag": "0017_widen_profile_avatar_ids",
+      "breakpoints": true
     }
   ]
 }

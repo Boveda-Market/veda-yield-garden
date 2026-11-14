@@ -1,0 +1,2 @@
+ALTER TABLE public.account_profiles DROP CONSTRAINT IF EXISTS profile_avatar;
+ALTER TABLE public.account_profiles ADD CONSTRAINT profile_avatar CHECK (avatar IN ('leaf', 'sun', 'gem', 'waves', 'vault', 'shield', 'zap', 'flame', 'star', 'diamond', 'crown'));
