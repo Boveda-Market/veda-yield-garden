@@ -52,7 +52,7 @@ export function PriceChart({ market, points, price, reference, referenceLabel }:
   );
 
   if (style === "duel") {
-    return <>{controls}<DuelLine points={points} price={price} reference={reference} /></>;
+    return <>{controls}<DuelLine points={points} reference={reference} /></>;
   }
   if (style === "line") {
     return <>{controls}<LiveLine points={points} sec={60} reference={reference} referenceLabel={referenceLabel} /></>;
@@ -301,37 +301,89 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
   );
 }
 
-/** Sube vs Baja duel: two mirrored lines showing who leads against the strike (visual lead, not a market probability). */
-function DuelLine({ points, price, reference }: { points: number[]; price?: number | undefined; reference?: number | undefined }) {
+/** Sube vs Baja duel: two mirrored lines showing who leads against the strike (visual lead, not a market probability).
+ * Animated like LiveLine: eased head between ticks, sliding time axis and an adaptive scale so small moves stay visible. */
+function DuelLine({ points, reference }: { points: number[]; reference?: number | undefined }) {
   const t = useT();
-  const pts = points.slice(-60);
-  if (!reference || pts.length < 2) return <div className="flex h-36 items-center justify-center text-xs text-muted-foreground">{t("Esperando el precio a batir…")}</div>;
-  // Lead in [-1, 1]: tanh of the distance to the strike, scaled to the recent price range.
-  const range = Math.max(...pts, reference) - Math.min(...pts, reference) || reference * 0.0005;
-  const lead = (v: number) => Math.tanh(((v - reference) / range) * 2.5);
-  const n = pts.length;
-  const x = (i: number) => (i / (n - 1)) * W;
+  const [, setFrame] = useState(0);
+  const tick = useRef({ at: 0, from: 0, to: 0, len: 0 });
+  const scale = useRef<number | null>(null);
+
+  const last = points[points.length - 1];
+  if (last !== undefined && points.length !== tick.current.len) {
+    const now = typeof performance !== "undefined" ? performance.now() : 0;
+    const k = tick.current;
+    const p = k.at ? ease(Math.min(1, (now - k.at) / TICK_MS)) : 1;
+    const shown = k.len ? k.from + (k.to - k.from) * p : last;
+    tick.current = { at: now, from: shown, to: last, len: points.length };
+  }
+
+  useEffect(() => {
+    let id = 0;
+    const loop = () => { setFrame((f) => (f + 1) % 1e6); id = requestAnimationFrame(loop); };
+    id = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  const span = 60_000;
+  const need = Math.ceil(span / TICK_MS) + 3;
+  const pts = points.slice(-need);
+  if (!reference || pts.length < 2 || !tick.current.at) return <div className="flex h-44 items-center justify-center text-xs text-muted-foreground">{t("Esperando el precio a batir…")}</div>;
+
+  const now = performance.now();
+  const k = tick.current;
+  const head = k.from + (k.to - k.from) * ease(Math.min(1, (now - k.at) / TICK_MS));
+  const elapsed = Math.min(now - k.at, TICK_MS);
+  const vals = pts.map((v, i) => (i === pts.length - 1 ? head : v));
+  const ages = pts.map((_, i) => (pts.length - 1 - i) * TICK_MS + (i === pts.length - 1 ? 0 : elapsed - TICK_MS));
+  const visible = vals.filter((_, i) => ages[i]! <= span + TICK_MS);
+
+  // Adaptive scale: the largest recent distance to the strike fills most of the height, so every tick shows.
+  const dev = Math.max(...visible.map((v) => Math.abs(v - reference))) || reference * 0.0002;
+  let sc = scale.current ?? dev;
+  sc += (dev - sc) * 0.08;
+  sc = Math.max(sc, dev * 0.85);
+  scale.current = sc;
+  const lead = (v: number) => Math.tanh(((v - reference) / sc) * 1.8);
+
+  const toX = (age: number) => W - (age / span) * W;
   const y = (share: number) => PAD + (1 - share) * (H - PAD * 2);
-  const up: [number, number][] = pts.map((v, i) => [x(i), y(0.5 + lead(v) * 0.45)]);
-  const down: [number, number][] = pts.map((v, i) => [x(i), y(0.5 - lead(v) * 0.45)]);
-  const now = lead(price ?? pts[n - 1]!);
-  const upPct = Math.round(50 + now * 45), downPct = 100 - upPct;
-  const upWins = now >= 0;
-  const eu = up[n - 1]!, ed = down[n - 1]!;
+  const up: [number, number][] = vals.map((v, i) => [toX(ages[i]!), y(0.5 + lead(v) * 0.47)]);
+  const down: [number, number][] = vals.map((v, i) => [toX(ages[i]!), y(0.5 - lead(v) * 0.47)]);
+  const dUp = smoothPath(up), dDown = smoothPath(down);
+  const eu = up[up.length - 1]!, ed = down[down.length - 1]!, fu = up[0]!;
+  const nowLead = lead(head);
+  const upPct = Math.round(50 + nowLead * 47), downPct = 100 - upPct;
+  const upWins = nowLead >= 0;
+  const mid = H / 2;
+
   return (
     <div className="relative overflow-hidden px-1">
       <div className="flex items-center justify-between px-3 pb-1 text-xs font-bold">
-        <span className={upWins ? "text-primary" : "text-muted-foreground"}>▲ {t("Sube")} {upPct}%</span>
-        <span className="text-[10px] font-semibold text-muted-foreground">{upWins ? t("Va ganando Sube") : t("Va ganando Baja")}</span>
-        <span className={!upWins ? "text-destructive" : "text-muted-foreground"}>{t("Baja")} {downPct}% ▼</span>
+        <span className={`tabular-nums transition-colors ${upWins ? "text-primary" : "text-muted-foreground"}`}>▲ {t("Sube")} {upPct}%</span>
+        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold transition-colors ${upWins ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{upWins ? t("Va ganando Sube") : t("Va ganando Baja")}</span>
+        <span className={`tabular-nums transition-colors ${!upWins ? "text-destructive" : "text-muted-foreground"}`}>{t("Baja")} {downPct}% ▼</span>
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="h-36 w-full" aria-label={upWins ? t("Va ganando Sube") : t("Va ganando Baja")}>
-        <line x1="0" x2={W} y1={H / 2} y2={H / 2} className="text-muted-foreground" stroke="currentColor" strokeOpacity="0.4" strokeDasharray="4 4" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-        <path d={smoothPath(down)} fill="none" className="text-destructive" stroke="currentColor" strokeWidth={upWins ? 2 : 3} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-        <path d={smoothPath(up)} fill="none" className="text-primary" stroke="currentColor" strokeWidth={upWins ? 3 : 2} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-      </svg>
-      <span className="pointer-events-none absolute h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-primary" style={{ right: "4px", top: `calc(1.5rem + ${(eu[1] / H) * 9}rem)` }} />
-      <span className="pointer-events-none absolute h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-destructive" style={{ right: "4px", top: `calc(1.5rem + ${(ed[1] / H) * 9}rem)` }} />
+      <div className="relative">
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="h-40 w-full" aria-label={upWins ? t("Va ganando Sube") : t("Va ganando Baja")}>
+          <defs>
+            <linearGradient id="duel-up" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="currentColor" stopOpacity="0.3" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient>
+            <linearGradient id="duel-down" x1="0" x2="0" y1="1" y2="0"><stop offset="0%" stopColor="currentColor" stopOpacity="0.3" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient>
+          </defs>
+          <rect x="0" y="0" width={W} height={mid} className="fill-primary" opacity="0.04" />
+          <rect x="0" y={mid} width={W} height={mid} className="fill-destructive" opacity="0.04" />
+          <path d={`${dUp} L${eu[0]},${mid} L${fu[0]},${mid} Z`} className="text-primary" fill="url(#duel-up)" />
+          <path d={`${dDown} L${ed[0]},${mid} L${down[0]![0]},${mid} Z`} className="text-destructive" fill="url(#duel-down)" />
+          <line x1="0" x2={W} y1={mid} y2={mid} className="text-muted-foreground" stroke="currentColor" strokeOpacity="0.5" strokeDasharray="4 4" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+          <path d={dDown} fill="none" className="text-destructive" stroke="currentColor" strokeWidth={upWins ? 2 : 3} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+          <path d={dUp} fill="none" className="text-primary" stroke="currentColor" strokeWidth={upWins ? 3 : 2} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        </svg>
+        {([[eu, "bg-primary", upWins], [ed, "bg-destructive", !upWins]] as const).map(([e, bg, lead], i) => (
+          <span key={i} className={`pointer-events-none absolute h-2.5 w-2.5 -translate-y-1/2 translate-x-1/2 rounded-full ${bg}`} style={{ top: `${(e[1] / H) * 100}%`, right: "4px" }}>
+            {lead && <span className={`absolute inset-0 animate-ping rounded-full ${bg} opacity-60`} />}
+          </span>
+        ))}
+      </div>
       <p className="px-3 pt-1 text-center text-[10px] text-muted-foreground">{t("Verde arriba: gana Sube. Roja arriba: gana Baja. Según el precio actual frente al precio a batir.")}</p>
     </div>
   );
