@@ -22,7 +22,7 @@ export const Route = createFileRoute("/")({ staticData: { sitemap: true },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
     { property: "og:url", content: "https://bovedamarket.app/" },
   ], links: [{ rel: "canonical", href: "https://bovedamarket.app/" }],
-  scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"BÓVEDA","url":"https://bovedamarket.app/","logo":"https://bovedamarket.app/favicon.ico","email":"admin@bovedamarket.app"},{"@type":"WebApplication","name":"BÓVEDA","url":"https://bovedamarket.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"es","description":"Guarda dólares digitales (USDC), genera rendimiento y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Prueba gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}]}) }] }), component: Landing,
+  scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"BÓVEDA","url":"https://bovedamarket.app/","logo":"https://bovedamarket.app/favicon.png","email":"admin@bovedamarket.app"},{"@type":"WebApplication","name":"BÓVEDA","url":"https://bovedamarket.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"es","description":"Guarda dólares digitales (USDC), genera rendimiento y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Prueba gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}]}) }] }), component: Landing,
 });
 
 const FAQS = [
