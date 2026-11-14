@@ -706,6 +706,7 @@ export const extra: Record<string, string> = {
   "Elige cómo quieres añadir dólares a tu cuenta": "Choose how you want to add dollars to your account",
   "Recomendado": "Recommended",
   "¿Cómo quieres pagar?": "How do you want to pay?",
+  "Compra directa de USDC (1 USDC ≈ $1). El monto se escribe en dólares.": "Direct USDC purchase (1 USDC ≈ $1). Enter the amount in dollars.",
   "Saldo de Coinbase, banco o tarjeta. Comisiones más bajas.": "Coinbase balance, bank or card. Lowest fees.",
   "Tarjeta / Apple Pay": "Card / Apple Pay",
   "Compra al instante con tarjeta, Apple Pay o Google Pay.": "Buy instantly with card, Apple Pay or Google Pay.",

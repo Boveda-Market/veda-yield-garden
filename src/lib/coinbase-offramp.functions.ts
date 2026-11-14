@@ -30,7 +30,7 @@ export const coinbaseSellStatus = createServerFn({ method: "POST" })
 
 export const startCoinbaseBuy = createServerFn({ method: "POST" })
   .middleware([requirePrivyAuth])
-  .inputValidator((d) => z.object({ wallet: solanaAddressSchema, asset: z.enum(["USDC", "SOL"]), origin: z.string().url() }).parse(d))
+  .inputValidator((d) => z.object({ wallet: solanaAddressSchema, asset: z.literal("USDC"), origin: z.string().url() }).parse(d))
   .handler(async ({ data }) => {
     try {
       const { coinbaseBuyUrl } = await import("@/lib/coinbase-offramp.server");

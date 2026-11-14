@@ -56,11 +56,11 @@ export async function coinbasePendingSell(privyUserId: string) {
 }
 
 /** Coinbase Onramp: buy USDC or native SOL straight into the user's own wallet. */
-export async function coinbaseBuyUrl(wallet: string, asset: "USDC" | "SOL", clientIp: string | undefined, redirectUrl: string) {
+export async function coinbaseBuyUrl(wallet: string, asset: "USDC", clientIp: string | undefined, redirectUrl: string) {
   const r = await cdp("POST", "/onramp/v1/token", { addresses: [{ address: wallet, blockchains: ["solana"] }], assets: [asset], ...(clientIp ? { clientIp } : {}) });
   const token = r.token ?? r.data?.token;
   if (typeof token !== "string") throw new Error("Coinbase no respondió. Inténtalo de nuevo.");
-  const q = new URLSearchParams({ sessionToken: token, defaultAsset: asset, defaultNetwork: "solana", redirectUrl });
-  if (asset === "USDC") q.set("presetFiatAmount", "50");
+  // Always priced in US dollars so a typed "10" means $10, never 10 tokens.
+  const q = new URLSearchParams({ sessionToken: token, defaultAsset: asset, defaultNetwork: "solana", defaultExperience: "buy", fiatCurrency: "USD", presetFiatAmount: "50", redirectUrl });
   return `https://pay.coinbase.com/buy/select-asset?${q}`;
 }

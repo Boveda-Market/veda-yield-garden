@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
-import { decimalToUnits, fundingAction } from "@/lib/onboarding";
+import { decimalToUnits } from "@/lib/onboarding";
 import { holdSessionForExternalFlow } from "@/components/idle-logout";
 import { coinbaseOnrampStatus, recordCoinbaseOnramp, startCoinbaseBuy } from "@/lib/coinbase-offramp.functions";
 
@@ -48,12 +48,11 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
     const release = provider === "coinbase" ? holdSessionForExternalFlow() : () => {};
     try {
       const before = await balances();
-      const starter = fundingAction(before.sol) === "starter";
       if (provider === "coinbase") {
-        const r = await cbBuy({ data: { wallet: address!, asset: starter ? "SOL" : "USDC", origin: window.location.origin } });
+        // Always USDC in US dollars (never SOL); the network reserve refills from USDC.
+        const r = await cbBuy({ data: { wallet: address!, asset: "USDC", origin: window.location.origin } });
         if (!r.success) { tab?.close(); throw new Error(r.error); }
         if (tab) tab.location.href = r.url; else window.location.href = r.url;
-        if (starter) return;
       } else {
         // Card purchases are always USDC priced in US dollars, so a typed "10" can never mean 10 SOL; the network reserve refills from USDC.
         if (!session.buyUsdc) throw new Error("Pago con tarjeta no disponible");
@@ -82,7 +81,7 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
         <button type="button" onClick={() => void pay("coinbase")} className="flex items-start gap-3 rounded-xl border border-primary/50 bg-primary/10 p-4 text-left transition-colors hover:bg-primary/20">
           <img src="/brands/coinbase.svg" alt="" width={32} height={32} className="h-8 w-8 rounded-md" />
           <span><span className="block font-semibold">Coinbase </span>
-          <span className="text-xs text-muted-foreground">{t("Saldo de Coinbase, banco o tarjeta. Comisiones más bajas.")}</span></span>
+          <span className="text-xs text-muted-foreground">{t("Compra directa de USDC (1 USDC ≈ $1). El monto se escribe en dólares.")}</span></span>
         </button>
         {session.buyUsdc && <button type="button" onClick={() => void pay("card")} className="flex items-start gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:bg-muted">
           <CreditCard size={24} className="mt-0.5 text-muted-foreground" />
