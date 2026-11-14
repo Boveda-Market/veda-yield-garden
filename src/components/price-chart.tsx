@@ -6,7 +6,7 @@ import { fetchCandles, type Candle, type MarketId } from "@/lib/markets";
 export const TICK_MS = 1500;
 const ZOOMS = [{ id: "1m", sec: 60 }, { id: "5m", sec: 300 }, { id: "15m", sec: 900 }, { id: "30m", sec: 1800 }, { id: "1h", sec: 3600 }] as const;
 type Zoom = (typeof ZOOMS)[number]["id"];
-type Style = "line" | "candles";
+type Style = "duel" | "line" | "candles";
 const COUNT = 120;
 const W = 360, H = 140, PAD = 6;
 
@@ -14,7 +14,7 @@ const fmt = (n: number) => n.toFixed(n >= 1000 ? 2 : 3).replace(/\B(?=(\d{3})+(?
 
 export function PriceChart({ market, points, price, reference, referenceLabel }: { market: MarketId; points: number[]; price?: number | undefined; reference?: number | undefined; referenceLabel?: string }) {
   const t = useT();
-  const [style, setStyle] = useState<Style>("line");
+  const [style, setStyle] = useState<Style>("duel");
   const [zoom, setZoom] = useState<Zoom>("1m");
   const [hover, setHover] = useState<number | null>(null);
   const [hist, setHist] = useState<Candle[]>([]);
@@ -43,7 +43,7 @@ export function PriceChart({ market, points, price, reference, referenceLabel }:
   const controls = (
     <div className="flex items-center justify-between gap-2 px-4 pb-2">
       <div className="flex rounded-full bg-secondary p-0.5" role="tablist" aria-label={t("Estilo de gráfica")}>
-        {([["line", t("Línea")], ["candles", t("Pro")]] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={style === k} onClick={() => setStyle(k)} className={pill(style === k)}>{l}</button>)}
+        {([["duel", t("Duelo")], ["line", t("Línea")], ["candles", t("Pro")]] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={style === k} onClick={() => setStyle(k)} className={pill(style === k)}>{l}</button>)}
       </div>
       {style === "candles" && <div className="flex rounded-full bg-secondary p-0.5" role="tablist" aria-label={t("Zoom de tiempo")}>
         {ZOOMS.map((z) => <button key={z.id} role="tab" aria-selected={zoom === z.id} onClick={() => setZoom(z.id)} className={pill(zoom === z.id)}>{z.id}</button>)}
@@ -51,6 +51,9 @@ export function PriceChart({ market, points, price, reference, referenceLabel }:
     </div>
   );
 
+  if (style === "duel") {
+    return <>{controls}<DuelLine points={points} price={price} reference={reference} /></>;
+  }
   if (style === "line") {
     return <>{controls}<LiveLine points={points} sec={60} reference={reference} referenceLabel={referenceLabel} /></>;
   }
@@ -295,5 +298,41 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
         {hc && <span className="absolute -translate-x-1/2 rounded-sm bg-foreground px-1 text-background" style={{ left: `${(cx(hover!) / W) * 100}%` }}>{hhmm(hc.t)}</span>}
       </div>
     </>
+  );
+}
+
+/** Sube vs Baja duel: two mirrored lines showing who leads against the strike (visual lead, not a market probability). */
+function DuelLine({ points, price, reference }: { points: number[]; price?: number | undefined; reference?: number | undefined }) {
+  const t = useT();
+  const pts = points.slice(-60);
+  if (!reference || pts.length < 2) return <div className="flex h-36 items-center justify-center text-xs text-muted-foreground">{t("Esperando el precio a batir…")}</div>;
+  // Lead in [-1, 1]: tanh of the distance to the strike, scaled to the recent price range.
+  const range = Math.max(...pts, reference) - Math.min(...pts, reference) || reference * 0.0005;
+  const lead = (v: number) => Math.tanh(((v - reference) / range) * 2.5);
+  const n = pts.length;
+  const x = (i: number) => (i / (n - 1)) * W;
+  const y = (share: number) => PAD + (1 - share) * (H - PAD * 2);
+  const up: [number, number][] = pts.map((v, i) => [x(i), y(0.5 + lead(v) * 0.45)]);
+  const down: [number, number][] = pts.map((v, i) => [x(i), y(0.5 - lead(v) * 0.45)]);
+  const now = lead(price ?? pts[n - 1]!);
+  const upPct = Math.round(50 + now * 45), downPct = 100 - upPct;
+  const upWins = now >= 0;
+  const eu = up[n - 1]!, ed = down[n - 1]!;
+  return (
+    <div className="relative overflow-hidden px-1">
+      <div className="flex items-center justify-between px-3 pb-1 text-xs font-bold">
+        <span className={upWins ? "text-primary" : "text-muted-foreground"}>▲ {t("Sube")} {upPct}%</span>
+        <span className="text-[10px] font-semibold text-muted-foreground">{upWins ? t("Va ganando Sube") : t("Va ganando Baja")}</span>
+        <span className={!upWins ? "text-destructive" : "text-muted-foreground"}>{t("Baja")} {downPct}% ▼</span>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="h-36 w-full" aria-label={upWins ? t("Va ganando Sube") : t("Va ganando Baja")}>
+        <line x1="0" x2={W} y1={H / 2} y2={H / 2} className="text-muted-foreground" stroke="currentColor" strokeOpacity="0.4" strokeDasharray="4 4" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+        <path d={smoothPath(down)} fill="none" className="text-destructive" stroke="currentColor" strokeWidth={upWins ? 2 : 3} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        <path d={smoothPath(up)} fill="none" className="text-primary" stroke="currentColor" strokeWidth={upWins ? 3 : 2} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+      </svg>
+      <span className="pointer-events-none absolute h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-primary" style={{ right: "4px", top: `calc(1.5rem + ${(eu[1] / H) * 9}rem)` }} />
+      <span className="pointer-events-none absolute h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-destructive" style={{ right: "4px", top: `calc(1.5rem + ${(ed[1] / H) * 9}rem)` }} />
+      <p className="px-3 pt-1 text-center text-[10px] text-muted-foreground">{t("Verde arriba: gana Sube. Roja arriba: gana Baja. Según el precio actual frente al precio a batir.")}</p>
+    </div>
   );
 }

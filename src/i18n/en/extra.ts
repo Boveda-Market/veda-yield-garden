@@ -1082,4 +1082,9 @@ export const extra: Record<string, string> = {
   "Sugerencias de migración activadas en la app y Telegram.": "Move suggestions turned on in the app and Telegram.",
   "Sugerencias de migración desactivadas.": "Move suggestions turned off.",
   "Otra cantidad": "Other amount",
+  "Duelo": "Duel",
+  "Esperando el precio a batir…": "Waiting for the price to beat…",
+  "Va ganando Sube": "Up is winning",
+  "Va ganando Baja": "Down is winning",
+  "Verde arriba: gana Sube. Roja arriba: gana Baja. Según el precio actual frente al precio a batir.": "Green on top: Up wins. Red on top: Down wins. Based on the current price vs the price to beat.",
 };
