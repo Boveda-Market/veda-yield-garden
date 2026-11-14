@@ -17,3 +17,8 @@ describe("new-user funding guide", () => {
     expect(decimalToUnits("abc", 6)).toBeNull();
   });
 });
+
+import { ACTIVATE_MIN_USD as _MIN } from "@/lib/onboarding";
+describe("activate dollars threshold", () => {
+  it("stays above a $3 position refund", () => { expect(_MIN).toBe(15); });
+});

@@ -70,6 +70,8 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
   const quote: SwapQuote | undefined = preview.data;
   const usd = quote ? Number(quote.outAmount) / 1e6 : 0;
   // Only show once a quote proves the convertible SOL is worth at least the minimum; dust (e.g. rent refunded by a liquidation) never flashes the card.
+  // Accounts that already hold dollars are not new: extra SOL here is a refund (e.g. a closed position), not a first purchase.
+  if (q.data.usdc >= MIN_USDC_MICRO) return null;
   if (convertible <= 0n || !quote || usd < ACTIVATE_MIN_USD) return null;
   async function activate() {
     if (!address) return;

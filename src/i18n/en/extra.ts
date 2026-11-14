@@ -734,6 +734,7 @@ export const extra: Record<string, string> = {
   "Calculando tu saldo en dólares…": "Calculating your balance in dollars…",
   "Activando…": "Activating…",
   "Activar mis dólares": "Activate my dollars",
+  "Garantía de red devuelta": "Network deposit returned",
   "Comprobando llegada de fondos…": "Checking for incoming funds…",
   "¡Fondos recibidos! Calculando tus dólares con el mejor tipo de cambio…": "Funds received! Calculating your dollars at the best rate…",
   "Reservamos {sol} SOL para costos de red. Confirmarás con tu firma.": "We keep {sol} SOL for network costs. You'll confirm with your signature.",
