@@ -154,7 +154,7 @@ export function WalletPanel() {
 
   // JupUSD (prediction payouts and refunds of unfilled orders) is a 1:1 dollar: count it so the total never looks short.
   const jupUsd = extra.data?.["JupUSD"] !== undefined ? Number(extra.data["JupUSD"]) / 1e6 : 0;
-  const solExcessUsd = balances.data?.sol !== undefined && prices.data?.SOL ? Number(solExcessLamports(balances.data.sol)) / 1e9 * prices.data.SOL : 0;
+  const solExcessUsd = balances.data?.sol !== undefined && prices.data?.["SOL"] ? Number(solExcessLamports(balances.data.sol)) / 1e9 * prices.data["SOL"] : 0;
   const fmt = (v: number, d = 2) => v.toLocaleString("en-US", { useGrouping: false, maximumFractionDigits: d });
   const assets = [
     { symbol: "USDC", label: t("Dólar digital"), raw: balances.data?.usdc, decimals: 6 },
