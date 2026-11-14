@@ -17,3 +17,4 @@
 - When adding avatar IDs to AVATAR_IDS, widen the account_profiles.profile_avatar CHECK in the same change; otherwise profile saves fail (guarded by avatar-constraint.test.ts).
 - Browser polyfills are kept by an explicit exported call plus the package.json "sideEffects" list; never rely on a bare side-effect import, which the production build tree-shakes.
 - Operator mailbox (mailbox-admin.tsx): reads/sends via the Gmail connector server-side only, every call gated by payoutAdmin; sending only from Gmail send-as aliases (domain addresses forwarded to that Gmail), header values stripped of line breaks.
+- Privy custom API domain fallback (privy-api-fallback.ts): app-config custom_api_url is dropped when that host is unreachable so login falls back to auth.privy.io; installed by explicit call in privy-access.

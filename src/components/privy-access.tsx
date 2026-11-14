@@ -1,6 +1,7 @@
 import { CARD_MIN_USD, GAS_TOP_UP_SOL } from "@/lib/onboarding";
 import { useT } from "@/lib/i18n";
 import { installBufferPolyfill } from "@/lib/buffer-polyfill";
+import { installPrivyApiFallback } from "@/lib/privy-api-fallback";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { setPrivyTokenGetter } from "@/lib/privy-token";
 import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useMfaEnrollment, usePrivy } from "@privy-io/react-auth";
@@ -22,6 +23,7 @@ import { IdleLogout } from "@/components/idle-logout";
 const OFFICIAL_ORIGIN = "https://bovedamarket.app";
 const isOfficialHost = () => typeof window === "undefined" || ["bovedamarket.app", "www.bovedamarket.app", "veda-yield-garden.lovable.app"].includes(window.location.hostname.toLowerCase());
 
+installPrivyApiFallback();
 const solanaConnectors = toSolanaWalletConnectors({ shouldAutoConnect: true });
 
 function SessionBridge({ children }: { children: ReactNode }) {
