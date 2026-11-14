@@ -1,4 +1,5 @@
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { getMigratePolicy } from "@/lib/migrate-policy.functions";
 import { Zap } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { VAULTS, type Vault } from "@/lib/vaults";
@@ -6,6 +7,11 @@ import { poolYieldOptions } from "@/lib/pool-yield";
 import { bestUpgrade } from "@/lib/migrate";
 import type { ChainPosition } from "@/lib/solana-data";
 import { Button } from "./ui/button";
+
+export function useMigrateEnabled() {
+  const q = useQuery({ queryKey: ["migrate-policy"], queryFn: () => getMigratePolicy().catch(() => ({ enabled: false })), staleTime: 60_000 });
+  return q.data?.enabled === true;
+}
 
 export function useVaultAprs() {
   const ys = useQueries({ queries: VAULTS.map((v) => poolYieldOptions(v.pool)) });
@@ -15,7 +21,8 @@ export function useVaultAprs() {
 /** Free-move offer card: shown when another vault beats this position by ≥ MIGRATE_MIN_GAIN APR points. */
 export function MigrateOffer({ position, aprs, onMigrate, className = "" }: { position: ChainPosition; aprs: Record<string, number | null>; onMigrate: (p: ChainPosition, v: Vault) => void; className?: string }) {
   const t = useT();
-  if (position.locked || (position.vaultId !== "sol" && position.vaultId !== "met")) return null;
+  const enabled = useMigrateEnabled();
+  if (!enabled || position.locked || (position.vaultId !== "sol" && position.vaultId !== "met")) return null;
   const up = bestUpgrade(position.vaultId, aprs);
   const target = up ? VAULTS.find((v) => v.id === up.id) : null;
   const from = VAULTS.find((v) => v.id === position.vaultId);

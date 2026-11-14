@@ -30,6 +30,8 @@ export const Route = createFileRoute("/api/public/jobs/check-system-status")({
           await db.from("system_service_status").upsert({ ...a.next, updated_at: new Date(now).toISOString() }, { onConflict: "service" });
         }
         try {
+          const { migrateAlertsEnabled } = await import("@/lib/migrate-policy.server");
+          if (!(await migrateAlertsEnabled())) throw new Error("migrate alerts off");
           const { VAULTS } = await import("@/lib/vaults");
           const { fetchPoolYield } = await import("@/lib/pool-yield");
           const { bestUpgrade, gapAlertDue } = await import("@/lib/migrate");
