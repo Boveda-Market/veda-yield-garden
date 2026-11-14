@@ -26,6 +26,10 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as GuiasIndexRouteImport } from './routes/guias/index'
+import { Route as GuiasInvertirSinEstafasRouteImport } from './routes/guias/invertir-sin-estafas'
+import { Route as GuiasQueEsUsdcRouteImport } from './routes/guias/que-es-usdc'
+import { Route as GuiasRetirarCashAppBitcoinRouteImport } from './routes/guias/retirar-cash-app-bitcoin'
 import { Route as ApiPublicJobsCheckSystemStatusRouteImport } from './routes/api/public/jobs/check-system-status'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -117,6 +121,27 @@ const WalletRoute = WalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuiasIndexRoute = GuiasIndexRouteImport.update({
+  id: '/guias/',
+  path: '/guias/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuiasInvertirSinEstafasRoute = GuiasInvertirSinEstafasRouteImport.update({
+  id: '/guias/invertir-sin-estafas',
+  path: '/guias/invertir-sin-estafas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuiasQueEsUsdcRoute = GuiasQueEsUsdcRouteImport.update({
+  id: '/guias/que-es-usdc',
+  path: '/guias/que-es-usdc',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuiasRetirarCashAppBitcoinRoute =
+  GuiasRetirarCashAppBitcoinRouteImport.update({
+    id: '/guias/retirar-cash-app-bitcoin',
+    path: '/guias/retirar-cash-app-bitcoin',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsCheckSystemStatusRoute =
   ApiPublicJobsCheckSystemStatusRouteImport.update({
     id: '/api/public/jobs/check-system-status',
@@ -164,6 +189,10 @@ export interface FileRoutesByFullPath {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
+  '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
+  '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
+  '/guias/': typeof GuiasIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -188,6 +217,10 @@ export interface FileRoutesByTo {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
+  '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
+  '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
+  '/guias': typeof GuiasIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -213,6 +246,10 @@ export interface FileRoutesById {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
+  '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
+  '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
+  '/guias/': typeof GuiasIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -239,6 +276,10 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/guias/invertir-sin-estafas'
+    | '/guias/que-es-usdc'
+    | '/guias/retirar-cash-app-bitcoin'
+    | '/guias/'
     | '/api/public/jobs/check-system-status'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
@@ -263,6 +304,10 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/guias/invertir-sin-estafas'
+    | '/guias/que-es-usdc'
+    | '/guias/retirar-cash-app-bitcoin'
+    | '/guias'
     | '/api/public/jobs/check-system-status'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
@@ -287,6 +332,10 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/guias/invertir-sin-estafas'
+    | '/guias/que-es-usdc'
+    | '/guias/retirar-cash-app-bitcoin'
+    | '/guias/'
     | '/api/public/jobs/check-system-status'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
@@ -312,6 +361,10 @@ export interface RootRouteChildren {
   StatusRoute: typeof StatusRoute
   TerminosRoute: typeof TerminosRoute
   WalletRoute: typeof WalletRoute
+  GuiasInvertirSinEstafasRoute: typeof GuiasInvertirSinEstafasRoute
+  GuiasQueEsUsdcRoute: typeof GuiasQueEsUsdcRoute
+  GuiasRetirarCashAppBitcoinRoute: typeof GuiasRetirarCashAppBitcoinRoute
+  GuiasIndexRoute: typeof GuiasIndexRoute
   ApiPublicJobsCheckSystemStatusRoute: typeof ApiPublicJobsCheckSystemStatusRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -440,6 +493,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WalletRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guias/': {
+      id: '/guias/'
+      path: '/guias'
+      fullPath: '/guias/'
+      preLoaderRoute: typeof GuiasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guias/invertir-sin-estafas': {
+      id: '/guias/invertir-sin-estafas'
+      path: '/guias/invertir-sin-estafas'
+      fullPath: '/guias/invertir-sin-estafas'
+      preLoaderRoute: typeof GuiasInvertirSinEstafasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guias/que-es-usdc': {
+      id: '/guias/que-es-usdc'
+      path: '/guias/que-es-usdc'
+      fullPath: '/guias/que-es-usdc'
+      preLoaderRoute: typeof GuiasQueEsUsdcRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guias/retirar-cash-app-bitcoin': {
+      id: '/guias/retirar-cash-app-bitcoin'
+      path: '/guias/retirar-cash-app-bitcoin'
+      fullPath: '/guias/retirar-cash-app-bitcoin'
+      preLoaderRoute: typeof GuiasRetirarCashAppBitcoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/check-system-status': {
       id: '/api/public/jobs/check-system-status'
       path: '/api/public/jobs/check-system-status'
@@ -496,6 +577,10 @@ const rootRouteChildren: RootRouteChildren = {
   StatusRoute: StatusRoute,
   TerminosRoute: TerminosRoute,
   WalletRoute: WalletRoute,
+  GuiasInvertirSinEstafasRoute: GuiasInvertirSinEstafasRoute,
+  GuiasQueEsUsdcRoute: GuiasQueEsUsdcRoute,
+  GuiasRetirarCashAppBitcoinRoute: GuiasRetirarCashAppBitcoinRoute,
+  GuiasIndexRoute: GuiasIndexRoute,
   ApiPublicJobsCheckSystemStatusRoute: ApiPublicJobsCheckSystemStatusRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
