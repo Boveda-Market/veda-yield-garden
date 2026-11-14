@@ -18,5 +18,5 @@ export const Route = createFileRoute("/faq")({ staticData: { sitemap: true },
 
 function FaqPage() {
   const t = useT();
-  return <LegalLayout title={t("Preguntas frecuentes")} legal={false}><Faq /></LegalLayout>;
+  return <LegalLayout title={t("Preguntas frecuentes")} legal={false} footer={false}><Faq /></LegalLayout>;
 }
