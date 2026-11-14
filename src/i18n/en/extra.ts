@@ -254,6 +254,8 @@ export const extra: Record<string, string> = {
   "Sube/Baja · predicción abierta": "Up/Down · prediction opened",
   "Sube/Baja · posición vendida": "Up/Down · position sold",
   "Sube/Baja · posición cerrada": "Up/Down · position closed",
+  "Pagos y reembolsos de predicciones": "Prediction payouts and refunds",
+  "Pasar a USDC": "Move to USDC",
   "Sube/Baja · orden no completada": "Up/Down · order not filled",
   "Sube/Baja · orden cancelada y reembolsada": "Up/Down · order cancelled and refunded",
   "Depósito en bóveda": "Vault deposit",
