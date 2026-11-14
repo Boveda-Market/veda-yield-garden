@@ -1083,6 +1083,8 @@ export const extra: Record<string, string> = {
   "Sugerencias de migración desactivadas.": "Move suggestions turned off.",
   "Otra cantidad": "Other amount",
   "Duelo": "Duel",
+  "Cargando precio en vivo…": "Loading live price…",
+  "La línea que va arriba es la que va ganando: verde para Sube, roja para Baja.": "The line on top is winning: green for Up, red for Down.",
   "Esperando el precio a batir…": "Waiting for the price to beat…",
   "Va ganando Sube": "Up is winning",
   "Va ganando Baja": "Down is winning",

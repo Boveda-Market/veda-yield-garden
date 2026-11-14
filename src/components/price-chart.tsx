@@ -12,9 +12,11 @@ const W = 360, H = 140, PAD = 6;
 
 const fmt = (n: number) => n.toFixed(n >= 1000 ? 2 : 3).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 
-export function PriceChart({ market, points, price, reference, referenceLabel }: { market: MarketId; points: number[]; price?: number | undefined; reference?: number | undefined; referenceLabel?: string }) {
+export function PriceChart({ market, points, price, reference, referenceLabel, window }: { market: MarketId; points: number[]; price?: number | undefined; reference?: number | undefined; referenceLabel?: string; window?: string | undefined }) {
   const t = useT();
-  const [style, setStyle] = useState<Style>("duel");
+  // Duel shines in 5 min rounds (price hugs the strike); longer rounds open on the classic line.
+  const [style, setStyle] = useState<Style>(window && window !== "5m" ? "line" : "duel");
+  useEffect(() => { setStyle(window && window !== "5m" ? "line" : "duel"); }, [window]);
   const [zoom, setZoom] = useState<Zoom>("1m");
   const [hover, setHover] = useState<number | null>(null);
   const [hist, setHist] = useState<Candle[]>([]);
@@ -328,7 +330,9 @@ function DuelLine({ points, reference }: { points: number[]; reference?: number 
   const span = 60_000;
   const need = Math.ceil(span / TICK_MS) + 3;
   const pts = points.slice(-need);
-  if (!reference || pts.length < 2 || !tick.current.at) return <div className="flex h-44 items-center justify-center text-xs text-muted-foreground">{t("Esperando el precio a batir…")}</div>;
+  if (pts.length < 2 || !tick.current.at) return <div className="flex h-44 items-center justify-center text-xs text-muted-foreground">{t("Cargando precio en vivo…")}</div>;
+  // Until the official strike arrives, duel against the first price seen so the chart never stalls.
+  const ref = reference ?? points[0]!;
 
   const now = performance.now();
   const k = tick.current;
@@ -339,22 +343,25 @@ function DuelLine({ points, reference }: { points: number[]; reference?: number 
   const visible = vals.filter((_, i) => ages[i]! <= span + TICK_MS);
 
   // Adaptive scale: the largest recent distance to the strike fills most of the height, so every tick shows.
-  const dev = Math.max(...visible.map((v) => Math.abs(v - reference))) || reference * 0.0002;
+  const dev = Math.max(...visible.map((v) => Math.abs(v - ref)), ref * 0.00003);
   let sc = scale.current ?? dev;
   sc += (dev - sc) * 0.08;
   sc = Math.max(sc, dev * 0.85);
   scale.current = sc;
-  const lead = (v: number) => Math.tanh(((v - reference) / sc) * 1.8);
+  const lead = (v: number) => Math.tanh(((v - ref) / sc) * 1.8);
+  // Each side has its own momentum (fast for Sube, slower for Baja), so the lines move independently and cross naturally.
+  const mom = (alpha: number) => { const out: number[] = []; let e = 0; for (let i = 0; i < vals.length; i++) { const d = i ? (vals[i]! - vals[i - 1]!) / sc : 0; e += (d - e) * alpha; out.push(Math.tanh(e * 4)); } return out; };
+  const mUp = mom(0.55), mDown = mom(0.25);
 
   const toX = (age: number) => W - (age / span) * W;
-  const y = (share: number) => PAD + (1 - share) * (H - PAD * 2);
-  const up: [number, number][] = vals.map((v, i) => [toX(ages[i]!), y(0.5 + lead(v) * 0.47)]);
-  const down: [number, number][] = vals.map((v, i) => [toX(ages[i]!), y(0.5 - lead(v) * 0.47)]);
+  const y = (share: number) => PAD + (1 - Math.max(0.02, Math.min(0.98, share))) * (H - PAD * 2);
+  const up: [number, number][] = vals.map((v, i) => [toX(ages[i]!), y(0.5 + lead(v) * 0.4 + mUp[i]! * 0.08)]);
+  const down: [number, number][] = vals.map((v, i) => [toX(ages[i]!), y(0.5 - lead(v) * 0.4 - mDown[i]! * 0.08)]);
   const dUp = smoothPath(up), dDown = smoothPath(down);
   const eu = up[up.length - 1]!, ed = down[down.length - 1]!, fu = up[0]!;
   const nowLead = lead(head);
   const upPct = Math.round(50 + nowLead * 47), downPct = 100 - upPct;
-  const upWins = nowLead >= 0;
+  const upWins = head >= ref;
   const mid = H / 2;
 
   return (
@@ -384,7 +391,7 @@ function DuelLine({ points, reference }: { points: number[]; reference?: number 
           </span>
         ))}
       </div>
-      <p className="px-3 pt-1 text-center text-[10px] text-muted-foreground">{t("Verde arriba: gana Sube. Roja arriba: gana Baja. Según el precio actual frente al precio a batir.")}</p>
+      <p className="px-3 pt-1 text-center text-[10px] text-muted-foreground">{t("La línea que va arriba es la que va ganando: verde para Sube, roja para Baja.")}</p>
     </div>
   );
 }
