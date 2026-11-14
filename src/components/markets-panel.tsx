@@ -1,6 +1,6 @@
 import { TokenIcon } from "@/components/token-icon";
 import { PoweredBy } from "@/components/powered-by";
-import { PredictHow } from "@/components/predict-how";
+import { PredictHow, PredictSteps } from "@/components/predict-how";
 import { PredictResults } from "@/components/predict-results";
 import { useEffect, useState } from "react";
 import { Loader2, Zap } from "lucide-react";
@@ -121,6 +121,7 @@ export function MarketsPanel(_: { identity: string }) {
       <PredictLive round={round} chart={<div className="overflow-hidden rounded-3xl border border-border bg-card py-3"><PriceChart market={market} points={series[market]} price={price} reference={strike} referenceLabel={t("A batir")} /></div>} />
       <PendingClaims />
       <CompactOpenPredictions />
+      <details className="rounded-2xl border border-primary/30 bg-primary/5 p-4"><summary className="cursor-pointer text-sm font-semibold">💡 {t("¿Cómo jugar en 4 pasos?")}</summary><div className="mt-3"><PredictSteps /></div></details>
       <details className="rounded-2xl border border-border bg-card p-4"><summary className="cursor-pointer text-sm font-semibold">{t("Historial de rondas recientes de {m}", { m: name })}</summary><div className="mt-3"><PredictResults asset={market} window={win} /></div></details>
     </div>
   );
