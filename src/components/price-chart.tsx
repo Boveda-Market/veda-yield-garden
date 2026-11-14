@@ -249,9 +249,9 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
         <span className="ml-auto">{hhmm(sel.t)}</span>
       </div>
       <div ref={boxRef} className="relative touch-none select-none" onPointerMove={move} onPointerDown={down} onPointerUp={up} onPointerCancel={up} onPointerLeave={(e) => { up(e); setHover(null); setHy(null); }}>
-        <div className="absolute bottom-1 left-1 z-10 flex overflow-hidden rounded-full border border-border bg-background/80 text-xs font-bold backdrop-blur" onPointerDown={(e) => e.stopPropagation()}>
-          <button type="button" aria-label={t("Alejar")} onClick={() => zoomBy(1.5)} disabled={CCOUNT >= ZMAX} className="px-2.5 py-1 disabled:opacity-40">−</button>
-          <button type="button" aria-label={t("Acercar")} onClick={() => zoomBy(1 / 1.5)} disabled={CCOUNT <= ZMIN} className="border-l border-border px-2.5 py-1 disabled:opacity-40">+</button>
+        <div className="absolute bottom-2 left-2 z-10 flex overflow-hidden rounded-full bg-foreground text-lg font-bold leading-none text-background shadow-lg ring-2 ring-background" onPointerDown={(e) => e.stopPropagation()}>
+          <button type="button" aria-label={t("Alejar")} onClick={() => zoomBy(1.5)} disabled={CCOUNT >= ZMAX} className="flex h-10 w-11 items-center justify-center active:bg-background/20 disabled:opacity-40">−</button>
+          <button type="button" aria-label={t("Acercar")} onClick={() => zoomBy(1 / 1.5)} disabled={CCOUNT <= ZMIN} className="flex h-10 w-11 items-center justify-center border-l border-background/30 active:bg-background/20 disabled:opacity-40">+</button>
         </div>
         <svg viewBox={`0 0 ${W} ${CH}`} preserveAspectRatio="none" className="h-52 w-full" aria-hidden>
           {grid.map((g) => <line key={g} x1="0" x2={PW} y1={y(g)} y2={y(g)} className="text-border" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke" />)}
