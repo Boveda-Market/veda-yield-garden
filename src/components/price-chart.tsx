@@ -45,14 +45,14 @@ export function PriceChart({ market, points, price, reference, referenceLabel }:
       <div className="flex rounded-full bg-secondary p-0.5" role="tablist" aria-label={t("Estilo de gráfica")}>
         {([["line", t("Línea")], ["candles", t("Velas")]] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={style === k} onClick={() => setStyle(k)} className={pill(style === k)}>{l}</button>)}
       </div>
-      <div className="flex rounded-full bg-secondary p-0.5" role="tablist" aria-label={t("Zoom de tiempo")}>
+      {style === "candles" && <div className="flex rounded-full bg-secondary p-0.5" role="tablist" aria-label={t("Zoom de tiempo")}>
         {ZOOMS.map((z) => <button key={z.id} role="tab" aria-selected={zoom === z.id} onClick={() => setZoom(z.id)} className={pill(zoom === z.id)}>{z.id}</button>)}
-      </div>
+      </div>}
     </div>
   );
 
   if (style === "line") {
-    return <>{controls}<LiveLine points={points} sec={sec} reference={reference} referenceLabel={referenceLabel} /></>;
+    return <>{controls}<LiveLine points={points} sec={60} reference={reference} referenceLabel={referenceLabel} /></>;
   }
 
   return <CandleView controls={controls} candles={candles} reference={reference} referenceLabel={referenceLabel} style={style} hover={hover} setHover={setHover} />;
@@ -183,7 +183,7 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
   const last = candles[n - 1]!;
   const refY = reference ? y(reference) : null;
   const grid = [0.1, 0.3, 0.5, 0.7, 0.9].map((f) => max - f * span);
-  const timeIdx = [0, Math.floor(n / 3), Math.floor((2 * n) / 3), n - 1];
+  const timeIdx = [...new Set(Array.from({ length: 7 }, (_, k) => Math.round(((n - 1) * k) / 6)))];
 
   const pick = (e: React.PointerEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -241,7 +241,7 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
         </>}
       </div>
       <div className="relative h-4 text-[9px] tabular-nums text-muted-foreground">
-        {timeIdx.map((i) => <span key={i} className="absolute -translate-x-1/2" style={{ left: `${(cx(i) / W) * 100}%` }}>{hhmm(candles[i]!.t)}</span>)}
+        {timeIdx.map((i, k) => <span key={i} className={`absolute ${k === 0 ? "" : k === timeIdx.length - 1 ? "-translate-x-full" : "-translate-x-1/2"}`} style={{ left: `${(cx(i) / W) * 100}%` }}>{hhmm(candles[i]!.t)}</span>)}
         {hc && <span className="absolute -translate-x-1/2 rounded-sm bg-foreground px-1 text-background" style={{ left: `${(cx(hover!) / W) * 100}%` }}>{hhmm(hc.t)}</span>}
       </div>
     </>
