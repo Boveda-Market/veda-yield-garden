@@ -43,8 +43,10 @@ export const getTokenBalance = createServerFn({ method: "POST" })
     try {
       const { PublicKey } = await import("@solana/web3.js");
       const { heliusConnection } = await import("@/lib/helius.server");
-      const res = await heliusConnection(key).getParsedTokenAccountsByOwner(new PublicKey(data.wallet), { mint: new PublicKey(data.mint) }, "confirmed");
-      let total = 0n;
+      const conn = heliusConnection(key);
+      const res = await conn.getParsedTokenAccountsByOwner(new PublicKey(data.wallet), { mint: new PublicKey(data.mint) }, "confirmed");
+      // SOL lives natively on the wallet account, not in a token account; include it so SOL balances are real.
+      let total = data.mint === "So11111111111111111111111111111111111111112" ? BigInt(await conn.getBalance(new PublicKey(data.wallet), "confirmed")) : 0n;
       for (const v of res.value) {
         const info = (v.account.data as { parsed?: { info?: { mint?: string; owner?: string; tokenAmount?: { amount?: string } } } }).parsed?.info;
         if (info?.mint === data.mint && info.owner === data.wallet && /^\d+$/.test(info.tokenAmount?.amount ?? "")) total += BigInt(info.tokenAmount!.amount!);
