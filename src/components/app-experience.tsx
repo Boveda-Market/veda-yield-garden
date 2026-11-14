@@ -199,7 +199,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
           <p className="font-semibold text-foreground">© {new Date().getFullYear()} Boveda Technologies LLC</p>
           <p className="mt-2">{t("BÓVEDA te permite usar bóvedas con tu wallet o practicar sin dinero. En Real puedes depositar entre 1 y 10,000 USDC en SOL y MET. Puedes cosechar o liquidar tus posiciones compatibles de SOL y MET con tu wallet. La liquidez bloqueada no se puede liquidar. Prueba usa 1,000 créditos ficticios y permite entrar como invitado.")}</p>
           <p className="mt-3">{t("BÓVEDA es una interfaz no custodia: tú firmas cada operación con tu wallet. Las estadísticas públicas provienen de DexScreener; los rendimientos mostrados son estimados y las ganancias de Prueba son ficticias. Las bóvedas implican volatilidad, pérdida impermanente y riesgo de contratos; en Sube/Baja puedes perder todo lo invertido en una predicción y BÓVEDA nunca es tu contraparte. Nada aquí es asesoría financiera, legal o fiscal.")}</p>
-          <nav className="mt-4 flex flex-wrap gap-5 text-primary"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to="/terminos">{t("Términos y condiciones")}</Link><Link to="/privacidad">{t("Política de privacidad")}</Link></nav>
+          <nav className="mt-4 flex flex-wrap gap-5 text-primary"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to="/terminos">{t("Términos y condiciones")}</Link><Link to="/privacidad">{t("Política de privacidad")}</Link><a href="mailto:admin@bovedamarket.app">admin@bovedamarket.app</a></nav>
         </div>
       </footer>
 
