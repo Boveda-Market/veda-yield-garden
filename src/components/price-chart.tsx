@@ -7,7 +7,7 @@ export const TICK_MS = 1500;
 const ZOOMS = [{ id: "1m", sec: 60 }, { id: "5m", sec: 300 }, { id: "15m", sec: 900 }] as const;
 type Zoom = (typeof ZOOMS)[number]["id"];
 type Style = "line" | "candles";
-const COUNT = 36;
+const COUNT = 48;
 const W = 360, H = 140, PAD = 6;
 
 const fmt = (n: number) => n.toFixed(n >= 1000 ? 2 : 3).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -163,62 +163,86 @@ function LiveLine({ points, sec, reference, referenceLabel }: { points: number[]
   );
 }
 
-function CandleView({ controls, candles, reference, referenceLabel, style, hover, setHover }: { controls: React.ReactNode; candles: Candle[]; reference?: number | undefined; referenceLabel?: string | undefined; style: Style; hover: number | null; setHover: (n: number | null) => void }) {
-  const t = useT();
-  if (candles.length < 2) return <>{controls}<div className="flex h-36 items-center justify-center text-xs text-muted-foreground">{t("Cargando gráfica…")}</div></>;
+const CH = 200, PW = 316, CCOUNT = 48;
+const hhmm = (t: number) => new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
 
-  const lows = candles.map((c) => c.l), highs = candles.map((c) => c.h);
-  const all = reference ? [...lows, ...highs, reference] : [...lows, ...highs];
-  const min = Math.min(...all), max = Math.max(...all), span = max - min || 1;
-  const y = (v: number) => PAD + (1 - (v - min) / span) * (H - PAD * 2);
-  const n = candles.length;
-  const step = W / COUNT; // fixed slot width so candles keep normal proportions
-  const x0 = W - n * step;
+function CandleView({ controls, candles: all0, reference, referenceLabel, hover, setHover }: { controls: React.ReactNode; candles: Candle[]; reference?: number | undefined; referenceLabel?: string | undefined; style: Style; hover: number | null; setHover: (n: number | null) => void }) {
+  const t = useT();
+  const [hy, setHy] = useState<number | null>(null);
+  const candles = all0.slice(-CCOUNT);
+  if (candles.length < 2) return <>{controls}<div className="flex h-52 items-center justify-center text-xs text-muted-foreground">{t("Cargando gráfica…")}</div></>;
+
+  const vals = candles.flatMap((c) => [c.l, c.h]);
+  if (reference) vals.push(reference);
+  const lo = Math.min(...vals), hi = Math.max(...vals), padv = (hi - lo) * 0.08 || hi * 0.0005 || 1;
+  const min = lo - padv, max = hi + padv, span = max - min;
+  const y = (v: number) => (1 - (v - min) / span) * CH;
+  const n = candles.length, step = PW / CCOUNT, x0 = PW - n * step;
   const cx = (i: number) => x0 + i * step + step / 2;
-  const bodyW = Math.max(2, step * 0.6);
-  const last = candles[n - 1]!.c;
-  const up = reference ? last >= reference : last >= candles[0]!.o;
-  const d = candles.map((c, i) => `${cx(i)},${y(c.c)}`).join(" ");
+  const bodyW = Math.max(2, step * 0.62);
+  const last = candles[n - 1]!;
   const refY = reference ? y(reference) : null;
+  const grid = [0.1, 0.3, 0.5, 0.7, 0.9].map((f) => max - f * span);
+  const timeIdx = [0, Math.floor(n / 3), Math.floor((2 * n) / 3), n - 1];
 
   const pick = (e: React.PointerEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
     const px = ((e.clientX - r.left) / r.width) * W;
     setHover(Math.max(0, Math.min(n - 1, Math.floor((px - x0) / step))));
+    setHy(Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)));
   };
   const hc = hover !== null ? candles[hover] : undefined;
-  const hx = hover !== null ? (cx(hover) / W) * 100 : 0;
+  const sel = hc ?? last;
+  const chg = ((sel.c - sel.o) / sel.o) * 100;
+  const rise = sel.c >= sel.o;
+  const pct = (v: number) => `${(y(v) / CH) * 100}%`;
+  const tag = "pointer-events-none absolute right-0 -translate-y-1/2 rounded-sm px-1 py-0.5 text-[9px] font-semibold tabular-nums";
 
   return (
     <>
       {controls}
-      <div className="relative touch-none" onPointerMove={pick} onPointerDown={pick} onPointerLeave={() => setHover(null)}>
-        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className={`h-36 w-full ${up ? "text-primary" : "text-destructive"}`} aria-hidden>
+      <div className="flex flex-wrap gap-x-2.5 px-5 pb-1.5 font-mono text-[10px] tabular-nums text-muted-foreground">
+        <span>O <b className="text-foreground">{fmt(sel.o)}</b></span>
+        <span>H <b className="text-foreground">{fmt(sel.h)}</b></span>
+        <span>L <b className="text-foreground">{fmt(sel.l)}</b></span>
+        <span>C <b className={rise ? "text-primary" : "text-destructive"}>{fmt(sel.c)}</b></span>
+        <span className={rise ? "text-primary" : "text-destructive"}>{chg >= 0 ? "+" : ""}{chg.toFixed(2)}%</span>
+        <span className="ml-auto">{hhmm(sel.t)}</span>
+      </div>
+      <div className="relative touch-none select-none" onPointerMove={pick} onPointerDown={pick} onPointerLeave={() => { setHover(null); setHy(null); }}>
+        <svg viewBox={`0 0 ${W} ${CH}`} preserveAspectRatio="none" className="h-52 w-full" aria-hidden>
+          {grid.map((g) => <line key={g} x1="0" x2={PW} y1={y(g)} y2={y(g)} className="text-border" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke" />)}
+          {timeIdx.map((i) => <line key={`v${i}`} x1={cx(i)} x2={cx(i)} y1="0" y2={CH} className="text-border" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" vectorEffect="non-scaling-stroke" />)}
           {refY !== null && <>
-            <rect x="0" y="0" width={W} height={refY} className="fill-primary" opacity="0.05" />
-            <rect x="0" y={refY} width={W} height={H - refY} className="fill-destructive" opacity="0.05" />
+            <rect x="0" y="0" width={PW} height={refY} className="fill-primary" opacity="0.05" />
+            <rect x="0" y={refY} width={PW} height={CH - refY} className="fill-destructive" opacity="0.05" />
           </>}
-          {(style as Style) === "line" ? <>
-            <defs><linearGradient id="pc-grad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="currentColor" stopOpacity="0.3" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient></defs>
-            <polygon points={`${cx(0)},${H} ${d} ${cx(n - 1)},${H}`} fill="url(#pc-grad)" />
-            <polyline points={d} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-          </> : candles.map((c, i) => {
-            const rise = c.c >= c.o;
+          {candles.map((c, i) => {
+            const up = c.c >= c.o;
             const top = y(Math.max(c.o, c.c)), bot = y(Math.min(c.o, c.c));
-            return <g key={c.t} className={rise ? "text-primary" : "text-destructive"}>
+            return <g key={c.t} className={up ? "text-primary" : "text-destructive"} opacity={hover === null || hover === i ? 1 : 0.55}>
               <line x1={cx(i)} x2={cx(i)} y1={y(c.h)} y2={y(c.l)} stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-              <rect x={cx(i) - bodyW / 2} width={bodyW} y={top} height={Math.max(1, bot - top)} rx="0.6" fill="currentColor" />
+              <rect x={cx(i) - bodyW / 2} width={bodyW} y={top} height={Math.max(1, bot - top)} rx="0.5" fill="currentColor" />
             </g>;
           })}
-          {refY !== null && <line x1="0" x2={W} y1={refY} y2={refY} className="text-muted-foreground" stroke="currentColor" strokeDasharray="4 3" strokeWidth="1" vectorEffect="non-scaling-stroke" />}
+          <line x1="0" x2={PW} y1={y(last.c)} y2={y(last.c)} className={last.c >= last.o ? "text-primary" : "text-destructive"} stroke="currentColor" strokeDasharray="2 2" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+          {refY !== null && <line x1="0" x2={PW} y1={refY} y2={refY} className="text-muted-foreground" stroke="currentColor" strokeDasharray="4 3" strokeWidth="1" vectorEffect="non-scaling-stroke" />}
         </svg>
-        {reference && refY !== null && <div className="pointer-events-none absolute left-1 -translate-y-1/2 rounded bg-secondary px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-secondary-foreground" style={{ top: `${(refY / H) * 100}%` }}>{referenceLabel} ${fmt(reference)}</div>}
-        {hc && <>
-          <div className="pointer-events-none absolute inset-y-0 w-px bg-foreground/40" style={{ left: `${hx}%` }} />
-          <div className="pointer-events-none absolute -top-2 rounded-md bg-foreground px-2 py-0.5 text-[10px] font-semibold tabular-nums text-background" style={{ left: `clamp(0px, calc(${hx}% - 60px), calc(100% - 130px))` }}>
-            {(style as Style) === "line" ? `$${fmt(hc.c)}` : `A ${fmt(hc.o)} · C ${fmt(hc.c)}`}
-          </div>
+        {grid.map((g) => <span key={g} className="pointer-events-none absolute right-1 -translate-y-1/2 text-[9px] tabular-nums text-muted-foreground" style={{ top: pct(g) }}>{fmt(g)}</span>)}
+        {reference && refY !== null && <>
+          <div className="pointer-events-none absolute left-1 -translate-y-1/2 rounded bg-secondary px-1.5 py-0.5 text-[10px] font-semibold text-secondary-foreground" style={{ top: pct(reference) }}>{referenceLabel}</div>
+          <span className={`${tag} bg-muted-foreground text-background`} style={{ top: pct(reference) }}>{fmt(reference)}</span>
         </>}
+        <span className={`${tag} ${last.c >= last.o ? "bg-primary text-primary-foreground" : "bg-destructive text-destructive-foreground"}`} style={{ top: pct(last.c) }}>{fmt(last.c)}</span>
+        {hc && hy !== null && <>
+          <div className="pointer-events-none absolute inset-y-0 border-l border-dashed border-foreground/50" style={{ left: `${(cx(hover!) / W) * 100}%` }} />
+          <div className="pointer-events-none absolute inset-x-0 border-t border-dashed border-foreground/50" style={{ top: `${hy * 100}%` }} />
+          <span className={`${tag} bg-foreground text-background`} style={{ top: `${hy * 100}%` }}>{fmt(max - hy * span)}</span>
+        </>}
+      </div>
+      <div className="relative h-4 text-[9px] tabular-nums text-muted-foreground">
+        {timeIdx.map((i) => <span key={i} className="absolute -translate-x-1/2" style={{ left: `${(cx(i) / W) * 100}%` }}>{hhmm(candles[i]!.t)}</span>)}
+        {hc && <span className="absolute -translate-x-1/2 rounded-sm bg-foreground px-1 text-background" style={{ left: `${(cx(hover!) / W) * 100}%` }}>{hhmm(hc.t)}</span>}
       </div>
     </>
   );
