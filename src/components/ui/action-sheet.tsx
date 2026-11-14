@@ -24,7 +24,7 @@ export const ActionSheetContent = React.forwardRef<
       ref={ref}
       style={drag ? { ...style, transform: `translateY(${drag}px)`, transition: "none" } : { ...style, transition: "transform 200ms ease-out" }}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mx-auto grid max-h-[92dvh] w-full max-w-lg gap-4 overflow-y-auto overscroll-contain rounded-t-3xl border border-b-0 bg-background px-5 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl",
+        "fixed inset-x-0 bottom-0 z-50 mx-auto grid max-h-[92dvh] w-full max-w-lg grid-cols-[minmax(0,1fr)] gap-3 overflow-x-hidden overflow-y-auto sm:gap-4 overscroll-contain rounded-t-3xl border border-b-0 bg-background px-5 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl",
         "duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom",
         "sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-h-[90dvh] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl sm:border-b sm:p-6",
         "sm:duration-200 sm:data-[state=open]:slide-in-from-bottom-0 sm:data-[state=closed]:slide-out-to-bottom-0 sm:data-[state=open]:fade-in-0 sm:data-[state=closed]:fade-out-0 sm:data-[state=open]:zoom-in-95 sm:data-[state=closed]:zoom-out-95",

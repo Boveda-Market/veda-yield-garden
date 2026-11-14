@@ -18,10 +18,12 @@ type Props = {
   busy: boolean;
   onConfirm: (quote: SwapQuote) => Promise<unknown>;
   compact?: boolean;
+  /** Rendered inside an action sheet: the sheet already shows the title. */
+  sheet?: boolean;
 };
 
 /** Quote-only requests never sign; only the reviewed, current input can be confirmed. Any pair; fee always in USDC. */
-export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "", busy, onConfirm, compact = false }: Props) {
+export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "", busy, onConfirm, compact = false, sheet = false }: Props) {
   const t = useT();
   const [from, setFrom] = useState(initialFrom);
   const [to, setTo] = useState(initialFrom === "USDC" ? "SOL" : "USDC");
@@ -102,13 +104,13 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
     {SWAP_TOKENS.map((x) => <option key={x.symbol} value={x.symbol}>{x.symbol}</option>)}
   </select></div>;
 
-  return <div className={compact ? "space-y-2" : "mt-4 space-y-3"} aria-busy={busy}>
-    {!compact && <h3 className="font-display text-lg">{t("Cambiar monedas")}</h3>}
+  return <div className={compact ? "space-y-2" : sheet ? "space-y-3" : "mt-4 space-y-3"} aria-busy={busy}>
+    {!compact && !sheet && <h3 className="font-display text-lg">{t("Cambiar monedas")}</h3>}
     <div className="relative space-y-1">
       <div className={`rounded-2xl bg-muted ${compact ? "p-3" : "p-4"}`}>
         <div className="flex items-center justify-between text-sm text-muted-foreground"><label htmlFor="swap-amount">{t("Pagas")}</label><span>{t("Disponible")}: {max === undefined ? "—" : format(max, from)}</span></div>
         <div className={`${compact ? "mt-1" : "mt-2"} flex items-center gap-2`}>
-          <input id="swap-amount" inputMode="decimal" placeholder="0.00" value={amount} disabled={busy} onChange={(e) => setAmount(sanitize(e.target.value))} className={`min-w-0 flex-1 bg-transparent font-display ${compact ? "text-2xl" : "text-3xl"} outline-none`} />
+          <input id="swap-amount" size={1} inputMode="decimal" placeholder="0.00" value={amount} disabled={busy} onChange={(e) => setAmount(sanitize(e.target.value))} className={`min-w-0 flex-1 bg-transparent font-display ${compact ? "text-2xl" : "text-3xl"} outline-none`} />
           {select("from", from)}
         </div>
         <p className="mt-1 h-4 text-xs text-muted-foreground">{current && !loading ? `≈ ${usd(current.usdcValue)}` : ""}</p>
