@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Check, X, ShieldCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useT } from "@/lib/i18n";
+import { DevNote } from "@/components/dev-note";
 
 const ROWS: [string, string][] = [
   ["Guardan tu dinero en sus propias cuentas.", "Tu dinero está siempre en tu propia wallet. Solo tú tienes la llave."],
@@ -35,6 +36,8 @@ export function SecurityWhyDialog({ trigger }: { trigger: (open: () => void) => 
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogTitle className="flex items-center gap-2 font-display"><ShieldCheck size={20} className="text-primary" />{t("¿Por qué tus fondos están seguros?")}</DialogTitle>
           <DialogDescription>{t("Otras apps han fallado por guardar el dinero de sus usuarios. BÓVEDA funciona distinto.")}</DialogDescription>
+          <DevNote />
+          <h3 className="mt-2 font-display font-semibold">{t("Comparativa rápida")}</h3>
           <SecurityGuarantees />
         </DialogContent>
       </Dialog>
