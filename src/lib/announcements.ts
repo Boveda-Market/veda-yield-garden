@@ -3,6 +3,7 @@ export type Announcement = { id: string; date: string; kind: AnnouncementKind; t
 
 /** Newest first. Add a new entry at the top to publish an update to every user. */
 export const ANNOUNCEMENTS: Announcement[] = [
+  { id: "2026-11-zero-friction", date: "2026-11-14", kind: "update", title: "Más velocidad, transparencia y cero fricción", body: "🎯 Sube y Baja: rondas de 5 min, 15 min y 4 horas; gráfica Duelo que muestra cuánto vas sobre o bajo el precio a batir; al llegar a 00:00 se espera el resultado oficial; si una orden no entra, te avisamos y tu reembolso queda listo en Mi Billetera.\n💼 Mi Billetera: premios, reembolsos y sobrantes pasan a tus dólares disponibles con 1 toque, sin comisión; tu balance total los incluye y recargas tu reserva de operaciones en segundos.\n🏛️ Bóvedas: Cosechar, Reinvertir y Liquidar directo en tus tarjetas; al liquidar, los sobrantes se convierten a dólares.\n📱 Celular: hojas deslizables para depositar, cambiar y retirar, y comprobantes claros al terminar cada operación.", href: "/", cta: "Probar ahora" },
   { id: "2026-11-security-performance", date: "2026-11-14", kind: "update", title: "Actualización mayor: seguridad, velocidad y Gráfica Pro", body: "📊 Gráfica Pro en Sube/Baja: velas con EMA, temporalidades 1m, 5m, 15m, 30m y 1h, zoom táctil y línea del precio a batir. Nuevas rondas de 4 horas.\n⚡ Precios y balances en vivo sin recargar, cierre anticipado de posiciones, alertas en Telegram aunque tengas la app cerrada y liquidaciones que convierten todo a USDC.\n🔒 Firmas guiadas paso a paso (1 de 2 / 2 de 2), recarga de reserva de red con USDC en un toque y validación estricta en el servidor: solo tus wallets autorizadas pueden operar.", href: "/", cta: "Probar ahora" },
   { id: "2026-11-fair-fees-redesign", date: "2026-11-13", kind: "policy", title: "$0 por depositar y una app más limpia", body: "Depositar en cualquier bóveda ahora cuesta $0: solo pagas un pequeño porcentaje al cosechar o retirar. Niveles Básico, Plus, Pro y VIP: más capital, menor tarifa; en la cosecha cuenta tu capital total. Mover a mayor APR es gratis y el cambio voluntario cuesta 0.10%. Bóvedas ahora es un catálogo limpio, Portafolio resume tu rendimiento y Sube o Baja tiene un tablero en vivo más ágil.", href: "/terminos", cta: "Ver términos" },
   { id: "2026-11-fee-tiers", date: "2026-11-13", kind: "policy", title: "Nuevas comisiones por niveles: más mueves, menos pagas", body: "Más mueves, menos pagas. Depositar, enviar, cambiar monedas y entrar a Sube/Baja es gratis. Siempre ves la comisión antes de firmar. El detalle completo está en Términos y condiciones.", href: "/terminos", cta: "Ver términos" },
@@ -18,7 +19,7 @@ export const SEEN_KEY = "boveda.news.seen";
 export const DISMISSED_KEY = "boveda.news.dismissed";
 
 /** Announcements already posted to the Telegram channel (plus ones marked locally by the operator). */
-export const PUBLISHED_IDS = ["2026-11-security-performance"];
+export const PUBLISHED_IDS = ["2026-11-zero-friction", "2026-11-security-performance"];
 export const PUBLISHED_KEY = "boveda-admin-published";
 export function readPublished(): string[] {
   try { return [...PUBLISHED_IDS, ...JSON.parse(localStorage.getItem(PUBLISHED_KEY) || "[]")]; } catch { return PUBLISHED_IDS; }
