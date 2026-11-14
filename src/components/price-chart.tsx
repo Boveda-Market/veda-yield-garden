@@ -7,7 +7,7 @@ export const TICK_MS = 1500;
 const ZOOMS = [{ id: "1m", sec: 60 }, { id: "5m", sec: 300 }, { id: "15m", sec: 900 }, { id: "30m", sec: 1800 }, { id: "1h", sec: 3600 }] as const;
 type Zoom = (typeof ZOOMS)[number]["id"];
 type Style = "line" | "candles";
-const COUNT = 48;
+const COUNT = 120;
 const W = 360, H = 140, PAD = 6;
 
 const fmt = (n: number) => n.toFixed(n >= 1000 ? 2 : 3).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -170,12 +170,27 @@ function LiveLine({ points, sec, reference, referenceLabel }: { points: number[]
   );
 }
 
-const CH = 200, PW = 316, CCOUNT = 48;
+const CH = 200, PW = 316, ZMIN = 12, ZMAX = 120;
 const hhmm = (t: number) => new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
 
 function CandleView({ controls, candles: all0, reference, referenceLabel, hover, setHover }: { controls: React.ReactNode; candles: Candle[]; reference?: number | undefined; referenceLabel?: string | undefined; style: Style; hover: number | null; setHover: (n: number | null) => void }) {
   const t = useT();
   const [hy, setHy] = useState<number | null>(null);
+  const [CCOUNT, setCount] = useState(48);
+  const pinch = useRef<{ ptrs: Map<number, number>; d0: number; c0: number }>({ ptrs: new Map(), d0: 0, c0: 48 });
+  const boxRef = useRef<HTMLDivElement>(null);
+  const zoomBy = (f: number) => setCount((c) => Math.round(Math.min(ZMAX, Math.max(ZMIN, c * f))));
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1);
+      zoomBy(Math.exp(dy * 0.002));
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  });
   const candles = all0.slice(-CCOUNT);
   if (candles.length < 2) return <>{controls}<div className="flex h-52 items-center justify-center text-xs text-muted-foreground">{t("Cargando gráfica…")}</div></>;
 
@@ -196,6 +211,19 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
   const grid = [0.1, 0.3, 0.5, 0.7, 0.9].map((f) => max - f * span);
   const timeIdx = [...new Set(Array.from({ length: 7 }, (_, k) => Math.round(((n - 1) * k) / 6)))];
 
+  const down = (e: React.PointerEvent<HTMLDivElement>) => {
+    const p = pinch.current;
+    p.ptrs.set(e.pointerId, e.clientX);
+    if (p.ptrs.size === 2) { const [a, b] = [...p.ptrs.values()]; p.d0 = Math.abs(a! - b!) || 1; p.c0 = CCOUNT; setHover(null); setHy(null); return; }
+    pick(e);
+  };
+  const move = (e: React.PointerEvent<HTMLDivElement>) => {
+    const p = pinch.current;
+    if (p.ptrs.has(e.pointerId)) p.ptrs.set(e.pointerId, e.clientX);
+    if (p.ptrs.size >= 2) { const [a, b] = [...p.ptrs.values()]; const d = Math.abs(a! - b!) || 1; setCount(Math.round(Math.min(ZMAX, Math.max(ZMIN, p.c0 * (p.d0 / d))))); return; }
+    pick(e);
+  };
+  const up = (e: React.PointerEvent<HTMLDivElement>) => { pinch.current.ptrs.delete(e.pointerId); };
   const pick = (e: React.PointerEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
     const px = ((e.clientX - r.left) / r.width) * W;
@@ -220,7 +248,11 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
         <span className={rise ? "text-primary" : "text-destructive"}>{chg >= 0 ? "+" : ""}{chg.toFixed(2)}%</span>
         <span className="ml-auto">{hhmm(sel.t)}</span>
       </div>
-      <div className="relative touch-none select-none" onPointerMove={pick} onPointerDown={pick} onPointerLeave={() => { setHover(null); setHy(null); }}>
+      <div ref={boxRef} className="relative touch-none select-none" onPointerMove={move} onPointerDown={down} onPointerUp={up} onPointerCancel={up} onPointerLeave={(e) => { up(e); setHover(null); setHy(null); }}>
+        <div className="absolute bottom-1 left-1 z-10 flex overflow-hidden rounded-full border border-border bg-background/80 text-xs font-bold backdrop-blur" onPointerDown={(e) => e.stopPropagation()}>
+          <button type="button" aria-label={t("Alejar")} onClick={() => zoomBy(1.5)} disabled={CCOUNT >= ZMAX} className="px-2.5 py-1 disabled:opacity-40">−</button>
+          <button type="button" aria-label={t("Acercar")} onClick={() => zoomBy(1 / 1.5)} disabled={CCOUNT <= ZMIN} className="border-l border-border px-2.5 py-1 disabled:opacity-40">+</button>
+        </div>
         <svg viewBox={`0 0 ${W} ${CH}`} preserveAspectRatio="none" className="h-52 w-full" aria-hidden>
           {grid.map((g) => <line key={g} x1="0" x2={PW} y1={y(g)} y2={y(g)} className="text-border" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke" />)}
           {timeIdx.map((i) => <line key={`v${i}`} x1={cx(i)} x2={cx(i)} y1="0" y2={CH} className="text-border" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" vectorEffect="non-scaling-stroke" />)}

@@ -454,6 +454,8 @@ export const extra: Record<string, string> = {
   "Velas": "Candles",
   "Pro": "Pro",
   "Cargando gráfica…": "Loading chart…",
+  "Acercar": "Zoom in",
+  "Alejar": "Zoom out",
   "Zoom de tiempo": "Time zoom",
   "Tu precio": "Your price",
   "Inicio": "Start",
