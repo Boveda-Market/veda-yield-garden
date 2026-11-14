@@ -1,6 +1,6 @@
 import { IN_APP_FLAG, OPEN_MENU_EVENT, OPEN_MENU_FLAG } from "./back-button";
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, Home, History, Send, Bell, Mail } from "lucide-react";
+import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, Home, History, Send, Bell } from "lucide-react";
 import { SUPPORT_URL } from "./safety-notice";
 import { InstallAppButton } from "./install-app";
 import { useEffect, useState } from "react";
@@ -82,7 +82,6 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
             <Link to="/invita" className={row} onClick={() => setOpen(false)}><Gift size={18} />{t("Invita y gana")}</Link>
           </>}
           <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className={row}><Send size={18} />{t("Canal oficial de Telegram")}</a>
-          <a href="mailto:admin@bovedamarket.app" className={row}><Mail size={18} />admin@bovedamarket.app</a>
           <Link to="/terminos" className={row}><FileText size={18} />{t("Términos y condiciones")}</Link>
           <Link to="/privacidad" className={row}><Shield size={18} />{t("Política de privacidad")}</Link>
           <Link to="/faq" className={row}><HelpCircle size={18} />{t("Preguntas frecuentes")}</Link>
