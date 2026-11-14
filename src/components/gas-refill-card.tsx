@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { prepareGasRefill } from "@/lib/gas-refill.functions";
-import { gasIsLow, GAS_TARGET_LAMPORTS } from "@/lib/gas-refill";
+import { gasIsLow } from "@/lib/gas-refill";
 import { MIN_USDC_MICRO, unitsToDecimal } from "@/lib/onboarding";
 
 type Props = { sol: bigint | undefined; usdc: bigint | undefined; onDone?: () => void };
@@ -28,8 +28,8 @@ export function GasRefillCard({ sol, usdc, onDone }: Props) {
       const r = await prepare({ data: { wallet: session.walletAddress } });
       if (!r.success) throw new Error(r.error);
       await session.signAndSend(Uint8Array.from(atob(r.transaction), (c) => c.charCodeAt(0)));
-      notify("success", t("Reserva recargada"), t("Ya puedes seguir operando"));
-      setMsg({ ok: true, text: t("Listo: recargaste {sol} SOL por {usdc} USDC. Ya puedes seguir operando.", { sol: unitsToDecimal(BigInt(r.lamports), 9), usdc: unitsToDecimal(BigInt(r.chargeMicro), 6) }) });
+      notify("success", t("Reserva lista"), t("Ya puedes hacer movimientos"));
+      setMsg({ ok: true, text: t("Listo: tu reserva para operaciones quedó activa (${usdc} de tus dólares). Ya puedes seguir usando tu cuenta con normalidad.", { usdc: unitsToDecimal(BigInt(r.chargeMicro), 6) }) });
       setTimeout(() => onDone?.(), 3000);
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? t(e.message) : t("No se pudo completar la recarga.") }); }
     finally { setBusy(false); }
@@ -37,16 +37,16 @@ export function GasRefillCard({ sol, usdc, onDone }: Props) {
   if (activation) return <section aria-label={t("Activa tu cuenta")} className="rounded-2xl border border-primary/40 bg-primary/10 p-5">
     <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><CheckCircle2 size={14} />{t("Dólares recibidos")}</p>
     <h2 className="mt-2 font-display text-xl font-semibold">{t("Activa tu cuenta para operar")}</h2>
-    <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Tus dólares ya están en tu billetera. Para depositar y operar, apartamos una parte pequeña (menos de $3) para tu reserva de red ({sol} SOL). BÓVEDA paga el costo de esta primera activación; después la reserva es tuya.", { sol: unitsToDecimal(GAS_TARGET_LAMPORTS, 9) })}</p>
+    <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Tus dólares ya están en tu cuenta. Para empezar a invertir y moverte libremente, apartamos unos $2 para tus próximos movimientos. BÓVEDA cubre el costo de esta primera activación.")}</p>
     {msg && <p role={msg.ok ? "status" : "alert"} className={`mt-2 text-sm ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text}</p>}
     {!msg?.ok && <Button className="mt-4 w-full" disabled={busy} onClick={() => void refill()}>{busy ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}{busy ? t("Activando…") : t("Activar mi cuenta")}</Button>}
     <p className="mt-2 text-xs text-muted-foreground">{t("Confirmarás con tu huella o Face ID; al terminar verás cuánto se usó.")}</p>
   </section>;
   return <section aria-label={t("Reserva para costos de red")} className={`rounded-2xl border p-4 ${empty ? "border-destructive/50 bg-destructive/10" : "border-accent bg-accent/30"}`}>
-    <p className="flex items-center gap-2 font-semibold"><Fuel size={16} />{empty ? t("Te quedaste sin reserva para costos de red") : t("Te queda poca reserva para costos de red")}</p>
-    <p className="mt-1 text-sm text-foreground/85">{t("Con un toque cambiamos una parte pequeña de tus USDC para dejar {sol} SOL de reserva. Funciona aunque tengas 0 SOL: BÓVEDA paga la red de esta recarga.", { sol: unitsToDecimal(GAS_TARGET_LAMPORTS, 9) })}</p>
+    <p className="flex items-center gap-2 font-semibold"><Fuel size={16} />{empty ? t("Te quedaste sin saldo para movimientos") : t("Te queda poco saldo para movimientos")}</p>
+    <p className="mt-1 text-sm text-foreground/85">{t("Con un toque apartamos una pequeña parte de tus dólares (unos $2) para cubrir tus próximas operaciones. BÓVEDA cubre el costo de esta recarga.")}</p>
     {msg && <p role={msg.ok ? "status" : "alert"} className={`mt-2 text-sm ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text}</p>}
-    {!msg?.ok && <Button className="mt-3 w-full" disabled={busy || usdc <= 0n} onClick={() => void refill()}>{busy ? t("Preparando recarga…") : t("Recargar reserva con USDC")}</Button>}
-    {usdc <= 0n && <p className="mt-2 text-xs text-muted-foreground">{t("Necesitas algunos USDC en tu wallet para recargar.")}</p>}
+    {!msg?.ok && <Button className="mt-3 w-full" disabled={busy || usdc <= 0n} onClick={() => void refill()}>{busy ? t("Preparando recarga…") : t("Recargar reserva de operaciones")}</Button>}
+    {usdc <= 0n && <p className="mt-2 text-xs text-muted-foreground">{t("Necesitas tener dólares disponibles para recargar tu reserva.")}</p>}
   </section>;
 }

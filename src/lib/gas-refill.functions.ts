@@ -12,13 +12,13 @@ export const prepareGasRefill = createServerFn({ method: "POST" })
     { const { assertTradingWallet } = await import("@/lib/trade-guard.server"); await assertTradingWallet(context.privyUserId, data.wallet); }
     const key = process.env["HELIUS_API_KEY"];
     const secret = process.env["AFFILIATE_PAYOUT_SECRET_KEY"];
-    if (!key || !secret) return { success: false, error: "La recarga de reserva no está disponible ahora. Usa Cambiar de USDC a SOL." };
+    if (!key || !secret) return { success: false, error: "La recarga de reserva no está disponible ahora. Inténtalo de nuevo en unos minutos." };
     try {
       const { PublicKey } = await import("@solana/web3.js");
       const { heliusConnection } = await import("@/lib/solana-read.server");
       const sol = BigInt(await heliusConnection(key).getBalance(new PublicKey(data.wallet), "confirmed"));
       const lamports = refillLamports(sol);
-      if (lamports <= 0n) return { success: false, error: "Tu reserva para costos de red ya está bien." };
+      if (lamports <= 0n) return { success: false, error: "Tu reserva para operaciones ya está bien." };
       const SOL = "So11111111111111111111111111111111111111112", USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
       const q = await fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${SOL}&outputMint=${USDC}&amount=${lamports}&slippageBps=50`);
       if (!q.ok) throw new Error("quote");
@@ -30,6 +30,6 @@ export const prepareGasRefill = createServerFn({ method: "POST" })
       return { success: true, transaction, lamports: lamports.toString(), chargeMicro: charge.toString() };
     } catch (e) {
       console.error("gas refill failed", e instanceof Error ? e.message : "unknown");
-      return { success: false, error: "No se pudo preparar la recarga. Revisa que tengas suficientes USDC e inténtalo de nuevo." };
+      return { success: false, error: "No se pudo preparar la recarga. Revisa que tengas suficientes dólares disponibles e inténtalo de nuevo." };
     }
   });
