@@ -1071,4 +1071,5 @@ export const extra: Record<string, string> = {
   "Muestra el aviso «Migrar gratis» en la app y publica la alerta en Telegram cuando otra bóveda rinde 5% APR más. Mover capital cuesta ~1% en cambios de mercado; déjalo apagado salvo oportunidades claras.": "Shows the “Move for free” notice in the app and posts the Telegram alert when another vault earns 5% more APR. Moving capital costs ~1% in market swaps; keep it off except for clear opportunities.",
   "Sugerencias de migración activadas en la app y Telegram.": "Move suggestions turned on in the app and Telegram.",
   "Sugerencias de migración desactivadas.": "Move suggestions turned off.",
+  "Otro monto": "Other amount",
 };

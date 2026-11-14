@@ -2,10 +2,11 @@ import { Dismissible } from "@/components/dismissible";
 import { notify } from "@/lib/notify";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2, Pencil } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { PredictPositionCard } from "@/components/predict-position-card";
 import { SolConvertShortcut } from "@/components/sol-convert-shortcut";
 import { ShareWin } from "@/components/share-win";
@@ -34,6 +35,9 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   const qc = useQueryClient();
   const [side, setSide] = useState<PredictSide | null>(null);
   const [amount, setAmount] = useState("5");
+  // Manual entry stays closed by default so the phone keyboard never covers the quote and confirm button.
+  const [customAmount, setCustomAmount] = useState(false);
+  useEffect(() => { if (!side) setCustomAmount(false); }, [side]);
   const [review, setReview] = useState<{ side: PredictSide; round: LiveRound; quote: PredictQuote; tx: string; context: string } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string; sig?: string; wallet?: boolean } | null>(null);
@@ -187,13 +191,16 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
       {chart}
       {!side && <p className="text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
       <Dialog open={!!side} onOpenChange={(o) => { if (!o && busy !== "sign") cancelQuote(); }}>
-        <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-2xl p-4 sm:p-6">
-          <DialogTitle className={`flex items-center gap-2 font-display text-xl ${side === "down" ? "text-destructive" : "text-primary"}`}>{side === "down" ? <ArrowDownRight size={22} /> : <ArrowUpRight size={22} />}{t(side === "down" ? "Predecir Baja" : "Predecir Sube")}{selPrice ? <span className="ml-auto text-sm font-semibold tabular-nums">{t("Paga {x}×", { x: (1 / selPrice).toFixed(2) })}</span> : null}</DialogTitle>
+        <ActionSheetContent closeLabel={t("Cerrar")} onOpenAutoFocus={(e) => e.preventDefault()}>
+          <DialogTitle className={`flex items-center gap-2 pr-10 font-display text-xl ${side === "down" ? "text-destructive" : "text-primary"}`}>{side === "down" ? <ArrowDownRight size={22} /> : <ArrowUpRight size={22} />}{t(side === "down" ? "Predecir Baja" : "Predecir Sube")}{selPrice ? <span className="ml-auto text-sm font-semibold tabular-nums">{t("Paga {x}×", { x: (1 / selPrice).toFixed(2) })}</span> : null}</DialogTitle>
           <DialogDescription className="text-xs">{t(side === "down" ? "Ganas si el precio baja" : "Ganas si el precio sube")}</DialogDescription>
       <section aria-label={t("Tu orden")}>
           <div className="flex items-center justify-between"><label htmlFor="predict-amount" className="text-sm font-semibold">{t("Estás poniendo (USDC)")}</label><span className="text-xs text-muted-foreground">{t("Disponible")}: <strong className="text-foreground tabular-nums">{!wallet ? "—" : balance === null ? "…" : usdc(balance)} USDC</strong></span></div>
-          <input id="predict-amount" inputMode="decimal" value={amount} onChange={(e) => { setAmount(e.target.value.replace(/[^0-9.]/g, "")); setReview(null); }} className="mt-2 h-12 w-full rounded-xl border border-input bg-background px-4 font-display text-xl font-bold" />
-          <div className="mt-2 grid grid-cols-5 gap-2">{[5, 10, 25, 50].map((v) => <Button key={v} type="button" variant="secondary" size="sm" onClick={() => { setAmount(String(v)); setReview(null); }}>${v}</Button>)}<Button type="button" variant="outline" size="sm" disabled={!maxMicro || maxMicro <= 0n} onClick={() => { if (maxMicro) { setAmount((Math.floor(Number(maxMicro) / 1e4) / 100).toFixed(2)); setReview(null); } }}>{t("Máx")}</Button></div>
+          {customAmount
+            ? <input id="predict-amount" autoFocus inputMode="decimal" enterKeyHint="done" value={amount} onChange={(e) => { setAmount(e.target.value.replace(/[^0-9.]/g, "")); setReview(null); }} onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }} className="mt-2 h-12 w-full rounded-xl border border-input bg-background px-4 font-display text-xl font-bold" />
+            : <p id="predict-amount" className="mt-1 font-display text-3xl font-bold tabular-nums">${amount || "0"}</p>}
+          <div className="mt-2 grid grid-cols-5 gap-2">{[5, 10, 25, 50].map((v) => { const on = !customAmount && Number(amount) === v; return <Button key={v} type="button" variant={on ? "default" : "secondary"} size="sm" aria-pressed={on} onClick={() => { setCustomAmount(false); setAmount(String(v)); setReview(null); }}>${v}</Button>; })}<Button type="button" variant="outline" size="sm" disabled={!maxMicro || maxMicro <= 0n} onClick={() => { if (maxMicro) { setCustomAmount(false); setAmount((Math.floor(Number(maxMicro) / 1e4) / 100).toFixed(2)); setReview(null); } }}>{t("Máx")}</Button></div>
+          {!customAmount && <Button type="button" variant="ghost" size="sm" className="mt-1 w-full text-muted-foreground" onClick={() => setCustomAmount(true)}><Pencil size={14} /> {t("Otro monto")}</Button>}
           {!inRange && <p className="mt-2 text-xs text-destructive">{t("Entre {min} y {max} USDC.", { min: PREDICT_MIN_USDC, max: PREDICT_MAX_USDC })}</p>}
           {short && <p className="mt-2 text-xs text-destructive">{t("Saldo insuficiente: tienes {v} USDC.", { v: usdc(balance) })} <Link to="/wallet" className="underline">{t("Depositar o cambiar a USDC")}</Link></p>}
           {inRange && selPrice && !review && <div className="mt-3 space-y-1 rounded-xl bg-secondary/50 p-3 text-sm">
@@ -223,7 +230,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
           <Button className="w-full" disabled={busy === "sign"} onClick={confirm}>{busy === "sign" ? <Loader2 className="animate-spin" /> : t("Confirmar y firmar")}</Button>
           <Button type="button" variant="outline" className="w-full" disabled={busy === "sign"} onClick={cancelQuote}>{t("Cancelar cotización")}</Button>
         </section>}
-        </DialogContent>
+        </ActionSheetContent>
       </Dialog>
 
       {msg && <Dismissible key={msg.text} onDismiss={() => setMsg(null)} ms={msg.ok ? 6000 : 10000} className={`rounded-xl border p-3 pr-10 ${msg.ok ? "border-primary/30 bg-primary/10 text-primary" : "border-destructive/30 bg-destructive/10 text-destructive"}`}><p role="status" className="text-sm">{msg.text} {msg.wallet && <Link to="/wallet" className="underline">{t("Ver en tu wallet")}</Link>}{msg.sig && <a className="inline-flex items-center gap-1 underline" href={`https://orbmarkets.io/tx/${msg.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}<ExternalLink size={12} /></a>}</p></Dismissible>}

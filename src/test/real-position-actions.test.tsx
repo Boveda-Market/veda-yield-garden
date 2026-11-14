@@ -10,6 +10,7 @@ vi.mock("@/components/open-predictions", () => ({ WalletOpenPredictions: () => n
 vi.mock("@/components/pending-claims", () => ({ PendingClaims: () => null }));
 vi.mock("@tanstack/react-query", () => ({ useQuery: () => ({ data: { success: true, data: { positions: mocks.positions, positionsComplete: true, usdc: "10", sol: "1", checkedAt: new Date().toISOString() } }, refetch: vi.fn() }), useQueries: ({ queries }: { queries: unknown[] }) => queries.map(() => ({ data: undefined })) }));
 vi.mock("@/lib/solana.functions", () => ({ getRealWallet: vi.fn() }));
+vi.mock("@/lib/migrate-policy.functions", () => ({ getMigratePolicy: vi.fn(async () => ({ enabled: false })), setMigratePolicy: vi.fn() }));
 vi.mock("@/components/deposit-simulation", () => ({ DepositSimulation: () => null }));
 vi.mock("@/components/withdrawal-simulation", () => ({ WithdrawalSimulation: () => <p>Revisión de cierre autorizada</p> }));
 vi.mock("@/components/harvest-dialog", () => ({ HarvestDialog: ({ compound }: { compound?: boolean }) => <p>{compound ? "Revisión de reinversión autorizada" : "Revisión de cosecha autorizada"}</p> }));
