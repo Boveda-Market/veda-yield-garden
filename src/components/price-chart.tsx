@@ -248,12 +248,14 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
         <span className={rise ? "text-primary" : "text-destructive"}>{chg >= 0 ? "+" : ""}{chg.toFixed(2)}%</span>
         <span className="ml-auto">{hhmm(sel.t)}</span>
       </div>
-      <div ref={boxRef} className="relative touch-none select-none" onPointerMove={move} onPointerDown={down} onPointerUp={up} onPointerCancel={up} onPointerLeave={(e) => { up(e); setHover(null); setHy(null); }}>
-        <div className="absolute bottom-2 left-2 z-10 flex overflow-hidden rounded-full bg-foreground text-lg font-bold leading-none text-background shadow-lg ring-2 ring-background" onPointerDown={(e) => e.stopPropagation()}>
-          <button type="button" aria-label={t("Alejar")} onClick={() => zoomBy(1.5)} disabled={CCOUNT >= ZMAX} className="flex h-10 w-11 items-center justify-center active:bg-background/20 disabled:opacity-40">−</button>
-          <button type="button" aria-label={t("Acercar")} onClick={() => zoomBy(1 / 1.5)} disabled={CCOUNT <= ZMIN} className="flex h-10 w-11 items-center justify-center border-l border-background/30 active:bg-background/20 disabled:opacity-40">+</button>
-          <button type="button" aria-label={t("Restablecer gráfica")} onClick={() => setCount(48)} disabled={CCOUNT === 48} className="flex h-10 w-11 items-center justify-center border-l border-background/30 text-base active:bg-background/20 disabled:opacity-40">↺</button>
+      <div className="flex items-center justify-between px-4 pb-1.5"><span className="text-[10px] text-muted-foreground">{CCOUNT} {t("velas")}</span>
+        <div className="flex overflow-hidden rounded-full bg-foreground text-lg font-bold leading-none text-background shadow" onPointerDown={(e) => e.stopPropagation()}>
+          <button type="button" aria-label={t("Alejar")} onClick={() => zoomBy(1.5)} disabled={CCOUNT >= ZMAX} className="flex h-9 w-11 items-center justify-center active:bg-background/20 disabled:opacity-40">−</button>
+          <button type="button" aria-label={t("Acercar")} onClick={() => zoomBy(1 / 1.5)} disabled={CCOUNT <= ZMIN} className="flex h-9 w-11 items-center justify-center border-l border-background/30 active:bg-background/20 disabled:opacity-40">+</button>
+          <button type="button" aria-label={t("Restablecer gráfica")} onClick={() => setCount(48)} disabled={CCOUNT === 48} className="flex h-9 w-11 items-center justify-center border-l border-background/30 text-base active:bg-background/20 disabled:opacity-40">↺</button>
         </div>
+      </div>
+      <div ref={boxRef} className="relative touch-none select-none" onPointerMove={move} onPointerDown={down} onPointerUp={up} onPointerCancel={up} onPointerLeave={(e) => { up(e); setHover(null); setHy(null); }}>
         <svg viewBox={`0 0 ${W} ${CH}`} preserveAspectRatio="none" className="h-52 w-full" aria-hidden>
           {grid.map((g) => <line key={g} x1="0" x2={PW} y1={y(g)} y2={y(g)} className="text-border" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke" />)}
           {timeIdx.map((i) => <line key={`v${i}`} x1={cx(i)} x2={cx(i)} y1="0" y2={CH} className="text-border" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" vectorEffect="non-scaling-stroke" />)}
