@@ -5,7 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, CreditCard, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
 import { decimalToUnits } from "@/lib/onboarding";
@@ -75,7 +76,7 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
     {auto ? waiting && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 size={16} className="animate-spin" />{t("Esperando tus dólares…")}</p> : <div className="flex flex-wrap gap-2">
       <Button onClick={() => void add()} disabled={waiting}>{waiting ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}{waiting ? t("Esperando tus dólares…") : t("Añadir fondos")}</Button>
     </div>}
-    <Dialog open={choosing} onOpenChange={setChoosing}><DialogContent>
+    <Dialog open={choosing} onOpenChange={setChoosing}><ActionSheetContent closeLabel={t("Cerrar")}>
       <DialogHeader><DialogTitle>{t("Añadir fondos")}</DialogTitle><DialogDescription>{t("Compra con tu saldo de Coinbase, banco o tarjeta.")}</DialogDescription></DialogHeader>
       <div className="grid gap-3">
         <button type="button" onClick={() => void pay("coinbase")} className="flex items-start gap-3 rounded-xl border border-primary/50 bg-primary/10 p-4 text-left transition-colors hover:bg-primary/20">
@@ -89,7 +90,7 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
           <span className="text-xs text-muted-foreground">{t("Compra rápida de USDC vía MoonPay. El monto se escribe en dólares.")}</span></span>
         </button>}
       </div>
-    </DialogContent></Dialog>
+    </ActionSheetContent></Dialog>
     {receipt && <div role="status" className="mt-3 rounded-xl border border-primary/40 bg-primary/10 p-4 text-sm">
       <p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} className="text-primary" />{t("¡Fondos añadidos!")}</p>
       <dl className="mt-2 divide-y divide-border">

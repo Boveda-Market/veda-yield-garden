@@ -60,3 +60,4 @@ use the editor.
 - Lazy-loaded components use lazyWithReload (src/lib/lazy-reload.ts) and the root listens for vite:preloadError: stale chunks after a new build trigger one guarded reload instead of a blank screen.
 - src/lib/dom-guard.ts patches Node removeChild/insertBefore on the client (installed in router.tsx) so translator/extension/visual-editor DOM edits cannot crash React into a blank screen; keep it.
 - Operation feedback: transient confirmations use notify() pills (src/lib/notify.tsx, Toaster mounted once in __root); confirmed vault/swap operations end on the shared ActionSuccess receipt, which never auto-dismisses, so users always see a calm, consistent proof of what happened.
+- Wallet actions (add funds, withdraw, swap, send, receive) open in the shared ActionSheetContent (src/components/ui/action-sheet.tsx) inside a Dialog root: bottom sheet with swipe-to-close on phones, centered card on desktop, so actions never jump the page scroll.

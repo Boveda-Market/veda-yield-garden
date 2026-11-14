@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Banknote, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { useT } from "@/lib/i18n";
 import { CashAppBtc } from "@/components/cashapp-btc";
 import { CoinbaseSell, sellFlagActive } from "@/components/coinbase-sell";
@@ -30,7 +31,7 @@ export function OfframpButton({ wallet, trial, trigger }: { wallet: string | nul
 
   return <>
     {trigger ? trigger(() => setOpen(true)) : <Button size="sm" onClick={() => setOpen(true)}><Banknote size={16} />{t("Retirar a banco o tarjeta")}</Button>}
-    <Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={setOpen}><ActionSheetContent closeLabel={t("Cerrar")}>
       <DialogHeader><DialogTitle>{t("Retirar a banco o tarjeta")}</DialogTitle><DialogDescription>{t("Pasa tus USDC a tu saldo de Coinbase, disponible al instante, o conviértelos a Bitcoin para Cash App. La comisión siempre la ves antes de firmar.")}</DialogDescription></DialogHeader>
       <div className="grid grid-cols-2 gap-2">{(Object.keys(options) as Provider[]).map((p) => <button key={p} type="button" onClick={() => setProvider(p)} aria-pressed={provider === p} className={`flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-colors ${provider === p ? "border-primary bg-primary/10 ring-2 ring-primary" : "border-border hover:border-primary/50"}`}><img src={options[p].icon} alt="" width={28} height={28} className="h-7 w-7 rounded-md" /><span className="text-sm font-semibold">{options[p].label}</span><span className="text-xs text-muted-foreground">{options[p].perk}</span></button>)}</div>
       {provider === "bank" && <p className="text-xs text-muted-foreground">{t("¿Usas PayPal? Retira primero a Coinbase y desde allí pásalo a PayPal.")}</p>}
@@ -39,6 +40,6 @@ export function OfframpButton({ wallet, trial, trigger }: { wallet: string | nul
         : !wallet ? <p role="status" className="text-sm">{t("Conecta tu wallet para retirar.")}</p>
         : provider === "cashapp" ? <CashAppBtc wallet={wallet} />
         : <CoinbaseSell wallet={wallet} />}
-    </DialogContent></Dialog>
+    </ActionSheetContent></Dialog>
   </>;
 }

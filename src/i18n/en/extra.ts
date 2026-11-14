@@ -1065,4 +1065,6 @@ export const extra: Record<string, string> = {
   "Tu billetera": "Your wallet", "Tus USDC ya están en tu billetera": "Your USDC is now in your wallet",
   "Tus dólares ya están rindiendo": "Your dollars are now earning", "Ya están en tu billetera": "They're now in your wallet",
   "Ya puedes seguir operando": "You can keep going", "{v} USDC en tu billetera": "{v} USDC in your wallet", "Ver en billetera": "View in wallet",
+  "Cambia entre tus monedas sin comisión de BÓVEDA.": "Swap between your coins with no BÓVEDA fee.", "Envía USDC o SOL a otra billetera.": "Send USDC or SOL to another wallet.",
+  "Envío realizado": "Transfer sent", "Envío": "Transfer",
 };

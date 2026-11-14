@@ -1,8 +1,11 @@
 import { ShieldCheck, Eye, EyeOff, LifeBuoy } from "lucide-react";
 import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
 import { TokenIcon } from "@/components/token-icon";
-import { useEffect, useRef, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useEffect, useState } from "react";
+import { Dialog, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ActionSheetContent } from "@/components/ui/action-sheet";
+import { ActionSuccess } from "@/components/action-success";
+import { notify } from "@/lib/notify";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, ChevronRight, LayoutDashboard, PieChart, Plus, TrendingUp } from "lucide-react";
@@ -63,7 +66,8 @@ export function WalletPanel() {
   const [buyOpen, setBuyOpen] = useState(0);
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [qr, setQr] = useState<string | null>(null);
-  const actionsRef = useRef<HTMLElement>(null);
+  const [sheet, setSheet] = useState(false);
+  const [sent, setSent] = useState<{ amount: string; asset: WalletAsset; to: string; sig: string } | null>(null);
   const [hidden, setHidden] = useHideBalances();
   const [contacts] = useContacts();
   const prices = useQuery({ queryKey: ["wallet-prices"], staleTime: 60_000, queryFn: async () => {
@@ -75,8 +79,8 @@ export function WalletPanel() {
     }));
     return out;
   } });
-  useEffect(() => { const f = new URLSearchParams(window.location.search).get("swap"); if (f === "SOL" || f === "USDC") { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from: f, amount: "" })); window.history.replaceState(null, "", "/wallet"); setTimeout(() => actionsRef.current?.scrollIntoView({ behavior: "smooth" }), 300); } }, []);
-  useEffect(() => { const c = new URLSearchParams(window.location.search).get("convert"); if (c && /^\d+(\.\d+)?$/.test(c)) { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from: "SOL", amount: c })); window.history.replaceState(null, "", "/wallet"); setTimeout(() => actionsRef.current?.scrollIntoView({ behavior: "smooth" }), 300); } }, []);
+  useEffect(() => { const f = new URLSearchParams(window.location.search).get("swap"); if (f === "SOL" || f === "USDC") { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from: f, amount: "" })); window.history.replaceState(null, "", "/wallet"); setSheet(true); } }, []);
+  useEffect(() => { const c = new URLSearchParams(window.location.search).get("convert"); if (c && /^\d+(\.\d+)?$/.test(c)) { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from: "SOL", amount: c })); window.history.replaceState(null, "", "/wallet"); setSheet(true); } }, []);
   useEffect(() => { if (!receiveOpen || !address || qr) return; void import("qrcode").then((m) => m.toDataURL(address, { width: 448, margin: 1 })).then(setQr).catch(() => setQr(null)); }, [receiveOpen, address, qr]);
 
   if (!session.authenticated) return <p className="text-muted-foreground">{t("Inicia sesión para ver tu wallet.")}</p>;
@@ -88,14 +92,17 @@ export function WalletPanel() {
   const amountError = amount && (!units ? t("Monto no válido") : units > max ? t("Saldo insuficiente") : null);
   const toError = tab === "send" && to && !solanaAddressSchema.safeParse(to).success ? t("Dirección no válida") : null;
   const reset = () => { setAmount(""); setTo(""); };
-  const done = (sig: string) => { setMessage(t("Listo. Operación enviada: {sig}", { sig: `${sig.slice(0, 8)}…` })); reset(); setTimeout(() => { void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] }); void queryClient.invalidateQueries({ queryKey: ["my-wallet-tokens", address] }); }, 4000); };
+  const refresh = () => setTimeout(() => { void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] }); void queryClient.invalidateQueries({ queryKey: ["my-wallet-tokens", address] }); }, 4000);
   const fail = (e: unknown) => setMessage(e instanceof Error ? e.message : t("No se pudo completar la operación."));
 
   async function send() {
     if (!units || amountError || toError || !to) return;
     setBusy(true); setMessage(null);
     if (!address) return;
-    try { done(await session.signAndSend(await buildTransfer({ from: address, to, asset, amount: units }))); } catch (e) { fail(e); } finally { setBusy(false); }
+    try {
+      const sig = await session.signAndSend(await buildTransfer({ from: address, to, asset, amount: units }));
+      setSent({ amount, asset, to, sig }); notify("success", t("Envío realizado"), `${amount} ${asset} → ${to.slice(0, 4)}…${to.slice(-4)}`); reset(); refresh();
+    } catch (e) { fail(e); } finally { setBusy(false); }
   }
   async function swap(quote: SwapQuote) {
     if (!address) return;
@@ -106,7 +113,7 @@ export function WalletPanel() {
         console.error("[BÓVEDA] swap preparation failed", e);
         throw new Error(`${t("No se pudo preparar el cambio")}: ${e instanceof Error ? e.message : String(e)}`);
       }
-      done(await session.signAndSend(bytes)); setMessage(null);
+      await session.signAndSend(bytes); refresh();
     } catch (e) { fail(e); throw e; } finally { setBusy(false); }
   }
 
@@ -116,8 +123,8 @@ export function WalletPanel() {
     { symbol: "SOL", label: t("Para costos de red"), raw: balances.data?.sol, decimals: 9 },
     ...extraTokens.map((x) => ({ symbol: x.symbol, label: x.symbol === "JupUSD" ? t("Pagos de predicciones") : x.symbol, raw: extra.data?.[x.symbol], decimals: x.decimals })),
   ].filter((a) => a.symbol === "USDC" || a.symbol === "SOL" || a.symbol === "MET" || (a.raw !== undefined && a.raw > 0n)).map((a) => { const amt = a.raw === undefined ? undefined : Number(a.raw) / 10 ** a.decimals; const p = prices.data?.[a.symbol]; return { ...a, amt, usd: amt !== undefined && p !== undefined ? amt * p : undefined }; });
-  const openSwap = (from: string, amount = "") => { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from, amount })); actionsRef.current?.scrollIntoView({ behavior: "smooth" }); };
-  const openSend = (a: WalletAsset) => { setTab("send"); setAsset(a); actionsRef.current?.scrollIntoView({ behavior: "smooth" }); };
+  const openSwap = (from: string, amount = "") => { setTab("swap"); setSent(null); setMessage(null); setSwapFrom((v) => ({ key: v.key + 1, from, amount })); setSheet(true); };
+  const openSend = (a: WalletAsset) => { setTab("send"); setSent(null); setMessage(null); setAsset(a); setSheet(true); };
   const decimals = asset === "SOL" ? 9 : 6;
   const setPct = (pct: bigint) => setAmount((Number((max * pct) / 100n) / 10 ** decimals).toString());
   const quick = [
@@ -186,9 +193,12 @@ export function WalletPanel() {
       </li>)}</ul>
     </section>
 
-    <section ref={actionsRef} className="scroll-mt-20 rounded-2xl border border-border bg-card p-5">
-      <div className="flex gap-2"><Button disabled={busy} variant={tab === "swap" ? "secondary" : "ghost"} onClick={() => setTab("swap")}><ArrowLeftRight size={16} />{t("Cambiar")}</Button><Button disabled={busy} variant={tab === "send" ? "secondary" : "ghost"} onClick={() => setTab("send")}><Send size={16} />{t("Enviar")}</Button></div>
-      {tab === "swap" ? <WalletSwap key={swapFrom.key} balances={swapBalances} initialFrom={swapFrom.from} initialAmount={swapFrom.amount} busy={busy} onConfirm={swap} /> : <div className="mt-4 space-y-4">
+    <Dialog open={sheet} onOpenChange={(o) => { if (!o && busy) return; setSheet(o); if (!o) { setSent(null); setMessage(null); } }}>
+      <ActionSheetContent closeLabel={t("Cerrar")} onInteractOutside={(e) => { if (busy) e.preventDefault(); }}>
+      <DialogHeader className="pr-10 text-left"><DialogTitle className="font-display text-xl">{tab === "swap" ? t("Cambiar") : t("Enviar")}</DialogTitle><DialogDescription>{tab === "swap" ? t("Cambia entre tus monedas sin comisión de BÓVEDA.") : t("Envía USDC o SOL a otra billetera.")}</DialogDescription></DialogHeader>
+      {!sent && <div role="tablist" className="grid grid-cols-2 gap-1 rounded-full bg-muted p-1">{([["swap", ArrowLeftRight, t("Cambiar")], ["send", Send, t("Enviar")]] as const).map(([k, Icon, label]) => <button key={k} type="button" role="tab" aria-selected={tab === k} disabled={busy} onClick={() => { setTab(k); setMessage(null); }} className={`flex items-center justify-center gap-1.5 rounded-full py-2 text-sm font-medium transition-colors ${tab === k ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}><Icon size={15} />{label}</button>)}</div>}
+      {sent ? <ActionSuccess destination={null} title={t("Envío realizado")} amount={{ value: sent.amount, unit: sent.asset }} body={t("Tu saldo se actualizará en unos segundos.")} details={[{ label: t("Operación"), value: t("Envío") }, { label: t("Destino"), value: `${sent.to.slice(0, 4)}…${sent.to.slice(-4)}` }, { label: t("Servicio BÓVEDA"), value: "0" }]} signature={sent.sig} onClose={() => { setSent(null); setSheet(false); }} />
+      : tab === "swap" ? <WalletSwap key={swapFrom.key} balances={swapBalances} initialFrom={swapFrom.from} initialAmount={swapFrom.amount} busy={busy} onConfirm={swap} /> : <div className="space-y-4">
         <div className="grid grid-cols-2 gap-2">{(["USDC", "SOL"] as const).map((a) => { const b = a === "SOL" ? balances.data?.sol : balances.data?.usdc; return <button key={a} type="button" onClick={() => setAsset(a)} className={`rounded-xl border p-3 text-left ${asset === a ? "border-primary bg-primary/10" : "border-border"}`}><p className="flex items-center gap-2 font-medium"><TokenIcon symbol={a} size={20} />{a}</p><p className="text-xs text-muted-foreground">{t("Disponible")}: {b !== undefined ? fmt(Number(spendable(b, a)) / 10 ** (a === "SOL" ? 9 : 6), 4) : "—"}</p></button>; })}</div>
         <div><label className="text-xs text-muted-foreground">{t("Dirección de destino")}</label><Input className="mt-1" placeholder={t("Pega la dirección aquí")} value={to} onChange={(e) => setTo(e.target.value.trim())} />
           {contacts.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{contacts.map((c) => <button key={c.address} type="button" onClick={() => setTo(c.address)} className={`rounded-full border px-3 py-1 text-xs ${to === c.address ? "border-primary bg-primary/10" : "border-border"}`}>{c.name} · {c.address.slice(0, 4)}…{c.address.slice(-4)}</button>)}</div>}
@@ -201,8 +211,9 @@ export function WalletPanel() {
         <p className="text-xs text-muted-foreground">{t("Revisa bien la dirección: los envíos no se pueden revertir. BÓVEDA no cobra comisión por enviar.")}</p>
         <Button className="w-full" disabled={busy || !units || !!amountError || !to || !!toError} onClick={() => void send()}>{busy ? t("Procesando…") : t("Revisar y firmar envío")}</Button>
       </div>}
-      {message && <p role="status" className="mt-3 text-sm">{message}</p>}
-    </section>
+      {message && <p role="alert" className="text-sm text-destructive">{message}</p>}
+      </ActionSheetContent>
+    </Dialog>
 
     <ReportProblem />
 
@@ -216,15 +227,15 @@ export function WalletPanel() {
     </details>
 
     <Dialog open={receiveOpen} onOpenChange={setReceiveOpen}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader><DialogTitle>{t("Recibir fondos")}</DialogTitle></DialogHeader>
+      <ActionSheetContent closeLabel={t("Cerrar")} className="sm:max-w-sm">
+        <DialogHeader className="pr-10 text-left"><DialogTitle className="font-display text-xl">{t("Recibir fondos")}</DialogTitle></DialogHeader>
         <div className="flex flex-col items-center gap-4">
           <div className="rounded-2xl bg-card p-3 ring-1 ring-border">{qr ? <img src={qr} alt={t("Código QR de tu dirección")} className="h-56 w-56" /> : <div className="h-56 w-56 animate-pulse rounded-xl bg-muted" />}</div>
           <code className="w-full break-all rounded-lg bg-muted p-3 text-center text-xs">{address}</code>
           <Button className="w-full" onClick={() => { void navigator.clipboard.writeText(address); setCopied(true); setTimeout(() => setCopied(false), 1500); }}><Copy size={14} />{copied ? t("Copiado") : t("Copiar dirección")}</Button>
           <p className="text-center text-xs text-muted-foreground">{t("Envía solo USDC, SOL o monedas compatibles a esta dirección.")}</p>
         </div>
-      </DialogContent>
+      </ActionSheetContent>
     </Dialog>
   </div>;
 }
