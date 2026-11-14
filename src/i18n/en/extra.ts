@@ -258,6 +258,8 @@ export const extra: Record<string, string> = {
   "Pasar a USDC": "Move to USDC",
   "Premios y reembolsos": "Prizes and refunds",
   "Pasar a disponibles": "Move to available",
+  "Sobrante de red": "Network surplus",
+  "No hay sobrante de red para pasar.": "There is no network surplus to move.",
   "Firmando…": "Signing…",
   "No hay premios ni reembolsos para pasar.": "There are no prizes or refunds to move.",
   "Listo: ya están en tus dólares disponibles": "Done: now in your available dollars",

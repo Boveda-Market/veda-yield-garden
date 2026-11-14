@@ -66,3 +66,12 @@ export function autoConvertLamports(balance: bigint): bigint {
 export function fundingAction(solLamports: bigint): "usdc" | "starter" {
   return solLamports >= MIN_SOL_LAMPORTS ? "usdc" : "starter";
 }
+
+/** Smallest prediction payout/refund (USD) offered for one-tap "Move to available"; dust stays counted in the total. */
+export const PAYOUT_MOVE_MIN_USD = 0.5;
+/** Smallest SOL excess (USD) above the network reserve offered for one-tap "Move to available". */
+export const SOL_EXCESS_MOVE_MIN_USD = 2;
+/** Lamports above the network reserve (MIN_SOL_LAMPORTS) that can move to available dollars; never touches the reserve. */
+export function solExcessLamports(balance: bigint): bigint {
+  return balance > MIN_SOL_LAMPORTS ? balance - MIN_SOL_LAMPORTS : 0n;
+}
