@@ -4,7 +4,7 @@ import { fetchCandles, type Candle, type MarketId } from "@/lib/markets";
 
 /** Price ticks arrive every ~1.5 s. */
 export const TICK_MS = 1500;
-const ZOOMS = [{ id: "1m", sec: 60 }, { id: "5m", sec: 300 }, { id: "15m", sec: 900 }] as const;
+const ZOOMS = [{ id: "1m", sec: 60 }, { id: "5m", sec: 300 }, { id: "15m", sec: 900 }, { id: "30m", sec: 1800 }, { id: "1h", sec: 3600 }] as const;
 type Zoom = (typeof ZOOMS)[number]["id"];
 type Style = "line" | "candles";
 const COUNT = 48;
@@ -39,11 +39,11 @@ export function PriceChart({ market, points, price, reference, referenceLabel }:
     if (candles.length > COUNT) candles.shift();
   }
 
-  const pill = (active: boolean) => `rounded-full px-3 py-1 text-xs font-semibold transition ${active ? "bg-foreground text-background" : "text-muted-foreground"}`;
+  const pill = (active: boolean) => `rounded-full px-2 py-1 text-[11px] font-semibold transition ${active ? "bg-foreground text-background" : "text-muted-foreground"}`;
   const controls = (
-    <div className="flex items-center justify-between px-5 pb-2">
+    <div className="flex items-center justify-between gap-2 px-4 pb-2">
       <div className="flex rounded-full bg-secondary p-0.5" role="tablist" aria-label={t("Estilo de gráfica")}>
-        {([["line", t("Línea")], ["candles", t("Velas")]] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={style === k} onClick={() => setStyle(k)} className={pill(style === k)}>{l}</button>)}
+        {([["line", t("Línea")], ["candles", t("Pro")]] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={style === k} onClick={() => setStyle(k)} className={pill(style === k)}>{l}</button>)}
       </div>
       {style === "candles" && <div className="flex rounded-full bg-secondary p-0.5" role="tablist" aria-label={t("Zoom de tiempo")}>
         {ZOOMS.map((z) => <button key={z.id} role="tab" aria-selected={zoom === z.id} onClick={() => setZoom(z.id)} className={pill(zoom === z.id)}>{z.id}</button>)}

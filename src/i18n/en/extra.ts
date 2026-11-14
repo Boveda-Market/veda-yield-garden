@@ -452,6 +452,7 @@ export const extra: Record<string, string> = {
   "Estilo de gráfica": "Chart style",
   "Línea": "Line",
   "Velas": "Candles",
+  "Pro": "Pro",
   "Cargando gráfica…": "Loading chart…",
   "Zoom de tiempo": "Time zoom",
   "Tu precio": "Your price",

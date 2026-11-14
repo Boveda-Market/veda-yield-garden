@@ -80,8 +80,20 @@ export async function fetchPrices(): Promise<Partial<Record<MarketId, number>>> 
 }
 
 export type Candle = { t: number; o: number; h: number; l: number; c: number };
-/** Recent real OHLC candles (oldest first). granularity in seconds: 60, 300 or 900. */
+/** Recent real OHLC candles (oldest first). granularity in seconds: 60, 300, 900, 1800 (aggregated) or 3600. */
 export async function fetchCandles(id: MarketId, granularity: number, count = 36): Promise<Candle[]> {
+  // Coinbase has no 30m granularity: build it from pairs of 15m candles.
+  if (granularity === 1800) {
+    const base = await fetchCandles(id, 900, count * 2 + 2);
+    const out: Candle[] = [];
+    for (const k of base) {
+      const t = Math.floor(k.t / 1_800_000) * 1_800_000;
+      const last = out[out.length - 1];
+      if (last && last.t === t) { last.h = Math.max(last.h, k.h); last.l = Math.min(last.l, k.l); last.c = k.c; }
+      else out.push({ ...k, t });
+    }
+    return out.slice(-count);
+  }
   try {
     const res = await fetch(`https://api.exchange.coinbase.com/products/${id}-USD/candles?granularity=${granularity}`);
     if (!res.ok) return [];
