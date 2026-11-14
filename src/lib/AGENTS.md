@@ -18,3 +18,4 @@
 - Browser polyfills are kept by an explicit exported call plus the package.json "sideEffects" list; never rely on a bare side-effect import, which the production build tree-shakes.
 - Operator mailbox (mailbox-admin.tsx): reads/sends via the Gmail connector server-side only, every call gated by payoutAdmin; sending only from Gmail send-as aliases (domain addresses forwarded to that Gmail), header values stripped of line breaks.
 - Privy custom API domain fallback (privy-api-fallback.ts): app-config custom_api_url is dropped when that host is unreachable so login falls back to auth.privy.io; installed by explicit call in privy-access.
+- Google Analytics 4: measurement ID stays in server secret GOOGLE_ANALYTICS_MEASUREMENT_ID, returned by getAnalyticsId and loaded client-side by GoogleAnalytics in __root (SPA page_view on route change).

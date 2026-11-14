@@ -19,6 +19,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { isChunkLoadError, reloadForNewVersion } from "../lib/lazy-reload";
 import { LanguageProvider } from "../lib/i18n";
 import { LanguageMenu } from "../components/language-menu";
+import { GoogleAnalytics } from "../components/google-analytics";
 import { REF_STORAGE_KEY, normalizeCode } from "../lib/affiliate";
 
 function NotFoundComponent() {
@@ -152,6 +153,7 @@ function RootComponent() {
       <LanguageProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <GoogleAnalytics />
         {!APP_PATHS.includes(pathname) && <LanguageMenu className="fixed bottom-4 right-4 z-50 shadow-lg" />}
       </LanguageProvider>
     </QueryClientProvider>
