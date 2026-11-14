@@ -22,6 +22,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   const t = useT();
   const [amount, setAmount] = useState(initialAmount);
   const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
   const readWallet = useServerFn(getRealWallet);
   const balances = useQuery({ queryKey: ["my-wallet", wallet], enabled: !!wallet, queryFn: async () => {
     const r = await readWallet({ data: { wallet: wallet! } });
@@ -40,8 +41,9 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   const clean = (v: string) => { const s = v.replace(/,/g, ".").replace(/[^\d.]/g, ""); const [w, ...rest] = s.split("."); return rest.length ? `${w}.${rest.join("").slice(0, 6)}` : (w ?? ""); };
 
   return <Dialog open onOpenChange={(open) => { if (!open && !busy) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
-    <DialogTitle>{position ? t("Depositar más ·") : t("Depositar ·")}{" "}{t(vault.name)}</DialogTitle>
-    <DialogDescription>{t("Elige cuánto quieres depositar y confirma con tu wallet.")}</DialogDescription>
+    <DialogTitle className={done ? "sr-only" : undefined}>{position ? t("Depositar más ·") : t("Depositar ·")}{" "}{t(vault.name)}</DialogTitle>
+    <DialogDescription className={done ? "sr-only" : undefined}>{t("Elige cuánto quieres depositar y confirma con tu wallet.")}</DialogDescription>
+    {!done && <>
     <div className="flex items-center justify-between rounded-xl bg-muted p-3 text-sm">
       <span className="text-muted-foreground">{t("Rendimiento estimado")}</span>
       <span className="font-display text-lg font-bold text-primary">{apr == null ? "—" : `${apr.toFixed(2)}% APR`}</span>
@@ -68,6 +70,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
     </dl>}
     <p className="text-xs leading-5 text-muted-foreground">{t("Parte de tus USDC se convierte automáticamente al otro token de la bóveda. Los costos de red se pagan aparte en SOL.")}</p>
     <p role="note" className="rounded-xl border border-border p-3 text-xs leading-5 text-muted-foreground">{t("Tu capital se combina con la otra moneda de la bóveda y su valor fluctuará con el precio de mercado, mientras acumulas comisiones en cada operación.")} <a href="/faq#vaults-fluctuation" className="underline">{t("¿Por qué cambia mi balance?")}</a></p>
-    {wallet ? <PilotDeposit vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onClose={onClose} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
+    </>}
+    {wallet ? <PilotDeposit vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onClose={onClose} onDoneChange={setDone} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
   </ActionSheetContent></Dialog>;
 }
