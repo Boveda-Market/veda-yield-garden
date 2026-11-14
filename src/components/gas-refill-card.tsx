@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Fuel } from "lucide-react";
+import { CheckCircle2, Fuel, Loader2, Sparkles } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { prepareGasRefill } from "@/lib/gas-refill.functions";
 import { gasIsLow, GAS_TARGET_LAMPORTS } from "@/lib/gas-refill";
-import { unitsToDecimal } from "@/lib/onboarding";
+import { MIN_USDC_MICRO, unitsToDecimal } from "@/lib/onboarding";
 
 type Props = { sol: bigint | undefined; usdc: bigint | undefined; onDone?: () => void };
 
@@ -19,6 +19,7 @@ export function GasRefillCard({ sol, usdc, onDone }: Props) {
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   if (sol === undefined || usdc === undefined || (!gasIsLow(sol) && !msg)) return null;
   const empty = sol === 0n;
+  const activation = empty && usdc >= MIN_USDC_MICRO;
   async function refill() {
     if (!session.walletAddress) return;
     setBusy(true); setMsg(null);
@@ -31,6 +32,14 @@ export function GasRefillCard({ sol, usdc, onDone }: Props) {
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? t(e.message) : t("No se pudo completar la recarga.") }); }
     finally { setBusy(false); }
   }
+  if (activation) return <section aria-label={t("Activa tu cuenta")} className="rounded-2xl border border-primary/40 bg-primary/10 p-5">
+    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><CheckCircle2 size={14} />{t("Dólares recibidos")}</p>
+    <h2 className="mt-2 font-display text-xl font-semibold">{t("Activa tu cuenta para operar")}</h2>
+    <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Tus dólares ya están en tu billetera. Para depositar y operar, apartamos una parte pequeña (menos de $3) para tu reserva de red ({sol} SOL). BÓVEDA paga el costo de esta primera activación; después la reserva es tuya.", { sol: unitsToDecimal(GAS_TARGET_LAMPORTS, 9) })}</p>
+    {msg && <p role={msg.ok ? "status" : "alert"} className={`mt-2 text-sm ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text}</p>}
+    {!msg?.ok && <Button className="mt-4 w-full" disabled={busy} onClick={() => void refill()}>{busy ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}{busy ? t("Activando…") : t("Activar mi cuenta")}</Button>}
+    <p className="mt-2 text-xs text-muted-foreground">{t("Confirmarás con tu huella o Face ID; al terminar verás cuánto se usó.")}</p>
+  </section>;
   return <section aria-label={t("Reserva para costos de red")} className={`rounded-2xl border p-4 ${empty ? "border-destructive/50 bg-destructive/10" : "border-accent bg-accent/30"}`}>
     <p className="flex items-center gap-2 font-semibold"><Fuel size={16} />{empty ? t("Te quedaste sin reserva para costos de red") : t("Te queda poca reserva para costos de red")}</p>
     <p className="mt-1 text-sm text-foreground/85">{t("Con un toque cambiamos una parte pequeña de tus USDC para dejar {sol} SOL de reserva. Funciona aunque tengas 0 SOL: BÓVEDA paga la red de esta recarga.", { sol: unitsToDecimal(GAS_TARGET_LAMPORTS, 9) })}</p>

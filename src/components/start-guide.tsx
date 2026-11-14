@@ -5,7 +5,7 @@ import { CheckCircle2, CreditCard, Loader2, ShieldCheck, Sparkles } from "lucide
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
-import { autoConvertLamports, decimalToUnits, GAS_KEEP_LAMPORTS, onboardingStep, ACTIVATE_MIN_USD } from "@/lib/onboarding";
+import { autoConvertLamports, decimalToUnits, GAS_KEEP_LAMPORTS, onboardingStep, ACTIVATE_MIN_USD, MIN_USDC_MICRO } from "@/lib/onboarding";
 import { buildSwap, quoteSwap, type SwapQuote } from "@/lib/wallet-actions";
 import { Button } from "@/components/ui/button";
 import { BuyUsdc } from "@/components/buy-usdc";
@@ -55,6 +55,8 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
   const step = onboardingStep(q.data.sol, q.data.usdc);
   if (!step && convertible <= 0n) return null;
 
+  // Funded with USDC but no network reserve: the activation card (treasury-sponsored refill) takes over.
+  if (step === "sol" && q.data.usdc >= MIN_USDC_MICRO) return null;
   if (step === "sol") return <section aria-label={t("Añadir fondos")} className={box}>
     <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Sparkles size={14} />{t("Empieza aquí")}</p>
     <h2 className="mt-2 font-display text-xl font-semibold">{t("Añade tus primeros fondos")}</h2>
