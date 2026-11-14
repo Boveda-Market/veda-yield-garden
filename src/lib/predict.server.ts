@@ -1,6 +1,7 @@
 import { parsePastRound, type PastRound } from "@/lib/predict";
 import { MARKET_ID_RE, assetOfTitle, windowOfDuration, windowOfSlug, windowOfTags, type LiveRound, type PredictPosition, type PredictQuote } from "@/lib/predict";
 import { USDC_MINT } from "@/lib/wallet-actions";
+import { orderStateOf, refundsFromHistory, type PredictOrderState, type PredictRefund } from "@/lib/predict-refunds";
 
 const API = "https://api.jup.ag/prediction/v1";
 
@@ -69,7 +70,7 @@ async function verify(heliusKey: string, wallet: string, base64: string) {
   if (sim.value.err) throw new Error("simulation failed");
 }
 
-type Build = { transaction: string | null; requiredSigners?: string[]; execution?: { context?: unknown }; order?: { contractsMicro?: string; orderCostUsd?: string } };
+type Build = { transaction: string | null; requiredSigners?: string[]; execution?: { context?: unknown }; order?: { contractsMicro?: string; orderCostUsd?: string; orderPubkey?: string } };
 
 export async function buildBuy(heliusKey: string, d: { wallet: string; marketId: string; isYes: boolean; amount: bigint }) {
   const live = await listRounds();
@@ -81,7 +82,8 @@ export async function buildBuy(heliusKey: string, d: { wallet: string; marketId:
   if (!b.transaction || (b.requiredSigners && b.requiredSigners.some((s) => s !== d.wallet))) throw new Error("bad build");
   await verify(heliusKey, d.wallet, b.transaction);
   const quote: PredictQuote = { contractsMicro: String(b.order?.contractsMicro ?? "0"), costMicro: String(b.order?.orderCostUsd ?? d.amount) };
-  return { transaction: b.transaction, context: JSON.stringify(b.execution?.context ?? null), quote };
+  const orderPubkey = typeof b.order?.orderPubkey === "string" && PUBKEY_RE.test(b.order.orderPubkey) ? b.order.orderPubkey : null;
+  return { transaction: b.transaction, context: JSON.stringify(b.execution?.context ?? null), quote, orderPubkey };
 }
 
 export async function buildSell(heliusKey: string, d: { wallet: string; position: string }) {
@@ -117,6 +119,25 @@ export async function listPositions(wallet: string): Promise<PredictPosition[]> 
     contractsMicro: p.contractsMicro, costMicro: p.totalCostUsd, valueMicro: p.valueUsd, payoutMicro: p.payoutUsd, pnlMicro: p.pnlUsd,
     closeTime: p.marketMetadata?.closeTime ?? null, status: p.marketMetadata?.status ?? "", result: p.marketMetadata?.result ?? null, isYes: p.isYes, eventId: p.eventId && /^POLY-\d{1,12}$/.test(p.eventId) ? p.eventId : undefined,
   }));
+}
+
+const PUBKEY_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+
+/** Fill state of one order after /execute; 404 right after submit just means "not indexed yet". */
+export async function orderStatus(orderPubkey: string): Promise<PredictOrderState> {
+  if (!PUBKEY_RE.test(orderPubkey)) throw new Error("bad order");
+  const key = process.env["JUPITER_API_KEY"];
+  const res = await fetch(`${API}/orders/status/${orderPubkey}`, { headers: key ? { "x-api-key": key } : {}, signal: AbortSignal.timeout(10_000) });
+  if (res.status === 404) return "pending";
+  if (!res.ok) throw new Error(`order status ${res.status}`);
+  const body = await res.json().catch(() => ({})) as { status?: string };
+  return orderStateOf(body.status);
+}
+
+/** Orders refunded in the last 24 h (never entered the round). */
+export async function listRefunds(wallet: string, maxAgeSec?: number): Promise<PredictRefund[]> {
+  const r = await jup<{ data?: Parameters<typeof refundsFromHistory>[0] }>(`/history?ownerPubkey=${encodeURIComponent(wallet)}&start=0&end=60`);
+  return refundsFromHistory(r.data ?? [], Date.now() / 1000, maxAgeSec);
 }
 
 let pastCache: { at: number; rounds: PastRound[] } | null = null;

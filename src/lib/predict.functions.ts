@@ -25,6 +25,23 @@ export const getPredictPositions = createServerFn({ method: "POST" })
     catch { return { success: false as const, positions: [] }; }
   });
 
+/** Public venue history: recent orders that did not enter their round and were refunded. */
+export const getPredictRefunds = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => z.object({ wallet: solanaAddressSchema }).strict().parse(i))
+  .handler(async ({ data }) => {
+    try { const { listRefunds } = await import("@/lib/predict.server"); return { success: true as const, refunds: await listRefunds(data.wallet) }; }
+    catch { return { success: false as const, refunds: [] }; }
+  });
+
+/** Fill state of the caller's just-submitted order so the app never claims an entry that was refunded. */
+export const getPredictOrderStatus = createServerFn({ method: "POST" })
+  .middleware([requirePrivyAuth])
+  .inputValidator((i: unknown) => z.object({ order: solanaAddressSchema }).strict().parse(i))
+  .handler(async ({ data }) => {
+    try { const { orderStatus } = await import("@/lib/predict.server"); return { success: true as const, state: await orderStatus(data.order) }; }
+    catch { return { success: false as const, state: "pending" as const }; }
+  });
+
 export const preparePredictBuy = createServerFn({ method: "POST" })
   .middleware([requirePrivyAuth])
   .inputValidator((i: unknown) => z.object({

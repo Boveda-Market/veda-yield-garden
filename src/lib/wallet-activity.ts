@@ -22,6 +22,7 @@ export function classifyActivity(logs: string[]): ActivityKind {
     if (has(/^CreateOrder/)) return "predict_buy";
     // A fill that logs "Order failed" did not open a position; the venue refunds it right after with CloseOrder.
     if (has(/^FillBuyOrder/)) return logs.some((l) => /Order failed/.test(l)) ? "predict_unfilled" : "predict_fill";
+    // CloseOrder also follows normal fills (returns leftover change); only a failed fill means a refund.
     if (has(/^CloseOrder/)) return "predict_cancel";
     return "predict_close";
   }
@@ -42,8 +43,8 @@ export const ACTIVITY_LABEL: Record<ActivityKind, string> = {
   predict_fill: "Sube/Baja · predicción abierta",
   predict_sell: "Sube/Baja · posición vendida",
   predict_close: "Sube/Baja · posición cerrada",
-  predict_unfilled: "Sube/Baja · orden no completada",
-  predict_cancel: "Sube/Baja · orden cancelada y reembolsada",
+  predict_unfilled: "Sube/Baja · orden no completada (reembolsada)",
+  predict_cancel: "Sube/Baja · orden finalizada",
   vault_deposit: "Depósito en bóveda",
   vault_harvest: "Cosecha de ganancias",
   vault_exit: "Cierre y liquidación",

@@ -13,7 +13,7 @@ import { ShareWin } from "@/components/share-win";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useT } from "@/lib/i18n";
 import { PREDICT_MAX_USDC, PREDICT_MIN_USDC, assetOfTitle, positionWon, potentialProfit, type LiveRound, type PredictPosition, type PredictQuote, type PredictSide } from "@/lib/predict";
-import { executePredict, getPredictPositions, preparePredictBuy, preparePredictClaim, preparePredictSell } from "@/lib/predict.functions";
+import { executePredict, getPredictOrderStatus, getPredictPositions, preparePredictBuy, preparePredictClaim, preparePredictSell } from "@/lib/predict.functions";
 import { buildSwap, JUPUSD_MINT, quoteSwap, readTokenBalance, toBaseUnits } from "@/lib/wallet-actions";
 import { getRealWallet } from "@/lib/solana.functions";
 import { decimalToUnits } from "@/lib/onboarding";
@@ -38,9 +38,9 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   // Manual entry stays closed by default so the phone keyboard never covers the quote and confirm button.
   const [customAmount, setCustomAmount] = useState(false);
   useEffect(() => { if (!side) setCustomAmount(false); }, [side]);
-  const [review, setReview] = useState<{ side: PredictSide; round: LiveRound; quote: PredictQuote; tx: string; context: string } | null>(null);
+  const [review, setReview] = useState<{ side: PredictSide; round: LiveRound; quote: PredictQuote; tx: string; context: string; order: string | null } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
-  const [msg, setMsg] = useState<{ ok: boolean; text: string; sig?: string; wallet?: boolean } | null>(null);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string; sig?: string; wallet?: boolean; pending?: boolean; sticky?: boolean } | null>(null);
   const [positions, setPositions] = useState<PredictPosition[]>([]);
   const [balance, setBalance] = useState<bigint | null>(null);
   const [win, setWin] = useState<string | null>(null);
@@ -110,7 +110,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
         const r = await preparePredictBuy({ data: { wallet, marketId: round.marketId, isYes: side === "up", amount: unitsKey } });
         if (id !== seq.current) return;
         if (!r.success) throw new Error(r.error);
-        setReview({ side, round, quote: r.quote, tx: r.transaction, context: r.context }); setQuoteErr(null);
+        setReview({ side, round, quote: r.quote, tx: r.transaction, context: r.context, order: r.orderPubkey ?? null }); setQuoteErr(null);
       } catch (e) { if (id === seq.current) { setReview(null); setQuoteErr(e instanceof Error ? e.message : String(e)); } }
       finally { if (id === seq.current) setQuoting(false); }
     };
@@ -128,10 +128,30 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
       seq.current++; setSide(null); setReview(null); setQuoteErr(null);
       const spent = toBaseUnits(amount, "USDC") ?? 0n;
       setBalance((b) => b === null ? b : b > spent ? b - spent : 0n);
-      setMsg({ ok: true, text: t("Predicción confirmada. Si aciertas, el pago llega solo a tu wallet al cerrar la ronda."), sig });
-      notify("round", t("Predicción confirmada"), t("Te avisamos al cerrar la ronda"));
       sync();
+      if (review.order) void followOrder(review.order, sig, review.quote.costMicro);
+      else { setMsg({ ok: true, text: t("Predicción enviada. Si aciertas, el pago llega solo a tu wallet al cerrar la ronda."), sig }); notify("round", t("Predicción enviada"), t("Te avisamos al cerrar la ronda")); }
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
+  };
+  // The signature only creates the order; the market fills it seconds later or refunds it. Tell the user which one happened.
+  const followOrder = async (order: string, sig: string, costMicro: string) => {
+    setMsg({ ok: true, pending: true, sticky: true, text: t("Orden enviada. Confirmando tu entrada a la ronda…"), sig });
+    const started = Date.now();
+    while (Date.now() - started < 45_000) {
+      await new Promise((r) => setTimeout(r, 2500));
+      const r = await getPredictOrderStatus({ data: { order } }).catch(() => null);
+      if (r?.state === "filled") {
+        setMsg({ ok: true, text: t("Predicción activa. Si aciertas, el pago llega solo a tu wallet al cerrar la ronda."), sig });
+        notify("round", t("Predicción activa"), t("Te avisamos al cerrar la ronda"));
+        sync(); return;
+      }
+      if (r?.state === "refunded") {
+        setMsg({ ok: true, sticky: true, wallet: true, text: t("Orden no completada: el precio cambió antes de entrar a la ronda. Te devolvimos ${v} completos y están listos en Mi Billetera.", { v: usdc(costMicro) }) });
+        notify("info", t("Orden no completada"), t("Te devolvimos tu dinero · Mi Billetera"));
+        sync(); void qc.invalidateQueries({ queryKey: ["predict-refunds", wallet] }); return;
+      }
+    }
+    setMsg({ ok: true, text: t("Tu orden sigue en proceso. Si no logra entrar a la ronda, te devolvemos el dinero y te avisamos aquí y en la campanita."), sig });
   };
   const sell = async (p: PredictPosition) => {
     if (!wallet) return; setBusy(p.pubkey); setMsg(null);
@@ -233,7 +253,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
         </ActionSheetContent>
       </Dialog>
 
-      {msg && <Dismissible key={msg.text} onDismiss={() => setMsg(null)} ms={msg.ok ? 6000 : 10000} className={`rounded-xl border p-3 pr-10 ${msg.ok ? "border-primary/30 bg-primary/10 text-primary" : "border-destructive/30 bg-destructive/10 text-destructive"}`}><p role="status" className="text-sm">{msg.text} {msg.wallet && <Link to="/wallet" className="underline">{t("Ver en tu wallet")}</Link>}{msg.sig && <a className="inline-flex items-center gap-1 underline" href={`https://orbmarkets.io/tx/${msg.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}<ExternalLink size={12} /></a>}</p></Dismissible>}
+      {msg && <Dismissible key={msg.text} onDismiss={() => setMsg(null)} ms={msg.sticky ? Infinity : msg.ok ? 6000 : 10000} className={`rounded-xl border p-3 pr-10 ${msg.ok ? "border-primary/30 bg-primary/10 text-primary" : "border-destructive/30 bg-destructive/10 text-destructive"}`}><p role="status" className="text-sm">{msg.pending && <Loader2 size={14} className="mr-1 inline animate-spin align-[-2px]" />}{msg.text} {msg.wallet && <Link to="/wallet" className="font-semibold underline">{t("Ir a Mi Billetera")}</Link>}{msg.sig && <a className="inline-flex items-center gap-1 underline" href={`https://orbmarkets.io/tx/${msg.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}<ExternalLink size={12} /></a>}</p></Dismissible>}
       {win && <ShareWin headline={t("¡Acerté! +{v} USDC", { v: win })} />}
 
       {lost.length > 0 && <section className="space-y-2" aria-label={t("Predicciones no acertadas")}>

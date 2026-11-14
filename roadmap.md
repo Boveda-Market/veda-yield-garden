@@ -63,3 +63,4 @@
 - [ ] Verify affiliate credit with a real invited wallet harvest/close — needs a real referred user's signature.
 
 - [x] Cash App: live quote before signing + 25/50/75/Max amount buttons.
+- [x] Notify refunded Sube/Baja orders: post-sign order check, bell card, Mi Billetera "Reembolso listo", Telegram (in app and while closed). Live order-status and history parsing verified on public data; not yet seen with a real refunded order from the owner's wallet.

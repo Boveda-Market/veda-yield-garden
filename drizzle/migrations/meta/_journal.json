@@ -127,6 +127,13 @@
       "when": 1794615458689,
       "tag": "0017_widen_profile_avatar_ids",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794693748516,
+      "tag": "0018_allow_refund_alerts",
+      "breakpoints": true
     }
   ]
 }

@@ -126,3 +126,22 @@ export const notifyPredictResults = createServerFn({ method: "POST" })
       return { success: true };
     } catch { return { success: false }; }
   });
+
+/** Telegram alert when the caller's Sube/Baja order was refunded instead of entering the round. Re-read server-side; once per account+order. */
+export const notifyPredictRefunds = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => req.extend({ wallet: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/), orders: z.array(z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/)).min(1).max(20) }).parse(i))
+  .handler(async ({ data }): Promise<{ success: boolean }> => {
+    try {
+      const { id, db } = await admin(data.token);
+      const { listRefunds } = await import("./predict.server");
+      const { refundAlertText } = await import("./predict-refunds");
+      const t = db as unknown as { from: (x: string) => any };
+      await t.from("telegram_links").update({ wallet: data.wallet }).eq("privy_user_id", id);
+      const tg = await import("./telegram.server");
+      for (const r of (await listRefunds(data.wallet)).filter((x) => data.orders.includes(x.order))) {
+        const { data: ins, error } = await t.from("predict_result_alerts").upsert({ privy_user_id: id, position: `order:${r.order}`, outcome: "refunded" }, { onConflict: "privy_user_id,position", ignoreDuplicates: true }).select("position");
+        if (!error && ins?.length) await tg.userAlert(id, refundAlertText(r), "predict");
+      }
+      return { success: true };
+    } catch { return { success: false }; }
+  });

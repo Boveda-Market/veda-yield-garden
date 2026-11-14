@@ -47,7 +47,8 @@ export const Route = createFileRoute("/api/public/jobs/check-system-status")({
         } catch { /* best-effort; never blocks status checks */ }
         try {
           // Sube/Baja results for linked users even while their app is closed; dedup shared with notifyPredictResults.
-          const { listPositions } = await import("@/lib/predict.server");
+          const { listPositions, listRefunds } = await import("@/lib/predict.server");
+          const { refundAlertText } = await import("@/lib/predict-refunds");
           const { resolvedOutcome, predictAlertText } = await import("@/lib/predict-alerts");
           const { data: links } = await db.from("telegram_links").select("privy_user_id, wallet").not("chat_id", "is", null).not("wallet", "is", null).eq("alerts_enabled", true).limit(200);
           for (const l of (links ?? []) as { privy_user_id: string; wallet: string }[]) {
@@ -57,6 +58,11 @@ export const Route = createFileRoute("/api/public/jobs/check-system-status")({
               if (!o) continue;
               const { data: ins, error } = await db.from("predict_result_alerts").upsert({ privy_user_id: l.privy_user_id, position: p.pubkey, outcome: o }, { onConflict: "privy_user_id,position", ignoreDuplicates: true }).select("position");
               if (!error && ins?.length) await tg.userAlert(l.privy_user_id, predictAlertText(p, o), "predict");
+            }
+            // Orders refunded instead of entering the round (last 2 h), so nobody waits on a round they are not in.
+            for (const r of await listRefunds(l.wallet, 7200).catch(() => [])) {
+              const { data: ins, error } = await db.from("predict_result_alerts").upsert({ privy_user_id: l.privy_user_id, position: `order:${r.order}`, outcome: "refunded" }, { onConflict: "privy_user_id,position", ignoreDuplicates: true }).select("position");
+              if (!error && ins?.length) await tg.userAlert(l.privy_user_id, refundAlertText(r), "predict");
             }
           }
         } catch { /* best-effort */ }

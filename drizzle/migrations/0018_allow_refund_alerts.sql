@@ -1,0 +1,2 @@
+ALTER TABLE public.predict_result_alerts DROP CONSTRAINT IF EXISTS predict_result_alerts_outcome_check;
+ALTER TABLE public.predict_result_alerts ADD CONSTRAINT predict_result_alerts_outcome_check CHECK (outcome IN ('won','lost','refunded'));
