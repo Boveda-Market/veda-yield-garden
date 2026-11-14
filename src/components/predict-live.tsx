@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { PredictPositionCard } from "@/components/predict-position-card";
 import { SolConvertShortcut } from "@/components/sol-convert-shortcut";
 import { ShareWin } from "@/components/share-win";
@@ -44,13 +45,8 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   const lostRef = useRef(new Set<string>());
 
   useEffect(() => { setReview(null); }, [round?.marketId]);
-  const confirmRef = useRef<HTMLDivElement>(null);
-  const jumpConfirm = () => requestAnimationFrame(() => confirmRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
-  // Scroll once per selection; the 15s quote refresh must not keep pulling the screen.
-  const jumped = useRef(false);
-  useEffect(() => { if (review && !jumped.current) { jumped.current = true; jumpConfirm(); } }, [review?.tx]);
-  const sidesRef = useRef<HTMLDivElement>(null);
-  const cancelQuote = () => { jumped.current = true; setSide(null); setReview(null); requestAnimationFrame(() => sidesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })); };
+  // The quote lives in a pop-up so choosing a side never scrolls the page.
+  const cancelQuote = () => { setSide(null); setReview(null); };
   const refresh = useCallback(async () => {
     if (!wallet) return;
     const r = await getPredictPositions({ data: { wallet } });
@@ -124,8 +120,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
     try {
       const sig = await sign(review.tx, review.context);
       // Order placed: clear the side so the 15s quote loop stops and the screen returns to normal.
-      seq.current++; jumped.current = true; setSide(null); setReview(null); setQuoteErr(null);
-      requestAnimationFrame(() => sidesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
+      seq.current++; setSide(null); setReview(null); setQuoteErr(null);
       const spent = toBaseUnits(amount, "USDC") ?? 0n;
       setBalance((b) => b === null ? b : b > spent ? b - spent : 0n);
       setMsg({ ok: true, text: t("Predicción confirmada. Si aciertas, el pago llega solo a tu wallet al cerrar la ronda."), sig });
@@ -172,11 +167,11 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
 
   return (
     <div className="space-y-4">
-      <div ref={sidesRef} className="grid grid-cols-2 gap-3 scroll-mt-24">
+      <div className="grid grid-cols-2 gap-3">
         {(["up", "down"] as const).map((s) => {
           const p = priceOf(s), on = side === s, up = s === "up";
           const Icon = up ? ArrowUpRight : ArrowDownRight;
-          return <button key={s} type="button" disabled={!p} aria-pressed={on} onClick={() => { if (on) { cancelQuote(); return; } jumped.current = false; setSide(s); setReview(null); jumpConfirm(); }}
+          return <button key={s} type="button" disabled={!p} aria-pressed={on} onClick={() => { if (on) { cancelQuote(); return; } setSide(s); setReview(null); }}
             className={`relative overflow-hidden rounded-2xl border-2 p-4 text-left transition active:scale-[0.97] disabled:opacity-40 ${on ? (up ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "border-destructive bg-destructive text-destructive-foreground shadow-lg shadow-destructive/30") : up ? "border-primary/40 bg-primary/5 text-primary" : "border-destructive/40 bg-destructive/5 text-destructive"}`}>
             <span className="flex items-center justify-between"><span className="font-display text-xl font-bold">{t(up ? "Sube" : "Baja")}</span><Icon size={22} /></span>
             <span className="mt-2 block font-display text-3xl font-bold tabular-nums">{p ? `${Math.round(p * 100)}%` : "—"}</span>
@@ -187,39 +182,46 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
       </div>
 
       {chart}
-      <section className="rounded-2xl border border-border bg-card p-4" aria-label={t("Tu orden")}>
-        <div className="flex items-center justify-between"><label htmlFor="predict-amount" className="text-sm font-semibold">{t("Estás poniendo (USDC)")}</label><span className="text-xs text-muted-foreground">{t("Disponible")}: <strong className="text-foreground tabular-nums">{!wallet ? "—" : balance === null ? "…" : usdc(balance)} USDC</strong></span></div>
-        <input id="predict-amount" inputMode="decimal" value={amount} onChange={(e) => { setAmount(e.target.value.replace(/[^0-9.]/g, "")); setReview(null); }} className="mt-2 h-12 w-full rounded-xl border border-input bg-background px-4 font-display text-xl font-bold" />
-        <div className="mt-2 grid grid-cols-5 gap-2">{[5, 10, 25, 50].map((v) => <Button key={v} type="button" variant="secondary" size="sm" onClick={() => { setAmount(String(v)); setReview(null); }}>${v}</Button>)}<Button type="button" variant="outline" size="sm" disabled={!maxMicro || maxMicro <= 0n} onClick={() => { if (maxMicro) { setAmount((Math.floor(Number(maxMicro) / 1e4) / 100).toFixed(2)); setReview(null); } }}>{t("Máx")}</Button></div>
-        {!inRange && <p className="mt-2 text-xs text-destructive">{t("Entre {min} y {max} USDC.", { min: PREDICT_MIN_USDC, max: PREDICT_MAX_USDC })}</p>}
-        {short && <p className="mt-2 text-xs text-destructive">{t("Saldo insuficiente: tienes {v} USDC.", { v: usdc(balance) })} <Link to="/wallet" className="underline">{t("Depositar o cambiar a USDC")}</Link></p>}
-        {inRange && selPrice && !review && <div className="mt-3 space-y-1 rounded-xl bg-secondary/50 p-3 text-sm">
-          <p className="flex justify-between"><span className="text-muted-foreground">{t("Pones")}</span><strong className="tabular-nums">{amt.toFixed(2)} USDC</strong></p>
-          <p className="flex justify-between"><span className="text-muted-foreground">{t("Si aciertas recibes aprox.")}</span><strong className="text-primary tabular-nums">{(amt / selPrice).toFixed(2)} USDC</strong></p>
-          <p className="flex justify-between"><span className="text-muted-foreground">{t("Ganancia posible")}</span><strong className="tabular-nums">+{(amt / selPrice - amt).toFixed(2)} USDC</strong></p>
-          <p className="flex justify-between"><span className="text-muted-foreground">{t("Precio por contrato")}</span><strong className="tabular-nums">{Math.round(selPrice * 100)}¢ · {(1 / selPrice).toFixed(2)}×</strong></p>
-          {short && <p className="pt-1 text-[11px] text-muted-foreground">{t("Cotización con el precio actual del mercado. Fondea tu wallet para firmarla.")}</p>}
-        </div>}
-        {short && <SolConvertShortcut className="mt-3" />}
-        {short && side && <Button asChild className="mt-3 h-12 w-full rounded-xl text-base font-bold"><Link to="/wallet">{t("Depositar o cambiar a USDC")}</Link></Button>}
-        {!side && <p className="mt-3 text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
-        {!wallet ? <p className="mt-3 rounded-xl bg-secondary p-3 text-center text-sm font-semibold">{t("Entra con tu cuenta para predecir en vivo con el USDC de tu wallet.")}</p>
-          : !review && !short && <Button disabled className="mt-3 h-12 w-full rounded-xl text-base font-bold">{quoting ? <><Loader2 className="animate-spin" /> {t("Cotizando en la red…")}</> : side ? t(side === "up" ? "Predecir Sube" : "Predecir Baja") : t("Elige Sube o Baja")}</Button>}
-        {quoteErr && <p className="mt-2 text-xs text-destructive">{t("No se pudo cotizar ahora mismo. Reintentando…")}</p>}
-        {side && !review && <Button type="button" variant="ghost" className="mt-2 w-full" onClick={cancelQuote}>{t("Cancelar cotización")}</Button>}
-        {wallet && !review && <p className="mt-2 text-[11px] text-muted-foreground">{t("La cotización real aparece aquí, lista para firmar.")}</p>}
-      </section>
-
-      <div ref={confirmRef} className="scroll-mt-24" />{review && <section className="space-y-2 rounded-2xl border-2 border-primary/50 bg-primary/5 p-4 text-sm" aria-label={t("Revisión")}>
-        <p className="flex items-center justify-between font-semibold"><span>{t("Cotización real")} · {t(review.side === "up" ? "Sube" : "Baja")}</span>{quoting && <Loader2 size={14} className="animate-spin text-muted-foreground" />}</p>
-        <p className="text-[11px] text-muted-foreground">{t("Transacción simulada en la red; se actualiza cada 15 s.")}</p>
-        <p className="flex justify-between"><span>{t("Pagas")}</span><strong>{usdc(review.quote.costMicro)} USDC</strong></p>
-        <p className="flex justify-between"><span>{t("Si aciertas recibes")}</span><strong className="text-primary">{usdc(review.quote.contractsMicro)} USDC</strong></p>
-        <p className="flex justify-between"><span>{t("Ganancia posible")}</span><strong>+{usdc(potentialProfit(review.quote))} USDC</strong></p>
-        <p className="text-xs text-muted-foreground">{t("Al expirar el tiempo la posición se cierra sola: si ganas, aparece tu premio para reclamar; si pierdes, desaparece. También puedes vender antes del cierre al precio del momento.")}</p>
-        <Button className="w-full" disabled={busy === "sign"} onClick={confirm}>{busy === "sign" ? <Loader2 className="animate-spin" /> : t("Confirmar y firmar")}</Button>
-        <Button type="button" variant="outline" className="w-full" disabled={busy === "sign"} onClick={cancelQuote}>{t("Cancelar cotización")}</Button>
-      </section>}
+      {!side && <p className="text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
+      <Dialog open={!!side} onOpenChange={(o) => { if (!o && busy !== "sign") cancelQuote(); }}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-2xl p-4 sm:p-6">
+          <DialogTitle className={`flex items-center gap-2 font-display text-xl ${side === "down" ? "text-destructive" : "text-primary"}`}>{side === "down" ? <ArrowDownRight size={22} /> : <ArrowUpRight size={22} />}{t(side === "down" ? "Predecir Baja" : "Predecir Sube")}{selPrice ? <span className="ml-auto text-sm font-semibold tabular-nums">{t("Paga {x}×", { x: (1 / selPrice).toFixed(2) })}</span> : null}</DialogTitle>
+          <DialogDescription className="text-xs">{t(side === "down" ? "Ganas si el precio baja" : "Ganas si el precio sube")}</DialogDescription>
+      <section aria-label={t("Tu orden")}>
+          <div className="flex items-center justify-between"><label htmlFor="predict-amount" className="text-sm font-semibold">{t("Estás poniendo (USDC)")}</label><span className="text-xs text-muted-foreground">{t("Disponible")}: <strong className="text-foreground tabular-nums">{!wallet ? "—" : balance === null ? "…" : usdc(balance)} USDC</strong></span></div>
+          <input id="predict-amount" inputMode="decimal" value={amount} onChange={(e) => { setAmount(e.target.value.replace(/[^0-9.]/g, "")); setReview(null); }} className="mt-2 h-12 w-full rounded-xl border border-input bg-background px-4 font-display text-xl font-bold" />
+          <div className="mt-2 grid grid-cols-5 gap-2">{[5, 10, 25, 50].map((v) => <Button key={v} type="button" variant="secondary" size="sm" onClick={() => { setAmount(String(v)); setReview(null); }}>${v}</Button>)}<Button type="button" variant="outline" size="sm" disabled={!maxMicro || maxMicro <= 0n} onClick={() => { if (maxMicro) { setAmount((Math.floor(Number(maxMicro) / 1e4) / 100).toFixed(2)); setReview(null); } }}>{t("Máx")}</Button></div>
+          {!inRange && <p className="mt-2 text-xs text-destructive">{t("Entre {min} y {max} USDC.", { min: PREDICT_MIN_USDC, max: PREDICT_MAX_USDC })}</p>}
+          {short && <p className="mt-2 text-xs text-destructive">{t("Saldo insuficiente: tienes {v} USDC.", { v: usdc(balance) })} <Link to="/wallet" className="underline">{t("Depositar o cambiar a USDC")}</Link></p>}
+          {inRange && selPrice && !review && <div className="mt-3 space-y-1 rounded-xl bg-secondary/50 p-3 text-sm">
+            <p className="flex justify-between"><span className="text-muted-foreground">{t("Pones")}</span><strong className="tabular-nums">{amt.toFixed(2)} USDC</strong></p>
+            <p className="flex justify-between"><span className="text-muted-foreground">{t("Si aciertas recibes aprox.")}</span><strong className="text-primary tabular-nums">{(amt / selPrice).toFixed(2)} USDC</strong></p>
+            <p className="flex justify-between"><span className="text-muted-foreground">{t("Ganancia posible")}</span><strong className="tabular-nums">+{(amt / selPrice - amt).toFixed(2)} USDC</strong></p>
+            <p className="flex justify-between"><span className="text-muted-foreground">{t("Precio por contrato")}</span><strong className="tabular-nums">{Math.round(selPrice * 100)}¢ · {(1 / selPrice).toFixed(2)}×</strong></p>
+            {short && <p className="pt-1 text-[11px] text-muted-foreground">{t("Cotización con el precio actual del mercado. Fondea tu wallet para firmarla.")}</p>}
+          </div>}
+          {short && <SolConvertShortcut className="mt-3" />}
+          {short && side && <Button asChild className="mt-3 h-12 w-full rounded-xl text-base font-bold"><Link to="/wallet">{t("Depositar o cambiar a USDC")}</Link></Button>}
+          {!side && <p className="mt-3 text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
+          {!wallet ? <p className="mt-3 rounded-xl bg-secondary p-3 text-center text-sm font-semibold">{t("Entra con tu cuenta para predecir en vivo con el USDC de tu wallet.")}</p>
+            : !review && !short && <Button disabled className="mt-3 h-12 w-full rounded-xl text-base font-bold">{quoting ? <><Loader2 className="animate-spin" /> {t("Cotizando en la red…")}</> : side ? t(side === "up" ? "Predecir Sube" : "Predecir Baja") : t("Elige Sube o Baja")}</Button>}
+          {quoteErr && <p className="mt-2 text-xs text-destructive">{t("No se pudo cotizar ahora mismo. Reintentando…")}</p>}
+          {side && !review && <Button type="button" variant="ghost" className="mt-2 w-full" onClick={cancelQuote}>{t("Cancelar cotización")}</Button>}
+          {wallet && !review && <p className="mt-2 text-[11px] text-muted-foreground">{t("La cotización real aparece aquí, lista para firmar.")}</p>}
+        </section>
+  
+        {review && <section className="space-y-2 rounded-2xl border-2 border-primary/50 bg-primary/5 p-4 text-sm" aria-label={t("Revisión")}>
+          <p className="flex items-center justify-between font-semibold"><span>{t("Cotización real")} · {t(review.side === "up" ? "Sube" : "Baja")}</span>{quoting && <Loader2 size={14} className="animate-spin text-muted-foreground" />}</p>
+          <p className="text-[11px] text-muted-foreground">{t("Transacción simulada en la red; se actualiza cada 15 s.")}</p>
+          <p className="flex justify-between"><span>{t("Pagas")}</span><strong>{usdc(review.quote.costMicro)} USDC</strong></p>
+          <p className="flex justify-between"><span>{t("Si aciertas recibes")}</span><strong className="text-primary">{usdc(review.quote.contractsMicro)} USDC</strong></p>
+          <p className="flex justify-between"><span>{t("Ganancia posible")}</span><strong>+{usdc(potentialProfit(review.quote))} USDC</strong></p>
+          <p className="text-xs text-muted-foreground">{t("Al expirar el tiempo la posición se cierra sola: si ganas, aparece tu premio para reclamar; si pierdes, desaparece. También puedes vender antes del cierre al precio del momento.")}</p>
+          <Button className="w-full" disabled={busy === "sign"} onClick={confirm}>{busy === "sign" ? <Loader2 className="animate-spin" /> : t("Confirmar y firmar")}</Button>
+          <Button type="button" variant="outline" className="w-full" disabled={busy === "sign"} onClick={cancelQuote}>{t("Cancelar cotización")}</Button>
+        </section>}
+        </DialogContent>
+      </Dialog>
 
       {msg && <Dismissible key={msg.text} onDismiss={() => setMsg(null)} ms={msg.ok ? 6000 : 10000} className={`rounded-xl border p-3 pr-10 ${msg.ok ? "border-primary/30 bg-primary/10 text-primary" : "border-destructive/30 bg-destructive/10 text-destructive"}`}><p role="status" className="text-sm">{msg.text} {msg.wallet && <Link to="/wallet" className="underline">{t("Ver en tu wallet")}</Link>}{msg.sig && <a className="inline-flex items-center gap-1 underline" href={`https://orbmarkets.io/tx/${msg.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}<ExternalLink size={12} /></a>}</p></Dismissible>}
       {win && <ShareWin headline={t("¡Acerté! +{v} USDC", { v: win })} />}
