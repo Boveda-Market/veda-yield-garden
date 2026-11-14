@@ -6,7 +6,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { ReceiptText, LoaderCircle, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { simulateRealWithdrawal, prepareRealWithdrawal } from "@/lib/withdrawal.functions";
 import { exitInput, EXIT_PERCENTS, type WithdrawalResult } from "@/lib/withdrawal";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
@@ -94,7 +95,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
     <label className="grid gap-2 text-sm">{t("Wallet propietaria")}<Input aria-label={t("Wallet propietaria")} value={address} disabled={pending || Boolean(wallet) || Boolean(signature)} maxLength={44} onChange={(e) => { setAddress(e.target.value.trim()); setResult(null); setAccepted(false); }} /></label>
     <label className="grid gap-2 text-sm">{t("Dirección de la posición")}<Input aria-label={t("Dirección de la posición")} value={positionAddress} disabled={pending || Boolean(position) || Boolean(signature)} maxLength={44} onChange={(e) => { setPositionAddress(e.target.value.trim()); setResult(null); setAccepted(false); }} /></label>
   </>;
-  return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
+  return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
     <DialogTitle>{t("Retiro a USDC ·")}{" "}{vaultId === "sol" ? "SOL" : "MET"}</DialogTitle>
     <DialogDescription>{t("Elige cuánto retirar y recíbelo en USDC en tu wallet.")}</DialogDescription>
     {!migrateTo && !finished && !signature && <div role="radiogroup" aria-label={t("Cuánto retirar")} className="grid grid-cols-4 gap-2">{EXIT_PERCENTS.map((p) => <Button key={p} type="button" role="radio" aria-checked={percent === p} variant={percent === p ? "default" : "outline"} disabled={pending} onClick={() => { setPercent(p); setResult(null); setAccepted(false); setMessage(null); }}>{p === 100 ? t("Todo") : `${p}%`}</Button>)}</div>}
@@ -128,5 +129,5 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
     {message && <p role="alert" className="text-sm">{message}</p>}
     {signature && <Link to="/wallet" onClick={onClose} className="text-xs underline">{t("Ver en tu wallet")}</Link>}
     </>}
-  </DialogContent></Dialog>;
+  </ActionSheetContent></Dialog>;
 }

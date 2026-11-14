@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { simulationDisplay } from "@/lib/deposit-simulation";
 import type { Vault } from "@/lib/vaults";
 import { PilotDeposit } from "@/components/pilot-deposit";
@@ -38,7 +39,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   const pick = (pct: bigint) => { if (usdc == null) return; const cap = usdc < MAX_MICRO ? usdc : MAX_MICRO; setAmount(microToText((cap * pct) / 100n)); };
   const clean = (v: string) => { const s = v.replace(/,/g, ".").replace(/[^\d.]/g, ""); const [w, ...rest] = s.split("."); return rest.length ? `${w}.${rest.join("").slice(0, 6)}` : (w ?? ""); };
 
-  return <Dialog open onOpenChange={(open) => { if (!open && !busy) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
+  return <Dialog open onOpenChange={(open) => { if (!open && !busy) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
     <DialogTitle>{position ? t("Depositar más ·") : t("Depositar ·")}{" "}{t(vault.name)}</DialogTitle>
     <DialogDescription>{t("Elige cuánto quieres depositar y confirma con tu wallet.")}</DialogDescription>
     <div className="flex items-center justify-between rounded-xl bg-muted p-3 text-sm">
@@ -68,5 +69,5 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
     <p className="text-xs leading-5 text-muted-foreground">{t("Parte de tus USDC se convierte automáticamente al otro token de la bóveda. Los costos de red se pagan aparte en SOL.")}</p>
     <p role="note" className="rounded-xl border border-border p-3 text-xs leading-5 text-muted-foreground">{t("Tu capital se combina con la otra moneda de la bóveda y su valor fluctuará con el precio de mercado, mientras acumulas comisiones en cada operación.")} <a href="/faq#vaults-fluctuation" className="underline">{t("¿Por qué cambia mi balance?")}</a></p>
     {wallet ? <PilotDeposit vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onClose={onClose} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
-  </DialogContent></Dialog>;
+  </ActionSheetContent></Dialog>;
 }

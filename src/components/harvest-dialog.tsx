@@ -7,7 +7,8 @@ import { ReceiptText, LoaderCircle, PenLine, Repeat } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { simulateRealHarvest, prepareRealHarvest } from "@/lib/harvest.functions";
 import type { HarvestResult } from "@/lib/harvest";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
@@ -64,7 +65,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
     finally { setPending(false); setStep(""); }
   }
   const coin = vaultId === "sol" ? "SOL" : "MET";
-  return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto">
+  return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
     <DialogTitle>{compound ? t("Reinvertir ganancias ·") : t("Cosechar Ganancias ·")}{" "}{coin}</DialogTitle>
     <DialogDescription>{compound ? t("Dos pasos: primero cosechas tus ganancias y luego sumas los USDC y el otro token cosechados a esta misma posición. Firmas cada paso por separado.") : t("Recibe las ganancias acumuladas. Tu depósito sigue en la bóveda generando más.")}</DialogDescription>
     {finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess title={t("¡Ganancias cosechadas!")} amount={result?.net ? { value: result.net, unit: "USDC" } : undefined} details={[{ label: t("Operación"), value: t("Cosecha de ganancias") }, { label: t("Origen"), value: t("Bóveda {v}", { v: vaultId === "sol" ? "SOL" : "MET" }) }, { label: t("Destino"), value: t("Tu billetera") }]} body={t("Las ganancias ya están en tu wallet y tu depósito sigue generando.")} signature={signature} onClose={onClose} />{compound && result?.netRaw && result.tokenRaw && <CompoundStep wallet={wallet} position={position} vaultId={vaultId} usdcRaw={result.netRaw} tokenRaw={result.tokenRaw} />}</> : <>
@@ -86,5 +87,5 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
     {message && <p role="alert" className="text-sm">{message}</p>}
     {signature && <a href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer" className="break-all text-xs underline">{t("Ver comprobante")}</a>}
     </>}
-  </DialogContent></Dialog>;
+  </ActionSheetContent></Dialog>;
 }
