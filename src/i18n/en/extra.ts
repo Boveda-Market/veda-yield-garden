@@ -1044,4 +1044,6 @@ export const extra: Record<string, string> = {
   "Marcar publicado": "Mark published",
   "Republicar": "Republish",
   "Escríbenos a admin@bovedamarket.app, consulta el canal oficial de Telegram o revisa los términos y la política de privacidad.": "Email us at admin@bovedamarket.app, check the official Telegram channel or review the terms and privacy policy.",
+  "Guías": "Guides",
+  "Leer la guía completa": "Read the full guide",
 };

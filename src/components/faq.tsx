@@ -5,7 +5,9 @@ import { ChevronDown, Search, X } from "lucide-react";
 import { FEE_WALLET } from "@/lib/fees";
 
 type Cat = "predict" | "vaults" | "fees" | "wallet" | "affiliates" | "trial";
-type Q = { id: string; cat: Cat; question: string; answer: string };
+type GuideTo = "/guias/que-es-usdc" | "/guias/retirar-cash-app-bitcoin" | "/guias/invertir-sin-estafas";
+type Q = { id: string; cat: Cat; question: string; answer: string; guide?: GuideTo };
+const GUIDES: Record<string, GuideTo> = { "wallet-usdc": "/guias/que-es-usdc", "withdraw-cashapp": "/guias/retirar-cash-app-bitcoin", "safety-why": "/guias/invertir-sin-estafas" };
 
 export const CATEGORIES: { id: Cat | "all"; label: string }[] = [
   { id: "all", label: "Todo" },
@@ -111,7 +113,7 @@ export function Faq({ preview = false }: { preview?: boolean }) {
     <div className="mt-10 rounded-xl border border-border bg-card p-5 text-sm text-card-foreground">
       <p className="font-display font-semibold">{t("¿No encontraste tu respuesta?")}</p>
       <p className="mt-1 text-muted-foreground">{t("Escríbenos a admin@bovedamarket.app, consulta el canal oficial de Telegram o revisa los términos y la política de privacidad.")}</p>
-      <div className="mt-3 flex flex-wrap gap-4 text-primary"><Link to="/terminos" className="underline">{t("Términos y condiciones")}</Link><Link to="/privacidad" className="underline">{t("Política de privacidad")}</Link><a href="mailto:admin@bovedamarket.app" className="underline">admin@bovedamarket.app</a></div>
+      <div className="mt-3 flex flex-wrap gap-4 text-primary"><Link to="/guias" className="underline">{t("Guías")}</Link><Link to="/terminos" className="underline">{t("Términos y condiciones")}</Link><Link to="/privacidad" className="underline">{t("Política de privacidad")}</Link><a href="mailto:admin@bovedamarket.app" className="underline">admin@bovedamarket.app</a></div>
     </div>
     <p className="mt-8 break-all text-xs leading-6 text-muted-foreground">{t("Wallet destinataria de cargos de Real:")}{" "}<span className="font-mono">{FEE_WALLET}</span></p>
   </section>;
@@ -122,6 +124,6 @@ function Item({ q, t, open }: { q: Q; t: (s: string) => string; open?: boolean }
     <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-display text-sm font-medium text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
       <span>{t(q.question)}</span><ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none" />
     </summary>
-    <div className="max-w-2xl pb-4 text-sm leading-7 text-muted-foreground">{t(q.answer)}</div>
+    <div className="max-w-2xl pb-4 text-sm leading-7 text-muted-foreground">{t(q.answer)}{GUIDES[q.id] && <> <Link to={GUIDES[q.id]} className="text-primary underline">{t("Leer la guía completa")}</Link></>}</div>
   </details>;
 }
