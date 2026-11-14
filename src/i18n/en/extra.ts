@@ -1104,4 +1104,7 @@ export const extra: Record<string, string> = {
   "Orden no completada": "Order not filled",
   "Te devolvimos tu dinero · Mi Billetera": "Your money was returned · My wallet",
   "Tu orden sigue en proceso. Si no logra entrar a la ronda, te devolvemos el dinero y te avisamos aquí y en la campanita.": "Your order is still processing. If it can't enter the round, your money is returned and we'll let you know here and in the bell.",
+  "Ronda finalizada · Confirmando el resultado oficial…": "Round ended · Confirming the official result…",
+  "sobre el precio a batir": "above the price to beat",
+  "debajo del precio a batir": "below the price to beat",
 };

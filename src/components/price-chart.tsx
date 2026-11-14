@@ -310,6 +310,9 @@ function DuelLine({ points, reference }: { points: number[]; reference?: number 
   const [, setFrame] = useState(0);
   const tick = useRef({ at: 0, from: 0, to: 0, len: 0 });
   const scale = useRef<number | null>(null);
+  // Keep the last official strike while the next one loads, so the duel never jumps to an unrelated reference.
+  const lastRef = useRef<number | undefined>(undefined);
+  if (reference) lastRef.current = reference;
 
   const last = points[points.length - 1];
   if (last !== undefined && points.length !== tick.current.len) {
@@ -332,7 +335,7 @@ function DuelLine({ points, reference }: { points: number[]; reference?: number 
   const pts = points.slice(-need);
   if (pts.length < 2 || !tick.current.at) return <div className="flex h-44 items-center justify-center text-xs text-muted-foreground">{t("Cargando precio en vivo…")}</div>;
   // Until the official strike arrives, duel against the first price seen so the chart never stalls.
-  const ref = reference ?? points[0]!;
+  const ref = reference ?? lastRef.current ?? points[0]!;
 
   const now = performance.now();
   const k = tick.current;
@@ -349,9 +352,9 @@ function DuelLine({ points, reference }: { points: number[]; reference?: number 
   sc = Math.max(sc, dev * 0.85);
   scale.current = sc;
   const lead = (v: number) => Math.tanh(((v - ref) / sc) * 1.8);
-  // Each side has its own momentum (fast for Sube, slower for Baja), so the lines move independently and cross naturally.
+  // Same momentum for both sides: the lines mirror each other exactly, with no visual bias toward Sube or Baja.
   const mom = (alpha: number) => { const out: number[] = []; let e = 0; for (let i = 0; i < vals.length; i++) { const d = i ? (vals[i]! - vals[i - 1]!) / sc : 0; e += (d - e) * alpha; out.push(Math.tanh(e * 4)); } return out; };
-  const mUp = mom(0.55), mDown = mom(0.25);
+  const mUp = mom(0.35), mDown = mUp;
 
   const toX = (age: number) => W - (age / span) * W;
   const y = (share: number) => PAD + (1 - Math.max(0.02, Math.min(0.98, share))) * (H - PAD * 2);
@@ -362,6 +365,7 @@ function DuelLine({ points, reference }: { points: number[]; reference?: number 
   const nowLead = lead(head);
   const upPct = Math.round(50 + nowLead * 47), downPct = 100 - upPct;
   const upWins = head >= ref;
+  const gap = head - ref;
   const mid = H / 2;
 
   return (
@@ -371,6 +375,7 @@ function DuelLine({ points, reference }: { points: number[]; reference?: number 
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold transition-colors ${upWins ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{upWins ? t("Va ganando Sube") : t("Va ganando Baja")}</span>
         <span className={`tabular-nums transition-colors ${!upWins ? "text-destructive" : "text-muted-foreground"}`}>{t("Baja")} {downPct}% ▼</span>
       </div>
+      <p className={`px-3 pb-1 text-center text-[11px] font-semibold tabular-nums ${upWins ? "text-primary" : "text-destructive"}`}>{upWins ? "▲ +" : "▼ -"}${fmt(Math.abs(gap))} {upWins ? t("sobre el precio a batir") : t("debajo del precio a batir")}</p>
       <div className="relative">
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="h-40 w-full" aria-label={upWins ? t("Va ganando Sube") : t("Va ganando Baja")}>
           <defs>

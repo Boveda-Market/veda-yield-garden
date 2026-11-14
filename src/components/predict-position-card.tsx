@@ -59,7 +59,14 @@ const money = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigi
 /** Live trading strip: principal, live asset price vs price to beat and current profit if the round closed now. */
 export function LivePositionStats({ p, price, strike, compact }: { p: PredictPosition; price: number | undefined; strike: number | undefined; compact?: boolean }) {
   const t = useT();
+  const now = useNow();
+  // After the bell the round is decided by the official close: freeze the last price seen before it, never later ticks.
+  const ended = !!p.closeTime && now >= p.closeTime * 1000;
+  const lastOpen = useRef<number | undefined>(undefined);
+  if (!ended && price !== undefined) lastOpen.current = price;
+  if (ended) price = lastOpen.current;
   const cost = Number(p.costMicro || "0") / 1e6, payout = Number(p.payoutMicro || "0") / 1e6;
+  if (ended) return <p className={compact ? "mt-0.5 text-[11px] font-semibold text-muted-foreground" : "mt-4 rounded-xl border border-border bg-muted/50 p-3 text-center text-sm font-semibold text-muted-foreground"}>⏳ {t("Ronda finalizada · Confirmando el resultado oficial…")}</p>;
   const diff = price !== undefined && strike ? price - strike : null;
   const winning = diff === null ? null : p.side === "up" ? diff >= 0 : diff < 0;
   const gain = winning === null ? null : winning ? payout - cost : -cost;
@@ -103,7 +110,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
         <p className="mt-1 text-xs text-muted-foreground">{when}</p>
         <PoweredBy brand="polymarket" className="mt-1 !justify-start" />
       </div>
-      <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums ${open ? (pnl !== null && pnl < 0n ? "bg-destructive/15 text-destructive" : "bg-primary/15 text-primary") : won ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
+      <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums ${open ? (!mmss ? "bg-muted text-muted-foreground" : pnl !== null && pnl < 0n ? "bg-destructive/15 text-destructive" : "bg-primary/15 text-primary") : won ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
         {open ? (mmss ? `⏱ ${t("Cierra en {v}", { v: mmss })}` : t("Resolviendo…")) : won === null ? t("Cerrada") : won ? t("Acertaste") : t("No acertaste")}
       </span>
     </div>
