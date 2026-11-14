@@ -820,6 +820,7 @@ export const extra: Record<string, string> = {
   "Verás primero la cantidad en SOL (≈ {sol} SOL = ${usd}).": "You'll first see the amount in SOL (≈ {sol} SOL = ${usd}).",
   "Para ver o escribir el monto en dólares, pulsa las flechas (⇄) dentro de MoonPay.": "To see or type the amount in dollars, tap the arrows (⇄) inside MoonPay.",
   "Tus fondos llegan a tu wallet y luego activas tus dólares con un toque.": "Your funds reach your wallet, then you activate your dollars with one tap.",
+  "Compra rápida de USDC vía MoonPay. El monto se escribe en dólares.": "Quick USDC purchase via MoonPay. You enter the amount in dollars.",
   "Continuar a MoonPay": "Continue to MoonPay",
   "Compra rápida de USDC vía MoonPay.": "Quick USDC purchase via MoonPay.",
   "Pago con tarjeta no disponible": "Card payment unavailable",

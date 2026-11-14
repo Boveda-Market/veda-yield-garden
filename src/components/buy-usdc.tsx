@@ -1,6 +1,5 @@
 import { useT } from "@/lib/i18n";
-import { CARD_MIN_USD, GAS_TOP_UP_SOL, STARTER_USD, solForUsd } from "@/lib/onboarding";
-import { ArrowLeftRight } from "lucide-react";
+import { CARD_MIN_USD } from "@/lib/onboarding";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -29,7 +28,6 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
   const cbBuy = useServerFn(startCoinbaseBuy);
   const cbStatus = useServerFn(coinbaseOnrampStatus);
   const cbRecord = useServerFn(recordCoinbaseOnramp);
-  const [intro, setIntro] = useState<{ sol: string } | null>(null);
   const [cardUnlocked, setCardUnlocked] = useState(false);
   useEffect(() => { if (session.authenticated) void cbStatus().then((r) => setCardUnlocked(r.done)).catch(() => {}); }, [session.authenticated]); // eslint-disable-line react-hooks/exhaustive-deps
   const address = session.walletAddress;
@@ -57,16 +55,7 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
         if (tab) tab.location.href = r.url; else window.location.href = r.url;
         if (starter) return;
       } else {
-        if (starter) {
-          // New wallets: buy in dollars, receive SOL for network costs; the start guide then activates the rest to USDC.
-          if (!session.buySol) throw new Error("Pago con tarjeta no disponible");
-          // Explain first that MoonPay opens in SOL and the arrows switch to dollars.
-          const price = await fetch("https://api.dexscreener.com/tokens/v1/solana/So11111111111111111111111111111111111111112").then((r) => r.json() as Promise<{ priceUsd?: string; liquidity?: { usd?: number } }[]>).then((j) => Number([...j].sort((a, b) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0))[0]?.priceUsd)).catch(() => null);
-          setIntro({ sol: solForUsd(Number(STARTER_USD), price) ?? GAS_TOP_UP_SOL });
-          return;
-          void queryClient.invalidateQueries();
-          return;
-        }
+        // Card purchases are always USDC priced in US dollars, so a typed "10" can never mean 10 SOL; the network reserve refills from USDC.
         if (!session.buyUsdc) throw new Error("Pago con tarjeta no disponible");
         await session.buyUsdc();
       }
@@ -81,12 +70,6 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
       const m = e instanceof Error ? e.message : String(e);
       if (!/exit|clos|cancel/i.test(m)) setError(t("No se pudo abrir la compra: {message}", { message: t(m) }));
     } finally { setWaiting(false); release(); }
-  }
-
-  async function continueCard() {
-    const sol = intro?.sol; setIntro(null);
-    try { await session.buySol?.(sol); void queryClient.invalidateQueries(); }
-    catch (e) { const m = e instanceof Error ? e.message : String(e); if (!/exit|clos|cancel/i.test(m)) setError(t("No se pudo abrir la compra: {message}", { message: t(m) })); }
   }
 
   return <div className={className}>
@@ -104,19 +87,8 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
         {session.buyUsdc && <button type="button" onClick={() => void pay("card")} className="flex items-start gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:bg-muted">
           <CreditCard size={24} className="mt-0.5 text-muted-foreground" />
           <span><span className="block text-sm font-medium">{t("Tarjeta o Apple Pay")} · {t("Mínimo")} ${CARD_MIN_USD}</span>
-          <span className="text-xs text-muted-foreground">{t("Compra rápida vía MoonPay. Usa las flechas para ver el monto en dólares.")}</span></span>
+          <span className="text-xs text-muted-foreground">{t("Compra rápida de USDC vía MoonPay. El monto se escribe en dólares.")}</span></span>
         </button>}
-      </div>
-    </DialogContent></Dialog>
-    <Dialog open={!!intro} onOpenChange={(o) => { if (!o) setIntro(null); }}><DialogContent>
-      <DialogHeader><DialogTitle>{t("Antes de pagar con tarjeta")}</DialogTitle><DialogDescription>{t("Monto sugerido: ${usd} (mínimo ${min}).", { usd: STARTER_USD, min: CARD_MIN_USD })}</DialogDescription></DialogHeader>
-      <div className="grid gap-3 text-sm">
-        <div className="rounded-xl border border-primary/40 bg-primary/10 p-4">
-          <p className="font-semibold">{t("Verás primero la cantidad en SOL (≈ {sol} SOL = ${usd}).", { sol: intro?.sol ?? "", usd: STARTER_USD })}</p>
-          <p className="mt-2 flex items-center gap-2 text-muted-foreground"><ArrowLeftRight size={16} className="shrink-0 text-primary" />{t("Para ver o escribir el monto en dólares, pulsa las flechas (⇄) dentro de MoonPay.")}</p>
-        </div>
-        <p className="text-muted-foreground">{t("Tus fondos llegan a tu wallet y luego activas tus dólares con un toque.")}</p>
-        <Button onClick={() => void continueCard()}>{t("Continuar a MoonPay")}</Button>
       </div>
     </DialogContent></Dialog>
     {receipt && <div role="status" className="mt-3 rounded-xl border border-primary/40 bg-primary/10 p-4 text-sm">
