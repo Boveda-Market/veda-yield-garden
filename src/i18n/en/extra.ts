@@ -454,6 +454,7 @@ export const extra: Record<string, string> = {
   "Velas": "Candles",
   "Pro": "Pro",
   "Cargando gráfica…": "Loading chart…",
+  "Restablecer gráfica": "Reset chart",
   "Acercar": "Zoom in",
   "Alejar": "Zoom out",
   "Zoom de tiempo": "Time zoom",

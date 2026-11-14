@@ -252,6 +252,7 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
         <div className="absolute bottom-2 left-2 z-10 flex overflow-hidden rounded-full bg-foreground text-lg font-bold leading-none text-background shadow-lg ring-2 ring-background" onPointerDown={(e) => e.stopPropagation()}>
           <button type="button" aria-label={t("Alejar")} onClick={() => zoomBy(1.5)} disabled={CCOUNT >= ZMAX} className="flex h-10 w-11 items-center justify-center active:bg-background/20 disabled:opacity-40">−</button>
           <button type="button" aria-label={t("Acercar")} onClick={() => zoomBy(1 / 1.5)} disabled={CCOUNT <= ZMIN} className="flex h-10 w-11 items-center justify-center border-l border-background/30 active:bg-background/20 disabled:opacity-40">+</button>
+          <button type="button" aria-label={t("Restablecer gráfica")} onClick={() => setCount(48)} disabled={CCOUNT === 48} className="flex h-10 w-11 items-center justify-center border-l border-background/30 text-base active:bg-background/20 disabled:opacity-40">↺</button>
         </div>
         <svg viewBox={`0 0 ${W} ${CH}`} preserveAspectRatio="none" className="h-52 w-full" aria-hidden>
           {grid.map((g) => <line key={g} x1="0" x2={PW} y1={y(g)} y2={y(g)} className="text-border" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke" />)}
