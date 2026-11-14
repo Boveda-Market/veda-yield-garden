@@ -16,3 +16,13 @@ export const ANNOUNCEMENTS: Announcement[] = [
 export const latestAnnouncementId = () => ANNOUNCEMENTS[0]?.id ?? "";
 export const SEEN_KEY = "boveda.news.seen";
 export const DISMISSED_KEY = "boveda.news.dismissed";
+
+/** Announcements already posted to the Telegram channel (plus ones marked locally by the operator). */
+export const PUBLISHED_IDS = ["2026-11-security-performance"];
+export const PUBLISHED_KEY = "boveda-admin-published";
+export function readPublished(): string[] {
+  try { return [...PUBLISHED_IDS, ...JSON.parse(localStorage.getItem(PUBLISHED_KEY) || "[]")]; } catch { return PUBLISHED_IDS; }
+}
+export function markPublished(id: string) {
+  try { const s = new Set(readPublished()); s.add(id); localStorage.setItem(PUBLISHED_KEY, JSON.stringify([...s])); window.dispatchEvent(new Event("boveda-published")); } catch { /* ignore */ }
+}
