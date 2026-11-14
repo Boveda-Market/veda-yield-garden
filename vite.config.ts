@@ -18,7 +18,13 @@ const browserEvents = require.resolve("events/");
 export default defineConfig({
   vite: {
     // Apply before SSR creates shared dependency chunks, not only in Nitro.
-    resolve: { alias: [{ find: /^@coral-xyz\/anchor$/, replacement: anchorCjs }] },
+    resolve: { alias: [
+      { find: /^@coral-xyz\/anchor$/, replacement: anchorCjs },
+      // Email rendering needs entities v4; a nested v7 copy lacks lib/decode.js.
+      { find: /^entities\/lib\/decode\.js$/, replacement: resolve("node_modules/entities/lib/decode.js") },
+      { find: /^entities\/lib\/encode\.js$/, replacement: resolve("node_modules/entities/lib/encode.js") },
+      { find: /^entities$/, replacement: resolve("node_modules/entities") },
+    ] },
     // Pre-bundle lazily imported wallet deps at startup so a mid-session
     // re-optimization cannot load two React copies (null hook dispatcher).
     optimizeDeps: { include: ["buffer", "bs58", "@solana/kit", "@privy-io/react-auth", "@privy-io/react-auth/solana", "@privy-io/react-auth/ui"] },
