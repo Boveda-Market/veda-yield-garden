@@ -23,7 +23,7 @@ export function installPrivyApiFallback(): void {
   window.fetch = async (input, init) => {
     const res = await original(input, init);
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-    if (!/^https:\/\/auth\.privy\.io\/api\/v1\/apps\/[^/?]+$/.test(url.split("?")[0]) || !res.ok) return res;
+    if (!/^https:\/\/auth\.privy\.io\/api\/v1\/apps\/[^/?]+$/.test(url.split("?")[0] ?? "") || !res.ok) return res;
     try {
       const data = await res.clone().json();
       const custom = data?.custom_api_url;
