@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQueries } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -17,7 +17,8 @@ import { HarvestDialog } from "@/components/harvest-dialog";
 import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
 import { DepositSimulation } from "@/components/deposit-simulation";
 import { PoweredBy } from "@/components/powered-by";
-import { RebalanceButton } from "@/components/rebalance-button";
+import { RebalanceButton, RangeUrgentBanner } from "@/components/rebalance-button";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useRealWallet } from "@/hooks/use-real-wallet";
 
 type Supported = OperableVault;
@@ -26,6 +27,21 @@ const supported = isOperableVault;
 /** Shared cached read of the wallet's open vault positions (same cache as every wallet screen). */
 export function useWalletVaults(wallet: string) {
   return useRealWallet(wallet);
+}
+
+/** Urgent out-of-range notice for Mi Billetera; a ?rebalance=<position> link (bell, Telegram) opens its sheet directly. */
+export function WalletRangeBanner({ wallet }: { wallet: string }) {
+  const query = useWalletVaults(wallet);
+  const positions: ChainPosition[] = query.data?.success ? query.data.data.positions : [];
+  const target = (useSearch({ strict: false }) as { rebalance?: string }).rebalance ?? null;
+  const navigate = useNavigate();
+  const [openFor, setOpenFor] = useState<string | null>(null);
+  useEffect(() => {
+    if (!target || !positions.some((p) => p.address === target)) return;
+    setOpenFor(target);
+    void navigate({ to: "/wallet", search: {}, replace: true });
+  }, [target, positions, navigate]);
+  return <RangeUrgentBanner positions={positions} openFor={openFor} />;
 }
 
 /** Compact open-vault cards for Mi Billetera; renders nothing without open positions. */

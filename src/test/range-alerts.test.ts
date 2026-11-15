@@ -43,3 +43,19 @@ describe("out-of-range monitor", () => {
     expect(r.cleared).toEqual([`range:${base.address}`]);
   });
 });
+
+import { rangeAlertButton, rebalanceLink } from "@/lib/dlmm";
+describe("rebalance deep link in alerts", () => {
+  it("Telegram button opens the rebalance sheet for that exact position in Mi Billetera", () => {
+    expect(rebalanceLink("5WbsuG4T4FrtwYDCB7YWTDxLj47yqAwAJD9o4Rk886nu")).toBe("https://bovedamarket.app/wallet?rebalance=5WbsuG4T4FrtwYDCB7YWTDxLj47yqAwAJD9o4Rk886nu");
+    expect(rangeAlertButton("abc").text).toBe("🎯 Rebalancear ahora");
+  });
+  it("the 10-minute alert carries the rebalance button", async () => {
+    const buttons: { url: string }[] = [];
+    const now = Date.now();
+    const rows = new Map([["range:Pos1", { service: "range:Pos1", first_down_at: new Date(now - 11 * 60_000).toISOString(), operator_alerted: false }]]);
+    const { trackRangePositions: track } = await import("@/lib/range-monitor");
+    await track({ privyUserId: "u1", positions: [{ address: "Pos1", vaultId: "gta6", symbol: "GTA6", tokenAmount: "1", usdcAmount: "1", feeTokenAmount: "0", feeUsdcAmount: "0", locked: false, outOfRange: true }] as never, rows, now, store: { save: async () => 0, clear: async () => 0 }, alert: async (_id, _html, b) => buttons.push(b), vaultName: () => "Bóveda GTA6" });
+    expect(buttons.map((b) => b.url)).toEqual(["https://bovedamarket.app/wallet?rebalance=Pos1"]);
+  });
+});

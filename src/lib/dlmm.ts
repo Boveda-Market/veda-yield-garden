@@ -57,8 +57,14 @@ export function rebalanceSwapPlan(x: bigint, y: bigint, price: number): { swapFo
 
 /** Personal alert text when a range position has been out of range for 10 minutes. */
 export function rangeAlertText(vaultName: string, above: boolean) {
-  return `⚠️ <b>Tu ${vaultName} lleva más de 10 minutos fuera de rango</b>\nEl precio ${above ? "subió por encima" : "bajó por debajo"} de tu rango, así que no está generando comisiones.\n\n🔗 <a href="https://bovedamarket.app/wallet">Entra a BÓVEDA y rebalancéala con un toque</a>`;
+  return `🚨 <b>Tu ${vaultName} dejó de generar ganancias</b>\nEl precio ${above ? "subió por encima" : "bajó por debajo"} de tu rango hace más de 10 minutos. Tu dinero sigue seguro, pero cada minuto fuera de rango son ganancias que no cobras.\n\n👉 Toca <b>Rebalancear ahora</b>: un toque y una firma, sin comisión de BÓVEDA.`;
 }
+
+/** Deep link that opens the one-tap rebalance sheet for this exact position in Mi Billetera. */
+export function rebalanceLink(position: string) {
+  return `https://bovedamarket.app/wallet?rebalance=${encodeURIComponent(position)}`;
+}
+export const rangeAlertButton = (position: string) => ({ text: "🎯 Rebalancear ahora", url: rebalanceLink(position) });
 
 export type RebalanceResult = {
   success: boolean;

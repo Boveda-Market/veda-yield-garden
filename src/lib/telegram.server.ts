@@ -13,13 +13,14 @@ export function announcementPost(a: Announcement) {
   return `<b>${HEAD[a.kind]}</b>\n\n<b>${esc(a.title)}</b>\n${esc(a.body)}${link}\n\n🛡️ Solo usamos ${SITE.replace("https://", "")}. Nunca te escribiremos primero por privado.`;
 }
 
-/** Sends a message through the connector gateway; returns false (never throws) when unavailable. */
-export async function sendTelegram(chatId: string, html: string): Promise<boolean> {
+export type TelegramButton = { text: string; url: string };
+/** Sends a message (optionally with one tappable link button) through the connector gateway; returns false (never throws) when unavailable. */
+export async function sendTelegram(chatId: string, html: string, button?: TelegramButton): Promise<boolean> {
   const lk = process.env["LOVABLE_API_KEY"], tk = process.env["TELEGRAM_API_KEY"];
   if (!lk || !tk) return false;
   try {
     const r = await fetch(`${GATEWAY}/sendMessage`, { method: "POST", headers: { Authorization: `Bearer ${lk}`, "X-Connection-Api-Key": tk, "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text: html, parse_mode: "HTML", disable_web_page_preview: true }) });
+      body: JSON.stringify({ chat_id: chatId, text: html, parse_mode: "HTML", disable_web_page_preview: true, ...(button ? { reply_markup: { inline_keyboard: [[button]] } } : {}) }) });
     if (!r.ok) { console.error(`Telegram sendMessage failed [${r.status}]: ${await r.text()}`); return false; }
     return ((await r.json()) as { ok?: boolean }).ok === true;
   } catch (e) { console.error("Telegram sendMessage error", e); return false; }
@@ -33,12 +34,12 @@ export async function treasuryAlert(html: string) {
 export const usdcText = (raw: bigint | number | string) => (Number(raw) / 1e6).toFixed(2);
 
 /** Personal account alert to a linked, enabled user (skipped when that kind is muted); never throws or blocks the caller. */
-export async function userAlert(privyUserId: string, html: string, kind?: AlertKind) {
+export async function userAlert(privyUserId: string, html: string, kind?: AlertKind, button?: TelegramButton) {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // "*" keeps alerts working even before the muted_kinds column exists.
     const { data } = await supabaseAdmin.from("telegram_links").select("*").eq("privy_user_id", privyUserId).maybeSingle();
     const row = data as { chat_id: number | null; alerts_enabled: boolean; muted_kinds?: unknown } | null;
-    if (row?.chat_id && alertAllowed(row.alerts_enabled, parseMuted(row.muted_kinds), kind)) await sendTelegram(String(row.chat_id), `${html}\n\n🛡️ BÓVEDA nunca te pedirá claves ni frases secretas.`);
+    if (row?.chat_id && alertAllowed(row.alerts_enabled, parseMuted(row.muted_kinds), kind)) await sendTelegram(String(row.chat_id), `${html}\n\n🛡️ BÓVEDA nunca te pedirá claves ni frases secretas.`, button);
   } catch { /* alerts are best-effort */ }
 }

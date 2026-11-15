@@ -15,7 +15,10 @@ import { PredictPositionCard } from "@/components/predict-position-card";
 import { ActionSuccess } from "@/components/action-success";
 import { RealPositions } from "@/components/real-positions";
 import { WorkingLine } from "@/components/move-steps";
-import { Crosshair } from "lucide-react";
+import { Crosshair, Send } from "lucide-react";
+import { RangeUrgentBanner } from "@/components/rebalance-button";
+import { sendRangeTestAlert } from "@/lib/range-test.functions";
+import { useBovedaSession } from "@/hooks/use-boveda-session";
 import type { PredictPosition } from "@/lib/predict";
 import type { ChainPosition } from "@/lib/solana-data";
 
@@ -29,6 +32,7 @@ export function NoticeGalleryAdmin() {
   const t = useT();
   const items: { id: string; title: string; node: ReactNode }[] = [
     { id: "bell", title: t("Campanita: premios, pérdidas, reembolsos y rango"), node: <NewsList predict={[{ id: "w", outcome: "won", p: { ...SAMPLE_ROUND, status: "closed", result: "yes", closeTime: Math.floor(NOW / 1000) - 60 } }, { id: "l", outcome: "lost", p: { ...SAMPLE_ROUND, pubkey: "Sample3333333333333333333333333333333333333", status: "closed", result: "no", closeTime: Math.floor(NOW / 1000) - 600 } }]} refunds={[{ id: "r", r: { order: "Sample4444444444444444444444444444444444444", marketId: "sample", title: SAMPLE_ROUND.title, amountMicro: "5000000", at: NOW - 120_000 } }]} ranges={[{ id: "g", p: SAMPLE_VAULT, since: NOW - 15 * 60_000 }]} /> },
+    { id: "range-banner", title: t("Aviso urgente en Mi Billetera"), node: <RangeUrgentBanner positions={[SAMPLE_VAULT]} /> },
     { id: "range-card", title: t("Bóveda fuera de rango (simulada)"), node: <RealPositions positions={[SAMPLE_VAULT]} onAction={() => undefined} showHarvestBanner={false} /> },
     { id: "rb-quote", title: t("Rebalanceo · cotización"), node: <div className="grid gap-3"><p className="font-display text-lg font-semibold">{t("Rebalancear posición")} · GTA6</p><p className="text-sm text-muted-foreground">{t("Tu posición salió del rango y no está generando. Con un toque cosechamos tus ganancias, dejamos mitad y mitad al precio actual y la volvemos a centrar.")}</p><dl className="grid gap-2 rounded-xl border border-border p-4 text-sm"><div className="flex justify-between"><dt className="text-muted-foreground">{t("Se recoloca")}</dt><dd className="font-semibold">≈ $12.40</dd></div><div className="flex justify-between"><dt className="text-muted-foreground">{t("Ganancias que se suman")}</dt><dd>$0.42 + 3 GTA6</dd></div><div className="flex justify-between"><dt className="text-muted-foreground">{t("Nuevo reparto")}</dt><dd>{t("Mitad {s} · mitad dólares", { s: "GTA6" })}</dd></div></dl><Button size="lg"><Crosshair className="mr-2 h-4 w-4" />{t("Rebalancear ahora")}</Button></div> },
     { id: "rb-working", title: t("Rebalanceo · en curso"), node: <WorkingLine text={t("Centrando tu posición…")} /> },
@@ -46,6 +50,20 @@ export function NoticeGalleryAdmin() {
     { id: "deposit", title: t("Comprobante de depósito"), node: <ActionSuccess title={t("¡Depósito exitoso!")} body={t("Tu posición ya está generando comisiones. Puedes cosecharlas cuando quieras desde tu Portafolio.")} amount={{ value: "10.00", unit: "$" }} details={[{ label: t("Operación"), value: t("Depósito en bóveda") }]} signature={null} destination={null} onClose={() => undefined} /> },
     { id: "withdraw", title: t("Comprobante de retiro"), node: <ActionSuccess title={t("¡Retiro completado!")} body={t("Tus USDC ya están en tu wallet. También recuperaste el SOL de apertura de la posición.")} amount={{ value: "9.85", unit: "$", label: "≈" }} details={[{ label: t("Operación"), value: t("Retiro total de bóveda") }]} signature={null} destination={null} onClose={() => undefined} /> },
   ];
+  const session = useBovedaSession();
+  const [testMsg, setTestMsg] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  async function sendTest() {
+    setSending(true); setTestMsg(null);
+    try {
+      const token = await session.getAccessToken?.();
+      if (!token) throw new Error();
+      // Points at the test wallet's real range position when the operator opens it; harmless otherwise (banner just won't open).
+      const r = await sendRangeTestAlert({ data: { token, position: SAMPLE_VAULT.address } });
+      setTestMsg(t(r.message));
+    } catch { setTestMsg(t("No se pudo enviar la prueba.")); }
+    finally { setSending(false); }
+  }
   const [shown, setShown] = useState<string[]>(items.map((i) => i.id));
   const toggle = (id: string) => setShown((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id]);
   return <section className="grid gap-4">
@@ -55,6 +73,7 @@ export function NoticeGalleryAdmin() {
     </div>
     <div className="rounded-2xl border border-border p-4">
       <p className="flex items-center gap-2 text-sm font-semibold"><Bell size={16} className="text-primary" />{t("Avisos emergentes (se muestran de verdad)")}</p>
+      <div className="mt-3 flex flex-wrap items-center gap-2"><Button size="sm" disabled={sending} onClick={() => void sendTest()}><Send size={14} />{sending ? t("Enviando…") : t("Enviar aviso de rango a mi Telegram")}</Button>{testMsg && <span role="status" className="text-xs text-muted-foreground">{testMsg}</span>}</div>
       <div className="mt-3 flex flex-wrap gap-2">{TONES.map(([tone, title, body]) => <Button key={tone} size="sm" variant="outline" onClick={() => notify(tone, t(title), t(body))}>{t(title)}</Button>)}</div>
     </div>
     <div className="flex flex-wrap gap-2">{items.map((i) => <Button key={i.id} size="sm" role="switch" aria-checked={shown.includes(i.id)} variant={shown.includes(i.id) ? "default" : "outline"} onClick={() => toggle(i.id)}>{i.title}</Button>)}</div>

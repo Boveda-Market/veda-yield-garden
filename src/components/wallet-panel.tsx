@@ -29,7 +29,7 @@ import { InstallAppBanner } from "@/components/install-app";
 import { InvitePromoCard } from "@/components/invite-share";
 import { GasRefillCard } from "@/components/gas-refill-card";
 import { PendingClaims } from "@/components/pending-claims";
-import { WalletPositions, useWalletVaults } from "@/components/wallet-positions";
+import { WalletPositions, useWalletVaults, WalletRangeBanner } from "@/components/wallet-positions";
 import { usePositionRows } from "@/hooks/use-position-rows";
 import { WalletOpenPredictions } from "@/components/open-predictions";
 import { ReportProblem } from "@/components/report-problem";
@@ -194,6 +194,7 @@ export function WalletPanel() {
     <InstallAppBanner />
     <GasRefillCard sol={balances.data?.sol} usdc={balances.data?.usdc} onDone={() => void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] })} />
     <PendingClaims />
+    <WalletRangeBanner wallet={address} />
 
     <StartGuide />
     <section className="rounded-3xl border border-border bg-card p-6">

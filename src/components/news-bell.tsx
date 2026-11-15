@@ -48,9 +48,9 @@ export function NewsList({ onNavigate, predict = [], refunds = [], ranges = [] }
     <ul className="space-y-3">
       {ranges.map((a) => <li key={a.id} className="relative rounded-xl border border-destructive/40 bg-destructive/10 p-4">
         <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-medium text-destructive">{t("Bóvedas")}</span>
-        <p className="mt-2 font-semibold">⚠️ {t("Bóveda {v} fuera de rango", { v: a.p.symbol })}</p>
-        <p className="mt-1 text-sm text-muted-foreground">{t("Lleva más de 10 minutos fuera de rango y no está generando. Rebalancéala con un toque.")}</p>
-        <Link to="/wallet" onClick={onNavigate} className="mt-3 inline-block text-sm font-medium text-primary">{t("Rebalancear en Mi Billetera")} →</Link>
+        <p className="mt-2 font-semibold">⚠️ {t("Bóveda {v} sin generar", { v: a.p.symbol })}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t("Lleva más de 10 minutos sin generar ganancias. Tu dinero sigue seguro; vuelve a centrarla con un toque y una firma.")}</p>
+        <Link to="/wallet" search={{ rebalance: a.p.address }} onClick={onNavigate} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground">🎯 {t("Rebalancear ahora")}</Link>
       </li>)}
       {refunded.map((a) => <li key={a.id} className="relative rounded-xl border border-primary/40 bg-primary/10 p-4">
         <button type="button" onClick={() => dismiss(a.id)} aria-label={t("Borrar notificación")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={14} /></button>

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
-import { Crosshair, LoaderCircle } from "lucide-react";
+import { Crosshair, LoaderCircle, Siren } from "lucide-react";
+import { VAULTS } from "@/lib/vaults";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
@@ -16,14 +17,41 @@ import type { RebalanceResult } from "@/lib/dlmm";
 import { WorkingLine } from "@/components/move-steps";
 
 /** One-tap, one-signature 50/50 rebalance for an out-of-range range-vault position. Renders nothing otherwise. */
-export function RebalanceButton({ position, className }: { position: ChainPosition; className?: string }) {
+export function RebalanceButton({ position, className, autoOpen = false, size = "sm", label }: { position: ChainPosition; className?: string; autoOpen?: boolean; size?: "sm" | "lg"; label?: string }) {
   const t = useT();
-  const [open, setOpen] = useState(false);
-  if (!position.outOfRange || position.locked || !isDlmmVault(position.vaultId)) return null;
+  const [open, setOpen] = useState(autoOpen);
+  useEffect(() => { if (autoOpen) setOpen(true); }, [autoOpen]);
+  if (!needsRebalance(position)) return null;
   return <>
-    <Button size="sm" className={className} onClick={() => setOpen(true)}><Crosshair size={14} />{t("Rebalancear")}</Button>
+    <Button size={size} className={className} onClick={() => setOpen(true)}><Crosshair size={size === "lg" ? 18 : 14} />{label ?? t("Rebalancear")}</Button>
     {open && <RebalanceSheet position={position} onClose={() => setOpen(false)} />}
   </>;
+}
+
+export const needsRebalance = (p: ChainPosition) => p.outOfRange && !p.locked && isDlmmVault(p.vaultId);
+
+/**
+ * Urgent Mi Billetera notice for every range position that is out of range (shown at once, no 10-min wait),
+ * with the one-tap rebalance right there. `openFor` auto-opens the sheet for a deep-linked position.
+ */
+export function RangeUrgentBanner({ positions, openFor }: { positions: ChainPosition[]; openFor?: string | null }) {
+  const t = useT();
+  const out = positions.filter(needsRebalance);
+  if (!out.length) return null;
+  return <div className="grid gap-3">{out.map((p) => {
+    const name = VAULTS.find((v) => v.id === p.vaultId)?.name;
+    return <section key={p.address} role="alert" aria-label={t("Bóveda fuera de rango")} className="rounded-2xl border-2 border-destructive/50 bg-destructive/10 p-4">
+      <div className="flex items-start gap-3">
+        <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-destructive/15 text-destructive"><Siren size={20} aria-hidden /><span className="absolute right-0 top-0 h-2.5 w-2.5 animate-ping rounded-full bg-destructive motion-reduce:animate-none" aria-hidden /></span>
+        <div className="min-w-0">
+          <p className="font-display text-base font-semibold">{t("Tu {v} dejó de generar ganancias", { v: name ? t(name) : `${p.symbol}/USDC` })}</p>
+          <p className="mt-1 text-sm leading-5 text-muted-foreground">{t("El precio salió de tu rango. Tu dinero sigue seguro, pero no cobras ganancias hasta que la vuelvas a centrar.")}</p>
+        </div>
+      </div>
+      <RebalanceButton position={p} size="lg" className="mt-3 w-full font-bold" autoOpen={openFor === p.address} label={t("Rebalancear ahora")} />
+      <p className="mt-2 text-center text-xs text-muted-foreground">{t("Un toque y una firma · sin comisión")}</p>
+    </section>;
+  })}</div>;
 }
 
 function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClose: () => void }) {
