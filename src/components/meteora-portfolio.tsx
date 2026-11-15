@@ -26,10 +26,6 @@ export function MeteoraPortfolio({ wallet, positions }: { wallet: string | null;
   const t = useT();
   const [filter, setFilter] = useState<"all" | "deposit" | "harvest" | "withdraw">("all");
   const { query, pages, records, metrics, ready, missing, scanned } = useMeteoraHistory(wallet);
-  const format = (value: string) => `${value} USDC`;
-  const withdrawn = tokenAmount(metrics.totals.reduce((sum, pool) => sum + pool.withdrawUsdc, 0n).toString(), 6);
-  const depositCount = records.filter((row) => row.kind === "deposit").length;
-  const withdrawCount = records.filter((row) => row.kind === "withdraw").length;
   const dec = vaultDecimals;
   return <div>
     <div className="flex items-center justify-between gap-3"><h2 className="font-display text-lg font-semibold">{t("Movimientos en bóvedas")}</h2><Button size="icon" variant="outline" title={t("Actualizar registros del pool")} aria-label={t("Actualizar registros del pool")} disabled={!wallet || query.isFetching} onClick={() => void query.refetch()}><RefreshCw size={16} className={query.isFetching ? "animate-spin motion-reduce:animate-none" : ""} /></Button></div>
@@ -42,11 +38,6 @@ export function MeteoraPortfolio({ wallet, positions }: { wallet: string | null;
     {query.hasNextPage && pages.length < 8 && <Button className="mt-5" variant="outline" disabled={query.isFetching} onClick={() => void query.fetchNextPage()}>{t("Consultar movimientos anteriores")}</Button>}
     <details className="mt-8 rounded-2xl border border-border bg-card p-4">
       <summary className="cursor-pointer text-sm font-semibold">{t("Desglose y cómo se calcula")}</summary>
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">{([
-        [ArrowDownLeft, `${t("Total depositado")} · ${depositCount}`, ready ? format(metrics.deposited) : t("No disponible"), t("Incluye también SOL o MET aportados; ver desglose abajo.")],
-        [ArrowUpRight, `${t("Total retirado")} · ${withdrawCount}`, ready ? format(withdrawn) : t("No disponible"), t("Liquidez que salió de las bóvedas; no es ganancia.")],
-        [Sparkles, t("Comisiones cobradas"), ready ? format(metrics.harvested) : t("No disponible"), t("Parte en USDC de tus cosechas, antes del cargo.")],
-      ] as const).map(([Icon, label, value, help]) => <div key={label} className="rounded-xl border border-border bg-background p-3"><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><Icon size={13} />{label}</p><p className="mt-1 break-words font-display text-lg">{value}</p><p className="mt-1 text-xs text-muted-foreground">{help}</p></div>)}</div>
     {metrics.totals.filter((pool) => pool.count > 0 || positions.some((p) => p.vaultId === pool.id)).map((pool) => <details key={pool.id} className="mt-3 rounded-xl border border-border bg-background p-3"><summary className="flex cursor-pointer items-center justify-between font-semibold"><span>{t("Bóveda")} {pool.symbol}</span><span className="text-xs font-normal text-muted-foreground">{t("Ver desglose")}</span></summary><dl className="mt-3 space-y-2 text-sm"><div><dt className="text-muted-foreground">{t("Comisiones cosechadas · brutas")}</dt><dd>{tokenAmount(pool.harvestToken.toString(), dec(pool.id))} {pool.symbol} + {tokenAmount(pool.harvestUsdc.toString(), 6)} USDC</dd></div><div><dt className="text-muted-foreground">{t("Liquidez aportada · registros cargados")}</dt><dd>{tokenAmount(pool.depositToken.toString(), dec(pool.id))} {pool.symbol} + {tokenAmount(pool.depositUsdc.toString(), 6)} USDC</dd></div><div><dt className="text-muted-foreground">{t("Liquidez retirada · no es ganancia")}</dt><dd>{tokenAmount(pool.withdrawToken.toString(), dec(pool.id))} {pool.symbol} + {tokenAmount(pool.withdrawUsdc.toString(), 6)} USDC</dd></div></dl></details>)}
       <ul className="mt-4 list-disc space-y-1 pl-5 text-xs leading-5 text-muted-foreground">
         <li>{t("Ganancias cobradas = comisiones cosechadas (USDC más tokens al precio actual). No incluye cambios de precio de tu capital.")}</li>

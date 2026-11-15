@@ -296,4 +296,12 @@ export const realOps: Record<string, string> = {
   "{n} transacciones no pudieron verificarse; los totales son parciales.": "{n} transactions could not be verified; totals are partial.",
   "estimado (24h)": "estimated (24h)",
   "próximas 24h": "next 24h",
+  "Rendimiento de tu portafolio": "Your portfolio performance",
+  "Tu rendimiento": "Your performance",
+  "APR promedio": "Average APR",
+  "Distribución de tu capital": "How your capital is split",
+  "Cuando tengas dinero en bóvedas o jugadas verás aquí cómo se reparte.": "Once you have money in vaults or plays, you'll see how it's split here.",
+  "Se activa desde $0.50.": "Unlocks from $0.50.",
+  "Lo que ya cosechaste.": "What you've already harvested.",
+  "Ganancias = lo que ya cosechaste, al precio de hoy. No incluye subidas o bajadas del precio de tu capital.": "Earnings = what you've already harvested, at today's price. Doesn't include price moves in your capital.",
 };
