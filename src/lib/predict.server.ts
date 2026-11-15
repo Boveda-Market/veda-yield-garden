@@ -23,7 +23,7 @@ const pr = (v: unknown) => { const n = Number(v); return Number.isFinite(n) && n
 
 /** Current BTC/ETH/SOL Up or Down rounds (5m, 15m, 4h) with real order-book prices; one per asset and window. */
 export async function listRounds(): Promise<LiveRound[]> {
-  if (cache && Date.now() - cache.at < 8_000) return cache.rounds;
+  if (cache && Date.now() - cache.at < 4_000) return cache.rounds;
   const now = Math.floor(Date.now() / 1000);
   const paths = [0, 50].map((s) => `/events?provider=polymarket&category=crypto&filter=live&includeMarkets=true&start=${s}&end=${s + 50}`);
   // 4 h rounds carry no tag and never show up under filter=live: read the unfiltered crypto pages instead.

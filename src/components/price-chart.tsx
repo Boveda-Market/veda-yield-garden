@@ -12,7 +12,8 @@ const W = 360, H = 140, PAD = 6;
 
 const fmt = (n: number) => n.toFixed(n >= 1000 ? 2 : 3).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 
-export function PriceChart({ market, points, price, reference, referenceLabel, window }: { market: MarketId; points: number[]; price?: number | undefined; reference?: number | undefined; referenceLabel?: string; window?: string | undefined }) {
+/** odds: the live market prices of each side (same numbers as the Sube/Baja buttons); the duel never invents its own percentages. */
+export function PriceChart({ market, points, price, reference, referenceLabel, window, odds }: { market: MarketId; points: number[]; price?: number | undefined; reference?: number | undefined; referenceLabel?: string; window?: string | undefined; odds?: { up: number | null; down: number | null } | undefined }) {
   const t = useT();
   // Duel shines in 5 min rounds (price hugs the strike); longer rounds open on the classic line.
   const [style, setStyle] = useState<Style>(window && window !== "5m" ? "line" : "duel");
@@ -54,7 +55,7 @@ export function PriceChart({ market, points, price, reference, referenceLabel, w
   );
 
   if (style === "duel") {
-    return <>{controls}<DuelLine points={points} reference={reference} referenceLabel={referenceLabel} /></>;
+    return <>{controls}<DuelLine points={points} reference={reference} referenceLabel={referenceLabel} odds={odds} /></>;
   }
   if (style === "line") {
     return <>{controls}<LiveLine points={points} sec={60} reference={reference} referenceLabel={referenceLabel} /></>;
@@ -311,7 +312,7 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
 
 /** Sube vs Baja duel: two mirrored lines showing who leads against the strike (visual lead, not a market probability).
  * Animated like LiveLine: eased head between ticks, sliding time axis and an adaptive scale so small moves stay visible. */
-function DuelLine({ points, reference, referenceLabel }: { points: number[]; reference?: number | undefined; referenceLabel?: string | undefined }) {
+function DuelLine({ points, reference, referenceLabel, odds }: { points: number[]; reference?: number | undefined; referenceLabel?: string | undefined; odds?: { up: number | null; down: number | null } | undefined }) {
   const t = useT();
   const [, setFrame] = useState(0);
   const tick = useRef({ at: 0, from: 0, to: 0, len: 0 });
@@ -368,8 +369,8 @@ function DuelLine({ points, reference, referenceLabel }: { points: number[]; ref
   const down: [number, number][] = vals.map((v, i) => [toX(ages[i]!), y(0.5 - lead(v) * 0.4 - mDown[i]! * 0.08)]);
   const dUp = smoothPath(up), dDown = smoothPath(down);
   const eu = up[up.length - 1]!, ed = down[down.length - 1]!, fu = up[0]!;
-  const nowLead = lead(head);
-  const upPct = Math.round(50 + nowLead * 47), downPct = 100 - upPct;
+  // Percentages come only from the live market (same as the buttons), never from the visual lead.
+  const upPct = odds?.up ? Math.round(odds.up * 100) : null, downPct = odds?.down ? Math.round(odds.down * 100) : null;
   const upWins = head >= ref;
   const gap = head - ref;
   const mid = H / 2;
@@ -377,9 +378,9 @@ function DuelLine({ points, reference, referenceLabel }: { points: number[]; ref
   return (
     <div className="relative overflow-hidden px-1">
       <div className="flex items-center justify-between px-3 pb-1 text-xs font-bold">
-        <span className={`tabular-nums transition-colors ${upWins ? "text-primary" : "text-muted-foreground"}`}>▲ {t("Sube")} {upPct}%</span>
+        <span className={`tabular-nums transition-colors ${upWins ? "text-primary" : "text-muted-foreground"}`}>▲ {t("Sube")}{upPct !== null && ` ${upPct}%`}</span>
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold transition-colors ${upWins ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{upWins ? t("Va ganando Sube") : t("Va ganando Baja")}</span>
-        <span className={`tabular-nums transition-colors ${!upWins ? "text-destructive" : "text-muted-foreground"}`}>{t("Baja")} {downPct}% ▼</span>
+        <span className={`tabular-nums transition-colors ${!upWins ? "text-destructive" : "text-muted-foreground"}`}>{t("Baja")}{downPct !== null && ` ${downPct}%`} ▼</span>
       </div>
       <p className={`px-3 pb-1 text-center text-[11px] font-semibold tabular-nums ${upWins ? "text-primary" : "text-destructive"}`}>{upWins ? "▲ +" : "▼ -"}${fmt(Math.abs(gap))} {upWins ? t("sobre el precio a batir") : t("debajo del precio a batir")}</p>
       <div className="relative">
