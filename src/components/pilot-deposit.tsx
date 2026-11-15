@@ -106,7 +106,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, autoStart = f
     <h3 id="pilot-title" className="sr-only">{t("Confirmar depósito")}</h3>
     {!walletAddress ? <p className="text-xs text-muted-foreground">{t("Inicia sesión con una wallet para firmar.")}</p> : <>
       {busy && <WorkingLine text={t(labels[step])} />}
-      <Button size="lg" disabled={busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? t(labels[step]) : t("Confirmar y depositar")}</Button>
+      <Button size="lg" disabled={busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? t(labels[step]) : step === "error" ? t("Intentar de nuevo") : t("Confirmar y depositar")}</Button>
       {!busy && <p className="text-center text-xs text-muted-foreground">{t("Una sola aprobación. Retirar o cosechar más adelante tiene una comisión según el monto.")}</p>}
     </>}
     {needsReserve && <div role="status" className="rounded-xl border border-primary/40 bg-primary/5 p-3 text-xs leading-5">

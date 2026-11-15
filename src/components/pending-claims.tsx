@@ -78,7 +78,7 @@ export function PendingClaims() {
         <DialogTitle className="pr-10 font-display text-xl">{t("Cobrar premio")}</DialogTitle>
         <DialogDescription>{t("Premio de ${v}", { v: usdc(flow.p.payoutMicro || "0") })}</DialogDescription>
         <ProgressSteps steps={[t("Cobrar premio"), t("Pasar a dólares")]} current={flow.phase} />
-        {flow.error ? <><p role="alert" className="text-sm text-destructive">{flow.error}</p><Button onClick={() => setFlow(null)}>{t("Cerrar")}</Button></> : <WorkingLine text={flow.text} />}
+        {flow.error ? <><p role="alert" className="text-sm text-destructive">{flow.error}</p><Button size="lg" onClick={() => void claim(flow.p)}>{t("Intentar de nuevo")}</Button><Button variant="ghost" onClick={() => setFlow(null)}>{t("Cerrar")}</Button></> : <WorkingLine text={flow.text} />}
       </>}
     </ActionSheetContent>
   </Dialog>;

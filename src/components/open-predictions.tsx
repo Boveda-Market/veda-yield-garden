@@ -122,7 +122,7 @@ function SellReview({ review, flow, onCancel, onConfirm }: { review: { p: Predic
         <DialogTitle className="pr-10 font-display text-xl">{t("Cerrar antes de tiempo")}</DialogTitle>
         <DialogDescription>{est !== null ? t("Recibes aprox. ${v}", { v: usdcText(est) }) : t("Vendes al precio que el mercado paga en este momento.")}</DialogDescription>
         <ProgressSteps steps={[t("Cerrar posición"), t("Pasar a dólares")]} current={flow.phase} />
-        {flow.error ? <><p role="alert" className="text-sm text-destructive">{flow.error}</p><Button onClick={onCancel}>{t("Cerrar")}</Button></> : <WorkingLine text={flow.text} />}
+        {flow.error ? <><p role="alert" className="text-sm text-destructive">{flow.error}</p>{review && <Button size="lg" onClick={onConfirm}>{t("Intentar de nuevo")}</Button>}<Button variant="ghost" onClick={onCancel}>{t("Cerrar")}</Button></> : <WorkingLine text={flow.text} />}
       </> : <>
       <DialogHeader className="pr-10 text-left">
         <DialogTitle className="font-display text-xl">{t("Cerrar antes de tiempo")}</DialogTitle>
