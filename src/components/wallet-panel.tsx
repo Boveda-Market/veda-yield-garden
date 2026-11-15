@@ -8,7 +8,7 @@ import { ActionSuccess } from "@/components/action-success";
 import { notify } from "@/lib/notify";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, ChevronRight, LayoutDashboard, PieChart, Plus, TrendingUp } from "lucide-react";
+import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, ChevronRight, PieChart, Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Banknote, Pencil } from "lucide-react";
 import { OfframpButton } from "@/components/offramp-dialog";
@@ -23,6 +23,7 @@ import { WalletSwap } from "@/components/wallet-swap";
 import { solanaAddressSchema } from "@/lib/solana-data";
 import { decimalToUnits, solExcessLamports, PAYOUT_MOVE_MIN_USD, SOL_EXCESS_MOVE_MIN_USD } from "@/lib/onboarding";
 import { StartGuide } from "@/components/start-guide";
+import { WalletHeroShortcuts } from "@/components/wallet-hero-shortcuts";
 
 import { BuyUsdc } from "@/components/buy-usdc";
 import { InstallAppBanner } from "@/components/install-app";
@@ -181,8 +182,6 @@ export function WalletPanel() {
     { icon: QrCode, label: t("Recibir"), on: () => setReceiveOpen(true) },
   ];
   const shortcuts = [
-    { to: "/app", icon: LayoutDashboard, title: t("Depositar en Bóvedas"), sub: t("Rendimiento diario en USDC") },
-    { to: "/mercados", icon: TrendingUp, title: t("⚡ Doble o Nada (5 min)"), sub: t("Hasta +90% por ronda sin comprar la moneda · Cobro directo a tu balance") },
     { to: "/portfolio", icon: PieChart, title: t("Manejar posiciones"), sub: t("Cosecha ganancias y retira capital") },
   ] as const;
 
@@ -191,6 +190,7 @@ export function WalletPanel() {
       <h1 className="font-display text-3xl font-semibold">{t("Mi Billetera")}</h1>
       <ReportProblem trigger={(open) => <button type="button" onClick={open} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"><LifeBuoy size={14} className="text-primary" />{t("Reportar")}</button>} />
     </div>
+    <WalletHeroShortcuts />
     <InstallAppBanner />
     <GasRefillCard sol={balances.data?.sol} usdc={balances.data?.usdc} onDone={() => void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] })} />
     <PendingClaims />
@@ -211,7 +211,7 @@ export function WalletPanel() {
       {balances.error && <p className="mt-2 text-sm text-destructive">{(balances.error as Error).message}</p>}
     </section>
 
-    <section aria-label={t("Accesos rápidos")} className="grid gap-2 sm:grid-cols-3 sm:gap-3">
+    <section aria-label={t("Accesos rápidos")} className="grid gap-2">
       {shortcuts.map((s) => <Link key={s.to} to={s.to} className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-primary/5 sm:flex-col sm:items-start">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><s.icon size={20} aria-hidden /></span>
         <span className="min-w-0 flex-1"><span className="block font-display text-base font-semibold">{s.title}</span><span className="block text-xs text-muted-foreground">{s.sub}</span></span>

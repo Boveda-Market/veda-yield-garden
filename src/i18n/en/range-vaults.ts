@@ -91,4 +91,7 @@ export const rangeVaults: Record<string, string> = {
   "Conecta tu Telegram en Notificaciones para recibir la prueba.": "Link your Telegram in Notifications to get the test.",
   "Telegram no respondió. Inténtalo de nuevo.": "Telegram didn't respond. Try again.",
   "Solo la wallet de tesorería verificada puede enviar pruebas.": "Only the verified treasury wallet can send tests.",
+  "Alto octanaje": "High octane",
+  "Comisiones brutales con el volumen de GTA6": "Huge fees from GTA6 trading volume",
+  "Rondas de 5 min · Hasta +90%": "5-min rounds · Up to +90%",
 };
