@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { fetchPoolStats } from "@/lib/pool-stats";
 import type { Vault } from "@/lib/vaults";
+import { isDlmmVault } from "@/lib/solana-data";
 import { PoolYield } from "@/components/pool-yield";
 
 const number = (value: number | null | undefined, digits = 2) => value == null ? "—" : value.toLocaleString("es-MX", { maximumFractionDigits: digits });
-const usd = (value: number | null | undefined, digits = 2) => value == null ? "—" : `$${value.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: digits })}`;
+const usd = (value: number | null | undefined, digits = 2) => value == null ? "—" : `$${value.toLocaleString("es-MX", { minimumFractionDigits: Math.min(2, digits), maximumFractionDigits: digits })}`;
 
 export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => void }) {
   const t = useT();
@@ -27,7 +28,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
   const holders = yieldQ.data?.holders ?? null, fees24h = yieldQ.data?.fees24h ?? null;
   const buys = stats?.buys24h ?? null, sells = stats?.sells24h ?? null;
-  const url = `https://app.meteora.ag/dammv2/${vault.pool}`;
+  const url = `https://app.meteora.ag/${isDlmmVault(vault.id) ? "dlmm" : "dammv2"}/${vault.pool}`;
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(url);
