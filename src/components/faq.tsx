@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronDown, Search, X } from "lucide-react";
 import { FEE_WALLET } from "@/lib/fees";
 
-type Cat = "predict" | "vaults" | "fees" | "wallet" | "affiliates" | "trial";
+type Cat = "predict" | "vaults" | "fees" | "wallet" | "affiliates";
 type GuideTo = "/guias/que-es-usdc" | "/guias/retirar-cash-app-bitcoin" | "/guias/invertir-sin-estafas";
 type Q = { id: string; cat: Cat; question: string; answer: string; guide?: GuideTo };
 const GUIDES: Record<string, GuideTo> = { "wallet-usdc": "/guias/que-es-usdc", "withdraw-cashapp": "/guias/retirar-cash-app-bitcoin", "safety-why": "/guias/invertir-sin-estafas" };

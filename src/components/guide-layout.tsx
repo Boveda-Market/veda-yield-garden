@@ -42,8 +42,8 @@ export function GuideLayout({ title, intro, minutes, current, children }: { titl
     <p className="mt-5 text-base leading-7 text-foreground/90">{intro}</p>
     <article className="mt-8 space-y-8 text-sm leading-7 text-muted-foreground [&_h2]:mb-2 [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-foreground [&_li]:ml-5 [&_ol]:list-decimal [&_ul]:list-disc [&_strong]:text-foreground">{children}</article>
     <section className="mt-10 rounded-2xl border border-primary/30 bg-primary/10 p-6">
-      <h2 className="font-display text-lg font-semibold">Pruébalo sin arriesgar nada</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Abre tu billetera en dólares o practica primero con 1,000 créditos ficticios.</p>
+      <h2 className="font-display text-lg font-semibold">Empieza a tu ritmo</h2>
+      <p className="mt-1 text-sm text-muted-foreground">Abre tu billetera en dólares en un minuto con Google y empieza con poco. Retiras cuando quieras.</p>
       <div className="mt-4 flex flex-wrap gap-3"><Link to="/" className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Abrir mi billetera</Link></div>
     </section>
     <nav className="mt-10 border-t border-border pt-5"><h2 className="mb-3 text-sm font-semibold">Más guías</h2><ul className="space-y-2 text-sm text-primary">{GUIDES.filter((g) => g.to !== current).map((g) => <li key={g.to}><Link to={g.to}>{g.title}</Link></li>)}</ul>

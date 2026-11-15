@@ -6,6 +6,7 @@ import { pages } from "./en/pages";
 import { legal } from "./en/legal";
 import { extra } from "./en/extra";
 import { more } from "./en/more";
+import { noTrial } from "./en/no-trial";
 
 /** English dictionary keyed by the original Spanish source text. Each area owns its own file. */
-export const en: Record<string, string> = { ...common, ...app, ...realOps, ...account, ...pages, ...legal, ...extra, ...more };
+export const en: Record<string, string> = { ...common, ...app, ...realOps, ...account, ...pages, ...legal, ...extra, ...more, ...noTrial };

@@ -1,7 +1,7 @@
 {
   "name": "BÓVEDA",
   "short_name": "Bóveda",
-  "description": "BÓVEDA: pools de Solana y modos Real y Prueba. 1,000 créditos ficticios para probar; operaciones Real aún no habilitadas.",
+  "description": "BÓVEDA: guarda dólares, genera rendimiento y juega Doble o Nada desde tu propia billetera.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8fafc",
