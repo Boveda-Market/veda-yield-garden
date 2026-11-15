@@ -30,6 +30,9 @@ export function useRealWallet(wallet: string | null | undefined) {
     placeholderData: (prev) => prev ?? readCache<RealWalletResult>(`vaults:${wallet}`) ?? undefined,
     enabled: Boolean(wallet),
     staleTime: 30_000,
-    retry: 2,
+    retry: 3,
+    retryDelay: (n) => Math.min(1000 * 2 ** n, 4000),
+    // Until a successful read arrives (e.g. right after sign-in), keep trying every few seconds instead of waiting for a manual refresh.
+    refetchInterval: (q) => (q.state.data?.success ? false : 5_000),
   });
 }

@@ -4,6 +4,7 @@ import { installBufferPolyfill } from "@/lib/buffer-polyfill";
 import { installPrivyApiFallback } from "@/lib/privy-api-fallback";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { setPrivyTokenGetter } from "@/lib/privy-token";
+import { sessionWalletAddress } from "@/lib/session-wallet";
 import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useMfaEnrollment, usePrivy } from "@privy-io/react-auth";
 import { useUpdateEmail } from "@privy-io/react-auth/ui";
 import { toSolanaWalletConnectors, useExportWallet, useFundWallet, useSignMessage, useSignTransaction, useWallets } from "@privy-io/react-auth/solana";
@@ -48,7 +49,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
     onComplete: () => setError(null),
     onError: () => setError(t("No se pudo iniciar sesión. Inténtalo de nuevo o prueba con otro método (Google, email o billetera).")),
   });
-  const walletAddress = wallets[0]?.address ?? null;
+  const walletAddress = sessionWalletAddress(wallets, authenticated, user?.linkedAccounts as Parameters<typeof sessionWalletAddress>[2]);
   const embedded = !!walletAddress && !!user?.linkedAccounts.some(a => a.type === "wallet" && a.address === walletAddress && (a.walletClientType === "privy" || a.walletClientType === "privy-v2"));
   const policy = useQuery({ queryKey: ["wallet-policy"], queryFn: () => getWalletPolicy().catch(() => ({ blockExternal: false })), staleTime: 30_000, refetchInterval: 60_000 });
   const blockExternal = policy.data?.blockExternal ?? false;
@@ -64,10 +65,19 @@ function SessionBridge({ children }: { children: ReactNode }) {
     const id = setTimeout(() => { setPendingMethod(null); setError(t("El acceso seguro no respondió. Revisa tu conexión y recarga la página.")); }, 15000);
     return () => clearTimeout(id);
   }, [pendingMethod, ready, login, t]);
+  // Registered during render (not only in an effect) so the first wallet reads fired by
+  // freshly mounted screens already carry the session instead of failing as signed out.
+  setPrivyTokenGetter(authenticated ? getAccessToken : null);
   useEffect(() => {
     setPrivyTokenGetter(authenticated ? getAccessToken : null);
     return () => setPrivyTokenGetter(null);
   }, [authenticated, getAccessToken]);
+  // Once signed in with a wallet, retry any read that failed during sign-in so values appear without a manual refresh.
+  useEffect(() => {
+    if (!authenticated || !walletAddress) return;
+    const id = setTimeout(() => { void queryClient.refetchQueries({ type: "active", predicate: (q) => q.state.status === "error" }); }, 1500);
+    return () => clearTimeout(id);
+  }, [authenticated, walletAddress, queryClient]);
   // Waking the phone: wait a moment for the network, then refresh live data instead of showing stale/empty screens.
   useEffect(() => {
     let id: ReturnType<typeof setTimeout> | undefined;
