@@ -84,3 +84,22 @@ export function parsePastRound(e: { slug?: string; title?: string; endDate?: str
     return { slug, title, asset, window, endTime, winner: o };
   } catch { return null; }
 }
+
+export type RoundOdds = { up: number | null; down: number | null };
+
+/** Live market odds (same prices as the Sube/Baja buttons) for the round a position belongs to; each side is its own market. */
+export function positionOdds(rounds: readonly LiveRound[], p: Pick<PredictPosition, "marketId" | "contractsMicro" | "valueMicro" | "side">): RoundOdds | undefined {
+  const r = rounds.find((x) => x.marketId === p.marketId || x.downMarketId === p.marketId);
+  if (r && r.upPrice && r.downPrice) return { up: r.upPrice, down: r.downPrice };
+  // Round not listed (yet): the position's own sell value is still a market price for its side.
+  const c = Number(p.contractsMicro), v = p.valueMicro === null ? NaN : Number(p.valueMicro);
+  if (!(c > 0) || !Number.isFinite(v)) return undefined;
+  const mine = Math.max(0.01, Math.min(0.99, v / c));
+  return p.side === "up" ? { up: mine, down: 1 - mine } : { up: 1 - mine, down: mine };
+}
+
+/** Whether the position's side leads, decided only by the market odds (never by exchange spot vs our strike). */
+export function positionLeading(side: PredictSide, odds: RoundOdds | undefined): boolean | null {
+  if (!odds?.up || !odds.down) return null;
+  return side === "up" ? odds.up >= odds.down : odds.down > odds.up;
+}

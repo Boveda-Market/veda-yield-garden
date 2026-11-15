@@ -24,6 +24,11 @@ export function PriceChart({ market, points, price, reference, referenceLabel, w
   const [zoom, setZoom] = useState<Zoom>("1m");
   const [hover, setHover] = useState<number | null>(null);
   const [hist, setHist] = useState<Candle[]>([]);
+  // Callers without their own odds history (position cards) still get a duel that follows the market odds.
+  const [ownOdds, setOwnOdds] = useState<OddsPoint[]>([]);
+  const ou = odds?.up, od = odds?.down;
+  useEffect(() => { if (ou && od) setOwnOdds((h) => [...h, { t: Date.now(), up: ou / (ou + od) }].slice(-4000)); }, [ou, od]);
+  const series = oddsSeries ?? (ownOdds.length ? ownOdds : undefined);
   const sec = ZOOMS.find((z) => z.id === zoom)!.sec;
 
   useEffect(() => {
@@ -59,11 +64,12 @@ export function PriceChart({ market, points, price, reference, referenceLabel, w
 
   if (style === "duel") {
     // With live market odds the duel plots them, so the line on top always matches the higher percentage.
-    if (odds && oddsSeries) return <>{controls}<OddsDuel series={oddsSeries} odds={odds} reference={reference} referenceLabel={referenceLabel} /></>;
-    return <>{controls}<DuelLine points={points} reference={reference} referenceLabel={referenceLabel} odds={odds} /></>;
+    if (odds && series) return <>{controls}<OddsDuel series={series} odds={odds} reference={reference} referenceLabel={referenceLabel} /></>;
+    // No market odds yet: never guess who leads from the price alone.
+    return <>{controls}<div className="flex h-44 items-center justify-center text-xs text-muted-foreground">{t("Cargando porcentajes del mercado…")}</div></>;
   }
   if (style === "line") {
-    return <>{controls}<LiveLine points={points} sec={60} reference={reference} referenceLabel={referenceLabel} /></>;
+    return <>{controls}<LiveLine points={points} sec={60} reference={reference} referenceLabel={referenceLabel} odds={odds} /></>;
   }
 
   return <CandleView controls={controls} candles={candles} reference={reference} referenceLabel={referenceLabel} style={style} hover={hover} setHover={setHover} />;
@@ -82,7 +88,7 @@ function smoothPath(p: [number, number][]) {
 
 const ease = (t: number) => 1 - Math.pow(1 - t, 3);
 
-function LiveLine({ points, sec, reference, referenceLabel }: { points: number[]; sec: number; reference?: number | undefined; referenceLabel?: string | undefined }) {
+function LiveLine({ points, sec, reference, referenceLabel, odds }: { points: number[]; sec: number; reference?: number | undefined; referenceLabel?: string | undefined; odds?: { up: number | null; down: number | null } | undefined }) {
   const [, setFrame] = useState(0);
   const [hoverX, setHoverX] = useState<number | null>(null);
   const tick = useRef({ at: 0, from: 0, to: 0, len: 0 });
@@ -136,7 +142,8 @@ function LiveLine({ points, sec, reference, referenceLabel }: { points: number[]
   for (let i = 0; i < vals.length; i++) coords.push([toX(ages[i]!), y(vals[i]!)]);
   const d = smoothPath(coords);
   const first = coords[0]!, end = coords[coords.length - 1]!;
-  const upL = reference ? head >= reference : head >= vals[0]!;
+  // Green/red follows the market odds when known, so the colour never contradicts the Sube/Baja percentages.
+  const upL = odds?.up && odds.down ? odds.up >= odds.down : reference ? head >= reference : head >= vals[0]!;
   const refY = reference ? y(reference) : null;
 
   let hv: number | undefined, hx = 0;
@@ -312,106 +319,6 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
         {hc && <span className="absolute -translate-x-1/2 rounded-sm bg-foreground px-1 text-background" style={{ left: `${(cx(hover!) / W) * 100}%` }}>{hhmm(hc.t)}</span>}
       </div>
     </>
-  );
-}
-
-/** Sube vs Baja duel: two mirrored lines showing who leads against the strike (visual lead, not a market probability).
- * Animated like LiveLine: eased head between ticks, sliding time axis and an adaptive scale so small moves stay visible. */
-function DuelLine({ points, reference, referenceLabel, odds }: { points: number[]; reference?: number | undefined; referenceLabel?: string | undefined; odds?: { up: number | null; down: number | null } | undefined }) {
-  const t = useT();
-  const [, setFrame] = useState(0);
-  const tick = useRef({ at: 0, from: 0, to: 0, len: 0 });
-  const scale = useRef<number | null>(null);
-  // Keep the last official strike while the next one loads, so the duel never jumps to an unrelated reference.
-  const lastRef = useRef<number | undefined>(undefined);
-  if (reference) lastRef.current = reference;
-
-  const last = points[points.length - 1];
-  if (last !== undefined && points.length !== tick.current.len) {
-    const now = typeof performance !== "undefined" ? performance.now() : 0;
-    const k = tick.current;
-    const p = k.at ? ease(Math.min(1, (now - k.at) / TICK_MS)) : 1;
-    const shown = k.len ? k.from + (k.to - k.from) * p : last;
-    tick.current = { at: now, from: shown, to: last, len: points.length };
-  }
-
-  useEffect(() => {
-    let id = 0;
-    const loop = () => { setFrame((f) => (f + 1) % 1e6); id = requestAnimationFrame(loop); };
-    id = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(id);
-  }, []);
-
-  const span = 60_000;
-  const need = Math.ceil(span / TICK_MS) + 3;
-  const pts = points.slice(-need);
-  if (pts.length < 2 || !tick.current.at) return <div className="flex h-44 items-center justify-center text-xs text-muted-foreground">{t("Cargando precio en vivo…")}</div>;
-  // Until the official strike arrives, duel against the first price seen so the chart never stalls.
-  const ref = reference ?? lastRef.current ?? points[0]!;
-
-  const now = performance.now();
-  const k = tick.current;
-  const head = k.from + (k.to - k.from) * ease(Math.min(1, (now - k.at) / TICK_MS));
-  const elapsed = Math.min(now - k.at, TICK_MS);
-  const vals = pts.map((v, i) => (i === pts.length - 1 ? head : v));
-  const ages = pts.map((_, i) => (pts.length - 1 - i) * TICK_MS + (i === pts.length - 1 ? 0 : elapsed - TICK_MS));
-  const visible = vals.filter((_, i) => ages[i]! <= span + TICK_MS);
-
-  // Adaptive scale: the largest recent distance to the strike fills most of the height, so every tick shows.
-  const dev = Math.max(...visible.map((v) => Math.abs(v - ref)), ref * 0.00003);
-  let sc = scale.current ?? dev;
-  sc += (dev - sc) * 0.08;
-  sc = Math.max(sc, dev * 0.85);
-  scale.current = sc;
-  const lead = (v: number) => Math.tanh(((v - ref) / sc) * 1.8);
-  // Same momentum for both sides: the lines mirror each other exactly, with no visual bias toward Sube or Baja.
-  const mom = (alpha: number) => { const out: number[] = []; let e = 0; for (let i = 0; i < vals.length; i++) { const d = i ? (vals[i]! - vals[i - 1]!) / sc : 0; e += (d - e) * alpha; out.push(Math.tanh(e * 4)); } return out; };
-  const mUp = mom(0.35), mDown = mUp;
-
-  const toX = (age: number) => W - (age / span) * W;
-  const y = (share: number) => PAD + (1 - Math.max(0.02, Math.min(0.98, share))) * (H - PAD * 2);
-  const up: [number, number][] = vals.map((v, i) => [toX(ages[i]!), y(0.5 + lead(v) * 0.4 + mUp[i]! * 0.08)]);
-  const down: [number, number][] = vals.map((v, i) => [toX(ages[i]!), y(0.5 - lead(v) * 0.4 - mDown[i]! * 0.08)]);
-  const dUp = smoothPath(up), dDown = smoothPath(down);
-  const eu = up[up.length - 1]!, ed = down[down.length - 1]!, fu = up[0]!;
-  // Percentages come only from the live market (same as the buttons), never from the visual lead.
-  const upPct = odds?.up ? Math.round(odds.up * 100) : null, downPct = odds?.down ? Math.round(odds.down * 100) : null;
-  const upWins = head >= ref;
-  const gap = head - ref;
-  const mid = H / 2;
-
-  return (
-    <div className="relative overflow-hidden px-1">
-      <div className="flex items-center justify-between px-3 pb-1 text-xs font-bold">
-        <span className={`tabular-nums transition-colors ${upWins ? "text-primary" : "text-muted-foreground"}`}>▲ {t("Sube")}{upPct !== null && ` ${upPct}%`}</span>
-        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold transition-colors ${upWins ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{upWins ? t("Va ganando Sube") : t("Va ganando Baja")}</span>
-        <span className={`tabular-nums transition-colors ${!upWins ? "text-destructive" : "text-muted-foreground"}`}>{t("Baja")}{downPct !== null && ` ${downPct}%`} ▼</span>
-      </div>
-      <p className={`px-3 pb-1 text-center text-[11px] font-semibold tabular-nums ${upWins ? "text-primary" : "text-destructive"}`}>{upWins ? "▲ +" : "▼ -"}${fmt(Math.abs(gap))} {upWins ? t("sobre el precio a batir") : t("debajo del precio a batir")}</p>
-      <div className="relative">
-        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="h-40 w-full" aria-label={upWins ? t("Va ganando Sube") : t("Va ganando Baja")}>
-          <defs>
-            <linearGradient id="duel-up" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="currentColor" stopOpacity="0.3" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient>
-            <linearGradient id="duel-down" x1="0" x2="0" y1="1" y2="0"><stop offset="0%" stopColor="currentColor" stopOpacity="0.3" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient>
-          </defs>
-          <rect x="0" y="0" width={W} height={mid} className="fill-primary" opacity="0.04" />
-          <rect x="0" y={mid} width={W} height={mid} className="fill-destructive" opacity="0.04" />
-          <path d={`${dUp} L${eu[0]},${mid} L${fu[0]},${mid} Z`} className="text-primary" fill="url(#duel-up)" />
-          <path d={`${dDown} L${ed[0]},${mid} L${down[0]![0]},${mid} Z`} className="text-destructive" fill="url(#duel-down)" />
-          <path d={dDown} fill="none" className="text-destructive" stroke="currentColor" strokeWidth={upWins ? 2 : 3} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-          <path d={dUp} fill="none" className="text-primary" stroke="currentColor" strokeWidth={upWins ? 3 : 2} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-          <line x1="0" x2={W} y1={mid} y2={mid} className="text-strike" stroke="currentColor" strokeWidth="8" strokeOpacity="0.2" vectorEffect="non-scaling-stroke" />
-          <line x1="0" x2={W} y1={mid} y2={mid} className="text-strike" stroke="currentColor" strokeDasharray="9 4" strokeWidth="2.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-        </svg>
-        {([[eu, "bg-primary", upWins], [ed, "bg-destructive", !upWins]] as const).map(([e, bg, lead], i) => (
-          <span key={i} className={`pointer-events-none absolute h-2.5 w-2.5 -translate-y-1/2 translate-x-1/2 rounded-full ${bg}`} style={{ top: `${(e[1] / H) * 100}%`, right: "4px" }}>
-            {lead && <span className={`absolute inset-0 animate-ping rounded-full ${bg} opacity-60`} />}
-          </span>
-        ))}
-        {reference && <div className="pointer-events-none absolute left-1 top-1/2 -translate-y-1/2 rounded bg-strike px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-background">🎯 {referenceLabel} · {fmt(reference)}</div>}
-      </div>
-      <p className="px-3 pt-1 text-center text-[10px] text-muted-foreground">{t("La línea que va arriba es la que va ganando: verde para Sube, roja para Baja. La línea amarilla marca el precio a batir.")}</p>
-    </div>
   );
 }
 

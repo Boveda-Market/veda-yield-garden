@@ -1100,6 +1100,7 @@ export const extra: Record<string, string> = {
   "La línea que va arriba es la que va ganando: verde para Sube, roja para Baja. La línea amarilla marca el precio a batir.": "The line on top is winning: green for Up, red for Down. The yellow line marks the price to beat.",
   "Esperando el precio a batir…": "Waiting for the price to beat…",
   "Va ganando Sube": "Up is winning",
+  "Cargando porcentajes del mercado…": "Loading market percentages…",
   "La línea que va arriba es la que va ganando según los porcentajes del mercado: verde para Sube, roja para Baja.": "The line on top is winning according to the market percentages: green for Up, red for Down.",
   "El resultado oficial usa un precio promedio, no el precio de este instante. Los porcentajes ya lo toman en cuenta.": "The official result uses an average price, not the price at this instant. The percentages already account for it.",
   "Va ganando Baja": "Down is winning",

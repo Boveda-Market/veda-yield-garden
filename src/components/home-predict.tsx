@@ -7,6 +7,7 @@ import { PoweredBy } from "@/components/powered-by";
 import { PriceChart } from "@/components/price-chart";
 import { MARKETS, fetchPrices, type MarketId } from "@/lib/markets";
 import { useT } from "@/lib/i18n";
+import { useLiveRounds } from "@/lib/predict-rounds-query";
 
 const short = (p: number) => (p >= 1000 ? `$${p.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, " ")}` : `$${p.toFixed(2)}`);
 
@@ -30,7 +31,11 @@ export function HomePredict() {
     return () => { alive = false; clearInterval(id); };
   }, []);
   const pts = series[market];
-  const up = pts.length > 1 ? pts[pts.length - 1]! >= pts[0]! : null;
+  // Who leads comes from the live 5 min round's market odds, the same numbers players see in Sube/Baja.
+  const rounds = useLiveRounds();
+  const round = (rounds.data ?? []).find((r) => r.asset === market && r.window === "5m");
+  const odds = round?.upPrice && round.downPrice ? { up: round.upPrice, down: round.downPrice } : undefined;
+  const up = odds ? odds.up! >= odds.down! : null;
   const steps = ["Elige tu cripto y tu ronda", "¿Sube o baja? ¡Tú decides!", "¡Acierta y cobra al cerrar la ronda!"];
   return <section className="py-12">
     <div className="flex flex-wrap items-center gap-2">
@@ -48,7 +53,7 @@ export function HomePredict() {
             <span className="mt-1 block font-display text-sm font-semibold tabular-nums text-muted-foreground">{p ? short(p) : "—"}</span>
           </button>; })}
       </div>
-      <PriceChart market={market} points={pts} price={prices[market]} />
+      <PriceChart key={`${market}-${round?.openTime ?? 0}`} market={market} points={pts} price={prices[market]} odds={odds} />
       <div className="grid grid-cols-2 gap-3 p-4">
         <Button asChild className={`h-14 text-base font-bold ${up === false ? "opacity-80" : ""}`}><Link to="/mercados"><TrendingUp size={18} />{t("Sube")}</Link></Button>
         <Button asChild variant="destructive" className={`h-14 text-base font-bold ${up === true ? "opacity-80" : ""}`}><Link to="/mercados"><TrendingDown size={18} />{t("Baja")}</Link></Button>

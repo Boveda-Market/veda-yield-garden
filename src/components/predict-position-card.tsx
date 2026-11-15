@@ -7,7 +7,8 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowDownRight, ArrowUpRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT, useLocale } from "@/lib/i18n";
-import { assetOfTitle, positionWon, pricePerContract, type PredictPosition } from "@/lib/predict";
+import { assetOfTitle, positionLeading, positionOdds, positionWon, pricePerContract, type PredictPosition, type RoundOdds } from "@/lib/predict";
+import { useLiveRounds } from "@/lib/predict-rounds-query";
 
 export const usdcText = (micro: string | bigint | null) => micro === null ? "—" : (Number(micro) / 1e6).toFixed(2);
 
@@ -57,7 +58,13 @@ function Tick({ value, children, className = "" }: { value: number | undefined; 
 const money = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 /** Live trading strip: principal, live asset price vs price to beat and current profit if the round closed now. */
-export function LivePositionStats({ p, price, strike, compact }: { p: PredictPosition; price: number | undefined; strike: number | undefined; compact?: boolean }) {
+/** Market odds for an open position, shared by its card, compact row and chart. */
+export function usePositionOdds(p: PredictPosition): RoundOdds | undefined {
+  const rounds = useLiveRounds(p.status === "open");
+  return positionOdds(rounds.data ?? [], p);
+}
+
+export function LivePositionStats({ p, price, strike, odds, compact }: { p: PredictPosition; price: number | undefined; strike: number | undefined; odds: RoundOdds | undefined; compact?: boolean }) {
   const t = useT();
   const now = useNow();
   // After the bell the round is decided by the official close: freeze the last price seen before it, never later ticks.
@@ -68,7 +75,8 @@ export function LivePositionStats({ p, price, strike, compact }: { p: PredictPos
   const cost = Number(p.costMicro || "0") / 1e6, payout = Number(p.payoutMicro || "0") / 1e6;
   if (ended) return <p className={compact ? "mt-0.5 text-[11px] font-semibold text-muted-foreground" : "mt-4 rounded-xl border border-border bg-muted/50 p-3 text-center text-sm font-semibold text-muted-foreground"}>⏳ {t("Ronda finalizada · Confirmando el resultado oficial…")}</p>;
   const diff = price !== undefined && strike ? price - strike : null;
-  const winning = diff === null ? null : p.side === "up" ? diff >= 0 : diff < 0;
+  // Who leads comes only from the market odds: the official result uses an oracle average, not this spot price.
+  const winning = positionLeading(p.side, odds);
   const gain = winning === null ? null : winning ? payout - cost : -cost;
   const gainTxt = gain === null ? "—" : `${gain >= 0 ? "+" : "-"}${Math.abs(gain).toFixed(2)} USDC`;
   const tone = winning === null ? "" : winning ? "text-primary" : "text-destructive";
@@ -101,6 +109,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
   const live = useLivePrice(open && asset ? (asset as MarketId) : null);
   const dur = roundSeconds(p.title);
   const strike = useStrike(open && asset ? (asset as MarketId) : null, p.closeTime && dur ? (p.closeTime - dur) * 1000 : null);
+  const odds = usePositionOdds(p);
   const Row = ({ k, v, tone }: { k: string; v: string; tone?: string }) => <div className="flex justify-between gap-2"><span className="text-muted-foreground">{k}</span><span className={`font-medium tabular-nums ${tone ?? ""}`}>{v}</span></div>;
   return <article className="rounded-lg border border-border bg-card p-5">
     <div className="flex items-start justify-between gap-3">
@@ -114,8 +123,8 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
         {open ? (mmss ? `⏱ ${t("Cierra en {v}", { v: mmss })}` : t("Resolviendo…")) : won === null ? t("Cerrada") : won ? t("Acertaste") : t("No acertaste")}
       </span>
     </div>
-    {open && asset && <LivePositionStats p={p} price={live.price} strike={strike} />}
-    {open && asset && mmss && <div className="mt-4 overflow-hidden rounded-xl border border-border bg-background/40 py-2"><PriceChart market={asset as MarketId} points={live.points} price={live.price} reference={strike} referenceLabel={t("A batir")} /></div>}
+    {open && asset && <LivePositionStats p={p} price={live.price} strike={strike} odds={odds} />}
+    {open && asset && mmss && <div className="mt-4 overflow-hidden rounded-xl border border-border bg-background/40 py-2"><PriceChart market={asset as MarketId} points={live.points} price={live.price} reference={strike} referenceLabel={t("A batir")} odds={odds} /></div>}
     <p className="mt-4 text-xs text-muted-foreground">{t("Premio si aciertas")}</p>
     <p className="font-display text-3xl font-semibold text-primary tabular-nums">{usdcText(payout)} USDC</p>
     <p className="mt-1 text-xs text-muted-foreground tabular-nums">{t("Invertido")}: {usdcText(cost)} USDC · {t("Ganancia posible")} +{usdcText(profit)}{cost > 0n ? ` (${(Number(payout) / Number(cost)).toFixed(2)}×)` : ""}</p>

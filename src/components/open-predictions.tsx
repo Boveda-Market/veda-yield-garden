@@ -8,7 +8,7 @@ import type { PredictPosition } from "@/lib/predict";
 import { executePredict, preparePredictSell } from "@/lib/predict.functions";
 import { annotateRecord } from "@/lib/predict-history";
 import { buildSwap, JUPUSD_MINT, quoteSwap, readTokenBalance } from "@/lib/wallet-actions";
-import { PredictPositionCard, usdcText, LivePositionStats, useStrike, roundSeconds } from "@/components/predict-position-card";
+import { PredictPositionCard, usdcText, LivePositionStats, useStrike, roundSeconds, usePositionOdds } from "@/components/predict-position-card";
 import { useLivePrice } from "@/hooks/use-live-price";
 import type { MarketId } from "@/lib/markets";
 import { Link } from "@tanstack/react-router";
@@ -107,5 +107,6 @@ function CompactLive({ p }: { p: PredictPosition }) {
   const live = useLivePrice(a);
   const dur = roundSeconds(p.title);
   const strike = useStrike(a, p.closeTime && dur ? (p.closeTime - dur) * 1000 : null);
-  return <LivePositionStats p={p} price={live.price} strike={strike} compact />;
+  const odds = usePositionOdds(p);
+  return <LivePositionStats p={p} price={live.price} strike={strike} odds={odds} compact />;
 }
