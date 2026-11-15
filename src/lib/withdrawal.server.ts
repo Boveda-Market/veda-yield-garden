@@ -79,7 +79,7 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput 
       if (bytes > 1232) throw new Error("Tamaño excedido");
       const fee = await connection.getFeeForMessage(tx.message, "confirmed");
       if (fee.value === null) throw new Error("Coste de red no disponible");
-      const response = await connection.simulateTransaction(tx, { sigVerify: false, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
+      const response = await connection.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
       if (response.value.err || !response.value.accounts || response.value.accounts.length !== addresses.length) throw new Error(`Simulación rechazada: ${JSON.stringify(response.value.err)} ${(response.value.logs ?? []).filter((l) => /error|failed|exceed|slippage/i.test(l)).slice(-3).join(" | ")}`);
       return { tx, accounts: response.value.accounts, bytes, networkFee: BigInt(fee.value), units: response.value.unitsConsumed };
     };

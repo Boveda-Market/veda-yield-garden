@@ -55,7 +55,7 @@ export async function prepareCompound(apiKey: string, input: CompoundInput): Pro
     const simulate = async (instructions: TransactionInstruction[], units = 400_000) => {
       const v = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...instructions]) }).compileToV0Message());
       if (v.serialize().length > 1232) throw new Error("Tamaño excedido");
-      const r = await connection.simulateTransaction(v, { sigVerify: false, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
+      const r = await connection.simulateTransaction(v, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
       if (r.value.err || !r.value.accounts) throw new Error("Simulación rechazada");
       return { v, accounts: r.value.accounts, units: r.value.unitsConsumed };
     };

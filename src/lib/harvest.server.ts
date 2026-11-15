@@ -53,7 +53,7 @@ export async function simulateHarvest(apiKey: string, input: WithdrawalInput, op
       const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...instructions]) }).compileToV0Message());
       const bytes = tx.serialize().length;
       if (bytes > 1232) throw new Error("Tamaño excedido");
-      const response = await connection.simulateTransaction(tx, { sigVerify: false, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
+      const response = await connection.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
       if (response.value.err || !response.value.accounts || response.value.accounts.length !== addresses.length) throw new Error("Simulación rechazada");
       return { tx, accounts: response.value.accounts, bytes, units: response.value.unitsConsumed };
     };

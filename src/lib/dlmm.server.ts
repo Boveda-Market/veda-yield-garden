@@ -237,7 +237,7 @@ export async function simulateDlmmHarvest(connection: Connection, input: Withdra
       const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...instructions]) }).compileToV0Message());
       const bytes = tx.serialize().length;
       if (bytes > 1232) throw new Error("Tamaño excedido");
-      const response = await connection.simulateTransaction(tx, { sigVerify: false, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
+      const response = await connection.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
       if (response.value.err || !response.value.accounts || response.value.accounts.length !== addresses.length) throw new Error("Simulación rechazada");
       return { tx, accounts: response.value.accounts, bytes, units: response.value.unitsConsumed };
     };
@@ -323,7 +323,7 @@ export async function simulateDlmmWithdrawal(connection: Connection, input: With
       if (bytes > 1232) throw new Error("Tamaño excedido");
       const fee = await connection.getFeeForMessage(tx.message, "confirmed");
       if (fee.value === null) throw new Error("Coste de red no disponible");
-      const response = await connection.simulateTransaction(tx, { sigVerify: false, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
+      const response = await connection.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
       if (response.value.err || !response.value.accounts || response.value.accounts.length !== addresses.length) throw new Error("Simulación rechazada");
       return { tx, accounts: response.value.accounts, bytes, networkFee: BigInt(fee.value), units: response.value.unitsConsumed };
     };
@@ -409,7 +409,7 @@ export async function prepareDlmmCompound(connection: Connection, input: Compoun
     const simulate = async (instructions: TransactionInstruction[], units = 600_000) => {
       const v = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...instructions]) }).compileToV0Message());
       if (v.serialize().length > 1232) throw new Error("Tamaño excedido");
-      const r = await connection.simulateTransaction(v, { sigVerify: false, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
+      const r = await connection.simulateTransaction(v, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
       if (r.value.err || !r.value.accounts) throw new Error("Simulación rechazada");
       return { v, accounts: r.value.accounts, units: r.value.unitsConsumed };
     };
@@ -498,7 +498,7 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
       const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...instructions]) }).compileToV0Message());
       if (tx.serialize().length > 1232) throw new Error("Tamaño excedido");
       const fee = await connection.getFeeForMessage(tx.message, "confirmed");
-      const r = await connection.simulateTransaction(tx, { sigVerify: false, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
+      const r = await connection.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
       if (r.value.err || !r.value.accounts || r.value.accounts.length !== addresses.length) throw new Error(`Simulación rechazada ${JSON.stringify(r.value.err)}`);
       return { tx, accounts: r.value.accounts, units: r.value.unitsConsumed, networkFee: BigInt(fee.value ?? 0) };
     };

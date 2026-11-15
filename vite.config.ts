@@ -14,15 +14,21 @@ import { dirname, resolve } from "node:path";
 const require = createRequire(import.meta.url);
 const anchorCjs = resolve(dirname(require.resolve("@coral-xyz/anchor/package.json")), "dist/cjs/index.js");
 const browserEvents = require.resolve("events/");
-// The DLMM SDK's ESM entry uses Node-invalid directory imports; its CommonJS build works everywhere.
+// The DLMM SDK's ESM entry uses Node-invalid directory imports, so dev SSR (plain Node) loads its CommonJS
+// build natively (plugin below). Builds bundle the ESM entry: the bundled CommonJS file kept bare
+// require("bn.js") calls and crashed the Worker ("No such module" / call-stack overflow).
 const dlmmCjs = require.resolve("@meteora-ag/dlmm");
+// bigint-buffer's Node entry tries native bindings at load; in the Worker that leaves a broken global
+// Error.prepareStackTrace (references __filename), so every later error.stack throws. Its pure-JS
+// browser build is identical in behaviour.
+const bigintBufferJs = resolve(dirname(require.resolve("bigint-buffer/package.json")), "dist/browser.js");
 
 export default defineConfig({
   vite: {
     // Apply before SSR creates shared dependency chunks, not only in Nitro.
     resolve: { alias: [
       { find: /^@coral-xyz\/anchor$/, replacement: anchorCjs },
-      { find: /^@meteora-ag\/dlmm$/, replacement: dlmmCjs },
+      { find: /^bigint-buffer$/, replacement: bigintBufferJs },
       // Email rendering needs entities v4; a nested v7 copy lacks lib/decode.js.
       { find: /^entities\/lib\/decode\.js$/, replacement: resolve("node_modules/entities/lib/decode.js") },
       { find: /^entities\/lib\/encode\.js$/, replacement: resolve("node_modules/entities/lib/encode.js") },
@@ -62,7 +68,7 @@ export default defineConfig({
           conditions: [...new Set([...conditions, "browser"])],
           // Anchor's browser and esm entries contain unwrapped CommonJS.
           // Its explicitly CommonJS source is transformed by the bundler.
-          alias: [{ find: /^@coral-xyz\/anchor$/, replacement: anchorCjs }, { find: /^@meteora-ag\/dlmm$/, replacement: dlmmCjs }],
+          alias: [{ find: /^@coral-xyz\/anchor$/, replacement: anchorCjs }, { find: /^bigint-buffer$/, replacement: bigintBufferJs }],
         } };
       },
     }],
