@@ -10,6 +10,13 @@ export function computeLimit(unitsConsumed: number | undefined | null): number {
   return Math.min(MAX_COMPUTE_UNITS, Math.ceil(unitsConsumed * 1.25) + 20_000);
 }
 
+/** Small transfers use few units, so the fixed price alone is ignored on a busy network: guarantee ~10,000 lamports of priority. */
+export const SMALL_TX_PRIORITY_LAMPORTS = 10_000;
+export function smallTxBudgetIxs(units: number): TransactionInstruction[] {
+  const price = Math.max(PRIORITY_MICRO_LAMPORTS, Math.ceil(SMALL_TX_PRIORITY_LAMPORTS * 1_000_000 / units));
+  return [ComputeBudgetProgram.setComputeUnitLimit({ units }), ComputeBudgetProgram.setComputeUnitPrice({ microLamports: price })];
+}
+
 export function computeBudgetIxs(units: number): TransactionInstruction[] {
   return [ComputeBudgetProgram.setComputeUnitLimit({ units }), ComputeBudgetProgram.setComputeUnitPrice({ microLamports: PRIORITY_MICRO_LAMPORTS })];
 }

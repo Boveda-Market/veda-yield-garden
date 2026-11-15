@@ -1,5 +1,5 @@
 import { parsePastRound, type PastRound } from "@/lib/predict";
-import { MARKET_ID_RE, assetOfTitle, windowOfDuration, windowOfSlug, windowOfTags, type LiveRound, type PredictPosition, type PredictQuote } from "@/lib/predict";
+import { MARKET_ID_RE, sellEstimate, assetOfTitle, windowOfDuration, windowOfSlug, windowOfTags, type LiveRound, type PredictPosition, type PredictQuote } from "@/lib/predict";
 import { USDC_MINT } from "@/lib/wallet-actions";
 import { orderStateOf, refundsFromHistory, type PredictOrderState, type PredictRefund } from "@/lib/predict-refunds";
 
@@ -70,7 +70,7 @@ async function verify(heliusKey: string, wallet: string, base64: string) {
   if (sim.value.err) throw new Error("simulation failed");
 }
 
-type Build = { transaction: string | null; requiredSigners?: string[]; execution?: { context?: unknown }; order?: { contractsMicro?: string; orderCostUsd?: string; orderPubkey?: string } };
+type Build = { transaction: string | null; requiredSigners?: string[]; execution?: { context?: unknown }; order?: { contractsMicro?: string; orderCostUsd?: string; orderPubkey?: string; marketId?: string; isYes?: boolean; estimatedTotalFeeUsd?: string } };
 
 export async function buildBuy(heliusKey: string, d: { wallet: string; marketId: string; isYes: boolean; amount: bigint }) {
   const live = await listRounds();
@@ -90,7 +90,18 @@ export async function buildSell(heliusKey: string, d: { wallet: string; position
   const b = await jup<Build>(`/positions/${d.position}`, { method: "DELETE", body: JSON.stringify({ ownerPubkey: d.wallet }) });
   if (!b.transaction || (b.requiredSigners && b.requiredSigners.some((s) => s !== d.wallet))) throw new Error("bad build");
   await verify(heliusKey, d.wallet, b.transaction);
-  return { transaction: b.transaction, context: JSON.stringify(b.execution?.context ?? null) };
+  // The venue sells at market with a very low floor, so show what the live bids really pay before the user signs.
+  let estimateMicro: string | null = null;
+  try {
+    const o = b.order;
+    if (o?.marketId && MARKET_ID_RE.test(o.marketId) && /^\d+$/.test(o.contractsMicro ?? "")) {
+      const book = await jup<{ yes?: [number, number][]; no?: [number, number][] }>(`/orderbook/${encodeURIComponent(o.marketId)}`);
+      const fee = /^\d+$/.test(o.estimatedTotalFeeUsd ?? "") ? BigInt(o.estimatedTotalFeeUsd!) : 0n;
+      const est = sellEstimate((o.isYes === false ? book.no : book.yes) ?? [], BigInt(o.contractsMicro!), fee);
+      estimateMicro = est === null ? null : est.toString();
+    }
+  } catch { estimateMicro = null; }
+  return { transaction: b.transaction, context: JSON.stringify(b.execution?.context ?? null), estimateMicro };
 }
 
 /** Claim a resolved winning position: the payout goes to the owner's wallet; only the wallet signs. */

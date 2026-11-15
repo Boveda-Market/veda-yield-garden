@@ -46,6 +46,23 @@ export type PredictQuote = { contractsMicro: string; costMicro: string };
 export type PredictPosition = { pubkey: string; marketId: string; title: string; side: PredictSide; outcome: string; contractsMicro: string; costMicro: string; valueMicro: string | null; payoutMicro: string; pnlMicro: string | null; closeTime: number | null; status: string; result: string | null; isYes?: boolean; eventId?: string | undefined };
 
 /** Payout if the side wins: each contract redeems for 1 USDC. */
+/**
+ * What an early close really pays: walk the bids for our side (price in cents, size in contracts) from best down
+ * until every contract is sold, minus the venue fee. Null when the bids cannot absorb the whole position.
+ */
+export function sellEstimate(bids: [number, number][], contractsMicro: bigint, feeMicro: bigint): bigint | null {
+  let left = contractsMicro, gross = 0n;
+  for (const [cents, size] of [...bids].sort((a, b) => b[0] - a[0])) {
+    if (left <= 0n) break;
+    if (!(cents > 0 && cents < 100) || !(size > 0)) continue;
+    const take = BigInt(Math.floor(size * 1e6)) < left ? BigInt(Math.floor(size * 1e6)) : left;
+    gross += take * BigInt(Math.round(cents)) / 100n;
+    left -= take;
+  }
+  if (left > 0n) return null;
+  return gross > feeMicro ? gross - feeMicro : 0n;
+}
+
 export const potentialProfit = (q: PredictQuote) => BigInt(q.contractsMicro) - BigInt(q.costMicro);
 
 /** Portfolio totals for prediction positions, in integer micro-USDC. Open = still in play; resolved PNL only counts closed positions with a reported PNL. */

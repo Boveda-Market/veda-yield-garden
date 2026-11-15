@@ -4,7 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchPoolStats } from "@/lib/pool-stats";
 import { VAULTS } from "@/lib/vaults";
-import { GAS_VAULT_TARGET_LAMPORTS } from "@/lib/gas-refill";
+import { GAS_DEPOSIT_TARGET_LAMPORTS, GAS_VAULT_TARGET_LAMPORTS } from "@/lib/gas-refill";
+import { CHAIN_POOLS } from "@/lib/solana-data";
 import { LoaderCircle, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,7 +32,10 @@ export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange,
   const [needsReserve, setNeedsReserve] = useState(false);
   const solPool = VAULTS.find((v) => v.id === "sol")?.pool ?? "";
   const solStats = useQuery({ queryKey: ["dexscreener-pool-stats", solPool], queryFn: ({ signal }) => fetchPoolStats(solPool, signal), enabled: needsReserve && Boolean(solPool), staleTime: 60_000, retry: 1 });
-  const guaranteeUsd = solStats.data?.price ? Math.ceil(Number(GAS_VAULT_TARGET_LAMPORTS) / 1e9 * solStats.data.price * 1.06) : null;
+  // Range vaults lock a larger refundable guarantee than regular vaults.
+  const rangeVault = CHAIN_POOLS.some((p) => p.id === vaultId && "kind" in p && p.kind === "dlmm");
+  const reserveTarget = rangeVault ? GAS_VAULT_TARGET_LAMPORTS : GAS_DEPOSIT_TARGET_LAMPORTS;
+  const guaranteeUsd = solStats.data?.price ? Math.ceil(Number(reserveTarget) / 1e9 * solStats.data.price * 1.06) : null;
   const queryClient = useQueryClient();
   const [accepted, setAccepted] = useState(false);
   const [step, setStep] = useState<Step>("idle");
@@ -78,7 +82,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange,
     if (!walletAddress || busy) return;
     setMessage(null); setStep("preparing");
     try {
-      const r = await prepareRefill({ data: { wallet: walletAddress, target: "vault" } });
+      const r = await prepareRefill({ data: { wallet: walletAddress, target: rangeVault ? "vault" : "deposit" } });
       if (!r.success) { setStep("error"); setMessage(t(r.error)); return; }
       setStep("signing");
       await signAndSend(Uint8Array.from(atob(r.transaction), (c) => c.charCodeAt(0)));

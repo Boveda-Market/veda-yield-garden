@@ -89,7 +89,19 @@ function SessionBridge({ children }: { children: ReactNode }) {
       }
       try {
         const base64 = btoa(Array.from(signed, (b) => String.fromCharCode(b)).join("")) as Base64EncodedWireTransaction;
-        const sig = await solanaRpcs["solana:mainnet"].rpc.sendTransaction(base64, { encoding: "base64", preflightCommitment: "confirmed" }).send();
+        const rpc = solanaRpcs["solana:mainnet"].rpc;
+        const sig = await rpc.sendTransaction(base64, { encoding: "base64", preflightCommitment: "confirmed" }).send();
+        // Busy network: a single send can be dropped silently. Re-send the same signed bytes until it lands or expires.
+        void (async () => {
+          for (let i = 0; i < 14; i++) {
+            await new Promise((r) => setTimeout(r, 2_500));
+            try {
+              const st = await rpc.getSignatureStatuses([sig]).send();
+              if (st.value[0]?.confirmationStatus) return;
+              await rpc.sendTransaction(base64, { encoding: "base64", skipPreflight: true, maxRetries: 0n }).send();
+            } catch { /* expired or already landed */ }
+          }
+        })();
         return String(sig);
       } catch (e) {
         console.error("[BÓVEDA] broadcast failed", e);

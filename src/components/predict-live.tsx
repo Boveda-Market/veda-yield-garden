@@ -13,6 +13,7 @@ import { PredictPositionCard } from "@/components/predict-position-card";
 import { SolConvertShortcut } from "@/components/sol-convert-shortcut";
 import { ShareWin } from "@/components/share-win";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
+import { GasRefillCard } from "@/components/gas-refill-card";
 import { useT } from "@/lib/i18n";
 import { PREDICT_MAX_USDC, PREDICT_MIN_USDC, assetOfTitle, positionWon, potentialProfit, type LiveRound, type PredictPosition, type PredictQuote, type PredictSide } from "@/lib/predict";
 import { executePredict, getPredictOrderStatus, getPredictPositions, preparePredictBuy, preparePredictClaim, preparePredictSell } from "@/lib/predict.functions";
@@ -103,6 +104,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   // Real network quote: build + simulate the exact signable order automatically, refreshed every 15s.
   const [quoting, setQuoting] = useState(false);
   const [quoteErr, setQuoteErr] = useState<string | null>(null);
+  const [needsReserve, setNeedsReserve] = useState(false);
   const seq = useRef(0);
   const unitsKey = units?.toString() ?? "";
   useEffect(() => {
@@ -114,7 +116,8 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
       try {
         const r = await preparePredictBuy({ data: { wallet, marketId: round.marketId, isYes: side === "up", amount: unitsKey } });
         if (id !== seq.current) return;
-        if (!r.success) throw new Error(r.error);
+        if (!r.success) { setNeedsReserve("reserve" in r && r.reserve === true); throw new Error(r.error); }
+        setNeedsReserve(false);
         setReview({ side, round, quote: r.quote, tx: r.transaction, context: r.context, order: r.orderPubkey ?? null }); setQuoteErr(null);
       } catch (e) { if (id === seq.current) { setReview(null); setQuoteErr(e instanceof Error ? e.message : String(e)); } }
       finally { if (id === seq.current) setQuoting(false); }
@@ -257,7 +260,8 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
           {!side && <p className="mt-3 text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
           {!wallet ? <p className="mt-3 rounded-xl bg-secondary p-3 text-center text-sm font-semibold">{t("Entra con tu cuenta para predecir en vivo con los dólares de tu wallet.")}</p>
             : !review && !short && <Button disabled className="mt-3 h-12 w-full rounded-xl text-base font-bold">{quoting ? <><Loader2 className="animate-spin" /> {t("Cotizando en la red…")}</> : side ? t(side === "up" ? "Predecir Sube" : "Predecir Baja") : t("Elige Sube o Baja")}</Button>}
-          {quoteErr && <p className="mt-2 text-xs text-destructive">{t("No se pudo cotizar ahora mismo. Reintentando…")}</p>}
+          {quoteErr && !needsReserve && <p className="mt-2 text-xs text-destructive">{t("No se pudo cotizar ahora mismo. Reintentando…")}</p>}
+          {needsReserve && wallet && <div className="mt-3"><GasRefillCard force target="deposit" sol={1n} usdc={units ?? 0n} onDone={() => setNeedsReserve(false)} /></div>}
           {side && !review && <Button type="button" variant="ghost" className="mt-2 w-full" onClick={cancelQuote}>{t("Cancelar cotización")}</Button>}
           {wallet && !review && <p className="mt-2 text-[11px] text-muted-foreground">{t("La cotización real aparece aquí, lista para firmar.")}</p>}
         </section>

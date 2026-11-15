@@ -66,7 +66,20 @@ export const preparePredictBuy = createServerFn({ method: "POST" })
     { const { assertTradingWallet } = await import("@/lib/trade-guard.server"); await assertTradingWallet(context.privyUserId, data.wallet); }
     const k = helius(); if (!k) return { success: false as const, error: FAIL };
     try { const { buildBuy } = await import("@/lib/predict.server"); return { success: true as const, ...(await buildBuy(k, data)) }; }
-    catch (e) { console.error("[predict] buy", e instanceof Error ? e.message : e); return { success: false as const, error: FAIL }; }
+    catch (e) {
+      console.error("[predict] buy", e instanceof Error ? e.message : e);
+      // The venue also needs a little network reserve to open the position: offer the one-tap refill instead of a dead end.
+      if (e instanceof Error && /INSUFFICIENT_FUNDS/.test(e.message)) {
+        try {
+          const { PublicKey } = await import("@solana/web3.js");
+          const { heliusConnection } = await import("@/lib/helius.server");
+          const { SOL_RESERVE_LAMPORTS } = await import("@/lib/wallet-actions");
+          const sol = BigInt(await heliusConnection(k).getBalance(new PublicKey(data.wallet), "confirmed"));
+          if (sol < SOL_RESERVE_LAMPORTS) return { success: false as const, reserve: true as const, error: "Te falta un poco de reserva de operaciones para entrar a la ronda." };
+        } catch { /* fall through */ }
+      }
+      return { success: false as const, error: FAIL };
+    }
   });
 
 export const preparePredictSell = createServerFn({ method: "POST" })

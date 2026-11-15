@@ -62,7 +62,7 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
 
     // Meteora opens a position account, NFT mint and NFT account (~0.0099 SOL
     // refundable rent) plus temporary token accounts and network fees.
-    if (await connection.getBalance(owner) < MIN_SOL_LAMPORTS) return result(false, "Se necesitan al menos 0.015 SOL en la wallet para las cuentas de Meteora (reembolsables al cerrar) y los costes de red.");
+    if (await connection.getBalance(owner) < MIN_SOL_LAMPORTS) { stage = "reserve"; return result(false, "Esta bóveda necesita una pequeña garantía de apertura en tu reserva de operaciones; casi toda vuelve a ti al cerrarla."); }
     stage = "jupiter";
     // Quote against the pool's actual ratio rather than assuming a 50/50 pool.
     // Binary search balances remaining USDC against the other token required.

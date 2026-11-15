@@ -16,6 +16,9 @@ import { ArrowDownRight, ArrowUpRight, ChevronRight } from "lucide-react";
 import { TokenIcon } from "@/components/token-icon";
 import { assetOfTitle } from "@/lib/predict";
 import { useEffect } from "react";
+import { Dialog, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ActionSheetContent } from "@/components/ui/action-sheet";
+import { Button } from "@/components/ui/button";
 
 const fromB64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 const toB64 = (b: Uint8Array) => btoa(Array.from(b, (x) => String.fromCharCode(x)).join(""));
@@ -36,17 +39,35 @@ export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPre
   const { items, refresh, session, wallet } = state;
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  // Early close sells at the live market price, which can be far below the position's reference value:
+  // show what the bids pay right now and sell only after the user confirms that amount.
+  const [review, setReview] = useState<{ p: PredictPosition; tx: string; context: string; estimateMicro: string | null; at: number } | null>(null);
   const sell = async (p: PredictPosition) => {
     if (!wallet) return; setBusy(p.pubkey); setMsg(null);
     try {
-      if (!session.signOnly) throw new Error(t("Tu wallet no admite esta operación."));
-      const before = await readTokenBalance(wallet, JUPUSD_MINT).catch(() => 0n);
       const r = await preparePredictSell({ data: { wallet, position: p.pubkey } });
       if (!r.success) throw new Error(r.error);
-      const signed = await session.signOnly(fromB64(r.transaction));
-      const x = await executePredict({ data: { wallet, signed: toB64(signed), context: r.context } });
+      setReview({ p, tx: r.transaction, context: r.context, estimateMicro: r.estimateMicro ?? null, at: Date.now() });
+    } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
+  };
+  const confirmSell = async () => {
+    if (!wallet || !review) return;
+    const { p } = review;
+    let { tx, context, estimateMicro } = review;
+    setReview(null); setBusy(p.pubkey); setMsg(null);
+    try {
+      if (!session.signOnly) throw new Error(t("Tu wallet no admite esta operación."));
+      // The prepared sale expires quickly: rebuild it when the user took a while to decide.
+      if (Date.now() - review.at > 30_000) {
+        const r = await preparePredictSell({ data: { wallet, position: p.pubkey } });
+        if (!r.success) throw new Error(r.error);
+        ({ transaction: tx, context } = r); estimateMicro = r.estimateMicro ?? estimateMicro;
+      }
+      const before = await readTokenBalance(wallet, JUPUSD_MINT).catch(() => 0n);
+      const signed = await session.signOnly(fromB64(tx));
+      const x = await executePredict({ data: { wallet, signed: toB64(signed), context } });
       if (!x.success) throw new Error(x.error);
-      annotateRecord(wallet, p.pubkey, { soldMicro: p.valueMicro ?? "0", sellSig: x.signature });
+      annotateRecord(wallet, p.pubkey, { soldMicro: estimateMicro ?? p.valueMicro ?? "0", sellSig: x.signature });
       setMsg({ ok: true, text: t("Firma 1 de 2 lista: posición cerrada. Ahora firma la 2 de 2 para pasarlo a dólares…") });
       // Closing early is free: convert only the JupUSD received from this sale to USDC (no BÓVEDA fee).
       try {
@@ -62,6 +83,7 @@ export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPre
   return <div className="space-y-3">
     {msg && <p role="status" className={`text-sm ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text}</p>}
     <div className="grid gap-4 md:grid-cols-2">{items.map((p) => <PredictPositionCard key={p.pubkey} p={p} onSell={() => void sell(p)} selling={busy === p.pubkey} disabled={!!busy} />)}</div>
+    <SellReview review={review} onCancel={() => setReview(null)} onConfirm={() => void confirmSell()} />
   </div>;
 }
 
@@ -74,6 +96,32 @@ export function WalletOpenPredictions() {
     <h3 className="mb-3 font-display text-lg">{t("Predicciones abiertas")}</h3>
     <OpenPredictions state={state} />
   </section>;
+}
+
+function SellReview({ review, onCancel, onConfirm }: { review: { p: PredictPosition; estimateMicro: string | null } | null; onCancel: () => void; onConfirm: () => void }) {
+  const t = useT();
+  const est = review?.estimateMicro ? BigInt(review.estimateMicro) : null;
+  const cost = review ? BigInt(review.p.costMicro || "0") : 0n;
+  return <Dialog open={!!review} onOpenChange={(o) => { if (!o) onCancel(); }}>
+    <ActionSheetContent closeLabel={t("Cerrar")} className="sm:max-w-sm">
+      <DialogHeader className="pr-10 text-left">
+        <DialogTitle className="font-display text-xl">{t("Cerrar antes de tiempo")}</DialogTitle>
+        <DialogDescription>{t("Vendes al precio que el mercado paga en este momento.")}</DialogDescription>
+      </DialogHeader>
+      <div className="rounded-xl bg-secondary/50 p-4 text-center">
+        <p className="text-xs text-muted-foreground">{t("Recibes aprox.")}</p>
+        <p className="font-display text-3xl font-semibold tabular-nums">{est !== null ? `$${usdcText(est)}` : "—"}</p>
+        <p className="mt-1 text-xs text-muted-foreground tabular-nums">{t("Invertido")}: ${usdcText(cost)}</p>
+      </div>
+      {est === null
+        ? <p className="text-sm text-destructive">{t("Ahora mismo no hay suficientes compradores: podrías recibir mucho menos. Si esperas al final de la ronda y aciertas, cobras el premio completo.")}</p>
+        : est < cost ? <p className="text-sm text-muted-foreground">{t("Recibirías menos de lo que invertiste. Si esperas al final de la ronda y aciertas, cobras el premio completo.")}</p> : null}
+      <div className="grid grid-cols-2 gap-2">
+        <Button variant="outline" onClick={onCancel}>{t("Mejor espero")}</Button>
+        <Button onClick={onConfirm}>{t("Confirmar venta")}</Button>
+      </div>
+    </ActionSheetContent>
+  </Dialog>;
 }
 
 function Countdown({ close }: { close: number | null }) {

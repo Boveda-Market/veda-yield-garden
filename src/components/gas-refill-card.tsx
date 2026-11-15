@@ -6,26 +6,27 @@ import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { prepareGasRefill } from "@/lib/gas-refill.functions";
-import { gasIsLow } from "@/lib/gas-refill";
+import { gasIsLow, type RefillTarget } from "@/lib/gas-refill";
 import { MIN_USDC_MICRO, unitsToDecimal } from "@/lib/onboarding";
 
-type Props = { sol: bigint | undefined; usdc: bigint | undefined; onDone?: () => void };
+/** `force` shows the card even above the low mark, for screens whose operation needs more reserve (refilled up to `target`). */
+type Props = { sol: bigint | undefined; usdc: bigint | undefined; onDone?: () => void; force?: boolean; target?: RefillTarget };
 
 /** Warns when the network reserve runs low and refills it from USDC in one signature, even at zero. */
-export function GasRefillCard({ sol, usdc, onDone }: Props) {
+export function GasRefillCard({ sol, usdc, onDone, force, target }: Props) {
   const t = useT();
   const session = useBovedaSession();
   const prepare = useServerFn(prepareGasRefill);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  if (sol === undefined || usdc === undefined || (!gasIsLow(sol) && !msg)) return null;
+  if (sol === undefined || usdc === undefined || (!gasIsLow(sol) && !force && !msg)) return null;
   const empty = sol === 0n;
   const activation = empty && usdc >= MIN_USDC_MICRO;
   async function refill() {
     if (!session.walletAddress) return;
     setBusy(true); setMsg(null);
     try {
-      const r = await prepare({ data: { wallet: session.walletAddress } });
+      const r = await prepare({ data: { wallet: session.walletAddress, ...(target ? { target } : {}) } });
       if (!r.success) throw new Error(r.error);
       await session.signAndSend(Uint8Array.from(atob(r.transaction), (c) => c.charCodeAt(0)));
       notify("success", t("Reserva lista"), t("Ya puedes hacer movimientos"));

@@ -51,7 +51,9 @@ export async function buildAffiliateClaim(apiKey: string, secret: string, payout
   const fromAta = getAssociatedTokenAddressSync(mint, kp.publicKey);
   const toAta = getAssociatedTokenAddressSync(mint, to, true);
   const { blockhash } = await conn.getLatestBlockhash("confirmed");
+  const { smallTxBudgetIxs } = await import("@/lib/compute-budget");
   const message = new TransactionMessage({ payerKey: to, recentBlockhash: blockhash, instructions: [
+    ...smallTxBudgetIxs(60_000),
     createAssociatedTokenAccountIdempotentInstruction(to, toAta, to, mint),
     createTransferCheckedInstruction(fromAta, mint, toAta, kp.publicKey, amount, 6),
   ] }).compileToV0Message();
@@ -77,7 +79,9 @@ export async function buildGasRefill(apiKey: string, secret: string, treasury: s
   const fromAta = getAssociatedTokenAddressSync(mint, owner, true);
   const toAta = getAssociatedTokenAddressSync(mint, kp.publicKey);
   const { blockhash } = await conn.getLatestBlockhash("confirmed");
+  const { smallTxBudgetIxs } = await import("@/lib/compute-budget");
   const message = new TransactionMessage({ payerKey: kp.publicKey, recentBlockhash: blockhash, instructions: [
+    ...smallTxBudgetIxs(20_000),
     createTransferCheckedInstruction(fromAta, mint, toAta, owner, charge, 6),
     SystemProgram.transfer({ fromPubkey: kp.publicKey, toPubkey: owner, lamports: Number(lamports) }),
   ] }).compileToV0Message();

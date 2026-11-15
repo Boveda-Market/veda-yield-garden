@@ -92,6 +92,8 @@ describe("unsigned composed deposit simulation", () => {
     mocks.connection.getBalance.mockResolvedValue(14_999_999);
     const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "1" }, { preparePilot: true });
     expect(result.success).toBe(false);
+    // "reserve" makes the deposit screen offer the one-tap reserve top-up.
+    expect(result.stage).toBe("reserve");
     expect(result.prepared).toBeUndefined();
     expect(mocks.connection.simulateTransaction).not.toHaveBeenCalled();
   });

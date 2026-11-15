@@ -41,6 +41,12 @@ export async function buildTransfer(input: z.infer<typeof sendInput>): Promise<U
   const signer = { address: owner, role: AccountRole.WRITABLE_SIGNER } as never;
   const authority = { address: owner, role: AccountRole.READONLY_SIGNER } as never;
   const instructions: Parameters<typeof appendTransactionMessageInstructions>[0][number][] = [];
+  // Small explicit priority (~10,000 lamports) so a plain transfer is not dropped on a busy network.
+  const budget = address("ComputeBudget111111111111111111111111111111");
+  const limit = asset === "SOL" ? 10_000 : 60_000;
+  const limitData = new Uint8Array(5); limitData[0] = 2; new DataView(limitData.buffer).setUint32(1, limit, true);
+  const priceData = new Uint8Array(9); priceData[0] = 3; new DataView(priceData.buffer).setBigUint64(1, BigInt(Math.ceil(10_000 * 1_000_000 / limit)), true);
+  instructions.push({ programAddress: budget, accounts: [], data: limitData } as never, { programAddress: budget, accounts: [], data: priceData } as never);
   if (asset === "SOL") {
     const system = await import("@solana-program/system");
     instructions.push(system.getTransferSolInstruction({ source: signer, destination: dest, amount }));
