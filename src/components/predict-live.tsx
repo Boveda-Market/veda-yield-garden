@@ -275,7 +275,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
         <p>{here.length > 0 ? t("Tienes una predicción activa en esta ronda: ${v} en {s}", { v: usdc(stake), s: here[0]?.side === "up" ? t("Sube") : t("Baja") }) : t("Tienes {n} predicciones abiertas", { n: positions.length })}</p>
         <Link to="/portfolio" className="font-semibold text-primary underline">{t("Ver en Portafolio")}</Link>
       </section>; })()}
-      <p className="text-xs text-muted-foreground">{t("Las predicciones en vivo se operan en un mercado externo con dólares reales; BÓVEDA no es la contraparte. El pago ganador se acredita automáticamente.")}</p>
+      <p className="text-xs text-muted-foreground">{t("Juegas con dólares reales contra otros participantes; BÓVEDA nunca juega en tu contra. Si ganas, te avisamos y cobras tu premio con un toque.")}</p>
     </div>
   );
 }
