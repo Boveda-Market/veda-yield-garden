@@ -1151,4 +1151,5 @@ export const extra: Record<string, string> = {
   "🔥 Doble o Nada en vivo · Hasta +90% de ganancia en una sola vela, sin comprar la moneda": "🔥 Double or Nothing live · Up to +90% profit on a single candle, without buying the coin",
   "Bitcoin, Ethereum y Solana en rondas relámpago, sin comprar la moneda: juegas en dólares. Si aciertas el movimiento, cobras el premio al instante.": "Bitcoin, Ethereum and Solana in lightning rounds, without buying the coin: you play in dollars. Call the move and collect your prize instantly.",
   "Hasta +90% por ronda sin comprar la moneda · Cobro directo a tu balance": "Up to +90% per round without buying the coin · Paid straight to your balance",
+  "No compras la moneda: tu dinero sigue en dólares. Nunca pierdes más de lo que pusiste y puedes vender antes del cierre.": "You don't buy the coin: your money stays in dollars. You never lose more than you put in, and you can sell before the close.",
 };
