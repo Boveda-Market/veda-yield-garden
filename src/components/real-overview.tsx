@@ -89,7 +89,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
     </article>)}</div>{!(data && data.positions.length > 0) && <><VaultSteps className="mt-6" /><StartGuide className="mt-4" /></>}</>}
     {simulationVault && <DepositSimulation key={`${simulationVault.id}-${addTo ?? "new"}`} vault={simulationVault} wallet={walletAddress} {...(addTo ? { position: addTo } : {})} initialAmount={depositAmount} migrate={migrating} onClose={() => { setSimulationVault(null); setAddTo(null); setDepositAmount(""); setMigrating(false); }} />}
     {harvest && walletAddress && <HarvestDialog wallet={walletAddress} position={harvest.position} vaultId={harvest.vaultId} onClose={() => setHarvest(null)} compound={harvest.compound} />}
-    {withdrawal && <WithdrawalSimulation wallet={walletAddress} {...withdrawal} onClose={() => setWithdrawal(null)} onMigrated={(usdc) => { const target = withdrawal.migrateTo; setWithdrawal(null); if (target) { setAddTo(null); setDepositAmount(usdc); setMigrating(true); setSimulationVault(target); } }} />}
+    {withdrawal && <WithdrawalSimulation wallet={walletAddress} {...withdrawal} onClose={() => setWithdrawal(null)} onMigrated={(usdc, target) => { setWithdrawal(null); if (target) { setAddTo(null); setDepositAmount(usdc); setMigrating(true); setSimulationVault(target); } }} />}
     <Dialog open={unavailableAction !== null} onOpenChange={(open) => { if (!open) setUnavailableAction(null); }}>
       <DialogContent>
         <DialogTitle>{unavailableAction === "harvest" ? t("Cosechar Ganancias") : t("Cerrar y Liquidar")}</DialogTitle>
