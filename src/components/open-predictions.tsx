@@ -47,14 +47,14 @@ export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPre
       const x = await executePredict({ data: { wallet, signed: toB64(signed), context: r.context } });
       if (!x.success) throw new Error(x.error);
       annotateRecord(wallet, p.pubkey, { soldMicro: p.valueMicro ?? "0", sellSig: x.signature });
-      setMsg({ ok: true, text: t("Firma 1 de 2 lista: posición cerrada. Ahora firma la 2 de 2 para cambiarlo a USDC…") });
+      setMsg({ ok: true, text: t("Firma 1 de 2 lista: posición cerrada. Ahora firma la 2 de 2 para pasarlo a dólares…") });
       // Closing early is free: convert only the JupUSD received from this sale to USDC (no BÓVEDA fee).
       try {
         let got = 0n;
         for (let i = 0; i < 4 && got <= 0n; i++) { await new Promise((res) => setTimeout(res, 2000)); got = (await readTokenBalance(wallet, JUPUSD_MINT)) - before; }
-        if (got > 0n) { const q = await quoteSwap("JupUSD", "USDC", got, { feeUsdc: 0n }); await session.signAndSend(await buildSwap(wallet, q)); setMsg({ ok: true, text: t("Posición cerrada. {v} USDC llegaron a tu wallet.", { v: usdcText(q.outAmount) }) }); notify("success", t("Posición cerrada"), t("{v} USDC en tu billetera", { v: usdcText(q.outAmount) })); }
-        else setMsg({ ok: true, text: t("Venta confirmada. El USDC está en tu wallet.") });
-      } catch { setMsg({ ok: true, text: t("Posición cerrada, pero falta el cambio a USDC. Hazlo en Mi Billetera → Cambiar (JupUSD → USDC).") }); }
+        if (got > 0n) { const q = await quoteSwap("JupUSD", "USDC", got, { feeUsdc: 0n }); await session.signAndSend(await buildSwap(wallet, q)); setMsg({ ok: true, text: t("Posición cerrada. ${v} llegaron a tu wallet.", { v: usdcText(q.outAmount) }) }); notify("success", t("Posición cerrada"), t("${v} en tu billetera", { v: usdcText(q.outAmount) })); }
+        else setMsg({ ok: true, text: t("Venta confirmada. El dinero está en tu wallet.") });
+      } catch { setMsg({ ok: true, text: t("Posición cerrada, pero falta el paso a dólares. Hazlo en Mi Billetera → Cambiar.") }); }
       setTimeout(() => void refresh(), 3000);
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };

@@ -163,8 +163,8 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
       const profit = p.valueMicro ? BigInt(p.valueMicro) - BigInt(p.costMicro) : 0n;
       if (profit > 0n) setWin(usdc(profit));
       doneRef.current.add(p.pubkey); annotateRecord(wallet, p.pubkey, { soldMicro: p.valueMicro ?? "0", sellSig: sig });
-      setMsg({ ok: true, text: t("Venta confirmada. El USDC está en tu wallet."), sig });
-      notify("success", t("Posición cerrada"), t("El USDC está en tu billetera"));
+      setMsg({ ok: true, text: t("Venta confirmada. El dinero está en tu wallet."), sig });
+      notify("success", t("Posición cerrada"), t("El dinero está en tu billetera"));
       sync();
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };
@@ -177,7 +177,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
       const sig = await sign(r.transaction, r.context);
       setWin(usdc(BigInt(p.payoutMicro || "0") - BigInt(p.costMicro || "0")));
       doneRef.current.add(p.pubkey); annotateRecord(wallet, p.pubkey, { claimSig: sig });
-      setMsg({ ok: true, text: t("Firma 1 de 2 lista: pago cobrado. Ahora firma la 2 de 2 para cambiarlo a USDC…"), sig });
+      setMsg({ ok: true, text: t("Firma 1 de 2 lista: pago cobrado. Ahora firma la 2 de 2 para pasarlo a dólares…"), sig });
       // Payout arrives as the venue's stable dollar; convert the whole balance to USDC with a second wallet signature.
       try {
         await new Promise((r) => setTimeout(r, 2500));
@@ -186,9 +186,9 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
           const q = await quoteSwap("JupUSD", "USDC", bal, { feeUsdc: predictClaimFee(BigInt(p.payoutMicro || "0"), BigInt(p.costMicro || "0")) });
           const swapSig = await session.signAndSend(await buildSwap(wallet, q));
           if (BigInt(q.feeUsdc) > 0n) void reportAffiliate(swapSig, "predict");
-          setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(q.outAmount) }), wallet: true });
-        } else setMsg({ ok: true, text: t("Ganancias reclamadas. {v} USDC llegaron a tu wallet.", { v: usdc(p.payoutMicro) }), wallet: true });
-      } catch { setMsg({ ok: true, text: t("Pago cobrado, pero falta el cambio a USDC. Hazlo en Mi Billetera → Cambiar (JupUSD → USDC)."), sig }); }
+          setMsg({ ok: true, text: t("Ganancias reclamadas. ${v} llegaron a tu wallet.", { v: usdc(q.outAmount) }), wallet: true });
+        } else setMsg({ ok: true, text: t("Ganancias reclamadas. ${v} llegaron a tu wallet.", { v: usdc(p.payoutMicro) }), wallet: true });
+      } catch { setMsg({ ok: true, text: t("Pago cobrado, pero falta el paso a dólares. Hazlo en Mi Billetera → Cambiar."), sig }); }
       sync();
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };
@@ -222,14 +222,14 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
           <DialogTitle className={`flex items-center gap-2 pr-10 font-display text-xl ${side === "down" ? "text-destructive" : "text-primary"}`}>{side === "down" ? <ArrowDownRight size={22} /> : <ArrowUpRight size={22} />}{t(side === "down" ? "Predecir Baja" : "Predecir Sube")}{selPrice ? <span className="ml-auto text-sm font-semibold tabular-nums">{t("Paga {x}×", { x: (1 / selPrice).toFixed(2) })}</span> : null}</DialogTitle>
           <DialogDescription className="text-xs">{t(side === "down" ? "Ganas si el precio baja" : "Ganas si el precio sube")}</DialogDescription>
       <section aria-label={t("Tu orden")}>
-          <div className="flex items-center justify-between"><label htmlFor="predict-amount" className="text-sm font-semibold">{t("Estás poniendo (USDC)")}</label><span className="text-xs text-muted-foreground">{t("Disponible")}: <strong className="text-foreground tabular-nums">{!wallet ? "—" : balance === null ? "…" : usdc(balance)} USDC</strong></span></div>
+          <div className="flex items-center justify-between"><label htmlFor="predict-amount" className="text-sm font-semibold">{t("Estás poniendo ($)")}</label><span className="text-xs text-muted-foreground">{t("Disponible")}: <strong className="text-foreground tabular-nums">{!wallet ? "—" : balance === null ? "…" : usdc(balance)} USDC</strong></span></div>
           {customAmount
             ? <input id="predict-amount" autoFocus inputMode="decimal" enterKeyHint="done" value={amount} onChange={(e) => { setAmount(e.target.value.replace(/[^0-9.]/g, "")); setReview(null); }} onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }} className="mt-2 h-12 w-full rounded-xl border border-input bg-background px-4 font-display text-xl font-bold" />
             : <p id="predict-amount" className="mt-1 font-display text-3xl font-bold tabular-nums">${amount || "0"}</p>}
           <div className="mt-2 grid grid-cols-5 gap-2">{[5, 10, 25, 50].map((v) => { const on = !customAmount && Number(amount) === v; return <Button key={v} type="button" variant={on ? "default" : "secondary"} size="sm" aria-pressed={on} onClick={() => { setCustomAmount(false); setAmount(String(v)); setReview(null); }}>${v}</Button>; })}<Button type="button" variant="outline" size="sm" disabled={!maxMicro || maxMicro <= 0n} onClick={() => { if (maxMicro) { setCustomAmount(false); setAmount((Math.floor(Number(maxMicro) / 1e4) / 100).toFixed(2)); setReview(null); } }}>{t("Máx")}</Button></div>
           {!customAmount && <Button type="button" variant="outline" className="mt-2 h-11 w-full rounded-xl border-2 border-primary/50 text-sm font-bold text-primary" onClick={() => setCustomAmount(true)}><Pencil size={16} /> {t("Otra cantidad")}</Button>}
-          {!inRange && <p className="mt-2 text-xs text-destructive">{t("Entre {min} y {max} USDC.", { min: PREDICT_MIN_USDC, max: PREDICT_MAX_USDC })}</p>}
-          {short && <p className="mt-2 text-xs text-destructive">{t("Saldo insuficiente: tienes {v} USDC.", { v: usdc(balance) })} <Link to="/wallet" className="underline">{t("Depositar o cambiar a USDC")}</Link></p>}
+          {!inRange && <p className="mt-2 text-xs text-destructive">{t("Entre {min} y ${max}.", { min: PREDICT_MIN_USDC, max: PREDICT_MAX_USDC })}</p>}
+          {short && <p className="mt-2 text-xs text-destructive">{t("Saldo insuficiente: tienes ${v}.", { v: usdc(balance) })} <Link to="/wallet" className="underline">{t("Depositar o cambiar a dólares")}</Link></p>}
           {inRange && selPrice && !review && <div className="mt-3 space-y-1 rounded-xl bg-secondary/50 p-3 text-sm">
             <p className="flex justify-between"><span className="text-muted-foreground">{t("Pones")}</span><strong className="tabular-nums">{amt.toFixed(2)} USDC</strong></p>
             <p className="flex justify-between"><span className="text-muted-foreground">{t("Si aciertas recibes aprox.")}</span><strong className="text-primary tabular-nums">{(amt / selPrice).toFixed(2)} USDC</strong></p>
@@ -238,9 +238,9 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
             {short && <p className="pt-1 text-[11px] text-muted-foreground">{t("Cotización con el precio actual del mercado. Fondea tu wallet para firmarla.")}</p>}
           </div>}
           {short && <SolConvertShortcut className="mt-3" />}
-          {short && side && <Button asChild className="mt-3 h-12 w-full rounded-xl text-base font-bold"><Link to="/wallet">{t("Depositar o cambiar a USDC")}</Link></Button>}
+          {short && side && <Button asChild className="mt-3 h-12 w-full rounded-xl text-base font-bold"><Link to="/wallet">{t("Depositar o cambiar a dólares")}</Link></Button>}
           {!side && <p className="mt-3 text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
-          {!wallet ? <p className="mt-3 rounded-xl bg-secondary p-3 text-center text-sm font-semibold">{t("Entra con tu cuenta para predecir en vivo con el USDC de tu wallet.")}</p>
+          {!wallet ? <p className="mt-3 rounded-xl bg-secondary p-3 text-center text-sm font-semibold">{t("Entra con tu cuenta para predecir en vivo con los dólares de tu wallet.")}</p>
             : !review && !short && <Button disabled className="mt-3 h-12 w-full rounded-xl text-base font-bold">{quoting ? <><Loader2 className="animate-spin" /> {t("Cotizando en la red…")}</> : side ? t(side === "up" ? "Predecir Sube" : "Predecir Baja") : t("Elige Sube o Baja")}</Button>}
           {quoteErr && <p className="mt-2 text-xs text-destructive">{t("No se pudo cotizar ahora mismo. Reintentando…")}</p>}
           {side && !review && <Button type="button" variant="ghost" className="mt-2 w-full" onClick={cancelQuote}>{t("Cancelar cotización")}</Button>}
@@ -261,21 +261,21 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
       </Dialog>
 
       {msg && <Dismissible key={msg.text} onDismiss={() => setMsg(null)} ms={msg.sticky ? Infinity : msg.ok ? 6000 : 10000} className={`rounded-xl border p-3 pr-10 ${msg.ok ? "border-primary/30 bg-primary/10 text-primary" : "border-destructive/30 bg-destructive/10 text-destructive"}`}><p role="status" className="text-sm">{msg.pending && <Loader2 size={14} className="mr-1 inline animate-spin align-[-2px]" />}{msg.text} {msg.wallet && <Link to="/wallet" className="font-semibold underline">{t("Ir a Mi Billetera")}</Link>}{msg.sig && <a className="inline-flex items-center gap-1 underline" href={`https://orbmarkets.io/tx/${msg.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}<ExternalLink size={12} /></a>}</p></Dismissible>}
-      {win && <ShareWin headline={t("¡Acerté! +{v} USDC", { v: win })} />}
+      {win && <ShareWin headline={t("¡Acerté! +${v}", { v: win })} />}
 
       {lost.length > 0 && <section className="space-y-2" aria-label={t("Predicciones no acertadas")}>
         {lost.map((p) => <div key={p.pubkey} role="status" className="rounded-xl border border-destructive/40 bg-destructive/10 p-4">
           <p className="font-semibold text-destructive">{t("No acertaste · {a} {s}", { a: assetOfTitle(p.title) ?? "", s: p.side === "up" ? t("Sube") : t("Baja") })}</p>
-          <p className="mt-1 text-sm">{t("La ronda cerró en la dirección contraria. Perdiste lo invertido: -{v} USDC.", { v: usdc(p.costMicro) })}</p>
+          <p className="mt-1 text-sm">{t("La ronda cerró en la dirección contraria. Perdiste lo invertido: -${v}.", { v: usdc(p.costMicro) })}</p>
           <p className="mt-1 text-xs text-muted-foreground">{t("Por eso ya no aparece entre tus predicciones abiertas. No hay nada que reclamar.")}</p>
           <Button size="sm" variant="outline" className="mt-3" onClick={() => dismissLost(p.pubkey)}>{t("Entendido")}</Button>
         </div>)}
       </section>}
       {positions.length > 0 && (() => { const here = round ? positions.filter((p) => p.marketId === round.marketId || p.marketId === round.downMarketId || p.eventId === round.eventId) : []; const stake = here.reduce((n, p) => n + BigInt(p.costMicro || "0"), 0n); return <section role="status" className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-primary/40 bg-primary/5 p-4 text-sm">
-        <p>{here.length > 0 ? t("Tienes una predicción activa en esta ronda: {v} USDC en {s}", { v: usdc(stake), s: here[0]?.side === "up" ? t("Sube") : t("Baja") }) : t("Tienes {n} predicciones abiertas", { n: positions.length })}</p>
+        <p>{here.length > 0 ? t("Tienes una predicción activa en esta ronda: ${v} en {s}", { v: usdc(stake), s: here[0]?.side === "up" ? t("Sube") : t("Baja") }) : t("Tienes {n} predicciones abiertas", { n: positions.length })}</p>
         <Link to="/portfolio" className="font-semibold text-primary underline">{t("Ver en Portafolio")}</Link>
       </section>; })()}
-      <p className="text-xs text-muted-foreground">{t("Las predicciones en vivo se operan en un mercado externo con USDC real; BÓVEDA no es la contraparte. El pago ganador se acredita automáticamente.")}</p>
+      <p className="text-xs text-muted-foreground">{t("Las predicciones en vivo se operan en un mercado externo con dólares reales; BÓVEDA no es la contraparte. El pago ganador se acredita automáticamente.")}</p>
     </div>
   );
 }
