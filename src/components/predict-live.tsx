@@ -236,7 +236,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
           <div className="mt-4 grid gap-2">
             <GoogleButton className="h-12 w-full" onClick={() => { setAskLogin(false); session.login("google"); }}>{t("Continuar con Google")}</GoogleButton>
             <Button variant="secondary" className="h-11 w-full" onClick={() => { setAskLogin(false); session.login("email"); }}>{t("Entrar con email")}</Button>
-            <Button variant="ghost" className="w-full" onClick={() => { setAskLogin(false); session.login("wallet"); }}>{t("Billetera externa (Phantom, Jupiter…)")}</Button>
+            <Button variant="ghost" className="w-full" onClick={() => setAskLogin(false)}>{t("Seguir mirando")}</Button>
           </div>
         </ActionSheetContent>
       </Dialog>
