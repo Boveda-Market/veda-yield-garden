@@ -7,6 +7,7 @@ import { VAULTS } from "@/lib/vaults";
 import { Sunset } from "./hot-vault-card";
 import titleEs from "@/assets/gta6-vault-title.png";
 import titleEn from "@/assets/gta6-vault-title-en.png";
+import dobleLogo from "@/assets/doble-o-nada-logo.png";
 
 const gta6 = VAULTS.find((v) => v.id === "gta6");
 
@@ -49,15 +50,17 @@ export function Gta6Hero({ title, sub }: { title: string; sub: string }) {
 export function HomeCtas({ vaultsFirst = false }: { vaultsFirst?: boolean }) {
   const t = useT();
   const apr = useGta6AprLabel();
+  const { lang } = useI18n();
+  const gtaTitle = lang === "en" ? titleEn : titleEs;
   const predict = <Link key="p" to="/mercados" className="group relative block min-w-0 rounded-2xl bg-primary p-[2px] shadow-[0_0_28px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
-    <span className="flex h-14 items-center justify-between gap-2 rounded-[14px] bg-primary px-3.5 text-primary-foreground">
-      <span className="flex min-w-0 items-center gap-1.5 whitespace-nowrap font-display text-[15px] font-black sm:text-base">⚡ {t("Ver Doble o Nada")}</span>
-      <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary-foreground/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary-foreground opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary-foreground" /></span>{t("En vivo")}</span>
+    <span className="flex h-16 items-center justify-between gap-2 rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
+      <span className="flex min-w-0 items-center gap-2"><img src={dobleLogo} alt="" aria-hidden className="h-10 w-auto shrink-0 drop-shadow-[0_0_10px_var(--primary)] sm:h-11" /><span className="sr-only">{t("Ver Doble o Nada")}</span></span>
+      <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary-foreground opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary-foreground" /></span>{t("En vivo")}</span>
     </span>
   </Link>;
   const vaults = <Link key="v" to="/app" className="hot-ring group relative block min-w-0 rounded-2xl p-[2px] shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98]">
-    <span className="flex h-14 items-center justify-between gap-2 rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3.5 text-hot-foreground">
-      <span className="flex min-w-0 items-center gap-1.5 whitespace-nowrap font-display text-[15px] font-black sm:text-base">🔥 {t("Explorar Bóvedas")}<ArrowRight size={16} className="hidden transition-transform group-hover:translate-x-0.5 min-[380px]:block" /></span>
+    <span className="flex h-16 items-center justify-between gap-2 rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
+      <span className="flex min-w-0 items-center gap-2 whitespace-nowrap font-display text-[15px] font-black sm:text-base"><img src={gtaTitle} alt="GTA6" className="h-7 w-auto shrink-0 -rotate-2 sm:h-9" /><span className="sr-only">{t("Explorar Bóvedas")}</span><ArrowRight size={16} className="hidden transition-transform group-hover:translate-x-0.5 min-[380px]:block" /></span>
       <span className="hot-cta shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-hot-surface">{apr}</span>
     </span>
   </Link>;
