@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 export const ActionSheetContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { closeLabel?: string }
->(({ className, children, closeLabel = "Cerrar", style, ...props }, ref) => {
+>(({ className, children, closeLabel = "Cerrar", style, onOpenAutoFocus, ...props }, ref) => {
   const closeRef = React.useRef<HTMLButtonElement>(null);
   const start = React.useRef<number | null>(null);
   const [drag, setDrag] = React.useState(0);
@@ -30,6 +30,8 @@ export const ActionSheetContent = React.forwardRef<
         "sm:duration-200 sm:data-[state=open]:slide-in-from-bottom-0 sm:data-[state=closed]:slide-out-to-bottom-0 sm:data-[state=open]:fade-in-0 sm:data-[state=closed]:fade-out-0 sm:data-[state=open]:zoom-in-95 sm:data-[state=closed]:zoom-out-95",
         className,
       )}
+      // Never focus a field on open: the phone keyboard would cover the quote and confirm button.
+      onOpenAutoFocus={(e) => { e.preventDefault(); onOpenAutoFocus?.(e); }}
       {...props}
     >
       <div data-sheet-handle aria-hidden onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
