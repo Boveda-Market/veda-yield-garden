@@ -1,6 +1,7 @@
 /** Range-based (GTA6) vault texts. */
 export const rangeVaults: Record<string, string> = {
   "Sé la casa": "Be the house",
+  "En la zona caliente": "In the hot zone",
   "Comisiones hoy": "Fees today",
   "Intercambios hoy": "Trades today",
   "Depositas": "You deposit",

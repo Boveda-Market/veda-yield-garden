@@ -1,1 +1,1 @@
-- Badge (high-octane) vaults render through HotVaultCard with dedicated --hot-* tokens identical in both themes so they always stand out; their long blurb/note live in pool details.
+- Badge (high-octane) vaults render through a compact HotVaultCard (same grid footprint as other vaults) and their active portfolio cards share its HotBanner and neon frame, with dedicated --hot-* tokens identical in both themes so they always stand out; their long blurb/note live in pool details.

@@ -19,6 +19,7 @@ import { MigrateOffer } from "./migrate-banner";
 import { RebalanceButton } from "./rebalance-button";
 import { MigratePicker } from "./migrate-picker";
 import { canHarvest } from "@/lib/harvest";
+import { HotBanner } from "./hot-vault-card";
 
 export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRotate, showHarvestBanner = true }: { positions: ChainPosition[]; onAction: (p: ChainPosition, a: "harvest" | "exit" | "compound") => void; onDeposit?: (p: ChainPosition) => void; onMigrate?: (p: ChainPosition, target: Vault) => void; onRotate?: (p: ChainPosition, target: Vault) => void; showHarvestBanner?: boolean }) {
   const t = useT();
@@ -32,22 +33,26 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
     <h2 className="font-display text-lg font-semibold">{t("Mis posiciones")}</h2>
     <div className="mt-4 grid gap-4 md:grid-cols-2">{rows.map(({ p, value, fees, apr }) => {
       const vault = VAULTS.find((v) => v.id === p.vaultId);
-      return <article key={p.address} className="rounded-lg border border-border bg-card p-5">
-        <div className="flex items-start justify-between gap-3"><div><h3 className="font-display font-semibold">{vault ? t(vault.name) : `${p.symbol}/USDC`}</h3><p className="mt-1 text-xs text-muted-foreground">{p.symbol}/USDC · {p.locked ? t("Con liquidez bloqueada") : p.outOfRange ? t("Fuera de rango") : t("Activa")}</p><PoweredBy brand="meteora" className="mt-1 !justify-start" /></div>
+      const hot = Boolean(vault?.badge);
+      const body = <>
+        {hot && vault ? <HotBanner vault={vault} className="-mx-5 -mt-5 mb-4"><span className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide ${p.outOfRange ? "animate-pulse bg-destructive text-destructive-foreground motion-reduce:animate-none" : "bg-hot-surface"}`}>{p.locked ? t("Con liquidez bloqueada") : p.outOfRange ? `⚠️ ${t("Fuera de rango")}` : `🎯 ${t("En la zona caliente")}`}</span><span className="rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase">🎰 {t("Sé la casa")}</span></HotBanner> : null}
+        <div className="flex items-start justify-between gap-3"><div>{!hot && <h3 className="font-display font-semibold">{vault ? t(vault.name) : `${p.symbol}/USDC`}</h3>}<p className="mt-1 text-xs text-muted-foreground">{p.symbol}/USDC{hot ? "" : ` · ${p.locked ? t("Con liquidez bloqueada") : p.outOfRange ? t("Fuera de rango") : t("Activa")}`}</p><PoweredBy brand="meteora" className="mt-1 !justify-start" /></div>
           <div className="flex gap-1"><Button size="icon" variant="ghost" aria-label={t("Copiar identificador")} title={t("Copiar identificador")} onClick={() => copy(p.address)}><Copy size={14} /></Button><Button asChild size="icon" variant="ghost"><a href={`https://orbmarkets.io/address/${p.address}`} target="_blank" rel="noopener noreferrer" aria-label={t("Ver en el explorador")} title={t("Ver en el explorador")}><ExternalLink size={14} /></a></Button></div></div>
         <p className="mt-4 text-xs text-muted-foreground">{t("Valor estimado")}</p>
-        <p className="font-display text-3xl font-semibold">{value === null ? t("No disponible") : `≈ ${formatUsd(value)}`}</p>
+        <p className={`font-display text-3xl font-semibold ${hot ? "w-fit bg-[image:var(--gradient-hot)] bg-clip-text font-black text-transparent" : ""}`}>{value === null ? t("No disponible") : `≈ ${formatUsd(value)}`}</p>
         <p className="mt-1 break-all text-xs text-muted-foreground">{p.tokenAmount === null ? "" : `${p.tokenAmount} ${p.symbol} + ${p.usdcAmount} USDC`}</p>
         <details className="mt-1 text-xs text-muted-foreground"><summary className="cursor-pointer underline-offset-2 hover:underline">ⓘ {t("¿Por qué cambia este balance?")}</summary><p className="mt-1 leading-5">{t("Tu posición combina dólares y otra moneda. Cuando esa moneda baja, tu posición tiene más de ella y el valor en dólares puede verse menor que lo depositado. Cuando sube con fuerza, se rebalancea hacia dólares y tendrías menos monedas que si las hubieras guardado aparte. Esto se llama pérdida impermanente. Las comisiones que cosechas son aparte y ayudan a compensarla.")}</p></details>
         {apr !== null && !p.locked && <p className="mt-3 text-xs tabular-nums text-muted-foreground"><span className="font-semibold text-primary">{apr.toFixed(2)}% APR</span> {t("estimado (24h)")} · {value === null ? "—" : `≈ +$${(value * apr / 36500).toFixed(2)}`} {t("próximas 24h")}</p>}
-        {fees !== null && <LiveEarnings base={fees} ratePerMs={p.locked ? 0 : earningRatePerMs(value, apr)} since={since} label={t("Ganancias por cosechar · estimado en vivo")} />}
+        {fees !== null && <LiveEarnings base={fees} ratePerMs={p.locked || p.outOfRange ? 0 : earningRatePerMs(value, apr)} since={since} label={t("Ganancias por cosechar · estimado en vivo")} />}
         {p.locked && <p className="mt-2 text-xs text-muted-foreground">{t("Incluye liquidez bloqueada; no toda la posición es retirable.")}</p>}
         {p.outOfRange && <p role="status" className="mt-2 rounded-lg border border-border bg-muted/50 p-2 text-xs leading-5 text-muted-foreground">{t("El precio salió del rango de esta bóveda: tu dinero sigue seguro pero no genera ganancias hasta que el precio vuelva o la cierres.")}</p>}
         {onMigrate && <MigrateOffer position={p} aprs={aprs} onMigrate={onMigrate} className="mt-3" />}
         <Button className="mt-4 w-full" disabled={!canHarvest(fees)} onClick={() => onAction(p, "harvest")}><Sprout size={16} />{t("Cosechar Ganancias")}</Button>{!canHarvest(fees) && <p className="mt-1 text-center text-xs text-muted-foreground">{t("Cosechar y reinvertir se activan desde $0.50 de ganancias.")}</p>}
         <div className="mt-2 grid grid-cols-2 gap-2"><RebalanceButton position={p} className="col-span-2" />{onDeposit && isOperableVault(p.vaultId) && <Button size="sm" className="col-span-2 h-10 font-bold shadow-md" onClick={() => onDeposit(p)}><Plus size={16} strokeWidth={3} />{t("Depositar más")}</Button>}<Button size="sm" variant="secondary" className="col-span-2" disabled={!canHarvest(fees)} onClick={() => onAction(p, "compound")}><Repeat size={14} />{t("Cosechar y reinvertir todo")}</Button>{onMigrate && isOperableVault(p.vaultId) && !p.locked && <MigratePicker position={p} aprs={aprs} onPick={onMigrate} />}<Button size="sm" variant="outline" className="col-span-2" onClick={() => onAction(p, "exit")}><ArrowDownToLine size={14} />{t("Retirar o liquidar")}</Button></div>
         {!isOperableVault(p.vaultId) && <p className="mt-3 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
-      </article>;
+      </>;
+      // High-octane vaults get the animated neon frame and sunset banner; actions stay identical to every other vault.
+      return hot ? <article key={p.address} className="hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)]"><div className="h-full overflow-hidden rounded-[calc(1rem-2px)] bg-card p-5">{body}</div></article> : <article key={p.address} className="rounded-lg border border-border bg-card p-5">{body}</article>;
     })}</div>
     <p className="mt-4 text-xs leading-5 text-muted-foreground">{t("Valores en dólares estimados al precio actual; pueden cambiar antes de firmar.")} {t("El contador en vivo estima cómo crecen tus ganancias con el rendimiento reciente de la bóveda; el monto exacto se confirma al cosechar.")}</p>
   </section>;
