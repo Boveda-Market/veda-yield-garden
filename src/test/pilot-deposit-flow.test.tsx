@@ -4,10 +4,11 @@ import { PilotDeposit } from "@/components/pilot-deposit";
 import { FEE_WALLET } from "@/lib/fees";
 
 const mocks = vi.hoisted(() => ({ prepare: vi.fn(), status: vi.fn(), sign: vi.fn() }));
-vi.mock("@tanstack/react-query", async (orig) => ({ ...(await orig<object>()), useQueryClient: () => ({ invalidateQueries: () => Promise.resolve() }) }));
+vi.mock("@tanstack/react-query", async (orig) => ({ ...(await orig<object>()), useQueryClient: () => ({ invalidateQueries: () => Promise.resolve() }), useQuery: () => ({ data: undefined }) }));
 vi.mock("@tanstack/react-router", () => ({ Link: ({ children }: { children: unknown }) => children }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@/hooks/use-affiliate-report", () => ({ useAffiliateReport: () => async () => undefined }));
+vi.mock("@/lib/gas-refill.functions", () => ({ prepareGasRefill: vi.fn() }));
 vi.mock("@/lib/pilot-deposit.functions", () => ({ preparePilotDeposit: mocks.prepare, pilotDepositStatus: mocks.status }));
 vi.mock("@/hooks/use-boveda-session", () => ({ useBovedaSession: () => ({ walletAddress: FEE_WALLET, signAndSend: mocks.sign }) }));
 afterEach(cleanup);

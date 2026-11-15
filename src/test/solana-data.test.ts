@@ -13,11 +13,12 @@ describe("Real chain amounts and supported pools", () => {
     expect(() => tokenAmount("-1", 6)).toThrow();
     expect(() => tokenAmount("1.1", 6)).toThrow();
   });
-  it("restricts pool discovery to the user's three exact addresses", () => {
+  it("restricts pool discovery to the exact supported pool addresses", () => {
     expect(CHAIN_POOLS.map((pool) => pool.pool)).toEqual([
       "8Pm2kZpnxD3hoMmt4bjStX2Pw2Z9abpbHzZxMPqxPmie",
       "BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1",
       "7EuQvReu44hnngX2nTpYZzhVCTtxdfhTZf5hzjzEipKR",
+      "99bL7ZdcQxcrkdJDKGoGpAhqZUMYEHzhMvtNadiZJpE8",
     ]);
     expect(USDC_MINT).toBe("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
   });
