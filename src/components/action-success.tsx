@@ -29,7 +29,7 @@ export function ActionSuccess({ title, body, signature, onClose, destination = "
     </span>
     <div className="grid gap-1">
       <h3 className="font-display text-xl font-bold">{title}</h3>
-      {amount && <p className="font-display text-3xl font-bold tabular-nums motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">{amount.label && <span className="mr-1 text-base font-semibold text-muted-foreground">{amount.label}</span>}{amount.value} <span className="text-base font-semibold text-muted-foreground">{amount.unit}</span></p>}
+      {amount && <p className="font-display text-3xl font-bold tabular-nums motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">{amount.label && <span className="mr-1 text-base font-semibold text-muted-foreground">{amount.label}</span>}{amount.unit === "$" ? `$${amount.value}` : <>{amount.value} <span className="text-base font-semibold text-muted-foreground">{amount.unit}</span></>}</p>}
     </div>
     <p className="text-muted-foreground">{body}</p>
     <dl className="grid w-full gap-2 rounded-xl border border-border bg-background/60 p-4 text-left">
@@ -45,7 +45,7 @@ export function ActionSuccess({ title, body, signature, onClose, destination = "
 export function ReceiveCard({ label, amount, unit, sub }: { label: string; amount: string; unit: string; sub?: string | undefined }) {
   return <div className="rounded-xl bg-muted p-4">
     <p className="text-xs text-muted-foreground">{label}</p>
-    <p className="font-display text-3xl font-bold text-primary">{amount} <span className="text-base font-semibold text-foreground">{unit}</span></p>
+    <p className="font-display text-3xl font-bold text-primary">{unit === "$" ? `$${amount}` : <>{amount} <span className="text-base font-semibold text-foreground">{unit}</span></>}</p>
     {sub && <p className="mt-1 text-xs text-muted-foreground">{sub}</p>}
   </div>;
 }

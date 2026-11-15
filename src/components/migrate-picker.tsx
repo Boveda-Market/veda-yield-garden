@@ -26,8 +26,13 @@ export function MigratePicker({ position, aprs, onPick }: { position: ChainPosit
             <span className="tabular-nums text-primary">{apr == null ? "—" : `${apr.toFixed(1)}% APR`}</span>
           </button>;
         })}</div>
-        {target && <p className="text-xs leading-5 text-muted-foreground">{t("Moveremos todo a {v}. Tu wallet te pedirá aprobar dos veces: cerrar esta bóveda y depositar en la nueva.", { v: t(target.name) })}</p>}
-        <Button size="lg" disabled={!target} onClick={() => { if (target) { setOpen(false); onPick(position, target); } }}>{t("Aprobar migración")}</Button>
+        {target && <dl className="grid gap-2 rounded-xl bg-muted p-4 text-sm">
+          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Mueves")}</dt><dd className="font-semibold">{t("Todo + ganancias")}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Destino")}</dt><dd className="font-semibold">{t(target.name)}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión BÓVEDA")}</dt><dd className="font-semibold text-primary">{t("Gratis")}</dd></div>
+          <p className="text-xs text-muted-foreground">{t("Tu billetera te pedirá 2 aprobaciones seguidas.")}</p>
+        </dl>}
+        <Button size="lg" disabled={!target} onClick={() => { if (target) { setOpen(false); onPick(position, target); } }}>{t("Ver cotización")}</Button>
       </ActionSheetContent>
     </Dialog>
   </>;

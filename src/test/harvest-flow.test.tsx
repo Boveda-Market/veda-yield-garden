@@ -23,10 +23,9 @@ it("reviews, obtains consent and freshly prepares new MET harvests before owner 
   mocks.status.mockResolvedValue({ status: "confirmed" });
   show();
   fireEvent.click(screen.getByRole("button", { name: "Revisar cosecha" }));
-  await waitFor(() => expect(screen.getByRole("button", { name: "Firmar cosecha" })).toBeDisabled());
+  await waitFor(() => expect(screen.getByRole("button", { name: "Confirmar cosecha" })).toBeEnabled());
   expect(mocks.prepare).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole("checkbox", { name: "Acepto la cosecha real" }));
-  await act(async () => fireEvent.click(screen.getByRole("button", { name: "Firmar cosecha" })));
+  await act(async () => fireEvent.click(screen.getByRole("button", { name: "Confirmar cosecha" })));
   expect(mocks.prepare).toHaveBeenCalledWith({ data: { wallet, position, vaultId: "met", maximumFeeRaw: "100" } });
   expect(mocks.send).toHaveBeenCalledTimes(1);
   expect(mocks.invalidate).toHaveBeenCalledWith({ queryKey: ["meteora-history", wallet] });
@@ -36,6 +35,6 @@ it("does not enable owner signing with a different connected wallet", async () =
   show(position);
   fireEvent.click(screen.getByRole("button", { name: "Revisar cosecha" }));
   await waitFor(() => expect(mocks.review).toHaveBeenCalled());
-  expect(screen.queryByRole("button", { name: "Firmar cosecha" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Confirmar cosecha" })).not.toBeInTheDocument();
   expect(mocks.send).not.toHaveBeenCalled();
 });
