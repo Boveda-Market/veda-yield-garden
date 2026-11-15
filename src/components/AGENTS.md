@@ -1,1 +1,2 @@
 - Badge (high-octane) vaults render through a compact HotVaultCard (same grid footprint as other vaults) and their active portfolio cards share its HotBanner and neon frame, with dedicated --hot-* tokens identical in both themes so they always stand out; their long blurb/note live in pool details.
+- GTA6 promo (gta6-promo.tsx): once-per-session popup in Mi Billetera only for holders of another unlocked vault, persistent banner in Bóvedas/Portafolio; every move goes through the 3-step strategy guide (Telegram recommended, not required) before the existing migrate flow.

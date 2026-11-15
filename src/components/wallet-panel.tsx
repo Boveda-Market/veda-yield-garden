@@ -24,6 +24,7 @@ import { solanaAddressSchema } from "@/lib/solana-data";
 import { decimalToUnits, solExcessLamports, PAYOUT_MOVE_MIN_USD, SOL_EXCESS_MOVE_MIN_USD } from "@/lib/onboarding";
 import { StartGuide } from "@/components/start-guide";
 import { WalletHeroShortcuts } from "@/components/wallet-hero-shortcuts";
+import { Gta6PromoPopup } from "@/components/gta6-promo";
 
 import { BuyUsdc } from "@/components/buy-usdc";
 import { InstallAppBanner } from "@/components/install-app";
@@ -191,6 +192,7 @@ export function WalletPanel() {
       <ReportProblem trigger={(open) => <button type="button" onClick={open} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"><LifeBuoy size={14} className="text-primary" />{t("Reportar")}</button>} />
     </div>
     <WalletHeroShortcuts />
+    <Gta6PromoPopup wallet={address} />
     <InstallAppBanner />
     <GasRefillCard sol={balances.data?.sol} usdc={balances.data?.usdc} onDone={() => void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] })} />
     <PendingClaims />

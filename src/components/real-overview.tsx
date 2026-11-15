@@ -1,4 +1,5 @@
 import { MigrateBanner } from "./migrate-banner";
+import { Gta6PromoBanner } from "./gta6-promo";
 import { MigratePicker } from "./migrate-picker";
 import { useQueries } from "@tanstack/react-query";
 import { poolYieldOptions } from "@/lib/pool-yield";
@@ -65,12 +66,12 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Tu portafolio")}</h1>{refresh}</div>
       {!walletAddress && <p className="mt-3 text-sm text-muted-foreground">{t("Conecta tu wallet para ver tu portafolio.")}</p>}
       {errors}
-      {data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
+      {data && <Gta6PromoBanner positions={data.positions} onMigrate={migrate} />}{data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
     </section> : <section aria-label={t("Bóvedas de rendimiento")} className="border-b border-border pb-4 pt-2">
       <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Bóvedas de rendimiento")}</h1>{refresh}</div>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Pon tus USDC a generar comisiones diarias. Retiras o cosechas cuando quieras.")}</p>
       {errors}
-      {data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
+      {data && <Gta6PromoBanner positions={data.positions} onMigrate={migrate} />}{data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
     </section>}
     {portfolioOnly && (() => { const nv = data?.positions.length ?? 0, np = predictions.items.length; const tabs = [{ id: "all", label: t("Todas"), n: nv + np }, { id: "vaults", label: t("Bóvedas"), n: nv }, { id: "predict", label: t("Sube / Baja"), n: np }] as const; return <div role="tablist" aria-label={t("Posiciones abiertas")} className="mt-8 flex gap-2 overflow-x-auto">{tabs.map((x) => <button key={x.id} role="tab" aria-selected={tab === x.id} onClick={() => setTab(x.id)} className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${tab === x.id ? "border-primary bg-primary text-primary-foreground shadow-md" : "border-border bg-card text-foreground hover:bg-secondary"}`}>{x.label}<span className={`rounded-full px-2 text-xs ${tab === x.id ? "bg-primary-foreground/20" : "bg-muted"}`}>{x.n}</span></button>)}</div>; })()}
     {portfolioOnly && tab !== "vaults" && predictions.items.length > 0 && <section aria-label={t("Predicciones abiertas")} className="border-b border-border py-8"><OpenPredictions state={predictions} /></section>}
