@@ -1,4 +1,6 @@
 import { MigrateBanner } from "./migrate-banner";
+import { isOperableVault, type OperableVault } from "@/lib/solana-data";
+import { isMigratableVault } from "@/lib/migrate";
 import { Plus, Sprout, Repeat, ArrowDownToLine } from "lucide-react";
 import { PoweredBy } from "@/components/powered-by";
 import { TokenIcon } from "@/components/token-icon";
@@ -28,16 +30,16 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   const t = useT();
   const [simulationVault, setSimulationVault] = useState<Vault | null>(null);
   const [addTo, setAddTo] = useState<string | null>(null);
-  const [withdrawal, setWithdrawal] = useState<{ position?: string; vaultId: "sol" | "met"; migrateTo?: Vault; rotate?: boolean } | null>(null);
+  const [withdrawal, setWithdrawal] = useState<{ position?: string; vaultId: OperableVault; migrateTo?: Vault; rotate?: boolean } | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
   const [migrating, setMigrating] = useState(false);
-  const migrate = (p: import("@/lib/solana-data").ChainPosition, target: Vault, rotate = false) => { if (walletAddress && (p.vaultId === "sol" || p.vaultId === "met") && !p.locked) setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target, ...(rotate ? { rotate: true } : {}) }); };
-  const [harvest, setHarvest] = useState<{ position: string; vaultId: "sol" | "met"; compound?: boolean } | null>(null);
+  const migrate = (p: import("@/lib/solana-data").ChainPosition, target: Vault, rotate = false) => { if (walletAddress && isMigratableVault(p.vaultId) && isMigratableVault(target.id) && !p.locked) setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target, ...(rotate ? { rotate: true } : {}) }); };
+  const [harvest, setHarvest] = useState<{ position: string; vaultId: OperableVault; compound?: boolean } | null>(null);
   const [unavailableAction, setUnavailableAction] = useState<"harvest" | "exit" | null>(null);
   function openPositionAction(position: import("@/lib/solana-data").ChainPosition, action: "harvest" | "exit" | "compound") {
     const vaultId = position.vaultId;
-    const authorized = Boolean(walletAddress) && (vaultId === "sol" || vaultId === "met");
-    if (!authorized || (vaultId !== "sol" && vaultId !== "met") || (action === "exit" && position.locked)) {
+    const authorized = Boolean(walletAddress) && isOperableVault(vaultId);
+    if (!authorized || !isOperableVault(vaultId) || (action === "exit" && position.locked) || (action === "compound" && position.outOfRange)) {
       setUnavailableAction(action === "exit" ? "exit" : "harvest");
       return;
     }
@@ -88,7 +90,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       {(() => { const own = data?.positions.find((p) => p.vaultId === vault.id); return own ? <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-2"><Button className="h-11 w-full text-base font-semibold" onClick={() => openPositionAction(own, "harvest")}><Sprout size={18} />{t("Cosechar ganancias")}</Button><div className="mt-2 grid grid-cols-2 gap-2"><Button variant="secondary" className="h-10 w-full px-2 font-semibold" onClick={() => openPositionAction(own, "compound")}><Repeat size={16} />{t("Reinvertir")}</Button><Button variant="outline" className="h-10 w-full border-primary/40 px-2 font-semibold" disabled={own.locked} onClick={() => openPositionAction(own, "exit")}><ArrowDownToLine size={16} />{t("Liquidar")}</Button></div></div> : null; })()}
       <p className="mt-2 flex-1 text-xs leading-5 text-muted-foreground">{t(vault.blurb)}</p>
       <div className="mt-3 grid grid-cols-2 gap-2"><Button variant="outline" className="h-10 w-full" onClick={() => onDetails(vault)}>{t("Detalles del pool")}</Button>
-      <Button variant={data?.positions.some((p) => p.vaultId === vault.id) ? "secondary" : "default"} className="h-10 w-full font-semibold" disabled={!walletAddress || (vault.id !== "sol" && vault.id !== "met")} onClick={() => { const own = data?.positions.find((p) => p.vaultId === vault.id && !p.locked); setAddTo(own?.address ?? null); setSimulationVault(vault); }}>{data?.positions.some((p) => p.vaultId === vault.id && !p.locked) ? <><Plus size={14} />{t("Añadir más")}</> : t("Depositar USDC")}</Button></div>
+      <Button variant={data?.positions.some((p) => p.vaultId === vault.id) ? "secondary" : "default"} className="h-10 w-full font-semibold" disabled={!walletAddress || !isOperableVault(vault.id)} onClick={() => { const own = data?.positions.find((p) => p.vaultId === vault.id && !p.locked); setAddTo(own?.address ?? null); setSimulationVault(vault); }}>{data?.positions.some((p) => p.vaultId === vault.id && !p.locked) ? <><Plus size={14} />{t("Añadir más")}</> : t("Depositar USDC")}</Button></div>
     </article>)}</div>{!(data && data.positions.length > 0) && <><VaultSteps className="mt-6" /><StartGuide className="mt-4" /></>}</>}
     {simulationVault && <DepositSimulation key={`${simulationVault.id}-${addTo ?? "new"}`} vault={simulationVault} wallet={walletAddress} {...(addTo ? { position: addTo } : {})} initialAmount={depositAmount} migrate={migrating} onClose={() => { setSimulationVault(null); setAddTo(null); setDepositAmount(""); setMigrating(false); }} />}
     {harvest && walletAddress && <HarvestDialog wallet={walletAddress} position={harvest.position} vaultId={harvest.vaultId} onClose={() => setHarvest(null)} compound={harvest.compound} />}
@@ -97,7 +99,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <DialogContent>
         <DialogTitle>{unavailableAction === "harvest" ? t("Cosechar Ganancias") : t("Cerrar y Liquidar")}</DialogTitle>
         <DialogDescription>{t("Esta operación todavía no está habilitada para esta posición.")}</DialogDescription>
-        <p className="text-sm leading-6 text-muted-foreground">{t("Puedes operar posiciones compatibles de SOL y MET con su wallet propietaria. La liquidez bloqueada no se puede liquidar. No se ha solicitado ninguna firma ni se ha movido dinero.")}</p>
+        <p className="text-sm leading-6 text-muted-foreground">{t("Puedes operar las posiciones de las bóvedas de BÓVEDA con su wallet propietaria. La liquidez bloqueada no se puede liquidar y no se reinvierte mientras el precio esté fuera de rango. No se ha solicitado ninguna firma ni se ha movido dinero.")}</p>
         <Button variant="outline" onClick={() => setUnavailableAction(null)}>{t("Volver a mis posiciones")}</Button>
       </DialogContent>
     </Dialog>

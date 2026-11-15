@@ -1,3 +1,7 @@
+/** Vaults eligible for move suggestions; volatile range-based vaults are excluded because their short-lived APR spikes would always win. */
+export const MIGRATE_VAULTS = ["sol", "met"] as const;
+export const isMigratableVault = (id: string): id is (typeof MIGRATE_VAULTS)[number] => (MIGRATE_VAULTS as readonly string[]).includes(id);
+
 /** Minimum APR advantage (percentage points) before suggesting a move to another vault. */
 export const MIGRATE_MIN_GAIN = 5;
 /** Moving between vaults is free of BÓVEDA fees (exit and entry). */
@@ -5,11 +9,12 @@ export const MIGRATE_FEE_PCT = 0;
 
 /** Best other vault whose estimated APR beats the current one by at least MIGRATE_MIN_GAIN points. */
 export function bestUpgrade(currentId: string, aprs: Record<string, number | null | undefined>) {
+  if (!isMigratableVault(currentId)) return null;
   const current = aprs[currentId];
   if (current == null || !Number.isFinite(current)) return null;
   let best: { id: string; apr: number; gain: number } | null = null;
   for (const [id, apr] of Object.entries(aprs)) {
-    if (id === currentId || apr == null || !Number.isFinite(apr)) continue;
+    if (id === currentId || !isMigratableVault(id) || apr == null || !Number.isFinite(apr)) continue;
     const gain = apr - current;
     if (gain >= MIGRATE_MIN_GAIN && (!best || gain > best.gain)) best = { id, apr, gain };
   }

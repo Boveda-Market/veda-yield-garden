@@ -1,20 +1,18 @@
 import BN from "bn.js";
 import { Buffer } from "buffer";
-import { z } from "zod";
 import { ComputeBudgetProgram, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import { AccountLayout, TOKEN_PROGRAM_ID, createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, getAssociatedTokenAddressSync, NATIVE_MINT } from "@solana/spl-token";
 import { CpAmm, getCurrentPoint } from "@meteora-ag/cp-amm-sdk/dist/index.js";
 import { ownsPositionNft } from "@/lib/position-ownership.server";
 import { heliusConnection } from "@/lib/solana-read.server";
-import { CHAIN_POOLS, USDC_MINT, tokenAmount, solanaAddressSchema } from "@/lib/solana-data";
+import { CHAIN_POOLS, USDC_MINT, tokenAmount } from "@/lib/solana-data";
 import { FEE_WALLET } from "@/lib/fees";
 import { compactDepositInstructions } from "@/lib/compact-deposit";
 import { computeBudgetIxs, computeLimit, MAX_COMPUTE_UNITS } from "@/lib/compute-budget";
+import { ledgerSwapToUsdc } from "@/lib/ledger-swap.server";
+import { simulateDlmmWithdrawal } from "@/lib/dlmm.server";
 import { withdrawalAmounts, exitFeeMode, partialLiquidity, type WithdrawalInput, type WithdrawalResult } from "@/lib/withdrawal";
 
-const ixSchema = z.object({ programId: solanaAddressSchema, accounts: z.array(z.object({ pubkey: solanaAddressSchema, isSigner: z.boolean(), isWritable: z.boolean() })), data: z.string().max(20_000) });
-const swapSchema = z.object({ setupInstructions: z.array(ixSchema), otherInstructions: z.array(ixSchema).optional(), tokenLedgerInstruction: ixSchema.optional(), swapInstruction: ixSchema, cleanupInstruction: ixSchema.nullable().optional(), addressLookupTableAddresses: z.array(solanaAddressSchema).max(16) });
-const quoteSchema = z.object({ inputMint: z.string(), outputMint: z.string(), inAmount: z.string().regex(/^\d+$/), otherAmountThreshold: z.string().regex(/^\d+$/), swapMode: z.literal("ExactIn"), routePlan: z.array(z.object({ swapInfo: z.object({ ammKey: z.string() }).passthrough() }).passthrough()) }).passthrough();
 
 /** Atomic owner-verified close: tiered exit fee on on-chain minima, delta-only conversion, owner signs only. */
 export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput & { percent?: number | undefined; migrate?: true | undefined; rotate?: true | undefined }, options: { prepare?: boolean; maximumFeeRaw?: string; minimumNetRaw?: string } = {}): Promise<WithdrawalResult> {
@@ -28,6 +26,7 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput 
     if (!Number.isInteger(percent) || percent < 1 || percent > 100) return fail("Porcentaje de retiro no válido.");
     const config = CHAIN_POOLS.find((p) => p.id === input.vaultId);
     if (!config) return fail("Bóveda no válida.");
+    if (config.kind === "dlmm") return simulateDlmmWithdrawal(connection, input, options);
     const owner = new PublicKey(input.wallet), position = new PublicKey(input.position), usdc = new PublicKey(USDC_MINT);
     const cp = new CpAmm(connection);
     const owned = (await cp.getPositionsByUser(owner)).find((p) => p.position.equals(position));
@@ -83,47 +82,14 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput 
     let minimumSwap = 0n;
     if (aReceived > 0n) {
       stage = "Cotización Jupiter";
-      const request = async (path: string, body?: unknown) => {
-        for (let attempt = 0; ; attempt++) {
-          const response = await fetch(`https://api.jup.ag/swap/v1/${path}`, { method: body ? "POST" : "GET", headers: { "Content-Type": "application/json" }, ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(20_000) });
-          if (response.status === 429 && attempt < 5) { await new Promise((resolve) => setTimeout(resolve, 1_200 * (attempt + 1))); continue; }
-          if (!response.ok) throw new Error("Jupiter no disponible");
-          return response.json();
-        }
-      };
       // Quote the minimum token A released by Meteora, excluding variable fees and upside.
       // The token ledger consumes the actual withdrawal delta, never the old token balance.
-      const swapInput = BigInt(minimumA.toString());
-      if (swapInput <= 0n) return fail("El retiro no permite proteger un mínimo positivo para la conversión.");
-      const params = new URLSearchParams({ inputMint: config.mint, outputMint: USDC_MINT, amount: swapInput.toString(), slippageBps: "50", maxAccounts: "24", onlyDirectRoutes: "true", excludeDexes: "Meteora,Meteora DLMM,Meteora DAMM v2" });
-      const jQuote = quoteSchema.parse(await request(`quote?${params}`));
-      if (jQuote.inputMint !== config.mint || jQuote.outputMint !== USDC_MINT || jQuote.inAmount !== swapInput.toString() || jQuote.routePlan.some((r) => r.swapInfo.ammKey === config.pool)) return fail("La conversión no coincide con los fondos retirados.");
-      minimumSwap = BigInt(jQuote.otherAmountThreshold);
-      stage = "Preparación Jupiter";
-      const swap = swapSchema.parse(await request("swap-instructions", { quoteResponse: jQuote, userPublicKey: input.wallet, wrapAndUnwrapSol: false, dynamicComputeUnitLimit: false, useTokenLedger: true, useSharedAccounts: false }));
-      const decode = (ix: z.infer<typeof ixSchema>) => new TransactionInstruction({ programId: new PublicKey(ix.programId), keys: ix.accounts.map((a) => ({ ...a, pubkey: new PublicKey(a.pubkey) })), data: Buffer.from(ix.data, "base64") });
-      if (swap.cleanupInstruction) return fail("La ruta necesita un cierre de cuenta adicional que todavía no está validado.");
-      if (!swap.tokenLedgerInstruction) return fail("Jupiter no proporcionó el registro de saldo necesario para no consumir tokens previos.");
-      const ledger = decode(swap.tokenLedgerInstruction), route = decode(swap.swapInstruction);
-      const jupiterProgram = new PublicKey("JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4");
-      if (!ledger.programId.equals(jupiterProgram) || !ledger.data.equals(Buffer.from([228, 85, 185, 112, 78, 79, 77, 2])) || !ledger.keys[1]?.pubkey.equals(tokenA) || !route.programId.equals(jupiterProgram) || !route.data.subarray(0, 8).equals(Buffer.from([150, 86, 71, 116, 167, 93, 14, 104])) || !route.keys[1]?.pubkey.equals(owner) || !route.keys[2]?.pubkey.equals(tokenA) || !route.keys[3]?.pubkey.equals(source) || !route.keys[5]?.pubkey.equals(usdc) || !route.keys[7]?.pubkey.equals(ledger.keys[0]?.pubkey ?? PublicKey.default) || route.data.length < 23) return fail("El registro de saldo o la ruta Jupiter no coincide con el retiro autorizado.");
-      // Borsh route_with_token_ledger ends in quoted_out_amount:u64,
-      // slippage_bps:u16, platform_fee_bps:u8. Enforce the exact quote minimum
-      // with zero additional slippage rather than discounting the minimum twice.
-      if (route.data[route.data.length - 1] !== 0) return fail("La ruta incluye una comisión adicional no autorizada.");
-      route.data.writeBigUInt64LE(minimumSwap, route.data.length - 11);
-      route.data.writeUInt16LE(0, route.data.length - 3);
-      if ((swap.otherInstructions ?? []).length > 0) return fail("La ruta incluye instrucciones adicionales no verificadas.");
-      const setup = swap.setupInstructions.map(decode);
-      const ataProgram = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
-      if (setup.some((ix) => !ix.programId.equals(ataProgram) || ix.data.length !== 1 || ix.data[0] !== 1 || !ix.keys[0]?.pubkey.equals(owner))) return fail("La preparación Jupiter contiene movimientos adicionales no autorizados.");
-      instructions.unshift(...setup, ledger);
-      instructions.push(route);
-      const loaded = await Promise.all(swap.addressLookupTableAddresses.map((address) => connection.getAddressLookupTable(new PublicKey(address))));
-      for (const table of loaded) {
-        if (!table.value) return fail("Tabla de direcciones no disponible.");
-        tables.push(table.value);
-      }
+      const swap = await ledgerSwapToUsdc(connection, { owner, inputMint: config.mint, inputAta: tokenA, usdcAta: source, minimumIn: BigInt(minimumA.toString()), pool: config.pool });
+      if (!swap.ok) return fail(swap.message);
+      minimumSwap = swap.minimumSwap;
+      instructions.unshift(...swap.setup, swap.ledger);
+      instructions.push(swap.route);
+      tables.push(...swap.tables);
     }
     stage = "Simulación de conversión a USDC";
     const converted = await simulate(instructions);

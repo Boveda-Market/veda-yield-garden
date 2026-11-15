@@ -13,11 +13,17 @@ export const GAS_FLAT_MICRO = 10_000n;
 export const GAS_MIN_CHARGE_MICRO = 50_000n;
 
 export function gasIsLow(sol: bigint) { return sol < GAS_LOW_LAMPORTS; }
-export function refillLamports(sol: bigint) { return sol < GAS_LOW_LAMPORTS ? GAS_TARGET_LAMPORTS - sol : 0n; }
+/** Target for "vault": a range-based vault position locks a refundable guarantee, so the reserve is topped up to cover it plus normal operations. */
+export const GAS_VAULT_TARGET_LAMPORTS = 65_000_000n;
+export type RefillTarget = "standard" | "vault";
+export function refillLamports(sol: bigint, target: RefillTarget = "standard") {
+  if (target === "vault") return sol < GAS_VAULT_TARGET_LAMPORTS ? GAS_VAULT_TARGET_LAMPORTS - sol : 0n;
+  return sol < GAS_LOW_LAMPORTS ? GAS_TARGET_LAMPORTS - sol : 0n;
+}
 /** USDC (micro) charged for the refill, given the market value (micro) of the SOL delivered. */
 export function refillCharge(marketMicro: bigint) {
   const c = marketMicro + (marketMicro * GAS_MARGIN_BPS + 9_999n) / 10_000n + GAS_FLAT_MICRO;
   return c < GAS_MIN_CHARGE_MICRO ? GAS_MIN_CHARGE_MICRO : c;
 }
 
-export const gasRefillInput = z.object({ wallet: solanaAddressSchema });
+export const gasRefillInput = z.object({ wallet: solanaAddressSchema, target: z.enum(["standard", "vault"]).optional() });

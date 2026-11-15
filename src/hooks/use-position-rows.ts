@@ -2,10 +2,10 @@ import { useQueries } from "@tanstack/react-query";
 import { fetchPoolStats } from "@/lib/pool-stats";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { estimateUsd } from "@/lib/position-value";
-import type { ChainPosition } from "@/lib/solana-data";
+import { isOperableVault, type ChainPosition } from "@/lib/solana-data";
 import { VAULTS } from "@/lib/vaults";
 
-export const operable = (p: ChainPosition) => p.vaultId === "sol" || p.vaultId === "met";
+export const operable = (p: ChainPosition) => isOperableVault(p.vaultId);
 
 /** Estimated USD value, pending fees and APR per position (shared cache with pool details). */
 export function usePositionRows(positions: ChainPosition[]) {

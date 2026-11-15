@@ -1,7 +1,10 @@
 import { useT } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchPoolStats } from "@/lib/pool-stats";
+import { VAULTS } from "@/lib/vaults";
+import { GAS_VAULT_TARGET_LAMPORTS } from "@/lib/gas-refill";
 import { LoaderCircle, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,6 +13,8 @@ import { notify } from "@/lib/notify";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { pilotDepositStatus, preparePilotDeposit } from "@/lib/pilot-deposit.functions";
+import { prepareGasRefill } from "@/lib/gas-refill.functions";
+import { unitsToDecimal } from "@/lib/onboarding";
 import { PILOT_VAULTS, pilotInput, type PilotStatus } from "@/lib/pilot-deposit";
 
 type Step = "idle" | "preparing" | "signing" | "confirming" | "done" | "error";
@@ -22,6 +27,11 @@ export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange,
   const prepare = useServerFn(preparePilotDeposit);
   const reportAffiliate = useAffiliateReport();
   const readStatus = useServerFn(pilotDepositStatus);
+  const prepareRefill = useServerFn(prepareGasRefill);
+  const [needsReserve, setNeedsReserve] = useState(false);
+  const solPool = VAULTS.find((v) => v.id === "sol")?.pool ?? "";
+  const solStats = useQuery({ queryKey: ["dexscreener-pool-stats", solPool], queryFn: ({ signal }) => fetchPoolStats(solPool, signal), enabled: needsReserve && Boolean(solPool), staleTime: 60_000, retry: 1 });
+  const guaranteeUsd = solStats.data?.price ? Math.ceil(Number(GAS_VAULT_TARGET_LAMPORTS) / 1e9 * solStats.data.price * 1.06) : null;
   const queryClient = useQueryClient();
   const [accepted, setAccepted] = useState(false);
   const [step, setStep] = useState<Step>("idle");
@@ -40,6 +50,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange,
     setMessage(null); setSignature(null); setStatus(null); setStep("preparing");
     try {
       const prepared = await prepare({ data: valid.data });
+      if (!prepared.success && prepared.stage === "reserve") { setStep("idle"); setNeedsReserve(true); return; }
       if (!prepared.success || !prepared.prepared) { setStep("error"); setMessage(`${prepared.message} No se pidió ninguna firma.`); return; }
       setStep("signing");
       let sig: string;
@@ -62,6 +73,23 @@ export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange,
     } catch { setStep("error"); setMessage(t("No se pudo preparar el depósito. No se pidió ninguna firma.")); }
   }
 
+  /** Tops the reserve up to the vault guarantee from the user's dollars (treasury pays the network fee), then retries the deposit. */
+  async function fundReserve() {
+    if (!walletAddress || busy) return;
+    setMessage(null); setStep("preparing");
+    try {
+      const r = await prepareRefill({ data: { wallet: walletAddress, target: "vault" } });
+      if (!r.success) { setStep("error"); setMessage(t(r.error)); return; }
+      setStep("signing");
+      await signAndSend(Uint8Array.from(atob(r.transaction), (c) => c.charCodeAt(0)));
+      notify("success", t("Garantía lista"), t("Usamos ${usd} de tus dólares", { usd: unitsToDecimal(BigInt(r.chargeMicro), 6) }));
+      setNeedsReserve(false); setStep("idle");
+      void queryClient.invalidateQueries({ queryKey: ["my-wallet", walletAddress] });
+      await new Promise((resolve) => setTimeout(resolve, 1_500));
+      await run();
+    } catch { setStep("error"); setMessage(t("No se pudo preparar la garantía. No se movió dinero.")); }
+  }
+
   if (!eligible) return <p className="border-t border-border pt-4 text-xs text-muted-foreground">{t("Los depósitos no están disponibles para esta bóveda.")}</p>;
   if (step === "done") return <>
     <p role="status" className="sr-only">{t("Depósito confirmado en la red (")}{status === "finalized" ? "finalizado" : "confirmado"}).</p>
@@ -74,6 +102,11 @@ export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange,
       <Button size="lg" disabled={!accepted || busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? labels[step] : t("Confirmar y depositar")}</Button>
       {!busy && <p className="text-center text-xs text-muted-foreground">{t("Tu wallet te pedirá aprobar la operación.")}</p>}
     </>}
+    {needsReserve && <div role="status" className="rounded-xl border border-primary/40 bg-primary/5 p-3 text-xs leading-5">
+      <p className="font-semibold text-foreground">{t("Esta bóveda necesita una garantía de apertura")}</p>
+      <p className="mt-1 text-muted-foreground">{guaranteeUsd === null ? t("Apartamos una pequeña parte de tus dólares en tu reserva de operaciones. Casi todo vuelve a ti cuando cierras la posición.") : t("Apartamos hasta unos ${usd} de tus dólares en tu reserva de operaciones. Casi todo vuelve a ti cuando cierras la posición.", { usd: String(guaranteeUsd) })}</p>
+      <Button className="mt-3 w-full" disabled={busy} onClick={() => void fundReserve()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : null}{busy ? t(labels[step]) : t("Preparar garantía y depositar")}</Button>
+    </div>}
     {message && <p role="alert" className="text-destructive">{message}</p>}
     {signature && <p className="break-all text-xs">{t("Transacción:")}{" "}<a className="underline" href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("ver en Helius")}</a></p>}
   </section>;

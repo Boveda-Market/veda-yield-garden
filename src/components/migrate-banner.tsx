@@ -4,7 +4,7 @@ import { Zap } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { VAULTS, type Vault } from "@/lib/vaults";
 import { poolYieldOptions } from "@/lib/pool-yield";
-import { bestUpgrade } from "@/lib/migrate";
+import { bestUpgrade, isMigratableVault } from "@/lib/migrate";
 import type { ChainPosition } from "@/lib/solana-data";
 import { Button } from "./ui/button";
 
@@ -22,7 +22,7 @@ export function useVaultAprs() {
 export function MigrateOffer({ position, aprs, onMigrate, className = "" }: { position: ChainPosition; aprs: Record<string, number | null>; onMigrate: (p: ChainPosition, v: Vault) => void; className?: string }) {
   const t = useT();
   const enabled = useMigrateEnabled();
-  if (!enabled || position.locked || (position.vaultId !== "sol" && position.vaultId !== "met")) return null;
+  if (!enabled || position.locked || !isMigratableVault(position.vaultId)) return null;
   const up = bestUpgrade(position.vaultId, aprs);
   const target = up ? VAULTS.find((v) => v.id === up.id) : null;
   const from = VAULTS.find((v) => v.id === position.vaultId);
@@ -38,6 +38,6 @@ export function MigrateOffer({ position, aprs, onMigrate, className = "" }: { po
 /** Top banner listing the first position with a free-move opportunity. */
 export function MigrateBanner({ positions, onMigrate }: { positions: ChainPosition[]; onMigrate: (p: ChainPosition, v: Vault) => void }) {
   const aprs = useVaultAprs();
-  const p = positions.find((x) => !x.locked && (x.vaultId === "sol" || x.vaultId === "met") && bestUpgrade(x.vaultId, aprs));
+  const p = positions.find((x) => !x.locked && isMigratableVault(x.vaultId) && bestUpgrade(x.vaultId, aprs));
   return p ? <MigrateOffer position={p} aprs={aprs} onMigrate={onMigrate} className="mt-6" /> : null;
 }

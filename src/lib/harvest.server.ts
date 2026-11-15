@@ -3,6 +3,7 @@ import { ComputeBudgetProgram, PublicKey, TransactionInstruction, TransactionMes
 import { AccountLayout, TOKEN_PROGRAM_ID, NATIVE_MINT, createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { CpAmm } from "@meteora-ag/cp-amm-sdk/dist/index.js";
 import { ownsPositionNft } from "@/lib/position-ownership.server";
+import { simulateDlmmHarvest } from "@/lib/dlmm.server";
 import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount } from "@/lib/solana-data";
 import { FEE_WALLET } from "@/lib/fees";
@@ -21,6 +22,7 @@ export async function simulateHarvest(apiKey: string, input: WithdrawalInput, op
     if (await connection.getGenesisHash() !== "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d") return fail("La conexión no corresponde a la red principal.");
     const config = CHAIN_POOLS.find((p) => p.id === input.vaultId);
     if (!config) return fail("Bóveda no válida.");
+    if (config.kind === "dlmm") return simulateDlmmHarvest(connection, input, options);
     const owner = new PublicKey(input.wallet), position = new PublicKey(input.position), usdc = new PublicKey(USDC_MINT);
     const cp = new CpAmm(connection);
     const owned = (await cp.getPositionsByUser(owner)).find((p) => p.position.equals(position));

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CHAIN_POOLS, realWalletInput, tokenAmount } from "./solana-data";
+import { CHAIN_POOLS, realWalletInput, tokenAmount, vaultDecimals } from "./solana-data";
 
 export const meteoraHistoryInput = realWalletInput.extend({ before: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,88}$/).optional() }).strict();
 export type MeteoraRecord = { id: string; signature: string; at: number | null; slot: number; pool: string; position: string; kind: "deposit" | "withdraw" | "harvest" | "close"; tokenRaw: string; usdcRaw: string };
@@ -25,7 +25,7 @@ export function harvestedUsdValue(totals: { id: string; harvestToken: bigint; ha
     if (row.harvestToken === 0n) continue;
     const price = prices[row.id];
     if (price == null || !Number.isFinite(price) || price <= 0) return null;
-    const decimals = row.id === "sol" ? 9n : 6n;
+    const decimals = BigInt(vaultDecimals(row.id));
     micro += (row.harvestToken * BigInt(Math.round(price * 1_000_000))) / 10n ** decimals;
   }
   return tokenAmount(micro.toString(), 6);

@@ -1,4 +1,5 @@
 import { ServiceFeeLabel } from "@/components/service-fee-label";
+import { vaultSymbol, type OperableVault } from "@/lib/solana-data";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
 import { useState } from "react";
@@ -17,7 +18,7 @@ import { notify } from "@/lib/notify";
 import { CompoundStep } from "@/components/compound-step";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 
-export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: { wallet: string; position: string; vaultId: "sol" | "met"; onClose: () => void; compound?: boolean | undefined }) {
+export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: { wallet: string; position: string; vaultId: OperableVault; onClose: () => void; compound?: boolean | undefined }) {
   const t = useT();
   const simulate = useServerFn(simulateRealHarvest);
   const prepare = useServerFn(prepareRealHarvest);
@@ -64,11 +65,11 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
     } catch { setMessage(t("No se pudo preparar la cosecha. No se pidió ninguna firma.")); }
     finally { setPending(false); setStep(""); }
   }
-  const coin = vaultId === "sol" ? "SOL" : "MET";
+  const coin = vaultSymbol(vaultId);
   return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
     <DialogTitle>{compound ? t("Reinvertir ganancias ·") : t("Cosechar Ganancias ·")}{" "}{coin}</DialogTitle>
     <DialogDescription>{compound ? t("Dos pasos: primero cosechas tus ganancias y luego sumas los USDC y el otro token cosechados a esta misma posición. Firmas cada paso por separado.") : t("Recibe las ganancias acumuladas. Tu depósito sigue en la bóveda generando más.")}</DialogDescription>
-    {finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess title={t("¡Ganancias cosechadas!")} amount={result?.net ? { value: result.net, unit: "USDC" } : undefined} details={[{ label: t("Operación"), value: t("Cosecha de ganancias") }, { label: t("Origen"), value: t("Bóveda {v}", { v: vaultId === "sol" ? "SOL" : "MET" }) }, { label: t("Destino"), value: t("Tu billetera") }]} body={t("Las ganancias ya están en tu wallet y tu depósito sigue generando.")} signature={signature} onClose={onClose} />{compound && result?.netRaw && result.tokenRaw && <CompoundStep wallet={wallet} position={position} vaultId={vaultId} usdcRaw={result.netRaw} tokenRaw={result.tokenRaw} />}</> : <>
+    {finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess title={t("¡Ganancias cosechadas!")} amount={result?.net ? { value: result.net, unit: "USDC" } : undefined} details={[{ label: t("Operación"), value: t("Cosecha de ganancias") }, { label: t("Origen"), value: t("Bóveda {v}", { v: vaultSymbol(vaultId) }) }, { label: t("Destino"), value: t("Tu billetera") }]} body={t("Las ganancias ya están en tu wallet y tu depósito sigue generando.")} signature={signature} onClose={onClose} />{compound && result?.netRaw && result.tokenRaw && <CompoundStep wallet={wallet} position={position} vaultId={vaultId} usdcRaw={result.netRaw} tokenRaw={result.tokenRaw} />}</> : <>
     {!result?.success && <Button variant={result ? "outline" : "default"} disabled={pending} onClick={() => void run()}>{pending && !step ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <ReceiptText className="mr-2 h-4 w-4" />}{pending && !step ? t("Calculando tus ganancias…") : t("Revisar cosecha")}</Button>}
     {result && <div role="status" className="grid gap-3 text-sm">
       {!result.success && <><p className="font-semibold">{t("Cosecha no disponible")}</p><p className="leading-6 text-muted-foreground">{result.message}</p></>}

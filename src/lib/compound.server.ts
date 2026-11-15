@@ -4,6 +4,7 @@ import { ComputeBudgetProgram, PublicKey, SystemProgram, TransactionMessage, Ver
 import { AccountLayout, TOKEN_PROGRAM_ID, NATIVE_MINT, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { CpAmm } from "@meteora-ag/cp-amm-sdk/dist/index.js";
 import { ownsPositionNft } from "@/lib/position-ownership.server";
+import { prepareDlmmCompound } from "@/lib/dlmm.server";
 import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount } from "@/lib/solana-data";
 import { compactDepositInstructions } from "@/lib/compact-deposit";
@@ -19,6 +20,7 @@ export async function prepareCompound(apiKey: string, input: CompoundInput): Pro
     if (await connection.getGenesisHash() !== "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d") return fail("La conexión no corresponde a la red principal.");
     const config = CHAIN_POOLS.find((p) => p.id === input.vaultId);
     if (!config) return fail("Bóveda no válida.");
+    if (config.kind === "dlmm") return prepareDlmmCompound(connection, input);
     const owner = new PublicKey(input.wallet), position = new PublicKey(input.position), usdc = new PublicKey(USDC_MINT);
     const cp = new CpAmm(connection);
     const owned = (await cp.getPositionsByUser(owner)).find((p) => p.position.equals(position));
@@ -64,7 +66,7 @@ export async function prepareCompound(apiKey: string, input: CompoundInput): Pro
     const positionOpen = (final.accounts[2]?.lamports ?? 0) > 0;
     if (!positionOpen || !compoundSpendValid(usdcSpent, tokenSpent, usdcRaw, tokenRaw)) return fail("La reinversión no superó las comprobaciones. No se pidió ninguna firma.");
     if (Date.now() - startedAt > 45_000) return fail("La preparación tardó demasiado. Repite la revisión.");
-    const dec = isNative ? 9 : 6;
+    const dec = config.decimals;
     return {
       success: true, message: "Reinversión verificada en simulación. Comisión 0%. Solo tu wallet puede firmar.", tokenSymbol: config.symbol,
       usdcUsed: tokenAmount(usdcSpent.toString(), 6), tokenUsed: tokenAmount(tokenSpent.toString(), dec),

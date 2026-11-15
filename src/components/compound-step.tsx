@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { vaultSymbol, type OperableVault } from "@/lib/solana-data";
 import { notify } from "@/lib/notify";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
@@ -11,7 +12,7 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 
 /** Step 2 of compound: add both harvested tokens to the same position (0% fee). */
-export function CompoundStep({ wallet, position, vaultId, usdcRaw, tokenRaw }: { wallet: string; position: string; vaultId: "sol" | "met"; usdcRaw: string; tokenRaw: string }) {
+export function CompoundStep({ wallet, position, vaultId, usdcRaw, tokenRaw }: { wallet: string; position: string; vaultId: OperableVault; usdcRaw: string; tokenRaw: string }) {
   const t = useT();
   const prepare = useServerFn(prepareRealCompound);
   const readStatus = useServerFn(pilotDepositStatus);

@@ -8,14 +8,15 @@ export const depositAmountSchema = z.string().regex(/^\d{1,5}(\.\d{1,6})?$/).ref
 
 export const simulationInput = z.object({
   wallet: solanaAddressSchema,
-  vaultId: z.enum(["sol", "met", "rwa"]),
+  vaultId: z.enum(["sol", "met", "rwa", "gta6"]),
   amount: depositAmountSchema,
   position: solanaAddressSchema.optional(),
   /** Moving between vaults: no BÓVEDA entry fee. */
   migrate: z.literal(true).optional(),
 }).strict();
 export type SimulationInput = z.infer<typeof simulationInput>;
-export type SimulationStage = "pool" | "jupiter" | "composition" | "simulation";
+/** "reserve": the wallet lacks the refundable network guarantee a range-based vault needs to open a position. */
+export type SimulationStage = "pool" | "reserve" | "jupiter" | "composition" | "simulation";
 export type SimulationResult = {
   success: boolean;
   stage: SimulationStage;

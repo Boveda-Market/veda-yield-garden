@@ -12,6 +12,7 @@ import { compactDepositInstructions } from "@/lib/compact-deposit";
 import { computeBudgetIxs, computeLimit, MAX_COMPUTE_UNITS } from "@/lib/compute-budget";
 import { pilotInput, type PreparedPilot } from "@/lib/pilot-deposit";
 import { ownsPositionNft } from "@/lib/position-ownership.server";
+import { simulateDlmmDeposit } from "@/lib/dlmm.server";
 
 const ixSchema = z.object({ programId: solanaAddressSchema, accounts: z.array(z.object({ pubkey: solanaAddressSchema, isSigner: z.boolean(), isWritable: z.boolean() })).max(128), data: z.string().max(20_000) });
 const swapSchema = z.object({ setupInstructions: z.array(ixSchema), swapInstruction: ixSchema, cleanupInstruction: ixSchema.nullable().optional(), otherInstructions: z.array(ixSchema).optional(), addressLookupTableAddresses: z.array(solanaAddressSchema).max(16) });
@@ -46,6 +47,7 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
     if (await connection.getGenesisHash() !== "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d") return result(false, "La conexión no corresponde a Solana Mainnet.");
     const config = CHAIN_POOLS.find((pool) => pool.id === input.vaultId);
     if (!config) return result(false, "Bóveda no válida.");
+    if (config.kind === "dlmm") return simulateDlmmDeposit(connection, input, options);
     const owner = new PublicKey(input.wallet);
     const usdc = new PublicKey(USDC_MINT);
     const cp = new CpAmm(connection);

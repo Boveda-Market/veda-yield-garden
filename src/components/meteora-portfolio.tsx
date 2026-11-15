@@ -1,4 +1,5 @@
 import { useT } from "@/lib/i18n";
+import { vaultDecimals } from "@/lib/solana-data";
 import { ArrowDownLeft, ArrowUpRight, ExternalLink, RefreshCw, Sparkles, XCircle } from "lucide-react";
 import { useMeteoraHistory } from "@/hooks/use-meteora-history";
 import { tokenAmount, type ChainPosition } from "@/lib/solana-data";
@@ -29,7 +30,7 @@ export function MeteoraPortfolio({ wallet, positions }: { wallet: string | null;
   const withdrawn = tokenAmount(metrics.totals.reduce((sum, pool) => sum + pool.withdrawUsdc, 0n).toString(), 6);
   const depositCount = records.filter((row) => row.kind === "deposit").length;
   const withdrawCount = records.filter((row) => row.kind === "withdraw").length;
-  const dec = (id: string) => id === "sol" ? 9 : 6;
+  const dec = vaultDecimals;
   return <div>
     <div className="flex items-center justify-between gap-3"><h2 className="font-display text-lg font-semibold">{t("Movimientos en bóvedas")}</h2><Button size="icon" variant="outline" title={t("Actualizar registros del pool")} aria-label={t("Actualizar registros del pool")} disabled={!wallet || query.isFetching} onClick={() => void query.refetch()}><RefreshCw size={16} className={query.isFetching ? "animate-spin motion-reduce:animate-none" : ""} /></Button></div>
     <div className="mt-3 flex flex-wrap gap-1" role="group" aria-label={t("Filtrar movimientos")}>{([["all", t("Todos")], ["deposit", t("Depósitos")], ["harvest", t("Cosechas")], ["withdraw", t("Retiros")]] as const).map(([id, label]) => { const count = records.filter((r) => matches(id, r.kind)).length; return <Button key={id} size="sm" variant={filter === id ? "secondary" : "ghost"} aria-pressed={filter === id} onClick={() => setFilter(id)}>{label} <span className="text-xs text-muted-foreground">({count})</span></Button>; })}</div>

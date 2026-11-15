@@ -17,7 +17,7 @@ export const prepareGasRefill = createServerFn({ method: "POST" })
       const { PublicKey } = await import("@solana/web3.js");
       const { heliusConnection } = await import("@/lib/solana-read.server");
       const sol = BigInt(await heliusConnection(key).getBalance(new PublicKey(data.wallet), "confirmed"));
-      const lamports = refillLamports(sol);
+      const lamports = refillLamports(sol, data.target ?? "standard");
       if (lamports <= 0n) return { success: false, error: "Tu reserva para operaciones ya está bien." };
       const SOL = "So11111111111111111111111111111111111111112", USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
       const q = await fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${SOL}&outputMint=${USDC}&amount=${lamports}&slippageBps=50`);

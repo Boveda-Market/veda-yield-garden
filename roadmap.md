@@ -1,4 +1,7 @@
 # Tasks
+- [x] GTA6/USDC vault: card, live APR/stats, position reading, deposit, harvest, reinvest, partial/full close, out-of-range notice, opening-guarantee top-up, excluded from move suggestions; all verified in live simulation, no funds moved.
+- [ ] GTA6 movements in vault history/harvested PNL (range-pool events not decoded yet) — pending the owner's go-ahead.
+- [ ] Verify a real GTA6 deposit/harvest/close with the owner's Privy wallet — requires the owner's sign-in, funds and signature.
 - [x] Fix reproduced SOL/MET deposit preparation SDK import failure; live preview now reaches genuine balance checks, 54 regressions pass including cryptographically valid NFT partial signatures and Privy codec round-trip. No funds moved; sampled public wallets lack 1 USDC, so full live composition remains unverified.
 - [ ] Verify deposit authorization with an actual funded Privy email/Google wallet — requires the owner's Privy login and explicit signature; managed Cloud auth cannot substitute for Privy.
 - [x] Improve Mi wallet swap with debounced quote previews, net received/minimum/fee review, reverse direction and freshness guards; automated quote/confirm tests pass, fees unchanged and no funds moved.

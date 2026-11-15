@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CHAIN_POOLS } from "@/lib/solana-data";
 
 const schema = z.object({
   address: z.string(),
@@ -17,7 +18,9 @@ export function parsePoolYield(data: unknown, address: string) {
 }
 
 export async function fetchPoolYield(address: string, signal?: AbortSignal) {
-  const response = await fetch(`https://damm-v2.datapi.meteora.ag/pools/${encodeURIComponent(address)}`, { signal: signal ?? null });
+  // Concentrated-liquidity pools publish the same address/tvl/fees shape on their own data API.
+  const host = CHAIN_POOLS.some((p) => p.pool === address && p.kind === "dlmm") ? "dlmm.datapi.meteora.ag" : "damm-v2.datapi.meteora.ag";
+  const response = await fetch(`https://${host}/pools/${encodeURIComponent(address)}`, { signal: signal ?? null });
   if (response.status === 404) return null;
   if (!response.ok) throw new Error("No se pudo consultar el rendimiento de Meteora.");
   return parsePoolYield(await response.json(), address);

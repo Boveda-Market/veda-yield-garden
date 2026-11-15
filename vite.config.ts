@@ -14,12 +14,15 @@ import { dirname, resolve } from "node:path";
 const require = createRequire(import.meta.url);
 const anchorCjs = resolve(dirname(require.resolve("@coral-xyz/anchor/package.json")), "dist/cjs/index.js");
 const browserEvents = require.resolve("events/");
+// The DLMM SDK's ESM entry uses Node-invalid directory imports; its CommonJS build works everywhere.
+const dlmmCjs = require.resolve("@meteora-ag/dlmm");
 
 export default defineConfig({
   vite: {
     // Apply before SSR creates shared dependency chunks, not only in Nitro.
     resolve: { alias: [
       { find: /^@coral-xyz\/anchor$/, replacement: anchorCjs },
+      { find: /^@meteora-ag\/dlmm$/, replacement: dlmmCjs },
       // Email rendering needs entities v4; a nested v7 copy lacks lib/decode.js.
       { find: /^entities\/lib\/decode\.js$/, replacement: resolve("node_modules/entities/lib/decode.js") },
       { find: /^entities\/lib\/encode\.js$/, replacement: resolve("node_modules/entities/lib/encode.js") },
@@ -49,7 +52,7 @@ export default defineConfig({
           conditions: [...new Set([...conditions, "browser"])],
           // Anchor's browser and esm entries contain unwrapped CommonJS.
           // Its explicitly CommonJS source is transformed by the bundler.
-          alias: [{ find: /^@coral-xyz\/anchor$/, replacement: anchorCjs }],
+          alias: [{ find: /^@coral-xyz\/anchor$/, replacement: anchorCjs }, { find: /^@meteora-ag\/dlmm$/, replacement: dlmmCjs }],
         } };
       },
     }],
