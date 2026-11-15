@@ -39,4 +39,10 @@ export const rangeVaults: Record<string, string> = {
   "Lleva más de 10 minutos fuera de rango y no está generando. Rebalancéala con un toque.": "It has been out of range for over 10 minutes and isn't earning. Rebalance it with one tap.",
   "Rebalancear en Mi Billetera": "Rebalance in My Wallet",
   "Bóvedas fuera de rango": "Vaults out of range",
+  "Bóveda fuera de rango (simulada)": "Out-of-range vault (simulated)",
+  "Rebalanceo · cotización": "Rebalance · quote",
+  "Rebalanceo · en curso": "Rebalance · in progress",
+  "Rebalanceo · error": "Rebalance · error",
+  "Rebalanceo · comprobante": "Rebalance · receipt",
+  "Ahora mismo el rebalanceo movería demasiado el precio de esta bóveda. Prueba en unos minutos.": "Right now the rebalance would move this vault's price too much. Try again in a few minutes.",
 };

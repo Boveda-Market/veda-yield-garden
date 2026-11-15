@@ -13,6 +13,9 @@ import { StartGuide } from "@/components/start-guide";
 import { DevNote } from "@/components/dev-note";
 import { PredictPositionCard } from "@/components/predict-position-card";
 import { ActionSuccess } from "@/components/action-success";
+import { RealPositions } from "@/components/real-positions";
+import { WorkingLine } from "@/components/move-steps";
+import { Crosshair } from "lucide-react";
 import type { PredictPosition } from "@/lib/predict";
 import type { ChainPosition } from "@/lib/solana-data";
 
@@ -26,6 +29,11 @@ export function NoticeGalleryAdmin() {
   const t = useT();
   const items: { id: string; title: string; node: ReactNode }[] = [
     { id: "bell", title: t("Campanita: premios, pérdidas, reembolsos y rango"), node: <NewsList predict={[{ id: "w", outcome: "won", p: { ...SAMPLE_ROUND, status: "closed", result: "yes", closeTime: Math.floor(NOW / 1000) - 60 } }, { id: "l", outcome: "lost", p: { ...SAMPLE_ROUND, pubkey: "Sample3333333333333333333333333333333333333", status: "closed", result: "no", closeTime: Math.floor(NOW / 1000) - 600 } }]} refunds={[{ id: "r", r: { order: "Sample4444444444444444444444444444444444444", marketId: "sample", title: SAMPLE_ROUND.title, amountMicro: "5000000", at: NOW - 120_000 } }]} ranges={[{ id: "g", p: SAMPLE_VAULT, since: NOW - 15 * 60_000 }]} /> },
+    { id: "range-card", title: t("Bóveda fuera de rango (simulada)"), node: <RealPositions positions={[SAMPLE_VAULT]} onAction={() => undefined} showHarvestBanner={false} /> },
+    { id: "rb-quote", title: t("Rebalanceo · cotización"), node: <div className="grid gap-3"><p className="font-display text-lg font-semibold">{t("Rebalancear posición")} · GTA6</p><p className="text-sm text-muted-foreground">{t("Tu posición salió del rango y no está generando. Con un toque cosechamos tus ganancias, dejamos mitad y mitad al precio actual y la volvemos a centrar.")}</p><dl className="grid gap-2 rounded-xl border border-border p-4 text-sm"><div className="flex justify-between"><dt className="text-muted-foreground">{t("Se recoloca")}</dt><dd className="font-semibold">≈ $12.40</dd></div><div className="flex justify-between"><dt className="text-muted-foreground">{t("Ganancias que se suman")}</dt><dd>$0.42 + 3 GTA6</dd></div><div className="flex justify-between"><dt className="text-muted-foreground">{t("Nuevo reparto")}</dt><dd>{t("Mitad {s} · mitad dólares", { s: "GTA6" })}</dd></div></dl><Button size="lg"><Crosshair className="mr-2 h-4 w-4" />{t("Rebalancear ahora")}</Button></div> },
+    { id: "rb-working", title: t("Rebalanceo · en curso"), node: <WorkingLine text={t("Centrando tu posición…")} /> },
+    { id: "rb-error", title: t("Rebalanceo · error"), node: <div className="grid gap-3"><p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm">{t("Ahora mismo el rebalanceo movería demasiado el precio de esta bóveda. Prueba en unos minutos.")}</p><Button>{t("Intentar de nuevo")}</Button><Button variant="outline">{t("Cerrar")}</Button></div> },
+    { id: "rb-done", title: t("Rebalanceo · comprobante"), node: <ActionSuccess title={t("¡Posición rebalanceada!")} body={t("Tus ganancias se sumaron y tu posición quedó centrada en el precio actual. Ya vuelve a generar.")} amount={{ value: "$12.40", unit: "" }} details={[]} signature={null} onClose={() => undefined} /> },
     { id: "round", title: t("Tarjeta de jugada Sube/Baja"), node: <PredictPositionCard p={SAMPLE_ROUND} onSell={() => undefined} /> },
     { id: "won", title: t("Tarjeta de jugada ganada"), node: <PredictPositionCard p={{ ...SAMPLE_ROUND, status: "closed", result: "yes", closeTime: Math.floor(NOW / 1000) - 60 }} onClaim={() => undefined} /> },
     { id: "gas", title: t("Recargar reserva de operaciones"), node: <GasRefillCard sol={1_000_000n} usdc={20_000_000n} force /> },
