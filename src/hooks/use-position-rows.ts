@@ -4,6 +4,7 @@ import { poolYieldOptions } from "@/lib/pool-yield";
 import { estimateUsd } from "@/lib/position-value";
 import { isOperableVault, type ChainPosition } from "@/lib/solana-data";
 import { VAULTS } from "@/lib/vaults";
+import { canHarvest } from "@/lib/harvest";
 
 export const operable = (p: ChainPosition) => isOperableVault(p.vaultId);
 
@@ -20,7 +21,7 @@ export function usePositionRows(positions: ChainPosition[]) {
   const loading = stats.some((s) => s?.isLoading);
   const ready = rows.filter((r) => r.fees !== null && r.fees > 0 && operable(r.p));
   const totalFees = ready.reduce((sum, r) => sum + (r.fees ?? 0), 0);
-  const top = [...ready].sort((a, b) => (b.fees ?? 0) - (a.fees ?? 0))[0] ?? null;
+  const top = [...ready].filter((r) => canHarvest(r.fees)).sort((a, b) => (b.fees ?? 0) - (a.fees ?? 0))[0] ?? null;
   const capital = rows.every((r) => r.value !== null) ? rows.reduce((sum, r) => sum + (r.value ?? 0), 0) : null;
   return { rows, ready, totalFees, top, capital, loading };
 }

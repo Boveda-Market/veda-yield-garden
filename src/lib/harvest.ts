@@ -26,3 +26,18 @@ export function harvestAmounts(claimedUsdc: bigint, positionUsdc = 0n) {
   const fee = harvestFee(claimedUsdc, positionUsdc);
   return { gross: claimedUsdc, fee, net: claimedUsdc - fee };
 }
+
+/** Harvest and harvest+reinvest unlock at $0.50 of estimated pending earnings, so network costs and rounding never eat the claim. */
+export const HARVEST_MIN_USD = 0.5;
+/** Unknown estimate (price unavailable) never blocks: the server quote still decides. */
+export function canHarvest(feesUsd: number | null | undefined) { return typeof feesUsd !== "number" || feesUsd >= HARVEST_MIN_USD; }
+
+/** Converts only the just-harvested other coin to dollars (one free wallet-signed swap); dust under 0.01 is left alone. */
+export async function harvestedToUsdc(wallet: string, symbol: string, tokenRaw: bigint, signAndSend: (tx: Uint8Array) => Promise<string>) {
+  if (tokenRaw <= 0n) return 0n;
+  const { quoteSwap, buildSwap } = await import("@/lib/wallet-actions");
+  const quote = await quoteSwap(symbol, "USDC", tokenRaw, { feeUsdc: 0n });
+  if (BigInt(quote.outAmount) < 10_000n) return 0n;
+  await signAndSend(await buildSwap(wallet, quote));
+  return BigInt(quote.outAmount);
+}

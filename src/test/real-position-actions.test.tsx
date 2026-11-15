@@ -53,3 +53,4 @@ it("does not authorize closing locked pilot liquidity", () => {
   fireEvent.click(screen.getByRole("button", { name: "Cosechar y reinvertir todo" }));
   expect(screen.getByText("Revisión de reinversión autorizada")).toBeInTheDocument();
 });
+

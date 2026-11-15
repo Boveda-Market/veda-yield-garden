@@ -1352,4 +1352,9 @@ export const extra: Record<string, string> = {
   "¡Predicción activa!": "Prediction active!",
   "¡Premio cobrado!": "Prize collected!",
   "¡Premio en tu billetera!": "Prize in your wallet!",
+  "Cosechar y reinvertir se activan desde $0.50 de ganancias.": "Harvest and reinvest unlock at $0.50 in earnings.",
+  "Cosecha lista. Aprueba en tu billetera (2 de 2) para pasar todo a dólares…": "Harvest done. Approve in your wallet (2 of 2) to turn it all into dollars…",
+  "Tus ganancias en dólares ya llegaron. La otra parte no se pasó a dólares; puedes hacerlo en Mi Billetera → Cambiar.": "Your dollar earnings arrived. The other part wasn't converted; you can do it in My Wallet → Swap.",
+  "+ la otra parte, convertida a dólares": "+ the other part, converted to dollars",
+  "2 aprobaciones seguidas: cobrar y pasar todo a dólares.": "2 approvals in a row: collect and turn it all into dollars.",
 };
