@@ -34,7 +34,7 @@ export function PredictHow() {
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("¿Cómo funcionan las predicciones?")}</DialogTitle>
-          <DialogDescription>{t("Predices el precio, no compras la moneda.")}</DialogDescription>
+          <DialogDescription>{t("Acierta el movimiento y cobra en minutos.")}</DialogDescription>
         </DialogHeader>
         <PredictSteps />
         <p className="text-sm text-muted-foreground">{t("No compras la cripto: tu dinero sigue en USDC. Nunca pierdes más de lo que pusiste y puedes vender antes del cierre.")}</p>

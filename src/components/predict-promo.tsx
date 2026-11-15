@@ -47,7 +47,7 @@ export function PredictPromo() {
         ? <div className="pp-end absolute inset-0 flex flex-col items-center justify-center bg-primary text-primary-foreground">
             <span className="font-display text-3xl font-black">{t("¡Acertaste!")}</span>
             <span className="mt-1 font-display text-2xl font-bold">+$9.80</span>
-            <span className="mt-1 text-xs font-medium">{t("directo a tu balance")}</span>
+            <span className="mt-1 text-xs font-medium">{t("en 5 minutos, directo a tu balance")}</span>
           </div>
         : <div className="pp-end absolute inset-0 flex flex-col items-center justify-center bg-destructive text-destructive-foreground">
             <span className="font-display text-3xl font-black">{t("No acertaste")}</span>

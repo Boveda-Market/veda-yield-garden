@@ -110,7 +110,7 @@ function Landing() {
       </section>
 
       <section aria-label={t("Sube y Baja")} className="mb-4 grid items-center gap-6 py-8 md:grid-cols-2">
-        <div className="text-center md:text-left"><p className="text-xs font-bold uppercase tracking-widest text-primary">{t("Sube y Baja")}</p><h2 className="mt-2 font-display text-3xl font-bold">{t("¿Sube o baja? Decide en un toque.")}</h2><p className="mt-3 text-muted-foreground">{t("Elige, confirma con tu huella y mira el resultado en minutos.")}</p></div>
+        <div className="text-center md:text-left"><p className="text-xs font-bold uppercase tracking-widest text-primary">{t("Sube y Baja")}</p><h2 className="mt-2 font-display text-3xl font-bold">{t("Haz dinero en minutos prediciendo el mercado.")}</h2><p className="mt-3 text-muted-foreground">{t("Bitcoin, Ethereum y Solana en rondas relámpago. Si aciertas el movimiento, cobras el premio al instante en dólares.")}</p></div>
         <PredictPromo />
       </section>
       <section id="opiniones" className="scroll-mt-4 py-12">

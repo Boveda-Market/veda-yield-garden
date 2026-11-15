@@ -1132,4 +1132,10 @@ export const extra: Record<string, string> = {
   "Racha: {n} rondas seguidas ganó Baja": "Streak: Down won {n} rounds in a row",
   "{n} jugadas · {v} en el último minuto": "{n} plays · {v} in the last minute",
   "{n} jugadas · {v} desde que abriste": "{n} plays · {v} since you opened",
+  "Haz dinero en minutos prediciendo el mercado.": "Make money in minutes predicting the market.",
+  "Bitcoin, Ethereum y Solana en rondas relámpago. Si aciertas el movimiento, cobras el premio al instante en dólares.": "Bitcoin, Ethereum and Solana in lightning rounds. Call the move and collect your prize instantly in dollars.",
+  "🔥 Hasta +90% de ganancia en una sola vela · Retiro inmediato a tu billetera": "🔥 Up to +90% profit on a single candle · Instant cash-out to your wallet",
+  "¿Ves venir la caída? Gana con la baja. ¿Ves el rebote? Gana con la subida.": "See the drop coming? Win on Down. See the bounce? Win on Up.",
+  "en 5 minutos, directo a tu balance": "in 5 minutes, straight to your balance",
+  "Acierta el movimiento y cobra en minutos.": "Call the move and get paid in minutes.",
 };
