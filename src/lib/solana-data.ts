@@ -45,6 +45,8 @@ export type ChainPosition = {
   outOfRange?: boolean;
   /** Range vaults only: the price sits above the range (position is all dollars). */
   priceAbove?: boolean;
+  /** Range vaults only: the position's bin range and the pool's current price bin (integer bin ids). */
+  bins?: { lower: number; upper: number; active: number };
 };
 export type RealWalletData = {
   wallet: string;

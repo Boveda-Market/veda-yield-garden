@@ -24,7 +24,7 @@ import type { ChainPosition } from "@/lib/solana-data";
 
 const NOW = Date.now();
 const SAMPLE_ROUND: PredictPosition = { pubkey: "Sample1111111111111111111111111111111111111", marketId: "sample", title: "Bitcoin Up or Down - 5 minutes", side: "up", outcome: "Up", contractsMicro: "10000000", costMicro: "5000000", valueMicro: "6200000", payoutMicro: "10000000", pnlMicro: "1200000", closeTime: Math.floor(NOW / 1000) + 180, status: "open", result: null, isYes: true };
-const SAMPLE_VAULT: ChainPosition = { address: "Sample2222222222222222222222222222222222222", vaultId: "gta6", symbol: "GTA6", tokenAmount: "1200", usdcAmount: "6.10", feeTokenAmount: "3", feeUsdcAmount: "0.42", locked: false, outOfRange: true };
+const SAMPLE_VAULT: ChainPosition = { address: "Sample2222222222222222222222222222222222222", vaultId: "gta6", symbol: "GTA6", tokenAmount: "1200", usdcAmount: "6.10", feeTokenAmount: "3", feeUsdcAmount: "0.42", locked: false, outOfRange: true, priceAbove: true, bins: { lower: 1000, upper: 1068, active: 1072 } };
 const TONES: [NotifyTone, string, string][] = [["success", "Depósito confirmado", "Tus dólares ya están rindiendo"], ["secure", "Firma aprobada", "Confirmando en la red…"], ["round", "Ronda activa", "Tu jugada ya está en juego"], ["info", "Información", "Ejemplo de aviso informativo"], ["error", "No se pudo completar", "No se movió dinero"]];
 
 /** Every notice and card with sample data, so the operator can inspect them. Rendered inert: nothing here signs or moves money. */

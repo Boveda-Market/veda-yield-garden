@@ -2,6 +2,11 @@
 export const rangeVaults: Record<string, string> = {
   "Sé la casa": "Be the house",
   "En la zona caliente": "In the hot zone",
+  "Zona caliente": "Hot zone",
+  "Centrado · cobrando a full": "Centered · earning at full speed",
+  "Cerca del borde · prepárate para rebalancear": "Near the edge · get ready to rebalance",
+  "Fuera de la zona · rebalancea para volver a cobrar": "Out of the zone · rebalance to earn again",
+  "Borde": "Edge",
   "Comisiones hoy": "Fees today",
   "Intercambios hoy": "Trades today",
   "Depositas": "You deposit",

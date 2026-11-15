@@ -73,6 +73,7 @@ export async function readDlmmPositions(connection: Connection, wallet: PublicKe
         locked: false, // BÓVEDA never locks these; every operation re-checks the live lock point.
         outOfRange: activeBin.binId < d.lowerBinId || activeBin.binId > d.upperBinId,
         ...(activeBin.binId > d.upperBinId ? { priceAbove: true } : {}),
+        bins: { lower: d.lowerBinId, upper: d.upperBinId, active: activeBin.binId },
       });
     }
   }

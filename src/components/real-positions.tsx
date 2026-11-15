@@ -20,6 +20,7 @@ import { RebalanceButton } from "./rebalance-button";
 import { MigratePicker } from "./migrate-picker";
 import { canHarvest } from "@/lib/harvest";
 import { HotBanner } from "./hot-vault-card";
+import { HotZoneMeter } from "./hot-zone-meter";
 
 export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRotate, showHarvestBanner = true }: { positions: ChainPosition[]; onAction: (p: ChainPosition, a: "harvest" | "exit" | "compound") => void; onDeposit?: (p: ChainPosition) => void; onMigrate?: (p: ChainPosition, target: Vault) => void; onRotate?: (p: ChainPosition, target: Vault) => void; showHarvestBanner?: boolean }) {
   const t = useT();
@@ -42,6 +43,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
         <p className={`font-display text-3xl font-semibold ${hot ? "w-fit bg-[image:var(--gradient-hot)] bg-clip-text font-black text-transparent" : ""}`}>{value === null ? t("No disponible") : `≈ ${formatUsd(value)}`}</p>
         <p className="mt-1 break-all text-xs text-muted-foreground">{p.tokenAmount === null ? "" : `${p.tokenAmount} ${p.symbol} + ${p.usdcAmount} USDC`}</p>
         <details className="mt-1 text-xs text-muted-foreground"><summary className="cursor-pointer underline-offset-2 hover:underline">ⓘ {t("¿Por qué cambia este balance?")}</summary><p className="mt-1 leading-5">{t("Tu posición combina dólares y otra moneda. Cuando esa moneda baja, tu posición tiene más de ella y el valor en dólares puede verse menor que lo depositado. Cuando sube con fuerza, se rebalancea hacia dólares y tendrías menos monedas que si las hubieras guardado aparte. Esto se llama pérdida impermanente. Las comisiones que cosechas son aparte y ayudan a compensarla.")}</p></details>
+        {hot && <HotZoneMeter position={p} className="mt-3" />}
         {apr !== null && !p.locked && <p className="mt-3 text-xs tabular-nums text-muted-foreground"><span className="font-semibold text-primary">{apr.toFixed(2)}% APR</span> {t("estimado (24h)")} · {value === null ? "—" : `≈ +$${(value * apr / 36500).toFixed(2)}`} {t("próximas 24h")}</p>}
         {fees !== null && <LiveEarnings base={fees} ratePerMs={p.locked || p.outOfRange ? 0 : earningRatePerMs(value, apr)} since={since} label={t("Ganancias por cosechar · estimado en vivo")} />}
         {p.locked && <p className="mt-2 text-xs text-muted-foreground">{t("Incluye liquidez bloqueada; no toda la posición es retirable.")}</p>}
