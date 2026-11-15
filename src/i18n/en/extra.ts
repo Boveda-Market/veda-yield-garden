@@ -1167,4 +1167,5 @@ export const extra: Record<string, string> = {
   "Explorar Bóvedas": "Explore Vaults",
   "¿Listo para tu primera jugada?": "Ready for your first play?",
   "Seguir mirando": "Keep watching",
+  "Entra con Google en 1 segundo y recarga con Coinbase usando tu tarjeta. Sin contraseñas.": "Sign in with Google in 1 second and top up with Coinbase using your card. No passwords.",
 };
