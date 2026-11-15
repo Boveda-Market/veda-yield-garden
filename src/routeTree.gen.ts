@@ -27,6 +27,7 @@ import { Route as StatusRouteImport } from './routes/status'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as GuiasIndexRouteImport } from './routes/guias/index'
+import { Route as GuiasBovedasAltoRendimientoRouteImport } from './routes/guias/bovedas-alto-rendimiento'
 import { Route as GuiasInvertirSinEstafasRouteImport } from './routes/guias/invertir-sin-estafas'
 import { Route as GuiasQueEsUsdcRouteImport } from './routes/guias/que-es-usdc'
 import { Route as GuiasRecargarConCoinbaseRouteImport } from './routes/guias/recargar-con-coinbase'
@@ -127,6 +128,12 @@ const GuiasIndexRoute = GuiasIndexRouteImport.update({
   path: '/guias/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuiasBovedasAltoRendimientoRoute =
+  GuiasBovedasAltoRendimientoRouteImport.update({
+    id: '/guias/bovedas-alto-rendimiento',
+    path: '/guias/bovedas-alto-rendimiento',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuiasInvertirSinEstafasRoute = GuiasInvertirSinEstafasRouteImport.update({
   id: '/guias/invertir-sin-estafas',
   path: '/guias/invertir-sin-estafas',
@@ -196,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
@@ -225,6 +233,7 @@ export interface FileRoutesByTo {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
@@ -255,6 +264,7 @@ export interface FileRoutesById {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/guias/bovedas-alto-rendimiento'
     | '/guias/invertir-sin-estafas'
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
@@ -315,6 +326,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/guias/bovedas-alto-rendimiento'
     | '/guias/invertir-sin-estafas'
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
@@ -344,6 +356,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/guias/bovedas-alto-rendimiento'
     | '/guias/invertir-sin-estafas'
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
@@ -374,6 +387,7 @@ export interface RootRouteChildren {
   StatusRoute: typeof StatusRoute
   TerminosRoute: typeof TerminosRoute
   WalletRoute: typeof WalletRoute
+  GuiasBovedasAltoRendimientoRoute: typeof GuiasBovedasAltoRendimientoRoute
   GuiasInvertirSinEstafasRoute: typeof GuiasInvertirSinEstafasRoute
   GuiasQueEsUsdcRoute: typeof GuiasQueEsUsdcRoute
   GuiasRecargarConCoinbaseRoute: typeof GuiasRecargarConCoinbaseRoute
@@ -514,6 +528,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuiasIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guias/bovedas-alto-rendimiento': {
+      id: '/guias/bovedas-alto-rendimiento'
+      path: '/guias/bovedas-alto-rendimiento'
+      fullPath: '/guias/bovedas-alto-rendimiento'
+      preLoaderRoute: typeof GuiasBovedasAltoRendimientoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guias/invertir-sin-estafas': {
       id: '/guias/invertir-sin-estafas'
       path: '/guias/invertir-sin-estafas'
@@ -598,6 +619,7 @@ const rootRouteChildren: RootRouteChildren = {
   StatusRoute: StatusRoute,
   TerminosRoute: TerminosRoute,
   WalletRoute: WalletRoute,
+  GuiasBovedasAltoRendimientoRoute: GuiasBovedasAltoRendimientoRoute,
   GuiasInvertirSinEstafasRoute: GuiasInvertirSinEstafasRoute,
   GuiasQueEsUsdcRoute: GuiasQueEsUsdcRoute,
   GuiasRecargarConCoinbaseRoute: GuiasRecargarConCoinbaseRoute,
