@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { BackButton } from "@/components/back-button";
 
 export const GUIDES = [
+  { to: "/guias/recargar-con-coinbase", title: "Cómo recargar dólares con Coinbase en BÓVEDA" },
   { to: "/guias/que-es-usdc", title: "¿Qué es USDC y cómo comprarlo con tarjeta?" },
   { to: "/guias/retirar-cash-app-bitcoin", title: "Cómo retirar tus dólares digitales a Cash App o Bitcoin" },
   { to: "/guias/invertir-sin-estafas", title: "Cómo hacer rendir tu dinero sin caer en estafas" },

@@ -29,6 +29,7 @@ import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as GuiasIndexRouteImport } from './routes/guias/index'
 import { Route as GuiasInvertirSinEstafasRouteImport } from './routes/guias/invertir-sin-estafas'
 import { Route as GuiasQueEsUsdcRouteImport } from './routes/guias/que-es-usdc'
+import { Route as GuiasRecargarConCoinbaseRouteImport } from './routes/guias/recargar-con-coinbase'
 import { Route as GuiasRetirarCashAppBitcoinRouteImport } from './routes/guias/retirar-cash-app-bitcoin'
 import { Route as ApiPublicJobsCheckSystemStatusRouteImport } from './routes/api/public/jobs/check-system-status'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
@@ -136,6 +137,12 @@ const GuiasQueEsUsdcRoute = GuiasQueEsUsdcRouteImport.update({
   path: '/guias/que-es-usdc',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuiasRecargarConCoinbaseRoute =
+  GuiasRecargarConCoinbaseRouteImport.update({
+    id: '/guias/recargar-con-coinbase',
+    path: '/guias/recargar-con-coinbase',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuiasRetirarCashAppBitcoinRoute =
   GuiasRetirarCashAppBitcoinRouteImport.update({
     id: '/guias/retirar-cash-app-bitcoin',
@@ -191,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/wallet': typeof WalletRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
+  '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/guias/': typeof GuiasIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
@@ -219,6 +227,7 @@ export interface FileRoutesByTo {
   '/wallet': typeof WalletRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
+  '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/guias': typeof GuiasIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
@@ -248,6 +257,7 @@ export interface FileRoutesById {
   '/wallet': typeof WalletRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
+  '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/guias/': typeof GuiasIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/guias/invertir-sin-estafas'
     | '/guias/que-es-usdc'
+    | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
     | '/guias/'
     | '/api/public/jobs/check-system-status'
@@ -306,6 +317,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/guias/invertir-sin-estafas'
     | '/guias/que-es-usdc'
+    | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
     | '/guias'
     | '/api/public/jobs/check-system-status'
@@ -334,6 +346,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/guias/invertir-sin-estafas'
     | '/guias/que-es-usdc'
+    | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
     | '/guias/'
     | '/api/public/jobs/check-system-status'
@@ -363,6 +376,7 @@ export interface RootRouteChildren {
   WalletRoute: typeof WalletRoute
   GuiasInvertirSinEstafasRoute: typeof GuiasInvertirSinEstafasRoute
   GuiasQueEsUsdcRoute: typeof GuiasQueEsUsdcRoute
+  GuiasRecargarConCoinbaseRoute: typeof GuiasRecargarConCoinbaseRoute
   GuiasRetirarCashAppBitcoinRoute: typeof GuiasRetirarCashAppBitcoinRoute
   GuiasIndexRoute: typeof GuiasIndexRoute
   ApiPublicJobsCheckSystemStatusRoute: typeof ApiPublicJobsCheckSystemStatusRoute
@@ -514,6 +528,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuiasQueEsUsdcRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guias/recargar-con-coinbase': {
+      id: '/guias/recargar-con-coinbase'
+      path: '/guias/recargar-con-coinbase'
+      fullPath: '/guias/recargar-con-coinbase'
+      preLoaderRoute: typeof GuiasRecargarConCoinbaseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guias/retirar-cash-app-bitcoin': {
       id: '/guias/retirar-cash-app-bitcoin'
       path: '/guias/retirar-cash-app-bitcoin'
@@ -579,6 +600,7 @@ const rootRouteChildren: RootRouteChildren = {
   WalletRoute: WalletRoute,
   GuiasInvertirSinEstafasRoute: GuiasInvertirSinEstafasRoute,
   GuiasQueEsUsdcRoute: GuiasQueEsUsdcRoute,
+  GuiasRecargarConCoinbaseRoute: GuiasRecargarConCoinbaseRoute,
   GuiasRetirarCashAppBitcoinRoute: GuiasRetirarCashAppBitcoinRoute,
   GuiasIndexRoute: GuiasIndexRoute,
   ApiPublicJobsCheckSystemStatusRoute: ApiPublicJobsCheckSystemStatusRoute,
