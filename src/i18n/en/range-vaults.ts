@@ -1,5 +1,17 @@
 /** Range-based (GTA6) vault texts. */
 export const rangeVaults: Record<string, string> = {
+  "Sé la casa": "Be the house",
+  "Cada intercambio de GTA6 deja comisión. Tú cobras como la casa.": "Every GTA6 trade leaves a fee. You collect like the house.",
+  "La casa cobró hoy": "House take today",
+  "Jugadas hoy": "Trades today",
+  "Poseedores": "Holders",
+  "Pones fichas": "Drop your chips",
+  "Cobras cada jugada": "Collect on every trade",
+  "Te avisamos si la mesa se mueve": "We ping you if the table moves",
+  "Detalles": "Details",
+  "Añadir más fichas": "Add more chips",
+  "Entrar a la mesa": "Join the table",
+  "No apuestas contra nadie: cobras comisiones de los intercambios. Tu saldo sube y baja con el precio de GTA6. Sin vínculo con Rockstar Games.": "You don't bet against anyone: you collect trading fees. Your balance moves up and down with the GTA6 price. Not affiliated with Rockstar Games.",
   "⚡ Alto Octanaje · Rango Activo": "⚡ High Octane · Active Range",
   "Comisiones brutales impulsadas por el volumen de GTA6. Tu dinero trabaja concentrado en la zona caliente de intercambio: mientras el precio esté en rango, cosechas a máxima velocidad. Si el mercado se mueve fuerte, rebalanceas con un toque y sigues en la jugada.": "Massive fees powered by GTA6 volume. Your money works concentrated in the hot trading zone: while the price is in range, you harvest at full speed. If the market moves hard, rebalance with one tap and stay in the game.",
   "Moneda comunitaria de alta volatilidad sin vínculo con Rockstar Games. La garantía de apertura se devuelve íntegra al retirar.": "High-volatility community coin with no link to Rockstar Games. The opening guarantee is fully returned when you withdraw.",

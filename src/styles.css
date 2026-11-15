@@ -63,6 +63,11 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
   --color-strike: var(--strike);
+  --color-hot: var(--hot);
+  --color-hot-2: var(--hot-2);
+  --color-hot-surface: var(--hot-surface);
+  --color-hot-foreground: var(--hot-foreground);
+  --color-hot-muted: var(--hot-muted);
   --color-google: var(--google);
   --color-google-foreground: var(--google-foreground);
   --color-google-border: var(--google-border);
@@ -82,6 +87,15 @@
 }
 
 :root {
+  /* High-octane (GTA6) vault: neon night palette, identical in Día and Noche so the card always pops. */
+  --hot: oklch(0.68 0.26 355);
+  --hot-2: oklch(0.8 0.17 60);
+  --hot-surface: oklch(0.17 0.035 315);
+  --hot-foreground: oklch(0.98 0.01 330);
+  --hot-muted: oklch(0.8 0.04 330);
+  --gradient-hot: linear-gradient(100deg, var(--hot-2), var(--hot) 55%, oklch(0.66 0.2 300));
+  --gradient-hot-surface: radial-gradient(110% 90% at 100% 0%, oklch(0.42 0.2 355 / 0.55), transparent 55%), radial-gradient(90% 80% at 0% 100%, oklch(0.45 0.15 55 / 0.35), transparent 60%), linear-gradient(var(--hot-surface), var(--hot-surface));
+  --shadow-hot: 0 18px 50px -18px oklch(0.68 0.26 355 / 0.7);
   --radius: 1rem;
   --background: oklch(0.18 0.012 255);
   --foreground: oklch(0.97 0.005 250);
@@ -214,3 +228,9 @@
 @keyframes count-pop { 0% { transform: scale(1.12); } 100% { transform: scale(1); } }
 .animate-count-pop { animation: count-pop 0.35s ease-out; }
 @media (prefers-reduced-motion: reduce) { .animate-trade-float, .animate-count-pop { animation: none; } }
+
+/* High-octane vault card: slow neon ring + shimmer on the main button. */
+@keyframes hot-shift { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+.hot-ring { background-image: linear-gradient(90deg, var(--hot-2), var(--hot), oklch(0.66 0.2 300), var(--hot-2)); background-size: 200% 100%; animation: hot-shift 6s linear infinite; }
+.hot-cta { background-image: linear-gradient(90deg, var(--hot-2), var(--hot), var(--hot-2)); background-size: 200% 100%; animation: hot-shift 3s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .hot-ring, .hot-cta { animation: none; } }

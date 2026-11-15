@@ -1,2 +1,5 @@
 - [x] Vista previa en panel de control: tarjetas reales de solo lectura y pasos de migración
 - [x] Vista previa: galería para ver y activar todos los avisos y tarjetas
+- [x] Tarjeta GTA6 más dinámica y llamativa (estilo Doble o Nada / Polymarket, colores propios, menos texto)
+- [x] Concepto tipo casino para explicar la bóveda GTA6 («Sé la casa»), sin prometer ganancias
+- [x] Estilo visual inspirado en GTA6 (atardecer Vice City, palmeras), sin logo ni marca oficial de Rockstar
