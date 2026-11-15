@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useT } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,6 @@ export function CoinbaseWordmark() {
 export function CoinbaseNote({ className }: { className?: string }) {
   const t = useT();
   return <span className={cn("block text-sm", className)}>
-    {t("Entra con Google en 1 segundo y recarga con")} <CoinbaseWordmark /> {t("usando tu tarjeta. Sin contraseñas.")}
+    {t("Entra con Google en 1 segundo y recarga con")} <CoinbaseWordmark /> {t("usando tu tarjeta. Sin contraseñas.")} <Link to="/terminos" hash="fondos" target="_blank" className="whitespace-nowrap font-medium text-primary underline underline-offset-2">{t("Más información")}</Link>
   </span>;
 }

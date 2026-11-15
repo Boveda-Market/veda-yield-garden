@@ -1170,4 +1170,5 @@ export const extra: Record<string, string> = {
   "Entra con Google en 1 segundo y recarga con Coinbase usando tu tarjeta. Sin contraseñas.": "Sign in with Google in 1 second and top up with Coinbase using your card. No passwords.",
   "Entra con Google en 1 segundo y recarga con": "Sign in with Google in 1 second and top up with",
   "usando tu tarjeta. Sin contraseñas.": "using your card. No passwords.",
+  "Más información": "Learn more",
 };
