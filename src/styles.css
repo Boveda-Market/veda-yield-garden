@@ -63,6 +63,9 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
   --color-strike: var(--strike);
+  --color-google: var(--google);
+  --color-google-foreground: var(--google-foreground);
+  --color-google-border: var(--google-border);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -107,6 +110,10 @@
   --chart-5: oklch(0.769 0.188 70.08);
   /* The "price to beat" reference line: must read above both the up and down price lines. */
   --strike: oklch(0.88 0.13 85);
+  /* Google sign-in button: Google's official dark/light themes. */
+  --google: #131314;
+  --google-foreground: #e3e3e3;
+  --google-border: #8e918f;
   --sidebar: oklch(0.984 0.003 247.858);
   --sidebar-foreground: oklch(0.129 0.042 264.695);
   --sidebar-primary: oklch(0.208 0.042 265.755);
@@ -140,6 +147,9 @@
   --ring: oklch(0.63 0.17 152);
   --gradient-hero: radial-gradient(120% 120% at 0% 0%, oklch(0.9 0.08 155) 0%, oklch(0.96 0.02 220) 45%, oklch(0.984 0.003 248) 100%);
   --strike: oklch(0.68 0.15 75);
+  --google: #ffffff;
+  --google-foreground: #1f1f1f;
+  --google-border: #747775;
   color-scheme: light;
 }
 :root.light .bg-card { box-shadow: 0 1px 2px oklch(0.21 0.04 266 / 6%), 0 4px 14px oklch(0.21 0.04 266 / 5%); }
