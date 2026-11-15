@@ -10,6 +10,7 @@ import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { simulationDisplay } from "@/lib/deposit-simulation";
 import type { Vault } from "@/lib/vaults";
 import { PilotDeposit } from "@/components/pilot-deposit";
+import { RangeAlertsGate } from "@/components/range-alerts-gate";
 import { getRealWallet } from "@/lib/solana.functions";
 import { decimalToUnits, MIN_SOL_LAMPORTS } from "@/lib/onboarding";
 import { poolYieldOptions } from "@/lib/pool-yield";
@@ -76,6 +77,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
     </dl>}
     {!position && !migrate && <p role="note" className="rounded-xl border border-border p-3 text-xs leading-5 text-muted-foreground">{t("Tu capital se combina con la otra moneda de la bóveda y su valor fluctuará con el precio de mercado, mientras acumulas comisiones en cada operación.")} <a href="/faq#vaults-fluctuation" className="underline">{t("¿Por qué cambia mi balance?")}</a></p>}
     </>}
+    {!done && !migrate && vault.id === "gta6" && <RangeAlertsGate />}
     {wallet ? <PilotDeposit autoStart={migrate} vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onClose={onClose} onDoneChange={setDone} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
   </ActionSheetContent></Dialog>;
 }
