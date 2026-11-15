@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bitcoin, CheckCircle2, LoaderCircle } from "lucide-react";
+import { Bitcoin, CheckCircle2, LoaderCircle, Pencil } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,6 +24,7 @@ export function CashAppBtc({ wallet }: { wallet: string }) {
   const statusFn = useServerFn(btcWithdrawStatus);
   const [addr, setAddr] = useState("");
   const [amount, setAmount] = useState("");
+  const [custom, setCustom] = useState(false);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [quoting, setQuoting] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -33,7 +34,7 @@ export function CashAppBtc({ wallet }: { wallet: string }) {
   const [status, setStatus] = useState<string>("waiting");
   const [balance, setBalance] = useState<number | null>(null);
   useEffect(() => { readTokenBalance(wallet, USDC_MINT).then((b) => setBalance(Number(b) / 1e6)).catch(() => setBalance(null)); }, [wallet, done]);
-  const pick = (f: number) => { if (balance == null) return; setAmount((Math.floor(balance * f * 100) / 100).toFixed(2)); };
+  const pick = (f: number) => { if (balance == null) return; setCustom(false); setAmount((Math.floor(balance * f * 100) / 100).toFixed(2)); };
 
   const n = Number(amount);
   const amountOk = amountAllowed(n);
@@ -87,9 +88,10 @@ export function CashAppBtc({ wallet }: { wallet: string }) {
 
   return <div className="grid gap-3">
     <p className="text-xs text-muted-foreground">{t("Convertimos tus USDC a Bitcoin y lo enviamos directo a tu Cash App. Solo firmas una vez.")}</p>
-    <label className="grid gap-1 text-sm"><span className="font-medium">{t("Monto en USDC")}</span><Input value={amount} onChange={(e) => setAmount(e.target.value.replace(",", "."))} inputMode="decimal" placeholder={`${BTC_OFFRAMP_MIN_USDC}.00`} disabled={busy} /></label>
+    <div className="grid gap-1 text-sm"><span className="font-medium">{t("Cantidad ($)")}</span>{custom ? <Input aria-label={t("Cantidad ($)")} autoFocus value={amount} onChange={(e) => setAmount(e.target.value.replace(",", "."))} onBlur={() => setCustom(false)} onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }} enterKeyHint="done" inputMode="decimal" placeholder={`${BTC_OFFRAMP_MIN_USDC}.00`} disabled={busy} className="font-display text-2xl" /> : <p className="font-display text-3xl font-bold tabular-nums">${amount || "0"}</p>}</div>
     <div className="flex items-center justify-between text-xs text-muted-foreground"><span>{t("Disponible")}: {balance == null ? "…" : `${balance.toFixed(2)} USDC`}</span></div>
     <div className="grid grid-cols-4 gap-2">{[[0.25,"25%"],[0.5,"50%"],[0.75,"75%"],[1,t("Máx")]].map(([f,l]) => <Button key={String(l)} type="button" size="sm" variant="outline" disabled={busy || !balance} onClick={() => pick(f as number)}>{l}</Button>)}</div>
+    {!custom && <Button type="button" variant="outline" disabled={busy} className="h-11 w-full rounded-xl border-2 border-primary/50 text-sm font-bold text-primary" onClick={() => setCustom(true)}><Pencil size={16} /> {t("Otra cantidad")}</Button>}
     {amount && !amountOk && <p className="text-xs text-destructive">{t("Mínimo")} {BTC_OFFRAMP_MIN_USDC} USDC · {t("Máximo")} {BTC_OFFRAMP_MAX_USDC} USDC</p>}
     {balance != null && n > balance && <p className="text-xs text-destructive">{t("Saldo insuficiente")}</p>}
     {quoting && !quote && <p className="flex items-center gap-2 text-xs"><LoaderCircle size={14} className="animate-spin" />{t("Cotizando…")}</p>}

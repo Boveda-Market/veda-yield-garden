@@ -4,7 +4,7 @@ import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ReceiptText, LoaderCircle, PenLine } from "lucide-react";
+import { ReceiptText, LoaderCircle, PenLine, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -38,6 +38,8 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
   const [address, setAddress] = useState(wallet ?? "");
   const [positionAddress, setPositionAddress] = useState(position ?? "");
   const [percent, setPercent] = useState(100);
+  const [customPct, setCustomPct] = useState(false);
+  const [pctText, setPctText] = useState("");
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<WithdrawalResult | null>(null);
   const [accepted, setAccepted] = useState(false);
@@ -110,6 +112,9 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
     <DialogTitle>{migrateTo ? t("Migrar a {v}", { v: t((dest ?? migrateTo).name) }) : <>{t("Retirar ·")}{" "}{vaultSymbol(vaultId)}</>}</DialogTitle>
     <DialogDescription>{migrateTo ? t("Movemos todo tu dinero y ganancias.") : t("Elige cuánto retirar a tus dólares disponibles.")}</DialogDescription>
     {!migrateTo && !finished && !signature && <div role="radiogroup" aria-label={t("Cuánto retirar")} className="grid grid-cols-4 gap-2">{EXIT_PERCENTS.map((p) => <Button key={p} type="button" role="radio" aria-checked={percent === p} variant={percent === p ? "default" : "outline"} disabled={pending} onClick={() => { setPercent(p); setResult(null); setAccepted(false); setMessage(null); }}>{p === 100 ? t("Todo") : `${p}%`}</Button>)}</div>}
+    {!migrateTo && !finished && !signature && (customPct
+      ? <div className="flex items-center gap-2 rounded-xl border-2 border-primary/50 p-2"><Input aria-label={t("Porcentaje a retirar")} autoFocus inputMode="numeric" enterKeyHint="done" placeholder="1–100" value={pctText} maxLength={3} className="border-0 font-display text-2xl shadow-none focus-visible:ring-0" onChange={(e) => setPctText(e.target.value.replace(/\D/g, "").slice(0, 3))} onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }} onBlur={() => { const n = Number(pctText); if (n >= 1 && n <= 100) { setPercent(n); setResult(null); setAccepted(false); setMessage(null); } setCustomPct(false); }} /><span className="font-display text-2xl font-bold">%</span><Button type="button" size="sm" >{t("Listo")}</Button></div>
+      : <Button type="button" variant="outline" disabled={pending} className="h-11 w-full rounded-xl border-2 border-primary/50 text-sm font-bold text-primary" onClick={() => { setPctText(EXIT_PERCENTS.includes(percent as never) ? "" : String(percent)); setCustomPct(true); }}><Pencil size={16} /> {t("Otra cantidad")}{EXIT_PERCENTS.includes(percent as never) ? "" : ` · ${percent}%`}</Button>)}
     {!migrateTo && !finished && !signature && percent !== 100 && <p className="text-xs text-muted-foreground">{t("Retiras el {p}% y el resto sigue invirtiendo en la bóveda.", { p: String(percent) })}</p>}
     {migrateTo && signature && <MoveSteps current={finished ? 2 : 1} from={vaultSymbol(vaultId)} to={t((dest ?? migrateTo).name)} />}
     {!migrateTo && two && signature && !finished && <ProgressSteps steps={[t("Retirar de la bóveda"), t("Pasar sobrantes a dólares")]} current={phase} />}

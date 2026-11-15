@@ -111,6 +111,7 @@ export const extra: Record<string, string> = {
   "Legal y ayuda": "Legal and help",
   "Ver en mi Portafolio": "View in my Portfolio",
   "Listo": "Done",
+  "Porcentaje a retirar": "Percent to withdraw",
   // Entry
   "Iniciar sesión": "Log in",
   "Crear cuenta": "Sign up",
