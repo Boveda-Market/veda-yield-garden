@@ -13,7 +13,7 @@ const num = (v: number | null | undefined) => v == null ? "—" : v.toLocaleStri
 const usd = (v: number | null | undefined) => v == null ? "—" : `$${v.toLocaleString("es-MX", { maximumFractionDigits: 0 })}`;
 
 /** Vice-City-style sunset sky with palm silhouettes (original art, no game logos). */
-function Sunset() {
+export function Sunset() {
   const palm = (x: number, h: number, flip = false) => <g transform={`translate(${x} ${100 - h})${flip ? " scale(-1 1)" : ""}`}>
     <path d={`M0 ${h} C 4 ${h * 0.6}, 8 ${h * 0.3}, 3 0`} fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
     {[[-30, 8], [-22, -4], [-6, -12], [12, -10], [28, 2], [22, 14], [-14, 16]].map(([dx, dy], i) => <path key={i} d={`M3 0 Q ${dx! * 0.5} ${dy! - 12}, ${dx} ${dy! + 10}`} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />)}

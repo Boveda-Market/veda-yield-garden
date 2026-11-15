@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { isReturning } from "@/lib/preferences";
 import { EntryAccess } from "@/components/entry-access";
 import { PredictPromo } from "@/components/predict-promo";
+import { Gta6Hero, HomeCtas } from "@/components/home-gta6";
 
 export const Route = createFileRoute("/")({ staticData: { sitemap: true },
   head: () => ({ meta: [
@@ -89,7 +90,8 @@ function Landing() {
     setHeroIdx(i);
     try { localStorage.setItem(HERO_KEY, String(i)); } catch { /* blocked storage */ }
   }, []);
-  const hero = HERO_VARIANTS[heroIdx] ?? HERO_VARIANTS[0];
+  const hero = HERO_VARIANTS[heroIdx] ?? HERO_VARIANTS[0]!;
+  const gtaHero = hero.theme === "gta6";
   if (compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-10 text-foreground">
     <img src="/icon-512.png" alt="" className="h-14 w-14 rounded-2xl" />
     <h1 className="mt-4 text-center font-display text-3xl font-bold">{t("Bienvenido de nuevo")}</h1>
@@ -101,10 +103,11 @@ function Landing() {
     <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-6 sm:px-6"><Link to="/" className="flex min-w-0 shrink-0 items-center gap-2 font-display text-lg font-bold sm:gap-3"><img src="/icon-512.png" alt="" className="h-9 w-9 shrink-0 rounded-lg" />BÓVEDA</Link><div className="flex min-w-0 items-center gap-1.5 sm:gap-2"></div></header>
     <main className="mx-auto max-w-5xl px-6">
       <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">
-        <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(hero.title)}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t(hero.sub)}</p><TrustTicker /></div>
+        {gtaHero && <div className="order-1 min-w-0 md:col-span-2"><Gta6Hero title={hero.title} sub={hero.sub} /></div>}
+        {!gtaHero && <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(hero.title)}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t(hero.sub)}</p><TrustTicker /></div>}
         <div className="order-3 min-w-0 text-center md:order-1 md:text-left">
-          <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(hero.title)}</h1>
-          <p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p><div className="hidden md:block"><TrustTicker /></div>
+          {!gtaHero && <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(hero.title)}</h1>}
+          {!gtaHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p><div className="hidden md:block"><TrustTicker /></div></>}
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground md:justify-start"><span className="flex items-center gap-1.5"><span>Powered by</span><img src="/brands/coinbase.svg" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-medium text-foreground">Coinbase</span></span><span className="flex items-center gap-1.5"><span>Network:</span><span className="flex items-center gap-1 font-semibold text-primary"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_var(--color-primary)]" /></span>{t("Online")}</span></span></div>
           <p className="mt-5 text-base leading-7 text-muted-foreground">{t("Tu dinero, tus reglas. BÓVEDA blinda tu capital con seguridad criptográfica: nadie puede congelar tus fondos y cada centavo se mueve únicamente con tu huella o Face ID.")}</p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs md:justify-start">
@@ -112,7 +115,7 @@ function Landing() {
           </ul>
         </div>
         <div id="acceso" className="order-2 min-w-0 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
-          <div className="mb-4 grid w-full gap-2"><Button asChild className="h-12 w-full text-base font-bold"><Link to="/mercados">⚡ {t("Ver Doble o Nada en vivo")}</Link></Button><Button asChild variant="outline" className="h-11 w-full"><Link to="/app">{t("Explorar Bóvedas")}<ArrowRight size={16} /></Link></Button></div>
+          <HomeCtas vaultsFirst={gtaHero} />
           <EntryAccess />
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span><span aria-hidden="true">·</span><a href="https://www.privy.io/security" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground underline-offset-2 hover:text-primary hover:underline">{t("Conoce más")} ↗</a></p>
         </div>
