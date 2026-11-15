@@ -1148,4 +1148,7 @@ export const extra: Record<string, string> = {
   "⚡ Doble o Nada (5 min)": "⚡ Double or Nothing (5 min)",
   "Multiplica hasta +90% por ronda · Cobro directo a tu balance": "Up to +90% per round · Paid straight to your balance",
   "🔥 Doble o Nada en vivo · Hasta +90% de ganancia en una sola vela": "🔥 Double or Nothing live · Up to +90% profit on a single candle",
+  "🔥 Doble o Nada en vivo · Hasta +90% de ganancia en una sola vela, sin comprar la moneda": "🔥 Double or Nothing live · Up to +90% profit on a single candle, without buying the coin",
+  "Bitcoin, Ethereum y Solana en rondas relámpago, sin comprar la moneda: juegas en dólares. Si aciertas el movimiento, cobras el premio al instante.": "Bitcoin, Ethereum and Solana in lightning rounds, without buying the coin: you play in dollars. Call the move and collect your prize instantly.",
+  "Hasta +90% por ronda sin comprar la moneda · Cobro directo a tu balance": "Up to +90% per round without buying the coin · Paid straight to your balance",
 };
