@@ -1,3 +1,4 @@
+import dobleLogo from "@/assets/doble-o-nada-logo.png";
 import { TokenIcon } from "@/components/token-icon";
 import { PoweredBy } from "@/components/powered-by";
 import { PredictHow, PredictSteps } from "@/components/predict-how";
@@ -84,7 +85,7 @@ export function MarketsPanel(_: { identity: string }) {
     <div className="space-y-4">
       <header className="space-y-0.5">
         <div className="flex flex-wrap items-center gap-2">
-          <Zap className="text-primary" size={20} /><h1 className="font-display text-2xl font-bold">{t("Sube o Baja")}</h1>
+          <h1 className="min-w-0"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} className="h-11 w-auto -ml-1 sm:h-14" /><span className="sr-only">{t("Sube o Baja")}</span></h1>
           <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />{t("En vivo")}</span>
           <PoweredBy brand="polymarket" className="ml-auto" />
         </div>

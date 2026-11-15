@@ -121,4 +121,5 @@ export const rangeVaults: Record<string, string> = {
   "Ver Doble o Nada": "Watch Double or Nothing",
   "Entra para depositar": "Sign in to deposit",
   "Al entrar te llevamos directo a {v} para depositar.": "Once you sign in, we take you straight to {v} to deposit.",
+  "Rondas relámpago": "Lightning rounds",
 };

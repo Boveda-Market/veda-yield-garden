@@ -1,3 +1,4 @@
+import dobleLogo from "@/assets/doble-o-nada-logo.png";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Flame, Zap } from "lucide-react";
@@ -25,7 +26,7 @@ export function WalletHeroShortcuts() {
     <Link to="/mercados" className="group relative block rounded-2xl bg-primary p-[2px] shadow-[0_0_24px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
       <span className="relative flex h-full flex-col gap-1.5 overflow-hidden rounded-[14px] bg-card p-3">
         <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-primary"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary" /></span>{t("En vivo")}</span>
-        <span className="flex items-center gap-1 font-display text-base font-bold leading-tight"><Zap size={16} className="text-primary" aria-hidden />{t("Doble o Nada")}</span>
+        <span className="block"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} className="h-8 w-auto max-w-full" /></span>
         <span className="text-[11px] leading-4 text-muted-foreground">{t("Rondas de 5 min · Hasta +90%")}</span>
         <ChevronRight size={16} aria-hidden className="absolute right-2 top-2 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
       </span>
