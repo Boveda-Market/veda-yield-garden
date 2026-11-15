@@ -6,6 +6,7 @@ import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2, Pencil } from "luc
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { CoinbaseNote } from "@/components/coinbase-note";
 import { GoogleButton } from "@/components/google-button";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { PredictPositionCard } from "@/components/predict-position-card";
@@ -223,7 +224,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
       <Dialog open={askLogin} onOpenChange={setAskLogin}>
         <ActionSheetContent>
           <DialogTitle className="pr-10 font-display text-xl">{t("Inicia sesión para confirmar tu jugada")}</DialogTitle>
-          <DialogDescription className="text-sm">{t("Entra con Google en 1 segundo y recibe tu billetera protegida, sin contraseñas.")}</DialogDescription>
+          <DialogDescription asChild><div><CoinbaseNote /></div></DialogDescription>
           <div className="mt-4 grid gap-2">
             <GoogleButton className="h-12 w-full" onClick={() => { setAskLogin(false); session.login("google"); }}>{t("Continuar con Google")}</GoogleButton>
             <Button variant="secondary" className="h-11 w-full" onClick={() => { setAskLogin(false); session.login("email"); }}>{t("Entrar con email")}</Button>
