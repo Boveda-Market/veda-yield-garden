@@ -1,4 +1,4 @@
-import { HERO_VARIANTS, HERO_KEY, pickHeroVariant } from "@/lib/hero-variants";
+import { HERO_VARIANTS, HERO_KEY, pickHeroVariant, isHeroReview } from "@/lib/hero-variants";
 import { Fingerprint, Landmark } from "lucide-react";
 import reviewCarlos from "@/assets/review-carlos.jpg";
 import reviewValeria from "@/assets/review-valeria.jpg";
@@ -81,7 +81,7 @@ const TRUST = [
 function Landing() {
   const t = useT();
   const [compact, setCompact] = useState(false);
-  useEffect(() => { setCompact(isReturning()); }, []);
+  useEffect(() => { setCompact(isReturning() && !isHeroReview()); }, []);
   const [heroIdx, setHeroIdx] = useState(0);
   useEffect(() => {
     let saved: string | null = null;
@@ -92,7 +92,7 @@ function Landing() {
   }, []);
   const hero = HERO_VARIANTS[heroIdx] ?? HERO_VARIANTS[0];
   const [preview, setPreview] = useState(false);
-  useEffect(() => { const h = window.location.hostname; setPreview(h.includes("id-preview") || h === "localhost"); }, []);
+  useEffect(() => { const h = window.location.hostname; setPreview(h.includes("id-preview") || h === "localhost"); }, []); // switcher only on preview hosts
   const pickHero = (i: number) => { setHeroIdx(i); try { localStorage.setItem(HERO_KEY, String(i)); } catch { /* blocked storage */ } };
   if (compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-10 text-foreground">
     <img src="/icon-512.png" alt="" className="h-14 w-14 rounded-2xl" />

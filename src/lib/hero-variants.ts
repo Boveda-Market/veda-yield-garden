@@ -17,3 +17,10 @@ export function pickHeroVariant(forced: string | null, saved: string | null, ran
   if (ok(saved)) return Number(saved);
   return Math.min(n - 1, Math.floor(rand * n));
 }
+
+/** Preview host or a forced ?v= link: show the full landing (no returning-user shortcut) so variants can be reviewed. */
+export function isHeroReview(): boolean {
+  if (typeof window === "undefined") return false;
+  const h = window.location.hostname;
+  return h.includes("id-preview") || h === "localhost" || new URLSearchParams(window.location.search).has("v");
+}
