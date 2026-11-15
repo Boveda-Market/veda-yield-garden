@@ -1,6 +1,6 @@
-import { ArrowDownLeft, ArrowUpRight, Layers, PieChart, Sparkles, Sprout, TrendingUp } from "lucide-react";
+import { Layers, PieChart, Sparkles, Sprout, TrendingUp } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { tokenAmount, type ChainPosition } from "@/lib/solana-data";
+import type { ChainPosition } from "@/lib/solana-data";
 import { useMeteoraHistory } from "@/hooks/use-meteora-history";
 import { usePositionRows } from "@/hooks/use-position-rows";
 import { MASK, useHideBalances } from "@/lib/preferences";
@@ -28,8 +28,6 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
   const vaultTotal = byVault.reduce((s, x) => s + x.value, 0);
   const aprWeighted = vaultTotal > 0 && byVault.every((x) => x.apr !== null) ? byVault.reduce((s, x) => s + x.value * (x.apr ?? 0), 0) / vaultTotal : null;
   const pnl = history.pnl ? Number(history.pnl.replace(/,/g, "")) : null;
-  const pct = history.ready ? history.metrics.usdcHarvestPercent : null;
-  const withdrawn = history.ready ? tokenAmount(history.metrics.totals.reduce((s, p) => s + p.withdrawUsdc, 0n).toString(), 6) : null;
   const tile = "rounded-2xl border border-border bg-card p-4";
   const label = "flex items-center gap-1.5 text-xs text-muted-foreground";
   const loading = history.query.isFetching ? t("Calculando…") : "—";
@@ -57,16 +55,7 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
       <div className={tile}>
         <p className={label}><Sparkles size={14} />{t("Ganancias (PNL)")}</p>
         <p className="mt-2 font-display text-xl font-semibold tabular-nums text-primary">{pnl !== null ? `+${money(pnl)}` : loading}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{pct !== null ? t("{percent}% sobre lo depositado", { percent: String(pct) }) : t("Lo que ya cosechaste.")}</p>
-        {pct !== null && <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary" style={{ width: `${Math.min(100, Math.max(2, pct))}%` }} /></div>}
-      </div>
-      <div className={tile}>
-        <p className={label}><ArrowDownLeft size={14} />{t("Total depositado")}</p>
-        <p className="mt-2 font-display text-xl font-semibold tabular-nums">{history.ready ? (hidden ? MASK : `$${history.metrics.deposited}`) : loading}</p>
-      </div>
-      <div className={tile}>
-        <p className={label}><ArrowUpRight size={14} />{t("Total retirado")}</p>
-        <p className="mt-2 font-display text-xl font-semibold tabular-nums">{withdrawn !== null ? (hidden ? MASK : `$${withdrawn}`) : loading}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t("Lo que ya cosechaste.")}</p>
       </div>
     </div>
     <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground"><Layers size={12} className="mt-0.5 shrink-0" />{t("Ganancias = lo que ya cosechaste, al precio de hoy. No incluye subidas o bajadas del precio de tu capital.")}</p>
