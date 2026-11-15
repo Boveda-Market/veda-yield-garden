@@ -31,7 +31,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   const [withdrawal, setWithdrawal] = useState<{ position?: string; vaultId: OperableVault; migrateTo?: Vault; rotate?: boolean } | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
   const [migrating, setMigrating] = useState(false);
-  const migrate = (p: import("@/lib/solana-data").ChainPosition, target: Vault, rotate = false) => { if (walletAddress && isMigratableVault(p.vaultId) && isMigratableVault(target.id) && !p.locked) setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target, ...(rotate ? { rotate: true } : {}) }); };
+  const migrate = (p: import("@/lib/solana-data").ChainPosition, target: Vault, rotate = false) => { if (walletAddress && isOperableVault(p.vaultId) && isOperableVault(target.id) && target.id !== p.vaultId && !p.locked) setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target, ...(rotate ? { rotate: true } : {}) }); };
   const [harvest, setHarvest] = useState<{ position: string; vaultId: OperableVault; compound?: boolean } | null>(null);
   const [unavailableAction, setUnavailableAction] = useState<"harvest" | "exit" | null>(null);
   function openPositionAction(position: import("@/lib/solana-data").ChainPosition, action: "harvest" | "exit" | "compound") {

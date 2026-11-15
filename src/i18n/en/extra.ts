@@ -1208,4 +1208,10 @@ export const extra: Record<string, string> = {
   "Solo la wallet de tesorería verificada puede hacer esto.": "Only the verified treasury wallet can do this.",
   "La tesorería no tiene al menos $5 libres (fuera de comisiones pendientes).": "The treasury doesn't have at least $5 free (excluding pending commissions).",
   "La reserva está por debajo de 0.0025 y no alcanza para pagar el cambio. Envía un poco de reserva manualmente.": "The reserve is below 0.0025 and can't pay for the conversion. Send a little reserve manually.",
+  "Migrar bóveda": "Move vault",
+  "Elige a dónde mover todo tu dinero y ganancias. Lo hacemos por ti con 0% de comisión de BÓVEDA.": "Choose where to move all your money and earnings. We do it for you with a 0% BÓVEDA fee.",
+  "Bóveda destino": "Destination vault",
+  "Moveremos todo a {v}. Tu wallet te pedirá aprobar dos veces: cerrar esta bóveda y depositar en la nueva.": "We'll move everything to {v}. Your wallet will ask you to approve twice: closing this vault and depositing in the new one.",
+  "Aprobar migración": "Approve move",
+  "Paso 1 de 2: cosechamos tus ganancias y cerramos esta bóveda. En cuanto se confirme, depositamos todo en {v} automáticamente. 0% de comisión de BÓVEDA.": "Step 1 of 2: we harvest your earnings and close this vault. Once confirmed, we deposit everything in {v} automatically. 0% BÓVEDA fee.",
 };

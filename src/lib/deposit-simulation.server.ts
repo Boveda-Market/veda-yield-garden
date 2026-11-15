@@ -68,7 +68,9 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
     // Binary search balances remaining USDC against the other token required.
     let low = 1n, high = amounts.net - 1n;
     let selected: { quote: z.infer<typeof quoteSchema>; minimum: BN; remaining: BN } | undefined;
-    for (let iteration = 0; iteration < 7 && low <= high; iteration++) {
+    let bestLiquidity = new BN(0);
+    // 7 halvings left up to net/128 unused (≈40% stayed in the wallet on narrow-ratio pools); 14 keeps it under net/16384.
+    for (let iteration = 0; iteration < 14 && low <= high; iteration++) {
       const swapAmount = (low + high) / 2n;
       const params = new URLSearchParams({ inputMint: USDC_MINT, outputMint: config.mint, amount: swapAmount.toString(), slippageBps: "50", maxAccounts: "24", onlyDirectRoutes: "true", excludeDexes: "Meteora,Meteora DLMM,Meteora DAMM v2" });
       const quote = quoteSchema.parse(await jupiter(`quote?${params}`));
@@ -79,7 +81,9 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
       const minimum = new BN(quote.otherAmountThreshold);
       const remaining = new BN((amounts.net - swapAmount).toString());
       const depositQuote = cp.getDepositQuote({ inAmount: remaining, isTokenA: false, minSqrtPrice: pool.sqrtMinPrice, maxSqrtPrice: pool.sqrtMaxPrice, sqrtPrice: pool.sqrtPrice, collectFeeMode: pool.collectFeeMode, tokenAAmount: pool.tokenAAmount, tokenBAmount: pool.tokenBAmount, liquidity: pool.liquidity });
-      selected = { quote, minimum, remaining };
+      // Keep the split that deposits the most, not merely the last one probed.
+      const delta = cp.getLiquidityDelta({ maxAmountTokenA: minimum, maxAmountTokenB: remaining, sqrtPrice: pool.sqrtPrice, sqrtMinPrice: pool.sqrtMinPrice, sqrtMaxPrice: pool.sqrtMaxPrice, collectFeeMode: pool.collectFeeMode, tokenAAmount: pool.tokenAAmount, tokenBAmount: pool.tokenBAmount, liquidity: pool.liquidity });
+      if (!selected || delta.gt(bestLiquidity)) { selected = { quote, minimum, remaining }; bestLiquidity = delta; }
       if (minimum.lt(depositQuote.outputAmount)) low = swapAmount + 1n;
       else high = swapAmount - 1n;
     }

@@ -14,10 +14,10 @@ import { poolYieldOptions } from "@/lib/pool-yield";
 import { earningRatePerMs } from "@/lib/live-earnings";
 import { LiveEarnings } from "./live-earnings";
 import { PoweredBy } from "./powered-by";
-import { bestUpgrade } from "@/lib/migrate";
 import type { Vault } from "@/lib/vaults";
 import { MigrateOffer } from "./migrate-banner";
 import { RebalanceButton } from "./rebalance-button";
+import { MigratePicker } from "./migrate-picker";
 
 export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRotate, showHarvestBanner = true }: { positions: ChainPosition[]; onAction: (p: ChainPosition, a: "harvest" | "exit" | "compound") => void; onDeposit?: (p: ChainPosition) => void; onMigrate?: (p: ChainPosition, target: Vault) => void; onRotate?: (p: ChainPosition, target: Vault) => void; showHarvestBanner?: boolean }) {
   const t = useT();
@@ -44,7 +44,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
         {p.outOfRange && <p role="status" className="mt-2 rounded-lg border border-border bg-muted/50 p-2 text-xs leading-5 text-muted-foreground">{t("El precio salió del rango de esta bóveda: tu dinero sigue seguro pero no genera ganancias hasta que el precio vuelva o la cierres.")}</p>}
         {onMigrate && <MigrateOffer position={p} aprs={aprs} onMigrate={onMigrate} className="mt-3" />}
         <Button className="mt-4 w-full" onClick={() => onAction(p, "harvest")}><Sprout size={16} />{t("Cosechar Ganancias")}</Button>
-        <div className="mt-2 grid grid-cols-2 gap-2"><RebalanceButton position={p} className="col-span-2" />{onDeposit && isOperableVault(p.vaultId) && <Button size="sm" variant="secondary" onClick={() => onDeposit(p)}><Plus size={14} />{t("Depositar más")}</Button>}<Button size="sm" variant="secondary" onClick={() => onAction(p, "compound")}><Repeat size={14} />{t("Cosechar y reinvertir todo")}</Button>{(() => { const other = onRotate && !p.locked && (p.vaultId === "sol" || p.vaultId === "met") && !bestUpgrade(p.vaultId, aprs) ? VAULTS.find((v) => v.id === (p.vaultId === "sol" ? "met" : "sol")) : null; return other ? <Button size="sm" variant="outline" className="col-span-2" title={t("Cambio voluntario: comisión reducida de 0.10% al salir y 0% al depositar.")} onClick={() => onRotate?.(p, other)}><Repeat size={14} />{t("Cambiar a {v} · 0.10%", { v: t(other.name) })}</Button> : null; })()}<Button size="sm" variant="outline" className="col-span-2" onClick={() => onAction(p, "exit")}><ArrowDownToLine size={14} />{t("Retirar o liquidar")}</Button></div>
+        <div className="mt-2 grid grid-cols-2 gap-2"><RebalanceButton position={p} className="col-span-2" />{onDeposit && isOperableVault(p.vaultId) && <Button size="sm" variant="secondary" onClick={() => onDeposit(p)}><Plus size={14} />{t("Depositar más")}</Button>}<Button size="sm" variant="secondary" onClick={() => onAction(p, "compound")}><Repeat size={14} />{t("Cosechar y reinvertir todo")}</Button>{onMigrate && isOperableVault(p.vaultId) && !p.locked && <MigratePicker position={p} aprs={aprs} onPick={onMigrate} />}<Button size="sm" variant="outline" className="col-span-2" onClick={() => onAction(p, "exit")}><ArrowDownToLine size={14} />{t("Retirar o liquidar")}</Button></div>
         {!isOperableVault(p.vaultId) && <p className="mt-3 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
       </article>;
     })}</div>

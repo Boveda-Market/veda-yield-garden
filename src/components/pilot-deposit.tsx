@@ -1,5 +1,5 @@
 import { useT } from "@/lib/i18n";
-import { useEffect, useState } from "react";
+import { useEffect, useState , useRef} from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchPoolStats } from "@/lib/pool-stats";
@@ -22,7 +22,7 @@ type Step = "idle" | "preparing" | "signing" | "confirming" | "done" | "error";
 const labels: Record<Step, string> = { idle: "", preparing: "Preparando tu depósito…", signing: "Esperando tu firma en la wallet…", confirming: "Enviada. Esperando confirmación en la red…", done: "", error: "" };
 
 /** Selected real deposit with fresh simulation and owner signature. */
-export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange, onClose, onDoneChange }: { vaultId: string; amount: string; position?: string | undefined; migrate?: boolean; onBusyChange: (busy: boolean) => void; onClose?: () => void; onDoneChange?: (done: boolean) => void }) {
+export function PilotDeposit({ vaultId, amount, position, migrate, autoStart = false, onBusyChange, onClose, onDoneChange }: { autoStart?: boolean; vaultId: string; amount: string; position?: string | undefined; migrate?: boolean; onBusyChange: (busy: boolean) => void; onClose?: () => void; onDoneChange?: (done: boolean) => void }) {
   const t = useT();
   const { walletAddress, signAndSend } = useBovedaSession();
   const prepare = useServerFn(preparePilotDeposit);
@@ -49,8 +49,12 @@ export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange,
   useEffect(() => { onBusyChange(busy); }, [busy, onBusyChange]);
   useEffect(() => { onDoneChange?.(step === "done"); }, [step, onDoneChange]);
 
-  async function run() {
-    if (!walletAddress || !accepted || busy || !eligible || !valid.success) return;
+  // Migration step 2 runs on its own: the user already approved the move.
+  const autoRan = useRef(false);
+  useEffect(() => { if (autoStart && !autoRan.current && walletAddress && valid.success && step === "idle") { autoRan.current = true; void run(true); } }); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function run(auto = false) {
+    if (!walletAddress || (!accepted && !auto) || busy || !eligible || !valid.success) return;
     setMessage(null); setSignature(null); setStatus(null); setStep("preparing");
     try {
       const prepared = await prepare({ data: valid.data });
@@ -90,7 +94,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, onBusyChange,
       setNeedsReserve(false); setStep("idle");
       void queryClient.invalidateQueries({ queryKey: ["my-wallet", walletAddress] });
       await new Promise((resolve) => setTimeout(resolve, 1_500));
-      await run();
+      await run(autoStart);
     } catch { setStep("error"); setMessage(t("No se pudo preparar la garantía. No se movió dinero.")); }
   }
 

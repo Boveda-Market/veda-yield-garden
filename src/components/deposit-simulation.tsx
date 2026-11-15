@@ -71,6 +71,6 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
     <p className="text-xs leading-5 text-muted-foreground">{t("Parte de tus USDC se convierte automáticamente al otro token de la bóveda. Los costos de red se pagan aparte en SOL.")}</p>
     <p role="note" className="rounded-xl border border-border p-3 text-xs leading-5 text-muted-foreground">{t("Tu capital se combina con la otra moneda de la bóveda y su valor fluctuará con el precio de mercado, mientras acumulas comisiones en cada operación.")} <a href="/faq#vaults-fluctuation" className="underline">{t("¿Por qué cambia mi balance?")}</a></p>
     </>}
-    {wallet ? <PilotDeposit vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onClose={onClose} onDoneChange={setDone} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
+    {wallet ? <PilotDeposit autoStart={migrate} vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onClose={onClose} onDoneChange={setDone} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
   </ActionSheetContent></Dialog>;
 }

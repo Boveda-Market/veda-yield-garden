@@ -72,3 +72,5 @@
 - [x] Sube/Baja: duel lines and win percentages must always agree (line on top = higher market %), since the official result uses the oracle average, not exchange spot.
 - [x] Sube/Baja: take live price and price to beat from Polymarket's own data (same source as the official result).
 - [x] Sube/Baja Polymarket-style engagement: rolling live price, countdown pulse, real live trade bubbles, round streak strip, quick-stake payout on buttons, other coins' odds.
+
+- [x] Migrar bóveda: botón en tarjetas + prueba real con billetera de pruebas

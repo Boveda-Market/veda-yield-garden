@@ -33,3 +33,4 @@
 - Fee lookups go through networkFeeOf (retry, then protocol formula) and simulations use replaceRecentBlockhash, so a node that has not seen our fresh blockhash never blocks an operation.
 - Doble o Nada early close: the venue sells at market with a ~90% slippage floor and no price parameter, so buildSell returns an orderbook-walk estimate (sellEstimate) and the app sells only after the user confirms that amount.
 - Treasury self-refill (treasury-topup.ts): 2-min status cron swaps free treasury USDC (minus pending affiliate commissions) to SOL via Jupiter, signed only by the treasury, when SOL < trigger, 4 h cooldown, needs a small SOL floor to pay itself; operator button in /admin banner (payoutAdmin).
+- Vault moves: «Migrar bóveda» on each active card picks any other operable vault; exit (migrate flag, 0% fee) then the deposit step starts automatically from the confirmed exit, so the user only approves twice in one sheet.
