@@ -183,8 +183,8 @@ export function WalletPanel() {
     { icon: QrCode, label: t("Recibir"), on: () => setReceiveOpen(true) },
   ];
   const shortcuts = [
-    { to: "/app", icon: Vault, title: t("Depositar en Bóvedas"), sub: t("Elige una bóveda y pon tu dinero a trabajar") },
     { to: "/portfolio", icon: PieChart, title: t("Ver ganancias"), sub: t("Cosecha ganancias y retira capital") },
+    { to: "/app", icon: Vault, title: t("Depositar en Bóvedas"), sub: t("Elige una bóveda y pon tu dinero a trabajar") },
   ] as const;
 
   return <div className="mx-auto max-w-2xl space-y-5">
