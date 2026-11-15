@@ -42,7 +42,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
   const total = buys != null && sells != null ? buys + sells : null;
   const buyPct = total ? Math.round((buys! / total) * 100) : null;
   const ch = s.data?.change24h ?? null;
-  const steps = [["💵", "Depositas"], ["🌱", "Cosechas comisiones"], ["📲", "Rebalanceas con 1 toque"]] as const;
+  const steps = [["💵", "Depositas"], ["📲", "Alerta al móvil"], ["🎯", "Rebalanceas con 1 toque"]] as const;
   return <article className="hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)] md:col-span-2">
     <div className="relative isolate flex h-full flex-col overflow-hidden rounded-[calc(1rem-2px)] bg-[image:var(--gradient-hot-surface)] p-4 text-hot-foreground sm:p-5">
       <div className="relative -mx-4 -mt-4 flex min-h-32 flex-col justify-between bg-[image:var(--gradient-hot)] p-4 sm:-mx-5 sm:-mt-5 sm:min-h-36 sm:p-5">
@@ -51,12 +51,12 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
           <span className="rounded-full bg-hot-surface px-3 py-1 text-xs font-black uppercase tracking-wide text-hot-foreground">🎰 {t("Sé la casa")}</span>
           <span className="flex items-center gap-1.5 rounded-full bg-hot-surface/70 px-2.5 py-1 text-[11px] font-bold uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-hot motion-reduce:animate-none" />{t("En vivo")}</span>
         </div>
-        <h3 className="relative mt-5 flex items-center gap-2"><img src={lang === "en" ? titleEn : titleEs} alt={t(vault.name)} width={lang === "en" ? 926 : 1059} height={lang === "en" ? 233 : 228} className="h-10 w-auto max-w-[78%] -rotate-2 sm:h-14" /></h3>
+        <h3 className="relative mt-5 flex items-center gap-2"><img src={lang === "en" ? titleEn : titleEs} alt={t(vault.name)} width={lang === "en" ? 935 : 1074} height={lang === "en" ? 233 : 228} className="h-10 w-auto max-w-[78%] -rotate-2 sm:h-14" /></h3>
       </div>
       <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-semibold text-hot-muted">{vault.pair}</p>
-          <p className="mt-1 max-w-sm text-sm font-semibold">{t("Cada intercambio de GTA6 deja comisión. Tú cobras como la casa.")}</p>
+          <p className="mt-1 max-w-sm text-sm font-semibold">{t("Deposita, recibe la alerta en Telegram y rebalancea con 1 botón para mantener tu capital concentrado donde más comisiones se cobran.")}</p>
         </div>
         <div className="text-right">
           <p key={apr ?? "x"} className="animate-count-pop bg-[image:var(--gradient-hot)] bg-clip-text font-display text-5xl font-black leading-none text-transparent tabular-nums">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 0 })}%`}</p>
