@@ -10,7 +10,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, ChevronRight, PieChart, Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { Banknote, Pencil } from "lucide-react";
+import { Banknote, Pencil, Vault } from "lucide-react";
 import { OfframpButton } from "@/components/offramp-dialog";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
@@ -183,7 +183,8 @@ export function WalletPanel() {
     { icon: QrCode, label: t("Recibir"), on: () => setReceiveOpen(true) },
   ];
   const shortcuts = [
-    { to: "/portfolio", icon: PieChart, title: t("Manejar posiciones"), sub: t("Cosecha ganancias y retira capital") },
+    { to: "/app", icon: Vault, title: t("Depositar en Bóvedas"), sub: t("Elige una bóveda y pon tu dinero a trabajar") },
+    { to: "/portfolio", icon: PieChart, title: t("Ver ganancias"), sub: t("Cosecha ganancias y retira capital") },
   ] as const;
 
   return <div className="mx-auto max-w-2xl space-y-5">

@@ -18,7 +18,7 @@ export function WalletHeroShortcuts() {
     <Link to="/app" className="hot-ring group relative block rounded-2xl p-[2px] transition-transform active:scale-[0.98]">
       <span className="relative flex h-full flex-col gap-1.5 overflow-hidden rounded-[14px] bg-[image:var(--gradient-hot-surface)] p-3 text-hot-foreground">
         <span className="hot-cta inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-hot-surface"><Flame size={12} aria-hidden />{aprLabel}</span>
-        <span className="font-display text-base font-bold leading-tight">{t("Depositar en Bóvedas")}</span>
+        <span className="font-display text-base font-bold leading-tight">{t("Bóveda GTA6")}</span>
         <span className="text-[11px] leading-4 text-hot-muted">{t("Comisiones brutales con el volumen de GTA6")}</span>
         <ChevronRight size={16} aria-hidden className="absolute right-2 top-2 opacity-70 transition-transform group-hover:translate-x-0.5" />
       </span>
