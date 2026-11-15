@@ -114,6 +114,7 @@ function Landing() {
           </ul>
         </div>
         <div id="acceso" className="order-2 min-w-0 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
+          <div className="mb-4 grid w-full gap-2"><Button asChild className="h-12 w-full text-base font-bold"><Link to="/mercados">⚡ {t("Ver Doble o Nada en vivo")}</Link></Button><Button asChild variant="outline" className="h-11 w-full"><Link to="/app">{t("Explorar Bóvedas")}<ArrowRight size={16} /></Link></Button></div>
           <EntryAccess />
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span><span aria-hidden="true">·</span><a href="https://www.privy.io/security" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground underline-offset-2 hover:text-primary hover:underline">{t("Conoce más")} ↗</a></p>
         </div>

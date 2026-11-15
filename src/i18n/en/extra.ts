@@ -1160,4 +1160,9 @@ export const extra: Record<string, string> = {
   "Doble o Nada en vivo: juegas contra el mercado en dólares reales. Tú eliges la jugada, nosotros vigilamos el reloj y tu premio cae con un solo toque.": "Double or Nothing live: play the market with real dollars. You make the play, we watch the clock, and your prize lands with one tap.",
   "¿Para qué trabajar 8 horas si una jugada de 5 minutos paga el día?": "Why work 8 hours when a 5-minute play can pay for the day?",
   "Predice si Bitcoin sube o baja en la próxima ronda sin comprar la moneda: juegas en dólares y cobras en el acto. Cero humo, pura puntería.": "Predict whether Bitcoin goes up or down next round without buying the coin: play in dollars, get paid on the spot. No hype, pure aim.",
+  "Mira la acción en vivo. Entra solo cuando quieras jugar.": "Watch the action live. Sign in only when you want to play.",
+  "Inicia sesión para confirmar tu jugada": "Sign in to confirm your play",
+  "Entra con Google en 1 segundo y recibe tu billetera protegida, sin contraseñas.": "Sign in with Google in 1 second and get your protected wallet, no passwords.",
+  "Ver Doble o Nada en vivo": "Watch Double or Nothing live",
+  "Explorar Bóvedas": "Explore Vaults",
 };

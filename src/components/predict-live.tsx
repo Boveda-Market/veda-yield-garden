@@ -6,6 +6,7 @@ import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2, Pencil } from "luc
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { GoogleButton } from "@/components/google-button";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { PredictPositionCard } from "@/components/predict-position-card";
 import { SolConvertShortcut } from "@/components/sol-convert-shortcut";
@@ -38,6 +39,8 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   const [amount, setAmount] = useState("5");
   // Manual entry stays closed by default so the phone keyboard never covers the quote and confirm button.
   const [customAmount, setCustomAmount] = useState(false);
+  // Visitors browse freely; acting asks for sign-in right here without leaving the round.
+  const [askLogin, setAskLogin] = useState(false);
   useEffect(() => { if (!side) setCustomAmount(false); }, [side]);
   const [review, setReview] = useState<{ side: PredictSide; round: LiveRound; quote: PredictQuote; tx: string; context: string; order: string | null } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -204,7 +207,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
         {(["up", "down"] as const).map((s) => {
           const p = priceOf(s), on = side === s, up = s === "up";
           const Icon = up ? ArrowUpRight : ArrowDownRight;
-          return <button key={s} type="button" disabled={!p} aria-pressed={on} onClick={() => { if (on) { cancelQuote(); return; } setSide(s); setReview(null); }}
+          return <button key={s} type="button" disabled={!p} aria-pressed={on} onClick={() => { if (!session.authenticated) { setAskLogin(true); return; } if (on) { cancelQuote(); return; } setSide(s); setReview(null); }}
             className={`relative overflow-hidden rounded-2xl border-2 p-4 text-left transition active:scale-[0.97] disabled:opacity-40 ${on ? (up ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "border-destructive bg-destructive text-destructive-foreground shadow-lg shadow-destructive/30") : up ? "border-primary/40 bg-primary/5 text-primary" : "border-destructive/40 bg-destructive/5 text-destructive"}`}>
             <span className="flex items-center justify-between"><span className="font-display text-xl font-bold">{t(up ? "Sube" : "Baja")}</span><Icon size={22} /></span>
             <span className="mt-2 block font-display text-3xl font-bold tabular-nums">{p ? `${Math.round(p * 100)}%` : "—"}</span>
@@ -217,6 +220,17 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
 
       {chart}
       {!side && <p className="text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
+      <Dialog open={askLogin} onOpenChange={setAskLogin}>
+        <ActionSheetContent>
+          <DialogTitle className="pr-10 font-display text-xl">{t("Inicia sesión para confirmar tu jugada")}</DialogTitle>
+          <DialogDescription className="text-sm">{t("Entra con Google en 1 segundo y recibe tu billetera protegida, sin contraseñas.")}</DialogDescription>
+          <div className="mt-4 grid gap-2">
+            <GoogleButton className="h-12 w-full" onClick={() => { setAskLogin(false); session.login("google"); }}>{t("Continuar con Google")}</GoogleButton>
+            <Button variant="secondary" className="h-11 w-full" onClick={() => { setAskLogin(false); session.login("email"); }}>{t("Entrar con email")}</Button>
+            <Button variant="ghost" className="w-full" onClick={() => { setAskLogin(false); session.login("wallet"); }}>{t("Billetera externa (Phantom, Jupiter…)")}</Button>
+          </div>
+        </ActionSheetContent>
+      </Dialog>
       <Dialog open={!!side} onOpenChange={(o) => { if (!o && busy !== "sign") cancelQuote(); }}>
         <ActionSheetContent closeLabel={t("Cerrar")} onOpenAutoFocus={(e) => e.preventDefault()}>
           <DialogTitle className={`flex items-center gap-2 pr-10 font-display text-xl ${side === "down" ? "text-destructive" : "text-primary"}`}>{side === "down" ? <ArrowDownRight size={22} /> : <ArrowUpRight size={22} />}{t(side === "down" ? "Predecir Baja" : "Predecir Sube")}{selPrice ? <span className="ml-auto text-sm font-semibold tabular-nums">{t("Paga {x}×", { x: (1 / selPrice).toFixed(2) })}</span> : null}</DialogTitle>
