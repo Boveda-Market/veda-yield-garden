@@ -19,6 +19,7 @@ export function LoginNudge() {
   const signedIn = session.authenticated;
   useEffect(() => {
     if (signedIn || !session.ready) return;
+    if (new URLSearchParams(window.location.search).has("acceso")) { setOpen(true); return; }
     try { if (sessionStorage.getItem(SEEN_KEY)) return; } catch { /* ignore */ }
     let done = false;
     const show = () => {
