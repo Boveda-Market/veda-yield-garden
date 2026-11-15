@@ -1199,4 +1199,13 @@ export const extra: Record<string, string> = {
   "La recarga automática no está disponible en este momento. Ya avisamos al equipo; inténtalo de nuevo más tarde. No se movió dinero.": "Automatic top-up isn't available right now. We've alerted the team; please try again later. No money was moved.",
   "Te falta un poco de reserva de operaciones para entrar a la ronda.": "You need a little more operations reserve to enter the round.",
   "Esta bóveda necesita una pequeña garantía de apertura en tu reserva de operaciones; casi toda vuelve a ti al cerrarla.": "This vault needs a small opening deposit in your operations reserve; almost all of it comes back when you close it.",
+  "Reserva recargada": "Reserve refilled",
+  "No se pudo hacer el cambio ahora. No se movió dinero.": "Couldn't convert right now. No money was moved.",
+  "Reserva de red de la tesorería": "Treasury network reserve",
+  "se recarga sola con dólares de la tesorería": "refills itself with treasury dollars",
+  "Convirtiendo…": "Converting…",
+  "Convertir $10 a reserva de red": "Convert $10 to network reserve",
+  "Solo la wallet de tesorería verificada puede hacer esto.": "Only the verified treasury wallet can do this.",
+  "La tesorería no tiene al menos $5 libres (fuera de comisiones pendientes).": "The treasury doesn't have at least $5 free (excluding pending commissions).",
+  "La reserva está por debajo de 0.0025 y no alcanza para pagar el cambio. Envía un poco de reserva manualmente.": "The reserve is below 0.0025 and can't pay for the conversion. Send a little reserve manually.",
 };

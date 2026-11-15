@@ -84,6 +84,22 @@ export const Route = createFileRoute("/api/public/jobs/check-system-status")({
           }
         } catch { /* best-effort */ }
         try {
+          // Treasury self-refill: swap free treasury dollars into network reserve before it runs dry (4 h cooldown).
+          const last = rows.get("treasury_topup")?.first_down_at;
+          const { runTreasuryTopup } = await import("@/lib/treasury-topup.server");
+          const r = await runTreasuryTopup({ lastAt: last ? Date.parse(last) : null });
+          if (r.done) {
+            await db.from("system_service_status").upsert({ service: "treasury_topup", first_down_at: new Date(now).toISOString(), operator_alerted: false, public_alerted: false, updated_at: new Date(now).toISOString() }, { onConflict: "service" });
+            await tg.treasuryAlert(`🔄 <b>Auto-recarga de tesorería</b>\n$${(Number(r.amountMicro) / 1e6).toFixed(2)} → ~${(Number(r.receivedLamports) / 1e9).toFixed(4)} SOL\nReserva antes: ${(Number(r.solBefore) / 1e9).toFixed(4)} SOL`);
+          } else if (r.reason === "no-sol" || r.reason === "no-dollars") {
+            const k = "treasury_topup_blocked", prev = rows.get(k)?.first_down_at;
+            if (!prev || now - Date.parse(prev) > 6 * 3600_000) {
+              await tg.treasuryAlert(r.reason === "no-sol" ? "⚠️ <b>Auto-recarga imposible</b>: la reserva está bajo 0.0025 SOL. Envía SOL a la tesorería." : "⚠️ <b>Auto-recarga imposible</b>: menos de $5 libres en la tesorería.");
+              await db.from("system_service_status").upsert({ service: k, first_down_at: new Date(now).toISOString(), operator_alerted: true, public_alerted: false, updated_at: new Date(now).toISOString() }, { onConflict: "service" });
+            }
+          }
+        } catch { /* best-effort */ }
+        try {
           // Range vaults: track out-of-range time per position; one personal alert after 10 min, reset when back in range or rebalanced.
           const key = process.env["HELIUS_API_KEY"];
           if (key) {
