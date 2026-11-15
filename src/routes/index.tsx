@@ -1,3 +1,4 @@
+import { HERO_VARIANTS, HERO_KEY, pickHeroVariant } from "@/lib/hero-variants";
 import { Fingerprint, Landmark } from "lucide-react";
 import reviewCarlos from "@/assets/review-carlos.jpg";
 import reviewValeria from "@/assets/review-valeria.jpg";
@@ -81,6 +82,15 @@ function Landing() {
   const t = useT();
   const [compact, setCompact] = useState(false);
   useEffect(() => { setCompact(isReturning()); }, []);
+  const [heroIdx, setHeroIdx] = useState(0);
+  useEffect(() => {
+    let saved: string | null = null;
+    try { saved = localStorage.getItem(HERO_KEY); } catch { /* blocked storage */ }
+    const i = pickHeroVariant(new URLSearchParams(window.location.search).get("v"), saved, Math.random());
+    setHeroIdx(i);
+    try { localStorage.setItem(HERO_KEY, String(i)); } catch { /* blocked storage */ }
+  }, []);
+  const hero = HERO_VARIANTS[heroIdx] ?? HERO_VARIANTS[0];
   if (compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-10 text-foreground">
     <img src="/icon-512.png" alt="" className="h-14 w-14 rounded-2xl" />
     <h1 className="mt-4 text-center font-display text-3xl font-bold">{t("Bienvenido de nuevo")}</h1>
@@ -93,10 +103,10 @@ function Landing() {
     <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-6 sm:px-6"><Link to="/" className="flex min-w-0 shrink-0 items-center gap-2 font-display text-lg font-bold sm:gap-3"><img src="/icon-512.png" alt="" className="h-9 w-9 shrink-0 rounded-lg" />BÓVEDA</Link><div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><Link to="/prueba" onClick={allowTrialEntry} className="flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/40 bg-primary/10 px-2.5 sm:px-3 text-xs font-semibold text-primary"><Sparkles size={13} />{t("Demo sin riesgo")}</Link></div></header>
     <main className="mx-auto max-w-5xl px-6">
       <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">
-        <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(" Nada de monedas locas. Genera ganancias reales.")}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t("Todo siempre bajo tu control. $0 para entrar, retira en cualquier momento. Garantizado.")}</p><TrustTicker /></div>
+        <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(" Nada de monedas locas. Genera ganancias reales.")}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t(hero.sub)}</p><TrustTicker /></div>
         <div className="order-3 min-w-0 text-center md:order-1 md:text-left">
           <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(" Nada de monedas locas. Genera ganancias reales.")}</h1>
-          <p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t("Todo siempre bajo tu control. $0 para entrar, retira en cualquier momento. Garantizado.")}</p><div className="hidden md:block"><TrustTicker /></div>
+          <p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p><div className="hidden md:block"><TrustTicker /></div>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground md:justify-start"><span className="flex items-center gap-1.5"><span>Powered by</span><img src="/brands/coinbase.svg" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-medium text-foreground">Coinbase</span></span><span className="flex items-center gap-1.5"><span>Network:</span><span className="flex items-center gap-1 font-semibold text-primary"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_var(--color-primary)]" /></span>{t("Online")}</span></span></div>
           <p className="mt-5 text-base leading-7 text-muted-foreground">{t("Tu dinero, tus reglas. BÓVEDA blinda tu capital con seguridad criptográfica: nadie puede congelar tus fondos y cada centavo se mueve únicamente con tu huella o Face ID.")}</p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs md:justify-start">
