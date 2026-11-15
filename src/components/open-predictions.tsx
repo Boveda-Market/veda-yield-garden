@@ -106,7 +106,7 @@ function CompactLive({ p }: { p: PredictPosition }) {
   const a = assetOfTitle(p.title) as MarketId | null;
   const live = useLivePrice(a);
   const dur = roundSeconds(p.title);
-  const strike = useStrike(a, p.closeTime && dur ? (p.closeTime - dur) * 1000 : null);
+  const strike = useStrike(a, p.closeTime, dur);
   const odds = usePositionOdds(p);
   return <LivePositionStats p={p} price={live.price} strike={strike} odds={odds} compact />;
 }

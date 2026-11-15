@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { fetchCandles, type Candle, type MarketId } from "@/lib/markets";
 
-/** Price ticks arrive every ~1.5 s. */
-export const TICK_MS = 1500;
+/** Live price ticks arrive about once per second. */
+export const TICK_MS = 1000;
 const ZOOMS = [{ id: "1m", sec: 60 }, { id: "5m", sec: 300 }, { id: "15m", sec: 900 }, { id: "30m", sec: 1800 }, { id: "1h", sec: 3600 }] as const;
 type Zoom = (typeof ZOOMS)[number]["id"];
 type Style = "duel" | "line" | "candles";

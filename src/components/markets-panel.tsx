@@ -7,7 +7,10 @@ import { Loader2, Zap } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { PredictLive } from "@/components/predict-live";
 import { PriceChart, type OddsPoint } from "@/components/price-chart";
-import { MARKETS, fetchPriceAt, fetchPrices, type MarketId } from "@/lib/markets";
+import { MARKETS, type MarketId } from "@/lib/markets";
+import { useLiveTicks, useLivePrices } from "@/hooks/use-live-price";
+import { usePriceToBeatInfo } from "@/hooks/use-price-to-beat";
+import { minuteAverage } from "@/lib/polymarket-prices";
 import { PREDICT_WINDOWS, type LiveRound, type PredictWindow } from "@/lib/predict";
 import { getLiveRounds } from "@/lib/predict.functions";
 import { PendingClaims } from "@/components/pending-claims";
@@ -21,31 +24,17 @@ const WIN_LABEL: Record<PredictWindow, string> = { "5m": "5 min", "15m": "15 min
 /** Live-only Up/Down rounds: BTC, ETH and SOL in 5 min, 15 min and 4 hours. */
 export function MarketsPanel(_: { identity: string }) {
   const t = useT();
-  const [prices, setPrices] = useState<Partial<Record<MarketId, number>>>({});
-  const [series, setSeries] = useState<Record<MarketId, { t: number; v: number }[]>>({ SOL: [], BTC: [], ETH: [] });
+  // Live prices come from Polymarket's own feed (the Chainlink prices rounds settle on), shared with every Sube/Baja screen.
+  const prices = useLivePrices();
   const [market, setMarket] = useState<MarketId>("BTC");
   const [win, setWin] = useState<PredictWindow>("5m");
   const [rounds, setRounds] = useState<LiveRound[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [now, setNow] = useState(0);
-  const [strikes, setStrikes] = useState<Record<string, number>>({});
   // Live odds history per round (asset:window:openTime), so the duel follows the same numbers as the buttons.
   const [oddsHist, setOddsHist] = useState<Record<string, OddsPoint[]>>({});
 
   useEffect(() => { setNow(Date.now()); const id = setInterval(() => setNow(Date.now()), 250); return () => clearInterval(id); }, []);
-  useEffect(() => {
-    let alive = true;
-    const tick = async () => {
-      try {
-        const p = await fetchPrices();
-        if (!alive) return;
-        setPrices((o) => ({ ...o, ...p }));
-        setSeries((s) => { const n = { ...s }; for (const m of MARKETS) { const v = p[m.id]; if (v) n[m.id] = [...s[m.id], { t: Date.now(), v }].slice(-12000); } return n; });
-      } catch { /* retry next tick */ }
-    };
-    void tick(); const id = setInterval(tick, 1500);
-    return () => { alive = false; clearInterval(id); };
-  }, []);
   useEffect(() => {
     let alive = true;
     const load = async () => {
@@ -67,22 +56,17 @@ export function MarketsPanel(_: { identity: string }) {
   }, []);
 
   const round = rounds.find((r) => r.asset === market && r.window === win && r.closeTime * 1000 > now) ?? null;
-  const skey = round ? `${market}:${round.openTime}` : "";
-  useEffect(() => {
-    if (!round || strikes[skey]) return;
-    // The opening candle may not be published yet right after a 5 min round starts: retry until it is.
-    let alive = true, timer: ReturnType<typeof setTimeout> | undefined;
-    const tryLoad = () => void fetchPriceAt(market, round.openTime * 1000).then((v) => {
-      if (!alive) return;
-      if (v) setStrikes((o) => ({ ...o, [skey]: v })); else timer = setTimeout(tryLoad, 4_000);
-    });
-    tryLoad();
-    return () => { alive = false; if (timer) clearTimeout(timer); };
-  }, [skey]); // eslint-disable-line react-hooks/exhaustive-deps
-  const strike = strikes[skey];
+  // Price to beat straight from Polymarket for this exact round.
+  const ptb = usePriceToBeatInfo(round ? market : null, round ? win : null, round?.openTime ?? null);
+  const ticks = useLiveTicks(market);
+  // Official value once Polymarket publishes it; before that, the same one-minute average measured from its feed
+  // when this screen saw the opening, else Polymarket's opening price.
+  const localStrike = round ? minuteAverage(ticks, round.openTime * 1000) : null;
+  const strike = ptb?.official ? ptb.price : localStrike ?? ptb?.price;
+  const avgNow = minuteAverage(ticks, now + 1, 20);
   // Each round starts a fresh chart: only ticks since its opening, anchored on the new price to beat.
   const openMs = round ? round.openTime * 1000 : 0;
-  const roundTicks = series[market].filter((x) => x.t >= openMs).map((x) => x.v);
+  const roundTicks = ticks.filter((x) => x.t >= openMs).map((x) => x.v);
   const roundPoints = strike ? [strike, ...roundTicks] : roundTicks;
   const price = prices[market];
   const remaining = round ? Math.max(0, round.closeTime * 1000 - now) : 0;
@@ -127,7 +111,8 @@ export function MarketsPanel(_: { identity: string }) {
             <div><p className="text-xs text-muted-foreground">{t("Precio actual")}</p>
               <p className="font-display text-lg font-bold tabular-nums">{price ? `$${num(price, digits(price))}` : "—"}</p>
               {/* Price vs our reference is shown neutrally: who leads is decided only by the market percentages below. */}
-              {price && strike && <p className="text-[11px] font-semibold tabular-nums text-muted-foreground">{ahead ? "▲" : "▼"} ${num(Math.abs(price - strike), digits(price))}</p>}</div>
+              {price && strike && <p className="text-[11px] font-semibold tabular-nums text-muted-foreground">{ahead ? "▲" : "▼"} ${num(Math.abs(price - strike), digits(price))}</p>}
+              {avgNow && <p className="text-[10px] tabular-nums text-muted-foreground" title={t("El resultado oficial compara el promedio del último minuto con el precio a batir.")}>{t("Promedio 1 min")}: ${num(avgNow, digits(avgNow))}</p>}</div>
             <div className="flex gap-1 text-center">{(s >= 3600 ? [[Math.floor(s / 3600), t("HORAS")], [Math.floor(s / 60) % 60, t("MIN")], [s % 60, t("SEG")]] : [[Math.floor(s / 60), t("MIN")], [s % 60, t("SEG")]]).map(([v, l]) => <div key={String(l)} className={`min-w-11 rounded-lg px-1.5 py-1 ${round && remaining < 30_000 ? "bg-destructive/15 text-destructive" : "bg-secondary"}`}><p className="font-display text-xl font-bold tabular-nums">{round ? String(v).padStart(2, "0") : "--"}</p><p className="text-[9px] font-semibold text-muted-foreground">{l}</p></div>)}</div>
           </div>
           {(() => { const diff = price && strike ? price - strike : 0; const dev = strike ? roundTicks.slice(-Math.max(2, Math.min(200, Math.ceil((now - (round?.openTime ?? 0) * 1000) / 1500)))).reduce((m, v) => Math.max(m, Math.abs(v - strike)), 0) : 0; const span = Math.max(dev, strike ? strike * 0.00005 : 1); const ou = round?.upPrice, od = round?.downPrice; const up = ou && od ? Math.max(3, Math.min(97, (ou / (ou + od)) * 100)) : 50 + Math.max(-47, Math.min(47, (diff / span) * 47)); const lead = price && strike ? (diff >= 0 ? "up" : "down") : null; return <div className="mt-3" aria-label={t("Quién va ganando")}>

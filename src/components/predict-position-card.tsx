@@ -1,13 +1,14 @@
 import { PriceChart } from "@/components/price-chart";
 import { useLivePrice } from "@/hooks/use-live-price";
-import { fetchPriceAt, type MarketId } from "@/lib/markets";
+import type { MarketId } from "@/lib/markets";
+import { usePriceToBeat } from "@/hooks/use-price-to-beat";
 import { TokenIcon } from "@/components/token-icon";
 import { PoweredBy } from "@/components/powered-by";
 import { useEffect, useRef, useState } from "react";
 import { ArrowDownRight, ArrowUpRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT, useLocale } from "@/lib/i18n";
-import { assetOfTitle, positionLeading, positionOdds, positionWon, pricePerContract, type PredictPosition, type RoundOdds } from "@/lib/predict";
+import { assetOfTitle, positionLeading, positionOdds, positionWon, pricePerContract, type PredictPosition, type PredictWindow, type RoundOdds } from "@/lib/predict";
 import { useLiveRounds } from "@/lib/predict-rounds-query";
 
 export const usdcText = (micro: string | bigint | null) => micro === null ? "—" : (Number(micro) / 1e6).toFixed(2);
@@ -33,17 +34,10 @@ export function roundWindowText(title: string, closeTime: number | null, locale?
   return dur >= 86400 ? `${day(start)} ${hm(start)} – ${day(end)} ${hm(end)}` : `${day(end)} · ${hm(start)} – ${hm(end)}`;
 }
 
-/** Opening price of the round (price to beat), retried until the opening candle is published. */
-export function useStrike(asset: MarketId | null, openMs: number | null) {
-  const [v, setV] = useState<number | undefined>();
-  useEffect(() => {
-    if (!asset || !openMs) return;
-    let alive = true, timer: ReturnType<typeof setTimeout> | undefined;
-    const load = () => void fetchPriceAt(asset, openMs).then((x) => { if (!alive) return; if (x) setV(x); else timer = setTimeout(load, 4_000); });
-    load();
-    return () => { alive = false; if (timer) clearTimeout(timer); };
-  }, [asset, openMs]);
-  return v;
+/** Price to beat of a position's round, from Polymarket (window from the round length, opening from its close). */
+export function useStrike(asset: MarketId | null, closeTime: number | null, dur: number | null) {
+  const window: PredictWindow | null = dur === 300 ? "5m" : dur === 900 ? "15m" : dur === 14_400 ? "4h" : null;
+  return usePriceToBeat(asset, window, closeTime && dur ? closeTime - dur : null);
 }
 
 function useNow() { const [n, setN] = useState(() => Date.now()); useEffect(() => { const id = setInterval(() => setN(Date.now()), 1000); return () => clearInterval(id); }, []); return n; }
@@ -108,7 +102,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
   const Up = p.side === "up";
   const live = useLivePrice(open && asset ? (asset as MarketId) : null);
   const dur = roundSeconds(p.title);
-  const strike = useStrike(open && asset ? (asset as MarketId) : null, p.closeTime && dur ? (p.closeTime - dur) * 1000 : null);
+  const strike = useStrike(open && asset ? (asset as MarketId) : null, p.closeTime, dur);
   const odds = usePositionOdds(p);
   const Row = ({ k, v, tone }: { k: string; v: string; tone?: string }) => <div className="flex justify-between gap-2"><span className="text-muted-foreground">{k}</span><span className={`font-medium tabular-nums ${tone ?? ""}`}>{v}</span></div>;
   return <article className="rounded-lg border border-border bg-card p-5">

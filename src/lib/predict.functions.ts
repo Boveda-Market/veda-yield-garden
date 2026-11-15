@@ -2,7 +2,7 @@ import { requirePrivyAuth } from "@/lib/privy-auth.middleware";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { solanaAddressSchema } from "@/lib/solana-data";
-import { MARKET_ID_RE, validPredictAmount } from "@/lib/predict";
+import { MARKET_ID_RE, PREDICT_ASSETS, PREDICT_WINDOWS, validPredictAmount } from "@/lib/predict";
 
 const FAIL = "No se pudo preparar la predicción. Inténtalo de nuevo; no se ha movido dinero.";
 const helius = () => process.env["HELIUS_API_KEY"];
@@ -12,6 +12,18 @@ export const getLiveRounds = createServerFn({ method: "GET" }).handler(async () 
   try { const { listRounds } = await import("@/lib/predict.server"); return { success: true as const, rounds: await listRounds() }; }
   catch (e) { console.error("[predict] rounds", e instanceof Error ? e.message : e); return { success: false as const, rounds: [] }; }
 });
+
+/** Price to beat of one live or recent round, read from Polymarket (cached server-side, so visitors cannot amplify upstream calls). */
+export const getPriceToBeat = createServerFn({ method: "GET" })
+  .inputValidator((i: unknown) => z.object({
+    asset: z.enum(PREDICT_ASSETS),
+    window: z.enum(PREDICT_WINDOWS),
+    openTime: z.number().int().refine((t) => t % 300 === 0 && Math.abs(t - Date.now() / 1000) < 2 * 86_400),
+  }).strict().parse(i))
+  .handler(async ({ data }) => {
+    try { const { priceToBeat } = await import("@/lib/price-to-beat.server"); return { success: true as const, value: await priceToBeat(data.asset, data.window, data.openTime) }; }
+    catch (e) { console.error("[predict] price to beat", e instanceof Error ? e.message : e); return { success: false as const, value: null }; }
+  });
 
 export const getPastRounds = createServerFn({ method: "GET" }).handler(async () => {
   try { const { listPastRounds } = await import("@/lib/predict.server"); return { success: true as const, rounds: await listPastRounds() }; }
