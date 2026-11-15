@@ -154,7 +154,7 @@ export function AccountSettings() {
       <ul className="mt-3 divide-y divide-border">
         {([["/terminos", "Términos y condiciones"], ["/privacidad", "Política de privacidad"], ["/faq", "Preguntas frecuentes"]] as const).map(([to, label]) => <li key={to}><Link to={to} className="flex items-center justify-between py-3 text-sm hover:text-primary">{t(label)}<ChevronRight size={16} /></Link></li>)}
       </ul>
-      <p className="mt-3 text-xs text-muted-foreground">Boveda Technologies LLC</p>
+      <p className="mt-3 text-xs text-muted-foreground">Boveda Technologies</p>
     </div>
 
     <Button variant="outline" className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => void (async () => { await session.logout(); window.location.assign("/"); })()}><LogOut size={16} />{t("Cerrar sesión")}</Button>

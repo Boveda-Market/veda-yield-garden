@@ -54,5 +54,5 @@ export const pages: Record<string, string> = {
   "Cada operación real requiere tu autorización.": "Every real transaction requires your authorization.",
   "Términos": "Terms",
   "Privacidad": "Privacy",
-  "Boveda Technologies LLC · No es un banco. Sin ganancias garantizadas. Real permite operar posiciones compatibles con tu wallet; Prueba no mueve fondos.": "Boveda Technologies LLC · Not a bank. No guaranteed earnings. Live lets you manage compatible positions with your wallet; Trial does not move funds.",
+  "Boveda Technologies · No es un banco. Sin ganancias garantizadas. Real permite operar posiciones compatibles con tu wallet; Prueba no mueve fondos.": "Boveda Technologies · Not a bank. No guaranteed earnings. Live lets you manage compatible positions with your wallet; Trial does not move funds.",
 };

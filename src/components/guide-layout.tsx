@@ -24,7 +24,7 @@ export function guideHead(o: { path: string; title: string; description: string 
     ],
     links: [{ rel: "canonical", href: url }],
     scripts: [{ type: "application/ld+json", children: JSON.stringify([
-      { "@context": "https://schema.org", "@type": "Article", headline: o.title, description: o.description, inLanguage: "es", mainEntityOfPage: url, author: { "@type": "Organization", name: "BÓVEDA" }, publisher: { "@type": "Organization", name: "Boveda Technologies LLC", logo: { "@type": "ImageObject", url: "https://bovedamarket.app/icon-512.png" } } },
+      { "@context": "https://schema.org", "@type": "Article", headline: o.title, description: o.description, inLanguage: "es", mainEntityOfPage: url, author: { "@type": "Organization", name: "BÓVEDA" }, publisher: { "@type": "Organization", name: "Boveda Technologies", logo: { "@type": "ImageObject", url: "https://bovedamarket.app/icon-512.png" } } },
       { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
         { "@type": "ListItem", position: 1, name: "Inicio", item: "https://bovedamarket.app/" },
         { "@type": "ListItem", position: 2, name: "Guías", item: "https://bovedamarket.app/guias" },

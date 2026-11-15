@@ -8,7 +8,7 @@ export function LegalLayout({ title, children, legal = true, backHash, footer = 
   return <main className="mx-auto min-h-screen max-w-3xl px-5 py-8 text-foreground">
     <BackButton fallback="/" homeHash={backHash} />
     <Link to="/" aria-label={t("BÓVEDA · Ir al inicio")} className="mt-10 flex items-center gap-3 font-display text-lg font-bold"><img src="/icon-512.png" alt="" className="h-9 w-9 rounded-lg" />BÓVEDA</Link>
-    <p className="mt-2 text-xs text-muted-foreground">Boveda Technologies LLC</p>
+    <p className="mt-2 text-xs text-muted-foreground">Boveda Technologies</p>
     <h1 className="mt-3 font-display text-3xl font-bold">{title}</h1>
     {legal && <p className="mt-3 text-sm text-muted-foreground">{t("Vigente desde el")} {t("8 de noviembre de 2026")}</p>}
     <article className="mt-8 space-y-8 text-sm leading-7 text-muted-foreground">{children}</article>

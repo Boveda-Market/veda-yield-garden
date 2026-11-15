@@ -197,7 +197,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
       <BottomNav active={activeView} guest={guest} onSelect={(v) => setGuestView(v as typeof guestView)} />
       <footer className="border-t border-border pb-20">
         <div className="mx-auto max-w-5xl px-5 py-8 text-xs leading-relaxed text-muted-foreground">
-          <p className="font-semibold text-foreground">© {new Date().getFullYear()} Boveda Technologies LLC</p>
+          <p className="font-semibold text-foreground">© {new Date().getFullYear()} Boveda Technologies</p>
           <p className="mt-2">{t("BÓVEDA te permite guardar dólares en bóvedas que generan rendimiento y jugar Doble o Nada, siempre desde tu propia billetera. Puedes depositar entre $1 y $10,000 por operación, y cosechar tus ganancias o retirar tu dinero cuando quieras. La liquidez bloqueada no se puede retirar.")}</p>
           <p className="mt-3">{t("BÓVEDA es una interfaz no custodia: tú firmas cada operación con tu wallet. Las estadísticas públicas provienen de DexScreener; los rendimientos mostrados son estimados. Las bóvedas implican volatilidad, pérdida impermanente y riesgo de contratos; en Sube/Baja puedes perder todo lo invertido en una predicción y BÓVEDA nunca es tu contraparte. Nada aquí es asesoría financiera, legal o fiscal.")}</p>
           <nav className="mt-4 flex flex-wrap gap-5 text-primary"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to="/terminos">{t("Términos y condiciones")}</Link><Link to="/privacidad">{t("Política de privacidad")}</Link><a href="mailto:admin@bovedamarket.app">admin@bovedamarket.app</a></nav>
