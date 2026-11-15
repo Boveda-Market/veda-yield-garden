@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { TokenIcon } from "@/components/token-icon";
-import { useT } from "@/lib/i18n";
+import { useI18n, useT } from "@/lib/i18n";
+// Title lettering is pre-rendered artwork (classic GTA-style display face), never shipped as a webfont.
+import titleEs from "@/assets/gta6-vault-title.png";
+import titleEn from "@/assets/gta6-vault-title-en.png";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { fetchPoolStats } from "@/lib/pool-stats";
 import type { Vault } from "@/lib/vaults";
@@ -31,6 +33,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
   vault: Vault; owned: ReactNode; ownedLink: ReactNode; hasPosition: boolean; depositDisabled: boolean; onDeposit: () => void; onDetails: () => void;
 }) {
   const t = useT();
+  const { lang } = useI18n();
   const y = useQuery(poolYieldOptions(vault.pool));
   // Same cache key as PoolYield / pool details, so DexScreener is queried once.
   const s = useQuery({ queryKey: ["dexscreener-pool-stats", vault.pool], queryFn: ({ signal }) => fetchPoolStats(vault.pool, signal), staleTime: 60_000, refetchInterval: 60_000, retry: 1 });
@@ -39,7 +42,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
   const total = buys != null && sells != null ? buys + sells : null;
   const buyPct = total ? Math.round((buys! / total) * 100) : null;
   const ch = s.data?.change24h ?? null;
-  const steps = [["🪙", "Pones fichas"], ["💸", "Cobras cada jugada"], ["📲", "Te avisamos si la mesa se mueve"]] as const;
+  const steps = [["💵", "Depositas"], ["🌱", "Cosechas comisiones"], ["📲", "Rebalanceas con 1 toque"]] as const;
   return <article className="hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)] md:col-span-2">
     <div className="relative isolate flex h-full flex-col overflow-hidden rounded-[calc(1rem-2px)] bg-[image:var(--gradient-hot-surface)] p-4 text-hot-foreground sm:p-5">
       <div className="relative -mx-4 -mt-4 flex min-h-32 flex-col justify-between bg-[image:var(--gradient-hot)] p-4 sm:-mx-5 sm:-mt-5 sm:min-h-36 sm:p-5">
@@ -48,7 +51,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
           <span className="rounded-full bg-hot-surface px-3 py-1 text-xs font-black uppercase tracking-wide text-hot-foreground">🎰 {t("Sé la casa")}</span>
           <span className="flex items-center gap-1.5 rounded-full bg-hot-surface/70 px-2.5 py-1 text-[11px] font-bold uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-hot motion-reduce:animate-none" />{t("En vivo")}</span>
         </div>
-        <h3 className="relative mt-6 flex items-center gap-2 font-display text-3xl font-black italic tracking-tight text-hot-surface sm:text-4xl"><TokenIcon symbol={vault.pair.split("/")[0] ?? ""} size={32} />{t(vault.name)}</h3>
+        <h3 className="relative mt-5 flex items-center gap-2"><img src={lang === "en" ? titleEn : titleEs} alt={t(vault.name)} width={lang === "en" ? 926 : 1059} height={lang === "en" ? 233 : 228} className="h-10 w-auto max-w-[78%] -rotate-2 sm:h-14" /></h3>
       </div>
       <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
@@ -61,7 +64,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
         </div>
       </div>
       <dl className="mt-4 grid grid-cols-3 gap-2">
-        {[[t("La casa cobró hoy"), usd(y.data?.fees24h)], [t("Jugadas hoy"), num(total)], [t("Poseedores"), num(y.data?.holders)]].map(([k, v]) => <div key={k} className="rounded-xl border border-hot-foreground/15 bg-hot-surface/60 p-2.5 backdrop-blur-sm">
+        {[[t("Comisiones hoy"), usd(y.data?.fees24h)], [t("Intercambios hoy"), num(total)], [t("Poseedores"), num(y.data?.holders)]].map(([k, v]) => <div key={k} className="rounded-xl border border-hot-foreground/15 bg-hot-surface/60 p-2.5 backdrop-blur-sm">
           <dt className="text-[10px] font-semibold uppercase tracking-wide text-hot-muted">{k}</dt>
           <dd className="mt-0.5 font-display text-lg font-bold tabular-nums">{v}</dd>
         </div>)}
@@ -74,8 +77,8 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
       {ownedLink}
       {owned}
       <div className="mt-4 grid grid-cols-[auto_1fr] gap-2">
-        <button type="button" onClick={onDetails} className="h-12 rounded-xl border border-hot-foreground/25 bg-hot-foreground/10 px-4 text-sm font-semibold transition hover:bg-hot-foreground/20">{t("Detalles")}</button>
-        <button type="button" disabled={depositDisabled} onClick={onDeposit} className="hot-cta flex h-12 items-center justify-center gap-2 rounded-xl font-display text-base font-black text-hot-surface shadow-[var(--shadow-hot)] transition active:scale-95 disabled:opacity-70">{hasPosition ? <><Plus size={18} strokeWidth={3} />{t("Añadir más fichas")}</> : <>🎰 {t("Entrar a la mesa")}</>}</button>
+        <button type="button" onClick={onDetails} className="h-12 rounded-xl border border-hot-foreground/25 bg-hot-foreground/10 px-4 text-sm font-semibold transition hover:bg-hot-foreground/20">{t("Detalles del pool")}</button>
+        <button type="button" disabled={depositDisabled} onClick={onDeposit} className="hot-cta flex h-12 items-center justify-center gap-2 rounded-xl font-display text-base font-black text-hot-surface shadow-[var(--shadow-hot)] transition active:scale-95 disabled:opacity-70">{hasPosition ? <><Plus size={18} strokeWidth={3} />{t("Añadir más")}</> : t("Depositar")}</button>
       </div>
       <p className="mt-3 text-[10px] leading-4 text-hot-muted">{t("No apuestas contra nadie: cobras comisiones de los intercambios. Tu saldo sube y baja con el precio de GTA6. Sin vínculo con Rockstar Games.")}</p>
     </div>

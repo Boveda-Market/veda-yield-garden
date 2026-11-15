@@ -3,3 +3,5 @@
 - [x] Tarjeta GTA6 más dinámica y llamativa (estilo Doble o Nada / Polymarket, colores propios, menos texto)
 - [x] Concepto tipo casino para explicar la bóveda GTA6 («Sé la casa»), sin prometer ganancias
 - [x] Estilo visual inspirado en GTA6 (atardecer Vice City, palmeras), sin logo ni marca oficial de Rockstar
+- [x] Título GTA6 con letra estilo GTA y botones con nombres normales (Depositar, Migrar…)
+- [x] Quitar «USDC» del botón de depositar

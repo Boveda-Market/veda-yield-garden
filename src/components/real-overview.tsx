@@ -86,7 +86,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       {owned}
       <p className={`mt-2 flex-1 text-xs leading-5 ${vault.badge ? "font-medium text-foreground" : "text-muted-foreground"}`}>{t(vault.blurb)}{vault.note && <span className="mt-1 block text-[11px] font-normal text-muted-foreground">{t(vault.note)}</span>}</p>
       <div className="mt-3 grid grid-cols-2 gap-2"><Button variant="outline" className="h-10 w-full" onClick={() => onDetails(vault)}>{t("Detalles del pool")}</Button>
-      <Button variant="default" className="h-11 w-full text-base font-bold shadow-md ring-2 ring-primary/30" disabled={blocked} onClick={openDeposit}>{canAdd ? <><Plus size={18} strokeWidth={3} />{t("Añadir más")}</> : t("Depositar USDC")}</Button></div>
+      <Button variant="default" className="h-11 w-full text-base font-bold shadow-md ring-2 ring-primary/30" disabled={blocked} onClick={openDeposit}>{canAdd ? <><Plus size={18} strokeWidth={3} />{t("Añadir más")}</> : t("Depositar")}</Button></div>
     </article>; })}</div>{!(data && data.positions.length > 0) && <><VaultSteps className="mt-6" /><StartGuide className="mt-4" /></>}</>}
     {simulationVault && <DepositSimulation key={`${simulationVault.id}-${addTo ?? "new"}`} vault={simulationVault} wallet={walletAddress} {...(addTo ? { position: addTo } : {})} initialAmount={depositAmount} migrate={migrating} onClose={() => { setSimulationVault(null); setAddTo(null); setDepositAmount(""); setMigrating(false); }} />}
     {harvest && walletAddress && <HarvestDialog wallet={walletAddress} position={harvest.position} vaultId={harvest.vaultId} onClose={() => setHarvest(null)} compound={harvest.compound} />}
