@@ -77,11 +77,11 @@ export function Gta6PromoBanner({ positions, onMigrate, className = "mt-6" }: { 
 }
 
 /** Once-per-session popup in Mi Billetera for users who already hold another vault. */
-export function Gta6PromoPopup({ wallet }: { wallet: string | null | undefined }) {
+export function Gta6PromoPopup({ wallet, samplePositions }: { wallet: string | null | undefined; samplePositions?: ChainPosition[] }) {
   const t = useT();
   const navigate = useNavigate();
   const q = useRealWallet(wallet ?? null);
-  const positions = q.data?.success ? q.data.data.positions : [];
+  const positions = samplePositions ?? (q.data?.success ? q.data.data.positions : []);
   const p = gta6Candidate(positions);
   const [open, setOpen] = useState(false);
   useEffect(() => { if (!p) return; try { if (sessionStorage.getItem(SEEN)) return; sessionStorage.setItem(SEEN, "1"); } catch { /* show anyway */ } setOpen(true); }, [p]);
