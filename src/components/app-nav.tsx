@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { LanguageMenu } from "./language-menu";
+import { ThemeToggle } from "./theme-toggle";
 import { NewsBell } from "./news-bell";
 import { SecurityWhyDialog } from "./security-why";
 import { useContext } from "react";
@@ -93,6 +94,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
           <InstallAppButton className={row} />
         </div>
         <div className="mt-6 flex items-center justify-between border-t border-border pt-4 text-sm"><span>{t("Idioma")}</span><LanguageMenu /></div>
+        <div className="mt-3 flex items-center justify-between text-sm"><span>{t("Apariencia")}</span><ThemeToggle /></div>
         <div className="mt-4 border-t border-border pt-4">
           {guest ? <Link to="/" className={row}><Home size={18} />{t("Crear cuenta o entrar")}</Link>
             : <button type="button" className={`${row} text-destructive`} onClick={() => { setOpen(false); try { sessionStorage.removeItem(IN_APP_FLAG); } catch { /* ignore */ } onLogout(); }}><LogOut size={18} />{t("Cerrar sesión")}</button>}

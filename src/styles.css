@@ -82,22 +82,22 @@
   --radius: 1rem;
   --background: oklch(0.15 0.005 160);
   --foreground: oklch(0.97 0.005 120);
-  --card: oklch(0.2 0.006 160);
+  --card: oklch(0.235 0.007 160);
   --card-foreground: oklch(0.97 0.005 120);
-  --popover: oklch(0.2 0.006 160);
+  --popover: oklch(0.24 0.007 160);
   --popover-foreground: oklch(0.97 0.005 120);
   --primary: oklch(0.9 0.2 128);
   --primary-foreground: oklch(0.17 0.02 140);
-  --secondary: oklch(0.26 0.008 160);
+  --secondary: oklch(0.3 0.009 160);
   --secondary-foreground: oklch(0.97 0.005 120);
-  --muted: oklch(0.24 0.006 160);
-  --muted-foreground: oklch(0.68 0.01 150);
+  --muted: oklch(0.28 0.007 160);
+  --muted-foreground: oklch(0.8 0.01 150);
   --accent: oklch(0.3 0.04 140);
   --accent-foreground: oklch(0.95 0.1 128);
   --destructive: oklch(0.68 0.2 25);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 12%);
+  --border: oklch(1 0 0 / 16%);
+  --input: oklch(1 0 0 / 20%);
   --ring: oklch(0.9 0.2 128);
   --gradient-hero: radial-gradient(120% 120% at 0% 0%, oklch(0.42 0.12 135) 0%, oklch(0.22 0.03 150) 45%, oklch(0.18 0.01 160) 100%);
   --chart-1: oklch(0.646 0.222 41.116);
@@ -116,6 +116,33 @@
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
 }
+
+/* Day mode (toggled by ThemeToggle via html.light). Night stays the :root default. */
+:root.light {
+  --background: oklch(0.975 0.006 110);
+  --foreground: oklch(0.2 0.015 160);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.015 160);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.015 160);
+  --primary: oklch(0.55 0.16 140);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.93 0.008 130);
+  --secondary-foreground: oklch(0.2 0.015 160);
+  --muted: oklch(0.94 0.006 130);
+  --muted-foreground: oklch(0.42 0.015 155);
+  --accent: oklch(0.92 0.05 135);
+  --accent-foreground: oklch(0.3 0.08 140);
+  --destructive: oklch(0.55 0.21 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.2 0.02 160 / 14%);
+  --input: oklch(0.2 0.02 160 / 20%);
+  --ring: oklch(0.55 0.16 140);
+  --gradient-hero: radial-gradient(120% 120% at 0% 0%, oklch(0.88 0.1 130) 0%, oklch(0.95 0.03 120) 45%, oklch(0.975 0.006 110) 100%);
+  --strike: oklch(0.62 0.15 70);
+  color-scheme: light;
+}
+:root.light .bg-card { box-shadow: 0 1px 2px oklch(0.2 0.02 160 / 6%), 0 4px 14px oklch(0.2 0.02 160 / 5%); }
 
 .dark {
   --background: oklch(0.129 0.042 264.695);

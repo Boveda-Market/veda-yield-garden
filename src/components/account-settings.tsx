@@ -10,6 +10,7 @@ import { HOME_OPTIONS, useContacts, useHideBalances, useHomePath, validContact, 
 import { FEE_TIERS } from "@/lib/fees";
 import { getAccountProfile, saveAccountProfile } from "@/lib/account-profile.functions";
 import { LanguageMenu } from "./language-menu";
+import { ThemeToggle } from "./theme-toggle";
 import { TierBadge, TierCard } from "./tier-badge";
 import { useAccountTier } from "@/hooks/use-account-tier";
 
@@ -115,6 +116,7 @@ export function AccountSettings() {
         </div><p className="text-xs text-muted-foreground">{t("Se recorta en círculo y se reduce automáticamente. Si no subes una, se usa tu icono.")}</p></div>
         <fieldset><legend className="mb-3 text-sm">{t("Elige tu avatar")}</legend><div className="flex flex-wrap gap-3">{avatars.map(({ id, label, Icon }) => { const min = AVATAR_MIN_TIER[id]; const locked = tierIndex < min; return <Button key={id} type="button" disabled={locked} variant={profile.avatar === id ? "default" : "outline"} size="icon" className="relative" title={locked ? t("Se desbloquea en nivel {tier}", { tier: FEE_TIERS[min]?.name ?? "" }) : t(label)} aria-label={t(label)} aria-pressed={profile.avatar === id} onClick={() => setProfile({ ...profile, avatar: id })}><Icon size={22} />{locked && <Lock size={10} className="absolute -right-1 -top-1 rounded-full bg-card" />}</Button>; })}</div><p className="mt-2 text-xs text-muted-foreground">{t("Los iconos con candado se desbloquean al subir de nivel (Plus, Pro y VIP).")}</p></fieldset>
         <div className="flex items-center justify-between gap-3 text-sm"><span className="flex items-center gap-2"><Languages size={16} />{t("Idioma")}</span><LanguageMenu /></div>
+        <div className="flex items-center justify-between gap-3 text-sm"><span>{t("Apariencia")}</span><ThemeToggle /></div>
         <Button type="submit" disabled={busy}><Check size={16} />{busy ? t("Un momento…") : t("Guardar cambios")}</Button>
         {message && <p role="status" className="text-sm text-muted-foreground">{message}</p>}
       </form>

@@ -1138,4 +1138,9 @@ export const extra: Record<string, string> = {
   "¿Ves venir la caída? Gana con la baja. ¿Ves el rebote? Gana con la subida.": "See the drop coming? Win on Down. See the bounce? Win on Up.",
   "en 5 minutos, directo a tu balance": "in 5 minutes, straight to your balance",
   "Acierta el movimiento y cobra en minutos.": "Call the move and get paid in minutes.",
+  "Modo día": "Day mode",
+  "Modo noche": "Night mode",
+  "Día": "Day",
+  "Noche": "Night",
+  "Apariencia": "Appearance",
 };

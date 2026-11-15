@@ -19,6 +19,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { isChunkLoadError, reloadForNewVersion } from "../lib/lazy-reload";
 import { LanguageProvider } from "../lib/i18n";
 import { LanguageMenu } from "../components/language-menu";
+import { ThemeToggle } from "../components/theme-toggle";
 import { GoogleAnalytics } from "../components/google-analytics";
 import { Toaster } from "../components/ui/sonner";
 import { REF_STORAGE_KEY, normalizeCode } from "../lib/affiliate";
@@ -119,12 +120,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 const CHUNK_GUARD = `(function(){var K="boveda-chunk-reload",R=/Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Loading chunk .* failed|No factory registered for module/i;function h(e){var m=e&&(e.reason||e.error||e);m=m&&m.message?m.message:String(e&&e.message||m||"");if(!R.test(m))return;try{var l=Number(sessionStorage.getItem(K)||0);if(Date.now()-l<30000)return;sessionStorage.setItem(K,String(Date.now()))}catch(_){}location.reload()}addEventListener("unhandledrejection",h);addEventListener("error",h,true)})();`;
 
+const THEME_BOOT = `try{if(localStorage.getItem("boveda-theme")==="light")document.documentElement.classList.add("light")}catch(e){}`;
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
         {/* Runs before the app bundle: if an outdated page asks for files from a previous build (blank screen), refresh once. */}
         <script dangerouslySetInnerHTML={{ __html: CHUNK_GUARD }} />
+        {/* Apply the saved day/night choice before paint so the page never flashes. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
         <HeadContent />
       </head>
       <body>
@@ -156,7 +161,12 @@ function RootComponent() {
         <Outlet />
         <GoogleAnalytics />
         <Toaster />
-        {!APP_PATHS.includes(pathname) && <LanguageMenu className="fixed bottom-4 right-4 z-50 shadow-lg" />}
+        {!APP_PATHS.includes(pathname) && (
+          <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
+            <ThemeToggle className="shadow-lg" />
+            <LanguageMenu className="shadow-lg" />
+          </div>
+        )}
       </LanguageProvider>
     </QueryClientProvider>
   );
