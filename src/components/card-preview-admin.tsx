@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RealOverview } from "@/components/real-overview";
 import { MoveSteps } from "@/components/move-steps";
 import { ActionSuccess, ReceiveCard } from "@/components/action-success";
+import { NoticeGalleryAdmin } from "@/components/notice-gallery-admin";
 
 /** Operator's test wallet: only its public positions are read; nothing here can sign or move money. */
 const TEST_WALLET = "5WbsuG4T4FrtwYDCB7YWTDxLj47yqAwAJD9o4Rk886nu";
@@ -64,5 +65,6 @@ export function CardPreviewAdmin() {
         </Frame>
       </div>
     </div>
+    <NoticeGalleryAdmin />
   </section>;
 }
