@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowDownToLine, Plus, Repeat, Sprout } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { getRealWallet } from "@/lib/solana.functions";
 import { fetchPoolStats } from "@/lib/pool-stats";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { estimateUsd, formatUsd } from "@/lib/position-value";
@@ -18,22 +17,14 @@ import { HarvestDialog } from "@/components/harvest-dialog";
 import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
 import { DepositSimulation } from "@/components/deposit-simulation";
 import { PoweredBy } from "@/components/powered-by";
-import { readCache, writeCache } from "@/lib/cached-query";
-import type { RealWalletResult } from "@/lib/solana-data";
+import { useRealWallet } from "@/hooks/use-real-wallet";
 
 type Supported = OperableVault;
 const supported = isOperableVault;
 
-/** Shared cached read of the wallet's open vault positions (same cache as WalletPositions). */
+/** Shared cached read of the wallet's open vault positions (same cache as every wallet screen). */
 export function useWalletVaults(wallet: string) {
-  const readWallet = useServerFn(getRealWallet);
-  const query = useQuery({ queryKey: ["real-solana", wallet], queryFn: async () => {
-    const r = await readWallet({ data: { wallet } });
-    // Keep the last good positions on screen instead of blanking on a transient read failure.
-    if (!r.success || !r.data.positionsComplete) throw new Error("positions unavailable");
-    writeCache(`vaults:${wallet}`, r); return r;
-  }, placeholderData: (prev) => prev ?? readCache<Extract<RealWalletResult, { success: true }>>(`vaults:${wallet}`), enabled: !!wallet, staleTime: 30_000, retry: 2 });
-  return query;
+  return useRealWallet(wallet);
 }
 
 /** Compact open-vault cards for Mi Billetera; renders nothing without open positions. */

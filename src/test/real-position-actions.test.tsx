@@ -8,7 +8,7 @@ vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@/lib/coinbase-offramp.functions", () => ({ startCoinbaseBuy: vi.fn(), coinbaseOnrampStatus: vi.fn(), recordCoinbaseOnramp: vi.fn(), startCoinbaseSell: vi.fn(), coinbaseSellStatus: vi.fn() }));
 vi.mock("@/components/open-predictions", () => ({ WalletOpenPredictions: () => null, OpenPredictions: () => null, useOpenPredictions: () => ({ items: [] }) }));
 vi.mock("@/components/pending-claims", () => ({ PendingClaims: () => null }));
-vi.mock("@tanstack/react-query", () => ({ useQuery: () => ({ data: { success: true, data: { positions: mocks.positions, positionsComplete: true, usdc: "10", sol: "1", checkedAt: new Date().toISOString() } }, refetch: vi.fn() }), useQueries: ({ queries }: { queries: unknown[] }) => queries.map(() => ({ data: undefined })) }));
+vi.mock("@tanstack/react-query", () => ({ useQuery: () => ({ data: { success: true, data: { positions: mocks.positions, positionsComplete: true, usdc: "10", sol: "1", checkedAt: new Date().toISOString() } }, refetch: vi.fn() }), useQueryClient: () => ({ getQueryData: () => undefined, invalidateQueries: vi.fn() }), useQueries: ({ queries }: { queries: unknown[] }) => queries.map(() => ({ data: undefined })) }));
 vi.mock("@/lib/solana.functions", () => ({ getRealWallet: vi.fn() }));
 vi.mock("@/lib/migrate-policy.functions", () => ({ getMigratePolicy: vi.fn(async () => ({ enabled: false })), setMigratePolicy: vi.fn() }));
 vi.mock("@/components/deposit-simulation", () => ({ DepositSimulation: () => null }));

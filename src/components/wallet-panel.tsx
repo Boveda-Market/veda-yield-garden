@@ -1,7 +1,7 @@
 import { ShieldCheck, Eye, EyeOff, LifeBuoy } from "lucide-react";
 import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
 import { TokenIcon } from "@/components/token-icon";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Dialog, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { ActionSuccess } from "@/components/action-success";
@@ -46,7 +46,11 @@ export function WalletPanel() {
   const refunds = usePredictRefunds(address);
   const vaultPositions = vaults.data?.success ? vaults.data.data.positions : [];
   const { capital } = usePositionRows(vaultPositions);
-  const working = vaultPositions.length > 0 ? capital : 0;
+  // Hold the last known vault value while prices refresh so the total never drops to cash only.
+  const lastWorking = useRef<number | null>(null);
+  const liveWorking = vaultPositions.length > 0 ? capital : 0;
+  if (liveWorking !== null) lastWorking.current = liveWorking;
+  const working = liveWorking ?? lastWorking.current;
   const balances = useQuery({ queryKey: ["my-wallet", address], enabled: !!address, refetchOnWindowFocus: "always", refetchInterval: (qq) => { const d = qq.state.data; return !d || (d.usdc === 0n && d.sol === 0n) ? 3_000 : 20_000; }, queryFn: async () => {
     if (!address) throw new Error(t("Todavía no hay una wallet conectada a tu cuenta."));
     const r = await readWallet({ data: { wallet: address } });
@@ -193,7 +197,7 @@ export function WalletPanel() {
     <StartGuide />
     <section className="rounded-3xl border border-border bg-card p-6">
       <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{vaultPositions.length > 0 || jupUsd > 0 ? t("Balance total") : t("Balance en USDC")}</p><Button variant="ghost" size="sm" onClick={() => { void balances.refetch(); void extra.refetch(); void prices.refetch(); void queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); void queryClient.invalidateQueries({ queryKey: ["predict-positions", address] }); }} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
-      <div className="mt-1 flex items-center gap-2"><p className="font-display text-4xl">{balances.data?.usdc !== undefined ? (hidden ? MASK : `$${fmt((Number(balances.data.usdc) / 1e6) + jupUsd + (working ?? 0))}`) : "—"}</p><button type="button" onClick={() => setHidden(!hidden)} aria-label={hidden ? t("Mostrar saldos") : t("Ocultar saldos")} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{hidden ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
+      <div className="mt-1 flex items-center gap-2"><p className="font-display text-4xl">{balances.data?.usdc !== undefined ? (hidden ? MASK : `${working === null ? "…" : `$${fmt((Number(balances.data.usdc) / 1e6) + jupUsd + working)}`}`) : "—"}</p><button type="button" onClick={() => setHidden(!hidden)} aria-label={hidden ? t("Mostrar saldos") : t("Ocultar saldos")} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{hidden ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
       {balances.data && balances.data.usdc === 0n && balances.data.sol === 0n && working === 0 ? <p role="status" className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"><RefreshCw size={12} className="animate-spin" />{t("Comprobando llegada de fondos…")}</p> : null}
       {vaultPositions.length > 0 && balances.data?.usdc !== undefined && <div className="mt-2 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{t("Disponible")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(Number(balances.data.usdc) / 1e6)}`}</span></span><Link to="/portfolio" className="rounded-full bg-primary/10 px-3 py-1 text-primary"><span>{t("Trabajando")}:</span> <span className="font-medium">{hidden ? MASK : working === null ? "…" : `$${fmt(working)}`}</span></Link></div>}
       {(jupUsd >= PAYOUT_MOVE_MIN_USD || solExcessUsd >= SOL_EXCESS_MOVE_MIN_USD) && <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">{jupUsd >= PAYOUT_MOVE_MIN_USD && <><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{refundReady ? t("Reembolso listo") : t("Premios y reembolsos")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(jupUsd)}`}</span></span><button type="button" onClick={() => void convertPayouts()} disabled={converting} className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 font-semibold text-primary-foreground disabled:opacity-70">{converting && <RefreshCw size={12} className="animate-spin" />}{converting ? t("Firmando…") : t("Pasar a disponibles")}</button></>}{solExcessUsd >= SOL_EXCESS_MOVE_MIN_USD && <><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{t("Sobrante de red")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(solExcessUsd)}`}</span></span><button type="button" onClick={() => void convertSolExcess()} disabled={converting} className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 font-semibold text-primary-foreground disabled:opacity-70">{converting && <RefreshCw size={12} className="animate-spin" />}{converting ? t("Firmando…") : t("Pasar a disponibles")}</button></>}</div>}

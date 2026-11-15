@@ -7,11 +7,9 @@ import { TokenIcon } from "@/components/token-icon";
 import { useT } from "@/lib/i18n";
 import { RefreshCw } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useRealWallet } from "@/hooks/use-real-wallet";
 import { Button } from "@/components/ui/button";
 import { VAULTS, type Vault } from "@/lib/vaults";
-import { getRealWallet } from "@/lib/solana.functions";
 import { Suspense, useState } from "react";
 import { lazyWithReload } from "@/lib/lazy-reload";
 import { DepositSimulation } from "@/components/deposit-simulation";
@@ -48,15 +46,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   }
   const [tab, setTab] = useState<"all" | "vaults" | "predict">("all");
   const predictions = useOpenPredictions();
-  const readWallet = useServerFn(getRealWallet);
-  const query = useQuery({
-    queryKey: ["real-solana", walletAddress],
-    queryFn: () => {
-      if (!walletAddress) throw new Error(t("Selecciona una wallet"));
-      return readWallet({ data: { wallet: walletAddress } });
-    },
-    enabled: Boolean(walletAddress), staleTime: 30_000, retry: false,
-  });
+  const query = useRealWallet(walletAddress);
   const data = query.data?.success ? query.data.data : null;
   const unavailable = query.isFetching ? t("Consultando…") : t("No disponible");
   const predictionsMicro = predictions.items.every((x) => x.valueMicro !== null) ? predictions.items.reduce((sum, x) => sum + BigInt(x.valueMicro ?? "0"), 0n) : null;

@@ -63,3 +63,4 @@ use the editor.
 - Wallet actions (add funds, withdraw, swap, send, receive) open in the shared ActionSheetContent (src/components/ui/action-sheet.tsx) inside a Dialog root: bottom sheet with swipe-to-close on phones, centered card on desktop, so actions never jump the page scroll.
 - Resolve browser theme preferences through src/lib/theme.ts for both pre-paint initialization and the selector, so defaults and storage-failure behavior stay consistent.
 - Dev SSR loads the DLMM SDK's CommonJS file through a `\0dlmm-cjs` createRequire wrapper (vite.config.ts, serve-only); Vite's module runner otherwise evaluates the aliased CJS as ESM and every wallet read fails. Builds keep the plain alias.
+- All ["real-solana", wallet] reads go through useRealWallet (src/hooks/use-real-wallet.ts), which keeps the last complete read when a newer one fails or is incomplete, so totals never drop to cash-only.
