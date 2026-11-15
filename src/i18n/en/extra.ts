@@ -920,6 +920,7 @@ export const extra: Record<string, string> = {
   "Jugar Sube/Baja": "Play Up/Down",
   "Rondas en BTC, ETH y SOL": "Rounds on BTC, ETH and SOL",
   "Manejar posiciones": "Manage positions",
+  "Cerrar detalles": "Close details",
   "Ver ganancias": "View earnings",
   "Elige una bóveda y pon tu dinero a trabajar": "Pick a vault and put your money to work",
   "Cosecha ganancias y retira capital": "Harvest earnings and withdraw capital",

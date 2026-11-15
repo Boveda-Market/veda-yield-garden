@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Check, Copy, RefreshCw, TrendingDown, TrendingUp, Users } from "lucide-react";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { fetchPoolStats } from "@/lib/pool-stats";
 import type { Vault } from "@/lib/vaults";
 import { isDlmmVault } from "@/lib/solana-data";
@@ -87,6 +87,9 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
           </div>
           {copied && <p role="status" className="mt-2 text-xs text-primary">{t("URL copiada")}</p>}
           {copyError && <p role="status" className="mt-2 text-xs text-muted-foreground">{t("No se pudo copiar. Selecciona la URL para copiarla manualmente.")}</p>}
+        </div>
+        <div className="sticky -bottom-6 -mx-6 -mb-6 border-t border-border bg-card px-6 py-3">
+          <DialogClose asChild><Button size="lg" className="w-full font-semibold">{t("Cerrar detalles")}</Button></DialogClose>
         </div>
       </DialogContent>
     </Dialog>
