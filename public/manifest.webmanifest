@@ -4,8 +4,8 @@
   "description": "BÓVEDA: pools de Solana y modos Real y Prueba. 1,000 créditos ficticios para probar; operaciones Real aún no habilitadas.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f7f3",
-  "theme_color": "#f7f7f3",
+  "background_color": "#f8fafc",
+  "theme_color": "#f8fafc",
   "icons": [
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]

@@ -2,7 +2,7 @@ export const THEME_KEY = "boveda-theme";
 export type Theme = "dark" | "light";
 
 /** Browser/status-bar color per mode; matches each mode's --background. */
-export const THEME_COLORS: Record<Theme, string> = { light: "#f7f7f3", dark: "#090c0a" };
+export const THEME_COLORS: Record<Theme, string> = { light: "#f8fafc", dark: "#0d1117" };
 
 export function resolveTheme(saved: string | null): Theme {
   return saved === "dark" ? "dark" : "light";
