@@ -88,7 +88,7 @@ export function MarketsPanel(_: { identity: string }) {
           <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />{t("En vivo")}</span>
           <PoweredBy brand="polymarket" className="ml-auto" />
         </div>
-        <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-semibold text-primary">{t("🔥 Doble o Nada en vivo · Hasta +90% de ganancia en una sola vela, sin comprar la moneda")}</p><p className="w-full text-xs text-muted-foreground">{t("¿Ves venir la caída? Gana con la baja. ¿Ves el rebote? Gana con la subida.")}</p><PredictHow /></div>
+        <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-semibold text-primary">{t("🔥 Doble o Nada en vivo · Hasta +90% de ganancia en una sola vela, sin comprar la moneda")}</p><p className="w-full text-xs text-muted-foreground">{t("¿Ves venir la caída? Gana con la baja. ¿Ves el rebote? Gana con la subida. Haz tu jugada, cierra el app y relájate: BÓVEDA te avisa cuando tu premio esté listo.")}</p><PredictHow /></div>
       </header>
 
       <div className="grid grid-cols-3 gap-2" role="tablist" aria-label={t("Mercado")}>

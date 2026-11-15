@@ -1135,7 +1135,7 @@ export const extra: Record<string, string> = {
   "Haz dinero en minutos prediciendo el mercado.": "Make money in minutes predicting the market.",
   "Bitcoin, Ethereum y Solana en rondas relámpago. Si aciertas el movimiento, cobras el premio al instante en dólares.": "Bitcoin, Ethereum and Solana in lightning rounds. Call the move and collect your prize instantly in dollars.",
   "🔥 Hasta +90% de ganancia en una sola vela · Retiro inmediato a tu billetera": "🔥 Up to +90% profit on a single candle · Instant cash-out to your wallet",
-  "¿Ves venir la caída? Gana con la baja. ¿Ves el rebote? Gana con la subida.": "See the drop coming? Win on Down. See the bounce? Win on Up.",
+  "¿Ves venir la caída? Gana con la baja. ¿Ves el rebote? Gana con la subida. Haz tu jugada, cierra el app y relájate: BÓVEDA te avisa cuando tu premio esté listo.": "See the drop coming? Win on Down. See the bounce? Win on Up. Make your play, close the app and relax: BÓVEDA lets you know when your prize is ready.",
   "en 5 minutos, directo a tu balance": "in 5 minutes, straight to your balance",
   "Acierta el movimiento y cobra en minutos.": "Call the move and get paid in minutes.",
   "Modo día": "Day mode",
