@@ -9,11 +9,15 @@ export function CoinbaseLogo({ size = 20, className }: { size?: number; classNam
   </svg>;
 }
 
+/** Coinbase wordmark (brand blue, lowercase bold). */
+export function CoinbaseWordmark() {
+  return <span aria-label="Coinbase" className="inline-block align-baseline font-sans text-[1.15em] font-extrabold tracking-tight" style={{ color: "#0052FF" }}>coinbase</span>;
+}
+
 /** Sign-in sheet line: enter with Google and top up with Coinbase. */
 export function CoinbaseNote({ className }: { className?: string }) {
   const t = useT();
-  return <span className={cn("flex items-start gap-2 text-sm", className)}>
-    <CoinbaseLogo className="mt-0.5" />
-    <span>{t("Entra con Google en 1 segundo y recarga con Coinbase usando tu tarjeta. Sin contraseñas.")}</span>
+  return <span className={cn("block text-sm", className)}>
+    {t("Entra con Google en 1 segundo y recarga con")} <CoinbaseWordmark /> {t("usando tu tarjeta. Sin contraseñas.")}
   </span>;
 }
