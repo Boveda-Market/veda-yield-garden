@@ -1,20 +1,24 @@
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/lib/i18n";
+import { resolveTheme, THEME_KEY, type Theme } from "@/lib/theme";
 
-export const THEME_KEY = "boveda-theme";
-type Theme = "dark" | "light";
+export { THEME_KEY } from "@/lib/theme";
 
 function apply(theme: Theme) {
   document.documentElement.classList.toggle("light", theme === "light");
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f6f5f0" : "#0b0d0c");
 }
 
-/** Day / night switch: remembers the choice in this browser; dark is the default. */
+/** Day / night switch: remembers the choice in this browser; light is the default. */
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const { t } = useI18n();
-  const [theme, setTheme] = useState<Theme>("dark");
-  useEffect(() => { setTheme(localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark"); }, []);
+  const [theme, setTheme] = useState<Theme>("light");
+  useEffect(() => {
+    let saved: string | null = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch { /* default when storage is blocked */ }
+    setTheme(resolveTheme(saved));
+  }, []);
   const next: Theme = theme === "light" ? "dark" : "light";
   return (
     <button

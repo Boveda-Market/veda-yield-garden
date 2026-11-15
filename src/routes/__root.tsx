@@ -20,6 +20,7 @@ import { isChunkLoadError, reloadForNewVersion } from "../lib/lazy-reload";
 import { LanguageProvider } from "../lib/i18n";
 import { LanguageMenu } from "../components/language-menu";
 import { ThemeToggle } from "../components/theme-toggle";
+import { THEME_BOOT } from "../lib/theme";
 import { GoogleAnalytics } from "../components/google-analytics";
 import { Toaster } from "../components/ui/sonner";
 import { REF_STORAGE_KEY, normalizeCode } from "../lib/affiliate";
@@ -94,7 +95,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#0b0d0c" },
+      { name: "theme-color", content: "#f6f5f0" },
       { name: "google-site-verification", content: "Y2kXe30nuZ-9oRhJr3vJImNAM6JqMbCDl5_3nuAcUdE" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -120,11 +121,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 const CHUNK_GUARD = `(function(){var K="boveda-chunk-reload",R=/Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Loading chunk .* failed|No factory registered for module/i;function h(e){var m=e&&(e.reason||e.error||e);m=m&&m.message?m.message:String(e&&e.message||m||"");if(!R.test(m))return;try{var l=Number(sessionStorage.getItem(K)||0);if(Date.now()-l<30000)return;sessionStorage.setItem(K,String(Date.now()))}catch(_){}location.reload()}addEventListener("unhandledrejection",h);addEventListener("error",h,true)})();`;
 
-const THEME_BOOT = `try{if(localStorage.getItem("boveda-theme")==="light")document.documentElement.classList.add("light")}catch(e){}`;
-
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="es" className="light" suppressHydrationWarning>
       <head>
         {/* Runs before the app bundle: if an outdated page asks for files from a previous build (blank screen), refresh once. */}
         <script dangerouslySetInnerHTML={{ __html: CHUNK_GUARD }} />
