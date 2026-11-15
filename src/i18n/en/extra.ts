@@ -1216,6 +1216,7 @@ export const extra: Record<string, string> = {
   "Paso 1 de 2: cosechamos tus ganancias y cerramos esta bóveda. En cuanto se confirme, depositamos todo en {v} automáticamente. 0% de comisión de BÓVEDA.": "Step 1 of 2: we harvest your earnings and close this vault. Once confirmed, we deposit everything in {v} automatically. 0% BÓVEDA fee.",
   "Migrar a {v}": "Move to {v}",
   "Movemos todo tu dinero y ganancias. 0% de comisión.": "We move all your money and earnings. 0% fee.",
+  "Movemos todo tu dinero y ganancias.": "We move all your money and earnings.",
   "Retirar ·": "Withdraw ·",
   "Elige cuánto retirar a tus dólares disponibles.": "Choose how much to withdraw to your available dollars.",
   "Cierre listo. Abriendo tu nueva bóveda…": "Closed. Opening your new vault…",

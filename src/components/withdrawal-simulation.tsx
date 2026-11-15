@@ -108,7 +108,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
   </>;
   return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
     <DialogTitle>{migrateTo ? t("Migrar a {v}", { v: t((dest ?? migrateTo).name) }) : <>{t("Retirar ·")}{" "}{vaultSymbol(vaultId)}</>}</DialogTitle>
-    <DialogDescription>{migrateTo ? t("Movemos todo tu dinero y ganancias. 0% de comisión.") : t("Elige cuánto retirar a tus dólares disponibles.")}</DialogDescription>
+    <DialogDescription>{migrateTo ? t("Movemos todo tu dinero y ganancias.") : t("Elige cuánto retirar a tus dólares disponibles.")}</DialogDescription>
     {!migrateTo && !finished && !signature && <div role="radiogroup" aria-label={t("Cuánto retirar")} className="grid grid-cols-4 gap-2">{EXIT_PERCENTS.map((p) => <Button key={p} type="button" role="radio" aria-checked={percent === p} variant={percent === p ? "default" : "outline"} disabled={pending} onClick={() => { setPercent(p); setResult(null); setAccepted(false); setMessage(null); }}>{p === 100 ? t("Todo") : `${p}%`}</Button>)}</div>}
     {!migrateTo && !finished && !signature && percent !== 100 && <p className="text-xs text-muted-foreground">{t("Retiras el {p}% y el resto sigue invirtiendo en la bóveda.", { p: String(percent) })}</p>}
     {migrateTo && signature && <MoveSteps current={finished ? 2 : 1} from={vaultSymbol(vaultId)} to={t((dest ?? migrateTo).name)} />}
@@ -123,7 +123,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
         <ReceiveCard label={migrateTo ? t("Moverás aproximadamente") : t("Recibes aproximadamente")} amount={result.net ?? "—"} unit="$" sub={result.minimumNet ? `${t("Mínimo garantizado:")} $${result.minimumNet}` : undefined} />
         <dl className="grid gap-2 rounded-xl border border-border p-4">
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Valor de tu posición")}</dt><dd>${result.gross}</dd></div>
-          <div className="flex justify-between gap-3"><dt><ServiceFeeLabel t={t} /></dt><dd>{migrateTo ? t("Gratis") : `−$${result.fee}`}</dd></div>
+          {!migrateTo && <div className="flex justify-between gap-3"><dt><ServiceFeeLabel t={t} /></dt><dd>−${result.fee}</dd></div>}
                   </dl>
       </>}
     </div>}

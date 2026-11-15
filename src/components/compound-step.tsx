@@ -59,7 +59,7 @@ export function CompoundStep({ wallet, position, vaultId, usdcRaw, tokenRaw, net
 
   if (done) return <ActionSuccess title={t("¡Ganancias reinvertidas!")} body={t("Se sumaron a tu misma bóveda y ya generan más.")} signature={signature} onClose={onClose}
     amount={netUsd ? { value: netUsd, unit: "$" } : undefined}
-    details={[{ label: t("Operación"), value: t("Reinversión de ganancias") }, ...(quote?.tokenUsed && quote.tokenUsed !== "0" ? [{ label: t("También sumado"), value: `${quote.tokenUsed} ${quote.tokenSymbol}` }] : []), { label: t("Comisión de reinversión"), value: "0%" }]} />;
+    details={[{ label: t("Operación"), value: t("Reinversión de ganancias") }, ...(quote?.tokenUsed && quote.tokenUsed !== "0" ? [{ label: t("También sumado"), value: `${quote.tokenUsed} ${quote.tokenSymbol}` }] : [])]} />;
   return <div className="grid gap-3 text-sm">
     {pending && <WorkingLine text={step} />}
     {message && <><p role="alert">{message}</p><Button size="lg" onClick={() => void sign()}>{t("Intentar de nuevo")}</Button><Button variant="ghost" onClick={onClose}>{t("Cerrar")}</Button></>}

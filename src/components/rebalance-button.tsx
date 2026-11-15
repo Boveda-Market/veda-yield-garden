@@ -84,7 +84,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
   return <Dialog open onOpenChange={(o) => { if (!o && !pending) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
     {done ? <ActionSuccess title={t("¡Posición rebalanceada!")} body={t("Tus ganancias se sumaron y tu posición quedó centrada en el precio actual. Ya vuelve a generar.")} signature={signature} onClose={onClose}
       amount={quote?.valueUsd ? { value: `$${quote.valueUsd}`, unit: "" } : undefined}
-      details={[{ label: t("Comisión de BÓVEDA"), value: "0%" }]} /> : <>
+      details={[]} /> : <>
       <DialogTitle>{t("Rebalancear posición")} · {symbol}</DialogTitle>
       <DialogDescription>{t("Tu posición salió del rango y no está generando. Con un toque cosechamos tus ganancias, dejamos mitad y mitad al precio actual y la volvemos a centrar.")}</DialogDescription>
       {pending && !quote && <WorkingLine text={t("Preparando tu rebalanceo…")} />}
@@ -92,7 +92,6 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Se recoloca")}</dt><dd className="font-semibold">≈ ${quote.valueUsd}</dd></div>
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias que se suman")}</dt><dd>${quote.feesUsdc} + {quote.feesToken} {symbol}</dd></div>
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Nuevo reparto")}</dt><dd>{t("Mitad {s} · mitad dólares", { s: symbol })}</dd></div>
-        <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión de BÓVEDA")}</dt><dd>0%</dd></div>
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Pequeño sobrante a tu billetera")}</dt><dd>${quote.usdcLeft} · {quote.tokenLeft} {symbol}</dd></div>
       </dl>}
       {quote?.success && <p className="text-xs leading-5 text-muted-foreground">{t("Para dejar mitad y mitad se cambia una parte dentro de la misma bóveda, con un límite de precio para protegerte. Es una sola firma.")}</p>}

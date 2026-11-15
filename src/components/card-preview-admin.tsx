@@ -44,7 +44,7 @@ export function CardPreviewAdmin() {
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <Frame title={t("1 · Cotización")}>
           <p className="font-display text-lg font-semibold">{t("Migrar a {v}", { v: t("Bóveda MET") })}</p>
-          <p className="text-sm text-muted-foreground">{t("Movemos todo tu dinero y ganancias. 0% de comisión.")}</p>
+          <p className="text-sm text-muted-foreground">{t("Movemos todo tu dinero y ganancias.")}</p>
           <div className="grid gap-2">{[["Bóveda MET", "48.2"], ["Bóveda GTA6", "112.5"]].map(([n, apr], i) => <div key={n} className={`flex items-center justify-between rounded-lg border p-3 text-sm ${i === 0 ? "border-primary bg-primary/10" : "border-border"}`}><span className="font-semibold">{t(n!)}</span><span className="tabular-nums text-primary">{apr}% APR</span></div>)}</div>
           <ReceiveCard label={t("Moverás aproximadamente")} amount="12.48" unit="$" sub={`${t("Mínimo garantizado:")} $12.23`} />
           <dl className="grid gap-2 rounded-xl border border-border p-4 text-sm"><div className="flex justify-between"><dt className="text-muted-foreground">{t("Valor de tu posición")}</dt><dd>$12.48</dd></div><div className="flex justify-between"><dt className="text-muted-foreground">{t("Comisión BÓVEDA")}</dt><dd>{t("Gratis")}</dd></div></dl>

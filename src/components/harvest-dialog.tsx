@@ -84,7 +84,6 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en dólares")}</dt><dd>${result.gross}</dd></div>
           <div className="flex justify-between gap-3"><dt><ServiceFeeLabel t={t} /></dt><dd>−${result.fee}</dd></div>
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en")} {result.tokenSymbol}</dt><dd>{result.tokenAmount} · {t("sin comisión")}</dd></div>
-          {compound && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión de reinversión")}</dt><dd>0%</dd></div>}
         </dl>
       </>}
     </div>}
