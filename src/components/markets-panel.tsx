@@ -15,8 +15,12 @@ import { PREDICT_WINDOWS, type LiveRound, type PredictWindow } from "@/lib/predi
 import { getLiveRounds } from "@/lib/predict.functions";
 import { PendingClaims } from "@/components/pending-claims";
 import { CompactOpenPredictions } from "@/components/open-predictions";
+import { RollingNumber } from "@/components/rolling-number";
+import { TradePulse } from "@/components/trade-pulse";
+import { RoundTimeline } from "@/components/round-timeline";
+import { roundSlug } from "@/lib/price-to-beat";
 
-const num = (n: number, d = 2) => n.toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+const num = (n: number, d = 2) => n.toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const digits = (p: number) => (p >= 1000 ? 2 : 3);
 const short = (p: number) => p >= 1000 ? `$${(p / 1000).toFixed(1)}k` : `$${p.toFixed(2)}`;
 const WIN_LABEL: Record<PredictWindow, string> = { "5m": "5 min", "15m": "15 min", "4h": "4 horas" };
@@ -90,9 +94,13 @@ export function MarketsPanel(_: { identity: string }) {
       <div className="grid grid-cols-3 gap-2" role="tablist" aria-label={t("Mercado")}>
         {MARKETS.map((m) => {
           const on = market === m.id, p = prices[m.id];
-          return <button key={m.id} role="tab" aria-selected={on} onClick={() => setMarket(m.id)} className={`flex items-center justify-center rounded-full border px-2 py-1.5 transition ${on ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
-            <span className="inline-flex items-center gap-1.5 text-sm font-bold"><TokenIcon symbol={m.id} size={18} />{m.id}</span>
-            <span className="ml-1 font-display text-xs font-semibold tabular-nums text-muted-foreground">{p ? short(p) : "—"}</span>
+          // Every coin shows its own live round odds for the chosen duration, so the other markets stay in view.
+          const r = rounds.find((x) => x.asset === m.id && x.window === win && x.closeTime * 1000 > now);
+          const lean = r?.upPrice && r.downPrice ? (r.upPrice >= r.downPrice ? { up: true, v: Math.round((r.upPrice / (r.upPrice + r.downPrice)) * 100) } : { up: false, v: Math.round((r.downPrice / (r.upPrice + r.downPrice)) * 100) }) : null;
+          return <button key={m.id} role="tab" aria-selected={on} onClick={() => setMarket(m.id)} className={`flex flex-col items-center justify-center rounded-2xl border px-2 py-1.5 transition ${on ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
+            <span className="flex items-center"><span className="inline-flex items-center gap-1.5 text-sm font-bold"><TokenIcon symbol={m.id} size={18} />{m.id}</span>
+            <span className="ml-1 font-display text-xs font-semibold tabular-nums text-muted-foreground">{p ? short(p) : "—"}</span></span>
+            {lean && <span className={`text-[10px] font-bold tabular-nums transition-colors ${lean.up ? "text-primary" : "text-destructive"}`}>{lean.up ? "▲" : "▼"} {t(lean.up ? "Sube" : "Baja")} {lean.v}%</span>}
           </button>;
         })}
       </div>
@@ -106,14 +114,19 @@ export function MarketsPanel(_: { identity: string }) {
             <h2 className="flex items-center gap-2 font-display text-lg font-bold"><TokenIcon symbol={market} size={22} />{t("{m} Sube o Baja {w}", { m: name, w: WIN_LABEL[win] })}</h2>
             {round && <span className="text-xs tabular-nums text-muted-foreground">{new Date(round.openTime * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} – {new Date(round.closeTime * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>}
           </div>
-          <div className="mt-3 grid grid-cols-[1fr_1fr_auto] items-end gap-3">
-            <div><p className="text-xs text-muted-foreground">{t("Precio a batir")}</p><p className="font-display text-lg font-bold tabular-nums">{strike ? `$${num(strike, digits(strike))}` : "—"}</p></div>
-            <div><p className="text-xs text-muted-foreground">{t("Precio actual")}</p>
-              <p className="font-display text-lg font-bold tabular-nums">{price ? `$${num(price, digits(price))}` : "—"}</p>
-              {/* Price vs our reference is shown neutrally: who leads is decided only by the market percentages below. */}
-              {price && strike && <p className="text-[11px] font-semibold tabular-nums text-muted-foreground">{ahead ? "▲" : "▼"} ${num(Math.abs(price - strike), digits(price))}</p>}
-              {avgNow && <p className="text-[10px] tabular-nums text-muted-foreground" title={t("El resultado oficial compara el promedio del último minuto con el precio a batir.")}>{t("Promedio 1 min")}: ${num(avgNow, digits(avgNow))}</p>}</div>
-            <div className="flex gap-1 text-center">{(s >= 3600 ? [[Math.floor(s / 3600), t("HORAS")], [Math.floor(s / 60) % 60, t("MIN")], [s % 60, t("SEG")]] : [[Math.floor(s / 60), t("MIN")], [s % 60, t("SEG")]]).map(([v, l]) => <div key={String(l)} className={`min-w-11 rounded-lg px-1.5 py-1 ${round && remaining < 30_000 ? "bg-destructive/15 text-destructive" : "bg-secondary"}`}><p className="font-display text-xl font-bold tabular-nums">{round ? String(v).padStart(2, "0") : "--"}</p><p className="text-[9px] font-semibold text-muted-foreground">{l}</p></div>)}</div>
+          {/* Big live ticker: rolling digits flash with each tick; the gap to the price to beat is shown neutrally because
+              who leads is decided only by the market percentages below. */}
+          <div className="mt-3 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">{t("Precio actual")}</p>
+              <RollingNumber value={price} decimals={digits(price ?? 0)} className="font-display text-[2rem] font-bold leading-tight sm:text-4xl" />
+              {price && strike && <p className="text-xs font-bold tabular-nums text-foreground">{ahead ? "▲" : "▼"} ${num(Math.abs(price - strike), digits(price))} <span className="font-semibold text-muted-foreground">{t(ahead ? "sobre el precio a batir" : "debajo del precio a batir")}</span></p>}
+            </div>
+            <div className="flex shrink-0 gap-1 text-center" role="timer" aria-label={t("Tiempo restante")}>{(s >= 3600 ? [[Math.floor(s / 3600), t("HORAS")], [Math.floor(s / 60) % 60, t("MIN")], [s % 60, t("SEG")]] : [[Math.floor(s / 60), t("MIN")], [s % 60, t("SEG")]]).map(([v, l]) => <div key={String(l)} className={`min-w-12 rounded-xl px-1.5 py-1.5 transition-colors ${round && remaining < 30_000 ? "bg-destructive/15 text-destructive" : "bg-secondary"} ${round && remaining < 10_000 ? "animate-pulse" : ""}`}><p key={round && remaining < 60_000 ? String(v) : undefined} className={`font-display text-2xl font-bold tabular-nums ${round && remaining < 60_000 ? "animate-count-pop" : ""}`}>{round ? String(v).padStart(2, "0") : "--"}</p><p className="text-[9px] font-semibold text-muted-foreground">{l}</p></div>)}</div>
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+            <span className="inline-flex items-center gap-1 rounded-full bg-strike/15 px-2 py-0.5 font-bold tabular-nums">🎯 {t("Precio a batir")}: {strike ? `$${num(strike, digits(strike))}` : "—"}</span>
+            {avgNow && <span className="tabular-nums text-muted-foreground" title={t("El resultado oficial compara el promedio del último minuto con el precio a batir.")}>{t("Promedio 1 min")}: ${num(avgNow, digits(avgNow))}</span>}
           </div>
           {(() => { const diff = price && strike ? price - strike : 0; const dev = strike ? roundTicks.slice(-Math.max(2, Math.min(200, Math.ceil((now - (round?.openTime ?? 0) * 1000) / 1500)))).reduce((m, v) => Math.max(m, Math.abs(v - strike)), 0) : 0; const span = Math.max(dev, strike ? strike * 0.00005 : 1); const ou = round?.upPrice, od = round?.downPrice; const up = ou && od ? Math.max(3, Math.min(97, (ou / (ou + od)) * 100)) : 50 + Math.max(-47, Math.min(47, (diff / span) * 47)); const lead = price && strike ? (diff >= 0 ? "up" : "down") : null; return <div className="mt-3" aria-label={t("Quién va ganando")}>
             {ou && od ? <div className="mb-1 flex justify-between text-[11px] font-bold tabular-nums"><span className={ou >= od ? "text-primary" : "text-muted-foreground"}>▲ {t("Sube")} {Math.round(ou * 100)}%</span><span className={od > ou ? "text-destructive" : "text-muted-foreground"}>{t("Baja")} {Math.round(od * 100)}% ▼</span></div>
@@ -125,7 +138,7 @@ export function MarketsPanel(_: { identity: string }) {
       </section>
       {!loaded ? <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin" size={16} />{t("Buscando rondas en vivo…")}</p>
         : !round && <div role="status" className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/10 p-3 text-sm"><Loader2 className="mt-0.5 shrink-0 animate-spin text-primary" size={16} /><p><strong>{t("Esperando la próxima ronda de {m} ({w})…", { m: name, w: WIN_LABEL[win] })}</strong><br /><span className="text-muted-foreground">{t("Abre en breve. Mientras tanto puedes probar otra duración o cripto arriba.")}</span></p></div>}
-      <PredictLive round={round} chart={<div className="overflow-hidden rounded-3xl border border-border bg-card py-3"><PriceChart key={`${market}-${win}-${round?.openTime ?? 0}`} market={market} points={roundPoints} price={price} reference={strike} referenceLabel={t("A batir")} window={win} odds={round ? { up: round.upPrice, down: round.downPrice } : undefined} oddsSeries={round ? oddsHist[`${round.asset}:${round.window}:${round.openTime}`] : undefined} /></div>} />
+      <PredictLive round={round} chart={<TradePulse slug={round ? roundSlug(market, win, round.openTime) : null}><div className="overflow-hidden rounded-3xl border border-border bg-card py-3"><PriceChart key={`${market}-${win}-${round?.openTime ?? 0}`} market={market} points={roundPoints} price={price} reference={strike} referenceLabel={t("A batir")} window={win} odds={round ? { up: round.upPrice, down: round.downPrice } : undefined} oddsSeries={round ? oddsHist[`${round.asset}:${round.window}:${round.openTime}`] : undefined} /><div className="mt-2 border-t border-border px-3 pt-2"><RoundTimeline asset={market} window={win} round={round} /></div></div></TradePulse>} />
       <PendingClaims />
       <CompactOpenPredictions />
       <details className="rounded-2xl border border-primary/30 bg-primary/5 p-4"><summary className="cursor-pointer text-sm font-semibold">💡 {t("¿Cómo jugar en 4 pasos?")}</summary><div className="mt-3"><PredictSteps /></div></details>

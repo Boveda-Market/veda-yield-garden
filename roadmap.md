@@ -66,3 +66,4 @@
 - [x] Notify refunded Sube/Baja orders: post-sign order check, bell card, Mi Billetera "Reembolso listo", Telegram (in app and while closed). Live order-status and history parsing verified on public data; not yet seen with a real refunded order from the owner's wallet.
 - [x] Sube/Baja: duel lines and win percentages must always agree (line on top = higher market %), since the official result uses the oracle average, not exchange spot.
 - [x] Sube/Baja: take live price and price to beat from Polymarket's own data (same source as the official result).
+- [x] Sube/Baja Polymarket-style engagement: rolling live price, countdown pulse, real live trade bubbles, round streak strip, quick-stake payout on buttons, other coins' odds.

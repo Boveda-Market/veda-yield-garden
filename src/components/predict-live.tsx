@@ -24,6 +24,7 @@ import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 const usdc = (micro: string | bigint | null) => micro === null ? "—" : (Number(micro) / 1e6).toFixed(2);
 const fromB64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 const dismissedLost = (wallet: string) => { try { const v = JSON.parse(localStorage.getItem(`boveda:predict-lost-seen:${wallet}`) ?? "[]"); return new Set<string>(Array.isArray(v) ? v : []); } catch { return new Set<string>(); } };
+const QUICK = [5, 10, 25, 50];
 const toB64 = (b: Uint8Array) => btoa(Array.from(b, (x) => String.fromCharCode(x)).join(""));
 
 /** Order ticket for the selected live Up/Down round. Wallet USDC only; BÓVEDA is never the counterparty. */
@@ -194,6 +195,11 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
 
   return (
     <div className="space-y-4">
+      {/* Quick stake: one tap picks the amount and both buttons show what it would pay right now. */}
+      <div className="flex items-center gap-2" role="group" aria-label={t("Jugada rápida")}>
+        <span className="shrink-0 text-xs font-semibold text-muted-foreground">{t("Jugada rápida")}</span>
+        <div className="grid flex-1 grid-cols-4 gap-1.5">{QUICK.map((v) => { const on = !customAmount && Number(amount) === v; return <button key={v} type="button" aria-pressed={on} onClick={() => { setCustomAmount(false); setAmount(String(v)); setReview(null); }} className={`rounded-full border py-1.5 text-sm font-bold tabular-nums transition active:scale-95 ${on ? "border-foreground bg-foreground text-background" : "border-border bg-card text-foreground"}`}>${v}</button>; })}</div>
+      </div>
       <div className="grid grid-cols-2 gap-3">
         {(["up", "down"] as const).map((s) => {
           const p = priceOf(s), on = side === s, up = s === "up";
@@ -203,6 +209,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
             <span className="flex items-center justify-between"><span className="font-display text-xl font-bold">{t(up ? "Sube" : "Baja")}</span><Icon size={22} /></span>
             <span className="mt-2 block font-display text-3xl font-bold tabular-nums">{p ? `${Math.round(p * 100)}%` : "—"}</span>
             <span className={`block text-xs font-semibold ${on ? "opacity-90" : "text-muted-foreground"}`}>{p ? t("Paga {x}×", { x: (1 / p).toFixed(2) }) : t("Sin precio")}</span>
+            {p && amt > 0 && <span className={`mt-1.5 block rounded-lg px-2 py-1 text-xs font-bold tabular-nums transition-colors ${on ? "bg-background/20" : up ? "bg-primary/15" : "bg-destructive/15"}`}><span className="block text-[10px] font-semibold opacity-80">{t("Con ${a} recibes", { a: amt % 1 ? amt.toFixed(2) : String(amt) })}</span><span className="block text-base">≈${(amt / p).toFixed(2)}</span></span>}
             <span className={`mt-1 block text-[11px] font-semibold ${on ? "opacity-90" : ""}`}>{t(up ? "Ganas si el precio sube" : "Ganas si el precio baja")}</span>
           </button>;
         })}
