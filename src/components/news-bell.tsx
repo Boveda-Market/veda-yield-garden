@@ -47,7 +47,7 @@ export function NewsList({ onNavigate, predict = [], refunds = [] }: { onNavigat
     <ul className="space-y-3">
       {refunded.map((a) => <li key={a.id} className="relative rounded-xl border border-primary/40 bg-primary/10 p-4">
         <button type="button" onClick={() => dismiss(a.id)} aria-label={t("Borrar notificación")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={14} /></button>
-        <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">{t("Sube y Baja")}</span>
+        <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">{t("Doble o Nada")}</span>
         <p className="mt-2 pr-6 font-semibold">{t("Orden reembolsada")}</p>
         {a.r.title && <p className="mt-1 text-xs text-muted-foreground">{assetOfTitle(a.r.title) ?? ""} · {roundWindowText(a.r.title, null)}</p>}
         <p className="mt-1 text-sm text-muted-foreground">{t("Tu jugada no entró a la ronda porque el precio cambió en ese instante. Te devolvimos ${v} completos; están listos en Mi Billetera.", { v: (Number(a.r.amountMicro) / 1e6).toFixed(2) })}</p>
@@ -55,7 +55,7 @@ export function NewsList({ onNavigate, predict = [], refunds = [] }: { onNavigat
       </li>)}
       {personal.map((a) => <li key={a.id} className={`relative rounded-xl border p-4 ${a.outcome === "won" ? "border-primary/40 bg-primary/10" : "border-border bg-secondary/40"}`}>
         {a.outcome === "lost" && <button type="button" onClick={() => dismiss(a.id)} aria-label={t("Borrar notificación")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={14} /></button>}
-        <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">{t("Sube y Baja")}</span>
+        <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">{t("Doble o Nada")}</span>
         <p className="mt-2 font-semibold">{a.outcome === "won" ? `🏆 ${t("Ganaste en Sube y Baja")}` : t("No acertaste en Sube y Baja")}</p>
         {a.p.title && <p className="mt-1 text-xs text-muted-foreground">{assetOfTitle(a.p.title) ?? ""} · {roundWindowText(a.p.title, a.p.closeTime)}</p>}
         <p className="mt-1 text-sm text-muted-foreground">{a.outcome === "won" ? t("Tu premio de {v} USDC está listo para reclamar.", { v: (Number(a.p.payoutMicro) / 1e6).toFixed(2) }) : t("La ronda terminó en tu contra. Invertiste {v} USDC.", { v: (Number(a.p.costMicro) / 1e6).toFixed(2) })}</p>

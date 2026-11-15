@@ -1,6 +1,6 @@
 import { IN_APP_FLAG, OPEN_MENU_EVENT, OPEN_MENU_FLAG } from "./back-button";
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, Home, History, Send, Bell } from "lucide-react";
+import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, Home, History, Send, Bell, Zap } from "lucide-react";
 import { SUPPORT_URL } from "./safety-notice";
 import { InstallAppButton } from "./install-app";
 import { useEffect, useState } from "react";
@@ -24,7 +24,7 @@ export type AppView = "vaults" | "portfolio" | "activity" | "account" | "securit
 
 const MAIN = [
   { key: "vaults", label: "Bóvedas", icon: LayoutDashboard, to: "/app" },
-  { key: "markets", label: "Sube/Baja", icon: TrendingUp, to: "/mercados" },
+  { key: "markets", label: "Doble o Nada", icon: Zap, to: "/mercados" },
   { key: "portfolio", label: "Ganancias", icon: PieChart, to: "/portfolio" },
   { key: "wallet", label: "Mi Billetera", icon: Wallet, to: "/wallet" },
 ] as const;

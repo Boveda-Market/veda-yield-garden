@@ -1143,4 +1143,9 @@ export const extra: Record<string, string> = {
   "Día": "Day",
   "Noche": "Night",
   "Apariencia": "Appearance",
+  "Doble o Nada": "Double or Nothing",
+  "Doble o Nada · Rondas relámpago": "Double or Nothing · Lightning rounds",
+  "⚡ Doble o Nada (5 min)": "⚡ Double or Nothing (5 min)",
+  "Multiplica hasta +90% por ronda · Cobro directo a tu balance": "Up to +90% per round · Paid straight to your balance",
+  "🔥 Doble o Nada en vivo · Hasta +90% de ganancia en una sola vela": "🔥 Double or Nothing live · Up to +90% profit on a single candle",
 };

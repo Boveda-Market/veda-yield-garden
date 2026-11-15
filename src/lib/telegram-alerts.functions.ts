@@ -88,7 +88,7 @@ const ACTION_TEXT = {
   harvest: "🌾 <b>Cosecha completada</b>\nTus ganancias de la bóveda llegaron a tu wallet. Tu posición sigue abierta.",
   exit: "🏁 <b>Bóveda cerrada</b>\nTu capital y ganancias se liquidaron a USDC en tu wallet.",
   withdraw: "🏧 <b>Retiro enviado</b>\nTu retiro está en camino a tu banco, tarjeta o Cash App.",
-  predict: "⚡ <b>Ganancias de Sube/Baja cobradas</b>\nTu premio ya está en USDC en tu wallet.",
+  predict: "⚡ <b>Premio de Doble o Nada cobrado</b>\nTu premio ya está en USDC en tu wallet.",
   deposit: "🏦 <b>Depósito confirmado</b>\nTu dinero ya está trabajando en la bóveda.",
 } as const;
 

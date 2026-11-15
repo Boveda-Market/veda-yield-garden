@@ -34,5 +34,5 @@ const usd = (m: string) => (Number(m) / 1e6).toFixed(2);
 /** Telegram text for one refunded order (Spanish, HTML). */
 export function refundAlertText(r: Pick<PredictRefund, "title" | "amountMicro">): string {
   const round = r.title ? `\n${r.title.replace(/[<>&]/g, "")}` : "";
-  return `⚡ <b>Orden no completada en Sube y Baja</b>${round}\nTu jugada no entró a la ronda porque el precio cambió en ese instante. Te devolvimos $${usd(r.amountMicro)} completos y están listos en Mi Billetera para pasarlos a disponibles.\nhttps://bovedamarket.app/wallet`;
+  return `⚡ <b>Orden no completada en Doble o Nada</b>${round}\nTu jugada no entró a la ronda porque el precio cambió en ese instante. Te devolvimos $${usd(r.amountMicro)} completos y están listos en Mi Billetera para pasarlos a disponibles.\nhttps://bovedamarket.app/wallet`;
 }
