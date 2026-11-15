@@ -20,6 +20,7 @@ import { PoweredBy } from "@/components/powered-by";
 import { RebalanceButton, RangeUrgentBanner } from "@/components/rebalance-button";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useRealWallet } from "@/hooks/use-real-wallet";
+import { canHarvest } from "@/lib/harvest";
 
 type Supported = OperableVault;
 const supported = isOperableVault;
@@ -76,11 +77,11 @@ export function WalletPositions({ wallet }: { wallet: string }) {
           <div className="rounded-lg bg-muted/50 p-2"><dt className="text-muted-foreground">{t("PNL")}</dt><dd className="mt-0.5 font-display text-sm font-semibold tabular-nums text-primary">{fees === null ? "—" : `+${formatUsd(fees)}`}</dd></div>
         </dl>
         {fees !== null && <LiveEarnings base={fees} ratePerMs={p.locked ? 0 : earningRatePerMs(value, apr)} since={since} label={t("Ganancias por cosechar · estimado en vivo")} />}
-        {ok ? <><Button className="mt-3 w-full" onClick={() => setHarvest({ position: p.address, vaultId: p.vaultId as Supported })}><Sprout size={16} />{t("Cosechar ganancias")}</Button>
+        {ok ? <><Button className="mt-3 w-full" disabled={!canHarvest(fees)} onClick={() => setHarvest({ position: p.address, vaultId: p.vaultId as Supported })}><Sprout size={16} />{t("Cosechar ganancias")}</Button>{!canHarvest(fees) && <p className="mt-1 text-center text-xs text-muted-foreground">{t("Cosechar y reinvertir se activan desde $0.50 de ganancias.")}</p>}
           <RebalanceButton position={p} className="mt-2 w-full" />
           <div className="mt-2 grid grid-cols-3 gap-2">
             <Button size="sm" variant="secondary" onClick={() => setAddTo({ position: p.address, vaultId: p.vaultId as Supported })}><Plus size={14} />{t("Depositar")}</Button>
-            <Button size="sm" variant="secondary" disabled={p.outOfRange} onClick={() => setHarvest({ position: p.address, vaultId: p.vaultId as Supported, compound: true })}><Repeat size={14} />{t("Reinvertir")}</Button>
+            <Button size="sm" variant="secondary" disabled={p.outOfRange || !canHarvest(fees)} onClick={() => setHarvest({ position: p.address, vaultId: p.vaultId as Supported, compound: true })}><Repeat size={14} />{t("Reinvertir")}</Button>
             <Button size="sm" variant="outline" disabled={p.locked} onClick={() => setExit({ position: p.address, vaultId: p.vaultId as Supported })}><ArrowDownToLine size={14} />{t("Cerrar")}</Button>
           </div>{p.outOfRange && <p className="mt-2 text-xs leading-5 text-muted-foreground">{p.vaultId === "gta6" ? t("El precio salió del rango: tu dinero sigue seguro pero no genera. Toca «Rebalancear» para volver a centrarla con un toque.") : t("El precio salió del rango de esta bóveda: tu dinero sigue seguro pero no genera ganancias hasta que el precio vuelva o la cierres.")}</p>}</> : <p className="mt-2 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
       </li>;
