@@ -1,0 +1,1 @@
+- Badge (high-octane) vaults render through HotVaultCard with dedicated --hot-* tokens identical in both themes so they always stand out; their long blurb/note live in pool details.
