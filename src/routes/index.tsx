@@ -91,9 +91,6 @@ function Landing() {
     try { localStorage.setItem(HERO_KEY, String(i)); } catch { /* blocked storage */ }
   }, []);
   const hero = HERO_VARIANTS[heroIdx] ?? HERO_VARIANTS[0];
-  const [preview, setPreview] = useState(false);
-  useEffect(() => { const h = window.location.hostname; setPreview(h.includes("id-preview") || h === "localhost"); }, []); // switcher only on preview hosts
-  const pickHero = (i: number) => { setHeroIdx(i); try { localStorage.setItem(HERO_KEY, String(i)); } catch { /* blocked storage */ } };
   if (compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-10 text-foreground">
     <img src="/icon-512.png" alt="" className="h-14 w-14 rounded-2xl" />
     <h1 className="mt-4 text-center font-display text-3xl font-bold">{t("Bienvenido de nuevo")}</h1>
@@ -103,7 +100,6 @@ function Landing() {
     <Link to="/prueba" onClick={allowTrialEntry} className="mt-3 text-xs text-muted-foreground underline underline-offset-4">{t("Demo sin riesgo")}</Link>
   </div>;
   return <div className="min-h-screen bg-background text-foreground">
-    {preview && <div className="fixed left-1/2 top-2 z-50 flex -translate-x-1/2 gap-1 rounded-full border border-border bg-card p-1 shadow-md">{HERO_VARIANTS.map((_, i) => <button key={i} type="button" onClick={() => pickHero(i)} className={`h-7 w-7 rounded-full text-xs font-semibold ${i === heroIdx ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>{i}</button>)}</div>}
     <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-6 sm:px-6"><Link to="/" className="flex min-w-0 shrink-0 items-center gap-2 font-display text-lg font-bold sm:gap-3"><img src="/icon-512.png" alt="" className="h-9 w-9 shrink-0 rounded-lg" />BÓVEDA</Link><div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><Link to="/prueba" onClick={allowTrialEntry} className="flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/40 bg-primary/10 px-2.5 sm:px-3 text-xs font-semibold text-primary"><Sparkles size={13} />{t("Demo sin riesgo")}</Link></div></header>
     <main className="mx-auto max-w-5xl px-6">
       <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">
