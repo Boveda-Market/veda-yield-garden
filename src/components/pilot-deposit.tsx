@@ -106,15 +106,16 @@ export function PilotDeposit({ vaultId, amount, position, migrate, autoStart = f
     <h3 id="pilot-title" className="sr-only">{t("Confirmar depósito")}</h3>
     {!walletAddress ? <p className="text-xs text-muted-foreground">{t("Inicia sesión con una wallet para firmar.")}</p> : <>
       {busy && <WorkingLine text={t(labels[step])} />}
+      {step === "error" && message && <p role="alert" className="rounded-xl bg-destructive/10 p-3 text-destructive">{message}</p>}
       <Button size="lg" disabled={busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? t(labels[step]) : step === "error" ? t("Intentar de nuevo") : t("Confirmar y depositar")}</Button>
-      {!busy && <p className="text-center text-xs text-muted-foreground">{t("Una sola aprobación. Retirar o cosechar más adelante tiene una comisión según el monto.")}</p>}
+      {!busy && step !== "error" && <p className="text-center text-xs text-muted-foreground">{t("Una sola aprobación. Retirar o cosechar más adelante tiene una comisión según el monto.")}</p>}
     </>}
     {needsReserve && <div role="status" className="rounded-xl border border-primary/40 bg-primary/5 p-3 text-xs leading-5">
       <p className="font-semibold text-foreground">{t("Esta bóveda necesita una garantía de apertura")}</p>
       <p className="mt-1 text-muted-foreground">{guaranteeUsd === null ? t("Apartamos una pequeña parte de tus dólares en tu reserva de operaciones. Casi todo vuelve a ti cuando cierras la posición.") : t("Apartamos hasta unos ${usd} de tus dólares en tu reserva de operaciones. Casi todo vuelve a ti cuando cierras la posición.", { usd: String(guaranteeUsd) })}</p>
       <Button className="mt-3 w-full" disabled={busy} onClick={() => void fundReserve()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : null}{busy ? t(labels[step]) : t("Preparar garantía y depositar")}</Button>
     </div>}
-    {message && <p role="alert" className="text-destructive">{message}</p>}
+    {message && step !== "error" && <p role="alert" className="text-destructive">{message}</p>}
     {signature && <a className="text-xs underline" href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("Ver comprobante")}</a>}
   </section>;
 }

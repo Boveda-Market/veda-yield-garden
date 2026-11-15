@@ -26,6 +26,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as ZzErrorCheckRouteImport } from './routes/zz-error-check'
 import { Route as GuiasIndexRouteImport } from './routes/guias/index'
 import { Route as GuiasInvertirSinEstafasRouteImport } from './routes/guias/invertir-sin-estafas'
 import { Route as GuiasQueEsUsdcRouteImport } from './routes/guias/que-es-usdc'
@@ -122,6 +123,11 @@ const WalletRoute = WalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZzErrorCheckRoute = ZzErrorCheckRouteImport.update({
+  id: '/zz-error-check',
+  path: '/zz-error-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GuiasIndexRoute = GuiasIndexRouteImport.update({
   id: '/guias/',
   path: '/guias/',
@@ -196,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/zz-error-check': typeof ZzErrorCheckRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
@@ -225,6 +232,7 @@ export interface FileRoutesByTo {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/zz-error-check': typeof ZzErrorCheckRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
@@ -255,6 +263,7 @@ export interface FileRoutesById {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/zz-error-check': typeof ZzErrorCheckRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
@@ -286,6 +295,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/zz-error-check'
     | '/guias/invertir-sin-estafas'
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
@@ -315,6 +325,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/zz-error-check'
     | '/guias/invertir-sin-estafas'
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
@@ -344,6 +355,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/zz-error-check'
     | '/guias/invertir-sin-estafas'
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
@@ -374,6 +386,7 @@ export interface RootRouteChildren {
   StatusRoute: typeof StatusRoute
   TerminosRoute: typeof TerminosRoute
   WalletRoute: typeof WalletRoute
+  ZzErrorCheckRoute: typeof ZzErrorCheckRoute
   GuiasInvertirSinEstafasRoute: typeof GuiasInvertirSinEstafasRoute
   GuiasQueEsUsdcRoute: typeof GuiasQueEsUsdcRoute
   GuiasRecargarConCoinbaseRoute: typeof GuiasRecargarConCoinbaseRoute
@@ -507,6 +520,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WalletRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/zz-error-check': {
+      id: '/zz-error-check'
+      path: '/zz-error-check'
+      fullPath: '/zz-error-check'
+      preLoaderRoute: typeof ZzErrorCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guias/': {
       id: '/guias/'
       path: '/guias'
@@ -598,6 +618,7 @@ const rootRouteChildren: RootRouteChildren = {
   StatusRoute: StatusRoute,
   TerminosRoute: TerminosRoute,
   WalletRoute: WalletRoute,
+  ZzErrorCheckRoute: ZzErrorCheckRoute,
   GuiasInvertirSinEstafasRoute: GuiasInvertirSinEstafasRoute,
   GuiasQueEsUsdcRoute: GuiasQueEsUsdcRoute,
   GuiasRecargarConCoinbaseRoute: GuiasRecargarConCoinbaseRoute,
