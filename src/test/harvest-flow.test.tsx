@@ -16,13 +16,12 @@ function show(connected = wallet) {
   const session: BovedaSession = { ready: true, authenticated: true, userId: "verified", label: "Owner", walletAddress: connected, error: null, login: vi.fn(), logout: vi.fn(), signAndSend: mocks.send };
   render(<BovedaSessionContext.Provider value={session}><HarvestDialog wallet={wallet} position={position} vaultId="met" onClose={vi.fn()} /></BovedaSessionContext.Provider>);
 }
-it("reviews, obtains consent and freshly prepares new MET harvests before owner signing", async () => {
+it("shows the quote on open and freshly prepares new MET harvests before owner signing", async () => {
   mocks.review.mockResolvedValue({ success: true, feeRaw: "100" });
   mocks.prepare.mockResolvedValue({ success: true, prepared: { wallet, position, transaction: btoa("unsigned"), expiresAt: Date.now() + 30_000 } });
   mocks.send.mockResolvedValue("signature");
   mocks.status.mockResolvedValue({ status: "confirmed" });
   show();
-  fireEvent.click(screen.getByRole("button", { name: "Revisar cosecha" }));
   await waitFor(() => expect(screen.getByRole("button", { name: "Confirmar cosecha" })).toBeEnabled());
   expect(mocks.prepare).not.toHaveBeenCalled();
   await act(async () => fireEvent.click(screen.getByRole("button", { name: "Confirmar cosecha" })));
@@ -33,7 +32,6 @@ it("reviews, obtains consent and freshly prepares new MET harvests before owner 
 it("does not enable owner signing with a different connected wallet", async () => {
   mocks.review.mockResolvedValue({ success: true, feeRaw: "100" });
   show(position);
-  fireEvent.click(screen.getByRole("button", { name: "Revisar cosecha" }));
   await waitFor(() => expect(mocks.review).toHaveBeenCalled());
   expect(screen.queryByRole("button", { name: "Confirmar cosecha" })).not.toBeInTheDocument();
   expect(mocks.send).not.toHaveBeenCalled();

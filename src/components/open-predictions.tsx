@@ -19,6 +19,8 @@ import { useEffect } from "react";
 import { Dialog, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { Button } from "@/components/ui/button";
+import { ActionSuccess } from "@/components/action-success";
+import { ProgressSteps, WorkingLine } from "@/components/move-steps";
 
 const fromB64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 const toB64 = (b: Uint8Array) => btoa(Array.from(b, (x) => String.fromCharCode(x)).join(""));
@@ -29,19 +31,24 @@ export function useOpenPredictions() {
   const wallet = session.walletAddress;
   const qc = useQueryClient();
   const q = usePredictPositions(wallet);
-  const items = (q.data ?? []).filter((p) => p.status === "open");
+  // A position being closed stays listed until its window closes, so a refresh never unmounts the receipt.
+  const [held, setHeld] = useState<PredictPosition | null>(null);
+  const open = (q.data ?? []).filter((p) => p.status === "open");
+  const items = held && !open.some((p) => p.pubkey === held.pubkey) ? [...open, held] : open;
   const refresh = useCallback(async () => { await qc.invalidateQueries({ queryKey: ["predict-positions", wallet] }); }, [qc, wallet]);
-  return { items, refresh, session, wallet };
+  return { items, refresh, session, wallet, setHeld };
 }
 
 export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPredictions> }) {
   const t = useT();
-  const { items, refresh, session, wallet } = state;
+  const { items, refresh, session, wallet, setHeld } = state;
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   // Early close sells at the live market price, which can be far below the position's reference value:
   // show what the bids pay right now and sell only after the user confirms that amount.
   const [review, setReview] = useState<{ p: PredictPosition; tx: string; context: string; estimateMicro: string | null; at: number } | null>(null);
+  // After "Confirmar venta" the same window shows progress (2 approvals) and ends on the receipt.
+  const [flow, setFlow] = useState<{ phase: 1 | 2; text: string; error?: string; receipt?: { amount: string; sig: string | null; partial?: boolean } } | null>(null);
   const sell = async (p: PredictPosition) => {
     if (!wallet) return; setBusy(p.pubkey); setMsg(null);
     try {
@@ -54,7 +61,7 @@ export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPre
     if (!wallet || !review) return;
     const { p } = review;
     let { tx, context, estimateMicro } = review;
-    setReview(null); setBusy(p.pubkey); setMsg(null);
+    setHeld(p); setBusy(p.pubkey); setMsg(null); setFlow({ phase: 1, text: t("Aprueba en tu billetera (1 de 2)…") });
     try {
       if (!session.signOnly) throw new Error(t("Tu wallet no admite esta operación."));
       // The prepared sale expires quickly: rebuild it when the user took a while to decide.
@@ -65,25 +72,28 @@ export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPre
       }
       const before = await readTokenBalance(wallet, JUPUSD_MINT).catch(() => 0n);
       const signed = await session.signOnly(fromB64(tx));
+      setFlow({ phase: 1, text: t("Cerrando tu posición…") });
       const x = await executePredict({ data: { wallet, signed: toB64(signed), context } });
       if (!x.success) throw new Error(x.error);
       annotateRecord(wallet, p.pubkey, { soldMicro: estimateMicro ?? p.valueMicro ?? "0", sellSig: x.signature });
-      setMsg({ ok: true, text: t("Firma 1 de 2 lista: posición cerrada. Ahora firma la 2 de 2 para pasarlo a dólares…") });
+      setFlow({ phase: 2, text: t("Posición cerrada. Preparando el paso a dólares…") });
       // Closing early is free: convert only the JupUSD received from this sale to USDC (no BÓVEDA fee).
       try {
         let got = 0n;
         for (let i = 0; i < 4 && got <= 0n; i++) { await new Promise((res) => setTimeout(res, 2000)); got = (await readTokenBalance(wallet, JUPUSD_MINT)) - before; }
-        if (got > 0n) { const q = await quoteSwap("JupUSD", "USDC", got, { feeUsdc: 0n }); await session.signAndSend(await buildSwap(wallet, q)); setMsg({ ok: true, text: t("Posición cerrada. ${v} llegaron a tu wallet.", { v: usdcText(q.outAmount) }) }); notify("success", t("Posición cerrada"), t("${v} en tu billetera", { v: usdcText(q.outAmount) })); }
-        else setMsg({ ok: true, text: t("Venta confirmada. El dinero está en tu wallet.") });
-      } catch { setMsg({ ok: true, text: t("Posición cerrada, pero falta el paso a dólares. Hazlo en Mi Billetera → Cambiar.") }); }
+        if (got > 0n) { const q = await quoteSwap("JupUSD", "USDC", got, { feeUsdc: 0n }); setFlow({ phase: 2, text: t("Aprueba en tu billetera (2 de 2)…") }); const s = await session.signAndSend(await buildSwap(wallet, q)); setFlow({ phase: 2, text: "", receipt: { amount: usdcText(q.outAmount), sig: s } }); notify("success", t("Posición cerrada"), t("${v} en tu billetera", { v: usdcText(q.outAmount) })); }
+        else setFlow({ phase: 2, text: "", receipt: { amount: usdcText(estimateMicro ?? p.valueMicro ?? "0"), sig: x.signature } });
+      } catch { setFlow({ phase: 2, text: "", receipt: { amount: usdcText(estimateMicro ?? p.valueMicro ?? "0"), sig: x.signature, partial: true } }); }
+      setReview(null);
       setTimeout(() => void refresh(), 3000);
-    } catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
+    } catch (e) { setFlow({ phase: 1, text: "", error: e instanceof Error ? e.message : String(e) }); } finally { setBusy(null); }
   };
+  const closeSheet = () => { if (busy) return; setReview(null); setFlow(null); setHeld(null); };
   if (items.length === 0) return <p className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">{t("No tienes predicciones abiertas ahora mismo.")}</p>;
   return <div className="space-y-3">
     {msg && <p role="status" className={`text-sm ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text}</p>}
     <div className="grid gap-4 md:grid-cols-2">{items.map((p) => <PredictPositionCard key={p.pubkey} p={p} onSell={() => void sell(p)} selling={busy === p.pubkey} disabled={!!busy} />)}</div>
-    <SellReview review={review} onCancel={() => setReview(null)} onConfirm={() => void confirmSell()} />
+    <SellReview review={review} flow={flow} onCancel={closeSheet} onConfirm={() => void confirmSell()} />
   </div>;
 }
 
@@ -98,12 +108,22 @@ export function WalletOpenPredictions() {
   </section>;
 }
 
-function SellReview({ review, onCancel, onConfirm }: { review: { p: PredictPosition; estimateMicro: string | null } | null; onCancel: () => void; onConfirm: () => void }) {
+type SellFlow = { phase: 1 | 2; text: string; error?: string; receipt?: { amount: string; sig: string | null; partial?: boolean } } | null;
+function SellReview({ review, flow, onCancel, onConfirm }: { review: { p: PredictPosition; estimateMicro: string | null } | null; flow: SellFlow; onCancel: () => void; onConfirm: () => void }) {
   const t = useT();
   const est = review?.estimateMicro ? BigInt(review.estimateMicro) : null;
   const cost = review ? BigInt(review.p.costMicro || "0") : 0n;
-  return <Dialog open={!!review} onOpenChange={(o) => { if (!o) onCancel(); }}>
+  return <Dialog open={!!review || !!flow} onOpenChange={(o) => { if (!o) onCancel(); }}>
     <ActionSheetContent closeLabel={t("Cerrar")} className="sm:max-w-sm">
+      {flow?.receipt ? <ActionSuccess destination="/wallet" title={t("¡Posición cerrada!")} amount={{ value: flow.receipt.amount, unit: "$", label: "≈" }}
+        body={flow.receipt.partial ? t("Ya vendiste, pero falta pasarlo a dólares. Hazlo en Mi Billetera → Cambiar.") : t("Ya está en tus dólares disponibles.")}
+        details={[{ label: t("Operación"), value: t("Cierre antes de tiempo") }, { label: t("Comisión"), value: t("Gratis") }]} signature={flow.receipt.sig} onClose={onCancel} />
+      : flow ? <>
+        <DialogTitle className="pr-10 font-display text-xl">{t("Cerrar antes de tiempo")}</DialogTitle>
+        <DialogDescription>{est !== null ? t("Recibes aprox. ${v}", { v: usdcText(est) }) : t("Vendes al precio que el mercado paga en este momento.")}</DialogDescription>
+        <ProgressSteps steps={[t("Cerrar posición"), t("Pasar a dólares")]} current={flow.phase} />
+        {flow.error ? <><p role="alert" className="text-sm text-destructive">{flow.error}</p><Button onClick={onCancel}>{t("Cerrar")}</Button></> : <WorkingLine text={flow.text} />}
+      </> : <>
       <DialogHeader className="pr-10 text-left">
         <DialogTitle className="font-display text-xl">{t("Cerrar antes de tiempo")}</DialogTitle>
         <DialogDescription>{t("Vendes al precio que el mercado paga en este momento.")}</DialogDescription>
@@ -120,6 +140,8 @@ function SellReview({ review, onCancel, onConfirm }: { review: { p: PredictPosit
         <Button variant="outline" onClick={onCancel}>{t("Mejor espero")}</Button>
         <Button onClick={onConfirm}>{t("Confirmar venta")}</Button>
       </div>
+      <p className="text-center text-xs text-muted-foreground">{t("Tu billetera te pedirá 2 aprobaciones seguidas.")}</p>
+      </>}
     </ActionSheetContent>
   </Dialog>;
 }

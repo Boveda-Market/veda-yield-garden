@@ -13,6 +13,7 @@ import { prepareRealRebalance } from "@/lib/rebalance.functions";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import type { RebalanceResult } from "@/lib/dlmm";
+import { WorkingLine } from "@/components/move-steps";
 
 /** One-tap, one-signature 50/50 rebalance for an out-of-range range-vault position. Renders nothing otherwise. */
 export function RebalanceButton({ position, className }: { position: ChainPosition; className?: string }) {
@@ -38,6 +39,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
   const [message, setMessage] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [step, setStep] = useState("");
 
   async function review() {
     setPending(true); setMessage(null);
@@ -50,16 +52,17 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
 
   async function sign() {
     if (pending || done) return;
-    setPending(true); setMessage(null);
+    setPending(true); setMessage(null); setStep(t("Preparando tu rebalanceo…"));
     try {
       const next = await prepare({ data: { ...input, prepare: true } });
       setQuote(next);
       if (!next.success || !next.prepared) { setMessage(next.message); return; }
       if (next.prepared.wallet !== session.walletAddress) { setMessage(t("La wallet cambió. Revisa nuevamente.")); return; }
+      setStep(t("Aprueba en tu billetera…"));
       let sig: string;
       try { sig = await session.signAndSend(Uint8Array.from(atob(next.prepared.transaction), (c) => c.charCodeAt(0))); }
-      catch { setMessage(t("La wallet canceló o rechazó la solicitud.")); return; }
-      setSignature(sig);
+      catch { setMessage(t("Cancelaste la aprobación. Tu posición sigue como estaba.")); return; }
+      setSignature(sig); setStep(t("Centrando tu posición…"));
       for (let attempt = 0; attempt < 30; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó el rebalanceo; tu posición sigue como estaba.")); return; }
@@ -72,9 +75,9 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
         }
         await new Promise((r) => setTimeout(r, 2_000));
       }
-      setMessage(t("Confirmación pendiente. Revisa el comprobante antes de reintentar."));
+      setMessage(t("La confirmación tarda más de lo habitual. Revisa tu billetera antes de intentarlo otra vez."));
     } catch { setMessage(t("No se pudo preparar el rebalanceo. No se firmó ni envió nada.")); }
-    finally { setPending(false); }
+    finally { setPending(false); setStep(""); }
   }
 
   const symbol = quote?.tokenSymbol ?? position.symbol;
@@ -84,7 +87,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
       details={[{ label: t("Comisión de BÓVEDA"), value: "0%" }]} /> : <>
       <DialogTitle>{t("Rebalancear posición")} · {symbol}</DialogTitle>
       <DialogDescription>{t("Tu posición salió del rango y no está generando. Con un toque cosechamos tus ganancias, dejamos mitad y mitad al precio actual y la volvemos a centrar.")}</DialogDescription>
-      {pending && !quote && <p className="flex items-center gap-2 text-sm text-muted-foreground"><LoaderCircle className="h-4 w-4 animate-spin motion-reduce:animate-none" />{t("Preparando tu rebalanceo…")}</p>}
+      {pending && !quote && <WorkingLine text={t("Preparando tu rebalanceo…")} />}
       {quote?.success && <dl className="grid gap-2 rounded-xl border border-border p-4 text-sm">
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Se recoloca")}</dt><dd className="font-semibold">≈ ${quote.valueUsd}</dd></div>
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias que se suman")}</dt><dd>${quote.feesUsdc} + {quote.feesToken} {symbol}</dd></div>
@@ -93,7 +96,8 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Pequeño sobrante a tu billetera")}</dt><dd>${quote.usdcLeft} · {quote.tokenLeft} {symbol}</dd></div>
       </dl>}
       {quote?.success && <p className="text-xs leading-5 text-muted-foreground">{t("Para dejar mitad y mitad se cambia una parte dentro de la misma bóveda, con un límite de precio para protegerte. Es una sola firma.")}</p>}
-      {quote?.success && <Button size="lg" disabled={pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Crosshair className="mr-2 h-4 w-4" />}{t("Rebalancear ahora")}</Button>}
+      {pending && step && quote?.success && <WorkingLine text={step} />}
+      {quote?.success && <Button size="lg" disabled={pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Crosshair className="mr-2 h-4 w-4" />}{pending && step ? step : t("Rebalancear ahora")}</Button>}
       {message && <p role="alert" className="text-sm">{message}</p>}
       {message && !pending && !quote?.success && <Button variant="secondary" onClick={() => void review()}>{t("Intentar de nuevo")}</Button>}
     </>}
