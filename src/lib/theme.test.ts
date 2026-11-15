@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveTheme, THEME_BOOT } from "./theme";
+import { resolveTheme, THEME_BOOT, THEME_COLORS } from "./theme";
 
 describe("theme preference", () => {
   it("defaults every new user to Day", () => {
@@ -17,5 +17,16 @@ describe("theme preference", () => {
       documentElement: { classList: { toggle(_name: string, value: boolean) { light = value; } } },
     });
     expect(light).toBe(true);
+  });
+  it("paints the phone top bar dark when Night was chosen", () => {
+    let color = "";
+    const meta = { setAttribute(_n: string, v: string) { color = v; } };
+    const run = new Function("localStorage", "document", THEME_BOOT);
+    run({ getItem: () => "dark" }, {
+      documentElement: { classList: { toggle() {} } },
+      querySelector: () => meta,
+    });
+    expect(color).toBe(THEME_COLORS.dark);
+    expect(THEME_COLORS.dark).not.toBe(THEME_COLORS.light);
   });
 });
