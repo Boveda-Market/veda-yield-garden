@@ -270,6 +270,7 @@ export const extra: Record<string, string> = {
   "Depósito en bóveda": "Vault deposit",
   "Envío / transferencia": "Transfer",
   "Otra transacción": "Other transaction",
+  "Rebalanceo de bóveda": "Vault rebalance",
   "Comisiones ficticias progresivas en entradas y salidas, iguales a Real. Un crédito simula un USDC; no se puede retirar ni convertir en dinero.": "Simulated progressive fees on entries and exits, same as Real. One credit simulates one USDC; it can't be withdrawn or converted to money.",
   // Affiliates
   "Próximo pago": "Next payout",
