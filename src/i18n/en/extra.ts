@@ -1165,4 +1165,6 @@ export const extra: Record<string, string> = {
   "Entra con Google en 1 segundo y recibe tu billetera protegida, sin contraseñas.": "Sign in with Google in 1 second and get your protected wallet, no passwords.",
   "Ver Doble o Nada en vivo": "Watch Double or Nothing live",
   "Explorar Bóvedas": "Explore Vaults",
+  "¿Listo para tu primera jugada?": "Ready for your first play?",
+  "Seguir mirando": "Keep watching",
 };
