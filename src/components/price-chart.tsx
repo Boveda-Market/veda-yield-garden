@@ -54,7 +54,7 @@ export function PriceChart({ market, points, price, reference, referenceLabel, w
   );
 
   if (style === "duel") {
-    return <>{controls}<DuelLine points={points} reference={reference} /></>;
+    return <>{controls}<DuelLine points={points} reference={reference} referenceLabel={referenceLabel} /></>;
   }
   if (style === "line") {
     return <>{controls}<LiveLine points={points} sec={60} reference={reference} referenceLabel={referenceLabel} /></>;
@@ -154,19 +154,22 @@ function LiveLine({ points, sec, reference, referenceLabel }: { points: number[]
         <defs><linearGradient id="pc-grad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="currentColor" stopOpacity="0.35" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient></defs>
         <path d={`${d} L${end[0]},${H} L${first[0]},${H} Z`} fill="url(#pc-grad)" />
         <path d={d} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-        {refY !== null && <line x1="0" x2={W} y1={refY} y2={refY} className="text-chart-4" stroke="currentColor" strokeDasharray="6 3" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}
+        {refY !== null && <>
+          <line x1="0" x2={W} y1={refY} y2={refY} className="text-strike" stroke="currentColor" strokeWidth="7" strokeOpacity="0.18" vectorEffect="non-scaling-stroke" />
+          <line x1="0" x2={W} y1={refY} y2={refY} className="text-strike" stroke="currentColor" strokeDasharray="9 4" strokeWidth="2.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        </>}
         <line x1="0" x2={W} y1={end[1]} y2={end[1]} stroke="currentColor" strokeOpacity="0.35" strokeDasharray="2 3" strokeWidth="1" vectorEffect="non-scaling-stroke" />
       </svg>
       {(() => { const hi = Math.max(...visible), lo = Math.min(...visible); return <>
         <span className="pointer-events-none absolute left-1 top-0.5 font-mono text-[9px] tabular-nums text-muted-foreground">H {fmt(hi)}</span>
         <span className="pointer-events-none absolute bottom-0.5 left-1 font-mono text-[9px] tabular-nums text-muted-foreground">L {fmt(lo)}</span>
       </>; })()}
-      {reference && refY !== null && <span className="pointer-events-none absolute right-1 -translate-y-1/2 rounded-sm bg-chart-4 px-1 py-0.5 text-[9px] font-semibold tabular-nums text-background" style={{ top: `${(refY / H) * 100}%` }}>{fmt(reference)}</span>}
+      {reference && refY !== null && <span className="pointer-events-none absolute right-1 -translate-y-1/2 rounded-sm bg-strike px-1 py-0.5 text-[9px] font-bold tabular-nums text-background" style={{ top: `${(refY / H) * 100}%` }}>{fmt(reference)}</span>}
       {reference && <span className={`pointer-events-none absolute right-4 -translate-y-[130%] rounded-sm px-1 py-0.5 text-[10px] font-bold tabular-nums ${upL ? "bg-primary text-primary-foreground" : "bg-destructive text-destructive-foreground"}`} style={{ top: `${(end[1] / H) * 100}%` }}>{head >= reference ? "▲ +" : "▼ -"}${fmt(Math.abs(head - reference))}</span>}
       <span className={`pointer-events-none absolute right-0 h-2.5 w-2.5 -translate-y-1/2 translate-x-1/2 rounded-full ${upL ? "bg-primary" : "bg-destructive"}`} style={{ top: `${(end[1] / H) * 100}%`, right: "4px" }}>
         <span className={`absolute inset-0 animate-ping rounded-full ${upL ? "bg-primary" : "bg-destructive"} opacity-60`} />
       </span>
-      {reference && refY !== null && <div className="pointer-events-none absolute left-1 -translate-y-1/2 rounded bg-chart-4 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-background" style={{ top: `${(refY / H) * 100}%` }}>🎯 {referenceLabel}</div>}
+      {reference && refY !== null && <div className="pointer-events-none absolute left-1 -translate-y-1/2 rounded bg-strike px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-background" style={{ top: `${((refY + (refY > H - 16 ? -15 : refY < 16 ? 15 : 0)) / H) * 100}%` }}>🎯 {referenceLabel}</div>}
       {hv !== undefined && <>
         <div className="pointer-events-none absolute inset-y-0 w-px bg-foreground/40" style={{ left: `${hx}%` }} />
         <div className="pointer-events-none absolute -top-2 rounded-md bg-foreground px-2 py-0.5 text-xs font-semibold tabular-nums text-background" style={{ left: `clamp(0px, calc(${hx}% - 40px), calc(100% - 90px))` }}>${fmt(hv)}</div>
@@ -278,12 +281,15 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
           })}
           <line x1="0" x2={PW} y1={y(last.c)} y2={y(last.c)} className={last.c >= last.o ? "text-primary" : "text-destructive"} stroke="currentColor" strokeDasharray="2 2" strokeWidth="1" vectorEffect="non-scaling-stroke" />
           <path d={emaD} fill="none" className="text-chart-2" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.9" vectorEffect="non-scaling-stroke" />
-          {refY !== null && <line x1="0" x2={PW} y1={refY} y2={refY} className="text-chart-4" stroke="currentColor" strokeDasharray="6 3" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}
+          {refY !== null && <>
+            <line x1="0" x2={PW} y1={refY} y2={refY} className="text-strike" stroke="currentColor" strokeWidth="7" strokeOpacity="0.18" vectorEffect="non-scaling-stroke" />
+            <line x1="0" x2={PW} y1={refY} y2={refY} className="text-strike" stroke="currentColor" strokeDasharray="9 4" strokeWidth="2.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+          </>}
         </svg>
         {grid.map((g) => <span key={g} className="pointer-events-none absolute right-1 -translate-y-1/2 text-[9px] tabular-nums text-muted-foreground" style={{ top: pct(g) }}>{fmt(g)}</span>)}
         {reference && refY !== null && <>
-          <div className="pointer-events-none absolute left-1 -translate-y-1/2 rounded bg-chart-4 px-1.5 py-0.5 text-[10px] font-semibold text-background" style={{ top: pct(reference) }}>🎯 {referenceLabel}</div>
-          <span className={`${tag} bg-chart-4 text-background`} style={{ top: pct(reference) }}>{fmt(reference)}</span>
+          <div className="pointer-events-none absolute left-1 -translate-y-1/2 rounded bg-strike px-1.5 py-0.5 text-[10px] font-bold text-background" style={{ top: pct(reference) }}>🎯 {referenceLabel}</div>
+          <span className={`${tag} bg-strike text-background`} style={{ top: pct(reference) }}>{fmt(reference)}</span>
         </>}
         <span className={`${tag} ${last.c >= last.o ? "bg-primary text-primary-foreground" : "bg-destructive text-destructive-foreground"}`} style={{ top: pct(last.c) }}>{fmt(last.c)}</span>
         <span className="pointer-events-none absolute -translate-x-1/2 -translate-y-full font-mono text-[9px] tabular-nums text-muted-foreground" style={{ left: `${(cx(hiI) / W) * 100}%`, top: pct(candles[hiI]!.h) }}>H {fmt(candles[hiI]!.h)}</span>
@@ -305,7 +311,7 @@ function CandleView({ controls, candles: all0, reference, referenceLabel, hover,
 
 /** Sube vs Baja duel: two mirrored lines showing who leads against the strike (visual lead, not a market probability).
  * Animated like LiveLine: eased head between ticks, sliding time axis and an adaptive scale so small moves stay visible. */
-function DuelLine({ points, reference }: { points: number[]; reference?: number | undefined }) {
+function DuelLine({ points, reference, referenceLabel }: { points: number[]; reference?: number | undefined; referenceLabel?: string | undefined }) {
   const t = useT();
   const [, setFrame] = useState(0);
   const tick = useRef({ at: 0, from: 0, to: 0, len: 0 });
@@ -386,17 +392,19 @@ function DuelLine({ points, reference }: { points: number[]; reference?: number 
           <rect x="0" y={mid} width={W} height={mid} className="fill-destructive" opacity="0.04" />
           <path d={`${dUp} L${eu[0]},${mid} L${fu[0]},${mid} Z`} className="text-primary" fill="url(#duel-up)" />
           <path d={`${dDown} L${ed[0]},${mid} L${down[0]![0]},${mid} Z`} className="text-destructive" fill="url(#duel-down)" />
-          <line x1="0" x2={W} y1={mid} y2={mid} className="text-muted-foreground" stroke="currentColor" strokeOpacity="0.5" strokeDasharray="4 4" strokeWidth="1" vectorEffect="non-scaling-stroke" />
           <path d={dDown} fill="none" className="text-destructive" stroke="currentColor" strokeWidth={upWins ? 2 : 3} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
           <path d={dUp} fill="none" className="text-primary" stroke="currentColor" strokeWidth={upWins ? 3 : 2} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+          <line x1="0" x2={W} y1={mid} y2={mid} className="text-strike" stroke="currentColor" strokeWidth="8" strokeOpacity="0.2" vectorEffect="non-scaling-stroke" />
+          <line x1="0" x2={W} y1={mid} y2={mid} className="text-strike" stroke="currentColor" strokeDasharray="9 4" strokeWidth="2.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
         </svg>
         {([[eu, "bg-primary", upWins], [ed, "bg-destructive", !upWins]] as const).map(([e, bg, lead], i) => (
           <span key={i} className={`pointer-events-none absolute h-2.5 w-2.5 -translate-y-1/2 translate-x-1/2 rounded-full ${bg}`} style={{ top: `${(e[1] / H) * 100}%`, right: "4px" }}>
             {lead && <span className={`absolute inset-0 animate-ping rounded-full ${bg} opacity-60`} />}
           </span>
         ))}
+        {reference && <div className="pointer-events-none absolute left-1 top-1/2 -translate-y-1/2 rounded bg-strike px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-background">🎯 {referenceLabel} · {fmt(reference)}</div>}
       </div>
-      <p className="px-3 pt-1 text-center text-[10px] text-muted-foreground">{t("La línea que va arriba es la que va ganando: verde para Sube, roja para Baja.")}</p>
+      <p className="px-3 pt-1 text-center text-[10px] text-muted-foreground">{t("La línea que va arriba es la que va ganando: verde para Sube, roja para Baja. La línea amarilla marca el precio a batir.")}</p>
     </div>
   );
 }
