@@ -37,7 +37,7 @@ export function PredictHow() {
           <DialogDescription>{t("Acierta el movimiento y cobra en minutos.")}</DialogDescription>
         </DialogHeader>
         <PredictSteps />
-        <p className="text-sm text-muted-foreground">{t("No compras la moneda: tu dinero sigue en dólares. Nunca pierdes más de lo que pusiste y puedes vender antes del cierre.")}</p>
+        <p className="text-sm text-muted-foreground">{t("No compras la moneda: juegas y cobras en dólares. Nunca pierdes más de lo que pusiste, y puedes vender antes del cierre al precio del momento.")}</p>
         <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-sm">
           <p className="font-semibold">{t("Ejemplo con $5")}</p>
           <p className="text-muted-foreground">{t("Crees que Bitcoin sube en 5 minutos. «Sube» cuesta 0.50, así que $5 compran 10 contratos. Si al final el precio está más alto, cobras $10.00. Si está más bajo, pierdes los $5.")}</p>
