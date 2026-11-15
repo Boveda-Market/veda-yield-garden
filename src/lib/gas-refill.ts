@@ -26,4 +26,9 @@ export function refillCharge(marketMicro: bigint) {
   return c < GAS_MIN_CHARGE_MICRO ? GAS_MIN_CHARGE_MICRO : c;
 }
 
+/** The treasury only sponsors a refill when it keeps its own low-reserve floor afterwards (it also pays the network fee). */
+export function treasuryCanRefill(treasuryLamports: bigint, lamports: bigint, floor: bigint) {
+  return treasuryLamports >= lamports + floor;
+}
+
 export const gasRefillInput = z.object({ wallet: solanaAddressSchema, target: z.enum(["standard", "vault"]).optional() });

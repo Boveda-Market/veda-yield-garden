@@ -6,7 +6,7 @@ import { loadDlmmSdk } from "@/lib/dlmm-sdk.server";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount, type ChainPoolConfig, type ChainPosition } from "@/lib/solana-data";
 import { FEE_WALLET } from "@/lib/fees";
 import { compactDepositInstructions } from "@/lib/compact-deposit";
-import { computeBudgetIxs, computeLimit, MAX_COMPUTE_UNITS } from "@/lib/compute-budget";
+import { computeBudgetIxs, computeLimit, MAX_COMPUTE_UNITS, networkFeeOf } from "@/lib/compute-budget";
 import { simulationAmounts, simulationDisplay, type SimulationInput, type SimulationResult, type SimulationStage } from "@/lib/deposit-simulation";
 import type { PreparedPilot } from "@/lib/pilot-deposit";
 import { harvestAmounts, type HarvestResult } from "@/lib/harvest";
@@ -321,8 +321,7 @@ export async function simulateDlmmWithdrawal(connection: Connection, input: With
       const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...stripBudget(instructions)]) }).compileToV0Message(tables));
       const bytes = tx.serialize().length;
       if (bytes > 1232) throw new Error("Tamaño excedido");
-      const fee = await connection.getFeeForMessage(tx.message, "confirmed");
-      if (fee.value === null) throw new Error("Coste de red no disponible");
+      const fee = { value: await networkFeeOf(connection, tx.message, units) };
       const response = await connection.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
       if (response.value.err || !response.value.accounts || response.value.accounts.length !== addresses.length) throw new Error("Simulación rechazada");
       return { tx, accounts: response.value.accounts, bytes, networkFee: BigInt(fee.value), units: response.value.unitsConsumed };
@@ -497,10 +496,10 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     const simulate = async (units = MAX_COMPUTE_UNITS) => {
       const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...instructions]) }).compileToV0Message());
       if (tx.serialize().length > 1232) throw new Error("Tamaño excedido");
-      const fee = await connection.getFeeForMessage(tx.message, "confirmed");
+      const fee = { value: await networkFeeOf(connection, tx.message, units) };
       const r = await connection.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
       if (r.value.err || !r.value.accounts || r.value.accounts.length !== addresses.length) throw new Error(`Simulación rechazada ${JSON.stringify(r.value.err)}`);
-      return { tx, accounts: r.value.accounts, units: r.value.unitsConsumed, networkFee: BigInt(fee.value ?? 0) };
+      return { tx, accounts: r.value.accounts, units: r.value.unitsConsumed, networkFee: fee.value };
     };
     stage = "Simulación del rebalanceo";
     const sized = await simulate();

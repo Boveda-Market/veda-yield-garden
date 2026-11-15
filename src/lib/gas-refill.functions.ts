@@ -1,6 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requirePrivyAuth } from "@/lib/privy-auth.middleware";
-import { gasRefillInput, refillCharge, refillLamports } from "@/lib/gas-refill";
+import { gasRefillInput, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
+
+const UNAVAILABLE = "La recarga automática no está disponible en este momento. Ya avisamos al equipo; inténtalo de nuevo más tarde. No se movió dinero.";
+let lastTreasuryAlert = 0;
 
 type Fail = { success: false; error: string };
 
@@ -19,12 +22,21 @@ export const prepareGasRefill = createServerFn({ method: "POST" })
       const sol = BigInt(await heliusConnection(key).getBalance(new PublicKey(data.wallet), "confirmed"));
       const lamports = refillLamports(sol, data.target ?? "standard");
       if (lamports <= 0n) return { success: false, error: "Tu reserva para operaciones ya está bien." };
+      const { FEE_WALLET } = await import("@/lib/fees");
+      const { TREASURY_SOL_LOW } = await import("@/lib/treasury-reserve");
+      const treasury = BigInt(await heliusConnection(key).getBalance(new PublicKey(FEE_WALLET), "confirmed"));
+      if (!treasuryCanRefill(treasury, lamports, TREASURY_SOL_LOW)) {
+        if (Date.now() - lastTreasuryAlert > 30 * 60_000) {
+          lastTreasuryAlert = Date.now();
+          try { const tg = await import("@/lib/telegram.server"); await tg.treasuryAlert(`⚠️ <b>Recarga de reserva bloqueada</b>\nUn usuario necesita ${(Number(lamports) / 1e9).toFixed(4)} SOL y la tesorería solo tiene ${(Number(treasury) / 1e9).toFixed(4)} SOL. Recarga la tesorería.`); } catch { /* best-effort */ }
+        }
+        return { success: false, error: UNAVAILABLE };
+      }
       const SOL = "So11111111111111111111111111111111111111112", USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
       const q = await fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${SOL}&outputMint=${USDC}&amount=${lamports}&slippageBps=50`);
       if (!q.ok) throw new Error("quote");
       const market = BigInt(((await q.json()) as { outAmount: string }).outAmount);
       const charge = refillCharge(market);
-      const { FEE_WALLET } = await import("@/lib/fees");
       const { buildGasRefill } = await import("@/lib/affiliate.server");
       const transaction = await buildGasRefill(key, secret, FEE_WALLET, data.wallet, lamports, charge);
       return { success: true, transaction, lamports: lamports.toString(), chargeMicro: charge.toString() };

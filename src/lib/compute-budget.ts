@@ -1,4 +1,4 @@
-import { ComputeBudgetProgram, type TransactionInstruction } from "@solana/web3.js";
+import { ComputeBudgetProgram, type Connection, type TransactionInstruction, type VersionedMessage } from "@solana/web3.js";
 
 /** Modest fixed priority price; an explicit price stops wallets adding inflated congestion fees. */
 export const PRIORITY_MICRO_LAMPORTS = 20_000;
@@ -12,4 +12,22 @@ export function computeLimit(unitsConsumed: number | undefined | null): number {
 
 export function computeBudgetIxs(units: number): TransactionInstruction[] {
   return [ComputeBudgetProgram.setComputeUnitLimit({ units }), ComputeBudgetProgram.setComputeUnitPrice({ microLamports: PRIORITY_MICRO_LAMPORTS })];
+}
+
+/** Network fee the protocol charges: 5,000 lamports per signature plus the priority price on the compute limit. */
+export function expectedNetworkFee(signatures: number, units: number): bigint {
+  return 5_000n * BigInt(signatures) + (BigInt(units) * BigInt(PRIORITY_MICRO_LAMPORTS) + 999_999n) / 1_000_000n;
+}
+
+/**
+ * Asks the node for the fee; a node that has not seen our fresh blockhash yet answers null,
+ * so retry briefly and then fall back to the protocol formula instead of failing the operation.
+ */
+export async function networkFeeOf(connection: Connection, message: VersionedMessage, units: number): Promise<bigint> {
+  for (let i = 0; i < 2; i++) {
+    const fee = await connection.getFeeForMessage(message, "confirmed").catch(() => null);
+    if (fee?.value != null) return BigInt(fee.value);
+    await new Promise((r) => setTimeout(r, 400));
+  }
+  return expectedNetworkFee(message.header.numRequiredSignatures, units);
 }

@@ -57,7 +57,7 @@ export async function buildAffiliateClaim(apiKey: string, secret: string, payout
   ] }).compileToV0Message();
   const tx = new VersionedTransaction(message);
   tx.sign([kp]);
-  const sim = await conn.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: false });
+  const sim = await conn.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: true });
   if (sim.value.err) throw new Error("simulation failed");
   return Buffer.from(tx.serialize()).toString("base64");
 }
@@ -83,7 +83,7 @@ export async function buildGasRefill(apiKey: string, secret: string, treasury: s
   ] }).compileToV0Message();
   const tx = new VersionedTransaction(message);
   tx.sign([kp]);
-  const sim = await conn.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: false });
+  const sim = await conn.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: true });
   if (sim.value.err) throw new Error("simulation failed");
   return Buffer.from(tx.serialize()).toString("base64");
 }

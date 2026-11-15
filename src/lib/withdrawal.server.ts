@@ -9,7 +9,7 @@ import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount } from "@/lib/solana-data";
 import { FEE_WALLET } from "@/lib/fees";
 import { compactDepositInstructions } from "@/lib/compact-deposit";
-import { computeBudgetIxs, computeLimit, MAX_COMPUTE_UNITS } from "@/lib/compute-budget";
+import { computeBudgetIxs, computeLimit, MAX_COMPUTE_UNITS, networkFeeOf } from "@/lib/compute-budget";
 import { ledgerSwapToUsdc } from "@/lib/ledger-swap.server";
 import { simulateDlmmWithdrawal } from "@/lib/dlmm.server";
 import { withdrawalAmounts, exitFeeMode, partialLiquidity, type WithdrawalInput, type WithdrawalResult } from "@/lib/withdrawal";
@@ -77,8 +77,7 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput 
       const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...instructions.filter((ix) => !ix.programId.equals(ComputeBudgetProgram.programId))]) }).compileToV0Message(tables));
       const bytes = tx.serialize().length;
       if (bytes > 1232) throw new Error("Tamaño excedido");
-      const fee = await connection.getFeeForMessage(tx.message, "confirmed");
-      if (fee.value === null) throw new Error("Coste de red no disponible");
+      const fee = { value: await networkFeeOf(connection, tx.message, units) };
       const response = await connection.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: true, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
       if (response.value.err || !response.value.accounts || response.value.accounts.length !== addresses.length) throw new Error(`Simulación rechazada: ${JSON.stringify(response.value.err)} ${(response.value.logs ?? []).filter((l) => /error|failed|exceed|slippage/i.test(l)).slice(-3).join(" | ")}`);
       return { tx, accounts: response.value.accounts, bytes, networkFee: BigInt(fee.value), units: response.value.unitsConsumed };

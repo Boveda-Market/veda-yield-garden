@@ -32,6 +32,7 @@ import { Route as GuiasQueEsUsdcRouteImport } from './routes/guias/que-es-usdc'
 import { Route as GuiasRecargarConCoinbaseRouteImport } from './routes/guias/recargar-con-coinbase'
 import { Route as GuiasRetirarCashAppBitcoinRouteImport } from './routes/guias/retirar-cash-app-bitcoin'
 import { Route as ApiPublicJobsCheckSystemStatusRouteImport } from './routes/api/public/jobs/check-system-status'
+import { Route as ApiPublicJobsDebugLiveRouteImport } from './routes/api/public/jobs/debug-live'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -155,6 +156,11 @@ const ApiPublicJobsCheckSystemStatusRoute =
     path: '/api/public/jobs/check-system-status',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsDebugLiveRoute = ApiPublicJobsDebugLiveRouteImport.update({
+  id: '/api/public/jobs/debug-live',
+  path: '/api/public/jobs/debug-live',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicTelegramWebhookRoute =
   ApiPublicTelegramWebhookRouteImport.update({
     id: '/api/public/telegram/webhook',
@@ -202,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/guias/': typeof GuiasIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
+  '/api/public/jobs/debug-live': typeof ApiPublicJobsDebugLiveRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -231,6 +238,7 @@ export interface FileRoutesByTo {
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/guias': typeof GuiasIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
+  '/api/public/jobs/debug-live': typeof ApiPublicJobsDebugLiveRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -261,6 +269,7 @@ export interface FileRoutesById {
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/guias/': typeof GuiasIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
+  '/api/public/jobs/debug-live': typeof ApiPublicJobsDebugLiveRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/guias/retirar-cash-app-bitcoin'
     | '/guias/'
     | '/api/public/jobs/check-system-status'
+    | '/api/public/jobs/debug-live'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -321,6 +331,7 @@ export interface FileRouteTypes {
     | '/guias/retirar-cash-app-bitcoin'
     | '/guias'
     | '/api/public/jobs/check-system-status'
+    | '/api/public/jobs/debug-live'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -350,6 +361,7 @@ export interface FileRouteTypes {
     | '/guias/retirar-cash-app-bitcoin'
     | '/guias/'
     | '/api/public/jobs/check-system-status'
+    | '/api/public/jobs/debug-live'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -380,6 +392,7 @@ export interface RootRouteChildren {
   GuiasRetirarCashAppBitcoinRoute: typeof GuiasRetirarCashAppBitcoinRoute
   GuiasIndexRoute: typeof GuiasIndexRoute
   ApiPublicJobsCheckSystemStatusRoute: typeof ApiPublicJobsCheckSystemStatusRoute
+  ApiPublicJobsDebugLiveRoute: typeof ApiPublicJobsDebugLiveRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -549,6 +562,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsCheckSystemStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/debug-live': {
+      id: '/api/public/jobs/debug-live'
+      path: '/api/public/jobs/debug-live'
+      fullPath: '/api/public/jobs/debug-live'
+      preLoaderRoute: typeof ApiPublicJobsDebugLiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/telegram/webhook': {
       id: '/api/public/telegram/webhook'
       path: '/api/public/telegram/webhook'
@@ -604,6 +624,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuiasRetirarCashAppBitcoinRoute: GuiasRetirarCashAppBitcoinRoute,
   GuiasIndexRoute: GuiasIndexRoute,
   ApiPublicJobsCheckSystemStatusRoute: ApiPublicJobsCheckSystemStatusRoute,
+  ApiPublicJobsDebugLiveRoute: ApiPublicJobsDebugLiveRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
