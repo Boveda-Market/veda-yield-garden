@@ -22,7 +22,7 @@ const WIN_LABEL: Record<PredictWindow, string> = { "5m": "5 min", "15m": "15 min
 export function MarketsPanel(_: { identity: string }) {
   const t = useT();
   const [prices, setPrices] = useState<Partial<Record<MarketId, number>>>({});
-  const [series, setSeries] = useState<Record<MarketId, number[]>>({ SOL: [], BTC: [], ETH: [] });
+  const [series, setSeries] = useState<Record<MarketId, { t: number; v: number }[]>>({ SOL: [], BTC: [], ETH: [] });
   const [market, setMarket] = useState<MarketId>("BTC");
   const [win, setWin] = useState<PredictWindow>("5m");
   const [rounds, setRounds] = useState<LiveRound[]>([]);
@@ -38,7 +38,7 @@ export function MarketsPanel(_: { identity: string }) {
         const p = await fetchPrices();
         if (!alive) return;
         setPrices((o) => ({ ...o, ...p }));
-        setSeries((s) => { const n = { ...s }; for (const m of MARKETS) { const v = p[m.id]; if (v) n[m.id] = [...s[m.id], v].slice(-600); } return n; });
+        setSeries((s) => { const n = { ...s }; for (const m of MARKETS) { const v = p[m.id]; if (v) n[m.id] = [...s[m.id], { t: Date.now(), v }].slice(-12000); } return n; });
       } catch { /* retry next tick */ }
     };
     void tick(); const id = setInterval(tick, 1500);
@@ -65,6 +65,10 @@ export function MarketsPanel(_: { identity: string }) {
     return () => { alive = false; if (timer) clearTimeout(timer); };
   }, [skey]); // eslint-disable-line react-hooks/exhaustive-deps
   const strike = strikes[skey];
+  // Each round starts a fresh chart: only ticks since its opening, anchored on the new price to beat.
+  const openMs = round ? round.openTime * 1000 : 0;
+  const roundTicks = series[market].filter((x) => x.t >= openMs).map((x) => x.v);
+  const roundPoints = strike ? [strike, ...roundTicks] : roundTicks;
   const price = prices[market];
   const remaining = round ? Math.max(0, round.closeTime * 1000 - now) : 0;
   const total = round ? (round.closeTime - round.openTime) * 1000 : 1;
@@ -110,7 +114,7 @@ export function MarketsPanel(_: { identity: string }) {
               {price && strike && <p className={`text-[11px] font-semibold tabular-nums ${ahead ? "text-primary" : "text-destructive"}`}>{ahead ? "▲" : "▼"} ${num(Math.abs(price - strike), digits(price))}</p>}</div>
             <div className="flex gap-1 text-center">{(s >= 3600 ? [[Math.floor(s / 3600), t("HORAS")], [Math.floor(s / 60) % 60, t("MIN")], [s % 60, t("SEG")]] : [[Math.floor(s / 60), t("MIN")], [s % 60, t("SEG")]]).map(([v, l]) => <div key={String(l)} className={`min-w-11 rounded-lg px-1.5 py-1 ${round && remaining < 30_000 ? "bg-destructive/15 text-destructive" : "bg-secondary"}`}><p className="font-display text-xl font-bold tabular-nums">{round ? String(v).padStart(2, "0") : "--"}</p><p className="text-[9px] font-semibold text-muted-foreground">{l}</p></div>)}</div>
           </div>
-          {(() => { const diff = price && strike ? price - strike : 0; const dev = strike ? series[market].slice(-Math.max(2, Math.min(200, Math.ceil((now - (round?.openTime ?? 0) * 1000) / 1500)))).reduce((m, v) => Math.max(m, Math.abs(v - strike)), 0) : 0; const span = Math.max(dev, strike ? strike * 0.00005 : 1); const up = 50 + Math.max(-47, Math.min(47, (diff / span) * 47)); const lead = price && strike ? (diff >= 0 ? "up" : "down") : null; return <div className="mt-3" aria-label={t("Quién va ganando")}>
+          {(() => { const diff = price && strike ? price - strike : 0; const dev = strike ? roundTicks.slice(-Math.max(2, Math.min(200, Math.ceil((now - (round?.openTime ?? 0) * 1000) / 1500)))).reduce((m, v) => Math.max(m, Math.abs(v - strike)), 0) : 0; const span = Math.max(dev, strike ? strike * 0.00005 : 1); const up = 50 + Math.max(-47, Math.min(47, (diff / span) * 47)); const lead = price && strike ? (diff >= 0 ? "up" : "down") : null; return <div className="mt-3" aria-label={t("Quién va ganando")}>
             <div className="mb-1 flex justify-between text-[11px] font-bold tabular-nums"><span className={lead === "up" ? "text-primary" : "text-muted-foreground"}>▲ {t("Sube")}{lead === "up" && ` +$${num(Math.abs(diff), digits(price!))}`}</span><span className={lead === "down" ? "text-destructive" : "text-muted-foreground"}>{lead === "down" && `-$${num(Math.abs(diff), digits(price!))} `}{t("Baja")} ▼</span></div>
             <div className="relative flex h-2.5 overflow-hidden rounded-full bg-secondary"><div className="h-full bg-primary transition-[width] duration-300 ease-out" style={{ width: `${up}%` }} /><div className="h-full flex-1 bg-destructive" /><span className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-background" /></div>
           </div>; })()}
@@ -118,7 +122,7 @@ export function MarketsPanel(_: { identity: string }) {
       </section>
       {!loaded ? <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin" size={16} />{t("Buscando rondas en vivo…")}</p>
         : !round && <div role="status" className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/10 p-3 text-sm"><Loader2 className="mt-0.5 shrink-0 animate-spin text-primary" size={16} /><p><strong>{t("Esperando la próxima ronda de {m} ({w})…", { m: name, w: WIN_LABEL[win] })}</strong><br /><span className="text-muted-foreground">{t("Abre en breve. Mientras tanto puedes probar otra duración o cripto arriba.")}</span></p></div>}
-      <PredictLive round={round} chart={<div className="overflow-hidden rounded-3xl border border-border bg-card py-3"><PriceChart market={market} points={series[market]} price={price} reference={strike} referenceLabel={t("A batir")} window={win} /></div>} />
+      <PredictLive round={round} chart={<div className="overflow-hidden rounded-3xl border border-border bg-card py-3"><PriceChart key={`${market}-${win}-${round?.openTime ?? 0}`} market={market} points={roundPoints} price={price} reference={strike} referenceLabel={t("A batir")} window={win} /></div>} />
       <PendingClaims />
       <CompactOpenPredictions />
       <details className="rounded-2xl border border-primary/30 bg-primary/5 p-4"><summary className="cursor-pointer text-sm font-semibold">💡 {t("¿Cómo jugar en 4 pasos?")}</summary><div className="mt-3"><PredictSteps /></div></details>
