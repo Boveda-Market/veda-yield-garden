@@ -1,5 +1,7 @@
 import { MigrateBanner } from "./migrate-banner";
 import { Gta6PromoBanner } from "./gta6-promo";
+import { LoginSheet } from "./login-nudge";
+import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { MigratePicker } from "./migrate-picker";
 import { useQueries } from "@tanstack/react-query";
 import { poolYieldOptions } from "@/lib/pool-yield";
@@ -15,7 +17,9 @@ import { Link } from "@tanstack/react-router";
 import { useRealWallet } from "@/hooks/use-real-wallet";
 import { Button } from "@/components/ui/button";
 import { VAULTS, type Vault } from "@/lib/vaults";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+
+const PENDING_DEPOSIT = "boveda:pending-deposit";
 import { lazyWithReload } from "@/lib/lazy-reload";
 import { DepositSimulation } from "@/components/deposit-simulation";
 import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
@@ -36,6 +40,16 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   const [withdrawal, setWithdrawal] = useState<{ position?: string; vaultId: OperableVault; migrateTo?: Vault; rotate?: boolean } | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
   const [migrating, setMigrating] = useState(false);
+  const session = useBovedaSession();
+  const [loginFor, setLoginFor] = useState<Vault | null>(null);
+  // Visitors tapping Depositar get the sign-in sheet; the chosen vault opens by itself once the wallet is ready.
+  useEffect(() => {
+    if (!walletAddress) return;
+    let id: string | null = null;
+    try { id = sessionStorage.getItem(PENDING_DEPOSIT); sessionStorage.removeItem(PENDING_DEPOSIT); } catch { /* storage blocked */ }
+    const v = VAULTS.find((x) => x.id === id);
+    if (v && isOperableVault(v.id)) setSimulationVault(v);
+  }, [walletAddress]);
   const vaultYields = useQueries({ queries: VAULTS.map((v) => poolYieldOptions(v.pool)) });
   const aprs = Object.fromEntries(VAULTS.map((v, i) => [v.id, vaultYields[i]?.data?.apr ?? null]));
   const migrate = (p: import("@/lib/solana-data").ChainPosition, target: Vault, rotate = false) => { if (walletAddress && isOperableVault(p.vaultId) && isOperableVault(target.id) && target.id !== p.vaultId && !p.locked) setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target, ...(rotate ? { rotate: true } : {}) }); };
@@ -80,7 +94,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
     {portfolioOnly && <Suspense fallback={<p role="status">{t("Cargando portafolio…")}</p>}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
     {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && tab !== "predict" && <PortfolioEmpty />}
     {!portfolioOnly && <><div className="mb-2 mt-3 flex justify-end"><PoweredBy brand="meteora" /></div>
-    <div className="grid gap-3 md:grid-cols-2">{[...VAULTS].sort((a, b) => { const has = (v: Vault) => data?.positions.some((p) => p.vaultId === v.id) ?? false; if (has(a) !== has(b)) return has(a) ? -1 : 1; return has(a) ? (aprs[b.id] ?? -1) - (aprs[a.id] ?? -1) : Number(Boolean(b.badge)) - Number(Boolean(a.badge)); }).map((vault) => { const own = data?.positions.find((p) => p.vaultId === vault.id); const ownCount = data?.positions.filter((p) => p.vaultId === vault.id).length ?? 0; const ownedLink = ownCount > 0 ? <Link to="/portfolio" className="mt-3 inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{t("Tienes capital aquí · Ver en Portafolio")} →</Link> : null; const owned = own ? <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-2"><Button className="h-11 w-full text-base font-semibold" onClick={() => openPositionAction(own, "harvest")}><Sprout size={18} />{t("Cosechar ganancias")}</Button><div className="mt-2 grid grid-cols-2 gap-2"><Button variant="secondary" className="h-10 w-full px-2 font-semibold" onClick={() => openPositionAction(own, "compound")}><Repeat size={16} />{t("Reinvertir")}</Button><Button variant="outline" className="h-10 w-full border-primary/40 px-2 font-semibold" disabled={own.locked} onClick={() => openPositionAction(own, "exit")}><ArrowDownToLine size={16} />{t("Liquidar")}</Button>{!own.locked && isOperableVault(own.vaultId) && <MigratePicker position={own} aprs={aprs} onPick={migrate} />}</div></div> : null; const openDeposit = () => { const o = data?.positions.find((p) => p.vaultId === vault.id && !p.locked); setAddTo(o?.address ?? null); setSimulationVault(vault); }; const canAdd = data?.positions.some((p) => p.vaultId === vault.id && !p.locked) ?? false; const blocked = !walletAddress || !isOperableVault(vault.id); if (vault.badge) return <HotVaultCard key={vault.id} vault={vault} owned={owned} ownedLink={ownedLink} hasPosition={canAdd} depositDisabled={blocked} onDeposit={openDeposit} onDetails={() => onDetails(vault)} />; return <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-4">
+    <div className="grid gap-3 md:grid-cols-2">{[...VAULTS].sort((a, b) => { const has = (v: Vault) => data?.positions.some((p) => p.vaultId === v.id) ?? false; if (has(a) !== has(b)) return has(a) ? -1 : 1; return has(a) ? (aprs[b.id] ?? -1) - (aprs[a.id] ?? -1) : Number(Boolean(b.badge)) - Number(Boolean(a.badge)); }).map((vault) => { const own = data?.positions.find((p) => p.vaultId === vault.id); const ownCount = data?.positions.filter((p) => p.vaultId === vault.id).length ?? 0; const ownedLink = ownCount > 0 ? <Link to="/portfolio" className="mt-3 inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{t("Tienes capital aquí · Ver en Portafolio")} →</Link> : null; const owned = own ? <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-2"><Button className="h-11 w-full text-base font-semibold" onClick={() => openPositionAction(own, "harvest")}><Sprout size={18} />{t("Cosechar ganancias")}</Button><div className="mt-2 grid grid-cols-2 gap-2"><Button variant="secondary" className="h-10 w-full px-2 font-semibold" onClick={() => openPositionAction(own, "compound")}><Repeat size={16} />{t("Reinvertir")}</Button><Button variant="outline" className="h-10 w-full border-primary/40 px-2 font-semibold" disabled={own.locked} onClick={() => openPositionAction(own, "exit")}><ArrowDownToLine size={16} />{t("Liquidar")}</Button>{!own.locked && isOperableVault(own.vaultId) && <MigratePicker position={own} aprs={aprs} onPick={migrate} />}</div></div> : null; const openDeposit = () => { if (!walletAddress && !session.authenticated) { try { sessionStorage.setItem(PENDING_DEPOSIT, vault.id); } catch { /* storage blocked */ } setLoginFor(vault); return; } const o = data?.positions.find((p) => p.vaultId === vault.id && !p.locked); setAddTo(o?.address ?? null); setSimulationVault(vault); }; const canAdd = data?.positions.some((p) => p.vaultId === vault.id && !p.locked) ?? false; const blocked = !isOperableVault(vault.id) || (!walletAddress && session.authenticated); if (vault.badge) return <HotVaultCard key={vault.id} vault={vault} owned={owned} ownedLink={ownedLink} hasPosition={canAdd} depositDisabled={blocked} onDeposit={openDeposit} onDetails={() => onDetails(vault)} />; return <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-4">
       <div className="flex items-center justify-between gap-2"><h3 className="flex min-w-0 items-center gap-2 font-display text-lg font-semibold"><TokenIcon symbol={vault.pair.split("/")[0] ?? ""} size={24} />{t(vault.name)}<span className="text-xs font-normal text-muted-foreground">{vault.pair}</span></h3>{vault.badge ? <span className="shrink-0 animate-pulse rounded-full border border-primary/50 bg-primary/15 px-2 py-0.5 text-[11px] font-bold text-primary motion-reduce:animate-none">{t(vault.badge)}</span> : <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{t("Riesgo")}{" "}{t(vault.risk)}</span>}</div>
       <PoolYield compact address={vault.pool} />
       {ownedLink}
@@ -89,6 +103,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <div className="mt-3 grid grid-cols-2 gap-2"><Button variant="outline" className="h-10 w-full" onClick={() => onDetails(vault)}>{t("Detalles del pool")}</Button>
       <Button variant="default" className="h-11 w-full text-base font-bold shadow-md ring-2 ring-primary/30" disabled={blocked} onClick={openDeposit}>{canAdd ? <><Plus size={18} strokeWidth={3} />{t("Añadir más")}</> : t("Depositar")}</Button></div>
     </article>; })}</div>{!(data && data.positions.length > 0) && <><VaultSteps className="mt-6" /><StartGuide className="mt-4" /></>}</>}
+    <LoginSheet open={!!loginFor} onOpenChange={(o) => { if (!o) setLoginFor(null); }} title={t("Entra para depositar")} body={loginFor ? t("Al entrar te llevamos directo a {v} para depositar.", { v: t(loginFor.name) }) : undefined} />
     {simulationVault && <DepositSimulation key={`${simulationVault.id}-${addTo ?? "new"}`} vault={simulationVault} wallet={walletAddress} {...(addTo ? { position: addTo } : {})} initialAmount={depositAmount} migrate={migrating} onClose={() => { setSimulationVault(null); setAddTo(null); setDepositAmount(""); setMigrating(false); }} />}
     {harvest && walletAddress && <HarvestDialog wallet={walletAddress} position={harvest.position} vaultId={harvest.vaultId} onClose={() => setHarvest(null)} compound={harvest.compound} />}
     {withdrawal && <WithdrawalSimulation wallet={walletAddress} {...withdrawal} onClose={() => setWithdrawal(null)} onMigrated={(usdc, target) => { setWithdrawal(null); if (target) { setAddTo(null); setDepositAmount(usdc); setMigrating(true); setSimulationVault(target); } }} />}

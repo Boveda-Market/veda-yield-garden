@@ -5,6 +5,7 @@ import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
 const mocks = vi.hoisted(() => ({ positions: [] as object[] }));
 vi.mock("@tanstack/react-router", () => ({ Link: ({ children }: { children: unknown }) => children }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@/hooks/use-boveda-session", async (orig) => ({ ...(await orig<object>()), useBovedaSession: () => ({ authenticated: true, ready: true, login: vi.fn() }) }));
 vi.mock("@/lib/coinbase-offramp.functions", () => ({ startCoinbaseBuy: vi.fn(), coinbaseOnrampStatus: vi.fn(), recordCoinbaseOnramp: vi.fn(), startCoinbaseSell: vi.fn(), coinbaseSellStatus: vi.fn() }));
 vi.mock("@/components/open-predictions", () => ({ WalletOpenPredictions: () => null, OpenPredictions: () => null, useOpenPredictions: () => ({ items: [] }) }));
 vi.mock("@/components/pending-claims", () => ({ PendingClaims: () => null }));

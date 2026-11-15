@@ -119,4 +119,6 @@ export const rangeVaults: Record<string, string> = {
   "Entrar a la Bóveda GTA6": "Enter the GTA6 Vault",
   "APR estimado de las últimas 24 h, cambia cada día. Moneda muy volátil, sin vínculo con Rockstar Games.": "Estimated APR from the last 24 h, changes daily. Very volatile coin, not affiliated with Rockstar Games.",
   "Ver Doble o Nada": "Watch Double or Nothing",
+  "Entra para depositar": "Sign in to deposit",
+  "Al entrar te llevamos directo a {v} para depositar.": "Once you sign in, we take you straight to {v} to deposit.",
 };

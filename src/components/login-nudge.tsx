@@ -38,15 +38,23 @@ export function LoginNudge() {
     const cleanup = () => { window.clearTimeout(timer); window.removeEventListener("scroll", onScroll); };
     return cleanup;
   }, [signedIn, session.ready]);
-  useEffect(() => { if (signedIn) setOpen(false); }, [signedIn]);
-  return <Dialog open={open} onOpenChange={setOpen}>
+  return <LoginSheet open={open} onOpenChange={setOpen} />;
+}
+
+/** Sign-in sheet (Google first), shared by the timed nudge and by actions that need an account, e.g. Depositar. */
+export function LoginSheet({ open, onOpenChange, title, body }: { open: boolean; onOpenChange: (o: boolean) => void; title?: string | undefined; body?: string | undefined }) {
+  const t = useT();
+  const session = useBovedaSession();
+  useEffect(() => { if (session.authenticated && open) onOpenChange(false); }, [session.authenticated, open, onOpenChange]);
+  const close = () => onOpenChange(false);
+  return <Dialog open={open} onOpenChange={onOpenChange}>
     <ActionSheetContent>
-      <DialogTitle className="pr-10 font-display text-xl">{t("¿Listo para tu primera jugada?")}</DialogTitle>
-      <DialogDescription asChild><div><CoinbaseNote /></div></DialogDescription>
+      <DialogTitle className="pr-10 font-display text-xl">{title ?? t("¿Listo para tu primera jugada?")}</DialogTitle>
+      <DialogDescription asChild><div>{body && <p className="mb-2 text-sm text-muted-foreground">{body}</p>}<CoinbaseNote /></div></DialogDescription>
       <div className="mt-4 grid gap-2">
-        <GoogleButton className="h-12 w-full" onClick={() => { setOpen(false); session.login("google"); }}>{t("Continuar con Google")}</GoogleButton>
-        <Button variant="secondary" className="h-11 w-full" onClick={() => { setOpen(false); session.login("email"); }}>{t("Entrar con email")}</Button>
-        <Button variant="ghost" className="w-full" onClick={() => setOpen(false)}>{t("Seguir mirando")}</Button>
+        <GoogleButton className="h-12 w-full" onClick={() => { close(); session.login("google"); }}>{t("Continuar con Google")}</GoogleButton>
+        <Button variant="secondary" className="h-11 w-full" onClick={() => { close(); session.login("email"); }}>{t("Entrar con email")}</Button>
+        <Button variant="ghost" className="w-full" onClick={close}>{t("Seguir mirando")}</Button>
       </div>
     </ActionSheetContent>
   </Dialog>;
