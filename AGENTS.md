@@ -62,3 +62,4 @@ use the editor.
 - Operation feedback: transient confirmations use notify() pills (src/lib/notify.tsx, Toaster mounted once in __root); confirmed vault/swap operations end on the shared ActionSuccess receipt, which never auto-dismisses, so users always see a calm, consistent proof of what happened.
 - Wallet actions (add funds, withdraw, swap, send, receive) open in the shared ActionSheetContent (src/components/ui/action-sheet.tsx) inside a Dialog root: bottom sheet with swipe-to-close on phones, centered card on desktop, so actions never jump the page scroll.
 - Resolve browser theme preferences through src/lib/theme.ts for both pre-paint initialization and the selector, so defaults and storage-failure behavior stay consistent.
+- Dev SSR loads the DLMM SDK's CommonJS file through a `\0dlmm-cjs` createRequire wrapper (vite.config.ts, serve-only); Vite's module runner otherwise evaluates the aliased CJS as ESM and every wallet read fails. Builds keep the plain alias.

@@ -33,6 +33,16 @@ export default defineConfig({
     optimizeDeps: { include: ["buffer", "bs58", "@solana/kit", "@privy-io/react-auth", "@privy-io/react-auth/solana", "@privy-io/react-auth/ui"] },
     define: { "process.env.ANCHOR_BROWSER": "true" },
     plugins: [{
+      // Dev SSR only: the alias above points at a CommonJS file, which Vite's module runner would
+      // evaluate as ESM ("exports is not defined"). Serve a tiny wrapper that lets Node require it.
+      // Builds keep the alias so the Worker bundle includes the transformed CommonJS.
+      name: "dev-ssr-dlmm-native",
+      apply: "serve",
+      enforce: "pre",
+      applyToEnvironment: (environment) => environment.name === "ssr",
+      resolveId(id) { return id === dlmmCjs || id === "@meteora-ag/dlmm" ? "\0dlmm-cjs" : null; },
+      load(id) { return id === "\0dlmm-cjs" ? `import { createRequire } from "node:module";\nexport default createRequire(${JSON.stringify(dlmmCjs)})(${JSON.stringify(dlmmCjs)});` : null; },
+    }, {
       // WalletConnect imports Node's events. Without this, the client build
       // emits an empty browser stub and its EventEmitter constructor fails.
       // A per-environment resolve.alias is not applied to these imports.

@@ -5,7 +5,6 @@ import { CHAIN_POOLS, USDC_MINT, tokenAmount, type ChainPosition, type RealWalle
 
 export { heliusConnection } from "@/lib/helius.server";
 import { heliusConnection } from "@/lib/helius.server";
-import { readDlmmPositions } from "@/lib/dlmm.server";
 
 export async function readRealWallet(apiKey: string, address: string): Promise<RealWalletData> {
   const connection = heliusConnection(apiKey);
@@ -63,6 +62,7 @@ export async function readRealWallet(apiKey: string, address: string): Promise<R
         tokenAmount: token, usdcAmount: usdcValue, feeTokenAmount: feeToken, feeUsdcAmount: feeUsdc, locked });
     }
   } catch { positionsComplete = false; }
-  try { positions.push(...await readDlmmPositions(connection, wallet)); } catch { positionsComplete = false; }
+  // Loaded on demand so a range-vault toolkit failure only marks positions incomplete instead of blocking balances.
+  try { const { readDlmmPositions } = await import("@/lib/dlmm.server"); positions.push(...await readDlmmPositions(connection, wallet)); } catch { positionsComplete = false; }
   return { wallet: address, sol: tokenAmount(String(sol), 9), usdc: tokenAmount(usdc.toString(), 6), positions, positionsComplete, checkedAt: new Date().toISOString() };
 }
