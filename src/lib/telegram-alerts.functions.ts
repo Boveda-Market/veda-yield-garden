@@ -145,3 +145,15 @@ export const notifyPredictRefunds = createServerFn({ method: "POST" })
       return { success: true };
     } catch { return { success: false }; }
   });
+
+/** Remembers the caller's wallet so the background job can send vault out-of-range alerts while the app is closed. */
+export const registerAlertWallet = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => req.extend({ wallet: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/) }).parse(i))
+  .handler(async ({ data }): Promise<{ success: boolean }> => {
+    try {
+      const { id, db } = await admin(data.token);
+      const t = db as unknown as { from: (x: string) => any };
+      const { error } = await t.from("telegram_links").update({ wallet: data.wallet }).eq("privy_user_id", id);
+      return { success: !error };
+    } catch { return { success: false }; }
+  });

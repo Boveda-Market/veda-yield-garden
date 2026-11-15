@@ -26,3 +26,50 @@ export function dlmmRange(activeId: number, moved: number, halfWidth = DLMM_HALF
 export function dlmmSlippagePct(moved: number, binStep: number) {
   return (moved + 3) * binStep / 100;
 }
+
+/** Out-of-range time before a position triggers its one personal alert (Telegram + bell). */
+export const RANGE_ALERT_MS = 10 * 60_000;
+/** Status-table key for a position's out-of-range tracking. */
+export const rangeKey = (position: string) => `range:${position}`;
+
+/** Alert once per out-of-range episode, only after it lasted RANGE_ALERT_MS. */
+export function rangeAlertDue(outSince: string | null | undefined, alerted: boolean, now: number) {
+  if (!outSince || alerted) return false;
+  const t = Date.parse(outSince);
+  return Number.isFinite(t) && now - t >= RANGE_ALERT_MS;
+}
+
+/**
+ * 50/50 rebalance plan: value both sides at the active price (raw Y per raw X) and swap half the
+ * excess of the heavier side inside the pool. Tiny imbalances (< 1% of value) skip the swap.
+ */
+export function rebalanceSwapPlan(x: bigint, y: bigint, price: number): { swapForY: boolean; amountIn: bigint } {
+  if (!(price > 0) || !Number.isFinite(price)) return { swapForY: true, amountIn: 0n };
+  const xValue = Number(x) * price, yValue = Number(y), total = xValue + yValue;
+  if (total <= 0 || Math.abs(xValue - yValue) < total / 100) return { swapForY: true, amountIn: 0n };
+  if (xValue > yValue) {
+    const inX = BigInt(Math.floor((xValue - yValue) / 2 / price));
+    return { swapForY: true, amountIn: inX > x ? x : inX };
+  }
+  const inY = BigInt(Math.floor((yValue - xValue) / 2));
+  return { swapForY: false, amountIn: inY > y ? y : inY };
+}
+
+/** Personal alert text when a range position has been out of range for 10 minutes. */
+export function rangeAlertText(vaultName: string, above: boolean) {
+  return `⚠️ <b>Tu ${vaultName} lleva más de 10 minutos fuera de rango</b>\nEl precio ${above ? "subió por encima" : "bajó por debajo"} de tu rango, así que no está generando comisiones.\n\n🔗 <a href="https://bovedamarket.app/wallet">Entra a BÓVEDA y rebalancéala con un toque</a>`;
+}
+
+export type RebalanceResult = {
+  success: boolean;
+  message: string;
+  tokenSymbol?: string;
+  /** Position value moved into the new centred range (dollars, at the active price). */
+  valueUsd?: string;
+  feesUsdc?: string;
+  feesToken?: string;
+  usdcLeft?: string;
+  tokenLeft?: string;
+  swapped?: "token" | "usdc" | "none";
+  prepared?: { transaction: string; expiresAt: number; lastValidBlockHeight: number; wallet: string; position: string };
+};

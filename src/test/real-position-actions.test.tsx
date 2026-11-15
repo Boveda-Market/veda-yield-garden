@@ -18,6 +18,7 @@ vi.mock("@/components/pool-yield", () => ({ PoolYield: () => null }));
 vi.mock("@/components/buy-usdc", () => ({ BuyUsdc: () => null }));
 vi.mock("@/components/real-portfolio-panel", () => ({ RealPortfolioPanel: () => null }));
 vi.mock("@/components/portfolio-summary", () => ({ PortfolioSummary: () => null }));
+vi.mock("@/components/rebalance-button", () => ({ RebalanceButton: () => null }));
 import { RealOverview } from "@/components/real-overview";
 
 afterEach(cleanup);

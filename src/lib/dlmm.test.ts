@@ -24,3 +24,24 @@ describe("range vault rules", () => {
     expect(refillLamports(70_000_000n, "vault")).toBe(0n);
   });
 });
+
+import { rangeAlertDue, rebalanceSwapPlan, RANGE_ALERT_MS } from "@/lib/dlmm";
+describe("range alerts", () => {
+  it("waits 10 minutes out of range, then alerts once", () => {
+    const now = Date.parse("2026-11-15T12:00:00Z");
+    expect(rangeAlertDue(new Date(now - 9 * 60_000).toISOString(), false, now)).toBe(false);
+    expect(rangeAlertDue(new Date(now - RANGE_ALERT_MS).toISOString(), false, now)).toBe(true);
+    expect(rangeAlertDue(new Date(now - 60 * 60_000).toISOString(), true, now)).toBe(false);
+  });
+});
+describe("50/50 rebalance plan", () => {
+  it("sells half of an all-token position", () => {
+    expect(rebalanceSwapPlan(1000n, 0n, 2)).toEqual({ swapForY: true, amountIn: 500n });
+  });
+  it("buys with half of an all-dollar position", () => {
+    expect(rebalanceSwapPlan(0n, 1000n, 2)).toEqual({ swapForY: false, amountIn: 500n });
+  });
+  it("skips the swap when already balanced", () => {
+    expect(rebalanceSwapPlan(500n, 1000n, 2).amountIn).toBe(0n);
+  });
+});

@@ -43,6 +43,8 @@ export type ChainPosition = {
   locked: boolean;
   /** Concentrated-liquidity only: the price left the position's range, so it is not earning fees. */
   outOfRange?: boolean;
+  /** Range vaults only: the price sits above the range (position is all dollars). */
+  priceAbove?: boolean;
 };
 export type RealWalletData = {
   wallet: string;

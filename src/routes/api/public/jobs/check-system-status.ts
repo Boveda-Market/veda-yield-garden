@@ -83,6 +83,29 @@ export const Route = createFileRoute("/api/public/jobs/check-system-status")({
             if (a) await db.from("system_service_status").upsert({ service: "treasury_sol", first_down_at: a === "low" ? new Date(now).toISOString() : null, operator_alerted: a === "low", public_alerted: false, updated_at: new Date(now).toISOString() }, { onConflict: "service" });
           }
         } catch { /* best-effort */ }
+        try {
+          // Range vaults: track out-of-range time per position; one personal alert after 10 min, reset when back in range or rebalanced.
+          const key = process.env["HELIUS_API_KEY"];
+          if (key) {
+            const { PublicKey } = await import("@solana/web3.js");
+            const { heliusConnection } = await import("@/lib/solana-read.server");
+            const { readDlmmPositions } = await import("@/lib/dlmm.server");
+            const { trackRangePositions } = await import("@/lib/range-monitor");
+            const { VAULTS } = await import("@/lib/vaults");
+            const connection = heliusConnection(key);
+            const { data: links } = await db.from("telegram_links").select("privy_user_id, wallet").not("chat_id", "is", null).not("wallet", "is", null).eq("alerts_enabled", true).limit(200);
+            for (const l of (links ?? []) as { privy_user_id: string; wallet: string }[]) {
+              const positions = await readDlmmPositions(connection, new PublicKey(l.wallet)).catch(() => null);
+              if (!positions) continue;
+              await trackRangePositions({
+                privyUserId: l.privy_user_id, positions, rows, now,
+                store: { save: (row) => db.from("system_service_status").upsert(row, { onConflict: "service" }), clear: (service) => db.from("system_service_status").delete().eq("service", service) },
+                alert: (id, html) => tg.userAlert(id, html, "range"),
+                vaultName: (id) => VAULTS.find((v) => v.id === id)?.name ?? "bóveda",
+              });
+            }
+          }
+        } catch { /* best-effort */ }
         return Response.json({ ok: true, down: checks.filter((c) => c.state === "down").map((c) => c.id) });
       },
     },

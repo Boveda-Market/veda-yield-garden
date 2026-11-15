@@ -13,7 +13,8 @@ import { harvestAmounts, type HarvestResult } from "@/lib/harvest";
 import { withdrawalAmounts, exitFeeMode, type WithdrawalInput, type WithdrawalResult } from "@/lib/withdrawal";
 import { ledgerSwapToUsdc } from "@/lib/ledger-swap.server";
 import { compoundSpendValid, type CompoundInput, type CompoundResult } from "@/lib/compound";
-import { dlmmRange, dlmmSlippagePct, binsMoved, DLMM_MIN_SOL_LAMPORTS, DLMM_MAX_SWAP_IMPACT_PCT, DLMM_EXIT_MIN_PCT } from "@/lib/dlmm";
+import type { RebalanceResult } from "@/lib/dlmm";
+import { dlmmRange, dlmmSlippagePct, binsMoved, rebalanceSwapPlan, DLMM_MIN_SOL_LAMPORTS, DLMM_MAX_SWAP_IMPACT_PCT, DLMM_EXIT_MIN_PCT } from "@/lib/dlmm";
 
 type Sdk = Awaited<ReturnType<typeof loadDlmmSdk>>;
 type Pool = Awaited<ReturnType<Sdk["DLMM"]["create"]>>;
@@ -71,6 +72,7 @@ export async function readDlmmPositions(connection: Connection, wallet: PublicKe
         feeTokenAmount: tokenAmount(d.feeX.toString(), config.decimals), feeUsdcAmount: tokenAmount(d.feeY.toString(), 6),
         locked: false, // BÓVEDA never locks these; every operation re-checks the live lock point.
         outOfRange: activeBin.binId < d.lowerBinId || activeBin.binId > d.upperBinId,
+        ...(activeBin.binId > d.upperBinId ? { priceAbove: true } : {}),
       });
     }
   }
@@ -227,7 +229,7 @@ export async function simulateDlmmHarvest(connection: Connection, input: Withdra
     const before = await connection.getMultipleAccountsInfo(addresses);
     const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), xBefore = tokenBalance(asSim(before[1]), mintX, owner), feeBefore = tokenBalance(asSim(before[2]), usdc, feeOwner);
     stage = "Preparación de la cosecha";
-    const claims = await pool.claimSwapFee({ owner, position: owned.lb });
+    const claims = data.feeX.isZero() && data.feeY.isZero() ? [] : await pool.claimSwapFee({ owner, position: owned.lb });
     if (claims.length !== 1) return fail("Esta cosecha necesitaría varias firmas; no se preparó.");
     const claimIxs = stripBudget(claims[0]!.instructions);
     const block = await connection.getLatestBlockhash();
@@ -425,5 +427,108 @@ export async function prepareDlmmCompound(connection: Connection, input: Compoun
   } catch (error) {
     log("compound", "", error);
     return fail("No se pudo preparar la reinversión. No se firmó ni envió nada.");
+  }
+}
+
+export type { RebalanceResult } from "@/lib/dlmm";
+
+/**
+ * One-signature 50/50 rebalance of an owner-verified range position: claim fees, remove all liquidity,
+ * swap half the excess side inside the same pool, then re-centre the same position on the current price
+ * with everything (capital + fees). 0% BÓVEDA fee; only the owner signs; the wallet never loses prior balances.
+ */
+export async function simulateDlmmRebalance(connection: Connection, input: WithdrawalInput, options: { prepare?: boolean } = {}): Promise<RebalanceResult> {
+  const startedAt = Date.now();
+  let stage = "Lectura de posición";
+  const fail = (message: string): RebalanceResult => ({ success: false, message });
+  try {
+    if (await connection.getGenesisHash() !== MAINNET) return fail("La conexión no corresponde a la red principal.");
+    const config = dlmmConfig(input.vaultId);
+    if (!config) return fail("Esta bóveda no admite rebalanceo.");
+    const opened = await openPool(connection, config);
+    if (!opened) return fail("Los tokens o programas de este pool no están validados.");
+    const { sdk, pool } = opened;
+    const owner = new PublicKey(input.wallet), position = new PublicKey(input.position), usdc = new PublicKey(USDC_MINT), mintX = new PublicKey(config.mint);
+    const owned = await ownedPosition(connection, sdk, pool, owner, position);
+    if (!owned) return fail("La posición no pertenece a esta wallet y bóveda.");
+    if (owned.locked) return fail("Esta posición está bloqueada y no se puede rebalancear.");
+    const data = owned.lb.positionData;
+    const active = pool.lbPair.activeId;
+    if (active >= data.lowerBinId && active <= data.upperBinId) return fail("Tu posición está dentro del rango y ya genera ganancias; no necesita rebalanceo.");
+    const x = rawFloor(data.totalXAmount) + BigInt(data.feeX.toString()), y = rawFloor(data.totalYAmount) + BigInt(data.feeY.toString());
+    if (x === 0n && y === 0n) return fail("Esta posición no tiene saldo para rebalancear.");
+    const price = Number(sdk.getPriceOfBinByBinId(active, pool.lbPair.binStep).toString());
+    const usdcAta = getAssociatedTokenAddressSync(usdc, owner), tokenX = getAssociatedTokenAddressSync(mintX, owner);
+    const addresses = [usdcAta, tokenX, position, owner];
+    const before = await connection.getMultipleAccountsInfo(addresses);
+    const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), xBefore = tokenBalance(asSim(before[1]), mintX, owner);
+    if (await connection.getBalance(owner) < 10_000_000) return fail("Necesitas un poco más de reserva de operaciones para rebalancear.");
+
+    stage = "Preparación del rebalanceo";
+    const claims = data.feeX.isZero() && data.feeY.isZero() ? [] : await pool.claimSwapFee({ owner, position: owned.lb });
+    const removals = await pool.removeLiquidity({ user: owner, position, fromBinId: data.lowerBinId, toBinId: data.upperBinId, bps: new BN(10_000), shouldClaimAndClose: false });
+    if (claims.length > 1 || removals.length !== 1) return fail("Este rebalanceo necesitaría varias firmas; no se preparó.");
+    // Withdrawn amounts are SDK estimates; keep a small margin so the swap never touches prior wallet balances.
+    const plan = rebalanceSwapPlan(x * 995n / 1000n, y * 995n / 1000n, price);
+    let swapIxs: TransactionInstruction[] = [], outMin = 0n;
+    if (plan.amountIn > 0n) {
+      stage = "Cotización del intercambio";
+      const binArrays = await pool.getBinArrayForSwap(plan.swapForY, 4);
+      const quote = pool.swapQuote(new BN(plan.amountIn.toString()), plan.swapForY, new BN(100), binArrays);
+      if (Number(quote.priceImpact.toString()) > DLMM_MAX_SWAP_IMPACT_PCT) return fail("Ahora mismo el rebalanceo movería demasiado el precio de esta bóveda. Prueba en unos minutos.");
+      if (quote.minOutAmount.isZero()) return fail("No hay liquidez suficiente para rebalancear ahora.");
+      outMin = BigInt(quote.minOutAmount.toString());
+      const [inToken, outToken] = plan.swapForY ? [mintX, usdc] : [usdc, mintX];
+      const swapTx = await pool.swap({ inToken, outToken, inAmount: new BN(plan.amountIn.toString()), minOutAmount: quote.minOutAmount, lbPair: pool.pubkey, user: owner, binArraysPubkey: quote.binArraysPubkey });
+      swapIxs = stripBudget(swapTx.instructions);
+    }
+    const depX = (plan.swapForY ? x - plan.amountIn : x + outMin) * 99n / 100n;
+    const depY = (plan.swapForY ? y + outMin : y - plan.amountIn) * 99n / 100n;
+    if (depX <= 0n && depY <= 0n) return fail("El saldo es demasiado pequeño para rebalancear.");
+    stage = "Nuevo rango centrado";
+    // Snapshot of the same position after the removal: no liquidity and no fees left.
+    const emptied = { ...data, totalXAmount: "0", totalYAmount: "0", feeX: new BN(0), feeY: new BN(0), rewardOne: new BN(0), rewardTwo: new BN(0), positionBinData: data.positionBinData.map((b) => ({ ...b, positionXAmount: "0", positionYAmount: "0", positionFeeXAmount: "0", positionFeeYAmount: "0", positionLiquidity: "0" })) } as typeof data;
+    const plannedRebalance = await pool.simulateRebalancePositionWithBalancedStrategy(position, emptied, sdk.StrategyType.Spot, new BN(depX.toString()), new BN(depY.toString()), new BN(0), new BN(0));
+    if (plannedRebalance.binArrayCount > 0) return fail("El precio actual está en una zona sin liquidez preparada; rebalancear costaría una reserva extra no recuperable. Prueba más tarde.");
+    const rebalance = await pool.rebalancePosition(plannedRebalance, new BN(3), owner, 1);
+    if (rebalance.initBinArrayInstructions.length) return fail("El precio actual está en una zona sin liquidez preparada. Prueba más tarde.");
+    const instructions = stripBudget([...(claims[0]?.instructions ?? []), ...removals[0]!.instructions, ...swapIxs, ...rebalance.rebalancePositionInstruction]);
+    const block = await connection.getLatestBlockhash();
+    const simulate = async (units = MAX_COMPUTE_UNITS) => {
+      const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...instructions]) }).compileToV0Message());
+      if (tx.serialize().length > 1232) throw new Error("Tamaño excedido");
+      const fee = await connection.getFeeForMessage(tx.message, "confirmed");
+      const r = await connection.simulateTransaction(tx, { sigVerify: false, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
+      if (r.value.err || !r.value.accounts || r.value.accounts.length !== addresses.length) throw new Error(`Simulación rechazada ${JSON.stringify(r.value.err)}`);
+      return { tx, accounts: r.value.accounts, units: r.value.unitsConsumed, networkFee: BigInt(fee.value ?? 0) };
+    };
+    stage = "Simulación del rebalanceo";
+    const sized = await simulate();
+    const final = await simulate(computeLimit(sized.units));
+    const usdcLeft = tokenBalance(final.accounts[0], usdc, owner) - usdcBefore, tokenLeft = tokenBalance(final.accounts[1], mintX, owner) - xBefore;
+    const pa = final.accounts[2];
+    let rangeOk = false;
+    if (pa?.data[0] && pa.owner === pool.program.programId.toBase58()) {
+      const state = sdk.wrapPosition(pool.program, position, { data: Buffer.from(pa.data[0], "base64"), owner: pool.program.programId, lamports: pa.lamports, executable: false } as AccountInfo<Buffer>);
+      rangeOk = state.lbPair().equals(pool.pubkey) && state.owner().equals(owner) && state.lowerBinId().toNumber() <= active && state.upperBinId().toNumber() >= active && state.liquidityShares().some((s) => !s.isZero());
+    }
+    const solSpent = BigInt(before[3]?.lamports ?? 0) - BigInt(final.accounts[3]?.lamports ?? 0);
+    const newAtaRent = [0, 1].reduce((sum, i) => sum + BigInt(before[i] ? 0 : final.accounts[i]?.lamports ?? 0), 0n);
+    const checks = { range: rangeOk, balances: usdcLeft >= 0n && tokenLeft >= 0n, budget: solSpent <= final.networkFee + newAtaRent + 2_000_000n };
+    const success = Object.values(checks).every(Boolean);
+    if (!success) { log("rebalance", "checks", JSON.stringify({ ...checks, solSpent: solSpent.toString() })); return fail("El rebalanceo no superó todas las comprobaciones. No se pidió ninguna firma."); }
+    if (options.prepare && Date.now() - startedAt > 45_000) return fail("La preparación tardó demasiado. Repite la revisión.");
+    const valueUsd = (Number(x) * price + Number(y)) / 1e6;
+    return {
+      success: true, tokenSymbol: config.symbol, valueUsd: valueUsd.toFixed(2),
+      feesUsdc: tokenAmount(data.feeY.toString(), 6), feesToken: tokenAmount(data.feeX.toString(), config.decimals),
+      usdcLeft: tokenAmount(usdcLeft.toString(), 6), tokenLeft: tokenAmount(tokenLeft.toString(), config.decimals),
+      swapped: plan.amountIn === 0n ? "none" : plan.swapForY ? "token" : "usdc",
+      message: "Rebalanceo verificado en simulación: tus ganancias se suman y tu posición vuelve a quedar centrada en el precio actual. Comisión 0%. Solo tu wallet puede firmar.",
+      ...(options.prepare ? { prepared: { transaction: Buffer.from(final.tx.serialize()).toString("base64"), expiresAt: startedAt + 45_000, lastValidBlockHeight: block.lastValidBlockHeight, wallet: input.wallet, position: input.position } } : {}),
+    };
+  } catch (error) {
+    log("rebalance", stage, error);
+    return fail(`No se pudo preparar el rebalanceo. Etapa: ${stage}. No se firmó ni envió nada; tu posición sigue intacta.`);
   }
 }

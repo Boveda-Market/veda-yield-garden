@@ -1,5 +1,5 @@
 /** Personal Telegram alert categories; each can be muted independently (all on by default). */
-export const ALERT_KINDS = ["harvest", "exit", "deposit", "withdraw", "predict", "commission"] as const;
+export const ALERT_KINDS = ["harvest", "exit", "deposit", "withdraw", "predict", "commission", "range"] as const;
 export type AlertKind = (typeof ALERT_KINDS)[number];
 
 export const ALERT_LABEL: Record<AlertKind, string> = {
@@ -9,6 +9,7 @@ export const ALERT_LABEL: Record<AlertKind, string> = {
   withdraw: "Retiros",
   predict: "Resultados y premios de Sube/Baja",
   commission: "Comisiones de afiliado",
+  range: "Bóvedas fuera de rango",
 };
 
 export const isAlertKind = (v: unknown): v is AlertKind => typeof v === "string" && (ALERT_KINDS as readonly string[]).includes(v);

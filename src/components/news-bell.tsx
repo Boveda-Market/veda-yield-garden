@@ -7,6 +7,7 @@ import { assetOfTitle } from "@/lib/predict";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { SUPPORT_URL } from "@/components/safety-notice";
 import { usePredictAlerts, type PredictAlert, type RefundAlert } from "@/hooks/use-predict-alerts";
+import { useRangeAlerts, type RangeAlert } from "@/hooks/use-range-alerts";
 import { ANNOUNCEMENTS, DISMISSED_KEY, SEEN_KEY, latestAnnouncementId, type AnnouncementKind } from "@/lib/announcements";
 
 const LABEL: Record<AnnouncementKind, string> = { vault: "Nueva bóveda", market: "Nuevo mercado", policy: "Aviso legal", update: "Novedad" };
@@ -21,7 +22,7 @@ function writeDismissed(ids: string[]) {
 }
 
 /** Announcement history, shared by the bell dialog and the Notifications section. Dismissals stay in this browser; new announcements still appear. */
-export function NewsList({ onNavigate, predict = [], refunds = [] }: { onNavigate?: () => void; predict?: PredictAlert[]; refunds?: RefundAlert[] }) {
+export function NewsList({ onNavigate, predict = [], refunds = [], ranges = [] }: { onNavigate?: () => void; predict?: PredictAlert[]; refunds?: RefundAlert[]; ranges?: RangeAlert[] }) {
   const t = useT();
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [showAll, setShowAll] = useState(false);
@@ -45,6 +46,12 @@ export function NewsList({ onNavigate, predict = [], refunds = [] }: { onNavigat
       <button type="button" onClick={() => setShowAll(false)} className="text-xs font-medium text-muted-foreground hover:text-foreground">{t("Ocultar historial")}</button>
     </div>}
     <ul className="space-y-3">
+      {ranges.map((a) => <li key={a.id} className="relative rounded-xl border border-destructive/40 bg-destructive/10 p-4">
+        <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-medium text-destructive">{t("Bóvedas")}</span>
+        <p className="mt-2 font-semibold">⚠️ {t("Bóveda {v} fuera de rango", { v: a.p.symbol })}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t("Lleva más de 10 minutos fuera de rango y no está generando. Rebalancéala con un toque.")}</p>
+        <Link to="/wallet" onClick={onNavigate} className="mt-3 inline-block text-sm font-medium text-primary">{t("Rebalancear en Mi Billetera")} →</Link>
+      </li>)}
       {refunded.map((a) => <li key={a.id} className="relative rounded-xl border border-primary/40 bg-primary/10 p-4">
         <button type="button" onClick={() => dismiss(a.id)} aria-label={t("Borrar notificación")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={14} /></button>
         <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">{t("Doble o Nada")}</span>
@@ -61,7 +68,7 @@ export function NewsList({ onNavigate, predict = [], refunds = [] }: { onNavigat
         <p className="mt-1 text-sm text-muted-foreground">{a.outcome === "won" ? t("Tu premio de ${v} está listo para reclamar.", { v: (Number(a.p.payoutMicro) / 1e6).toFixed(2) }) : t("La ronda terminó en tu contra. Invertiste ${v}.", { v: (Number(a.p.costMicro) / 1e6).toFixed(2) })}</p>
         {a.outcome === "won" && <Link to="/portfolio" onClick={onNavigate} className="mt-3 inline-block text-sm font-medium text-primary">{t("Reclamar premio")} →</Link>}
       </li>)}
-      {items.length === 0 && personal.length === 0 && refunded.length === 0 && <li className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
+      {items.length === 0 && personal.length === 0 && refunded.length === 0 && ranges.length === 0 && <li className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
         {ANNOUNCEMENTS.length === 0 ? t("No hay novedades por ahora.") : t("No tienes notificaciones pendientes.")}
         {ANNOUNCEMENTS.length > 0 && <button type="button" onClick={() => setShowAll(true)} className="mt-2 block w-full text-xs font-medium text-primary">{t("Ver historial completo")}</button>}
       </li>}
@@ -84,23 +91,26 @@ export function NewsBell() {
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(false);
   const predict = usePredictAlerts();
+  const ranges = useRangeAlerts();
+  const [seenRanges, setSeenRanges] = useState<string[]>([]);
+  const rangeUnread = ranges.some((a) => !seenRanges.includes(a.id));
   useEffect(() => {
     try { setUnread(ANNOUNCEMENTS.length > 0 && localStorage.getItem(SEEN_KEY) !== latestAnnouncementId()); } catch { /* ignore */ }
   }, []);
   const show = () => {
-    setOpen(true); setUnread(false); predict.markSeen();
+    setOpen(true); setUnread(false); predict.markSeen(); setSeenRanges(ranges.map((a) => a.id));
     try { localStorage.setItem(SEEN_KEY, latestAnnouncementId()); } catch { /* ignore */ }
   };
   return <>
     <button type="button" onClick={show} aria-label={t("Novedades")} className="relative grid h-10 w-10 place-items-center rounded-full border border-border bg-card">
       <Bell size={18} />
-      {(unread || predict.unread) && <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />}
+      {(unread || predict.unread || rangeUnread) && <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />}
     </button>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogTitle className="font-display">{t("Novedades")}</DialogTitle>
         <DialogDescription>{t("Nuevas bóvedas, mercados y cambios importantes.")}</DialogDescription>
-        <NewsList onNavigate={() => setOpen(false)} predict={predict.alerts} refunds={predict.refunds} />
+        <NewsList onNavigate={() => setOpen(false)} predict={predict.alerts} refunds={predict.refunds} ranges={ranges} />
         <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className="mt-2 block rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground">{t("Únete a nuestro canal de Telegram para enterarte primero")}</a>
       </DialogContent>
     </Dialog>
