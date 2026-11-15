@@ -16,7 +16,6 @@ export const CATEGORIES: { id: Cat | "all"; label: string }[] = [
   { id: "fees", label: "Comisiones" },
   { id: "wallet", label: "Wallet y acceso" },
   { id: "affiliates", label: "Afiliados" },
-  { id: "trial", label: "Prueba" },
 ];
 
 export const questions: Q[] = [
@@ -54,9 +53,6 @@ export const questions: Q[] = [
   { id: "wallet-install", cat: "wallet", question: "¿Puedo instalar BÓVEDA?", answer: "Sí, desde un navegador compatible puedes añadirla a tu pantalla de inicio. Necesitas internet para operar." },
   { id: "aff-how", cat: "affiliates", question: "¿Cómo funciona el programa de afiliados?", answer: "Compartes tu enlace y recibes 50% de las comisiones de depósito, cosecha, cierre, retiro y Sube/Baja de las personas que invites, más 10% de las que inviten ellas. Los cambios y envíos no generan comisión de afiliado." },
   { id: "aff-pay", cat: "affiliates", question: "¿Cuándo cobro mis comisiones de afiliado?", answer: "Se acreditan automáticamente después de cada operación confirmada. Desde 10 USDC acumulados tocas «Cobrar comisiones» y las recibes completas al instante; solo necesitas unos 0.003 SOL para la tarifa de red." },
-  { id: "trial-what", cat: "trial", question: "¿Puedo probar sin crear una cuenta?", answer: "Sí. Elige «Probar como invitado» y recibe 1,000 créditos ficticios. No necesitas wallet ni dinero. La prueba se guarda en este navegador." },
-  { id: "trial-diff", cat: "trial", question: "¿Cuál es la diferencia entre Real y Prueba?", answer: "Real usa dinero de tu wallet. Prueba usa 1,000 créditos ficticios y no mueve dinero." },
-  { id: "trial-cash", cat: "trial", question: "¿Puedo convertir los créditos en dinero?", answer: "No. Los créditos y las ganancias de Prueba son ficticios. No se pueden retirar ni pasar a Real." },
 ];
 
 const FEATURED = ["predict-claim", "vaults-partial", "fees-cost"];

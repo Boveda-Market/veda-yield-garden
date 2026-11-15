@@ -5,7 +5,6 @@ import reviewValeria from "@/assets/review-valeria.jpg";
 import reviewDavid from "@/assets/review-david.jpg";
 import reviewMarisol from "@/assets/review-marisol.jpg";
 import { Lock, Gift, Search, Star, Quote, MessageSquare, Send, Activity } from "lucide-react";
-import { allowTrialEntry } from "@/lib/trial-entry";
 import { useT } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ShieldCheck, Sparkles, ChevronDown } from "lucide-react";
@@ -97,10 +96,9 @@ function Landing() {
     <p className="mt-2 text-center text-sm text-muted-foreground">{t("Entra para ver tu wallet y tus ganancias.")}</p>
     <div className="mt-2 flex w-full max-w-sm flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0"><EntryAccess /></div>
     <button type="button" onClick={() => setCompact(false)} className="mt-6 text-sm text-primary underline underline-offset-4">{t("Ver portada completa")}</button>
-    <Link to="/prueba" onClick={allowTrialEntry} className="mt-3 text-xs text-muted-foreground underline underline-offset-4">{t("Demo sin riesgo")}</Link>
   </div>;
   return <div className="min-h-screen bg-background text-foreground">
-    <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-6 sm:px-6"><Link to="/" className="flex min-w-0 shrink-0 items-center gap-2 font-display text-lg font-bold sm:gap-3"><img src="/icon-512.png" alt="" className="h-9 w-9 shrink-0 rounded-lg" />BÓVEDA</Link><div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><Link to="/prueba" onClick={allowTrialEntry} className="flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/40 bg-primary/10 px-2.5 sm:px-3 text-xs font-semibold text-primary"><Sparkles size={13} />{t("Demo sin riesgo")}</Link></div></header>
+    <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-6 sm:px-6"><Link to="/" className="flex min-w-0 shrink-0 items-center gap-2 font-display text-lg font-bold sm:gap-3"><img src="/icon-512.png" alt="" className="h-9 w-9 shrink-0 rounded-lg" />BÓVEDA</Link><div className="flex min-w-0 items-center gap-1.5 sm:gap-2"></div></header>
     <main className="mx-auto max-w-5xl px-6">
       <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">
         <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(hero.title)}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t(hero.sub)}</p><TrustTicker /></div>
@@ -157,15 +155,6 @@ function Landing() {
             <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t("Únete a @bovedamarket: recibe alertas automáticas del estado de la red y de la app, avisos de seguridad y cada mejora en cuanto sale.")}</p>
             <p className="mt-4 flex max-w-xl items-start gap-2 rounded-xl border border-border bg-background/60 p-3 text-xs leading-5 text-muted-foreground"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-primary" /><span>{t("Nadie de BÓVEDA te escribirá primero por privado. Nunca te pediremos claves, frases de recuperación, códigos ni dinero para retirar. Si alguien lo hace, es una estafa.")}</span></p></div>
           <div className="flex shrink-0 flex-col gap-2"><Button asChild className="h-12"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer">{t("Unirme a @bovedamarket")}<ArrowRight size={16} /></a></Button><Link to="/status" search={{ from: "transparencia" }} className="flex items-center justify-center gap-1.5 text-sm text-primary underline"><Activity size={14} />{t("Ver estado del sistema")}</Link></div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-primary/30 bg-primary/5 p-6 sm:p-8">
-        <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Sparkles size={14} />{t("Simulador sin riesgo")}</p>
-            <h2 className="mt-2 font-display text-2xl font-bold">{t("Prueba primero, sin arriesgar dinero.")}</h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t("Recibe 1,000 créditos ficticios para depositar, cosechar ganancias y hacer cambios. Sin registro, sin wallet y sin mover dinero.")}</p></div>
-          <Button asChild className="h-12 shrink-0"><Link to="/prueba" onClick={allowTrialEntry}>{t("Probar como invitado")}<ArrowRight size={16} /></Link></Button>
         </div>
       </section>
 

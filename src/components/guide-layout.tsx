@@ -43,7 +43,7 @@ export function GuideLayout({ title, intro, minutes, current, children }: { titl
     <section className="mt-10 rounded-2xl border border-primary/30 bg-primary/10 p-6">
       <h2 className="font-display text-lg font-semibold">Pruébalo sin arriesgar nada</h2>
       <p className="mt-1 text-sm text-muted-foreground">Abre tu billetera en dólares o practica primero con 1,000 créditos ficticios.</p>
-      <div className="mt-4 flex flex-wrap gap-3"><Link to="/" className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Abrir mi billetera</Link><Link to="/prueba" className="rounded-xl border border-border px-4 py-2 text-sm font-semibold">Probar gratis</Link></div>
+      <div className="mt-4 flex flex-wrap gap-3"><Link to="/" className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Abrir mi billetera</Link></div>
     </section>
     <nav className="mt-10 border-t border-border pt-5"><h2 className="mb-3 text-sm font-semibold">Más guías</h2><ul className="space-y-2 text-sm text-primary">{GUIDES.filter((g) => g.to !== current).map((g) => <li key={g.to}><Link to={g.to}>{g.title}</Link></li>)}</ul>
       <p className="mt-6 text-xs text-muted-foreground">Contenido educativo, no es asesoría financiera. Las bóvedas pueden perder capital y no hay ganancias garantizadas. ¿Dudas? <a href="mailto:admin@bovedamarket.app" className="text-primary underline">admin@bovedamarket.app</a></p></nav>
