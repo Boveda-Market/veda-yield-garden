@@ -288,7 +288,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
         <ActionSheetContent closeLabel={t("Cerrar")} className="sm:max-w-sm">
           {placed?.phase === "active" ? <ActionSuccess destination="/portfolio" title={t("¡Predicción activa!")} amount={{ value: placed.cost, unit: "$", label: t(placed.side === "up" ? "Sube" : "Baja") }}
             body={t("Si aciertas, tu premio aparece en Ganancias para cobrarlo con un toque.")}
-            details={[{ label: t("Si aciertas recibes"), value: `$${placed.payout}` }, { label: t("Comisión de entrada"), value: t("Gratis") }]} signature={placed.sig} onClose={() => setPlaced(null)} />
+            details={[{ label: t("Si aciertas recibes"), value: `$${placed.payout}` }, { label: t("Comisión de entrada"), value: "$0.00" }]} signature={placed.sig} onClose={() => setPlaced(null)} />
           : placed && <>
             <DialogTitle className="pr-10 font-display text-xl">{placed.phase === "refunded" ? t("Orden no completada") : t("Entrando a la ronda")}</DialogTitle>
             <DialogDescription>{t("Pones ${a} · si aciertas recibes ${b}", { a: placed.cost, b: placed.payout })}</DialogDescription>

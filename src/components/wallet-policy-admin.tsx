@@ -54,7 +54,7 @@ export function WalletPolicyAdmin() {
       <div className="mt-6 flex items-start justify-between gap-4 border-t border-border pt-4">
         <div>
           <p className="font-medium">{t("Sugerencias de migración entre bóvedas")}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{t("Muestra el aviso «Migrar gratis» en la app y publica la alerta en Telegram cuando otra bóveda rinde 5% APR más. Mover capital cuesta ~1% en cambios de mercado; déjalo apagado salvo oportunidades claras.")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("Muestra el aviso «Migrar sin comisión» en la app y publica la alerta en Telegram cuando otra bóveda rinde 5% APR más. Mover capital cuesta ~1% en cambios de mercado; déjalo apagado salvo oportunidades claras.")}</p>
         </div>
         <Switch checked={migrate.data?.enabled ?? false} disabled={busy || migrate.isLoading} onCheckedChange={toggleMigrate} aria-label={t("Sugerencias de migración entre bóvedas")} />
       </div>

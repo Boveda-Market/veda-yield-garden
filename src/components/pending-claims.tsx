@@ -74,7 +74,7 @@ export function PendingClaims() {
     <ActionSheetContent closeLabel={t("Cerrar")} className="sm:max-w-sm">
       {flow?.receipt ? <ActionSuccess destination="/wallet" title={flow.receipt.partial ? t("¡Premio cobrado!") : t("¡Premio en tu billetera!")} amount={{ value: flow.receipt.net, unit: "$" }}
         body={flow.receipt.partial ? t("Tu premio ya es tuyo, pero falta pasarlo a dólares. Hazlo en Mi Billetera → Cambiar.") : t("Ya está en tus dólares disponibles.")}
-        details={[{ label: t("Operación"), value: t("Premio de Doble o Nada") }, { label: t("Comisión"), value: flow.receipt.fee === "0.00" ? t("Gratis") : `−$${flow.receipt.fee}` }]} signature={flow.receipt.sig} onClose={() => setFlow(null)} /> : flow && <>
+        details={[{ label: t("Operación"), value: t("Premio de Doble o Nada") }, { label: t("Comisión"), value: flow.receipt.fee === "0.00" ? "$0.00" : `−$${flow.receipt.fee}` }]} signature={flow.receipt.sig} onClose={() => setFlow(null)} /> : flow && <>
         <DialogTitle className="pr-10 font-display text-xl">{t("Cobrar premio")}</DialogTitle>
         <DialogDescription>{t("Premio de ${v}", { v: usdc(flow.p.payoutMicro || "0") })}</DialogDescription>
         <ProgressSteps steps={[t("Cobrar premio"), t("Pasar a dólares")]} current={flow.phase} />

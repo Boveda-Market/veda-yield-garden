@@ -117,7 +117,7 @@ function SellReview({ review, flow, onCancel, onConfirm }: { review: { p: Predic
     <ActionSheetContent closeLabel={t("Cerrar")} className="sm:max-w-sm">
       {flow?.receipt ? <ActionSuccess destination="/wallet" title={t("¡Posición cerrada!")} amount={{ value: flow.receipt.amount, unit: "$", label: "≈" }}
         body={flow.receipt.partial ? t("Ya vendiste, pero falta pasarlo a dólares. Hazlo en Mi Billetera → Cambiar.") : t("Ya está en tus dólares disponibles.")}
-        details={[{ label: t("Operación"), value: t("Cierre antes de tiempo") }, { label: t("Comisión"), value: t("Gratis") }]} signature={flow.receipt.sig} onClose={onCancel} />
+        details={[{ label: t("Operación"), value: t("Cierre antes de tiempo") }, { label: t("Comisión"), value: "$0.00" }]} signature={flow.receipt.sig} onClose={onCancel} />
       : flow ? <>
         <DialogTitle className="pr-10 font-display text-xl">{t("Cerrar antes de tiempo")}</DialogTitle>
         <DialogDescription>{est !== null ? t("Recibes aprox. ${v}", { v: usdcText(est) }) : t("Vendes al precio que el mercado paga en este momento.")}</DialogDescription>
