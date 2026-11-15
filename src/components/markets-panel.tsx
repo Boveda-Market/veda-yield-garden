@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Zap } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { PredictLive } from "@/components/predict-live";
-import { PriceChart } from "@/components/price-chart";
+import { PriceChart, type OddsPoint } from "@/components/price-chart";
 import { MARKETS, fetchPriceAt, fetchPrices, type MarketId } from "@/lib/markets";
 import { PREDICT_WINDOWS, type LiveRound, type PredictWindow } from "@/lib/predict";
 import { getLiveRounds } from "@/lib/predict.functions";
@@ -29,6 +29,8 @@ export function MarketsPanel(_: { identity: string }) {
   const [loaded, setLoaded] = useState(false);
   const [now, setNow] = useState(0);
   const [strikes, setStrikes] = useState<Record<string, number>>({});
+  // Live odds history per round (asset:window:openTime), so the duel follows the same numbers as the buttons.
+  const [oddsHist, setOddsHist] = useState<Record<string, OddsPoint[]>>({});
 
   useEffect(() => { setNow(Date.now()); const id = setInterval(() => setNow(Date.now()), 250); return () => clearInterval(id); }, []);
   useEffect(() => {
@@ -46,7 +48,20 @@ export function MarketsPanel(_: { identity: string }) {
   }, []);
   useEffect(() => {
     let alive = true;
-    const load = async () => { const r = await getLiveRounds(); if (alive) { setRounds(r.rounds); setLoaded(true); } };
+    const load = async () => {
+      const r = await getLiveRounds();
+      if (!alive) return;
+      setRounds(r.rounds); setLoaded(true);
+      setOddsHist((h) => {
+        const n: Record<string, OddsPoint[]> = {}, at = Date.now();
+        for (const x of r.rounds) {
+          const k = `${x.asset}:${x.window}:${x.openTime}`;
+          const ou = x.upPrice, od = x.downPrice;
+          n[k] = ou && od ? [...(h[k] ?? []), { t: at, up: ou / (ou + od) }].slice(-4000) : (h[k] ?? []);
+        }
+        return n;
+      });
+    };
     void load(); const id = setInterval(load, 4_000);
     return () => { alive = false; clearInterval(id); };
   }, []);
@@ -115,14 +130,16 @@ export function MarketsPanel(_: { identity: string }) {
             <div className="flex gap-1 text-center">{(s >= 3600 ? [[Math.floor(s / 3600), t("HORAS")], [Math.floor(s / 60) % 60, t("MIN")], [s % 60, t("SEG")]] : [[Math.floor(s / 60), t("MIN")], [s % 60, t("SEG")]]).map(([v, l]) => <div key={String(l)} className={`min-w-11 rounded-lg px-1.5 py-1 ${round && remaining < 30_000 ? "bg-destructive/15 text-destructive" : "bg-secondary"}`}><p className="font-display text-xl font-bold tabular-nums">{round ? String(v).padStart(2, "0") : "--"}</p><p className="text-[9px] font-semibold text-muted-foreground">{l}</p></div>)}</div>
           </div>
           {(() => { const diff = price && strike ? price - strike : 0; const dev = strike ? roundTicks.slice(-Math.max(2, Math.min(200, Math.ceil((now - (round?.openTime ?? 0) * 1000) / 1500)))).reduce((m, v) => Math.max(m, Math.abs(v - strike)), 0) : 0; const span = Math.max(dev, strike ? strike * 0.00005 : 1); const ou = round?.upPrice, od = round?.downPrice; const up = ou && od ? Math.max(3, Math.min(97, (ou / (ou + od)) * 100)) : 50 + Math.max(-47, Math.min(47, (diff / span) * 47)); const lead = price && strike ? (diff >= 0 ? "up" : "down") : null; return <div className="mt-3" aria-label={t("Quién va ganando")}>
-            <div className="mb-1 flex justify-between text-[11px] font-bold tabular-nums"><span className={lead === "up" ? "text-primary" : "text-muted-foreground"}>▲ {t("Sube")}{lead === "up" && ` +$${num(Math.abs(diff), digits(price!))}`}</span><span className={lead === "down" ? "text-destructive" : "text-muted-foreground"}>{lead === "down" && `-$${num(Math.abs(diff), digits(price!))} `}{t("Baja")} ▼</span></div>
+            {ou && od ? <div className="mb-1 flex justify-between text-[11px] font-bold tabular-nums"><span className={ou >= od ? "text-primary" : "text-muted-foreground"}>▲ {t("Sube")} {Math.round(ou * 100)}%</span><span className={od > ou ? "text-destructive" : "text-muted-foreground"}>{t("Baja")} {Math.round(od * 100)}% ▼</span></div>
+              : <div className="mb-1 flex justify-between text-[11px] font-bold tabular-nums"><span className={lead === "up" ? "text-primary" : "text-muted-foreground"}>▲ {t("Sube")}{lead === "up" && ` +$${num(Math.abs(diff), digits(price!))}`}</span><span className={lead === "down" ? "text-destructive" : "text-muted-foreground"}>{lead === "down" && `-$${num(Math.abs(diff), digits(price!))} `}{t("Baja")} ▼</span></div>}
             <div className="relative flex h-2.5 overflow-hidden rounded-full bg-secondary"><div className="h-full bg-primary transition-[width] duration-300 ease-out" style={{ width: `${up}%` }} /><div className="h-full flex-1 bg-destructive" /><span className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-background" /></div>
+            {ou && od && lead && (lead === "up") !== (ou >= od) && <p className="mt-1.5 text-[11px] text-muted-foreground">{t("El resultado oficial usa un precio promedio, no el precio de este instante. Los porcentajes ya lo toman en cuenta.")}</p>}
           </div>; })()}
           </div>
       </section>
       {!loaded ? <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin" size={16} />{t("Buscando rondas en vivo…")}</p>
         : !round && <div role="status" className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/10 p-3 text-sm"><Loader2 className="mt-0.5 shrink-0 animate-spin text-primary" size={16} /><p><strong>{t("Esperando la próxima ronda de {m} ({w})…", { m: name, w: WIN_LABEL[win] })}</strong><br /><span className="text-muted-foreground">{t("Abre en breve. Mientras tanto puedes probar otra duración o cripto arriba.")}</span></p></div>}
-      <PredictLive round={round} chart={<div className="overflow-hidden rounded-3xl border border-border bg-card py-3"><PriceChart key={`${market}-${win}-${round?.openTime ?? 0}`} market={market} points={roundPoints} price={price} reference={strike} referenceLabel={t("A batir")} window={win} odds={round ? { up: round.upPrice, down: round.downPrice } : undefined} /></div>} />
+      <PredictLive round={round} chart={<div className="overflow-hidden rounded-3xl border border-border bg-card py-3"><PriceChart key={`${market}-${win}-${round?.openTime ?? 0}`} market={market} points={roundPoints} price={price} reference={strike} referenceLabel={t("A batir")} window={win} odds={round ? { up: round.upPrice, down: round.downPrice } : undefined} oddsSeries={round ? oddsHist[`${round.asset}:${round.window}:${round.openTime}`] : undefined} /></div>} />
       <PendingClaims />
       <CompactOpenPredictions />
       <details className="rounded-2xl border border-primary/30 bg-primary/5 p-4"><summary className="cursor-pointer text-sm font-semibold">💡 {t("¿Cómo jugar en 4 pasos?")}</summary><div className="mt-3"><PredictSteps /></div></details>

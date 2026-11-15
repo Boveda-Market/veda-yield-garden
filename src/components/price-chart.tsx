@@ -12,8 +12,11 @@ const W = 360, H = 140, PAD = 6;
 
 const fmt = (n: number) => n.toFixed(n >= 1000 ? 2 : 3).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 
+/** One live market sample: t = ms timestamp, up = Sube share of the two sides' prices (0..1). */
+export type OddsPoint = { t: number; up: number };
+
 /** odds: the live market prices of each side (same numbers as the Sube/Baja buttons); the duel never invents its own percentages. */
-export function PriceChart({ market, points, price, reference, referenceLabel, window, odds }: { market: MarketId; points: number[]; price?: number | undefined; reference?: number | undefined; referenceLabel?: string; window?: string | undefined; odds?: { up: number | null; down: number | null } | undefined }) {
+export function PriceChart({ market, points, price, reference, referenceLabel, window, odds, oddsSeries }: { market: MarketId; points: number[]; price?: number | undefined; reference?: number | undefined; referenceLabel?: string; window?: string | undefined; odds?: { up: number | null; down: number | null } | undefined; oddsSeries?: OddsPoint[] | undefined }) {
   const t = useT();
   // Duel shines in 5 min rounds (price hugs the strike); longer rounds open on the classic line.
   const [style, setStyle] = useState<Style>(window && window !== "5m" ? "line" : "duel");
@@ -55,6 +58,8 @@ export function PriceChart({ market, points, price, reference, referenceLabel, w
   );
 
   if (style === "duel") {
+    // With live market odds the duel plots them, so the line on top always matches the higher percentage.
+    if (odds && oddsSeries) return <>{controls}<OddsDuel series={oddsSeries} odds={odds} reference={reference} referenceLabel={referenceLabel} /></>;
     return <>{controls}<DuelLine points={points} reference={reference} referenceLabel={referenceLabel} odds={odds} /></>;
   }
   if (style === "line") {
@@ -406,6 +411,80 @@ function DuelLine({ points, reference, referenceLabel, odds }: { points: number[
         {reference && <div className="pointer-events-none absolute left-1 top-1/2 -translate-y-1/2 rounded bg-strike px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-background">🎯 {referenceLabel} · {fmt(reference)}</div>}
       </div>
       <p className="px-3 pt-1 text-center text-[10px] text-muted-foreground">{t("La línea que va arriba es la que va ganando: verde para Sube, roja para Baja. La línea amarilla marca el precio a batir.")}</p>
+    </div>
+  );
+}
+
+/** Sube vs Baja duel driven only by the live market odds (same numbers as the buttons): green sits at the Sube share,
+ * red mirrors it, so the line on top is always the side with the higher percentage. */
+function OddsDuel({ series, odds, reference, referenceLabel }: { series: OddsPoint[]; odds: { up: number | null; down: number | null }; reference?: number | undefined; referenceLabel?: string | undefined }) {
+  const t = useT();
+  const [, setFrame] = useState(0);
+  const anim = useRef({ at: 0, from: 0.5, to: 0.5, len: 0 });
+  const last = series[series.length - 1];
+  if (last && series.length !== anim.current.len) {
+    const now = typeof performance !== "undefined" ? performance.now() : 0;
+    const a = anim.current;
+    const shown = a.len ? a.from + (a.to - a.from) * ease(Math.min(1, (now - a.at) / 1000)) : last.up;
+    anim.current = { at: now, from: shown, to: last.up, len: series.length };
+  }
+  useEffect(() => {
+    let id = 0;
+    const loop = () => { setFrame((f) => (f + 1) % 1e6); id = requestAnimationFrame(loop); };
+    id = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  const upPct = odds.up ? Math.round(odds.up * 100) : null, downPct = odds.down ? Math.round(odds.down * 100) : null;
+  if (!last || upPct === null || downPct === null) return <div className="flex h-44 items-center justify-center text-xs text-muted-foreground">{t("Cargando precio en vivo…")}</div>;
+
+  const a = anim.current;
+  const head = a.from + (a.to - a.from) * ease(Math.min(1, (performance.now() - a.at) / 1000));
+  const nowMs = Date.now();
+  const t0 = series[0]!.t, span = Math.max(30_000, nowMs - t0);
+  const toX = (ms: number) => ((ms - (nowMs - span)) / span) * W;
+  const y = (share: number) => PAD + (1 - Math.max(0.02, Math.min(0.98, share))) * (H - PAD * 2);
+  const raw: [number, number][] = series.map((p) => [toX(p.t), p.up]);
+  if (raw.length === 1) raw.unshift([0, raw[0]![1]]);
+  raw[raw.length - 1] = [raw[raw.length - 1]![0], head];
+  raw.push([W, head]);
+  const up = raw.map(([x, v]) => [x, y(v)] as [number, number]);
+  const down = raw.map(([x, v]) => [x, y(1 - v)] as [number, number]);
+  const dUp = smoothPath(up), dDown = smoothPath(down);
+  const eu = up[up.length - 1]!, ed = down[down.length - 1]!;
+  const upWins = upPct >= downPct;
+  const mid = H / 2;
+
+  return (
+    <div className="relative overflow-hidden px-1">
+      <div className="flex items-center justify-between px-3 pb-1 text-xs font-bold">
+        <span className={`tabular-nums transition-colors ${upWins ? "text-primary" : "text-muted-foreground"}`}>▲ {t("Sube")} {upPct}%</span>
+        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold transition-colors ${upWins ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{upWins ? t("Va ganando Sube") : t("Va ganando Baja")}</span>
+        <span className={`tabular-nums transition-colors ${!upWins ? "text-destructive" : "text-muted-foreground"}`}>{t("Baja")} {downPct}% ▼</span>
+      </div>
+      <div className="relative">
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="h-40 w-full" aria-label={upWins ? t("Va ganando Sube") : t("Va ganando Baja")}>
+          <defs>
+            <linearGradient id="odds-up" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="currentColor" stopOpacity="0.3" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient>
+            <linearGradient id="odds-down" x1="0" x2="0" y1="1" y2="0"><stop offset="0%" stopColor="currentColor" stopOpacity="0.3" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient>
+          </defs>
+          <rect x="0" y="0" width={W} height={mid} className="fill-primary" opacity="0.04" />
+          <rect x="0" y={mid} width={W} height={mid} className="fill-destructive" opacity="0.04" />
+          <path d={`${dUp} L${eu[0]},${mid} L${up[0]![0]},${mid} Z`} className="text-primary" fill="url(#odds-up)" />
+          <path d={`${dDown} L${ed[0]},${mid} L${down[0]![0]},${mid} Z`} className="text-destructive" fill="url(#odds-down)" />
+          <path d={dDown} fill="none" className="text-destructive" stroke="currentColor" strokeWidth={upWins ? 2 : 3} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+          <path d={dUp} fill="none" className="text-primary" stroke="currentColor" strokeWidth={upWins ? 3 : 2} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+          <line x1="0" x2={W} y1={mid} y2={mid} className="text-strike" stroke="currentColor" strokeWidth="8" strokeOpacity="0.2" vectorEffect="non-scaling-stroke" />
+          <line x1="0" x2={W} y1={mid} y2={mid} className="text-strike" stroke="currentColor" strokeDasharray="9 4" strokeWidth="2.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        </svg>
+        {([[eu, "bg-primary", upWins], [ed, "bg-destructive", !upWins]] as const).map(([e, bg, lead], i) => (
+          <span key={i} className={`pointer-events-none absolute h-2.5 w-2.5 -translate-y-1/2 translate-x-1/2 rounded-full ${bg}`} style={{ top: `${(e[1] / H) * 100}%`, right: "4px" }}>
+            {lead && <span className={`absolute inset-0 animate-ping rounded-full ${bg} opacity-60`} />}
+          </span>
+        ))}
+        {reference && <div className="pointer-events-none absolute left-1 top-1/2 -translate-y-1/2 rounded bg-strike px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-background">🎯 {referenceLabel} · {fmt(reference)}</div>}
+      </div>
+      <p className="px-3 pt-1 text-center text-[10px] text-muted-foreground">{t("La línea que va arriba es la que va ganando según los porcentajes del mercado: verde para Sube, roja para Baja.")}</p>
     </div>
   );
 }
