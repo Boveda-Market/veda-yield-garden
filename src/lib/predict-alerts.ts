@@ -1,4 +1,5 @@
 import { positionWon, type PredictPosition } from "@/lib/predict";
+import { tgCard, tgRow } from "@/lib/telegram-format";
 
 export type PredictOutcome = "won" | "lost";
 
@@ -14,8 +15,8 @@ const usd = (m: string) => (Number(m) / 1e6).toFixed(2);
 
 /** Telegram text for one resolved round (Spanish, HTML). */
 export function predictAlertText(p: Pick<PredictPosition, "title" | "payoutMicro" | "costMicro">, o: PredictOutcome): string {
-  const round = p.title ? `\n${p.title.replace(/[<>&]/g, "")}` : "";
+  const round = p.title ? `🎯 <i>${p.title.replace(/[<>&]/g, "")}</i>` : null;
   return o === "won"
-    ? `🏆 <b>¡Ganaste en Doble o Nada!</b>${round}\nTu premio de ${usd(p.payoutMicro)} USDC está listo. Reclámalo en tu Portafolio cuando quieras.\nhttps://bovedamarket.app/portfolio`
-    : `📉 <b>No acertaste en Doble o Nada</b>${round}\nLa ronda terminó en tu contra; invertiste ${usd(p.costMicro)} USDC. La posición se cerró sola.`;
+    ? tgCard("🏆", "¡Ganaste en Doble o Nada!", [round, tgRow("💵", "Premio", `$${usd(p.payoutMicro)}`), "", "Reclámalo en tu Portafolio cuando quieras.", '👉 <a href="https://bovedamarket.app/portfolio">Reclamar premio</a>'])
+    : tgCard("📉", "No acertaste en Doble o Nada", [round, tgRow("💸", "Jugaste", `$${usd(p.costMicro)}`), "", "La ronda terminó en tu contra y la posición se cerró sola."]);
 }

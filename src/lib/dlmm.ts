@@ -1,3 +1,4 @@
+import { tgCard } from "@/lib/telegram-format";
 /** Concentrated-liquidity vault rules shared by server and tests. */
 
 /** Bins on each side of the post-swap price for a new position (69 bins ≈ ±27% at 0.8% steps). */
@@ -57,7 +58,12 @@ export function rebalanceSwapPlan(x: bigint, y: bigint, price: number): { swapFo
 
 /** Personal alert text when a range position has been out of range for 10 minutes. */
 export function rangeAlertText(vaultName: string, above: boolean) {
-  return `🚨 <b>Tu ${vaultName} dejó de generar ganancias</b>\nEl precio ${above ? "subió por encima" : "bajó por debajo"} de tu rango hace más de 10 minutos. Tu dinero sigue seguro, pero cada minuto fuera de rango son ganancias que no cobras.\n\n👉 Toca <b>Rebalancear ahora</b>: un toque y una firma, sin comisión de BÓVEDA.`;
+  return tgCard("🚨", `Tu ${vaultName} dejó de generar ganancias`, [
+    `📍 El precio ${above ? "subió por encima" : "bajó por debajo"} de tu rango hace más de 10 minutos.`,
+    "🔒 Tu dinero sigue seguro, pero cada minuto fuera de rango son ganancias que no cobras.",
+    "",
+    "👉 Toca <b>Rebalancear ahora</b>: un toque, una firma y sin comisión de BÓVEDA.",
+  ]);
 }
 
 /** Deep link that opens the one-tap rebalance sheet for this exact position in Mi Billetera. */

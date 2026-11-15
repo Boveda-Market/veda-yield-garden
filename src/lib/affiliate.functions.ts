@@ -399,7 +399,7 @@ export const publishAnnouncementToTelegram = createServerFn({ method: "POST" })
     const a = ANNOUNCEMENTS.find((x) => x.id === data.id);
     if (!a) return { success: false, error: "Aviso no encontrado." };
     const tg = await import("./telegram.server");
-    return (await tg.sendTelegram(tg.TELEGRAM_CHANNEL, tg.announcementPost(a))) ? { success: true } : { success: false, error: "Telegram no aceptó el mensaje. Revisa que el bot sea administrador del canal." };
+    return (await tg.sendTelegram(tg.TELEGRAM_CHANNEL, tg.announcementPost(a), tg.announcementButton(a))) ? { success: true } : { success: false, error: "Telegram no aceptó el mensaje. Revisa que el bot sea administrador del canal." };
   });
 
 /** Operator-only: read community suggestions (newest first). */

@@ -17,7 +17,7 @@ export const sendRangeTestAlert = createServerFn({ method: "POST" })
       const { data: link } = await db.from("telegram_links").select("chat_id").eq("privy_user_id", id).maybeSingle();
       const chat = link?.chat_id ? String(link.chat_id) : process.env["TELEGRAM_ALERT_CHAT_ID"];
       if (!chat) return { success: false, message: "Conecta tu Telegram en Notificaciones para recibir la prueba." };
-      const ok = await tg.sendTelegram(chat, `${html}\n\n🛡️ BÓVEDA nunca te pedirá claves ni frases secretas.`, rangeAlertButton(data.position));
+      const ok = await tg.sendTelegram(chat, `${html}\n\n<i>🛡️ BÓVEDA nunca te pedirá claves ni frases secretas.</i>`, rangeAlertButton(data.position));
       return ok ? { success: true, message: "Aviso de prueba enviado a tu Telegram." } : { success: false, message: "Telegram no respondió. Inténtalo de nuevo." };
     } catch { return { success: false, message: "Solo la wallet de tesorería verificada puede enviar pruebas." }; }
   });

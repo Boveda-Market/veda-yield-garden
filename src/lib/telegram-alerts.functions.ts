@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { ALERT_KINDS, parseMuted, toggleMuted, type AlertKind } from "./alert-kinds";
+import { TG_SAFETY, tgCard } from "./telegram-format";
 
 export const TELEGRAM_BOT = "bovedamarketbot";
 const req = z.object({ token: z.string().min(20).max(12000) });
@@ -50,7 +51,7 @@ export const setTelegramAlerts = createServerFn({ method: "POST" })
       const { error } = await q;
       if (!error && data.action === "unlink" && row?.chat_id) {
         const tg = await import("./telegram.server");
-        await tg.sendTelegram(String(row.chat_id), "🔕 Desconectaste tu cuenta de BÓVEDA. Ya no recibirás avisos aquí.");
+        await tg.sendTelegram(String(row.chat_id), tgCard("🔕", "Cuenta desconectada", ["Ya no recibirás avisos de BÓVEDA aquí.", "Vuelve a conectarla cuando quieras desde Mi cuenta."]));
       }
       return { success: !error };
     } catch { return { success: false }; }
@@ -79,17 +80,17 @@ export const sendTelegramTest = createServerFn({ method: "POST" })
       const { data: row } = await db.from("telegram_links").select("chat_id").eq("privy_user_id", id).maybeSingle();
       if (!row?.chat_id) return { success: false };
       const tg = await import("./telegram.server");
-      const ok = await tg.sendTelegram(String(row.chat_id), "✅ <b>Aviso de prueba</b>\nTus alertas de BÓVEDA funcionan. Aquí recibirás tus cosechas, retiros, Sube/Baja y comisiones.\n\n🛡️ BÓVEDA nunca te pedirá claves ni frases secretas.");
+      const ok = await tg.sendTelegram(String(row.chat_id), `${tgCard("✅", "Aviso de prueba", ["Tus alertas de BÓVEDA funcionan.", "", "🌾 Cosechas  ·  🏧 Retiros", "⚡ Doble o Nada  ·  🎯 Rebalanceos"])}\n\n${TG_SAFETY}`);
       return { success: ok };
     } catch { return { success: false }; }
   });
 
 const ACTION_TEXT = {
-  harvest: "🌾 <b>Cosecha completada</b>\nTus ganancias de la bóveda llegaron a tu wallet. Tu posición sigue abierta.",
-  exit: "🏁 <b>Bóveda cerrada</b>\nTu capital y ganancias se liquidaron a USDC en tu wallet.",
-  withdraw: "🏧 <b>Retiro enviado</b>\nTu retiro está en camino a tu banco, tarjeta o Cash App.",
-  predict: "⚡ <b>Premio de Doble o Nada cobrado</b>\nTu premio ya está en USDC en tu wallet.",
-  deposit: "🏦 <b>Depósito confirmado</b>\nTu dinero ya está trabajando en la bóveda.",
+  harvest: tgCard("🌾", "Cosecha completada", ["Tus ganancias ya están en tu billetera.", "✅ Tu bóveda sigue abierta y generando."]),
+  exit: tgCard("🏁", "Bóveda cerrada", ["Tu capital y tus ganancias ya están en dólares en tu billetera."]),
+  withdraw: tgCard("🏧", "Retiro enviado", ["Tu dinero va en camino a tu banco, tarjeta o Cash App."]),
+  predict: tgCard("⚡", "Premio de Doble o Nada cobrado", ["💵 Tu premio ya está en dólares en tu billetera."]),
+  deposit: tgCard("🏦", "Depósito confirmado", ["Tu dinero ya está trabajando en la bóveda.", "🌾 Te avisamos aquí cada vez que cosechas."]),
 } as const;
 
 /** Personal alert for the signed-in user's own confirmed action; only ever reaches that user's linked chat. */
@@ -99,7 +100,7 @@ export const notifyMyAction = createServerFn({ method: "POST" })
     try {
       const { id } = await admin(data.token);
       const tg = await import("./telegram.server");
-      await tg.userAlert(id, `${ACTION_TEXT[data.kind]}\n<a href="https://orbmarkets.io/tx/${data.signature}">Ver comprobante</a>`, data.kind);
+      await tg.userAlert(id, ACTION_TEXT[data.kind], data.kind, { text: "🧾 Ver comprobante", url: `https://orbmarkets.io/tx/${data.signature}` });
       return { success: true };
     } catch { return { success: false }; }
   });

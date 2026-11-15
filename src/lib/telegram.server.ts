@@ -1,16 +1,22 @@
 import { alertAllowed, parseMuted, type AlertKind } from "./alert-kinds";
-import type { Announcement } from "./announcements";
+import { announcementSections, shortDate, type Announcement } from "./announcements";
+import { TG_RULE, TG_SAFETY, tgEsc } from "./telegram-format";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/telegram";
 export const TELEGRAM_CHANNEL = "@bovedamarket";
 const SITE = "https://bovedamarket.app";
-const HEAD: Record<Announcement["kind"], string> = { vault: "🏦 NUEVA BÓVEDA", market: "⚡ NUEVO MERCADO", policy: "📜 AVISO IMPORTANTE", update: "🚀 NOVEDAD EN BÓVEDA" };
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const HEAD: Record<Announcement["kind"], string> = { vault: "🏦 NUEVA BÓVEDA", market: "⚡ NUEVO MERCADO", policy: "📜 AVISO IMPORTANTE", update: "🚀 NOVEDADES" };
 
-/** HTML post for the official channel; links only to the official domain. */
+/** Channel post: header + date, bold title, short lead, then one spaced block per highlight; the CTA travels as a button. */
 export function announcementPost(a: Announcement) {
-  const link = a.href ? `\n\n🔗 <a href="${SITE}${a.href === "/" ? "" : a.href}">${esc(a.cta ?? "Abrir BÓVEDA")}</a>` : "";
-  return `<b>${HEAD[a.kind]}</b>\n\n<b>${esc(a.title)}</b>\n${esc(a.body)}${link}\n\n🛡️ Solo usamos ${SITE.replace("https://", "")}. Nunca te escribiremos primero por privado.`;
+  const { lead, items } = announcementSections(a.body);
+  const top = [`<b>${HEAD[a.kind]}</b>  ·  <i>${shortDate(a.date)}</i>`, TG_RULE, `<b>${tgEsc(a.title)}</b>`, ...(lead ? [`<i>${tgEsc(lead)}</i>`] : [])].join("\n");
+  const blocks = items.map((it) => it.title ? `${it.icon} <b>${tgEsc(it.title)}</b>\n${tgEsc(it.text)}` : `${it.icon} ${tgEsc(it.text)}`);
+  return [top, ...blocks, `${TG_RULE}\n<blockquote>🛡️ Solo usamos ${SITE.replace("https://", "")}. Nunca te escribiremos primero por privado.</blockquote>`].join("\n\n");
+}
+/** Tappable button under the channel post (official domain only). */
+export function announcementButton(a: Announcement): TelegramButton | undefined {
+  return a.href ? { text: `👉 ${a.cta ?? "Abrir BÓVEDA"}`, url: `${SITE}${a.href === "/" ? "" : a.href}` } : undefined;
 }
 
 export type TelegramButton = { text: string; url: string };
@@ -40,6 +46,6 @@ export async function userAlert(privyUserId: string, html: string, kind?: AlertK
     // "*" keeps alerts working even before the muted_kinds column exists.
     const { data } = await supabaseAdmin.from("telegram_links").select("*").eq("privy_user_id", privyUserId).maybeSingle();
     const row = data as { chat_id: number | null; alerts_enabled: boolean; muted_kinds?: unknown } | null;
-    if (row?.chat_id && alertAllowed(row.alerts_enabled, parseMuted(row.muted_kinds), kind)) await sendTelegram(String(row.chat_id), `${html}\n\n🛡️ BÓVEDA nunca te pedirá claves ni frases secretas.`, button);
+    if (row?.chat_id && alertAllowed(row.alerts_enabled, parseMuted(row.muted_kinds), kind)) await sendTelegram(String(row.chat_id), `${html}\n\n${TG_SAFETY}`, button);
   } catch { /* alerts are best-effort */ }
 }

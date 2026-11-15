@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Bell, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { SUPPORT_URL } from "@/components/safety-notice";
 import { usePredictAlerts, type PredictAlert, type RefundAlert } from "@/hooks/use-predict-alerts";
 import { useRangeAlerts, type RangeAlert } from "@/hooks/use-range-alerts";
-import { ANNOUNCEMENTS, DISMISSED_KEY, SEEN_KEY, latestAnnouncementId, type AnnouncementKind } from "@/lib/announcements";
+import { ANNOUNCEMENTS, DISMISSED_KEY, SEEN_KEY, announcementSections, latestAnnouncementId, shortDate, type Announcement, type AnnouncementKind } from "@/lib/announcements";
 
 const LABEL: Record<AnnouncementKind, string> = { vault: "Nueva bóveda", market: "Nuevo mercado", policy: "Aviso legal", update: "Novedad" };
 
@@ -19,6 +19,53 @@ function readDismissed(): string[] {
 function writeDismissed(ids: string[]) {
   try { localStorage.setItem(DISMISSED_KEY, JSON.stringify(ids)); } catch { /* ignore */ }
   window.dispatchEvent(new Event(DISMISS_EVENT));
+}
+
+type Tone = "urgent" | "win" | "info";
+const TONE: Record<Tone, { box: string; bar: string; icon: string; chip: string }> = {
+  urgent: { box: "border-destructive/40 bg-destructive/5", bar: "bg-destructive", icon: "bg-destructive/15", chip: "bg-destructive/15 text-destructive" },
+  win: { box: "border-primary/40 bg-primary/5", bar: "bg-primary", icon: "bg-primary/15", chip: "bg-primary/15 text-primary" },
+  info: { box: "border-border bg-card", bar: "bg-primary/50", icon: "bg-secondary", chip: "bg-secondary text-muted-foreground" },
+};
+const KIND_ICON: Record<AnnouncementKind, string> = { vault: "🏦", market: "⚡", policy: "📜", update: "🚀" };
+const ctaClass = (primary: boolean) => `mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold ${primary ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-secondary/70"}`;
+
+/** One notification card: accent bar, emoji tile, label chip, bold title, short body and an optional full-width action. */
+function NoticeCard({ tone, icon, label, date, title, onDismiss, children }: { tone: Tone; icon: string; label: string; date?: string | undefined; title: string; onDismiss?: (() => void) | undefined; children?: ReactNode }) {
+  const t = useT();
+  const c = TONE[tone];
+  return <li className={`relative overflow-hidden rounded-2xl border p-4 pl-5 ${c.box}`}>
+    <span aria-hidden className={`absolute inset-y-0 left-0 w-1 ${c.bar}`} />
+    {onDismiss && <button type="button" onClick={onDismiss} aria-label={t("Borrar notificación")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={14} /></button>}
+    <div className="flex items-start gap-3 pr-6">
+      <span aria-hidden className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl text-xl ${c.icon}`}>{icon}</span>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          <span className={`rounded-full px-2 py-0.5 font-semibold uppercase tracking-wide ${c.chip}`}>{label}</span>
+          {date && <time dateTime={date} className="text-muted-foreground">{shortDate(date)}</time>}
+        </div>
+        <p className="mt-1 font-display font-semibold leading-snug">{title}</p>
+      </div>
+    </div>
+    {children}
+  </li>;
+}
+
+/** Announcement as a scannable card: lead line plus emoji highlights (first 3, expandable). */
+function AnnouncementCard({ a, primary, onDismiss, onNavigate }: { a: Announcement; primary: boolean; onDismiss?: (() => void) | undefined; onNavigate?: (() => void) | undefined }) {
+  const t = useT();
+  const [open, setOpen] = useState(false);
+  const { lead, items } = announcementSections(a.body);
+  const shown = open ? items : items.slice(0, 3);
+  return <NoticeCard tone={primary ? "win" : "info"} icon={KIND_ICON[a.kind]} label={t(LABEL[a.kind])} date={a.date} title={t(a.title)} onDismiss={onDismiss}>
+    {lead && <p className="mt-2 text-sm text-muted-foreground">{t(lead)}</p>}
+    {shown.length > 0 && <ul className="mt-3 space-y-2">{shown.map((it, k) => <li key={k} className="flex gap-2.5 rounded-xl bg-secondary/50 p-2.5">
+      <span aria-hidden className="text-base leading-5">{it.icon}</span>
+      <div className="min-w-0 text-sm">{it.title && <p className="font-semibold text-foreground">{t(it.title)}</p>}<p className="text-muted-foreground">{t(it.text)}</p></div>
+    </li>)}</ul>}
+    {items.length > 3 && <button type="button" onClick={() => setOpen((v) => !v)} className="mt-2 text-xs font-semibold text-primary">{open ? t("Ver menos") : t("Ver {n} más", { n: items.length - 3 })}</button>}
+    {a.href && a.cta && <Link to={a.href} onClick={onNavigate} className={ctaClass(primary)}>{t(a.cta)} →</Link>}
+  </NoticeCard>;
 }
 
 /** Announcement history, shared by the bell dialog and the Notifications section. Dismissals stay in this browser; new announcements still appear. */
@@ -38,6 +85,7 @@ export function NewsList({ onNavigate, predict = [], refunds = [], ranges = [] }
   const items = showAll ? ANNOUNCEMENTS : ANNOUNCEMENTS.filter((a) => !dismissed.includes(a.id));
   const dismiss = (id: string) => writeDismissed([...new Set([...dismissed, id])]);
   const clearAll = () => { setShowAll(false); writeDismissed(ANNOUNCEMENTS.map((a) => a.id)); };
+  const latest = latestAnnouncementId();
   return <div className="mt-2">
     {items.length > 0 && !showAll && <div className="mb-2 flex justify-end">
       <button type="button" onClick={clearAll} className="text-xs font-medium text-muted-foreground hover:text-foreground">{t("Borrar todas")}</button>
@@ -46,42 +94,26 @@ export function NewsList({ onNavigate, predict = [], refunds = [], ranges = [] }
       <button type="button" onClick={() => setShowAll(false)} className="text-xs font-medium text-muted-foreground hover:text-foreground">{t("Ocultar historial")}</button>
     </div>}
     <ul className="space-y-3">
-      {ranges.map((a) => <li key={a.id} className="relative rounded-xl border border-destructive/40 bg-destructive/10 p-4">
-        <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-medium text-destructive">{t("Bóvedas")}</span>
-        <p className="mt-2 font-semibold">⚠️ {t("Bóveda {v} sin generar", { v: a.p.symbol })}</p>
-        <p className="mt-1 text-sm text-muted-foreground">{t("Lleva más de 10 minutos sin generar ganancias. Tu dinero sigue seguro; vuelve a centrarla con un toque y una firma.")}</p>
-        <Link to="/wallet" search={{ rebalance: a.p.address }} onClick={onNavigate} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground">🎯 {t("Rebalancear ahora")}</Link>
-      </li>)}
-      {refunded.map((a) => <li key={a.id} className="relative rounded-xl border border-primary/40 bg-primary/10 p-4">
-        <button type="button" onClick={() => dismiss(a.id)} aria-label={t("Borrar notificación")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={14} /></button>
-        <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">{t("Doble o Nada")}</span>
-        <p className="mt-2 pr-6 font-semibold">{t("Orden reembolsada")}</p>
-        {a.r.title && <p className="mt-1 text-xs text-muted-foreground">{assetOfTitle(a.r.title) ?? ""} · {roundWindowText(a.r.title, null)}</p>}
+      {ranges.map((a) => <NoticeCard key={a.id} tone="urgent" icon="🚨" label={t("Bóvedas")} title={t("Bóveda {v} sin generar", { v: a.p.symbol })}>
+        <p className="mt-2 text-sm text-muted-foreground">{t("Lleva más de 10 minutos sin generar ganancias. Tu dinero sigue seguro; vuelve a centrarla con un toque y una firma.")}</p>
+        <Link to="/wallet" search={{ rebalance: a.p.address }} onClick={onNavigate} className={ctaClass(true)}>🎯 {t("Rebalancear ahora")}</Link>
+      </NoticeCard>)}
+      {refunded.map((a) => <NoticeCard key={a.id} tone="win" icon="↩️" label={t("Doble o Nada")} title={t("Orden reembolsada")} onDismiss={() => dismiss(a.id)}>
+        {a.r.title && <p className="mt-2 text-xs text-muted-foreground">🎯 {assetOfTitle(a.r.title) ?? ""} · {roundWindowText(a.r.title, null)}</p>}
         <p className="mt-1 text-sm text-muted-foreground">{t("Tu jugada no entró a la ronda porque el precio cambió en ese instante. Te devolvimos ${v} completos; están listos en Mi Billetera.", { v: (Number(a.r.amountMicro) / 1e6).toFixed(2) })}</p>
-        <Link to="/wallet" onClick={onNavigate} className="mt-3 inline-block text-sm font-medium text-primary">{t("Ir a Mi Billetera")} →</Link>
-      </li>)}
-      {personal.map((a) => <li key={a.id} className={`relative rounded-xl border p-4 ${a.outcome === "won" ? "border-primary/40 bg-primary/10" : "border-border bg-secondary/40"}`}>
-        {a.outcome === "lost" && <button type="button" onClick={() => dismiss(a.id)} aria-label={t("Borrar notificación")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={14} /></button>}
-        <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">{t("Doble o Nada")}</span>
-        <p className="mt-2 font-semibold">{a.outcome === "won" ? `🏆 ${t("Ganaste en Sube y Baja")}` : t("No acertaste en Sube y Baja")}</p>
-        {a.p.title && <p className="mt-1 text-xs text-muted-foreground">{assetOfTitle(a.p.title) ?? ""} · {roundWindowText(a.p.title, a.p.closeTime)}</p>}
+        <Link to="/wallet" onClick={onNavigate} className={ctaClass(false)}>{t("Ir a Mi Billetera")} →</Link>
+      </NoticeCard>)}
+      {personal.map((a) => <NoticeCard key={a.id} tone={a.outcome === "won" ? "win" : "info"} icon={a.outcome === "won" ? "🏆" : "📉"} label={t("Doble o Nada")} title={a.outcome === "won" ? t("Ganaste en Sube y Baja") : t("No acertaste en Sube y Baja")} onDismiss={a.outcome === "lost" ? () => dismiss(a.id) : undefined}>
+        {a.p.title && <p className="mt-2 text-xs text-muted-foreground">🎯 {assetOfTitle(a.p.title) ?? ""} · {roundWindowText(a.p.title, a.p.closeTime)}</p>}
         <p className="mt-1 text-sm text-muted-foreground">{a.outcome === "won" ? t("Tu premio de ${v} está listo para reclamar.", { v: (Number(a.p.payoutMicro) / 1e6).toFixed(2) }) : t("La ronda terminó en tu contra. Invertiste ${v}.", { v: (Number(a.p.costMicro) / 1e6).toFixed(2) })}</p>
-        {a.outcome === "won" && <Link to="/portfolio" onClick={onNavigate} className="mt-3 inline-block text-sm font-medium text-primary">{t("Reclamar premio")} →</Link>}
-      </li>)}
-      {items.length === 0 && personal.length === 0 && refunded.length === 0 && ranges.length === 0 && <li className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
+        {a.outcome === "won" && <Link to="/portfolio" onClick={onNavigate} className={ctaClass(true)}>🏆 {t("Reclamar premio")}</Link>}
+      </NoticeCard>)}
+      {items.length === 0 && personal.length === 0 && refunded.length === 0 && ranges.length === 0 && <li className="rounded-2xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
+        <span aria-hidden className="mb-1 block text-2xl">🔔</span>
         {ANNOUNCEMENTS.length === 0 ? t("No hay novedades por ahora.") : t("No tienes notificaciones pendientes.")}
         {ANNOUNCEMENTS.length > 0 && <button type="button" onClick={() => setShowAll(true)} className="mt-2 block w-full text-xs font-medium text-primary">{t("Ver historial completo")}</button>}
       </li>}
-      {items.map((a) => <li key={a.id} className="relative rounded-xl border border-border bg-secondary/40 p-4">
-        {!showAll && <button type="button" onClick={() => dismiss(a.id)} aria-label={t("Borrar notificación")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={14} /></button>}
-        <div className="flex items-center justify-between pr-7 text-xs text-muted-foreground">
-          <span className="rounded-full bg-primary/15 px-2 py-0.5 font-medium text-primary">{t(LABEL[a.kind])}</span>
-          <time dateTime={a.date}>{a.date}</time>
-        </div>
-        <p className="mt-2 font-semibold">{t(a.title)}</p>
-        <p className="mt-1 text-sm text-muted-foreground">{t(a.body)}</p>
-        {a.href && a.cta && <Link to={a.href} onClick={onNavigate} className="mt-3 inline-block text-sm font-medium text-primary">{t(a.cta)} →</Link>}
-      </li>)}
+      {items.map((a) => <AnnouncementCard key={a.id} a={a} primary={a.id === latest} onNavigate={onNavigate} onDismiss={showAll ? undefined : () => dismiss(a.id)} />)}
     </ul>
   </div>;
 }

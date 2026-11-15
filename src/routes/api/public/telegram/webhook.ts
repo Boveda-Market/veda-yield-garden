@@ -36,7 +36,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         // One chat per account: release this chat from any other account first.
         await supabaseAdmin.from("telegram_links").update({ chat_id: null }).eq("chat_id", chatId).neq("privy_user_id", row.privy_user_id);
         await supabaseAdmin.from("telegram_links").update({ chat_id: chatId, username: msg.from?.username?.slice(0, 64) ?? null, link_code: null, code_expires_at: null, alerts_enabled: true, linked_at: new Date().toISOString() }).eq("privy_user_id", row.privy_user_id);
-        await tg.sendTelegram(String(chatId), "✅ <b>¡Cuenta conectada!</b>\nDesde ahora recibirás aquí los avisos de tu cuenta en BÓVEDA: cosechas, ganancias de Sube/Baja, retiros y comisiones de invitados.\n\nPuedes pausarlos o desconectarlos en Mi cuenta.\n🛡️ Nunca te pediremos claves ni frases secretas.");
+        await tg.sendTelegram(String(chatId), "✅ <b>¡Cuenta conectada!</b>\n━━━━━━━━━━━━━━\nDesde ahora te avisamos aquí al instante:\n\n🌾 Cosechas y depósitos\n⚡ Premios de Doble o Nada\n🎯 Bóvedas que necesitan rebalanceo\n🏧 Retiros y comisiones de invitados\n\nPuedes pausarlos o desconectarlos en Mi cuenta.\n\n<i>🛡️ Nunca te pediremos claves ni frases secretas.</i>");
         return Response.json({ ok: true });
       },
     },
