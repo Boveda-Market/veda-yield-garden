@@ -12,7 +12,8 @@ import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
 vi.mock("@/lib/fees", async (orig) => ({ ...(await orig<typeof import("@/lib/fees")>()), progressiveFee: () => 0n }));
 const mocks = vi.hoisted(() => ({ genesis: vi.fn(), owned: vi.fn(), pool: vi.fn(), before: vi.fn(), simulate: vi.fn(), remove: vi.fn(), send: vi.fn() }));
 vi.mock("@/lib/solana-read.server", () => ({ heliusConnection: () => ({ getGenesisHash: mocks.genesis, getMultipleAccountsInfo: mocks.before, getLatestBlockhash: async () => ({ blockhash: USDC_MINT }), getFeeForMessage: async () => ({ value: 0 }), simulateTransaction: mocks.simulate, sendRawTransaction: mocks.send }) }));
-vi.mock("@meteora-ag/cp-amm-sdk/dist/index.js", () => ({ getCurrentPoint: async () => new BN(1), CpAmm: class { getPositionsByUser = mocks.owned; fetchPoolState = mocks.pool; removeAllLiquidityAndClosePosition = mocks.remove; getWithdrawQuote = () => ({ outAmountA: new BN(100), outAmountB: new BN(1_000_000) }); } }));
+vi.mock("@/lib/chain-clock.server", () => ({ currentActivationPoint: async () => new BN(1) }));
+vi.mock("@meteora-ag/cp-amm-sdk/dist/index.js", () => ({ CpAmm: class { getPositionsByUser = mocks.owned; fetchPoolState = mocks.pool; removeAllLiquidityAndClosePosition = mocks.remove; getWithdrawQuote = () => ({ outAmountA: new BN(100), outAmountB: new BN(1_000_000) }); } }));
 import { simulateWithdrawal } from "@/lib/withdrawal.server";
 
 describe("full-close withdrawal simulation", () => {
@@ -46,7 +47,7 @@ describe("full-close withdrawal simulation", () => {
     expect(result.success).toBe(true);
     expect(result.checks).toEqual({ closed: true, usdc: true, fee: true, rent: true });
     expect(result.net).toBe("1");
-    expect(result.minimumGross).toBe("0.995");
+    expect(result.minimumGross).toBe("0.98");
     expect(result.fee).toBe("0");
     expect(result.rentSol).toBe("0.007");
     expect(result).not.toHaveProperty("transaction");
@@ -118,7 +119,7 @@ describe("full-close withdrawal simulation", () => {
       return response;
     });
     const route = { swapInfo: { ammKey: CHAIN_POOLS[2].pool, label: "Raydium", inputMint: token.toBase58(), outputMint: USDC_MINT, inAmount: "100", outAmount: "500000", feeAmount: "1", feeMint: token.toBase58() }, percent: 100, bps: 10000 };
-    const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ inputMint: token.toBase58(), outputMint: USDC_MINT, inAmount: "99", otherAmountThreshold: "490000", swapMode: "ExactIn", routePlan: [route] }))).mockResolvedValueOnce(new Response(JSON.stringify({ setupInstructions: [], swapInstruction: { programId: CHAIN_POOLS[2].pool, accounts: [], data: "AQ==" }, addressLookupTableAddresses: [] })));
+    const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ inputMint: token.toBase58(), outputMint: USDC_MINT, inAmount: "98", otherAmountThreshold: "490000", swapMode: "ExactIn", routePlan: [route] }))).mockResolvedValueOnce(new Response(JSON.stringify({ setupInstructions: [], swapInstruction: { programId: CHAIN_POOLS[2].pool, accounts: [], data: "AQ==" }, addressLookupTableAddresses: [] })));
     vi.stubGlobal("fetch", fetchMock);
     try {
       await simulateWithdrawal("test", { wallet, position, vaultId: "met" });
@@ -136,7 +137,7 @@ describe("full-close withdrawal simulation", () => {
     expect(mocks.send).not.toHaveBeenCalled();
   });
   it("prepares new owned MET positions beyond the original pilot", async () => {
-    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "0", minimumNetRaw: "995000" });
+    const result = await simulateWithdrawal("test", { wallet, position, vaultId: "met" }, { prepare: true, maximumFeeRaw: "0", minimumNetRaw: "980000" });
     expect(result.success).toBe(true);
     expect(result.prepared?.wallet).toBe(wallet);
     expect(result.prepared?.position).toBe(position);
@@ -160,7 +161,7 @@ describe("full-close withdrawal simulation", () => {
       const final = ++count >= 3;
       return { value: { err: null, accounts: [{ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(final ? 1_000_000n : 1_000_000n, pilotOwner).toString("base64"), "base64"], lamports: 2_000_000 }, null, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(0n, new PublicKey(FEE_WALLET)).toString("base64"), "base64"], lamports: 2_000_000 }, null, null, null, { lamports: 27_000_000 }] } };
     });
-    const result = await simulateWithdrawal("test", WITHDRAWAL_PILOT, { prepare: true, maximumFeeRaw: "0", minimumNetRaw: "995000" });
+    const result = await simulateWithdrawal("test", WITHDRAWAL_PILOT, { prepare: true, maximumFeeRaw: "0", minimumNetRaw: "980000" });
     expect(result.success).toBe(true);
     expect(result.prepared?.wallet).toBe(WITHDRAWAL_PILOT.wallet);
     expect(result.prepared?.transaction).toBeTruthy();

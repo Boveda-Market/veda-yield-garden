@@ -2,7 +2,8 @@ import BN from "bn.js";
 import { Buffer } from "buffer";
 import { ComputeBudgetProgram, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import { AccountLayout, TOKEN_PROGRAM_ID, createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, getAssociatedTokenAddressSync, NATIVE_MINT } from "@solana/spl-token";
-import { CpAmm, getCurrentPoint } from "@meteora-ag/cp-amm-sdk/dist/index.js";
+import { CpAmm } from "@meteora-ag/cp-amm-sdk/dist/index.js";
+import { currentActivationPoint } from "@/lib/chain-clock.server";
 import { ownsPositionNft } from "@/lib/position-ownership.server";
 import { heliusConnection } from "@/lib/solana-read.server";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount } from "@/lib/solana-data";
@@ -13,6 +14,11 @@ import { ledgerSwapToUsdc } from "@/lib/ledger-swap.server";
 import { simulateDlmmWithdrawal } from "@/lib/dlmm.server";
 import { withdrawalAmounts, exitFeeMode, partialLiquidity, type WithdrawalInput, type WithdrawalResult } from "@/lib/withdrawal";
 
+
+/** Share of each quoted token the pool must release on exit (basis points). */
+const EXIT_TOKEN_FLOOR_BPS = 9_800;
+/** Leftover base units of the released token accepted as rounding dust after conversion. */
+const EXIT_DUST_UNITS = 1_000n;
 
 /** Atomic owner-verified close: tiered exit fee on on-chain minima, delta-only conversion, owner signs only. */
 export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput & { percent?: number | undefined; migrate?: true | undefined; rotate?: true | undefined }, options: { prepare?: boolean; maximumFeeRaw?: string; minimumNetRaw?: string } = {}): Promise<WithdrawalResult> {
@@ -54,9 +60,12 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput 
     const liquidityDelta = full ? state.unlockedLiquidity : new BN(partialLiquidity(BigInt(state.unlockedLiquidity.toString()), percent).toString());
     if (liquidityDelta.isZero()) return fail("La parte elegida es demasiado pequeña para retirarla.");
     const quote = cp.getWithdrawQuote({ liquidityDelta, sqrtPrice: pool.sqrtPrice, minSqrtPrice: pool.sqrtMinPrice, maxSqrtPrice: pool.sqrtMaxPrice, collectFeeMode: pool.collectFeeMode, tokenAAmount: pool.tokenAAmount, tokenBAmount: pool.tokenBAmount, liquidity: pool.liquidity });
-    const minimumA = quote.outAmountA.muln(995).divn(1000);
-    const minimumB = quote.outAmountB.muln(995).divn(1000);
-    const currentPoint = await getCurrentPoint(connection, pool.activationType);
+    // Per-token floor: in a concentrated pool a small price move shifts the token split between
+    // quote and confirmation, so 0.5% per token made exits fail at random. 2% per token keeps the
+    // total value protected (the USDC minimum and fee use these floors) and matches range vaults.
+    const minimumA = quote.outAmountA.muln(EXIT_TOKEN_FLOOR_BPS).divn(10_000);
+    const minimumB = quote.outAmountB.muln(EXIT_TOKEN_FLOOR_BPS).divn(10_000);
+    const currentPoint = await currentActivationPoint(connection, pool.activationType);
     const removal = full
       ? await cp.removeAllLiquidityAndClosePosition({ owner, position, positionNftAccount: owned.positionNftAccount, positionState: state, poolState: pool, vestings: [], currentPoint, tokenAAmountThreshold: minimumA, tokenBAmountThreshold: minimumB, isSkipReward: false })
       : await cp.removeLiquidity({ owner, position, pool: state.pool, positionNftAccount: owned.positionNftAccount, liquidityDelta, tokenAAmountThreshold: minimumA, tokenBAmountThreshold: minimumB, tokenAMint: pool.tokenAMint, tokenBMint: pool.tokenBMint, tokenAVault: pool.tokenAVault, tokenBVault: pool.tokenBVault, tokenAProgram: TOKEN_PROGRAM_ID, tokenBProgram: TOKEN_PROGRAM_ID, vestings: [], currentPoint });
@@ -71,7 +80,7 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput 
       const fee = await connection.getFeeForMessage(tx.message, "confirmed");
       if (fee.value === null) throw new Error("Coste de red no disponible");
       const response = await connection.simulateTransaction(tx, { sigVerify: false, accounts: { encoding: "base64", addresses: addresses.map((a) => a.toBase58()) } });
-      if (response.value.err || !response.value.accounts || response.value.accounts.length !== addresses.length) throw new Error("Simulación rechazada");
+      if (response.value.err || !response.value.accounts || response.value.accounts.length !== addresses.length) throw new Error(`Simulación rechazada: ${JSON.stringify(response.value.err)} ${(response.value.logs ?? []).filter((l) => /error|failed|exceed|slippage/i.test(l)).slice(-3).join(" | ")}`);
       return { tx, accounts: response.value.accounts, bytes, networkFee: BigInt(fee.value), units: response.value.unitsConsumed };
     };
     stage = "Simulación del cierre";
@@ -120,11 +129,17 @@ export async function simulateWithdrawal(apiKey: string, input: WithdrawalInput 
     // allowing only rent for newly created token accounts, not token principal.
     const newAccountRent = [0, 1, 2].reduce((sum, i) => sum + BigInt(before[i] ? 0 : final.accounts[i]?.lamports ?? 0), 0n);
     const solDelta = BigInt(final.accounts[6]?.lamports ?? 0) - BigInt(before[6]?.lamports ?? 0);
-    const checks = { closed, usdc: remainingToken === 0n && netDelta >= breakdown.net && realizedGross >= minimumGross, fee: feeDelta === breakdown.fee && feeDelta === withdrawalAmounts(minimumGross, exitFeeMode(input)).fee, rent: closed && (full ? rentLamports > 0n : true) && solDelta + newAccountRent + final.networkFee === rentLamports };
+    // Some routes cannot consume the last base unit of the released token; tolerate negligible dust.
+    // With a newly created wrapped-SOL account that dust sits in its lamports, so exclude it from rent.
+    const dustOk = remainingToken >= 0n && remainingToken <= EXIT_DUST_UNITS;
+    const nativeDust = pool.tokenAMint.equals(NATIVE_MINT) && !before[1] && dustOk ? remainingToken : 0n;
+    const checks = { closed, usdc: dustOk && netDelta >= breakdown.net && realizedGross >= minimumGross, fee: feeDelta === breakdown.fee && feeDelta === withdrawalAmounts(minimumGross, exitFeeMode(input)).fee, rent: closed && (full ? rentLamports > 0n : true) && solDelta + newAccountRent - nativeDust + final.networkFee === rentLamports };
     const success = Object.values(checks).every(Boolean);
+    if (!success) console.error("[withdrawal] checks", { vault: input.vaultId, percent, checks, netDelta: netDelta.toString(), net: breakdown.net.toString(), realizedGross: realizedGross.toString(), minimumGross: minimumGross.toString(), remainingToken: remainingToken.toString(), solDelta: solDelta.toString(), newAccountRent: newAccountRent.toString(), networkFee: final.networkFee.toString(), rentLamports: rentLamports.toString() });
     if (options.prepare && Date.now() - startedAt > 45_000) return fail("La preparación tardó demasiado. Repite la revisión para obtener una transacción reciente.");
     return { success, sent: false, bytes: final.bytes, checks, gross: tokenAmount(realizedGross.toString(), 6), fee: tokenAmount(feeDelta.toString(), 6), net: tokenAmount(netDelta.toString(), 6), expectedFee: tokenAmount(breakdown.fee.toString(), 6), minimumGross: tokenAmount(minimumGross.toString(), 6), minimumNet: tokenAmount(breakdown.net.toString(), 6), feeRaw: breakdown.fee.toString(), minimumNetRaw: breakdown.net.toString(), remainingTokenRaw: remainingToken.toString(), rentSol: tokenAmount(rentLamports.toString(), 9), ...(success && options.prepare ? { prepared: { transaction: Buffer.from(final.tx.serialize()).toString("base64"), expiresAt: startedAt + 45_000, lastValidBlockHeight: block.lastValidBlockHeight, wallet: input.wallet, position: input.position } } : {}), message: success && !full ? `Retiro parcial del ${percent}% verificado en simulación. Tu posición sigue abierta con el resto; comisión según la tarifa progresiva sobre el mínimo protegido. Solo tu wallet puede firmar y enviar.` : success ? "Retiro verificado en simulación. Comisión fija del 1% sobre el mínimo bruto protegido por slippage; cualquier USDC adicional es tuyo. La renta del NFT se devuelve en SOL y no lleva esta comisión. Solo tu wallet puede firmar y enviar." : "El retiro no superó todas las comprobaciones de mínimos, saldos previos, comisión y renta. No se autoriza ninguna firma." };
-  } catch {
+  } catch (error) {
+    console.error("[withdrawal] failed", { stage, vault: input.vaultId, percent: input.percent ?? 100, error: error instanceof Error ? error.message : String(error) });
     return fail(`No se pudo validar el retiro. Etapa: ${stage}. No se firmó ni envió nada; la posición permanece intacta.`);
   }
 }

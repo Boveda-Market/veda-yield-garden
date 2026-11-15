@@ -1,4 +1,6 @@
 # Tasks
+- [ ] Fix random 'Retiro no disponible' on SOL vault partial withdrawals (network clock read).
+- [ ] Test every money-moving operation in live simulation (deposit, harvest, reinvest, withdraw, swap, send, reserve refill, leftovers, Doble o Nada, cash-out) and fix failures.
 - [x] GTA6/USDC vault: card, live APR/stats, position reading, deposit, harvest, reinvest, partial/full close, out-of-range notice, opening-guarantee top-up, excluded from move suggestions; all verified in live simulation, no funds moved.
 - [ ] GTA6 movements in vault history/harvested PNL (range-pool events not decoded yet) — pending the owner's go-ahead.
 - [ ] Verify a real GTA6 deposit/harvest/close with the owner's Privy wallet — requires the owner's sign-in, funds and signature.
