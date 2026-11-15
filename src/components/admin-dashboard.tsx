@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Suspense, useEffect, useState } from "react";
 import { ANNOUNCEMENTS, readPublished } from "@/lib/announcements";
 import { Link } from "@tanstack/react-router";
-import { Activity, Megaphone, ShieldCheck, Wallet } from "lucide-react";
+import { Activity, Eye, Megaphone, ShieldCheck, Wallet } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
@@ -15,12 +15,14 @@ const AffiliateVipAdmin = lazyWithReload(() => import("./affiliate-vip-admin").t
 const TelegramPublishAdmin = lazyWithReload(() => import("./telegram-publish-admin").then((m) => ({ default: m.TelegramPublishAdmin })));
 const MailboxAdmin = lazyWithReload(() => import("./mailbox-admin").then((m) => ({ default: m.MailboxAdmin })));
 const SuggestionsAdmin = lazyWithReload(() => import("./suggestions-admin").then((m) => ({ default: m.SuggestionsAdmin })));
+const CardPreviewAdmin = lazyWithReload(() => import("./card-preview-admin").then((m) => ({ default: m.CardPreviewAdmin })));
 const WalletPolicyAdmin = lazyWithReload(() => import("./wallet-policy-admin").then((m) => ({ default: m.WalletPolicyAdmin })));
 
 const TABS = [
   { key: "negocio", label: "Finanzas y Afiliados", hint: "Tesorería, pagos y códigos VIP", icon: Wallet },
   { key: "comunicaciones", label: "Comunicaciones", hint: "Correo, Telegram y sugerencias", icon: Megaphone },
   { key: "seguridad", label: "Seguridad y Estado", hint: "Acceso de wallets y monitor", icon: ShieldCheck },
+  { key: "vista", label: "Vista previa", hint: "Tarjetas y pasos tal como los ve el usuario", icon: Eye },
 ] as const;
 
 const Block = ({ title, children }: { title: string; children: ReactNode }) => <div><h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</h3>{children}</div>;
@@ -52,6 +54,7 @@ export function AdminDashboard() {
         <TabsContent value="negocio" className={`mt-4 space-y-8 ${box}`}><Block title={t("Tesorería y pagos")}><AffiliatePayoutsAdmin /></Block><Block title={t("Códigos VIP y directorio")}><AffiliateVipAdmin /></Block></TabsContent>
         <TabsContent value="comunicaciones" className={`mt-4 space-y-8 ${box}`}><Block title={t("Canal de Telegram")}><TelegramPublishAdmin /></Block><Block title={t("Buzón oficial")}><MailboxAdmin /></Block><Block title={t("Sugerencias")}><SuggestionsAdmin /></Block></TabsContent>
         <TabsContent value="seguridad" className={`mt-4 space-y-8 ${box}`}><Block title={t("Control de acceso")}><WalletPolicyAdmin /></Block><Block title={t("Monitor del sistema")}><Link to="/status" className="flex items-center justify-between rounded-2xl border border-border bg-card p-5 hover:bg-secondary"><span className="flex items-center gap-2 font-medium"><Activity size={18} className="text-primary" />{t("Ver estado en vivo de los servicios")}</span><span aria-hidden>→</span></Link></Block></TabsContent>
+        <TabsContent value="vista" className="mt-4"><CardPreviewAdmin /></TabsContent>
       </Suspense>
     </Tabs>
   </div>;
