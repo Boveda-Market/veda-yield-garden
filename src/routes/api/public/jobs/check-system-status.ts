@@ -123,7 +123,8 @@ export const Route = createFileRoute("/api/public/jobs/check-system-status")({
               await trackRangePositions({
                 privyUserId: l.privy_user_id, positions, rows, now,
                 store: { save: (row) => db.from("system_service_status").upsert(row, { onConflict: "service" }), clear: (service) => db.from("system_service_status").delete().eq("service", service) },
-                alert: (id, html, button) => tg.userAlert(id, html, "range", button),
+                // Autopilot handles out-of-range positions; no manual-rebalance push alerts.
+                alert: async () => undefined,
                 vaultName,
               });
             }

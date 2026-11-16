@@ -7,7 +7,7 @@ import { assetOfTitle } from "@/lib/predict";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { SUPPORT_URL } from "@/components/safety-notice";
 import { usePredictAlerts, type PredictAlert, type RefundAlert } from "@/hooks/use-predict-alerts";
-import { useRangeAlerts, type RangeAlert } from "@/hooks/use-range-alerts";
+import type { RangeAlert } from "@/hooks/use-range-alerts";
 import { useAutopilot } from "@/components/autopilot-toggle";
 import { autopilotNotice } from "@/lib/autopilot";
 import { ANNOUNCEMENTS, DISMISSED_KEY, SEEN_KEY, announcementSections, latestAnnouncementId, shortDate, type Announcement, type AnnouncementKind } from "@/lib/announcements";
@@ -131,7 +131,7 @@ export function NewsBell() {
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(false);
   const predict = usePredictAlerts();
-  const ranges = useRangeAlerts();
+  const ranges: RangeAlert[] = []; // no manual-rebalance notices: Autopilot re-centres and reports when done
   const [seenRanges, setSeenRanges] = useState<string[]>([]);
   const rangeUnread = ranges.some((a) => !seenRanges.includes(a.id));
   const ap = autopilotNotice(useAutopilot().status, Date.now());
