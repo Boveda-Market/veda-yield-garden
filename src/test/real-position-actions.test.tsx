@@ -52,7 +52,7 @@ it("does not authorize closing locked pilot liquidity", () => {
   expect(screen.queryByText("Revisión de cierre autorizada")).not.toBeInTheDocument();
 });it("opens the two-step reinvest flow from Reinvertir ganancias", () => {
   show("new-position");
-  fireEvent.click(screen.getByRole("button", { name: "Reinvertir" }));
+  fireEvent.click(screen.getByRole("button", { name: "Sumar ganancias a la bóveda" }));
   expect(screen.getByText("Revisión de reinversión autorizada")).toBeInTheDocument();
 });
 

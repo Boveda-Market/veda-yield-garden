@@ -145,7 +145,7 @@ export const more: Record<string, string> = {
   "PNL": "PNL",
   "Depositar": "Deposit",
   "Reinvertir": "Reinvest",
-  "Sumar ganancias": "Add earnings",
+  "Sumar ganancias a la bóveda": "Add earnings to the vault",
   "PNL = ganancias por cosechar, estimadas al precio actual. APR estimado con las últimas 24h.": "PNL = earnings ready to harvest, estimated at current price. APR estimated from the last 24h.",
   "Comisión aparte en USDC": "Fee charged separately in USDC",
   "Necesitas USDC para la comisión de este cambio.": "You need USDC for this swap's fee.",
