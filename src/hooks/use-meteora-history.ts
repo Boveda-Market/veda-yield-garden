@@ -14,7 +14,7 @@ export function useMeteoraHistory(wallet: string | null) {
   const pages = query.data?.pages ?? [];
   const records = [...new Map(pages.flatMap((page) => page.records).map((row) => [row.id, row])).values()].sort((a, b) => b.slot - a.slot);
   const metrics = meteoraMetrics(records);
-  const priced = metrics.totals.filter((p) => p.id !== "rwa");
+  const priced = metrics.totals;
   const priceQueries = useQueries({ queries: priced.map((p) => ({ queryKey: ["dexscreener-pool-stats", p.pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(p.pool, signal), staleTime: 60_000, retry: 1 })) });
   const prices = Object.fromEntries(priced.map((p, i) => { const s = priceQueries[i]?.data; return [p.id, s && s.baseSymbol.toUpperCase().includes(p.symbol) ? s.price : null]; }));
   const ready = pages.length > 0;

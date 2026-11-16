@@ -150,7 +150,7 @@ describe("unsigned composed deposit simulation", () => {
     expect(mocks.connection.simulateTransaction).not.toHaveBeenCalled();
   });
   it("does not widen signable vaults to Token-2022", async () => {
-    await expect(simulateDeposit("test-credential", { wallet, vaultId: "rwa", amount: "10000" }, { preparePilot: true })).rejects.toThrow();
+    await expect(simulateDeposit("test-credential", { wallet, vaultId: "rwa" as never, amount: "10000" }, { preparePilot: true })).rejects.toThrow();
   });
   it("pilot returns nothing when Solana rejects the simulation", async () => {
     mocks.connection.simulateTransaction.mockResolvedValue({ context: { slot: 123 }, value: { err: { InstructionError: [4, "Custom"] } } });

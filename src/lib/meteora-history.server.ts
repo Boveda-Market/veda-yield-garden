@@ -32,7 +32,7 @@ export function decodeMeteoraRecords(tx: ParsedTransactionWithMeta, wallet: stri
       if (address(data["owner"]) !== wallet) continue;
       const pool = address(data["pool"]);
       // Token-2022 event extension accounting remains deliberately unavailable.
-      if (!CHAIN_POOLS.some((config) => config.pool === pool && config.id !== "rwa")) continue;
+      if (!CHAIN_POOLS.some((config) => config.pool === pool)) continue;
       const kind = event.name === "EvtClaimPositionFee" ? "harvest" : event.name === "EvtClosePosition" ? "close" : data["change_type"] === 0 ? "deposit" : data["change_type"] === 1 ? "withdraw" : null;
       if (!kind) throw new Error("Cambio de liquidez desconocido");
       records.push({ id: `${signature}:${group.index}:${index}`, signature, at: tx.blockTime ? tx.blockTime * 1000 : null, slot: tx.slot, pool, position: address(data["position"]), kind,

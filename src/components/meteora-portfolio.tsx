@@ -45,7 +45,7 @@ export function MeteoraPortfolio({ wallet, positions }: { wallet: string | null;
         {ready && <li>{metrics.count} {t("eventos en")}{" "}{scanned} {t("transacciones revisadas.")}{" "}{query.hasNextPage ? t("Hay movimientos anteriores por consultar.") : t("Fin de las páginas consultadas; no garantiza incluir cuentas de tokens, delegados o posiciones transferidas.")}</li>}
         {missing > 0 && <li>{t("{n} transacciones no pudieron verificarse; los totales son parciales.", { n: String(missing) })}</li>}
         {pages.length >= 8 && <li>{t("Límite de consulta: 200 transacciones para mantener la aplicación ligera. Estos totales no representan todo tu historial.")}</li>}
-        <li>{t("Solo se suman los registros cargados. SPCX no se incluye.")}</li>
+        <li>{t("Solo se suman los registros cargados.")}</li>
       </ul>
     </details>
   </div>;

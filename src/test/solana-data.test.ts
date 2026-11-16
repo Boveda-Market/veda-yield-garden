@@ -17,7 +17,6 @@ describe("Real chain amounts and supported pools", () => {
     expect(CHAIN_POOLS.map((pool) => pool.pool)).toEqual([
       "8Pm2kZpnxD3hoMmt4bjStX2Pw2Z9abpbHzZxMPqxPmie",
       "BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1",
-      "7EuQvReu44hnngX2nTpYZzhVCTtxdfhTZf5hzjzEipKR",
       "99bL7ZdcQxcrkdJDKGoGpAhqZUMYEHzhMvtNadiZJpE8",
     ]);
     expect(USDC_MINT).toBe("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");

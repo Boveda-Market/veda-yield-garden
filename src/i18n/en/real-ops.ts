@@ -43,7 +43,7 @@ export const realOps: Record<string, string> = {
   "No pudimos cargar todos los registros. Los resultados anteriores se conservan; intenta actualizar.": "We couldn't load all records. Earlier results are kept; try refreshing.",
   "eventos en": "events in",
   "Fin de las páginas consultadas; no garantiza incluir cuentas de tokens, delegados o posiciones transferidas.": "End of the pages checked; token accounts, delegates or transferred positions may not be included.",
-  "Solo se suman los registros cargados. SPCX no se incluye.": "Only loaded records are added up. SPCX is not included.",
+  "Solo se suman los registros cargados.": "Only loaded records are added up.",
   "Liquidez retirada · no es ganancia": "Liquidity withdrawn · not a gain",
   "Movimientos en bóvedas": "Vault activity",
   "No hay eventos SOL/MET en las transacciones revisadas.": "No SOL/MET events in the transactions reviewed.",
