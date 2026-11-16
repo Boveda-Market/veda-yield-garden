@@ -83,11 +83,7 @@ export function InviteHero({ link, code, referred, pending, preview, onCopied, r
         <p className="text-[11px] font-semibold uppercase tracking-wide text-invite-muted">{t("Tu enlace")} · <span className="font-mono normal-case text-invite">{code}</span></p>
         <p className="mt-1 truncate font-mono text-sm">{link.replace(/^https?:\/\//, "")}</p>
         <button type="button" onClick={() => void copy()} className="invite-cta mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-xl font-display text-lg font-extrabold text-invite-surface transition-transform active:scale-[0.98]">{copied ? <><Check size={20} />{t("¡Copiado!")}</> : <><Copy size={20} />{t("Copiar mi enlace")}</>}</button>
-        <div className="mt-2 grid grid-cols-3 gap-2">
-          <a href={`https://wa.me/?text=${enc(`${text} ${link}`)}`} target="_blank" rel="noopener noreferrer" className="flex h-11 items-center justify-center gap-1.5 rounded-xl bg-whatsapp text-sm font-bold text-brand-foreground shadow-md transition-transform hover:brightness-110 active:scale-[0.97]"><WaLogo />WhatsApp</a>
-          <a href={`https://t.me/share/url?url=${enc(link)}&text=${enc(text)}`} target="_blank" rel="noopener noreferrer" className="flex h-11 items-center justify-center gap-1.5 rounded-xl bg-telegram text-sm font-bold text-brand-foreground shadow-md transition-transform hover:brightness-110 active:scale-[0.97]"><TgLogo />Telegram</a>
-          <button type="button" onClick={() => void share()} className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-invite/40 text-sm font-bold hover:bg-invite/10"><Share2 size={16} />{t("Más")}</button>
-        </div>
+        <button type="button" onClick={() => void share()} className="mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-invite/50 text-base font-bold transition-colors hover:bg-invite/10"><Share2 size={18} />{t("Compartir")}</button>
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-2">
         <div className="rounded-2xl bg-invite-foreground/5 p-3"><dt className="flex items-center gap-1 text-[11px] text-invite-muted"><Users size={12} />{t("Invitados")}</dt><dd className="font-display text-2xl font-extrabold">{referred}</dd></div>
