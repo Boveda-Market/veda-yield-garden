@@ -1233,7 +1233,6 @@ export const extra: Record<string, string> = {
   "Moveremos todo a {v}. Tu wallet te pedirá aprobar dos veces: cerrar esta bóveda y depositar en la nueva.": "We'll move everything to {v}. Your wallet will ask you to approve twice: closing this vault and depositing in the new one.",
   "Aprobar migración": "Approve move",
   "Paso 1 de 2: cosechamos tus ganancias y cerramos esta bóveda. En cuanto se confirme, depositamos todo en {v} automáticamente. 0% de comisión de BÓVEDA.": "Step 1 of 2: we harvest your earnings and close this vault. Once confirmed, we deposit everything in {v} automatically. 0% BÓVEDA fee.",
-  "Migrar a {v}": "Move to {v}",
   "Movemos todo tu dinero y ganancias. 0% de comisión.": "We move all your money and earnings. 0% fee.",
   "Movemos todo tu dinero y ganancias.": "We move all your money and earnings.",
   "Retirar ·": "Withdraw ·",
