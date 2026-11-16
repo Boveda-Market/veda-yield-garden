@@ -221,9 +221,9 @@ export function WalletPanel() {
     </section>
 
     <section aria-label={t("Accesos rápidos")} className="grid gap-2">
-      <Link to="/invita" className="invite-ring group block rounded-2xl p-[2px] transition-transform active:scale-[0.98]">
+      <Link to="/invita" className="invite-ring cta-attn cta-glow-invite group block rounded-2xl p-[2px] transition-transform active:scale-[0.98]">
         <span className="flex items-center gap-3 rounded-[14px] bg-[image:var(--gradient-invite-surface)] p-4 text-invite-foreground">
-          <span className="invite-cta grid h-11 w-11 shrink-0 place-items-center rounded-xl text-invite-surface"><Gift size={22} aria-hidden /></span>
+          <span className="invite-cta grid h-11 w-11 shrink-0 place-items-center rounded-xl text-invite-surface"><span className="cta-wiggle"><Gift size={22} aria-hidden /></span></span>
           <span className="min-w-0 flex-1"><span className="block font-display text-lg font-extrabold">{t("Invita y Gana")}</span><span className="block text-xs font-semibold text-invite-muted">{t("Gana hasta 60% de comisión en dólares")}</span></span>
           <ChevronRight size={18} className="shrink-0 text-invite transition-transform group-hover:translate-x-0.5" aria-hidden />
         </span>

@@ -36,21 +36,21 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
   const apr = y.data?.apr;
   const aprLabel = apr != null && apr >= 100 ? `+${Math.round(apr).toLocaleString("en-US")}% APR` : t("Alto octanaje");
   return <section aria-label={t("Accesos rápidos")} className="grid grid-cols-2 gap-2 sm:gap-3">
-    {mine ? <button type="button" onClick={() => setOpen(true)} className="hot-ring group relative block rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">
+    {mine ? <button type="button" onClick={() => setOpen(true)} className="hot-ring cta-attn cta-glow-hot group relative block rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">
       <span className="relative flex h-full flex-col gap-1.5 overflow-hidden rounded-[14px] bg-[image:var(--gradient-hot-surface)] p-3 text-hot-foreground">
         <span className="hot-cta inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-hot-surface"><Zap size={12} aria-hidden />{mine.outOfRange ? t("Rebalancear") : t("Activa")}</span>
         <span className="font-display text-base font-bold leading-tight">{t("Bóveda GTA6")}</span>
         <span className="text-[11px] font-semibold leading-4">{t("Ver ganancias")} →</span>
       </span>
-    </button> : <Link to="/app" className="hot-ring group relative block rounded-2xl p-[2px] transition-transform active:scale-[0.98]">
+    </button> : <Link to="/app" className="hot-ring cta-attn cta-glow-hot group relative block rounded-2xl p-[2px] transition-transform active:scale-[0.98]">
       <span className="relative flex h-full flex-col gap-1.5 overflow-hidden rounded-[14px] bg-[image:var(--gradient-hot-surface)] p-3 text-hot-foreground">
-        <span className="hot-cta inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-hot-surface"><Flame size={12} aria-hidden />{aprLabel}</span>
+        <span className="hot-cta inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-hot-surface"><Flame size={12} aria-hidden className="flame-flicker" />{aprLabel}</span>
         <span className="font-display text-base font-bold leading-tight">{t("Bóveda GTA6")}</span>
         <span className="text-[11px] leading-4 text-hot-muted">{t("Comisiones brutales con el volumen de GTA6")}</span>
         <ChevronRight size={16} aria-hidden className="absolute right-2 top-2 opacity-70 transition-transform group-hover:translate-x-0.5" />
       </span>
     </Link>}
-    <Link to="/mercados" className="group relative block rounded-2xl bg-primary p-[2px] shadow-[0_0_24px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
+    <Link to="/mercados" className="cta-attn group relative block rounded-2xl bg-primary p-[2px] shadow-[0_0_24px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
       <span className="relative flex h-full flex-col gap-1.5 overflow-hidden rounded-[14px] bg-card p-3">
         <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-primary"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary" /></span>{t("En vivo")}</span>
         <span className="block"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} className="h-8 w-auto max-w-full" /></span>

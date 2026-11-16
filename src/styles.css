@@ -275,3 +275,12 @@
 @keyframes duel-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .duel-scroll { animation: duel-scroll 6s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .cta-shimmer, .flame-flicker, .duel-scroll { animation: none; } }
+
+/* Attention CTAs: breathing glow + periodic shine so key buttons stand out over the rest. */
+@keyframes cta-breathe { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 color-mix(in oklab, var(--cta-glow, var(--primary)) 55%, transparent); } 50% { transform: scale(1.03); box-shadow: 0 0 26px 4px color-mix(in oklab, var(--cta-glow, var(--primary)) 55%, transparent); } }
+@keyframes cta-wiggle { 0%,88%,100% { transform: rotate(0); } 91% { transform: rotate(-12deg) scale(1.15); } 94% { transform: rotate(10deg) scale(1.15); } 97% { transform: rotate(-6deg); } }
+.cta-attn { position: relative; overflow: hidden; animation: cta-breathe 2.2s ease-in-out infinite; }
+.cta-attn::after { content: ""; position: absolute; inset: 0; width: 40%; pointer-events: none; background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--background) 70%, transparent), transparent); animation: cta-shimmer 2.8s ease-in-out infinite; }
+.cta-wiggle { display: inline-flex; animation: cta-wiggle 3s ease-in-out infinite; }
+.cta-glow-hot { --cta-glow: var(--hot); } .cta-glow-invite { --cta-glow: var(--invite-2); }
+@media (prefers-reduced-motion: reduce) { .cta-attn, .cta-attn::after, .cta-wiggle { animation: none; } }
