@@ -57,12 +57,12 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
 
   // Funded with USDC but no network reserve: the activation card (treasury-sponsored refill) takes over.
   if (step === "sol" && q.data.usdc >= MIN_USDC_MICRO) return null;
-  if (step === "sol") return <section aria-label={t("Añadir fondos")} className={box}>
+  if (step === "sol") return <section aria-label={t("Añadir dólares")} className={box}>
     <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Sparkles size={14} />{t("Empieza aquí")}</p>
-    <h2 className="mt-2 font-display text-xl font-semibold">{t("Añade tus primeros fondos")}</h2>
+    <h2 className="mt-2 font-display text-xl font-semibold">{t("Añade tus primeros dólares")}</h2>
     <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Elige Coinbase (saldo, banco o tarjeta) o tarjeta y Apple Pay. Tu primera compra incluye una pequeña reserva para costos de red y luego activas tus dólares con un toque.")}</p>
     <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck size={14} className="text-primary" />{t("Solo tú controlas tus fondos. BÓVEDA no puede moverlos sin tu firma.")}</p>
-    <Button className="mt-4 w-full" onClick={() => setBuyOpen((v) => v + 1)}><CreditCard size={16} />{t("Añadir fondos")}</Button>
+    <Button className="mt-4 w-full" onClick={() => setBuyOpen((v) => v + 1)}><CreditCard size={16} />{t("Añadir dólares")}</Button>
     {buyOpen ? <BuyUsdc className="mt-3" auto={buyOpen} /> : null}
     {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}
   </section>;

@@ -74,10 +74,10 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
 
   return <div className={className}>
     {auto ? waiting && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 size={16} className="animate-spin" />{t("Esperando tus dólares…")}</p> : <div className="flex flex-wrap gap-2">
-      <Button onClick={() => void add()} disabled={waiting}>{waiting ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}{waiting ? t("Esperando tus dólares…") : t("Añadir fondos")}</Button>
+      <Button onClick={() => void add()} disabled={waiting}>{waiting ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}{waiting ? t("Esperando tus dólares…") : t("Añadir dólares")}</Button>
     </div>}
     <Dialog open={choosing} onOpenChange={setChoosing}><ActionSheetContent closeLabel={t("Cerrar")}>
-      <DialogHeader><DialogTitle>{t("Añadir fondos")}</DialogTitle><DialogDescription>{t("Compra con tu saldo de Coinbase, banco o tarjeta.")}</DialogDescription></DialogHeader>
+      <DialogHeader><DialogTitle>{t("Añadir dólares")}</DialogTitle><DialogDescription>{t("Compra con tu saldo de Coinbase, banco o tarjeta.")}</DialogDescription></DialogHeader>
       <div className="grid gap-3">
         <button type="button" onClick={() => void pay("coinbase")} className="flex items-start gap-3 rounded-xl border border-primary/50 bg-primary/10 p-4 text-left transition-colors hover:bg-primary/20">
           <img src="/brands/coinbase.svg" alt="" width={32} height={32} className="h-8 w-8 rounded-md" />

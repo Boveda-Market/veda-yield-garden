@@ -177,7 +177,7 @@ export function WalletPanel() {
   const decimals = asset === "SOL" ? 9 : 6;
   const setPct = (pct: bigint) => setAmount((Number((max * pct) / 100n) / 10 ** decimals).toString());
   const quick = [
-    { icon: CreditCard, label: t("Añadir fondos"), on: () => setBuyOpen((v) => v + 1) },
+    { icon: CreditCard, label: t("Añadir dólares"), on: () => setBuyOpen((v) => v + 1) },
     { icon: ArrowLeftRight, label: t("Cambiar"), on: () => openSwap("USDC") },
     { icon: Send, label: t("Enviar"), on: () => openSend("USDC") },
     { icon: QrCode, label: t("Recibir"), on: () => setReceiveOpen(true) },
@@ -239,7 +239,7 @@ export function WalletPanel() {
         <TokenIcon symbol={a.symbol} size={40} />
         <div className="min-w-0 flex-1"><p className="font-medium">{a.symbol}</p><p className="text-xs text-muted-foreground">{a.label}</p></div>
         <div className="text-right"><p className="font-medium">{hidden ? "••••" : a.amt !== undefined ? fmt(a.amt, a.symbol === "USDC" ? 2 : 4) : "—"}</p><p className="text-xs text-muted-foreground">{hidden ? MASK : a.usd !== undefined ? `$${fmt(a.usd)}` : "—"}</p></div>
-        {a.symbol === "USDC" && <Button size="icon" variant="ghost" aria-label={t("Añadir fondos")} onClick={() => setBuyOpen((v) => v + 1)}><Plus size={16} /></Button>}
+        {a.symbol === "USDC" && <Button size="icon" variant="ghost" aria-label={t("Añadir dólares")} onClick={() => setBuyOpen((v) => v + 1)}><Plus size={16} /></Button>}
         <Button size="icon" variant="ghost" aria-label={t("Cambiar")} onClick={() => openSwap(a.symbol)}><ArrowLeftRight size={16} /></Button>
         {(a.symbol === "USDC" || a.symbol === "SOL") && <Button size="icon" variant="ghost" aria-label={t("Enviar")} onClick={() => openSend(a.symbol as WalletAsset)}><Send size={16} /></Button>}
       </li>)}</ul>

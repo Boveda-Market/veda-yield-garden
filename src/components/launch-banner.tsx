@@ -16,7 +16,7 @@ export function LaunchBanner() {
     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/15 text-primary"><Rocket size={16} /></span>
     <div className="min-w-0 text-sm">
       <p className="font-semibold">{t("Novedades: Coinbase y alertas en Telegram")}</p>
-      <p className="mt-0.5 text-muted-foreground">{t("Añade fondos y retira a tu banco con Coinbase, y recibe avisos de tus ganancias en Telegram.")}</p>
+      <p className="mt-0.5 text-muted-foreground">{t("Añade dólares y retira a tu banco con Coinbase, y recibe avisos de tus ganancias en Telegram.")}</p>
       <div className="mt-2 flex flex-wrap gap-3 text-xs font-semibold text-primary">
         <Link to="/wallet" onClick={close} className="hover:underline">{t("Ir a Mi Billetera")}</Link>
         <Link to="/notificaciones" onClick={close} className="hover:underline">{t("Activar alertas")}</Link>
