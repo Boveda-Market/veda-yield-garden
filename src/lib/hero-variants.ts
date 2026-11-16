@@ -6,10 +6,16 @@ export const HERO_VARIANTS: readonly { title: string; sub: string; theme?: "gta6
   { title: "5 minutos. Dos botones. Tu dinero duplicado o vete a casa.", sub: "Doble o Nada en vivo: juegas contra el mercado en dólares reales. Tú eliges la jugada, nosotros vigilamos el reloj y tu premio cae con un solo toque." },
   { title: "¿Para qué trabajar 8 horas si una jugada de 5 minutos paga el día?", sub: "Predice si Bitcoin sube o baja en la próxima ronda sin comprar la moneda: juegas en dólares y cobras en el acto. Cero humo, pura puntería." },
   { title: "Mientras todos esperan el juego, tú cobras como la casa.", sub: "Cada compra y venta de GTA6 te deja comisión. Deposita, recibe la alerta en Telegram y rebalancea con 1 toque.", theme: "gta6" },
+  { title: "Los demás van a gastar en el juego. Tú vas a cobrarles el peaje.", sub: "Pon tus dólares en la bóveda de mayor volumen. Cada compra y venta de GTA6 te deja comisiones en automático, día y noche.", theme: "gta6" },
+  { title: "El lanzamiento más grande de la historia. Tu saldo cobrando cada segundo.", sub: "Millones van a mover GTA6 sin parar. Conviértete en la casa y quédate con una tajada de cada transacción antes de que salga el juego.", theme: "gta6" },
+  { title: "No esperes a jugar GTA6. Sé el dueño del banco.", sub: "La bóveda de alto octanaje que convierte el furor mundial en dólares diarios para ti. Sin vueltas técnicas y con retiro libre en cualquier momento.", theme: "gta6" },
+  { title: "Bóveda GTA6: Comisiones brutales impulsadas por pura adrenalina.", sub: "Aprovecha el rendimiento más agresivo del mercado. Entras en un toque, el piloto automático cuida tu rango y tus ganancias crecen solas.", theme: "gta6" },
+  { title: "Mientras el mundo se desvive por GTA6, tú cobras sentado.", sub: "Cada intercambio del juego te paga comisión directo a tu billetera. Cero monedas raras: generas dólares reales con piloto automático.", theme: "gta6" },
 ];
 
 /** Index of the GTA6 launch variant and the share of new visitors who see it. */
 export const GTA6_HERO = HERO_VARIANTS.findIndex((v) => v.theme === "gta6");
+export const GTA6_HEROES = HERO_VARIANTS.map((v, i) => (v.theme === "gta6" ? i : -1)).filter((i) => i >= 0);
 export const GTA6_HERO_SHARE = 0.4;
 
 export const HERO_KEY = "boveda-hero-v";
@@ -20,10 +26,11 @@ export function pickHeroVariant(forced: string | null, saved: string | null, ran
   const ok = (s: string | null) => s !== null && /^\d+$/.test(s) && Number(s) < n;
   if (ok(forced)) return Number(forced);
   if (ok(saved)) return Number(saved);
-  if (GTA6_HERO >= 0 && rand < GTA6_HERO_SHARE) return GTA6_HERO;
+  const g = GTA6_HEROES;
+  if (g.length && rand < GTA6_HERO_SHARE) return g[Math.min(g.length - 1, Math.floor((rand / GTA6_HERO_SHARE) * g.length))]!;
   // Remaining visitors split evenly among the other variants.
-  const others = HERO_VARIANTS.map((_, i) => i).filter((i) => i !== GTA6_HERO);
-  const r = GTA6_HERO >= 0 ? (rand - GTA6_HERO_SHARE) / (1 - GTA6_HERO_SHARE) : rand;
+  const others = HERO_VARIANTS.map((_, i) => i).filter((i) => !g.includes(i));
+  const r = g.length ? (rand - GTA6_HERO_SHARE) / (1 - GTA6_HERO_SHARE) : rand;
   return others[Math.min(others.length - 1, Math.floor(r * others.length))]!;
 }
 
