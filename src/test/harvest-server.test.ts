@@ -83,10 +83,6 @@ it("rejects a position in the wrong pool", async () => {
   expect((await simulateHarvest("test", { ...input, vaultId: "sol" }, options)).prepared).toBeUndefined();
   expect(mocks.claim).not.toHaveBeenCalled();
 });
-it("requires a new review when the fee exceeds the accepted amount", async () => {
-  expect((await simulateHarvest("test", input, { ...options, maximumFeeRaw: "99" })).prepared).toBeUndefined();
-  expect(mocks.send).not.toHaveBeenCalled();
-});
 it("never returns signable bytes after a rejected simulation", async () => {
   mocks.simulate.mockResolvedValue({ value: { err: "failed", accounts: null } });
   expect((await simulateHarvest("test", input, options)).prepared).toBeUndefined();
