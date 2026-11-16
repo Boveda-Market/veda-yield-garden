@@ -1,5 +1,5 @@
 /** Rotating home headlines. Index 0 is the original; ?v=N forces one (for campaigns). The gta6 variant restyles the whole hero. */
-export const HERO_VARIANTS: readonly { title: string; sub: string; theme?: "gta6" }[] = [
+export const HERO_VARIANTS: readonly { title: string; sub: string; theme?: "gta6" | "doble" }[] = [
   { title: " Nada de monedas locas. Genera ganancias reales.", sub: "Todo siempre bajo tu control. $0 para entrar, retira en cualquier momento. Garantizado." },
   { title: "Deja de mirar las gráficas como un bobo. Duplica tus dólares en 300 segundos.", sub: "¿Sube o Baja? Escoge tu bando, confirma con tu huella y cóbrale al mercado antes de que se enfríe tu café. Sin comprar monedas raras: cobras dólares reales al instante." },
   { title: "El banco te da 3% al año. Aquí te llevas hasta +90% en 5 minutos.", sub: "Rondas relámpago de Bitcoin, Ethereum y Solana. Si tienes el timing, te llevas el bote en dólares directo a tu billetera. Si dudas, quédate en el banco." },
@@ -11,11 +11,11 @@ export const HERO_VARIANTS: readonly { title: string; sub: string; theme?: "gta6
   { title: "No esperes a jugar GTA6. Sé el dueño del banco.", sub: "La bóveda de alto octanaje que convierte el furor mundial en dólares diarios para ti. Sin vueltas técnicas y con retiro libre en cualquier momento.", theme: "gta6" },
   { title: "Bóveda GTA6: Comisiones brutales impulsadas por pura adrenalina.", sub: "Aprovecha el rendimiento más agresivo del mercado. Entras en un toque, el piloto automático cuida tu rango y tus ganancias crecen solas.", theme: "gta6" },
   { title: "Mientras el mundo se desvive por GTA6, tú cobras sentado.", sub: "Cada intercambio del juego te paga comisión directo a tu billetera. Cero monedas raras: generas dólares reales con piloto automático.", theme: "gta6" },
-  { title: "Predicciones de Bitcoin en vivo: duplica tus dólares en 5 minutos.", sub: "¿Sube o Baja? Sin comprar monedas raras: eliges tu bando en rondas relámpago de Bitcoin, Ethereum y Solana, juegas en dólares y cobras directo a tu billetera al terminar el reloj." },
-  { title: "Doble o Nada: la forma más rápida de multiplicar tu dinero prediciendo el mercado.", sub: "Dos botones, rondas de 300 segundos y premios en dólares reales. Olvídate de gráficas complicadas: pon a prueba tu puntería y retira cuando quieras." },
-  { title: "Los bancos te dan centavos al año. Una ronda de 5 minutos te paga el día.", sub: "Entra al mercado de predicciones en vivo en español. Elige si el precio sube o baja, confirma con tu huella y llévate hasta +90% en dólares en una sola jugada." },
-  { title: "5 minutos. Dos opciones. Tus dólares duplicados en tiempo real.", sub: "Juega Doble o Nada con Bitcoin, Ethereum y Solana. Entrar es gratis y tus premios llegan en dólares a tu billetera." },
-  { title: "¿Sube o baja? La jugada de 300 segundos donde tu instinto vale oro.", sub: "Predice el movimiento del mercado en vivo. Si aciertas la tendencia, cobras dólares limpios y puedes retirar en cualquier momento." },
+  { title: "Predicciones de Bitcoin en vivo: duplica tus dólares en 5 minutos.", sub: "¿Sube o Baja? Sin comprar monedas raras: eliges tu bando en rondas relámpago de Bitcoin, Ethereum y Solana, juegas en dólares y cobras directo a tu billetera al terminar el reloj.", theme: "doble" },
+  { title: "Doble o Nada: la forma más rápida de multiplicar tu dinero prediciendo el mercado.", sub: "Dos botones, rondas de 300 segundos y premios en dólares reales. Olvídate de gráficas complicadas: pon a prueba tu puntería y retira cuando quieras.", theme: "doble" },
+  { title: "Los bancos te dan centavos al año. Una ronda de 5 minutos te paga el día.", sub: "Entra al mercado de predicciones en vivo en español. Elige si el precio sube o baja, confirma con tu huella y llévate hasta +90% en dólares en una sola jugada.", theme: "doble" },
+  { title: "5 minutos. Dos opciones. Tus dólares duplicados en tiempo real.", sub: "Juega Doble o Nada con Bitcoin, Ethereum y Solana. Entrar es gratis y tus premios llegan en dólares a tu billetera.", theme: "doble" },
+  { title: "¿Sube o baja? La jugada de 300 segundos donde tu instinto vale oro.", sub: "Predice el movimiento del mercado en vivo. Si aciertas la tendencia, cobras dólares limpios y puedes retirar en cualquier momento.", theme: "doble" },
 ];
 
 /** Index of the GTA6 launch variant and the share of new visitors who see it. */

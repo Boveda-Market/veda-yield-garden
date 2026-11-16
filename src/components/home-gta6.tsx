@@ -1,7 +1,8 @@
 import type React from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Flame } from "lucide-react";
+import { ArrowRight, Flame, TrendingDown, TrendingUp } from "lucide-react";
 import { useI18n, useT } from "@/lib/i18n";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { VAULTS } from "@/lib/vaults";
@@ -105,4 +106,42 @@ export function Gta6TileBody({ status }: { status?: React.ReactNode }) {
     </span>
     {status}
   </span>;
+}
+
+/** Seconds left in the current 5-minute round (rounds start on 5-minute marks); client-only to avoid hydration drift. */
+function useRoundCountdown() {
+  const [left, setLeft] = useState<number | null>(null);
+  useEffect(() => { const tick = () => setLeft(300 - (Math.floor(Date.now() / 1000) % 300)); tick(); const id = setInterval(tick, 1000); return () => clearInterval(id); }, []);
+  return left;
+}
+
+/** Full-width Doble o Nada hero for the home rotation: live duel lines, round countdown and Sube/Baja buttons. */
+export function DobleHero({ title, sub }: { title: string; sub: string }) {
+  const t = useT();
+  const left = useRoundCountdown();
+  const clock = left == null ? "5:00" : `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
+  const steps = [["🎯", "Eliges Sube o Baja"], ["⏱️", "Esperas 5 min"], ["💵", "Cobras en dólares"]] as const;
+  return <div className="duel-ring rounded-3xl p-[2px] shadow-[var(--shadow-duel)]">
+    <div className="relative isolate overflow-hidden rounded-[calc(1.5rem-2px)] bg-[image:var(--gradient-duel-surface)] text-hot-foreground">
+      <div className="relative isolate h-36 overflow-hidden px-5 pt-4 sm:h-44 sm:px-8">
+        <DuelLines />
+        <span aria-hidden className="cta-shimmer pointer-events-none absolute inset-y-0 left-0 z-10 w-1/4 bg-gradient-to-r from-transparent via-hot-foreground/25 to-transparent" />
+        <div className="relative flex flex-wrap items-center justify-between gap-2">
+          <span className="flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-primary-foreground"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary-foreground opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary-foreground" /></span>{t("En vivo")} · BTC · ETH · SOL</span>
+          <span className="rounded-full bg-hot-surface/80 px-2.5 py-0.5 font-display text-sm font-black tabular-nums" aria-label={t("Tiempo de la ronda")}>⏱️ {clock}</span>
+        </div>
+        <img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} className="relative mx-auto mt-3 h-16 w-auto max-w-full -rotate-2 drop-shadow-[0_0_14px_var(--primary)] sm:mx-0 sm:h-20" />
+      </div>
+      <div className="px-5 pb-5 pt-3 text-center sm:px-8 md:text-left">
+        <h1 className="font-display text-[1.7rem] font-black leading-tight sm:text-4xl">{t(title)}</h1>
+        <p className="mt-2 text-sm leading-6 text-hot-muted sm:text-base">{t(sub)}</p>
+        <ol className="mt-4 grid grid-cols-3 gap-2 text-[11px] font-bold sm:text-xs">{steps.map(([i, l]) => <li key={l} className="flex flex-col items-center gap-1 rounded-xl bg-hot-surface/70 px-2 py-2"><span aria-hidden className="text-xl">{i}</span>{t(l)}</li>)}</ol>
+        <div className="mt-4 grid grid-cols-2 gap-2.5 md:max-w-md">
+          <Link to="/mercados" className="cta-attn flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary text-lg font-black text-primary-foreground shadow-[0_0_24px_-4px_var(--primary)] transition-transform active:scale-[0.98]"><TrendingUp size={20} aria-hidden />{t("Sube")}</Link>
+          <Link to="/mercados" className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-destructive text-lg font-black text-destructive-foreground shadow-[0_0_24px_-4px_var(--destructive)] transition-transform active:scale-[0.98]"><TrendingDown size={20} aria-hidden />{t("Baja")}</Link>
+        </div>
+        <p className="mt-3 text-[11px] leading-4 text-hot-muted">{t("Los precios y premios cambian en cada ronda. Puedes perder lo que juegas.")}</p>
+      </div>
+    </div>
+  </div>;
 }
