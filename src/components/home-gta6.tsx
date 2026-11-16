@@ -59,9 +59,14 @@ export function HomeCtas({ vaultsFirst = false }: { vaultsFirst?: boolean }) {
     </span>
   </Link>;
   const vaults = <Link key="v" to="/app" className="hot-ring group relative block min-w-0 rounded-2xl p-[2px] shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98]">
-    <span className="flex h-16 items-center justify-between gap-2 rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
+    <span className="flex h-[4.5rem] items-center justify-between gap-2 rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
       <span className="flex min-w-0 items-center gap-2 whitespace-nowrap font-display text-[15px] font-black sm:text-base"><img src={gtaTitle} alt="GTA6" className="h-7 w-auto shrink-0 -rotate-2 sm:h-9" /><span className="sr-only">{t("Explorar Bóvedas")}</span><ArrowRight size={16} className="hidden transition-transform group-hover:translate-x-0.5 min-[380px]:block" /></span>
-      <span className="hot-cta shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-hot-surface">{apr}</span>
+      {apr.endsWith(" APR")
+        ? <span className="hot-cta flex shrink-0 flex-col items-center justify-center rounded-xl px-3 py-1 leading-none text-hot-surface shadow-[0_0_18px_-2px_var(--hot)]">
+            <span className="flex items-center gap-1 font-display text-2xl font-black tabular-nums tracking-tight sm:text-[1.7rem]"><Flame size={18} aria-hidden className="shrink-0" />{apr.replace(" APR", "")}</span>
+            <span className="mt-0.5 text-[10px] font-black uppercase tracking-[0.18em]">APR</span>
+          </span>
+        : <span className="hot-cta flex shrink-0 items-center gap-1 rounded-xl px-3 py-2 font-display text-sm font-black uppercase tracking-wide text-hot-surface"><Flame size={16} aria-hidden />{apr}</span>}
     </span>
   </Link>;
   return <div className="mb-4 grid w-full min-w-0 grid-cols-1 gap-2.5">{vaultsFirst ? [vaults, predict] : [predict, vaults]}</div>;
