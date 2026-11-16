@@ -36,7 +36,7 @@ export const more: Record<string, string> = {
   "Profit disponible = saldo USDC menos lo reservado para afiliados. Puedes retirarlo sin dejar a nadie sin cobrar.": "Available profit = USDC balance minus what's reserved for affiliates. You can withdraw it without leaving anyone unpaid.",
   "Añade al menos 0.05 SOL para que los cobros automáticos no fallen.": "Add at least 0.05 SOL so automatic payouts don't fail.",
   "El saldo USDC no cubre todo lo reservado para afiliados.": "The USDC balance doesn't cover everything reserved for affiliates.",
-  "No hay afiliados con 10 USDC o más pendientes.": "No affiliates have 10 USDC or more pending.",
+  "No hay afiliados con 3 USDC o más pendientes.": "No affiliates have 3 USDC or more pending.",
   "Sin wallet de cobro": "No payout wallet",
   "comisiones": "commissions",
   "Pagar": "Pay",
@@ -170,6 +170,8 @@ export const more: Record<string, string> = {
   "Consulta su comprobante antes de volver a intentarlo. Solo está completada cuando la red la confirma. Si falla, puede cobrar costes de red.": "Check its receipt before trying again. It's only complete once the network confirms it. If it fails, network costs may still be charged.",
   "El acceso lo gestiona un proveedor seguro. Los movimientos reales son públicos en la red.": "Sign-in is handled by a secure provider. Real movements are public on the network.",
   "Sí, desde un navegador compatible puedes añadirla a tu pantalla de inicio. Necesitas internet para operar.": "Yes, from a compatible browser you can add it to your home screen. You need internet to operate.",
-  "Se acreditan automáticamente después de cada operación confirmada. Desde 10 USDC acumulados tocas «Cobrar comisiones» y las recibes completas al instante; solo necesitas unos 0.003 SOL para la tarifa de red.": "They're credited automatically after each confirmed operation. Once you've accumulated 10 USDC, tap “Collect commissions” and receive them in full instantly; you only need about 0.003 SOL for the network fee.",
+  "Se acreditan automáticamente después de cada operación confirmada. Desde 3 USDC acumulados tocas «Cobrar comisiones» y las recibes completas al instante; solo necesitas unos 0.003 SOL para la tarifa de red.": "They're credited automatically after each confirmed operation. Once you've accumulated 3 USDC, tap “Collect commissions” and receive them in full instantly; you only need about 0.003 SOL for the network fee.",
   "Real usa dinero de tu wallet. Prueba usa 1,000 créditos ficticios y no mueve dinero.": "Real uses money from your wallet. Trial uses 1,000 fictitious credits and doesn't move money.",
+  "Reclamar": "Claim",
+  "Reclamas desde $3. Te faltan": "You can claim from $3. You need",
 };

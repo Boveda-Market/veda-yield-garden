@@ -71,6 +71,9 @@
   --color-hot-foreground: var(--hot-foreground);
   --color-hot-muted: var(--hot-muted);
   --color-invite: var(--invite);
+  --color-whatsapp: var(--whatsapp);
+  --color-telegram: var(--telegram);
+  --color-brand-foreground: var(--brand-foreground);
   --color-invite-2: var(--invite-2);
   --color-invite-surface: var(--invite-surface);
   --color-invite-foreground: var(--invite-foreground);
@@ -103,6 +106,10 @@
   --gradient-hot: linear-gradient(100deg, var(--hot-2), var(--hot) 55%, oklch(0.66 0.2 300));
   --gradient-hot-surface: radial-gradient(110% 90% at 100% 0%, oklch(0.42 0.2 355 / 0.55), transparent 55%), radial-gradient(90% 80% at 0% 100%, oklch(0.45 0.15 55 / 0.35), transparent 60%), linear-gradient(var(--hot-surface), var(--hot-surface));
   /* Invita y Gana: emerald + gold on deep ink, identical in both themes so it reads as a reward. */
+  /* Official share brand colors (WhatsApp, Telegram). */
+  --whatsapp: #25d366;
+  --telegram: #229ed9;
+  --brand-foreground: #ffffff;
   --invite: oklch(0.82 0.19 155);
   --invite-2: oklch(0.86 0.16 85);
   --invite-surface: oklch(0.19 0.04 200);

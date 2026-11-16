@@ -245,12 +245,12 @@ export const claimAffiliatePayout = createServerFn({ method: "POST" })
     // Release abandoned locks (never signed / expired transactions).
     await db.from("affiliate_earnings").update({ status: "pending", paid_at: null }).eq("affiliate_privy_id", id).eq("status", "paid").is("payout_signature", null).lt("paid_at", new Date(Date.now() - STALE_CLAIM_MS).toISOString());
     const { data: pending } = await db.from("affiliate_earnings").select("commission_raw").eq("affiliate_privy_id", id).eq("status", "pending");
-    if (claimNet((pending ?? []).reduce((a, r) => a + BigInt(r.commission_raw), 0n)) === null) return { success: false, error: "Necesitas al menos 10 USDC acumulados para cobrar." };
+    if (claimNet((pending ?? []).reduce((a, r) => a + BigInt(r.commission_raw), 0n)) === null) return { success: false, error: "Necesitas al menos 3 USDC acumulados para cobrar." };
     const { data: locked, error: lockErr } = await db.from("affiliate_earnings").update({ status: "paid", paid_at: new Date().toISOString() }).eq("affiliate_privy_id", id).eq("status", "pending").is("payout_signature", null).select("signature, level, commission_raw");
     if (lockErr || !locked?.length) return { success: false, error: "Ya hay un cobro en proceso. Espera unos minutos." };
     const net = claimNet(locked.reduce((a, r) => a + BigInt(r.commission_raw), 0n));
     const revert = async () => { for (const r of locked) await db.from("affiliate_earnings").update({ status: "pending", paid_at: null }).eq("signature", r.signature).eq("level", r.level).eq("affiliate_privy_id", id).is("payout_signature", null); };
-    if (net === null) { await revert(); return { success: false, error: "Necesitas al menos 10 USDC acumulados para cobrar." }; }
+    if (net === null) { await revert(); return { success: false, error: "Necesitas al menos 3 USDC acumulados para cobrar." }; }
     try {
       const { AFFILIATE_PAYOUT_WALLET } = await import("./affiliate");
       const { buildAffiliateClaim } = await import("./affiliate.server");

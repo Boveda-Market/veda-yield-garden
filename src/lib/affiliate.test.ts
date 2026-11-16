@@ -10,17 +10,18 @@ describe("affiliate economics", () => {
     expect(earn(10)).toBe(usdc(0.075));
     expect(earn(1000)).toBe(usdc(3.75));
   });
-  it("payout requires 10 USDC accumulated", () => {
-    expect(payoutProgress(usdc(4.5))).toEqual({ pct: 45, ready: false, missingRaw: usdc(5.5) });
-    expect(payoutProgress(usdc(10)).ready).toBe(true);
+  it("payout requires 3 USDC accumulated", () => {
+    expect(payoutProgress(usdc(1.5))).toEqual({ pct: 50, ready: false, missingRaw: usdc(1.5) });
+    expect(payoutProgress(usdc(2.99)).ready).toBe(false);
+    expect(payoutProgress(usdc(3)).ready).toBe(true);
   });
 });
 
 import { payoutsDue } from "./affiliate";
 describe("payoutsDue", () => {
-  it("only affiliates with 10 USDC or more pending are due", () => {
-    const due = payoutsDue([{ affiliate_privy_id: "a", commission_raw: 6_000_000 }, { affiliate_privy_id: "a", commission_raw: 4_000_000 }, { affiliate_privy_id: "b", commission_raw: 9_999_999 }]);
-    expect(due).toEqual([{ affiliate: "a", raw: 10_000_000n, count: 2 }]);
+  it("only affiliates with 3 USDC or more pending are due", () => {
+    const due = payoutsDue([{ affiliate_privy_id: "a", commission_raw: 2_000_000 }, { affiliate_privy_id: "a", commission_raw: 1_000_000 }, { affiliate_privy_id: "b", commission_raw: 2_999_999 }]);
+    expect(due).toEqual([{ affiliate: "a", raw: 3_000_000n, count: 2 }]);
   });
 });
 

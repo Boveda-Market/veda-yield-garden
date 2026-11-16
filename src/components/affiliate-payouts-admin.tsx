@@ -76,7 +76,7 @@ export function AffiliatePayoutsAdmin() {
       </dl>
       <p className="mt-2 text-xs text-muted-foreground">{t("Profit disponible = saldo USDC menos lo reservado para afiliados. Puedes retirarlo sin dejar a nadie sin cobrar.")}</p>
       {balance !== null && balance < BigInt(pendingAll) && <p className="mt-2 text-xs text-destructive">{t("El saldo USDC no cubre todo lo reservado para afiliados.")}</p>}
-      {due.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">{t("No hay afiliados con 10 USDC o más pendientes.")}</p> :
+      {due.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">{t("No hay afiliados con 3 USDC o más pendientes.")}</p> :
         <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-card">{due.map((d) => <li key={d.affiliate} className="flex items-center gap-3 px-3 py-3 text-sm">
           <div className="min-w-0 flex-1"><p className="font-semibold">{d.code}</p><p className="font-mono text-xs text-muted-foreground">{d.wallet ? short(d.wallet) : t("Sin wallet de cobro")} · {d.count} {t("comisiones")}</p></div>
           <Button size="sm" disabled={!d.wallet || !!busy || (balance !== null && balance < BigInt(d.pendingRaw))} onClick={() => void pay(d)}>{busy === d.affiliate ? <Loader2 size={14} className="animate-spin" /> : `${t("Pagar")} ${usdc(d.pendingRaw)}`}</Button>

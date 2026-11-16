@@ -20,7 +20,7 @@ export function affiliateCommission(feeRaw: bigint, shareBps: number): bigint {
 }
 
 /** Minimum accumulated commission (micro-USDC) before a manual payout is processed. */
-export const PAYOUT_MIN_MICRO = 10_000_000n;
+export const PAYOUT_MIN_MICRO = 3_000_000n;
 
 /** Progress toward the next payout, 0–100, plus whether the threshold is reached. */
 export function payoutProgress(pendingRaw: bigint) {
