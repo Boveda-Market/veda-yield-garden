@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
-import { Copy, Users, Save } from "lucide-react";
+import { Users, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
-import { ShareButtons } from "@/components/invite-share";
+import { InviteHero } from "@/components/invite-share";
 import { AffiliateHow } from "@/components/affiliate-how";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { AFFILIATE_SHARE_BPS, SUB_AFFILIATE_SHARE_BPS, PAYOUT_MIN_MICRO, payoutProgress, REF_STORAGE_KEY, normalizeCode, type AffiliateDashboard } from "@/lib/affiliate";
@@ -70,19 +70,11 @@ export function AffiliatePanel() {
   const preview = !session.authenticated;
   if (preview && !dash) { setDash({ code: "EJEMPLO", shareBps: AFFILIATE_SHARE_BPS, referred: 3, subReferred: 2, pendingRaw: "1250000", paidRaw: "0", payoutWallet: null, joinedCode: false, earnings: [] }); setCustomCode("EJEMPLO"); }
   const link = dash ? `${window.location.origin}/?ref=${dash.code}` : "";
-  return <section className="mt-10 border-t border-border pt-8" aria-labelledby="affiliate-title">
-    <h1 id="affiliate-title" className="flex items-center gap-2 font-display text-2xl font-semibold"><Users size={20} />{t("Invita y gana")}</h1>
-    <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("Comparte tu enlace con amigos y familia. Cada vez que alguien que invitaste deposita, cosecha ganancias o cierra una bóveda, recibes una parte de la comisión que cobra BÓVEDA, sin que a ellos les cueste nada extra.")}</p>
-    {preview && <p className="mt-3 rounded-lg border border-border p-3 text-xs text-muted-foreground">{t("Vista de ejemplo: crea una cuenta para obtener tu código real.")}</p>}
+  return <section className="pt-4" aria-labelledby="invite-hero">
     {!dash ? <p className="mt-4 text-sm text-muted-foreground">{message ?? t("Cargando…")}</p> : <>
-      <div className="mt-5 rounded-xl border border-border bg-card p-4">
-        <p className="text-xs text-muted-foreground">{t("Tu comisión")}</p>
-        <p className="font-semibold">{dash.shareBps / 100}% {t("de la comisión")}{dash.shareBps > AFFILIATE_SHARE_BPS && <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">{t("Socio VIP")}</span>}</p>
-        <p className="mt-3 text-xs text-muted-foreground">{t("Tu código")}</p>
-        <p className="font-mono text-lg font-semibold">{dash.code}</p>
-        <div className="mt-3 flex gap-2"><input readOnly value={link} aria-label={t("Tu enlace")} className="min-w-0 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-xs" /><Button size="sm" variant="outline" onClick={() => { void navigator.clipboard.writeText(link); setMessage(t("Enlace copiado.")); }}><Copy size={14} />{t("Copiar")}</Button></div>
-        <div className="mt-3"><ShareButtons link={link} onCopied={() => setMessage(t("Enlace copiado."))} /></div>
-      </div>
+      <InviteHero link={link} code={dash.code} referred={dash.referred} pending={(Number(dash.pendingRaw) / 1e6).toFixed(2)} preview={preview} />
+      {dash.shareBps > AFFILIATE_SHARE_BPS && <p className="mt-3 text-center text-sm font-semibold">{t("Socio VIP")} · {dash.shareBps / 100}% {t("de la comisión")}</p>}
+      <h2 id="affiliate-title" className="mt-8 flex items-center gap-2 font-display text-xl font-semibold"><Users size={18} />{t("Tu panel")}</h2>
       <form className="mt-4" onSubmit={(e) => { e.preventDefault(); const value = normalizeCode(customCode); if (!value) { setMessage(t("Usa de 4 a 16 letras o números, sin espacios.")); return; } if (preview) { setDash({ ...dash, code: value }); setMessage(t("Enlace de ejemplo actualizado. Inicia sesión para guardar el tuyo.")); return; } void act(async () => saveCode({ data: { token: await token(), code: value } }), "Tu enlace se actualizó."); }}>
         <label className="block text-sm">{t("Personaliza tu enlace")}<input value={customCode} minLength={4} maxLength={16} required onChange={(e) => setCustomCode(e.target.value)} className={field} /></label>
         <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Usa de 4 a 16 letras o números, sin espacios.")} {t("Tus invitados actuales se mantienen. Al cambiar el código, comparte el nuevo enlace: el anterior deja de funcionar.")}</p>

@@ -1,6 +1,6 @@
 import { TapAmount } from "@/components/ui/tap-amount";
 import { BalanceLoading } from "@/components/ui/balance-loading";
-import { ShieldCheck, Eye, EyeOff, LifeBuoy } from "lucide-react";
+import { ShieldCheck, Eye, EyeOff, LifeBuoy, Gift } from "lucide-react";
 import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
 import { TokenIcon } from "@/components/token-icon";
 import { useEffect, useState, useRef } from "react";
@@ -10,7 +10,7 @@ import { ActionSuccess } from "@/components/action-success";
 import { notify } from "@/lib/notify";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, ChevronRight, PieChart, Plus } from "lucide-react";
+import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, ChevronRight, Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Banknote, Vault } from "lucide-react";
 import { OfframpButton } from "@/components/offramp-dialog";
@@ -30,7 +30,6 @@ import { Gta6PromoPopup } from "@/components/gta6-promo";
 
 import { BuyUsdc } from "@/components/buy-usdc";
 import { InstallAppBanner } from "@/components/install-app";
-import { InvitePromoCard } from "@/components/invite-share";
 import { GasRefillCard } from "@/components/gas-refill-card";
 import { PendingClaims } from "@/components/pending-claims";
 import { WalletPositions, useWalletVaults, WalletRangeBanner } from "@/components/wallet-positions";
@@ -184,7 +183,6 @@ export function WalletPanel() {
     { icon: QrCode, label: t("Recibir"), on: () => setReceiveOpen(true) },
   ];
   const shortcuts = [
-    { to: "/portfolio", icon: PieChart, title: t("Ver ganancias"), sub: t("Cosecha ganancias y retira capital") },
     { to: "/app", icon: Vault, title: t("Depositar en Bóvedas"), sub: t("Elige una bóveda y pon tu dinero a trabajar") },
   ] as const;
 
@@ -216,6 +214,13 @@ export function WalletPanel() {
     </section>
 
     <section aria-label={t("Accesos rápidos")} className="grid gap-2">
+      <Link to="/invita" className="invite-ring group block rounded-2xl p-[2px] transition-transform active:scale-[0.98]">
+        <span className="flex items-center gap-3 rounded-[14px] bg-[image:var(--gradient-invite-surface)] p-4 text-invite-foreground">
+          <span className="invite-cta grid h-11 w-11 shrink-0 place-items-center rounded-xl text-invite-surface"><Gift size={22} aria-hidden /></span>
+          <span className="min-w-0 flex-1"><span className="block font-display text-lg font-extrabold">{t("Invita y Gana")}</span><span className="block text-xs font-semibold text-invite-muted">{t("Gana hasta 60% de comisión en dólares")}</span></span>
+          <ChevronRight size={18} className="shrink-0 text-invite transition-transform group-hover:translate-x-0.5" aria-hidden />
+        </span>
+      </Link>
       {shortcuts.map((s) => <Link key={s.to} to={s.to} className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-primary/5 sm:flex-col sm:items-start">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><s.icon size={20} aria-hidden /></span>
         <span className="min-w-0 flex-1"><span className="block font-display text-base font-semibold">{s.title}</span><span className="block text-xs text-muted-foreground">{s.sub}</span></span>
@@ -229,7 +234,6 @@ export function WalletPanel() {
       <ChevronRight size={16} className="shrink-0 text-muted-foreground" aria-hidden />
     </Link>}
 
-    <InvitePromoCard />
 
     <WalletPositions wallet={address} />
     <WalletOpenPredictions />
