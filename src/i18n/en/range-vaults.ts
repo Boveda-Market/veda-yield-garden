@@ -6,6 +6,8 @@ export const rangeVaults: Record<string, string> = {
   "Centrado · cobrando a full": "Centered · earning at full speed",
   "Cerca del borde · prepárate para rebalancear": "Near the edge · get ready to rebalance",
   "Fuera de la zona · rebalancea para volver a cobrar": "Out of the zone · rebalance to earn again",
+  "Sistema listo para rebalancear": "System ready to rebalance",
+  "Sistema listo para rebalancear · también lo hace en automático": "System ready to rebalance · it also does it automatically",
   "Borde": "Edge",
   "Comisiones hoy": "Fees today",
   "Intercambios hoy": "Trades today",
