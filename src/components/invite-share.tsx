@@ -7,7 +7,7 @@ import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getAffiliateDashboard } from "@/lib/affiliate.functions";
 
-export const shareText = (t: (s: string) => string) => t("Oye, estoy usando BÓVEDA para poner mis dólares a rendir y jugar Doble o Nada. Entra con mi enlace:");
+export const shareText = (t: (s: string) => string) => t("Chequea esto, aquí es donde estoy poniendo a rendir mis dólares. Échale un ojo:");
 
 /** One-tap share buttons (native sheet, WhatsApp, Telegram) for a referral link. */
 export function ShareButtons({ link, onCopied }: { link: string; onCopied?: () => void }) {
