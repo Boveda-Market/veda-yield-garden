@@ -53,21 +53,38 @@ export function HomeCtas({ vaultsFirst = false }: { vaultsFirst?: boolean }) {
   const { lang } = useI18n();
   const gtaTitle = lang === "en" ? titleEn : titleEs;
   const predict = <Link key="p" to="/mercados" className="group relative block min-w-0 rounded-2xl bg-primary p-[2px] shadow-[0_0_28px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
-    <span className="flex h-16 items-center justify-between gap-2 rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
+    <span className="relative isolate flex h-16 items-center justify-between gap-2 overflow-hidden rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
+      <DuelLines />
       <span className="flex min-w-0 items-center gap-2"><img src={dobleLogo} alt="" aria-hidden className="h-10 w-auto shrink-0 drop-shadow-[0_0_10px_var(--primary)] sm:h-11" /><span className="sr-only">{t("Ver Doble o Nada")}</span></span>
       <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary-foreground opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary-foreground" /></span>{t("En vivo")}</span>
     </span>
   </Link>;
   const vaults = <Link key="v" to="/app" className="hot-ring group relative block min-w-0 rounded-2xl p-[2px] shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98]">
-    <span className="flex h-[4.5rem] items-center justify-between gap-2 rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
+    <span className="relative isolate flex h-[4.5rem] items-center justify-between gap-2 overflow-hidden rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
+      <span aria-hidden className="cta-shimmer pointer-events-none absolute inset-y-0 left-0 z-10 w-1/4 bg-gradient-to-r from-transparent via-hot-foreground/30 to-transparent" />
       <span className="flex min-w-0 items-center gap-2 whitespace-nowrap font-display text-[15px] font-black sm:text-base"><img src={gtaTitle} alt="GTA6" className="h-7 w-auto shrink-0 -rotate-2 sm:h-9" /><span className="sr-only">{t("Explorar Bóvedas")}</span><ArrowRight size={16} className="hidden transition-transform group-hover:translate-x-0.5 min-[380px]:block" /></span>
       {apr.endsWith(" APR")
         ? <span className="hot-cta flex shrink-0 flex-col items-center justify-center rounded-xl px-3 py-1 leading-none text-hot-surface shadow-[0_0_18px_-2px_var(--hot)]">
-            <span className="flex items-center gap-1 font-display text-2xl font-black tabular-nums tracking-tight sm:text-[1.7rem]"><Flame size={18} aria-hidden className="shrink-0" />{apr.replace(" APR", "")}</span>
+            <span className="flex items-center gap-1 font-display text-2xl font-black tabular-nums tracking-tight sm:text-[1.7rem]"><Flame size={18} aria-hidden className="flame-flicker shrink-0" />{apr.replace(" APR", "")}</span>
             <span className="mt-0.5 text-[10px] font-black uppercase tracking-[0.18em]">APR</span>
           </span>
-        : <span className="hot-cta flex shrink-0 items-center gap-1 rounded-xl px-3 py-2 font-display text-sm font-black uppercase tracking-wide text-hot-surface"><Flame size={16} aria-hidden />{apr}</span>}
+        : <span className="hot-cta flex shrink-0 items-center gap-1 rounded-xl px-3 py-2 font-display text-sm font-black uppercase tracking-wide text-hot-surface"><Flame size={16} aria-hidden className="flame-flicker" />{apr}</span>}
     </span>
   </Link>;
   return <div className="mb-4 grid w-full min-w-0 grid-cols-1 gap-2.5">{vaultsFirst ? [vaults, predict] : [predict, vaults]}</div>;
+}
+
+/** Decorative Sube/Baja duel: green and red lines keep crossing a dashed target line, looping behind the logo. */
+function DuelLines() {
+  const up = "M0 34 C25 14 50 14 75 30 S125 50 150 26 S200 8 225 28 S275 46 300 34";
+  const down = "M0 30 C25 48 50 46 75 32 S125 12 150 34 S200 52 225 32 S275 16 300 30";
+  return <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-60">
+    <span className="absolute inset-x-0 top-1/2 border-t border-dashed border-hot-foreground/40" />
+    <svg viewBox="0 0 300 64" preserveAspectRatio="none" className="duel-scroll absolute inset-y-0 left-0 h-full w-[200%]">
+      {[0, 300].map((x) => <g key={x} transform={`translate(${x / 2} 0) scale(0.5 1)`}>
+        <path d={up} fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        <path d={down} fill="none" stroke="var(--destructive)" strokeWidth="2.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+      </g>)}
+    </svg>
+  </span>;
 }

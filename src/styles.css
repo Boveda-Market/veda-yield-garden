@@ -245,3 +245,12 @@
 .balance-coin { animation: balance-bounce 1s ease-in-out infinite; }
 .balance-step { animation: balance-fade 0.35s ease-out; }
 @media (prefers-reduced-motion: reduce) { .balance-shimmer, .balance-coin, .balance-step { animation: none; } }
+
+/* Home CTA animations */
+@keyframes cta-shimmer { 0%,60% { transform: translateX(-120%) skewX(-20deg); } 100% { transform: translateX(320%) skewX(-20deg); } }
+.cta-shimmer { animation: cta-shimmer 3s ease-in-out infinite; }
+@keyframes flame-flicker { 0%,100% { transform: scale(1) rotate(-3deg); opacity: 1; } 25% { transform: scale(1.15) rotate(3deg); opacity: .85; } 50% { transform: scale(.95) rotate(-1deg); } 75% { transform: scale(1.1) rotate(2deg); opacity: .9; } }
+.flame-flicker { animation: flame-flicker .9s ease-in-out infinite; transform-origin: 50% 90%; }
+@keyframes duel-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.duel-scroll { animation: duel-scroll 6s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .cta-shimmer, .flame-flicker, .duel-scroll { animation: none; } }
