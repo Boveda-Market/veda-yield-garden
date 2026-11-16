@@ -98,7 +98,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
     {result && <div role="status" className="grid gap-3 text-sm">
       {!result.success && <><p className="font-semibold">{t("Cosecha no disponible")}</p><p className="leading-6 text-muted-foreground">{result.message}</p></>}
       {result.gross && <>
-        <ReceiveCard label={compound ? t("Reinviertes") : t("Recibes")} amount={totalNet} unit="$" sub={otherUsd !== null ? t("Total en dólares, ya con todo convertido") : result.tokenRaw && BigInt(result.tokenRaw) > 0n ? t("+ la otra parte, convertida a dólares") : undefined} />
+        <ReceiveCard label={compound ? t("Reinviertes") : t("Recibes")} amount={totalNet} unit="$" sub={otherUsd !== null ? t("Total estimado") : result.tokenRaw && BigInt(result.tokenRaw) > 0n ? t("+ la otra parte, convertida a dólares") : undefined} />
         <DetailsToggle><dl className="grid gap-2 rounded-xl border border-border p-4">
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en dólares")}</dt><dd>${result.gross}</dd></div>
           <div className="flex justify-between gap-3"><dt><ServiceFeeLabel t={t} /></dt><dd>−${result.fee}</dd></div>
