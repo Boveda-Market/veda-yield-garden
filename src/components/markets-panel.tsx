@@ -82,14 +82,14 @@ export function MarketsPanel(_: { identity: string }) {
   const name = MARKETS.find((m) => m.id === market)?.name ?? market;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <header className="space-y-0.5">
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="min-w-0"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} className="h-11 w-auto -ml-1 sm:h-14" /><span className="sr-only">{t("Sube o Baja")}</span></h1>
+          <h1 className="min-w-0"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} className="h-9 w-auto -ml-1 sm:h-14" /><span className="sr-only">{t("Sube o Baja")}</span></h1>
           <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />{t("En vivo")}</span>
           <PoweredBy brand="polymarket" className="ml-auto" />
         </div>
-        <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-semibold text-primary">{t("🔥 Doble o Nada en vivo · Hasta +90% de ganancia en una sola jugada, sin comprar la moneda")}</p><p className="w-full text-xs text-muted-foreground">{t("¿Ves venir la caída? Gana con la baja. ¿Ves el rebote? Gana con la subida. Tú pones la jugada, nosotros vigilamos el reloj. Si ganas, te avisamos al instante.")}</p><PredictHow /></div>
+        <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-semibold text-primary">{t("🔥 Doble o Nada en vivo · Hasta +90% de ganancia en una sola jugada, sin comprar la moneda")}</p><PredictHow /></div>
       </header>
 
       <div className="grid grid-cols-3 gap-2" role="tablist" aria-label={t("Mercado")}>
@@ -112,12 +112,12 @@ export function MarketsPanel(_: { identity: string }) {
       <section className="overflow-hidden rounded-3xl border border-border bg-card">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="flex items-center gap-2 font-display text-lg font-bold"><TokenIcon symbol={market} size={22} />{t("{m} Sube o Baja {w}", { m: name, w: WIN_LABEL[win] })}</h2>
-            {round && <span className="text-xs tabular-nums text-muted-foreground">{new Date(round.openTime * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} – {new Date(round.closeTime * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>}
+            <h2 className="flex min-w-0 items-center gap-2 font-display text-base font-bold sm:text-lg"><TokenIcon symbol={market} size={22} />{t("{m} Sube o Baja {w}", { m: name, w: WIN_LABEL[win] })}</h2>
+            {round && <span className="shrink-0 whitespace-nowrap text-[11px] tabular-nums text-muted-foreground">{new Date(round.openTime * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} – {new Date(round.closeTime * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>}
           </div>
           {/* Big live ticker: rolling digits flash with each tick; the gap to the price to beat is shown neutrally because
               who leads is decided only by the market percentages below. */}
-          <div className="mt-3 flex items-start justify-between gap-3">
+          <div className="mt-2 flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground">{t("Precio actual")}</p>
               <RollingNumber value={price} decimals={digits(price ?? 0)} className="font-display text-[2rem] font-bold leading-tight sm:text-4xl" />
@@ -143,7 +143,7 @@ export function MarketsPanel(_: { identity: string }) {
       <PredictLive round={round} chart={<TradePulse slug={round ? roundSlug(market, win, round.openTime) : null}><div className="overflow-hidden rounded-3xl border border-border bg-card py-3"><PriceChart key={`${market}-${win}-${round?.openTime ?? 0}`} market={market} points={roundPoints} price={price} reference={strike} referenceLabel={t("A batir")} window={win} odds={round ? { up: round.upPrice, down: round.downPrice } : undefined} oddsSeries={round ? oddsHist[`${round.asset}:${round.window}:${round.openTime}`] : undefined} /><div className="mt-2 border-t border-border px-3 pt-2"><RoundTimeline asset={market} window={win} round={round} /></div></div></TradePulse>} />
       <PendingClaims />
       <CompactOpenPredictions />
-      <details className="rounded-2xl border border-primary/30 bg-primary/5 p-4"><summary className="cursor-pointer text-sm font-semibold">💡 {t("¿Cómo jugar en 4 pasos?")}</summary><div className="mt-3"><PredictSteps /></div></details>
+      <details className="rounded-2xl border border-primary/30 bg-primary/5 p-4"><summary className="cursor-pointer text-sm font-semibold">💡 {t("¿Cómo jugar en 4 pasos?")}</summary><div className="mt-3 space-y-3"><p className="text-xs text-muted-foreground">{t("¿Ves venir la caída? Gana con la baja. ¿Ves el rebote? Gana con la subida. Tú pones la jugada, nosotros vigilamos el reloj. Si ganas, te avisamos al instante.")}</p><PredictSteps /><p className="text-xs text-muted-foreground">{t("Juegas con dólares reales contra otros participantes; BÓVEDA nunca juega en tu contra. Si ganas, te avisamos y cobras tu premio con un toque.")}</p></div></details>
       <details className="rounded-2xl border border-border bg-card p-4"><summary className="cursor-pointer text-sm font-semibold">{t("Historial de rondas recientes de {m}", { m: name })}</summary><div className="mt-3"><PredictResults asset={market} window={win} /></div></details>
     </div>
   );

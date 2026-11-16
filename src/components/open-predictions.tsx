@@ -164,7 +164,7 @@ export function CompactOpenPredictions() {
         {a && <TokenIcon symbol={a} size={24} />}
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-1.5 text-sm font-semibold">{a ?? "—"}<span className={`inline-flex items-center rounded-full px-1.5 text-[11px] font-bold ${Up ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{Up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}{t(Up ? "Sube" : "Baja")}</span></p>
-          <p className="text-xs text-muted-foreground"><Countdown close={p.closeTime} /> · {t("Premio")} <span className="font-semibold text-primary tabular-nums">{usdcText(p.payoutMicro)} USDC</span></p>
+          <p className="text-xs text-muted-foreground"><Countdown close={p.closeTime} /> · {t("Premio")} <span className="font-semibold text-primary tabular-nums">${usdcText(p.payoutMicro)}</span></p>
           <CompactLive p={p} />
         </div>
         <Link to="/portfolio" className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold">{t("Ver posición")}<ChevronRight size={14} /></Link>
