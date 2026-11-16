@@ -141,6 +141,13 @@
       "when": 1794827590637,
       "tag": "0019_create_autopilot_enrollments",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794858809457,
+      "tag": "0020_autopilot_last_gains",
+      "breakpoints": true
     }
   ]
 }

@@ -526,12 +526,13 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     if (!success) { log("rebalance", "checks", JSON.stringify({ ...checks, solSpent: solSpent.toString() })); return fail("El rebalanceo no superó todas las comprobaciones. No se pidió ninguna firma."); }
     if (options.prepare && Date.now() - startedAt > 45_000) return fail("La preparación tardó demasiado. Repite la revisión.");
     const valueUsd = (Number(x) * price + Number(y)) / 1e6;
+    const gainsAddedUsd = Math.max(0, (Number(data.feeX.toString()) * price + Number(data.feeY.toString()) - Number(bovedaFee)) / 1e6);
     return {
       success: true, tokenSymbol: config.symbol, valueUsd: valueUsd.toFixed(2),
       feesUsdc: tokenAmount(data.feeY.toString(), 6), feesToken: tokenAmount(data.feeX.toString(), config.decimals),
       usdcLeft: tokenAmount(usdcLeft.toString(), 6), tokenLeft: tokenAmount(tokenLeft.toString(), config.decimals),
       swapped: plan.amountIn === 0n ? "none" : plan.swapForY ? "token" : "usdc",
-      bovedaFeeUsdc: tokenAmount(bovedaFee.toString(), 6),
+      bovedaFeeUsdc: tokenAmount(bovedaFee.toString(), 6), gainsAddedUsd: gainsAddedUsd.toFixed(2),
       message: "Rebalanceo verificado en simulación: tus ganancias se suman y tu posición vuelve a quedar centrada en el precio actual. Solo tu wallet puede firmar.",
       ...(options.prepare ? { prepared: { transaction: Buffer.from(final.tx.serialize()).toString("base64"), expiresAt: startedAt + 45_000, lastValidBlockHeight: block.lastValidBlockHeight, wallet: input.wallet, position: input.position } } : {}),
     };

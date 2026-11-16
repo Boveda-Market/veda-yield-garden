@@ -48,11 +48,28 @@ export function onlyAllowedPrograms(programIds: readonly string[], allowed: read
 }
 
 /** Personal Telegram card after Autopilot re-centred a position. */
-export function autopilotDoneText(vaultName: string, valueUsd: string | undefined) {
-  return tgCard("🤖", `Piloto automático rebalanceó tu ${vaultName}`, [
-    `🎯 El precio salió de tu rango y la volvimos a centrar${valueUsd ? ` (≈ $${valueUsd})` : ""}.`,
-    "💰 Tus ganancias pendientes se sumaron a la posición.",
-    "✅ Ya vuelve a generar. Puedes apagar el piloto cuando quieras en Mi Billetera.",
+/** Below this, harvested earnings are "centavos": the notice explains the reset without quoting a tiny amount. */
+export const AUTOPILOT_SMALL_GAINS_USD = 0.5;
+
+/** True when the earnings folded into the vault are worth quoting as an exact amount. */
+export const gainsWorthQuoting = (gainsUsd: number | null | undefined): gainsUsd is number => typeof gainsUsd === "number" && Number.isFinite(gainsUsd) && gainsUsd >= AUTOPILOT_SMALL_GAINS_USD;
+
+/**
+ * Personal Telegram card after an automatic rebalance. The rebalance also folds the pending earnings into the vault,
+ * so the card says how much was added (or, for cents, that the counter restarts) and nobody thinks earnings vanished.
+ */
+export function autopilotDoneText(vaultName: string, valueUsd: string | undefined, gainsUsd?: number | null) {
+  if (gainsWorthQuoting(gainsUsd)) {
+    return tgCard("🤖", `Piloto automático rebalanceó tu ${vaultName}`, [
+      `🎯 <b>Volvimos a centrar tu posición:</b> el precio se movió y la dejamos en el punto óptimo${valueUsd ? ` (≈ <b>$${valueUsd}</b>)` : ""}.`,
+      `💰 <b>Ganancias sumadas a tu capital:</b> cosechamos <b>+$${gainsUsd.toFixed(2)}</b> de tus ganancias acumuladas y se agregaron a tu depósito para que sigan rindiendo.`,
+      "✅ <b>Tu contador de ganancias empieza desde cero:</b> ya está generando comisiones otra vez.",
+    ]);
+  }
+  return tgCard("🤖", `${vaultName} rebalanceada con éxito`, [
+    "🎯 Centramos tu rango para que no dejes de generar comisiones.",
+    "📈 <b>Reinversión automática:</b> tus ganancias acumuladas se sumaron directamente a tu capital depositado.",
+    "💡 <i>Nota:</i> tu contador de ganancias se reinicia porque tus dólares ya están trabajando en la bóveda.",
   ]);
 }
 
@@ -62,10 +79,10 @@ export function shouldAutoEnableAutopilot(opts: { hasRangePosition: boolean; ena
 }
 
 /** Informational bell/Telegram notice: the newest Autopilot event worth telling (rebalance first, then activation) within 7 days. */
-export function autopilotNotice(s: { enabled: boolean; enabledAt: string | null; lastRebalanceAt: string | null } | null, now: number): { id: string; kind: "rebalanced" | "on"; at: string } | null {
+export function autopilotNotice(s: { enabled: boolean; enabledAt: string | null; lastRebalanceAt: string | null; lastGainsUsd?: number | null } | null, now: number): { id: string; kind: "rebalanced" | "on"; at: string; gainsUsd: number | null } | null {
   if (!s) return null;
   const fresh = (iso: string | null) => !!iso && now - Date.parse(iso) < 7 * 86_400_000;
-  if (fresh(s.lastRebalanceAt)) return { id: `autopilot:rb:${s.lastRebalanceAt}`, kind: "rebalanced", at: s.lastRebalanceAt! };
+  if (fresh(s.lastRebalanceAt)) return { id: `autopilot:rb:${s.lastRebalanceAt}`, kind: "rebalanced", at: s.lastRebalanceAt!, gainsUsd: gainsWorthQuoting(s.lastGainsUsd) ? s.lastGainsUsd : null };
   return null;
 }
 

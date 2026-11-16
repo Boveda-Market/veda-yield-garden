@@ -84,11 +84,12 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
         ok = st?.confirmationStatus === "confirmed" || st?.confirmationStatus === "finalized";
       }
       if (!ok) { await save(e.wallet, { last_signature: signature, last_result: "Sin confirmación; se revisará en el próximo ciclo." }); continue; }
-      await save(e.wallet, { last_rebalance_at: iso, last_signature: signature, last_result: "Rebalanceada" });
+      const gains = quote.gainsAddedUsd != null ? Number(quote.gainsAddedUsd) : null;
+      await save(e.wallet, { last_rebalance_at: iso, last_signature: signature, last_result: "Rebalanceada", last_gains_usd: gains });
       e.last_rebalance_at = iso;
       await db.from("system_service_status").delete().eq("service", k);
       opts.rows.delete(k);
-      await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName(p.vaultId), quote.valueUsd), { text: "👀 Ver mi posición", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
+      await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName(p.vaultId), quote.valueUsd, gains), { text: "👀 Ver mi posición", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
       done++;
       break; // one rebalance per wallet per cooldown
     }

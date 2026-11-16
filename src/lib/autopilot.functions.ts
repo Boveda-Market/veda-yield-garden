@@ -5,7 +5,7 @@ import { requirePrivyAuth } from "@/lib/privy-auth.middleware";
 const walletInput = z.object({ wallet: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/) }).strict();
 const enableInput = z.object({ wallet: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/), auto: z.boolean().optional() }).strict();
 /** `enrolled` = a choice was ever recorded for this wallet (on or off), so the default never overrides a user who switched it off. */
-export type AutopilotStatus = { enabled: boolean; enrolled: boolean; enabledAt: string | null; lastRebalanceAt: string | null; lastSignature: string | null };
+export type AutopilotStatus = { enabled: boolean; enrolled: boolean; enabledAt: string | null; lastRebalanceAt: string | null; lastSignature: string | null; lastGainsUsd?: number | null };
 
 const adminDb = async () => { const { supabaseAdmin } = await import("@/integrations/supabase/client.server"); return supabaseAdmin as unknown as { from: (t: string) => any }; };
 
@@ -15,9 +15,9 @@ export const autopilotStatus = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => walletInput.parse(input))
   .handler(async ({ data, context }): Promise<AutopilotStatus> => {
     const db = await adminDb();
-    const { data: row } = await db.from("autopilot_enrollments").select("enabled, updated_at, last_rebalance_at, last_signature").eq("wallet", data.wallet).eq("privy_user_id", context.privyUserId).maybeSingle();
-    const r = row as { enabled: boolean; updated_at: string; last_rebalance_at: string | null; last_signature: string | null } | null;
-    return { enabled: !!r?.enabled, enrolled: !!r, enabledAt: r?.enabled ? r.updated_at : null, lastRebalanceAt: r?.last_rebalance_at ?? null, lastSignature: r?.last_signature ?? null };
+    const { data: row } = await db.from("autopilot_enrollments").select("enabled, updated_at, last_rebalance_at, last_signature, last_gains_usd").eq("wallet", data.wallet).eq("privy_user_id", context.privyUserId).maybeSingle();
+    const r = row as { enabled: boolean; updated_at: string; last_rebalance_at: string | null; last_signature: string | null; last_gains_usd: number | string | null } | null;
+    return { enabled: !!r?.enabled, enrolled: !!r, enabledAt: r?.enabled ? r.updated_at : null, lastRebalanceAt: r?.last_rebalance_at ?? null, lastSignature: r?.last_signature ?? null, lastGainsUsd: r?.last_gains_usd != null ? Number(r.last_gains_usd) : null };
   });
 
 /** Turns Autopilot on after the client attached the signer: verifies the caller's own embedded wallet and the signer at Privy. `auto` marks the range-vault default. */
@@ -41,8 +41,8 @@ export const enableAutopilot = createServerFn({ method: "POST" })
     if (error) throw new Error("No se pudo activar el piloto automático. Inténtalo de nuevo.");
     // Information-only Telegram card (the bell shows the same notice from this status).
     // Transparent: no activation notice; users only hear about Autopilot when it re-centres a position.
-    const { data: row } = await db.from("autopilot_enrollments").select("last_rebalance_at, last_signature").eq("wallet", data.wallet).maybeSingle();
-    return { enabled: true, enrolled: true, enabledAt: now, lastRebalanceAt: row?.last_rebalance_at ?? null, lastSignature: row?.last_signature ?? null };
+    const { data: row } = await db.from("autopilot_enrollments").select("last_rebalance_at, last_signature, last_gains_usd").eq("wallet", data.wallet).maybeSingle();
+    return { enabled: true, enrolled: true, enabledAt: now, lastRebalanceAt: row?.last_rebalance_at ?? null, lastSignature: row?.last_signature ?? null, lastGainsUsd: row?.last_gains_usd != null ? Number(row.last_gains_usd) : null };
   });
 
 /** Turns Autopilot off (the client also removes the signer at Privy, which is the real revocation). */

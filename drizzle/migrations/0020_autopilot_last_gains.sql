@@ -1,0 +1,1 @@
+ALTER TABLE public.autopilot_enrollments ADD COLUMN IF NOT EXISTS last_gains_usd numeric;

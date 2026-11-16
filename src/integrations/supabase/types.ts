@@ -190,6 +190,7 @@ export type Database = {
           created_at: string
           enabled: boolean
           last_attempt_at: string | null
+          last_gains_usd: number | null
           last_rebalance_at: string | null
           last_result: string | null
           last_signature: string | null
@@ -202,6 +203,7 @@ export type Database = {
           created_at?: string
           enabled?: boolean
           last_attempt_at?: string | null
+          last_gains_usd?: number | null
           last_rebalance_at?: string | null
           last_result?: string | null
           last_signature?: string | null
@@ -214,6 +216,7 @@ export type Database = {
           created_at?: string
           enabled?: boolean
           last_attempt_at?: string | null
+          last_gains_usd?: number | null
           last_rebalance_at?: string | null
           last_result?: string | null
           last_signature?: string | null

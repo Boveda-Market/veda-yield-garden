@@ -173,6 +173,8 @@ export const rangeVaults: Record<string, string> = {
   "Tu Bóveda GTA6": "Your GTA6 Vault",
   "Piloto automático rebalanceó tu bóveda": "Autopilot rebalanced your vault",
   "Ver mi bóveda": "View my vault",
+  "Se sumaron +${amount} de tus ganancias a tu inversión. Tu contador de ganancias empieza desde cero porque esos dólares ya están rindiendo.": "+${amount} of your earnings was added to your investment. Your earnings counter starts from zero because those dollars are already working.",
+  "Centramos tu rango y tus ganancias acumuladas se sumaron a tu inversión. Tu contador de ganancias se reinicia porque ya están trabajando en la bóveda.": "We re-centred your range and your accumulated earnings were added to your investment. Your earnings counter restarts because they're already working in the vault.",
   "El precio salió de tu rango y la volvimos a centrar por ti, sin firmas. Ya vuelve a generar.": "The price left your range and we re-centred it for you, with no signatures. It's earning again.",
   "Si el precio sale de tu rango, la volvemos a centrar por ti, sin firmas. Lo apagas cuando quieras en la tarjeta de tu bóveda.": "If the price leaves your range, we re-centre it for you, with no signatures. Turn it off anytime from your vault card.",
   "Incluye piloto automático: si sale de rango la recentramos por ti, sin firmas. Lo apagas cuando quieras.": "Includes Autopilot: if it leaves its range we re-centre it for you, no signatures. Turn it off anytime.",

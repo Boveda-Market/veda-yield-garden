@@ -85,5 +85,7 @@ export type RebalanceResult = {
   swapped?: "token" | "usdc" | "none";
   /** BÓVEDA fee (tiered, on the claimed USDC only), dollars. */
   bovedaFeeUsdc?: string;
+  /** Earnings (both tokens, after BÓVEDA's fee) folded into the new range, in dollars at the active price. */
+  gainsAddedUsd?: string;
   prepared?: { transaction: string; expiresAt: number; lastValidBlockHeight: number; wallet: string; position: string };
 };

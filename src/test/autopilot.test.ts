@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { p256 } from "@noble/curves/nist.js";
-import { autopilotDecision, autopilotNotice, onlyAllowedPrograms, shouldAutoEnableAutopilot, AUTOPILOT_PROGRAMS } from "@/lib/autopilot";
+import { autopilotDecision, autopilotDoneText, autopilotNotice, onlyAllowedPrograms, shouldAutoEnableAutopilot, AUTOPILOT_PROGRAMS } from "@/lib/autopilot";
 import { authorizationSignature, autopilotPrivateKey, canonicalJson } from "@/lib/privy-signer";
 
 const now = Date.parse("2026-11-16T12:00:00Z");
@@ -52,5 +52,22 @@ describe("Autopilot default for range vaults", () => {
     expect(autopilotNotice({ enabled: true, enabledAt: ago(60), lastRebalanceAt: null }, now)).toBeNull();
     expect(autopilotNotice({ enabled: true, enabledAt: ago(8 * 1440), lastRebalanceAt: null }, now)).toBeNull();
     expect(autopilotNotice({ enabled: false, enabledAt: null, lastRebalanceAt: null }, now)).toBeNull();
+  });
+});
+
+describe("Autopilot rebalance notice explains the harvested earnings", () => {
+  it("quotes the exact amount from $0.50 up (Telegram and bell)", () => {
+    const text = autopilotDoneText("Bóveda GTA6", "250.00", 8.45);
+    expect(text).toContain("+$8.45");
+    expect(text).toContain("empieza desde cero");
+    expect(autopilotNotice({ enabled: true, enabledAt: null, lastRebalanceAt: ago(5), lastGainsUsd: 0.5 }, now)?.gainsUsd).toBe(0.5);
+  });
+  it("uses the short reassuring message for cents or unknown amounts", () => {
+    for (const g of [0.49, 0, null, undefined]) {
+      const text = autopilotDoneText("Bóveda GTA6", "250.00", g);
+      expect(text).toContain("rebalanceada con éxito");
+      expect(text).not.toContain("+$");
+    }
+    expect(autopilotNotice({ enabled: true, enabledAt: null, lastRebalanceAt: ago(5), lastGainsUsd: 0.2 }, now)?.gainsUsd).toBeNull();
   });
 });
