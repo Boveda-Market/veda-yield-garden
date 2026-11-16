@@ -69,7 +69,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
             <dd className="font-display text-sm font-bold tabular-nums">{v}</dd>
           </div>)}
         </dl>
-        <ol className="mt-3 flex flex-wrap gap-1.5">{steps.map(([icon, label]) => <li key={label} className="flex items-center gap-1 rounded-full bg-hot-surface/60 px-2.5 py-1 text-[11px] font-bold">{icon} {t(label)}</li>)}</ol>
+        {!hasPosition && <ol className="mt-3 flex flex-wrap gap-1.5">{steps.map(([icon, label]) => <li key={label} className="flex items-center gap-1 rounded-full bg-hot-surface/60 px-2.5 py-1 text-[11px] font-bold">{icon} {t(label)}</li>)}</ol>}
         {ownedLink}
         {owned}
         <div className="mt-3 grid grid-cols-[auto_1fr] gap-2">

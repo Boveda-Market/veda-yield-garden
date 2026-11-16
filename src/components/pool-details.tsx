@@ -73,7 +73,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
           <Metric label={t("Operaciones · 24 h")} value={number(stats?.transactions24h, 0)} />
           <Metric label={t("Riesgo de la bóveda")} value={vault.badge ? t(vault.badge) : t(vault.risk)} />
         </dl>
-        {vault.badge && <p className="text-xs leading-relaxed text-foreground">{t(vault.blurb)}{vault.note && <span className="mt-1 block text-muted-foreground">{t(vault.note)}</span>}</p>}
+        {<p className="text-xs leading-relaxed text-foreground">{t(vault.blurb)}{vault.note && <span className="mt-1 block text-muted-foreground">{t(vault.note)}</span>}</p>}
 
         <p className="text-xs leading-relaxed text-muted-foreground" role="status">
           {query.isError ? t("No se pudo actualizar la información de DexScreener. Inténtalo de nuevo.") : !query.isPending && !stats ? t("Este pool no tiene datos disponibles en DexScreener. No se muestran cifras estimadas.") : t("Fuente: DexScreener. Precio, volumen y liquidez en USD. La liquidez representa los activos del pool, no una garantía de bloqueo ni de rendimiento.")}

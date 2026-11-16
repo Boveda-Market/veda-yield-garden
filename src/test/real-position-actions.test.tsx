@@ -36,10 +36,10 @@ it("opens harvest review for the exact authorized pilot", () => {
 });
 it("opens close review for the exact unlocked authorized pilot", () => {
   show(WITHDRAWAL_PILOT.position);
-  fireEvent.click(screen.getByRole("button", { name: "Retirar o liquidar" }));
+  fireEvent.click(screen.getByRole("button", { name: "Retirar" }));
   expect(screen.getByText("Revisión de cierre autorizada")).toBeInTheDocument();
 });
-it.each(["Cosechar Ganancias", "Retirar o liquidar"])("opens %s review for new owner positions", (name) => {
+it.each(["Cosechar Ganancias", "Retirar"])("opens %s review for new owner positions", (name) => {
   show("new-position");
   expect(screen.getByRole("button", { name })).toBeEnabled();
   fireEvent.click(screen.getByRole("button", { name }));
@@ -47,12 +47,12 @@ it.each(["Cosechar Ganancias", "Retirar o liquidar"])("opens %s review for new o
 });
 it("does not authorize closing locked pilot liquidity", () => {
   show(WITHDRAWAL_PILOT.position, true);
-  fireEvent.click(screen.getByRole("button", { name: "Retirar o liquidar" }));
+  fireEvent.click(screen.getByRole("button", { name: "Retirar" }));
   expect(screen.getByRole("dialog")).toBeInTheDocument();
   expect(screen.queryByText("Revisión de cierre autorizada")).not.toBeInTheDocument();
 });it("opens the two-step reinvest flow from Reinvertir ganancias", () => {
   show("new-position");
-  fireEvent.click(screen.getByRole("button", { name: "Cosechar y reinvertir todo" }));
+  fireEvent.click(screen.getByRole("button", { name: "Reinvertir" }));
   expect(screen.getByText("Revisión de reinversión autorizada")).toBeInTheDocument();
 });
 
