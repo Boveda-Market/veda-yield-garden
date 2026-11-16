@@ -37,6 +37,8 @@ import { usePositionRows } from "@/hooks/use-position-rows";
 import { WalletOpenPredictions } from "@/components/open-predictions";
 import { ReportProblem } from "@/components/report-problem";
 import { usePredictRefunds } from "@/lib/predict-refunds-query";
+import { usePredictPositions } from "@/lib/predict-positions-query";
+import { positionWon } from "@/lib/predict";
 
 
 export function WalletPanel() {
@@ -48,7 +50,11 @@ export function WalletPanel() {
   const vaults = useWalletVaults(address ?? "");
   const refunds = usePredictRefunds(address);
   const vaultPositions = vaults.data?.success ? vaults.data.data.positions : [];
-  const { capital } = usePositionRows(vaultPositions);
+  const { capital, totalFees } = usePositionRows(vaultPositions);
+  // Unclaimed vault earnings and won-but-unclaimed prizes are NOT in the total; shown apart so the total visibly grows on claim.
+  const predict = usePredictPositions(address);
+  const unclaimedPrizes = (predict.data ?? []).filter((p) => p.status !== "open" && positionWon(p) === true).reduce((s, p) => s + Number(p.payoutMicro || "0") / 1e6, 0);
+  const unclaimed = totalFees + unclaimedPrizes;
   // Hold the last known vault value while prices refresh so the total never drops to cash only.
   const lastWorking = useRef<number | null>(null);
   const liveWorking = vaultPositions.length > 0 ? capital : 0;
@@ -204,6 +210,7 @@ export function WalletPanel() {
       <div className="mt-1 flex items-center gap-2">{balances.data?.usdc !== undefined && (hidden || working !== null) ? <p className="font-display text-4xl">{hidden ? MASK : `$${fmt((Number(balances.data.usdc) / 1e6) + jupUsd + (working ?? 0))}`}</p> : <BalanceLoading />}<button type="button" onClick={() => setHidden(!hidden)} aria-label={hidden ? t("Mostrar saldos") : t("Ocultar saldos")} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{hidden ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
       {balances.data && balances.data.usdc === 0n && balances.data.sol === 0n && working === 0 ? <p role="status" className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"><RefreshCw size={12} className="animate-spin" />{t("Comprobando llegada de fondos…")}</p> : null}
       {vaultPositions.length > 0 && balances.data?.usdc !== undefined && <div className="mt-2 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{t("Disponible")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(Number(balances.data.usdc) / 1e6)}`}</span></span><Link to="/portfolio" className="rounded-full bg-primary/10 px-3 py-1 text-primary"><span>{t("Trabajando")}:</span> <span className="font-medium">{hidden ? MASK : working === null ? <BalanceLoading compact /> : `$${fmt(working)}`}</span></Link></div>}
+      {unclaimed >= 0.01 && <Link to="/portfolio" className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs text-primary"><Gift size={12} aria-hidden />{t("Por reclamar")}: <span className="font-semibold">{hidden ? MASK : `+$${fmt(unclaimed)}`}</span> · {t("se suma al reclamar")}</Link>}
       {(jupUsd >= PAYOUT_MOVE_MIN_USD || solExcessUsd >= SOL_EXCESS_MOVE_MIN_USD) && <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">{jupUsd >= PAYOUT_MOVE_MIN_USD && <><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{refundReady ? t("Reembolso listo") : t("Premios y reembolsos")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(jupUsd)}`}</span></span><button type="button" onClick={() => void convertPayouts()} disabled={converting} className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 font-semibold text-primary-foreground disabled:opacity-70">{converting && <RefreshCw size={12} className="animate-spin" />}{converting ? t("Firmando…") : t("Pasar a disponibles")}</button></>}{solExcessUsd >= SOL_EXCESS_MOVE_MIN_USD && <><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{t("Sobrante de red")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(solExcessUsd)}`}</span></span><button type="button" onClick={() => void convertSolExcess()} disabled={converting} className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 font-semibold text-primary-foreground disabled:opacity-70">{converting && <RefreshCw size={12} className="animate-spin" />}{converting ? t("Firmando…") : t("Pasar a disponibles")}</button></>}</div>}
       {vaultPositions.length > 0 && <details className="mt-2 text-xs text-muted-foreground"><summary className="cursor-pointer underline-offset-2 hover:underline">ⓘ {t("¿Por qué cambia el balance total?")}</summary><div className="mt-1 space-y-1 leading-5"><p>{t("Tu balance combina tus dólares disponibles en la billetera y el dinero que está trabajando en las bóvedas:")}</p><p>• <span className="font-medium text-foreground">{t("Disponible (USDC):")}</span> {t("dólares digitales exactos en tu billetera. No suben ni bajan.")}</p><p>• <span className="font-medium text-foreground">{t("Trabajando:")}</span> {t("capital en las bóvedas generando comisiones. Su valor se actualiza en vivo con el precio de mercado de las monedas.")}</p><p>{t("Nadie te descuenta dinero ni hay comisiones ocultas; todo está bajo el control de tu huella o Face ID.")}</p><a href="/faq#vaults-fluctuation" className="inline-block text-primary underline">{t("Ver explicación completa en Preguntas frecuentes")} →</a></div></details>}
       {vaultPositions.length > 0 && working === null && <p className="mt-1 text-xs text-muted-foreground">{t("Calculando el valor de tus bóvedas…")}</p>}
