@@ -111,6 +111,13 @@ export const extra: Record<string, string> = {
   "Legal y ayuda": "Legal and help",
   "Ver en mi Portafolio": "View in my Portfolio",
   "Listo": "Done",
+  "Aprobar": "Approve",
+  "Esperar": "Wait",
+  "Progreso": "Progress",
+  "{n} de {m}": "{n} of {m}",
+  "Listo · ver mi posición": "Done · see my position",
+  "Listo · ver billetera": "Done · see wallet",
+  "Un toque y vuelve a generar ganancias.": "One tap and it earns again.",
   "Porcentaje a retirar": "Percent to withdraw",
   // Entry
   "Iniciar sesión": "Log in",

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DetailsToggle } from "@/components/ui/details-toggle";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
 import { Crosshair, LoaderCircle, Siren } from "lucide-react";
@@ -6,7 +7,7 @@ import { VAULTS } from "@/lib/vaults";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
-import { ActionSuccess } from "@/components/action-success";
+import { ActionSuccess, ReceiveCard } from "@/components/action-success";
 import { useT } from "@/lib/i18n";
 import { notify } from "@/lib/notify";
 import { isDlmmVault, type ChainPosition, type OperableVault } from "@/lib/solana-data";
@@ -14,7 +15,7 @@ import { prepareRealRebalance } from "@/lib/rebalance.functions";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import type { RebalanceResult } from "@/lib/dlmm";
-import { WorkingLine } from "@/components/move-steps";
+import { FlowSteps, WorkingLine } from "@/components/move-steps";
 import { AutopilotToggle, useAutopilot } from "@/components/autopilot-toggle";
 
 /** One-tap, one-signature 50/50 rebalance for an out-of-range range-vault position. Renders nothing otherwise. */
@@ -120,15 +121,16 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
       amount={quote?.valueUsd ? { value: `$${quote.valueUsd}`, unit: "" } : undefined}
       details={[]} /> : <>
       <DialogTitle>{t("Rebalancear posición")} · {symbol}</DialogTitle>
-      <DialogDescription>{t("Tu posición salió del rango y no está generando. Con un toque cosechamos tus ganancias, dejamos mitad y mitad al precio actual y la volvemos a centrar.")}</DialogDescription>
+      <DialogDescription>{t("Un toque y vuelve a generar ganancias.")}</DialogDescription>
+      {quote?.success && !pending && <ReceiveCard label={t("Se recoloca")} amount={quote.valueUsd} unit="$" />}
       {pending && !quote && <WorkingLine text={t("Preparando tu rebalanceo…")} />}
-      {quote?.success && <dl className="grid gap-2 rounded-xl border border-border p-4 text-sm">
+      {quote?.success && !pending && <DetailsToggle><dl className="grid gap-2 rounded-xl border border-border p-4 text-sm">
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Se recoloca")}</dt><dd className="font-semibold">≈ ${quote.valueUsd}</dd></div>
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias que se suman")}</dt><dd>${quote.feesUsdc} + {quote.feesToken} {symbol}</dd></div>
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Nuevo reparto")}</dt><dd>{t("Mitad {s} · mitad dólares", { s: symbol })}</dd></div>
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Pequeño sobrante a tu billetera")}</dt><dd>${quote.usdcLeft} · {quote.tokenLeft} {symbol}</dd></div>
-      </dl>}
-      {quote?.success && <p className="text-xs leading-5 text-muted-foreground">{t("Para dejar mitad y mitad se cambia una parte dentro de la misma bóveda, con un límite de precio para protegerte. Es una sola firma.")}</p>}
+      </dl><p className="text-xs leading-5 text-muted-foreground">{t("Tu posición salió del rango y no está generando. Con un toque cosechamos tus ganancias, dejamos mitad y mitad al precio actual y la volvemos a centrar.")} {t("Para dejar mitad y mitad se cambia una parte dentro de la misma bóveda, con un límite de precio para protegerte. Es una sola firma.")}</p></DetailsToggle>}
+      {pending && signature && <FlowSteps current={2} />}
       {pending && step && quote?.success && <WorkingLine text={step} />}
       {quote?.success && <Button size="lg" disabled={pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Crosshair className="mr-2 h-4 w-4" />}{pending && step ? step : t("Rebalancear ahora")}</Button>}
       {message && <p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm">{message}</p>}

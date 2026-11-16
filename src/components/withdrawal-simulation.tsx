@@ -1,4 +1,5 @@
 import { ServiceFeeLabel } from "@/components/service-fee-label";
+import { DetailsToggle } from "@/components/ui/details-toggle";
 import { vaultSymbol, type OperableVault } from "@/lib/solana-data";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
@@ -126,10 +127,10 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
       {!result.success && <><p className="font-semibold">{t("Retiro no disponible")}</p><p className="leading-6 text-muted-foreground">{result.message}</p></>}
       {result.gross && <>
         <ReceiveCard label={migrateTo ? t("Moverás aproximadamente") : t("Recibes aproximadamente")} amount={result.net ?? "—"} unit="$" sub={result.minimumNet ? `${t("Mínimo garantizado:")} $${result.minimumNet}` : undefined} />
-        <dl className="grid gap-2 rounded-xl border border-border p-4">
+        <DetailsToggle><dl className="grid gap-2 rounded-xl border border-border p-4">
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Valor de tu posición")}</dt><dd>${result.gross}</dd></div>
           {!migrateTo && <div className="flex justify-between gap-3"><dt><ServiceFeeLabel t={t} /></dt><dd>−${result.fee}</dd></div>}
-                  </dl>
+                  </dl></DetailsToggle>
       </>}
     </div>}
     {result && !result.success && result.remainingTokenRaw && result.remainingTokenRaw !== "0" && <p role="alert" className="text-xs leading-5 text-destructive">{t("Diferencia de tokens tras la conversión:")}{" "}{result.remainingTokenRaw} {t("unidades mínimas. No es un importe en USD; la liquidación no está validada.")}</p>}

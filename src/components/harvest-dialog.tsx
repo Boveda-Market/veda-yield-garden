@@ -1,4 +1,5 @@
 import { ServiceFeeLabel } from "@/components/service-fee-label";
+import { DetailsToggle } from "@/components/ui/details-toggle";
 import { vaultSymbol, type OperableVault } from "@/lib/solana-data";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
@@ -88,11 +89,11 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
       {!result.success && <><p className="font-semibold">{t("Cosecha no disponible")}</p><p className="leading-6 text-muted-foreground">{result.message}</p></>}
       {result.gross && <>
         <ReceiveCard label={compound ? t("Reinviertes") : t("Recibes")} amount={result.net ?? "—"} unit="$" sub={compound ? t("+ ganancias en {s}", { s: result.tokenSymbol ?? "" }) : t("+ la otra parte, convertida a dólares")} />
-        <dl className="grid gap-2 rounded-xl border border-border p-4">
+        <DetailsToggle><dl className="grid gap-2 rounded-xl border border-border p-4">
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en dólares")}</dt><dd>${result.gross}</dd></div>
           <div className="flex justify-between gap-3"><dt><ServiceFeeLabel t={t} /></dt><dd>−${result.fee}</dd></div>
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en")} {result.tokenSymbol}</dt><dd>{result.tokenAmount} · {t("sin comisión")}</dd></div>
-        </dl>
+        </dl></DetailsToggle>
       </>}
     </div>}
     {result && !result.success && !pending && <Button variant="outline" onClick={() => void run()}>{t("Intentar de nuevo")}</Button>}
