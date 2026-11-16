@@ -21,9 +21,3 @@ describe("Email consent", () => {
   it("requires explicit consent", () => { expect(emailSignupSchema.safeParse({ email: "a@example.com", consent: false, website: "" }).success).toBe(false); });
   it("rejects honeypot submissions", () => { expect(emailSignupSchema.safeParse({ email: "a@example.com", consent: true, website: "bot" }).success).toBe(false); });
 });
-import { harvestFee as rebalanceFee } from "@/lib/fees";
-describe("rebalance fee", () => {
-  it("charges the harvest tier on claimed dollars only: $10 claimed on a $600 position pays 0.5%", () => {
-    expect(rebalanceFee(10_000_000n, 600_000_000n)).toBe(50_000n);
-  });
-});

@@ -435,7 +435,7 @@ export type { RebalanceResult } from "@/lib/dlmm";
 /**
  * One-signature 50/50 rebalance of an owner-verified range position: claim fees, remove all liquidity,
  * swap half the excess side inside the same pool, then re-centre the same position on the current price
- * with everything (capital + fees). Tiered harvest fee on the claimed USDC only (same tiers as harvest) goes to the fee ATA; only the owner signs; the wallet never loses prior balances.
+ * with everything (capital + fees). Free: no BÓVEDA fee, earnings stay in the vault; only the owner signs; the wallet never loses prior balances.
  */
 export async function simulateDlmmRebalance(connection: Connection, input: WithdrawalInput, options: { prepare?: boolean; maxImpactPct?: number } = {}): Promise<RebalanceResult> {
   const startedAt = Date.now();
@@ -462,9 +462,8 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     const feeAta = getAssociatedTokenAddressSync(usdc, new PublicKey(FEE_WALLET));
     const addresses = [usdcAta, tokenX, position, owner, feeAta];
     const before = await connection.getMultipleAccountsInfo(addresses);
-    // Tiered harvest fee on the claimed USDC (tier by position value); skipped if the treasury USDC account is missing.
-    const positionUnits = BigInt(Math.floor(Number(xAll) * price)) + yAll;
-    const bovedaFee = before[4] ? harvestFee(BigInt(data.feeY.toString()), positionUnits) : 0n;
+    // Rebalancing is free: pending earnings stay inside the vault (re-deposited), never sent to the wallet or charged.
+    const bovedaFee = 0n;
     const x = xAll, y = yAll - bovedaFee;
     const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), xBefore = tokenBalance(asSim(before[1]), mintX, owner);
     if (await connection.getBalance(owner) < 10_000_000) return fail("Necesitas un poco más de reserva de operaciones para rebalancear.");
