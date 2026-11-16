@@ -39,8 +39,8 @@ export function validDeposit(amount: string, available: number) {
   return /^\d+(\.\d{1,6})?$/.test(amount) && Number(amount) > 0 && Number(amount) <= available && Number.isFinite(Number(amount));
 }
 
-/** Voluntary vault change (no APR offer): reduced 0.10% on the exit only, never shared with affiliates. */
-export const ROTATE_FEE_BPS = 10n;
+/** Any vault move (offer or voluntary): fixed 3% on the exit only, never shared with affiliates. */
+export const ROTATE_FEE_BPS = 300n;
 export function rotateFee(units: bigint) { return units > 0n ? (units * ROTATE_FEE_BPS) / 10_000n : 0n; }
 
 /** Progressive BÓVEDA fee on bank/Cash App/Coinbase withdrawals, floored micro-USDC, deducted from the gross amount. */

@@ -127,7 +127,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
         <ReceiveCard label={migrateTo ? t("Moverás aproximadamente") : t("Recibes aproximadamente")} amount={result.net ?? "—"} unit="$" sub={result.minimumNet ? `${t("Mínimo garantizado:")} $${result.minimumNet}` : undefined} />
         <DetailsToggle><dl className="grid gap-2 rounded-xl border border-border p-4">
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Valor de tu posición")}</dt><dd>${result.gross}</dd></div>
-          {!migrateTo && <div className="flex justify-between gap-3"><dt><ServiceFeeLabel t={t} /></dt><dd>−${result.fee}</dd></div>}
+          {<div className="flex justify-between gap-3"><dt><ServiceFeeLabel t={t} /></dt><dd>−${result.fee}</dd></div>}
                   </dl></DetailsToggle>
       </>}
     </div>}

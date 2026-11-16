@@ -4,8 +4,8 @@ export const isMigratableVault = (id: string): id is (typeof MIGRATE_VAULTS)[num
 
 /** Minimum APR advantage (percentage points) before suggesting a move to another vault. */
 export const MIGRATE_MIN_GAIN = 5;
-/** Moving between vaults is free of BÓVEDA fees (exit and entry). */
-export const MIGRATE_FEE_PCT = 0;
+/** Moving between vaults costs a fixed 3% on exit; entry is free. */
+export const MIGRATE_FEE_PCT = 3;
 
 /** Best other vault whose estimated APR beats the current one by at least MIGRATE_MIN_GAIN points. */
 export function bestUpgrade(currentId: string, aprs: Record<string, number | null | undefined>) {
@@ -23,7 +23,7 @@ export function bestUpgrade(currentId: string, aprs: Record<string, number | nul
 
 /** Days for the extra simple APR to recover the moving fees. */
 export function breakEvenDays(gain: number) {
-  return gain > 0 ? Math.ceil((MIGRATE_FEE_PCT / gain) * 365) : null; // 0 = earns more from day one
+  return gain > 0 ? Math.ceil((MIGRATE_FEE_PCT / gain) * 365) : null;
 }
 
 /** Public channel posts about a free-move opportunity at most once per cooldown. */

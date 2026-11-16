@@ -36,10 +36,10 @@ export type WithdrawalResult = {
 
 /** Fixed fee on the enforced gross USDC minimum; refundable SOL rent is excluded. */
 export type ExitFeeMode = boolean | "rotate";
-/** Offer move (migrate) = 0%; voluntary vault change (rotate) = reduced fee; otherwise the normal exit fee. */
+/** Any vault move (migrate or rotate) = fixed move fee; otherwise the normal exit fee. */
 export function exitFeeMode(input: { migrate?: true | undefined; rotate?: true | undefined }): ExitFeeMode { return input.rotate === true ? "rotate" : input.migrate === true; }
 export function withdrawalAmounts(minimumGross: bigint, migrate: ExitFeeMode = false) {
   if (minimumGross < 0n) throw new Error("Importe inválido");
-  const fee = migrate === "rotate" ? rotateFee(minimumGross) : migrate ? 0n : progressiveFee(minimumGross);
+  const fee = migrate ? rotateFee(minimumGross) : progressiveFee(minimumGross);
   return { gross: minimumGross, fee, net: minimumGross - fee };
 }

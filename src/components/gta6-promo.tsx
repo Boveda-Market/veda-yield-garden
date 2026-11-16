@@ -35,7 +35,7 @@ function Headline({ from }: { from?: string | undefined }) {
   return <>
     <span className="hot-cta inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-hot-surface"><Flame size={12} aria-hidden />{t("Nueva")} · {apr}</span>
     <p className="mt-2 font-display text-xl font-black leading-tight">{t("Bóveda GTA6: súper alto rendimiento")}</p>
-    <p className="mt-1 text-sm leading-5 text-hot-muted">{from ? t("Tu dinero en {v} puede cobrar muchas más comisiones aquí. Traslado sin comisión de BÓVEDA.", { v: from }) : t("Tu dinero puede cobrar muchas más comisiones aquí. Traslado sin comisión de BÓVEDA.")}</p>
+    <p className="mt-1 text-sm leading-5 text-hot-muted">{from ? t("Tu dinero en {v} puede cobrar muchas más comisiones aquí. Traslado en un solo paso.", { v: from }) : t("Tu dinero puede cobrar muchas más comisiones aquí. Traslado en un solo paso.")}</p>
   </>;
 }
 
@@ -54,7 +54,7 @@ export function Gta6Guide({ open, onOpenChange, onStart }: { open: boolean; onOp
       <ol className="grid gap-3">{steps.map(([icon, title, body], i) => <li key={title} className="flex gap-3 rounded-xl border border-border p-3"><span aria-hidden className="text-2xl">{icon}</span><div><p className="text-sm font-bold">{i + 1}. {title}</p><p className="mt-0.5 text-xs leading-5 text-muted-foreground">{body}</p></div></li>)}</ol>
       <Suspense fallback={null}><RangeAlertsGate /></Suspense>
       <p role="note" className="text-xs leading-5 text-muted-foreground">⚠️ {t("Recomendado: sin Telegram no te llegará el aviso si la bóveda se pausa y podrías dejar de ganar. Puedes continuar de todos modos.")}</p>
-      <Button size="lg" className="hot-cta w-full font-bold text-hot-surface" onClick={onStart}>{t("Entendido, migrar sin comisión")} →</Button>
+      <Button size="lg" className="hot-cta w-full font-bold text-hot-surface" onClick={onStart}>{t("Entendido, migrar")} →</Button>
     </DialogContent>
   </Dialog>;
 }

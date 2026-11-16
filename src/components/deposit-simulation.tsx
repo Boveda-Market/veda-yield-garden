@@ -57,7 +57,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
       <span className="text-xs text-muted-foreground">{t("Cantidad ($)")}</span>
       <TapAmount label={t("Cantidad ($)")} prefix="$" value={amount} disabled={busy} onChange={(v) => setAmount(clean(v))} />
       <div className="grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={p.toString()} type="button" size="sm" variant="secondary" disabled={busy || !usdc} onClick={() => pick(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
-      <p className="text-xs text-muted-foreground">{migrate ? t("Traslado entre bóvedas: sin comisión de BÓVEDA.") : t("Entre $1 y $10,000. Depositar es sin comisión.")}</p>
+      <p className="text-xs text-muted-foreground">{migrate ? t("Traslado entre bóvedas: el detalle aparece antes de confirmar.") : t("Entre $1 y $10,000. Depositar es sin comisión.")}</p>
       {overBalance && <p role="alert" className="text-xs text-destructive">{t("No tienes suficientes dólares para esta cantidad.")}</p>}
       {(overBalance || usdc === 0n) && <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs"><span>{t("¿Necesitas dólares? Añádelos en Mi Billetera.")}</span><Button asChild size="sm" variant="outline"><Link to="/wallet">{t("Ir a Mi Billetera")} →</Link></Button></div>}
     </div>
