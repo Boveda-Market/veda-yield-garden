@@ -75,7 +75,7 @@ export function HomeCtas({ vaultsFirst = false }: { vaultsFirst?: boolean }) {
 }
 
 /** Decorative Sube/Baja duel: green and red lines keep crossing a dashed target line, looping behind the logo. */
-function DuelLines() {
+export function DuelLines() {
   const up = "M0 34 C25 14 50 14 75 30 S125 50 150 26 S200 8 225 28 S275 46 300 34";
   const down = "M0 30 C25 48 50 46 75 32 S125 12 150 34 S200 52 225 32 S275 16 300 30";
   return <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-60">
