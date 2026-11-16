@@ -1,3 +1,4 @@
+import { TapAmount } from "@/components/ui/tap-amount";
 import { ShieldCheck, Eye, EyeOff, LifeBuoy } from "lucide-react";
 import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
 import { TokenIcon } from "@/components/token-icon";
@@ -10,7 +11,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, ChevronRight, PieChart, Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { Banknote, Pencil, Vault } from "lucide-react";
+import { Banknote, Vault } from "lucide-react";
 import { OfframpButton } from "@/components/offramp-dialog";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
@@ -73,7 +74,6 @@ export function WalletPanel() {
   const [copied, setCopied] = useState(false);
   const [buyOpen, setBuyOpen] = useState(0);
   const [receiveOpen, setReceiveOpen] = useState(false);
-  const [customAmt, setCustomAmt] = useState(false);
   const [qr, setQr] = useState<string | null>(null);
   const [sheet, setSheet] = useState(false);
   const [converting, setConverting] = useState(false);
@@ -256,9 +256,8 @@ export function WalletPanel() {
           {contacts.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{contacts.map((c) => <button key={c.address} type="button" onClick={() => setTo(c.address)} className={`rounded-full border px-3 py-1 text-xs ${to === c.address ? "border-primary bg-primary/10" : "border-border"}`}>{c.name} · {c.address.slice(0, 4)}…{c.address.slice(-4)}</button>)}</div>}
           {toError ? <p className="mt-1 text-sm text-destructive">{toError}</p> : to && <p className="mt-1 flex items-center gap-1 text-xs text-primary"><CheckCircle2 size={12} />{t("Dirección válida")}: {to.slice(0, 4)}…{to.slice(-4)}</p>}
           {to && to === address && <p className="mt-1 text-xs text-destructive">{t("Esta es tu propia dirección.")}</p>}</div>
-        <div><label className="text-xs text-muted-foreground">{t("Monto")}</label>{customAmt ? <Input aria-label={t("Monto")} autoFocus className="mt-1 font-display text-2xl" inputMode="decimal" enterKeyHint="done" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value.replace(",", "."))} onBlur={() => setCustomAmt(false)} onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }} /> : <p className="mt-1 font-display text-3xl font-bold tabular-nums">{amount || "0"} <span className="text-sm text-muted-foreground">{asset}</span></p>}
-          <div className="mt-2 grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={String(p)} size="sm" variant="outline" onClick={() => { setCustomAmt(false); setPct(p); }}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
-          {!customAmt && <Button type="button" variant="outline" className="mt-2 h-11 w-full rounded-xl border-2 border-primary/50 text-sm font-bold text-primary" onClick={() => setCustomAmt(true)}><Pencil size={16} /> {t("Otra cantidad")}</Button>}
+        <div><label className="text-xs text-muted-foreground">{t("Monto")}</label><TapAmount className="mt-1" label={t("Monto")} suffix={asset} value={amount} onChange={(v) => setAmount(v.replace(",", ".").replace(/[^\d.]/g, ""))} />
+          <div className="mt-2 grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={String(p)} size="sm" variant="outline" onClick={() => setPct(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
           {amountError && <p className="mt-1 text-sm text-destructive">{amountError}</p>}{asset === "SOL" && <p className="mt-1 text-xs text-muted-foreground">{t("Guardamos 0.01 SOL para pagar los costos de red.")}</p>}</div>
         {units && !amountError && to && !toError && <div className="rounded-xl bg-muted p-3 text-sm"><div className="flex justify-between"><span className="text-muted-foreground">{t("Envías")}</span><span>{amount} {asset}</span></div><div className="flex justify-between"><span className="text-muted-foreground">{t("Servicio BÓVEDA")}</span><span>0</span></div><div className="flex justify-between"><span className="text-muted-foreground">{t("Destino")}</span><code>{to.slice(0, 4)}…{to.slice(-4)}</code></div></div>}
         <p className="text-xs text-muted-foreground">{t("Revisa bien la dirección: los envíos no se pueden revertir. BÓVEDA no cobra comisión por enviar.")}</p>

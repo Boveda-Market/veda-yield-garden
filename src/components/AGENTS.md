@@ -2,3 +2,4 @@
 - GTA6 promo (gta6-promo.tsx): once-per-session popup in Mi Billetera only for holders of another unlocked vault, persistent banner in Bóvedas/Portafolio; every move goes through the 3-step strategy guide (Telegram recommended, not required) before the existing migrate flow.
 - Signed-out visitors tapping Depositar get the shared LoginSheet (login-nudge.tsx); the vault id is kept in sessionStorage and its deposit sheet opens once the wallet is ready, so the tap is never a dead end.
 - Official safety notice (safety-notice.tsx) is the only welcome disclaimer; visits are counted per browser session on the device and safety-reminder.ts decides when it reappears.
+- Amount entry uses the shared TapAmount (ui/tap-amount.tsx): the big number is itself the input (never autofocused), so there is no separate "Otra cantidad" button and the keyboard opens only when the person taps the number.

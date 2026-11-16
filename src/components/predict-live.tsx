@@ -1,8 +1,9 @@
+import { TapAmount } from "@/components/ui/tap-amount";
 import { Dismissible } from "@/components/dismissible";
 import { notify } from "@/lib/notify";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2, Pencil } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -42,11 +43,8 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   const qc = useQueryClient();
   const [side, setSide] = useState<PredictSide | null>(null);
   const [amount, setAmount] = useState("5");
-  // Manual entry stays closed by default so the phone keyboard never covers the quote and confirm button.
-  const [customAmount, setCustomAmount] = useState(false);
   // Visitors browse freely; acting asks for sign-in right here without leaving the round.
   const [askLogin, setAskLogin] = useState(false);
-  useEffect(() => { if (!side) setCustomAmount(false); }, [side]);
   const [review, setReview] = useState<{ side: PredictSide; round: LiveRound; quote: PredictQuote; tx: string; context: string; order: string | null } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   // After "Confirmar" the entry continues in its own window: progress while the round accepts it, then the receipt.
@@ -211,7 +209,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
       {/* Quick stake: one tap picks the amount and both buttons show what it would pay right now. */}
       <div className="flex items-center gap-2" role="group" aria-label={t("Jugada rápida")}>
         <span className="shrink-0 text-xs font-semibold text-muted-foreground">{t("Jugada rápida")}</span>
-        <div className="grid flex-1 grid-cols-4 gap-1.5">{QUICK.map((v) => { const on = !customAmount && Number(amount) === v; return <button key={v} type="button" aria-pressed={on} onClick={() => { setCustomAmount(false); setAmount(String(v)); setReview(null); }} className={`rounded-full border py-1.5 text-sm font-bold tabular-nums transition active:scale-95 ${on ? "border-foreground bg-foreground text-background" : "border-border bg-card text-foreground"}`}>${v}</button>; })}</div>
+        <div className="grid flex-1 grid-cols-4 gap-1.5">{QUICK.map((v) => { const on = Number(amount) === v; return <button key={v} type="button" aria-pressed={on} onClick={() => { setAmount(String(v)); setReview(null); }} className={`rounded-full border py-1.5 text-sm font-bold tabular-nums transition active:scale-95 ${on ? "border-foreground bg-foreground text-background" : "border-border bg-card text-foreground"}`}>${v}</button>; })}</div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         {(["up", "down"] as const).map((s) => {
@@ -247,11 +245,8 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
           <DialogDescription className="text-xs">{t(side === "down" ? "Ganas si el precio baja" : "Ganas si el precio sube")}</DialogDescription>
       <section aria-label={t("Tu orden")}>
           <div className="flex items-center justify-between"><label htmlFor="predict-amount" className="text-sm font-semibold">{t("Estás poniendo ($)")}</label><span className="text-xs text-muted-foreground">{t("Disponible")}: <strong className="text-foreground tabular-nums">{!wallet ? "—" : balance === null ? "…" : `$${usdc(balance)}`}</strong></span></div>
-          {customAmount
-            ? <input id="predict-amount" autoFocus inputMode="decimal" enterKeyHint="done" value={amount} onChange={(e) => { setAmount(e.target.value.replace(/[^0-9.]/g, "")); setReview(null); }} onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }} className="mt-2 h-12 w-full rounded-xl border border-input bg-background px-4 font-display text-xl font-bold" />
-            : <p id="predict-amount" className="mt-1 font-display text-3xl font-bold tabular-nums">${amount || "0"}</p>}
-          <div className="mt-2 grid grid-cols-5 gap-2">{[5, 10, 25, 50].map((v) => { const on = !customAmount && Number(amount) === v; return <Button key={v} type="button" variant={on ? "default" : "secondary"} size="sm" aria-pressed={on} onClick={() => { setCustomAmount(false); setAmount(String(v)); setReview(null); }}>${v}</Button>; })}<Button type="button" variant="outline" size="sm" disabled={!maxMicro || maxMicro <= 0n} onClick={() => { if (maxMicro) { setCustomAmount(false); setAmount((Math.floor(Number(maxMicro) / 1e4) / 100).toFixed(2)); setReview(null); } }}>{t("Máx")}</Button></div>
-          {!customAmount && <Button type="button" variant="outline" className="mt-2 h-11 w-full rounded-xl border-2 border-primary/50 text-sm font-bold text-primary" onClick={() => setCustomAmount(true)}><Pencil size={16} /> {t("Otra cantidad")}</Button>}
+          <TapAmount id="predict-amount" className="mt-1" label={t("Estás poniendo ($)")} prefix="$" value={amount} onChange={(v) => { setAmount(v.replace(",", ".").replace(/[^0-9.]/g, "")); setReview(null); }} />
+          <div className="mt-2 grid grid-cols-5 gap-2">{[5, 10, 25, 50].map((v) => { const on = Number(amount) === v; return <Button key={v} type="button" variant={on ? "default" : "secondary"} size="sm" aria-pressed={on} onClick={() => { setAmount(String(v)); setReview(null); }}>${v}</Button>; })}<Button type="button" variant="outline" size="sm" disabled={!maxMicro || maxMicro <= 0n} onClick={() => { if (maxMicro) { setAmount((Math.floor(Number(maxMicro) / 1e4) / 100).toFixed(2)); setReview(null); } }}>{t("Máx")}</Button></div>
           {!inRange && <p className="mt-2 text-xs text-destructive">{t("Entre {min} y ${max}.", { min: PREDICT_MIN_USDC, max: PREDICT_MAX_USDC })}</p>}
           {short && <p className="mt-2 text-xs text-destructive">{t("Saldo insuficiente: tienes ${v}.", { v: usdc(balance) })} <Link to="/wallet" className="underline">{t("Depositar o cambiar a dólares")}</Link></p>}
           {inRange && selPrice && !review && <div className="mt-3 rounded-xl bg-secondary/50 p-3 text-center">
