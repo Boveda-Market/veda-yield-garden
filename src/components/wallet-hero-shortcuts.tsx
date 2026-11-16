@@ -4,7 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
-import { WalletPositions, useWalletVaults } from "@/components/wallet-positions";
+import { useWalletVaults } from "@/components/wallet-positions";
+import { RealPositions } from "@/components/real-positions";
+import { HarvestDialog } from "@/components/harvest-dialog";
+import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
+import { DepositSimulation } from "@/components/deposit-simulation";
+import { isOperableVault, type ChainPosition, type OperableVault } from "@/lib/solana-data";
+import type { Vault } from "@/lib/vaults";
 import { ChevronRight, Flame, Zap } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { poolYieldOptions } from "@/lib/pool-yield";
@@ -18,6 +24,14 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
   const vaults = useWalletVaults(wallet ?? "");
   const mine = wallet && vaults.data?.success ? vaults.data.data.positions.find((p) => p.vaultId === "gta6") : undefined;
   const [open, setOpen] = useState(false);
+  const [harvest, setHarvest] = useState<{ position: string; vaultId: OperableVault; compound?: boolean } | null>(null);
+  const [withdrawal, setWithdrawal] = useState<{ position: string; vaultId: OperableVault; migrateTo?: Vault; rotate?: boolean } | null>(null);
+  const [deposit, setDeposit] = useState<{ vault: Vault; position?: string; amount?: string; migrate?: boolean } | null>(null);
+  const mineAll = wallet && vaults.data?.success ? vaults.data.data.positions.filter((p) => p.vaultId === "gta6") : [];
+  // Every action closes the popup first so only one sheet is ever on screen.
+  const act = (p: ChainPosition, a: "harvest" | "exit" | "compound") => { if (!isOperableVault(p.vaultId)) return; setOpen(false); if (a === "exit") setWithdrawal({ position: p.address, vaultId: p.vaultId }); else setHarvest({ position: p.address, vaultId: p.vaultId, compound: a === "compound" }); };
+  const move = (p: ChainPosition, target: Vault, rotate = false) => { if (!isOperableVault(p.vaultId) || !isOperableVault(target.id) || p.locked || (target.id === p.vaultId && !rotate)) return; setOpen(false); setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target, ...(rotate ? { rotate: true } : {}) }); };
+  const refetch = () => void vaults.refetch();
   const y = useQuery({ ...poolYieldOptions(gta6?.pool ?? ""), enabled: !!gta6 });
   const apr = y.data?.apr;
   const aprLabel = apr != null && apr >= 100 ? `+${Math.round(apr).toLocaleString("en-US")}% APR` : t("Alto octanaje");
@@ -47,8 +61,11 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <ActionSheetContent closeLabel={t("Cerrar")}>
         <DialogHeader className="pr-10 text-left"><DialogTitle className="font-display text-xl">{t("Tu Bóveda GTA6")}</DialogTitle><DialogDescription className="sr-only">{t("Ver ganancias")}</DialogDescription></DialogHeader>
-        {open && wallet && <WalletPositions wallet={wallet} only="gta6" bare />}
+        {open && wallet && <RealPositions bare showHarvestBanner={false} positions={mineAll} onAction={act} onMigrate={(p, v) => move(p, v)} onRotate={(p, v) => move(p, v, true)} onDeposit={(p) => { if (!gta6) return; setOpen(false); setDeposit({ vault: gta6, position: p.address }); }} />}
       </ActionSheetContent>
     </Dialog>
+    {wallet && harvest && <HarvestDialog wallet={wallet} position={harvest.position} vaultId={harvest.vaultId} compound={harvest.compound} onClose={() => { setHarvest(null); refetch(); }} />}
+    {wallet && withdrawal && <WithdrawalSimulation wallet={wallet} {...withdrawal} onClose={() => { setWithdrawal(null); refetch(); }} onMigrated={(usdc, target) => { setWithdrawal(null); if (target) setDeposit({ vault: target, amount: usdc, migrate: true }); }} />}
+    {wallet && deposit && <DepositSimulation key={`${deposit.vault.id}-${deposit.position ?? "new"}`} vault={deposit.vault} wallet={wallet} {...(deposit.position ? { position: deposit.position } : {})} initialAmount={deposit.amount ?? ""} migrate={Boolean(deposit.migrate)} onClose={() => { setDeposit(null); refetch(); }} />}
   </section>;
 }

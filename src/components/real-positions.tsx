@@ -23,17 +23,17 @@ import { canHarvest } from "@/lib/harvest";
 import { HotBanner } from "./hot-vault-card";
 import { HotZoneMeter } from "./hot-zone-meter";
 
-export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRotate, showHarvestBanner = true }: { positions: ChainPosition[]; onAction: (p: ChainPosition, a: "harvest" | "exit" | "compound") => void; onDeposit?: (p: ChainPosition) => void; onMigrate?: (p: ChainPosition, target: Vault) => void; onRotate?: (p: ChainPosition, target: Vault) => void; showHarvestBanner?: boolean }) {
+export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRotate, showHarvestBanner = true, bare = false }: { bare?: boolean; positions: ChainPosition[]; onAction: (p: ChainPosition, a: "harvest" | "exit" | "compound") => void; onDeposit?: (p: ChainPosition) => void; onMigrate?: (p: ChainPosition, target: Vault) => void; onRotate?: (p: ChainPosition, target: Vault) => void; showHarvestBanner?: boolean }) {
   const t = useT();
   const { rows, totalFees, top } = usePositionRows(positions);
   const vaultYields = useQueries({ queries: VAULTS.map((v) => poolYieldOptions(v.pool)) });
   const aprs = Object.fromEntries(VAULTS.map((v, i) => [v.id, vaultYields[i]?.data?.apr ?? null]));
   const since = useMemo(() => Date.now(), [positions]);
   const copy = (address: string) => { void navigator.clipboard?.writeText(address).then(() => notify("success", t("Identificador copiado"))); };
-  return <section aria-label={t("Posiciones reales")} className="border-b border-border py-8">
+  return <section aria-label={t("Posiciones reales")} className={bare ? "" : "border-b border-border py-8"}>
     {showHarvestBanner && top && totalFees >= 0.5 && <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-primary/40 bg-primary/10 p-5"><div><p className="text-sm text-muted-foreground">{t("Ganancias listas para cosechar")}</p><p className="mt-1 font-display text-2xl font-semibold text-primary">≈ {formatUsd(totalFees)}</p><p className="mt-1 text-xs text-muted-foreground">{t("Envíalas a tu wallet sin tocar tu depósito.")}</p></div><Button onClick={() => onAction(top.p, "harvest")}><Sprout size={16} />{t("Cosechar ahora")}</Button></div>}
-    <h2 className="font-display text-lg font-semibold">{t("Mis posiciones")}</h2>
-    <div className="mt-4 grid gap-4 md:grid-cols-2">{rows.map(({ p, value, fees, apr }) => {
+    {!bare && <h2 className="font-display text-lg font-semibold">{t("Mis posiciones")}</h2>}
+    <div className={bare ? "grid gap-4" : "mt-4 grid gap-4 md:grid-cols-2"}>{rows.map(({ p, value, fees, apr }) => {
       const vault = VAULTS.find((v) => v.id === p.vaultId);
       const hot = Boolean(vault?.badge);
       const body = <>
