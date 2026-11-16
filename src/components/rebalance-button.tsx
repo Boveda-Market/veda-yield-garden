@@ -122,7 +122,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
       details={[]} /> : <>
       <DialogTitle>{t("Rebalancear posición")} · {symbol}</DialogTitle>
       <DialogDescription>{t("Un toque y vuelve a generar ganancias.")}</DialogDescription>
-      {quote?.success && !pending && <ReceiveCard label={t("Se recoloca")} amount={quote.valueUsd} unit="$" />}
+      {quote?.success && !pending && <ReceiveCard label={t("Se recoloca")} amount={quote.valueUsd ?? "—"} unit="$" />}
       {pending && !quote && <WorkingLine text={t("Preparando tu rebalanceo…")} />}
       {quote?.success && !pending && <DetailsToggle><dl className="grid gap-2 rounded-xl border border-border p-4 text-sm">
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Se recoloca")}</dt><dd className="font-semibold">≈ ${quote.valueUsd}</dd></div>
