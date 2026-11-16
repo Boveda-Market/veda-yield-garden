@@ -1,3 +1,4 @@
+import type React from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Flame } from "lucide-react";
@@ -86,5 +87,22 @@ export function DuelLines() {
         <path d={down} fill="none" stroke="var(--destructive)" strokeWidth="2.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
       </g>)}
     </svg>
+  </span>;
+}
+
+/** Shared GTA6 tile body for Mi Billetera: Sunset, GTA-style title, shimmer and a big live APR badge, identical with or without a position. */
+export function Gta6TileBody({ status }: { status?: React.ReactNode }) {
+  const t = useT();
+  const apr = useGta6AprLabel();
+  const { lang } = useI18n();
+  const num = apr.endsWith(" APR") ? apr.replace(" APR", "") : null;
+  return <span className="relative isolate flex h-full flex-col gap-1.5 overflow-hidden rounded-[14px] bg-[image:var(--gradient-hot-surface)] p-3 text-hot-foreground">
+    <span aria-hidden className="cta-shimmer pointer-events-none absolute inset-y-0 left-0 z-10 w-1/3 bg-gradient-to-r from-transparent via-hot-foreground/30 to-transparent" />
+    <img src={lang === "en" ? titleEn : titleEs} alt={t("Bóveda GTA6")} className="h-7 w-auto max-w-full self-start -rotate-2 drop-shadow-[0_0_10px_var(--hot)]" />
+    <span className="hot-cta flex w-fit items-end gap-1 rounded-xl px-2.5 py-1 leading-none text-hot-surface shadow-[0_0_18px_-2px_var(--hot)]">
+      <Flame size={18} aria-hidden className="flame-flicker mb-0.5 shrink-0" />
+      {num ? <><span className="font-display text-2xl font-black tabular-nums tracking-tight">{num}</span><span className="mb-0.5 text-[10px] font-black uppercase tracking-widest">APR</span></> : <span className="font-display text-sm font-black uppercase">{apr}</span>}
+    </span>
+    {status}
   </span>;
 }
