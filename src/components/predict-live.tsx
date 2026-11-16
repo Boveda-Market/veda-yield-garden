@@ -24,7 +24,8 @@ import { annotateRecord } from "@/lib/predict-history";
 import { predictClaimFee } from "@/lib/fees";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { ActionSuccess } from "@/components/action-success";
-import { WorkingLine } from "@/components/move-steps";
+import { FlowSteps, WorkingLine } from "@/components/move-steps";
+import { DetailsToggle } from "@/components/ui/details-toggle";
 
 const usdc = (micro: string | bigint | null) => micro === null ? "—" : (Number(micro) / 1e6).toFixed(2);
 const fromB64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
@@ -253,11 +254,9 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
           {!customAmount && <Button type="button" variant="outline" className="mt-2 h-11 w-full rounded-xl border-2 border-primary/50 text-sm font-bold text-primary" onClick={() => setCustomAmount(true)}><Pencil size={16} /> {t("Otra cantidad")}</Button>}
           {!inRange && <p className="mt-2 text-xs text-destructive">{t("Entre {min} y ${max}.", { min: PREDICT_MIN_USDC, max: PREDICT_MAX_USDC })}</p>}
           {short && <p className="mt-2 text-xs text-destructive">{t("Saldo insuficiente: tienes ${v}.", { v: usdc(balance) })} <Link to="/wallet" className="underline">{t("Depositar o cambiar a dólares")}</Link></p>}
-          {inRange && selPrice && !review && <div className="mt-3 space-y-1 rounded-xl bg-secondary/50 p-3 text-sm">
-            <p className="flex justify-between"><span className="text-muted-foreground">{t("Pones")}</span><strong className="tabular-nums">${amt.toFixed(2)}</strong></p>
-            <p className="flex justify-between"><span className="text-muted-foreground">{t("Si aciertas recibes aprox.")}</span><strong className="text-primary tabular-nums">${(amt / selPrice).toFixed(2)}</strong></p>
-            <p className="flex justify-between"><span className="text-muted-foreground">{t("Ganancia posible")}</span><strong className="tabular-nums">+${(amt / selPrice - amt).toFixed(2)}</strong></p>
-            <p className="flex justify-between"><span className="text-muted-foreground">{t("Precio por contrato")}</span><strong className="tabular-nums">{Math.round(selPrice * 100)}¢ · {(1 / selPrice).toFixed(2)}×</strong></p>
+          {inRange && selPrice && !review && <div className="mt-3 rounded-xl bg-secondary/50 p-3 text-center">
+            <p className="text-xs text-muted-foreground">{t("Si aciertas recibes aprox.")}</p>
+            <p className="font-display text-2xl font-bold text-primary tabular-nums">${(amt / selPrice).toFixed(2)}</p>
             {short && <p className="pt-1 text-[11px] text-muted-foreground">{t("Cotización con el precio actual del mercado. Fondea tu wallet para firmarla.")}</p>}
           </div>}
           {short && <SolConvertShortcut className="mt-3" />}
@@ -268,18 +267,24 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
           {quoteErr && !needsReserve && <p className="mt-2 text-xs text-destructive">{t("No se pudo cotizar ahora mismo. Reintentando…")}</p>}
           {needsReserve && wallet && <div className="mt-3"><GasRefillCard force target="deposit" sol={1n} usdc={units ?? 0n} onDone={() => setNeedsReserve(false)} /></div>}
           {side && !review && <Button type="button" variant="ghost" className="mt-2 w-full" onClick={cancelQuote}>{t("Cancelar cotización")}</Button>}
-          {wallet && !review && <p className="mt-2 text-[11px] text-muted-foreground">{t("La cotización real aparece aquí, lista para firmar.")}</p>}
         </section>
   
-        {review && <section className="space-y-2 rounded-2xl border-2 border-primary/50 bg-primary/5 p-4 text-sm" aria-label={t("Revisión")}>
-          <p className="flex items-center justify-between font-semibold"><span>{t("Cotización real")} · {t(review.side === "up" ? "Sube" : "Baja")}</span>{quoting && <Loader2 size={14} className="animate-spin text-muted-foreground" />}</p>
-          <p className="text-[11px] text-muted-foreground">{t("Precio real del momento; se actualiza cada 15 s.")}</p>
-          <p className="flex justify-between"><span>{t("Pagas")}</span><strong>${usdc(review.quote.costMicro)}</strong></p>
-          <p className="flex justify-between"><span>{t("Si aciertas recibes")}</span><strong className="text-primary">${usdc(review.quote.contractsMicro)}</strong></p>
-          <p className="flex justify-between"><span>{t("Ganancia posible")}</span><strong>+${usdc(potentialProfit(review.quote))}</strong></p>
-          <p className="text-xs text-muted-foreground">{t("Al expirar el tiempo la posición se cierra sola: si ganas, aparece tu premio para reclamar; si pierdes, desaparece. También puedes vender antes del cierre al precio del momento.")}</p>
-          <Button className="w-full" disabled={busy === "sign"} onClick={confirm}>{busy === "sign" ? <><Loader2 className="animate-spin" /> {t("Aprueba en tu billetera…")}</> : t("Confirmar jugada")}</Button>
-          <Button type="button" variant="outline" className="w-full" disabled={busy === "sign"} onClick={cancelQuote}>{t("Cancelar cotización")}</Button>
+        {review && <section className="space-y-3 rounded-2xl border-2 border-primary/50 bg-primary/5 p-4 text-sm" aria-label={t("Revisión")}>
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground">{t("Si aciertas recibes")} {quoting && <Loader2 size={12} className="inline animate-spin align-[-1px]" />}</p>
+            <p className="font-display text-3xl font-bold text-primary tabular-nums">${usdc(review.quote.contractsMicro)}</p>
+            <p className="text-xs text-muted-foreground tabular-nums">{t("Pones")} ${usdc(review.quote.costMicro)} · {t(review.side === "up" ? "Sube" : "Baja")}</p>
+          </div>
+          <Button size="lg" className="h-12 w-full rounded-xl text-base font-bold" disabled={busy === "sign"} onClick={confirm}>{busy === "sign" ? <><Loader2 className="animate-spin" /> {t("Aprueba en tu billetera…")}</> : t("Confirmar jugada")}</Button>
+          <DetailsToggle>
+            <div className="grid gap-1 rounded-xl border border-border p-3">
+              <p className="flex justify-between"><span className="text-muted-foreground">{t("Pagas")}</span><strong className="tabular-nums">${usdc(review.quote.costMicro)}</strong></p>
+              <p className="flex justify-between"><span className="text-muted-foreground">{t("Ganancia posible")}</span><strong className="tabular-nums">+${usdc(potentialProfit(review.quote))}</strong></p>
+              {selPrice ? <p className="flex justify-between"><span className="text-muted-foreground">{t("Precio por contrato")}</span><strong className="tabular-nums">{Math.round(selPrice * 100)}¢ · {(1 / selPrice).toFixed(2)}×</strong></p> : null}
+            </div>
+            <p className="text-xs text-muted-foreground">{t("Precio real del momento; se actualiza cada 15 s.")} {t("Al expirar el tiempo la posición se cierra sola: si ganas, aparece tu premio para reclamar; si pierdes, desaparece. También puedes vender antes del cierre al precio del momento.")}</p>
+          </DetailsToggle>
+          <Button type="button" variant="ghost" className="w-full" disabled={busy === "sign"} onClick={cancelQuote}>{t("Cancelar cotización")}</Button>
         </section>}
         </ActionSheetContent>
       </Dialog>
@@ -292,7 +297,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
           : placed && <>
             <DialogTitle className="pr-10 font-display text-xl">{placed.phase === "refunded" ? t("Orden no completada") : t("Entrando a la ronda")}</DialogTitle>
             <DialogDescription>{t("Pones ${a} · si aciertas recibes ${b}", { a: placed.cost, b: placed.payout })}</DialogDescription>
-            {placed.phase === "confirming" && <WorkingLine text={t("Confirmando tu entrada a la ronda…")} />}
+            {placed.phase === "confirming" && <><FlowSteps current={2} /><WorkingLine text={t("Confirmando tu entrada a la ronda…")} /></>}
             {placed.phase === "refunded" && <p role="status" className="text-sm">{t("El precio cambió antes de entrar a la ronda. Te devolvimos ${v} completos a tu billetera.", { v: placed.cost })}</p>}
             {placed.phase === "slow" && <p role="status" className="text-sm">{t("Tu orden sigue en proceso. Si no logra entrar a la ronda, te devolvemos el dinero y te avisamos en la campanita.")}</p>}
             {placed.phase !== "confirming" && <Button className="w-full" onClick={() => setPlaced(null)}>{t("Entendido")}</Button>}
