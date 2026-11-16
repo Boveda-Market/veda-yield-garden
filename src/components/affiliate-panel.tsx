@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
-import { Users, Save } from "lucide-react";
+import { Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { InviteHero } from "@/components/invite-share";
@@ -35,7 +35,7 @@ export function AffiliatePanel() {
   const [dash, setDash] = useState<AffiliateDashboard | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [code, setCode] = useState("");
-  const [customCode, setCustomCode] = useState("");
+  const [, setCustomCode] = useState("");
   const [payout, setPayout] = useState("");
   const [busy, setBusy] = useState(false);
   const [editingPayout, setEditingPayout] = useState(false);
@@ -72,14 +72,9 @@ export function AffiliatePanel() {
   const link = dash ? `${window.location.origin}/?ref=${dash.code}` : "";
   return <section className="pt-4" aria-labelledby="invite-hero">
     {!dash ? <p className="mt-4 text-sm text-muted-foreground">{message ?? t("Cargando…")}</p> : <>
-      <InviteHero link={link} code={dash.code} referred={dash.referred} pending={(Number(dash.pendingRaw) / 1e6).toFixed(2)} preview={preview} busy={busy} ready={payoutProgress(BigInt(dash.pendingRaw)).ready} missing={(Number(payoutProgress(BigInt(dash.pendingRaw)).missingRaw) / 1e6).toFixed(2)} onClaim={() => void act(collect, "¡Cobro enviado a tu wallet!")} />
+      <InviteHero link={link} code={dash.code} referred={dash.referred} pending={(Number(dash.pendingRaw) / 1e6).toFixed(2)} preview={preview} busy={busy} ready={payoutProgress(BigInt(dash.pendingRaw)).ready} missing={(Number(payoutProgress(BigInt(dash.pendingRaw)).missingRaw) / 1e6).toFixed(2)} onClaim={() => void act(collect, "¡Cobro enviado a tu wallet!")} onSaveCode={async (value) => { if (preview) { setDash({ ...dash, code: value }); setMessage(t("Enlace de ejemplo actualizado. Inicia sesión para guardar el tuyo.")); return null; } try { const r = await saveCode({ data: { token: await token(), code: value } }); if (!r.success) return t(r.error ?? "No se pudo completar."); setMessage(t("Tu enlace se actualizó.")); await refresh(); return null; } catch { return t("No se pudo completar."); } }} />
       {dash.shareBps > AFFILIATE_SHARE_BPS && <p className="mt-3 text-center text-sm font-semibold">{t("Socio VIP")} · {dash.shareBps / 100}% {t("de la comisión")}</p>}
       <h2 id="affiliate-title" className="mt-8 flex items-center gap-2 font-display text-xl font-semibold"><Users size={18} />{t("Tu panel")}</h2>
-      <form className="mt-4" onSubmit={(e) => { e.preventDefault(); const value = normalizeCode(customCode); if (!value) { setMessage(t("Usa de 4 a 16 letras o números, sin espacios.")); return; } if (preview) { setDash({ ...dash, code: value }); setMessage(t("Enlace de ejemplo actualizado. Inicia sesión para guardar el tuyo.")); return; } void act(async () => saveCode({ data: { token: await token(), code: value } }), "Tu enlace se actualizó."); }}>
-        <label className="block text-sm">{t("Personaliza tu enlace")}<input value={customCode} minLength={4} maxLength={16} required onChange={(e) => setCustomCode(e.target.value)} className={field} /></label>
-        <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Usa de 4 a 16 letras o números, sin espacios.")} {t("Tus invitados actuales se mantienen. Al cambiar el código, comparte el nuevo enlace: el anterior deja de funcionar.")}</p>
-        <Button type="submit" size="sm" variant="outline" className="mt-2" disabled={busy}><Save size={14} />{t("Guardar enlace")}</Button>
-      </form>
       <dl className="mt-4 grid grid-cols-3 gap-3 text-sm">
         <div className="rounded-xl border border-border p-3"><dt className="text-xs text-muted-foreground">{t("Invitados")}</dt><dd className="font-semibold">{dash.referred}</dd></div>
         <div className="rounded-xl border border-border p-3"><dt className="text-xs text-muted-foreground">{t("Red secundaria")} ({SUB_AFFILIATE_SHARE_BPS / 100}%)</dt><dd className="font-semibold">{dash.subReferred}</dd></div>
