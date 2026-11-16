@@ -26,7 +26,6 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as WalletRouteImport } from './routes/wallet'
-import { Route as ZzPreviewLoadingRouteImport } from './routes/zz-preview-loading'
 import { Route as GuiasIndexRouteImport } from './routes/guias/index'
 import { Route as GuiasBovedasAltoRendimientoRouteImport } from './routes/guias/bovedas-alto-rendimiento'
 import { Route as GuiasInvertirSinEstafasRouteImport } from './routes/guias/invertir-sin-estafas'
@@ -124,11 +123,6 @@ const WalletRoute = WalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ZzPreviewLoadingRoute = ZzPreviewLoadingRouteImport.update({
-  id: '/zz-preview-loading',
-  path: '/zz-preview-loading',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const GuiasIndexRoute = GuiasIndexRouteImport.update({
   id: '/guias/',
   path: '/guias/',
@@ -209,7 +203,6 @@ export interface FileRoutesByFullPath {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
-  '/zz-preview-loading': typeof ZzPreviewLoadingRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
@@ -240,7 +233,6 @@ export interface FileRoutesByTo {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
-  '/zz-preview-loading': typeof ZzPreviewLoadingRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
@@ -272,7 +264,6 @@ export interface FileRoutesById {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
-  '/zz-preview-loading': typeof ZzPreviewLoadingRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
@@ -305,7 +296,6 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
-    | '/zz-preview-loading'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/invertir-sin-estafas'
     | '/guias/que-es-usdc'
@@ -336,7 +326,6 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
-    | '/zz-preview-loading'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/invertir-sin-estafas'
     | '/guias/que-es-usdc'
@@ -367,7 +356,6 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
-    | '/zz-preview-loading'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/invertir-sin-estafas'
     | '/guias/que-es-usdc'
@@ -399,7 +387,6 @@ export interface RootRouteChildren {
   StatusRoute: typeof StatusRoute
   TerminosRoute: typeof TerminosRoute
   WalletRoute: typeof WalletRoute
-  ZzPreviewLoadingRoute: typeof ZzPreviewLoadingRoute
   GuiasBovedasAltoRendimientoRoute: typeof GuiasBovedasAltoRendimientoRoute
   GuiasInvertirSinEstafasRoute: typeof GuiasInvertirSinEstafasRoute
   GuiasQueEsUsdcRoute: typeof GuiasQueEsUsdcRoute
@@ -534,13 +521,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WalletRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/zz-preview-loading': {
-      id: '/zz-preview-loading'
-      path: '/zz-preview-loading'
-      fullPath: '/zz-preview-loading'
-      preLoaderRoute: typeof ZzPreviewLoadingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/guias/': {
       id: '/guias/'
       path: '/guias'
@@ -639,7 +619,6 @@ const rootRouteChildren: RootRouteChildren = {
   StatusRoute: StatusRoute,
   TerminosRoute: TerminosRoute,
   WalletRoute: WalletRoute,
-  ZzPreviewLoadingRoute: ZzPreviewLoadingRoute,
   GuiasBovedasAltoRendimientoRoute: GuiasBovedasAltoRendimientoRoute,
   GuiasInvertirSinEstafasRoute: GuiasInvertirSinEstafasRoute,
   GuiasQueEsUsdcRoute: GuiasQueEsUsdcRoute,
