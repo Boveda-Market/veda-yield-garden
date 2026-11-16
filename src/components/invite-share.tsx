@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Gift, Share2, ChevronRight, Copy, Check, Users, Wallet } from "lucide-react";
+import { Gift, Share2, ChevronRight, Copy, Check, Users, Wallet, Flame, TrendingUp, Zap } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { poolYieldOptions } from "@/lib/pool-yield";
+import { VAULTS } from "@/lib/vaults";
+import { HOOK_TEXT, hookLink, exampleEarning, type InviteHook } from "@/lib/invite-hooks";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
@@ -64,10 +68,18 @@ const TgLogo = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="curre
 export function InviteHero({ link, code, referred, pending, preview, onCopied, ready, missing, busy, onClaim }: { link: string; code: string; referred: number; pending: string; preview: boolean; onCopied?: () => void; ready?: boolean; missing?: string; busy?: boolean; onClaim?: () => void }) {
   const t = useT();
   const [copied, setCopied] = useState(false);
-  const text = shareText(t);
-  const enc = encodeURIComponent;
-  async function copy() { try { await navigator.clipboard.writeText(link); } catch { /* ignore */ } setCopied(true); onCopied?.(); setTimeout(() => setCopied(false), 2000); }
-  async function share() { if (navigator.share) { try { await navigator.share({ title: "BÓVEDA", text, url: link }); } catch { /* cancelled */ } return; } await copy(); }
+  const [hook, setHook] = useState<InviteHook>("yield");
+  const [text, setText] = useState(() => t(HOOK_TEXT.yield));
+  const [calc, setCalc] = useState(100);
+  const gta6 = VAULTS.find((v) => v.id === "gta6");
+  const y = useQuery({ ...poolYieldOptions(gta6?.pool ?? ""), enabled: !!gta6 });
+  const apr = y.data?.apr != null && y.data.apr >= 100 ? `+${Math.round(y.data.apr).toLocaleString("en-US")}% APR` : t("Alto octanaje");
+  const pick = (h: InviteHook) => { setHook(h); setText(t(HOOK_TEXT[h])); };
+  const shareLink = hookLink(link, hook);
+  const earned = (Number(exampleEarning(calc)) / 1e6).toFixed(2);
+  const hooks: [InviteHook, string, typeof Flame][] = [["yield", t("Rendimiento"), TrendingUp], ["gta6", "GTA6", Flame], ["duel", t("Doble o Nada"), Zap]];
+  async function copy() { try { await navigator.clipboard.writeText(shareLink); } catch { /* ignore */ } setCopied(true); onCopied?.(); setTimeout(() => setCopied(false), 2000); }
+  async function share() { if (navigator.share) { try { await navigator.share({ title: "BÓVEDA", text, url: shareLink }); } catch { /* cancelled */ } return; } try { await navigator.clipboard.writeText(`${text} ${shareLink}`); } catch { /* ignore */ } setCopied(true); onCopied?.(); setTimeout(() => setCopied(false), 2000); }
   const steps: [string, string][] = [[t("Copia tu enlace"), t("Ya está listo. Un toque y es tuyo.")], [t("Compártelo"), t("Con amigos y familia, por WhatsApp o Telegram.")], [t("Gana hasta 60%"), t("De la comisión de cada movimiento, en dólares.")]];
   return <section aria-labelledby="invite-hero" className="invite-ring rounded-3xl p-[2px]">
     <div className="rounded-[22px] bg-[image:var(--gradient-invite-surface)] p-5 text-invite-foreground sm:p-7">
@@ -79,16 +91,36 @@ export function InviteHero({ link, code, referred, pending, preview, onCopied, r
         <p className="mt-2 text-sm font-bold leading-tight">{h}</p>
         <p className="mt-1 text-[11px] leading-4 text-invite-muted">{d}</p>
       </li>)}</ol>
+      <button type="button" onClick={() => pick("gta6")} aria-pressed={hook === "gta6"} className={`hot-ring mt-4 block w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98] ${hook === "gta6" ? "" : "opacity-90"}`}>
+        <span className="flex items-center gap-3 rounded-[calc(1rem-2px)] bg-[image:var(--gradient-hot-surface)] px-3 py-2.5 text-hot-foreground">
+          <Flame size={22} className="flame-flicker shrink-0" aria-hidden />
+          <span className="min-w-0 flex-1"><span className="block text-sm font-black">{t("Bóveda GTA6")} · <span className="text-hot-muted">{apr}</span></span><span className="block text-[11px] text-hot-muted">{hook === "gta6" ? t("¡Listo! Tu enlace abre directo en GTA6.") : t("Lo que más curiosidad despierta. Toca para usarlo.")}</span></span>
+          <span className="hot-cta shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black text-hot-surface">{hook === "gta6" ? "✓" : t("Usar")}</span>
+        </span>
+      </button>
       <div className="mt-5 rounded-2xl border border-invite/30 bg-invite-surface/60 p-3">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-invite-muted">{t("Elige tu mensaje")}</p>
+        <div role="radiogroup" className="mt-2 grid grid-cols-3 gap-1.5">{hooks.map(([h, label, Icon]) => <button key={h} type="button" role="radio" aria-checked={hook === h} onClick={() => pick(h)} className={`flex h-10 items-center justify-center gap-1 rounded-xl text-xs font-bold transition-colors ${hook === h ? "invite-cta text-invite-surface" : "border border-invite/30 hover:bg-invite/10"}`}><Icon size={14} aria-hidden />{label}</button>)}</div>
+        <p className="mt-3 text-[11px] text-invite-muted">{t("Así lo verá tu amigo (toca para editarlo)")}</p>
+        <div className="mt-1 rounded-2xl rounded-tl-sm bg-invite-foreground/10 p-2.5">
+          <textarea aria-label={t("Mensaje")} value={text} onChange={(e) => setText(e.target.value.slice(0, 280))} rows={2} className="w-full resize-none bg-transparent text-sm leading-5 outline-none" />
+          <p className="truncate font-mono text-xs text-invite">{shareLink.replace(/^https?:\/\//, "")}</p>
+        </div>
+      </div>
+      <div className="mt-3 rounded-2xl border border-invite/30 bg-invite-surface/60 p-3">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-invite-muted">{t("Tu enlace")} · <span className="font-mono normal-case text-invite">{code}</span></p>
-        <p className="mt-1 truncate font-mono text-sm">{link.replace(/^https?:\/\//, "")}</p>
-        <button type="button" onClick={() => void copy()} className="invite-cta mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-xl font-display text-lg font-extrabold text-invite-surface transition-transform active:scale-[0.98]">{copied ? <><Check size={20} />{t("¡Copiado!")}</> : <><Copy size={20} />{t("Copiar mi enlace")}</>}</button>
+                <button type="button" onClick={() => void copy()} className="invite-cta mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-xl font-display text-lg font-extrabold text-invite-surface transition-transform active:scale-[0.98]">{copied ? <><Check size={20} />{t("¡Copiado!")}</> : <><Copy size={20} />{t("Copiar mi enlace")}</>}</button>
         <button type="button" onClick={() => void share()} className="mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-invite/50 text-base font-bold transition-colors hover:bg-invite/10"><Share2 size={18} />{t("Compartir")}</button>
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-2">
         <div className="rounded-2xl bg-invite-foreground/5 p-3"><dt className="flex items-center gap-1 text-[11px] text-invite-muted"><Users size={12} />{t("Invitados")}</dt><dd className="font-display text-2xl font-extrabold">{referred}</dd></div>
         <div className="rounded-2xl bg-invite-foreground/5 p-3"><dt className="flex items-center gap-1 text-[11px] text-invite-muted"><Wallet size={12} />{t("Ganado por cobrar")}</dt><dd className="font-display text-2xl font-extrabold text-invite">${pending}</dd></div>
       </dl>
+      <div className="mt-3 rounded-2xl border border-invite/25 bg-invite-foreground/5 p-3">
+        <p className="text-sm font-bold">🧮 {t("Calcula cuánto ganas")}</p>
+        <div className="mt-2 grid grid-cols-4 gap-1.5">{[50, 100, 250, 500].map((n) => <button key={n} type="button" aria-pressed={calc === n} onClick={() => setCalc(n)} className={`h-9 rounded-lg text-sm font-bold ${calc === n ? "invite-cta text-invite-surface" : "border border-invite/30"}`}>${n}</button>)}</div>
+        <p className="mt-2 text-xs leading-5 text-invite-muted">{t("Cada vez que tu invitado retira")} ${calc} {t("de una bóveda, tú ganas")} <span className="font-display text-base font-extrabold text-invite">${earned}</span>. {t("También ganas cuando cosecha o cobra premios. Sin límite de invitados.")}</p>
+      </div>
       {ready && !preview ? <button type="button" disabled={busy} onClick={onClaim} className="invite-cta mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-xl font-display text-lg font-extrabold text-invite-surface transition-transform active:scale-[0.98] disabled:opacity-60"><Wallet size={20} />{busy ? t("Enviando…") : `${t("Reclamar")} $${pending}`}</button>
         : missing && <p className="mt-3 text-center text-xs text-invite-muted">{t("Reclamas desde $3. Te faltan")} ${missing}</p>}
       {preview && <p className="mt-3 text-center text-xs text-invite-muted">{t("Vista de ejemplo: inicia sesión para obtener tu enlace real.")}</p>}
