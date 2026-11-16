@@ -23,5 +23,7 @@ export function usePositionRows(positions: ChainPosition[]) {
   const totalFees = ready.reduce((sum, r) => sum + (r.fees ?? 0), 0);
   const top = [...ready].filter((r) => canHarvest(r.fees)).sort((a, b) => (b.fees ?? 0) - (a.fees ?? 0))[0] ?? null;
   const capital = rows.every((r) => r.value !== null) ? rows.reduce((sum, r) => sum + (r.value ?? 0), 0) : null;
-  return { rows, ready, totalFees, top, capital, loading };
+  // Once price lookups have settled, the sum of positions that do have a price, so totals never wait forever on one missing price.
+  const knownCapital = rows.reduce((sum, r) => sum + (r.value ?? 0), 0);
+  return { rows, ready, totalFees, top, capital, knownCapital, loading };
 }

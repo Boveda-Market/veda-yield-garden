@@ -1147,6 +1147,7 @@ export const extra: Record<string, string> = {
   "Ahora": "Now",
   "Tiempo restante": "Time left",
   "Jugada rápida": "Quick play",
+  "Algunas bóvedas aún no tienen precio; el total puede ser mayor.": "Some vaults have no price yet; your total may be higher.",
   "Ir con la mayoría": "Go with the crowd",
   "⚖️ Ronda pareja: el mercado está dividido. Elige tú.": "⚖️ Close round: the market is split. Your call.",
   "1 toque · Pones ${a} → recibes ≈${b} si acierta la mayoría": "1 tap · Put ${a} → get ≈${b} if the crowd is right",
