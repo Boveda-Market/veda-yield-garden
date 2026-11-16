@@ -54,7 +54,7 @@ export function Gta6Guide({ open, onOpenChange, onStart }: { open: boolean; onOp
       <ol className="grid gap-3">{steps.map(([icon, title, body], i) => <li key={title} className="flex gap-3 rounded-xl border border-border p-3"><span aria-hidden className="text-2xl">{icon}</span><div><p className="text-sm font-bold">{i + 1}. {title}</p><p className="mt-0.5 text-xs leading-5 text-muted-foreground">{body}</p></div></li>)}</ol>
       <Suspense fallback={null}><RangeAlertsGate /></Suspense>
       <p role="note" className="text-xs leading-5 text-muted-foreground">⚠️ {t("Recomendado: sin Telegram no te llegará el aviso si la bóveda se pausa y podrías dejar de ganar. Puedes continuar de todos modos.")}</p>
-      <Button size="lg" className="hot-cta w-full font-bold text-hot-surface" onClick={onStart}>{t("Entendido, migrar")} →</Button>
+      <Button size="lg" className="hot-cta w-full font-bold text-hot-surface" onClick={onStart}>{t("Entendido, cambiar")} →</Button>
     </DialogContent>
   </Dialog>;
 }
@@ -70,7 +70,7 @@ export function Gta6PromoBanner({ positions, onMigrate, className = "mt-6" }: { 
   return <div className={`hot-ring rounded-2xl p-[2px] ${className}`}>
     <div className="rounded-[calc(1rem-2px)] bg-[image:var(--gradient-hot-surface)] p-4 text-hot-foreground">
       <Headline from={from ? t(from.name) : undefined} />
-      <Button size="lg" className="hot-cta mt-3 w-full font-bold text-hot-surface" onClick={() => setGuide(true)}>{t("Migrar a GTA6 ahora")} →</Button>
+      <Button size="lg" className="hot-cta mt-3 w-full font-bold text-hot-surface" onClick={() => setGuide(true)}>{t("Cambiar a GTA6 ahora")} →</Button>
     </div>
     <Gta6Guide open={guide} onOpenChange={setGuide} onStart={() => { setGuide(false); onMigrate(p, gta6); }} />
   </div>;
@@ -93,9 +93,9 @@ export function Gta6PromoPopup({ wallet, samplePositions }: { wallet: string | n
       <div className="rounded-[inherit] bg-[image:var(--gradient-hot-surface)] p-5 text-hot-foreground">
         <button type="button" aria-label={t("Cerrar")} onClick={() => setOpen(false)} className="float-right rounded-full p-1 text-hot-muted hover:text-hot-foreground"><X size={18} /></button>
         <DialogTitle className="sr-only">{t("Bóveda GTA6: súper alto rendimiento")}</DialogTitle>
-        <DialogDescription className="sr-only">{t("Ver estrategia y migrar")}</DialogDescription>
+        <DialogDescription className="sr-only">{t("Ver estrategia y cambiar")}</DialogDescription>
         <Headline from={from ? t(from.name) : undefined} />
-        <Button size="lg" className="hot-cta mt-4 w-full font-bold text-hot-surface" onClick={go}>{t("Ver estrategia y migrar")} →</Button>
+        <Button size="lg" className="hot-cta mt-4 w-full font-bold text-hot-surface" onClick={go}>{t("Ver estrategia y cambiar")} →</Button>
         <button type="button" onClick={() => setOpen(false)} className="mt-2 w-full text-center text-sm text-hot-muted underline-offset-2 hover:underline">{t("Ahora no")}</button>
         <p className="mt-2 text-center text-[11px] text-hot-muted">{t("Siempre lo encuentras en Bóvedas y Portafolio.")}</p>
       </div>

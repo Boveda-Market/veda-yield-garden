@@ -43,12 +43,12 @@ export function CardPreviewAdmin() {
       <p className="text-sm text-muted-foreground">{t("Cantidades de ejemplo para revisar el diseño de cada paso.")}</p>
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <Frame title={t("1 · Cotización")}>
-          <p className="font-display text-lg font-semibold">{t("Migrar a {v}", { v: t("Bóveda MET") })}</p>
+          <p className="font-display text-lg font-semibold">{t("Cambiar a {v}", { v: t("Bóveda MET") })}</p>
           <p className="text-sm text-muted-foreground">{t("Movemos todo tu dinero y ganancias.")}</p>
           <div className="grid gap-2">{[["Bóveda MET", "48.2"], ["Bóveda GTA6", "112.5"]].map(([n, apr], i) => <div key={n} className={`flex items-center justify-between rounded-lg border p-3 text-sm ${i === 0 ? "border-primary bg-primary/10" : "border-border"}`}><span className="font-semibold">{t(n!)}</span><span className="tabular-nums text-primary">{apr}% APR</span></div>)}</div>
           <ReceiveCard label={t("Moverás aproximadamente")} amount="12.48" unit="$" sub={`${t("Mínimo garantizado:")} $12.23`} />
           <dl className="grid gap-2 rounded-xl border border-border p-4 text-sm"><div className="flex justify-between"><dt className="text-muted-foreground">{t("Valor de tu posición")}</dt><dd>$12.48</dd></div><div className="flex justify-between"><dt className="text-muted-foreground">{t("Comisión BÓVEDA")}</dt><dd>$0.00</dd></div></dl>
-          <Button size="lg"><PenLine className="mr-2 h-4 w-4" />{t("Confirmar migración")}</Button>
+          <Button size="lg"><PenLine className="mr-2 h-4 w-4" />{t("Confirmar cambio")}</Button>
           <p className="text-center text-xs text-muted-foreground">{t("Tu billetera te pedirá 2 aprobaciones seguidas.")}</p>
         </Frame>
         <Frame title={t("2 · Cerrando bóveda (firma 1)")}>
@@ -61,7 +61,7 @@ export function CardPreviewAdmin() {
           <Button size="lg"><LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" />{t("Esperando tu firma en la wallet…")}</Button>
         </Frame>
         <Frame title={t("4 · Comprobante")}>
-          <ActionSuccess title={t("¡Migración completada!")} body={t("Todo tu dinero ya está generando en la nueva bóveda. Comisión: $0.00.")} amount={{ value: "12.23", unit: "$" }} details={[{ label: t("Operación"), value: t("Migración de bóveda") }, { label: t("Destino"), value: t("Bóveda {v}", { v: "MET" }) }]} signature={null} destination={null} onClose={noop} />
+          <ActionSuccess title={t("¡Cambio de bóveda listo!")} body={t("Todo tu dinero ya está generando en la nueva bóveda. Comisión: $0.00.")} amount={{ value: "12.23", unit: "$" }} details={[{ label: t("Operación"), value: t("Cambio de bóveda") }, { label: t("Destino"), value: t("Bóveda {v}", { v: "MET" }) }]} signature={null} destination={null} onClose={noop} />
         </Frame>
       </div>
     </div>

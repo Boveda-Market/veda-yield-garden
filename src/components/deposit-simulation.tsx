@@ -43,7 +43,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   const clean = (v: string) => { const s = v.replace(/,/g, ".").replace(/[^\d.]/g, ""); const [w, ...rest] = s.split("."); return rest.length ? `${w}.${rest.join("").slice(0, 6)}` : (w ?? ""); };
 
   return <Dialog open onOpenChange={(open) => { if (!open && !busy) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
-    <DialogTitle className={done ? "sr-only" : undefined}>{migrate ? t("Migrar a {v}", { v: t(vault.name) }) : <>{position ? t("Depositar más ·") : t("Depositar ·")}{" "}{t(vault.name)}</>}</DialogTitle>
+    <DialogTitle className={done ? "sr-only" : undefined}>{migrate ? t("Cambiar a {v}", { v: t(vault.name) }) : <>{position ? t("Depositar más ·") : t("Depositar ·")}{" "}{t(vault.name)}</>}</DialogTitle>
     <DialogDescription className={done ? "sr-only" : undefined}>{migrate ? t("Movemos todo tu dinero y ganancias.") : t("Elige cuánto quieres depositar y confirma.")}</DialogDescription>
     {migrate && !done && <MoveSteps current={2} to={t(vault.name)} />}
     {migrate && !done && <p className="text-center font-display text-3xl font-bold tabular-nums">${amount || "—"}</p>}

@@ -31,7 +31,7 @@ export function MigrateOffer({ position, aprs, onMigrate, className = "" }: { po
     <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary-foreground"><Zap size={12} />{t("Traslado rápido")}</span>
     <p className="mt-3 text-sm">{t("{v} rinde", { v: t(target.name) })} <span className="font-display text-xl font-bold text-primary">+{up.gain.toFixed(1)}% APR</span> {t("más que {f}", { f: from ? t(from.name) : "" })}</p>
     <p className="mt-1 text-xs text-muted-foreground">{t("Movemos tu capital y ganancias en un solo paso. Tú firmas cada paso.")}</p>
-    <Button className="mt-3 w-full" size="lg" onClick={() => onMigrate(position, target)}>{t("Migrar a {v}", { v: t(target.name) })} →</Button>
+    <Button className="mt-3 w-full" size="lg" onClick={() => onMigrate(position, target)}>{t("Cambiar a {v}", { v: t(target.name) })} →</Button>
   </div>;
 }
 
