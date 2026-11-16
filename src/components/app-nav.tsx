@@ -1,3 +1,4 @@
+import { AutopilotDefault } from "@/components/autopilot-toggle";
 import { IN_APP_FLAG, OPEN_MENU_EVENT, OPEN_MENU_FLAG } from "./back-button";
 import { Link } from "@tanstack/react-router";
 import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, Home, History, Send, Bell, Zap } from "lucide-react";
@@ -62,7 +63,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
     return () => window.removeEventListener(OPEN_MENU_EVENT, openMenu);
   }, [guest]);
   return <>
-    <span className="inline-flex items-center gap-2"><NewsBell />
+    <span className="inline-flex items-center gap-2"><NewsBell /><AutopilotDefault />
     <button type="button" onClick={() => setOpen(true)} aria-label={t("Abrir menú")} className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-medium hover:bg-secondary"><Menu size={18} />{t("Menú")}</button></span>
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent side="right" className="w-[85%] max-w-sm overflow-y-auto">

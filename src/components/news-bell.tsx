@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { SUPPORT_URL } from "@/components/safety-notice";
 import { usePredictAlerts, type PredictAlert, type RefundAlert } from "@/hooks/use-predict-alerts";
 import { useRangeAlerts, type RangeAlert } from "@/hooks/use-range-alerts";
+import { useAutopilot } from "@/components/autopilot-toggle";
+import { autopilotNotice } from "@/lib/autopilot";
 import { ANNOUNCEMENTS, DISMISSED_KEY, SEEN_KEY, announcementSections, latestAnnouncementId, shortDate, type Announcement, type AnnouncementKind } from "@/lib/announcements";
 
 const LABEL: Record<AnnouncementKind, string> = { vault: "Nueva bóveda", market: "Nuevo mercado", policy: "Aviso legal", update: "Novedad" };
@@ -69,7 +71,7 @@ function AnnouncementCard({ a, primary, onDismiss, onNavigate }: { a: Announceme
 }
 
 /** Announcement history, shared by the bell dialog and the Notifications section. Dismissals stay in this browser; new announcements still appear. */
-export function NewsList({ onNavigate, predict = [], refunds = [], ranges = [] }: { onNavigate?: () => void; predict?: PredictAlert[]; refunds?: RefundAlert[]; ranges?: RangeAlert[] }) {
+export function NewsList({ onNavigate, predict = [], refunds = [], ranges = [], autopilot = null }: { onNavigate?: () => void; predict?: PredictAlert[]; refunds?: RefundAlert[]; ranges?: RangeAlert[]; autopilot?: ReturnType<typeof autopilotNotice> }) {
   const t = useT();
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [showAll, setShowAll] = useState(false);
@@ -98,6 +100,10 @@ export function NewsList({ onNavigate, predict = [], refunds = [], ranges = [] }
         <p className="mt-2 text-sm text-muted-foreground">{t("Lleva más de 10 minutos sin generar ganancias. Tu dinero sigue seguro; vuelve a centrarla con un toque y una firma.")}</p>
         <Link to="/wallet" search={{ rebalance: a.p.address }} onClick={onNavigate} className={ctaClass(true)}>🎯 {t("Rebalancear ahora")}</Link>
       </NoticeCard>)}
+      {autopilot && !dismissed.includes(autopilot.id) && <NoticeCard tone="info" icon="🤖" label={t("Piloto automático")} date={autopilot.at} title={autopilot.kind === "rebalanced" ? t("Piloto automático rebalanceó tu bóveda") : t("Piloto automático activado")} onDismiss={() => dismiss(autopilot.id)}>
+        <p className="mt-2 text-sm text-muted-foreground">{autopilot.kind === "rebalanced" ? t("El precio salió de tu rango y la volvimos a centrar por ti, sin firmas y sin comisión. Ya vuelve a generar.") : t("Si el precio sale de tu rango, la volvemos a centrar por ti, sin firmas y sin comisión. Lo apagas cuando quieras en la tarjeta de tu bóveda.")}</p>
+        <Link to="/portfolio" onClick={onNavigate} className={ctaClass(false)}>{t("Ver mi bóveda")} →</Link>
+      </NoticeCard>}
       {refunded.map((a) => <NoticeCard key={a.id} tone="win" icon="↩️" label={t("Doble o Nada")} title={t("Orden reembolsada")} onDismiss={() => dismiss(a.id)}>
         {a.r.title && <p className="mt-2 text-xs text-muted-foreground">🎯 {assetOfTitle(a.r.title) ?? ""} · {roundWindowText(a.r.title, null)}</p>}
         <p className="mt-1 text-sm text-muted-foreground">{t("Tu jugada no entró a la ronda porque el precio cambió en ese instante. Te devolvimos ${v} completos; están listos en Mi Billetera.", { v: (Number(a.r.amountMicro) / 1e6).toFixed(2) })}</p>
@@ -108,7 +114,7 @@ export function NewsList({ onNavigate, predict = [], refunds = [], ranges = [] }
         <p className="mt-1 text-sm text-muted-foreground">{a.outcome === "won" ? t("Tu premio de ${v} está listo para reclamar.", { v: (Number(a.p.payoutMicro) / 1e6).toFixed(2) }) : t("La ronda terminó en tu contra. Invertiste ${v}.", { v: (Number(a.p.costMicro) / 1e6).toFixed(2) })}</p>
         {a.outcome === "won" && <Link to="/portfolio" onClick={onNavigate} className={ctaClass(true)}>🏆 {t("Reclamar premio")}</Link>}
       </NoticeCard>)}
-      {items.length === 0 && personal.length === 0 && refunded.length === 0 && ranges.length === 0 && <li className="rounded-2xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
+      {items.length === 0 && personal.length === 0 && refunded.length === 0 && ranges.length === 0 && !(autopilot && !dismissed.includes(autopilot.id)) && <li className="rounded-2xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
         <span aria-hidden className="mb-1 block text-2xl">🔔</span>
         {ANNOUNCEMENTS.length === 0 ? t("No hay novedades por ahora.") : t("No tienes notificaciones pendientes.")}
         {ANNOUNCEMENTS.length > 0 && <button type="button" onClick={() => setShowAll(true)} className="mt-2 block w-full text-xs font-medium text-primary">{t("Ver historial completo")}</button>}
@@ -118,6 +124,8 @@ export function NewsList({ onNavigate, predict = [], refunds = [], ranges = [] }
   </div>;
 }
 
+const AP_SEEN = "boveda:autopilot-notice-seen";
+
 export function NewsBell() {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -126,23 +134,28 @@ export function NewsBell() {
   const ranges = useRangeAlerts();
   const [seenRanges, setSeenRanges] = useState<string[]>([]);
   const rangeUnread = ranges.some((a) => !seenRanges.includes(a.id));
+  const ap = autopilotNotice(useAutopilot().status, Date.now());
+  const [apSeen, setApSeen] = useState<string | null>(null);
+  useEffect(() => { try { setApSeen(localStorage.getItem(AP_SEEN) ?? ""); } catch { setApSeen(""); } }, []);
+  const apUnread = !!ap && apSeen !== null && apSeen !== ap.id;
   useEffect(() => {
     try { setUnread(ANNOUNCEMENTS.length > 0 && localStorage.getItem(SEEN_KEY) !== latestAnnouncementId()); } catch { /* ignore */ }
   }, []);
   const show = () => {
     setOpen(true); setUnread(false); predict.markSeen(); setSeenRanges(ranges.map((a) => a.id));
+    if (ap) { setApSeen(ap.id); try { localStorage.setItem(AP_SEEN, ap.id); } catch { /* ignore */ } }
     try { localStorage.setItem(SEEN_KEY, latestAnnouncementId()); } catch { /* ignore */ }
   };
   return <>
     <button type="button" onClick={show} aria-label={t("Novedades")} className="relative grid h-10 w-10 place-items-center rounded-full border border-border bg-card">
       <Bell size={18} />
-      {(unread || predict.unread || rangeUnread) && <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />}
+      {(unread || predict.unread || rangeUnread || apUnread) && <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />}
     </button>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogTitle className="font-display">{t("Novedades")}</DialogTitle>
         <DialogDescription>{t("Nuevas bóvedas, mercados y cambios importantes.")}</DialogDescription>
-        <NewsList onNavigate={() => setOpen(false)} predict={predict.alerts} refunds={predict.refunds} ranges={ranges} />
+        <NewsList onNavigate={() => setOpen(false)} predict={predict.alerts} refunds={predict.refunds} ranges={ranges} autopilot={ap} />
         <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className="mt-2 block rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground">{t("Únete a nuestro canal de Telegram para enterarte primero")}</a>
       </DialogContent>
     </Dialog>

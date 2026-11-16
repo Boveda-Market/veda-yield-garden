@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRealWallet } from "@/hooks/use-real-wallet";
+import { isDlmmVault } from "@/lib/solana-data";
+import { shouldAutoEnableAutopilot } from "@/lib/autopilot";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bot, LoaderCircle, ShieldCheck, Timer, Zap } from "lucide-react";
@@ -19,6 +22,34 @@ export function useAutopilot() {
   const available = !!session.autopilot && !!wallet;
   const query = useQuery({ queryKey: ["autopilot", wallet], queryFn: () => read({ data: { wallet } }), enabled: available, staleTime: 60_000, retry: 1 });
   return { available, wallet, status: query.data ?? null, session };
+}
+
+/**
+ * Range vaults run on Autopilot by default: once a signed-in BÓVEDA wallet holds a range position and never recorded a
+ * choice, attach the rebalance-only permission and enable it (one try per session). Telegram and the bell then inform.
+ */
+export function AutopilotDefault() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  const { available, wallet, status, session } = useAutopilot();
+  const enable = useServerFn(enableAutopilot);
+  const real = useRealWallet(available ? wallet : null);
+  const hasRange = (real.data?.success ? real.data.data.positions : []).some((p) => isDlmmVault(p.vaultId) && !p.locked);
+  const tried = useRef(false);
+  useEffect(() => {
+    if (tried.current || !available || !status || !shouldAutoEnableAutopilot({ hasRangePosition: hasRange, enrolled: status.enrolled })) return;
+    const key = `boveda:autopilot-default:${wallet}`;
+    try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch { return; }
+    tried.current = true;
+    void (async () => {
+      try {
+        try { await session.autopilot!.grant(); } catch (e) { if (!/already|exist/i.test(e instanceof Error ? e.message : "")) return; }
+        queryClient.setQueryData(["autopilot", wallet], await enable({ data: { wallet, auto: true } }));
+        notify("success", t("Piloto automático activado"), t("Recentramos tus bóvedas de rango por ti"));
+      } catch { /* the manual switch and range alerts remain available */ }
+    })();
+  }, [available, status, hasRange, wallet, session, enable, queryClient, t]);
+  return null;
 }
 
 function ago(iso: string, t: ReturnType<typeof useT>) {

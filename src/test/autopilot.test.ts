@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { p256 } from "@noble/curves/nist.js";
-import { autopilotDecision, onlyAllowedPrograms, AUTOPILOT_PROGRAMS } from "@/lib/autopilot";
+import { autopilotDecision, autopilotNotice, onlyAllowedPrograms, shouldAutoEnableAutopilot, AUTOPILOT_PROGRAMS } from "@/lib/autopilot";
 import { authorizationSignature, autopilotPrivateKey, canonicalJson } from "@/lib/privy-signer";
 
 const now = Date.parse("2026-11-16T12:00:00Z");
@@ -37,5 +37,20 @@ describe("Privy request signing", () => {
     const sig = Uint8Array.from(atob(authorizationSignature(seed, url, body)), (c) => c.charCodeAt(0));
     const payload = new TextEncoder().encode(canonicalJson({ version: 1, method: "POST", url, body, headers: { "privy-app-id": "cmw6ftcf900ge0hl0jyw3rc75" } }));
     expect(p256.verify(sig, payload, p256.getPublicKey(autopilotPrivateKey(seed)), { format: "der" })).toBe(true);
+  });
+});
+
+describe("Autopilot default for range vaults", () => {
+  it("turns on by default for a range position with no recorded choice", () => expect(shouldAutoEnableAutopilot({ hasRangePosition: true, enrolled: false })).toBe(true));
+  it("never turns back on a wallet that already chose (including switching it off)", () => expect(shouldAutoEnableAutopilot({ hasRangePosition: true, enrolled: true })).toBe(false));
+  it("does nothing without a range position or before the status loads", () => {
+    expect(shouldAutoEnableAutopilot({ hasRangePosition: false, enrolled: false })).toBe(false);
+    expect(shouldAutoEnableAutopilot({ hasRangePosition: true, enrolled: null })).toBe(false);
+  });
+  it("bell tells the latest event: rebalance before activation, only within 7 days", () => {
+    expect(autopilotNotice({ enabled: true, enabledAt: ago(60), lastRebalanceAt: ago(5) }, now)?.kind).toBe("rebalanced");
+    expect(autopilotNotice({ enabled: true, enabledAt: ago(60), lastRebalanceAt: null }, now)?.kind).toBe("on");
+    expect(autopilotNotice({ enabled: true, enabledAt: ago(8 * 1440), lastRebalanceAt: null }, now)).toBeNull();
+    expect(autopilotNotice({ enabled: false, enabledAt: null, lastRebalanceAt: null }, now)).toBeNull();
   });
 });
