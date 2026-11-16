@@ -5,9 +5,9 @@ import { ChevronDown, Search, X } from "lucide-react";
 import { FEE_WALLET } from "@/lib/fees";
 
 type Cat = "predict" | "vaults" | "fees" | "wallet" | "affiliates";
-type GuideTo = "/guias/que-es-usdc" | "/guias/retirar-cash-app-bitcoin" | "/guias/invertir-sin-estafas";
+type GuideTo = "/guias/mercados-de-prediccion" | "/guias/que-es-usdc" | "/guias/retirar-cash-app-bitcoin" | "/guias/invertir-sin-estafas";
 type Q = { id: string; cat: Cat; question: string; answer: string; guide?: GuideTo };
-const GUIDES: Record<string, GuideTo> = { "wallet-usdc": "/guias/que-es-usdc", "withdraw-cashapp": "/guias/retirar-cash-app-bitcoin", "safety-why": "/guias/invertir-sin-estafas" };
+const GUIDES: Record<string, GuideTo> = { "predict-how": "/guias/mercados-de-prediccion", "wallet-usdc": "/guias/que-es-usdc", "withdraw-cashapp": "/guias/retirar-cash-app-bitcoin", "safety-why": "/guias/invertir-sin-estafas" };
 
 export const CATEGORIES: { id: Cat | "all"; label: string }[] = [
   { id: "all", label: "Todo" },

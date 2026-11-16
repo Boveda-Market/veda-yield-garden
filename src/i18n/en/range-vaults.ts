@@ -191,4 +191,5 @@ export const rangeVaults: Record<string, string> = {
   "Juega Doble o Nada con Bitcoin, Ethereum y Solana. Entrar es gratis y tus premios llegan en dólares a tu billetera.": "Play Double or Nothing with Bitcoin, Ethereum and Solana. Entering is free and your prizes land in dollars in your wallet.",
   "¿Sube o baja? La jugada de 300 segundos donde tu instinto vale oro.": "Up or down? The 300-second play where your instinct is worth gold.",
   "Predice el movimiento del mercado en vivo. Si aciertas la tendencia, cobras dólares limpios y puedes retirar en cualquier momento.": "Predict the live market move. Call the trend and you collect clean dollars, withdrawable anytime.",
+  "¿Cómo funciona? Lee la guía": "How does it work? Read the guide",
 };

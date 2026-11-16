@@ -126,7 +126,7 @@ function Landing() {
       </section>
 
       <section aria-label={t("Doble o Nada")} className="mb-4 grid items-center gap-6 py-8 md:grid-cols-2">
-        <div className="text-center md:text-left"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} loading="lazy" className="mx-auto h-16 w-auto md:mx-0 sm:h-20" /><p className="mt-1 text-xs font-bold uppercase tracking-widest text-primary">{t("Rondas relámpago")}</p><h2 className="mt-2 font-display text-3xl font-bold">{t("Haz dinero en minutos prediciendo el mercado.")}</h2><p className="mt-3 text-muted-foreground">{t("Bitcoin, Ethereum y Solana en rondas relámpago, sin comprar la moneda: juegas en dólares. Si aciertas el movimiento, cobras el premio al instante.")}</p></div>
+        <div className="text-center md:text-left"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} loading="lazy" className="mx-auto h-16 w-auto md:mx-0 sm:h-20" /><p className="mt-1 text-xs font-bold uppercase tracking-widest text-primary">{t("Rondas relámpago")}</p><h2 className="mt-2 font-display text-3xl font-bold">{t("Haz dinero en minutos prediciendo el mercado.")}</h2><p className="mt-3 text-muted-foreground">{t("Bitcoin, Ethereum y Solana en rondas relámpago, sin comprar la moneda: juegas en dólares. Si aciertas el movimiento, cobras el premio al instante.")}</p><Link to="/guias/mercados-de-prediccion" className="mt-3 inline-block text-sm font-semibold text-primary underline underline-offset-4">{t("¿Cómo funciona? Lee la guía")} →</Link></div>
         <PredictPromo />
       </section>
       <section id="opiniones" className="scroll-mt-4 py-12">

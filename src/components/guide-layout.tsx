@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { BackButton } from "@/components/back-button";
 
 export const GUIDES = [
+  { to: "/guias/mercados-de-prediccion", title: "Mercados de predicción: qué son y cómo jugar Sube o Baja" },
   { to: "/guias/bovedas-alto-rendimiento", title: "Guía completa de bóvedas de alto rendimiento (como la Bóveda GTA6)" },
   { to: "/guias/recargar-con-coinbase", title: "Cómo recargar dólares con Coinbase en BÓVEDA" },
   { to: "/guias/que-es-usdc", title: "¿Qué es USDC y cómo comprarlo con tarjeta?" },

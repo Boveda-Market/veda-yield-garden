@@ -29,6 +29,7 @@ import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as GuiasIndexRouteImport } from './routes/guias/index'
 import { Route as GuiasBovedasAltoRendimientoRouteImport } from './routes/guias/bovedas-alto-rendimiento'
 import { Route as GuiasInvertirSinEstafasRouteImport } from './routes/guias/invertir-sin-estafas'
+import { Route as GuiasMercadosDePrediccionRouteImport } from './routes/guias/mercados-de-prediccion'
 import { Route as GuiasQueEsUsdcRouteImport } from './routes/guias/que-es-usdc'
 import { Route as GuiasRecargarConCoinbaseRouteImport } from './routes/guias/recargar-con-coinbase'
 import { Route as GuiasRetirarCashAppBitcoinRouteImport } from './routes/guias/retirar-cash-app-bitcoin'
@@ -139,6 +140,12 @@ const GuiasInvertirSinEstafasRoute = GuiasInvertirSinEstafasRouteImport.update({
   path: '/guias/invertir-sin-estafas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuiasMercadosDePrediccionRoute =
+  GuiasMercadosDePrediccionRouteImport.update({
+    id: '/guias/mercados-de-prediccion',
+    path: '/guias/mercados-de-prediccion',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuiasQueEsUsdcRoute = GuiasQueEsUsdcRouteImport.update({
   id: '/guias/que-es-usdc',
   path: '/guias/que-es-usdc',
@@ -205,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/wallet': typeof WalletRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
+  '/guias/mercados-de-prediccion': typeof GuiasMercadosDePrediccionRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
@@ -235,6 +243,7 @@ export interface FileRoutesByTo {
   '/wallet': typeof WalletRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
+  '/guias/mercados-de-prediccion': typeof GuiasMercadosDePrediccionRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
@@ -266,6 +275,7 @@ export interface FileRoutesById {
   '/wallet': typeof WalletRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
+  '/guias/mercados-de-prediccion': typeof GuiasMercadosDePrediccionRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
@@ -298,6 +308,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/invertir-sin-estafas'
+    | '/guias/mercados-de-prediccion'
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/invertir-sin-estafas'
+    | '/guias/mercados-de-prediccion'
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
@@ -358,6 +370,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/invertir-sin-estafas'
+    | '/guias/mercados-de-prediccion'
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
@@ -389,6 +402,7 @@ export interface RootRouteChildren {
   WalletRoute: typeof WalletRoute
   GuiasBovedasAltoRendimientoRoute: typeof GuiasBovedasAltoRendimientoRoute
   GuiasInvertirSinEstafasRoute: typeof GuiasInvertirSinEstafasRoute
+  GuiasMercadosDePrediccionRoute: typeof GuiasMercadosDePrediccionRoute
   GuiasQueEsUsdcRoute: typeof GuiasQueEsUsdcRoute
   GuiasRecargarConCoinbaseRoute: typeof GuiasRecargarConCoinbaseRoute
   GuiasRetirarCashAppBitcoinRoute: typeof GuiasRetirarCashAppBitcoinRoute
@@ -542,6 +556,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuiasInvertirSinEstafasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guias/mercados-de-prediccion': {
+      id: '/guias/mercados-de-prediccion'
+      path: '/guias/mercados-de-prediccion'
+      fullPath: '/guias/mercados-de-prediccion'
+      preLoaderRoute: typeof GuiasMercadosDePrediccionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guias/que-es-usdc': {
       id: '/guias/que-es-usdc'
       path: '/guias/que-es-usdc'
@@ -621,6 +642,7 @@ const rootRouteChildren: RootRouteChildren = {
   WalletRoute: WalletRoute,
   GuiasBovedasAltoRendimientoRoute: GuiasBovedasAltoRendimientoRoute,
   GuiasInvertirSinEstafasRoute: GuiasInvertirSinEstafasRoute,
+  GuiasMercadosDePrediccionRoute: GuiasMercadosDePrediccionRoute,
   GuiasQueEsUsdcRoute: GuiasQueEsUsdcRoute,
   GuiasRecargarConCoinbaseRoute: GuiasRecargarConCoinbaseRoute,
   GuiasRetirarCashAppBitcoinRoute: GuiasRetirarCashAppBitcoinRoute,
