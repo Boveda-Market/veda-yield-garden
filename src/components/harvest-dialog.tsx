@@ -35,7 +35,17 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
   const [finished, setFinished] = useState(false);
   const [extraUsd, setExtraUsd] = useState(0);
   const [sweepNote, setSweepNote] = useState<string | null>(null);
+  const [otherUsd, setOtherUsd] = useState<number | null>(null);
   const input = { wallet, position, vaultId };
+  // Value the other coin in dollars so the review shows the full harvest, matching the portfolio card.
+  useEffect(() => {
+    const raw = result?.tokenRaw ? BigInt(result.tokenRaw) : 0n, sym = result?.tokenSymbol;
+    if (!result?.success || raw <= 0n || !sym) { setOtherUsd(null); return; }
+    let live = true;
+    void import("@/lib/wallet-actions").then(({ quoteSwap }) => quoteSwap(sym, "USDC", raw, { feeUsdc: 0n })).then((q) => { if (live) setOtherUsd(Number(q.outAmount) / 1e6); }).catch(() => { if (live) setOtherUsd(null); });
+    return () => { live = false; };
+  }, [result?.success, result?.tokenRaw, result?.tokenSymbol]);
+  const totalNet = result?.net ? (Number(result.net) + (otherUsd ?? 0)).toFixed(2) : "—";
   const canSign = session.authenticated && session.walletAddress === wallet;
   async function run() {
     if (pending) return;
@@ -88,11 +98,11 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
     {result && <div role="status" className="grid gap-3 text-sm">
       {!result.success && <><p className="font-semibold">{t("Cosecha no disponible")}</p><p className="leading-6 text-muted-foreground">{result.message}</p></>}
       {result.gross && <>
-        <ReceiveCard label={compound ? t("Reinviertes") : t("Recibes")} amount={result.net ?? "—"} unit="$" sub={compound ? t("+ ganancias en {s}", { s: result.tokenSymbol ?? "" }) : t("+ la otra parte, convertida a dólares")} />
+        <ReceiveCard label={compound ? t("Reinviertes") : t("Recibes")} amount={totalNet} unit="$" sub={otherUsd !== null ? t("Total en dólares, ya con todo convertido") : result.tokenRaw && BigInt(result.tokenRaw) > 0n ? t("+ la otra parte, convertida a dólares") : undefined} />
         <DetailsToggle><dl className="grid gap-2 rounded-xl border border-border p-4">
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en dólares")}</dt><dd>${result.gross}</dd></div>
           <div className="flex justify-between gap-3"><dt><ServiceFeeLabel t={t} /></dt><dd>−${result.fee}</dd></div>
-          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en")} {result.tokenSymbol}</dt><dd>{result.tokenAmount} · {t("sin comisión")}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en")} {result.tokenSymbol}</dt><dd>{otherUsd !== null ? `≈ $${otherUsd.toFixed(2)}` : result.tokenAmount}</dd></div>
         </dl></DetailsToggle>
       </>}
     </div>}

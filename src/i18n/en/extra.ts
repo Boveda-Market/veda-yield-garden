@@ -1112,6 +1112,7 @@ export const extra: Record<string, string> = {
   "Sugerencias de migración desactivadas.": "Move suggestions turned off.",
   "Otra cantidad": "Other amount",
   "Toca para cambiar": "Tap to change",
+  "Total en dólares, ya con todo convertido": "Total in dollars, everything converted",
   "Duelo": "Duel",
   "Cargando precio en vivo…": "Loading live price…",
   "La línea que va arriba es la que va ganando: verde para Sube, roja para Baja. La línea amarilla marca el precio a batir.": "The line on top is winning: green for Up, red for Down. The yellow line marks the price to beat.",
