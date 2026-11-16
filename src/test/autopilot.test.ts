@@ -13,13 +13,10 @@ describe("Autopilot rules", () => {
     expect(autopilotDecision(row(), ago(4), now)).toBe("waiting");
     expect(autopilotDecision(row(), ago(5), now)).toBe("due");
   });
-  it("rebalances at most once every 12 hours", () => {
-    expect(autopilotDecision(row({ last_rebalance_at: ago(11 * 60) }), ago(30), now)).toBe("cooldown");
-    expect(autopilotDecision(row({ last_rebalance_at: ago(12 * 60) }), ago(30), now)).toBe("due");
-  });
-  it("retries a failed attempt only after 30 minutes", () => {
-    expect(autopilotDecision(row({ last_attempt_at: ago(29) }), ago(60), now)).toBe("retry");
-    expect(autopilotDecision(row({ last_attempt_at: ago(30) }), ago(60), now)).toBe("due");
+  it("has no cooldown after a rebalance and retries a failed attempt after 5 minutes", () => {
+    expect(autopilotDecision(row({ last_rebalance_at: ago(10) }), ago(30), now)).toBe("due");
+    expect(autopilotDecision(row({ last_attempt_at: ago(4) }), ago(30), now)).toBe("retry");
+    expect(autopilotDecision(row({ last_attempt_at: ago(5) }), ago(30), now)).toBe("due");
   });
   it("refuses any transaction that calls a program outside the rebalance allowlist", () => {
     expect(onlyAllowedPrograms(["ComputeBudget111111111111111111111111111111", "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo"], AUTOPILOT_PROGRAMS)).toBe(true);

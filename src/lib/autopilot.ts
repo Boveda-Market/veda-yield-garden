@@ -17,10 +17,8 @@ export const AUTOPILOT_FEE_ATA = "DXbXVtrEEyJ7zuanJNzyyj1D3PQBsUm65hdQ3DHiarQW";
 
 /** Autopilot waits this long out of range before re-centring (the manual 10-min alert stays the fallback). */
 export const AUTOPILOT_WAIT_MS = 5 * 60_000;
-/** At most one automatic rebalance per wallet in this window, so a choppy market cannot grind the balance down. */
-export const AUTOPILOT_COOLDOWN_MS = 12 * 3600_000;
 /** A failed attempt (price impact, low reserve, network) is retried after this pause. */
-export const AUTOPILOT_RETRY_MS = 30 * 60_000;
+export const AUTOPILOT_RETRY_MS = 5 * 60_000;
 /** Stricter in-pool swap impact than the manual rebalance; above it Autopilot waits and the user is alerted instead. */
 export const AUTOPILOT_MAX_IMPACT_PCT = 1.5;
 /** Rebalances one cron pass may run, bounding work and RPC use. */
@@ -31,12 +29,10 @@ export type AutopilotRow = { enabled: boolean; last_attempt_at: string | null; l
 const ms = (v: string | null | undefined) => { const t = v ? Date.parse(v) : NaN; return Number.isFinite(t) ? t : null; };
 
 /** Why Autopilot should (or should not) re-centre a position on this pass. */
-export function autopilotDecision(row: AutopilotRow, outSince: string | null | undefined, now: number): "due" | "off" | "waiting" | "cooldown" | "retry" {
+export function autopilotDecision(row: AutopilotRow, outSince: string | null | undefined, now: number): "due" | "off" | "waiting" | "retry" {
   if (!row.enabled) return "off";
   const out = ms(outSince);
   if (out === null || now - out < AUTOPILOT_WAIT_MS) return "waiting";
-  const last = ms(row.last_rebalance_at);
-  if (last !== null && now - last < AUTOPILOT_COOLDOWN_MS) return "cooldown";
   const tried = ms(row.last_attempt_at);
   if (tried !== null && now - tried < AUTOPILOT_RETRY_MS) return "retry";
   return "due";

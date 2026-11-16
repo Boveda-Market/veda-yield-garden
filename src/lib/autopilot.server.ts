@@ -27,7 +27,7 @@ export async function hasAutopilotSigner(walletId: string, secret: string): Prom
 
 /**
  * One Autopilot pass (2-min status cron): for every enabled wallet, re-centre range positions that stayed out of range
- * past AUTOPILOT_WAIT_MS, at most once per cooldown. The transaction is the same simulated, owner-verified rebalance
+ * past AUTOPILOT_WAIT_MS (no cooldown; failures retry after AUTOPILOT_RETRY_MS). The transaction is the same simulated, owner-verified rebalance
  * the user would sign by hand; it is signed by the user's own Privy wallet through the delegated signer, whose Privy
  * policy only allows the rebalance programs. Anything unusual is skipped and the regular alert stays the fallback.
  */
@@ -91,7 +91,7 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
       opts.rows.delete(k);
       await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName(p.vaultId), quote.valueUsd, gains), { text: "👀 Ver mi posición", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
       done++;
-      break; // one rebalance per wallet per cooldown
+      break; // one rebalance per wallet per pass
     }
   }
   return done;
