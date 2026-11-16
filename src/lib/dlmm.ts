@@ -83,5 +83,7 @@ export type RebalanceResult = {
   usdcLeft?: string;
   tokenLeft?: string;
   swapped?: "token" | "usdc" | "none";
+  /** BÓVEDA fee (tiered, on the claimed USDC only), dollars. */
+  bovedaFeeUsdc?: string;
   prepared?: { transaction: string; expiresAt: number; lastValidBlockHeight: number; wallet: string; position: string };
 };

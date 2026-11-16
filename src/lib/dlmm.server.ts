@@ -4,7 +4,7 @@ import { ComputeBudgetProgram, Keypair, PublicKey, TransactionMessage, Versioned
 import { AccountLayout, TOKEN_PROGRAM_ID, createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, getAccount, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { loadDlmmSdk } from "@/lib/dlmm-sdk.server";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount, type ChainPoolConfig, type ChainPosition } from "@/lib/solana-data";
-import { FEE_WALLET } from "@/lib/fees";
+import { FEE_WALLET, harvestFee } from "@/lib/fees";
 import { compactDepositInstructions } from "@/lib/compact-deposit";
 import { computeBudgetIxs, computeLimit, MAX_COMPUTE_UNITS, networkFeeOf } from "@/lib/compute-budget";
 import { simulationAmounts, simulationDisplay, type SimulationInput, type SimulationResult, type SimulationStage } from "@/lib/deposit-simulation";
@@ -435,7 +435,7 @@ export type { RebalanceResult } from "@/lib/dlmm";
 /**
  * One-signature 50/50 rebalance of an owner-verified range position: claim fees, remove all liquidity,
  * swap half the excess side inside the same pool, then re-centre the same position on the current price
- * with everything (capital + fees). 0% BÓVEDA fee; only the owner signs; the wallet never loses prior balances.
+ * with everything (capital + fees). Tiered harvest fee on the claimed USDC only (same tiers as harvest) goes to the fee ATA; only the owner signs; the wallet never loses prior balances.
  */
 export async function simulateDlmmRebalance(connection: Connection, input: WithdrawalInput, options: { prepare?: boolean; maxImpactPct?: number } = {}): Promise<RebalanceResult> {
   const startedAt = Date.now();
@@ -455,12 +455,17 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     const data = owned.lb.positionData;
     const active = pool.lbPair.activeId;
     if (active >= data.lowerBinId && active <= data.upperBinId) return fail("Tu posición está dentro del rango y ya genera ganancias; no necesita rebalanceo.");
-    const x = rawFloor(data.totalXAmount) + BigInt(data.feeX.toString()), y = rawFloor(data.totalYAmount) + BigInt(data.feeY.toString());
-    if (x === 0n && y === 0n) return fail("Esta posición no tiene saldo para rebalancear.");
+    const xAll = rawFloor(data.totalXAmount) + BigInt(data.feeX.toString()), yAll = rawFloor(data.totalYAmount) + BigInt(data.feeY.toString());
+    if (xAll === 0n && yAll === 0n) return fail("Esta posición no tiene saldo para rebalancear.");
     const price = Number(sdk.getPriceOfBinByBinId(active, pool.lbPair.binStep).toString());
     const usdcAta = getAssociatedTokenAddressSync(usdc, owner), tokenX = getAssociatedTokenAddressSync(mintX, owner);
-    const addresses = [usdcAta, tokenX, position, owner];
+    const feeAta = getAssociatedTokenAddressSync(usdc, new PublicKey(FEE_WALLET));
+    const addresses = [usdcAta, tokenX, position, owner, feeAta];
     const before = await connection.getMultipleAccountsInfo(addresses);
+    // Tiered harvest fee on the claimed USDC (tier by position value); skipped if the treasury USDC account is missing.
+    const positionUnits = BigInt(Math.floor(Number(xAll) * price)) + yAll;
+    const bovedaFee = before[4] ? harvestFee(BigInt(data.feeY.toString()), positionUnits) : 0n;
+    const x = xAll, y = yAll - bovedaFee;
     const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), xBefore = tokenBalance(asSim(before[1]), mintX, owner);
     if (await connection.getBalance(owner) < 10_000_000) return fail("Necesitas un poco más de reserva de operaciones para rebalancear.");
 
@@ -492,7 +497,8 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     if (plannedRebalance.binArrayCount > 0) return fail("El precio actual está en una zona sin liquidez preparada; rebalancear costaría una reserva extra no recuperable. Prueba más tarde.");
     const rebalance = await pool.rebalancePosition(plannedRebalance, new BN(3), owner, 1);
     if (rebalance.initBinArrayInstructions.length) return fail("El precio actual está en una zona sin liquidez preparada. Prueba más tarde.");
-    const instructions = stripBudget([...(claims[0]?.instructions ?? []), ...removals[0]!.instructions, ...swapIxs, ...rebalance.rebalancePositionInstruction]);
+    const feeIxs = bovedaFee > 0n ? [createTransferCheckedInstruction(usdcAta, usdc, feeAta, owner, bovedaFee, 6)] : [];
+    const instructions = stripBudget([...(claims[0]?.instructions ?? []), ...removals[0]!.instructions, ...feeIxs, ...swapIxs, ...rebalance.rebalancePositionInstruction]);
     const block = await connection.getLatestBlockhash();
     const simulate = async (units = MAX_COMPUTE_UNITS) => {
       const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...instructions]) }).compileToV0Message());
@@ -514,7 +520,8 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     }
     const solSpent = BigInt(before[3]?.lamports ?? 0) - BigInt(final.accounts[3]?.lamports ?? 0);
     const newAtaRent = [0, 1].reduce((sum, i) => sum + BigInt(before[i] ? 0 : final.accounts[i]?.lamports ?? 0), 0n);
-    const checks = { range: rangeOk, balances: usdcLeft >= 0n && tokenLeft >= 0n, budget: solSpent <= final.networkFee + newAtaRent + 2_000_000n };
+    const feeDelta = before[4] ? tokenBalance(final.accounts[4], usdc, new PublicKey(FEE_WALLET)) - tokenBalance(asSim(before[4]), usdc, new PublicKey(FEE_WALLET)) : 0n;
+    const checks = { range: rangeOk, fee: feeDelta === bovedaFee, balances: usdcLeft >= 0n && tokenLeft >= 0n, budget: solSpent <= final.networkFee + newAtaRent + 2_000_000n };
     const success = Object.values(checks).every(Boolean);
     if (!success) { log("rebalance", "checks", JSON.stringify({ ...checks, solSpent: solSpent.toString() })); return fail("El rebalanceo no superó todas las comprobaciones. No se pidió ninguna firma."); }
     if (options.prepare && Date.now() - startedAt > 45_000) return fail("La preparación tardó demasiado. Repite la revisión.");
@@ -524,7 +531,8 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
       feesUsdc: tokenAmount(data.feeY.toString(), 6), feesToken: tokenAmount(data.feeX.toString(), config.decimals),
       usdcLeft: tokenAmount(usdcLeft.toString(), 6), tokenLeft: tokenAmount(tokenLeft.toString(), config.decimals),
       swapped: plan.amountIn === 0n ? "none" : plan.swapForY ? "token" : "usdc",
-      message: "Rebalanceo verificado en simulación: tus ganancias se suman y tu posición vuelve a quedar centrada en el precio actual. Comisión 0%. Solo tu wallet puede firmar.",
+      bovedaFeeUsdc: tokenAmount(bovedaFee.toString(), 6),
+      message: "Rebalanceo verificado en simulación: tus ganancias se suman y tu posición vuelve a quedar centrada en el precio actual. Solo tu wallet puede firmar.",
       ...(options.prepare ? { prepared: { transaction: Buffer.from(final.tx.serialize()).toString("base64"), expiresAt: startedAt + 45_000, lastValidBlockHeight: block.lastValidBlockHeight, wallet: input.wallet, position: input.position } } : {}),
     };
   } catch (error) {

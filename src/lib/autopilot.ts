@@ -10,7 +10,10 @@ export const AUTOPILOT_PROGRAMS = [
   "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
   "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
   "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+  "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
 ] as const;
+/** Treasury USDC account: the only destination a top-level token transfer in an Autopilot rebalance may use (the fee). */
+export const AUTOPILOT_FEE_ATA = "DXbXVtrEEyJ7zuanJNzyyj1D3PQBsUm65hdQ3DHiarQW";
 
 /** Autopilot waits this long out of range before re-centring (the manual 10-min alert stays the fallback). */
 export const AUTOPILOT_WAIT_MS = 5 * 60_000;
@@ -48,7 +51,7 @@ export function onlyAllowedPrograms(programIds: readonly string[], allowed: read
 export function autopilotDoneText(vaultName: string, valueUsd: string | undefined) {
   return tgCard("🤖", `Piloto automático rebalanceó tu ${vaultName}`, [
     `🎯 El precio salió de tu rango y la volvimos a centrar${valueUsd ? ` (≈ $${valueUsd})` : ""}.`,
-    "💰 Tus ganancias pendientes se sumaron a la posición. Sin comisión de BÓVEDA.",
+    "💰 Tus ganancias pendientes se sumaron a la posición.",
     "✅ Ya vuelve a generar. Puedes apagar el piloto cuando quieras en Mi Billetera.",
   ]);
 }
@@ -70,7 +73,7 @@ export function autopilotNotice(s: { enabled: boolean; enabledAt: string | null;
 export function autopilotOnText(auto: boolean) {
   return tgCard("🤖", "Piloto automático activado", [
     auto ? "✨ Tus bóvedas de rango (como GTA6) ya vienen con piloto automático." : "✨ Activaste el piloto automático en tus bóvedas de rango.",
-    "🎯 Si el precio sale de tu rango, la volvemos a centrar por ti, sin firmas y sin comisión.",
+    "🎯 Si el precio sale de tu rango, la volvemos a centrar por ti, sin firmas.",
     "🔒 Solo puede rebalancear: nunca retira ni envía tu dinero. Lo apagas cuando quieras en la tarjeta de tu bóveda.",
   ]);
 }

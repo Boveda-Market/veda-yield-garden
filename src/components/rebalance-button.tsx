@@ -53,7 +53,7 @@ export function RangeUrgentBanner({ positions, openFor }: { positions: ChainPosi
       </div>
       {autopilotOn && <p className="mt-3 rounded-lg bg-primary/10 p-2 text-center text-xs font-medium text-primary">🤖 {t("Tu piloto automático la recentrará en unos minutos. Si prefieres, hazlo ya:")}</p>}
       <RebalanceButton position={p} size="lg" className="mt-3 w-full font-bold" autoOpen={openFor === p.address} label={t("Rebalancear ahora")} />
-      <p className="mt-2 text-center text-xs text-muted-foreground">{t("Un toque y una firma · sin comisión")}</p>
+      <p className="mt-2 text-center text-xs text-muted-foreground">{t("Un toque y una firma")}</p>
     </section>;
   })}</div>;
 }
@@ -126,6 +126,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
       {quote?.success && !pending && <DetailsToggle><dl className="grid gap-2 rounded-xl border border-border p-4 text-sm">
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Se recoloca")}</dt><dd className="font-semibold">≈ ${quote.valueUsd}</dd></div>
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias que se suman")}</dt><dd>${quote.feesUsdc} + {quote.feesToken} {symbol}</dd></div>
+        {quote.bovedaFeeUsdc && Number(quote.bovedaFeeUsdc) > 0 && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión")}</dt><dd>−${quote.bovedaFeeUsdc}</dd></div>}
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Nuevo reparto")}</dt><dd>{t("Mitad {s} · mitad dólares", { s: symbol })}</dd></div>
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Pequeño sobrante a tu billetera")}</dt><dd>${quote.usdcLeft} · {quote.tokenLeft} {symbol}</dd></div>
       </dl><p className="text-xs leading-5 text-muted-foreground">{t("Tu posición salió del rango y no está generando. Con un toque cosechamos tus ganancias, dejamos mitad y mitad al precio actual y la volvemos a centrar.")} {t("Para dejar mitad y mitad se cambia una parte dentro de la misma bóveda, con un límite de precio para protegerte. Es una sola firma.")}</p></DetailsToggle>}

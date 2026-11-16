@@ -1,7 +1,7 @@
 import type { Connection } from "@solana/web3.js";
 import type { MonitorRow } from "@/lib/status-monitor";
 import { AUTOPILOT_POLICY_ID, AUTOPILOT_PROGRAMS, AUTOPILOT_SIGNER_ID, PRIVY_APP_ID, privyWalletRpc } from "@/lib/privy-signer";
-import { AUTOPILOT_MAX_IMPACT_PCT, AUTOPILOT_MAX_PER_RUN, autopilotDecision, autopilotDoneText, onlyAllowedPrograms, type AutopilotRow } from "@/lib/autopilot";
+import { AUTOPILOT_FEE_ATA, AUTOPILOT_MAX_IMPACT_PCT, AUTOPILOT_MAX_PER_RUN, autopilotDecision, autopilotDoneText, onlyAllowedPrograms, type AutopilotRow } from "@/lib/autopilot";
 
 type Db = { from: (t: string) => any };
 type Enrollment = AutopilotRow & { wallet: string; privy_user_id: string; wallet_id: string };
@@ -63,7 +63,10 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
       const tx = VersionedTransaction.deserialize(Buffer.from(quote.prepared.transaction, "base64"));
       const keys = tx.message.staticAccountKeys.map((k) => k.toBase58());
       const programs = [...new Set(tx.message.compiledInstructions.map((ix) => keys[ix.programIdIndex] ?? ""))];
-      if (keys[0] !== e.wallet || tx.message.addressTableLookups.length || !onlyAllowedPrograms(programs, AUTOPILOT_PROGRAMS)) { await save(e.wallet, { last_result: "Operación fuera de lo permitido; no se firmó." }); continue; }
+      // Top-level token instructions may only be the fee: TransferChecked (opcode 12) into the treasury USDC account.
+      const tokenIxs = tx.message.compiledInstructions.filter((ix) => keys[ix.programIdIndex] === "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+      const feeOnly = tokenIxs.length <= 1 && tokenIxs.every((ix) => ix.data[0] === 12 && keys[ix.accountKeyIndexes[2] ?? -1] === AUTOPILOT_FEE_ATA);
+      if (keys[0] !== e.wallet || tx.message.addressTableLookups.length || !feeOnly || !onlyAllowedPrograms(programs, AUTOPILOT_PROGRAMS)) { await save(e.wallet, { last_result: "Operación fuera de lo permitido; no se firmó." }); continue; }
       let signed: string;
       try {
         const out = await privyWalletRpc(e.wallet_id, { method: "signTransaction", chain_type: "solana", params: { transaction: quote.prepared.transaction, encoding: "base64" } }, { appSecret, seed });

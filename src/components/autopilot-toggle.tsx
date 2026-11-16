@@ -106,7 +106,7 @@ export function AutopilotToggle({ className }: { className?: string }) {
       <DialogTitle className="flex items-center gap-2"><Bot size={20} className="text-primary" aria-hidden />{t("Activa el piloto automático")}</DialogTitle>
       <DialogDescription>{t("Olvídate de rebalancear: si el precio sale de tu rango, la volvemos a centrar por ti para que siga generando.")}</DialogDescription>
       <ul className="grid gap-3 text-sm">
-        <li className="flex gap-3"><Zap size={18} className="mt-0.5 shrink-0 text-primary" aria-hidden /><span>{t("Si pasa más de 5 minutos fuera de rango, la recentramos sola. Sin firmas y sin comisión.")}</span></li>
+        <li className="flex gap-3"><Zap size={18} className="mt-0.5 shrink-0 text-primary" aria-hidden /><span>{t("Si pasa más de 5 minutos fuera de rango, la recentramos sola. Sin firmas.")}</span></li>
         <li className="flex gap-3"><Timer size={18} className="mt-0.5 shrink-0 text-primary" aria-hidden /><span>{t("Máximo una vez cada 12 horas y solo con el precio estable. Si no, te avisamos para que decidas tú.")}</span></li>
         <li className="flex gap-3"><ShieldCheck size={18} className="mt-0.5 shrink-0 text-primary" aria-hidden /><span>{t("El permiso solo sirve para rebalancear: no puede retirar ni enviar tu dinero. Lo apagas cuando quieras.")}</span></li>
       </ul>

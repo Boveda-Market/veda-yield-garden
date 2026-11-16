@@ -24,7 +24,7 @@ describe("Autopilot rules", () => {
   it("refuses any transaction that calls a program outside the rebalance allowlist", () => {
     expect(onlyAllowedPrograms(["ComputeBudget111111111111111111111111111111", "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo"], AUTOPILOT_PROGRAMS)).toBe(true);
     expect(onlyAllowedPrograms(["LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo", "11111111111111111111111111111111"], AUTOPILOT_PROGRAMS)).toBe(false);
-    expect(onlyAllowedPrograms(["TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"], AUTOPILOT_PROGRAMS)).toBe(false);
+    expect(onlyAllowedPrograms(["TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"], AUTOPILOT_PROGRAMS)).toBe(false);
     expect(onlyAllowedPrograms([], AUTOPILOT_PROGRAMS)).toBe(false);
   });
 });
