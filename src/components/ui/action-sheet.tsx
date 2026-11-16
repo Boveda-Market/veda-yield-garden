@@ -2,6 +2,7 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BackToClose } from "@/lib/back-close";
 
 /**
  * Action sheet (Robinhood / Cash App style): on phones it slides up from the bottom with a grab
@@ -39,6 +40,7 @@ export const ActionSheetContent = React.forwardRef<
         <span className="h-1.5 w-10 rounded-full bg-muted-foreground/30" />
       </div>
       {children}
+      <BackToClose closeRef={closeRef} />
       <DialogPrimitive.Close ref={closeRef} className="absolute right-4 top-4 grid size-8 place-items-center rounded-full bg-muted text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring sm:top-5">
         <X className="size-4" />
         <span className="sr-only">{closeLabel}</span>
