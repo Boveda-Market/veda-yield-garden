@@ -8,7 +8,6 @@ import { isReturning, markReturning, useHomePath } from "@/lib/preferences";
 import { isHeroReview } from "@/lib/hero-variants";
 import { Button } from "./ui/button";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
-import { SafetyNotice } from "./safety-notice";
 import { CoinbaseNote } from "./coinbase-note";
 import { GoogleButton } from "./google-button";
 const PrivyAccess = lazyWithReload(() => import("./privy-access"));
@@ -24,12 +23,12 @@ function EntryButtons() {
   useEffect(() => {
     if (!session.ready || !session.authenticated) return;
     markReturning();
-    // Returning users already saw the safety notice: go straight to their home screen.
+    // Returning users go straight to their home screen.
     if (wasReturning.current) void navigate({ to: home, replace: true });
   }, [session.ready, session.authenticated, home, navigate]);
   if (session.ready && session.authenticated && wasReturning.current) return <p role="status" className="mt-8 text-sm text-muted-foreground">{t("Abriendo tu cuenta…")}</p>;
   if (session.ready && session.authenticated && isHeroReview()) return <div className="mt-8 w-full max-w-sm"><Button asChild className="h-12 w-full"><Link to={home}>{t("Continuar al app")}<ArrowRight size={16} /></Link></Button></div>;
-  if (session.ready && session.authenticated) return <div role="dialog" aria-modal="true" aria-label={t("Protégete de estafas")} className="fixed inset-0 z-50 grid place-items-center bg-background/80 p-4 backdrop-blur-sm animate-in fade-in duration-200"><div className="w-full max-w-md rounded-xl bg-card shadow-lg"><SafetyNotice className="border-0" /><div className="px-4 pb-4"><Button asChild className="h-12 w-full"><Link to={home}>{t("Continuar al app")}<ArrowRight size={16} /></Link></Button></div></div></div>;
+  if (session.ready && session.authenticated) return <div className="mt-8 w-full max-w-sm"><Button asChild className="h-12 w-full"><Link to={home}>{t("Continuar al app")}<ArrowRight size={16} /></Link></Button></div>;
   return <div className="mt-8 w-full max-w-sm space-y-3">
     <div role="tablist" className="mb-4 grid grid-cols-2 rounded-xl bg-secondary p-1 text-sm font-medium">
       <button role="tab" aria-selected={!signup} onClick={() => setSignup(false)} className={`rounded-lg py-2 ${!signup ? "bg-background shadow-sm" : "text-muted-foreground"}`}>{t("Iniciar sesión")}</button>

@@ -1373,4 +1373,12 @@ export const extra: Record<string, string> = {
   "Piloto automático apagado para todos: nadie se rebalancea solo hasta que lo enciendas.": "Autopilot off for everyone: no position re-centres by itself until you turn it on.",
   "Piloto automático (todos los usuarios)": "Autopilot (all users)",
   "Recentra solas las bóvedas de rango (como GTA6) que salen de rango. Viene incluido en todas las posiciones; los usuarios solo reciben aviso cuando rebalancea. Apágalo para detenerlo en todos.": "Automatically re-centres range vaults (like GTA6) that leave their range. Included in every position; users are only notified when it rebalances. Turn it off to stop it for everyone.",
+  "Cero redes sociales:": "Zero social media:",
+  "BÓVEDA no tiene cuentas en Instagram, X, TikTok, Facebook ni Discord.": "BÓVEDA has no accounts on Instagram, X, TikTok, Facebook or Discord.",
+  "Únicos canales oficiales:": "Only official channels:",
+  "Nadie del equipo te escribirá primero.": "No one from the team will ever message you first.",
+  "Jamás te pediremos dinero, claves, códigos ni frases de recuperación. Si alguien te contacta diciendo ser de BÓVEDA, es una estafa.": "We will never ask for money, keys, codes or recovery phrases. If someone contacts you claiming to be BÓVEDA, it’s a scam.",
+  "Aviso oficial de seguridad": "Official safety notice",
+  "Protege tus fondos de imitadores y estafadores.": "Protect your funds from impersonators and scammers.",
+  "Entendido, entrar a BÓVEDA": "Got it, enter BÓVEDA",
 };

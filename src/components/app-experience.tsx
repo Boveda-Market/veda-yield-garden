@@ -1,5 +1,4 @@
 import { LoginNudge } from "./login-nudge";
-import { DevNoteWelcome } from "@/components/dev-note";
 import { LoginAlert } from "@/components/login-alert";
 import { Dismissible } from "@/components/dismissible";
 import { PoweredBy } from "@/components/powered-by";
@@ -23,9 +22,8 @@ import { OpenPositionsMini } from "@/components/open-positions-mini";
 import { canUseTrial, type AppMode } from "@/lib/app-mode";
 import { AccountSettings } from "@/components/account-settings";
 import { AffiliatePanel } from "./affiliate-panel";
-import { SUPPORT_URL } from "./safety-notice";
+import { SUPPORT_URL, SafetyWelcome } from "./safety-notice";
 import { StayUpdated } from "./stay-updated";
-import { LaunchBanner } from "./launch-banner";
 import { NotificationsCenter } from "./notifications-center";
 import { AccountSecuritySettings } from "./account-security";
 import { WalletPanel } from "./wallet-panel";
@@ -152,12 +150,12 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
 
       <main className="mx-auto max-w-5xl px-5 pb-28">
         {guest && <p className="mb-4 text-xs text-muted-foreground"><strong className="text-foreground">{t("Invitado · Prueba")}</strong> {t("· Sin dinero real")}</p>}
-        {user && !guest && <LaunchBanner />}
+        {user && !guest && <SafetyWelcome />}
         {!guest && ["account","security","notifications","activity","invite"].includes(activeView) && <BackButton inApp className="mb-2" />}
         {session.error && <LoginAlert className="mb-4" message={session.error} onDismiss={() => session.clearError?.()} />}
 
         {session.tradeBlock && <section role="note" className="mb-4 rounded-2xl border border-primary/40 bg-primary/5 p-4 text-sm"><p className="font-semibold">{session.tradeBlock === "treasury" ? t("Modo operador activo") : t("Modo solo consulta")}</p><p className="mt-1 text-muted-foreground">{session.tradeBlock === "treasury" ? t("La wallet de tesorería no puede depositar, predecir ni retirar en BÓVEDA. Tu panel de control está en Invita y gana → Tesorería.") : t("Con una wallet externa puedes ver la app, pero no operar. Para operar, entra con Google, email o passkey y usa tu billetera protegida de BÓVEDA.")}</p>{session.tradeBlock === "external" && <Button className="mt-3" size="sm" onClick={async () => { await session.logout(); session.login("google"); }}>{t("Entrar con Google")}</Button>}</section>}
-        {activeView === "markets" ? <><MarketsPanel identity={identity ?? "anon"} />{!identity && <LoginNudge />}</> : activeView === "wallet" ? <><DevNoteWelcome /><WalletPanel /><div className="mt-10 border-t border-border"><ActivityView trial={false} wallet={session.walletAddress} rows={[]} heading="Actividad del wallet" level={2} /></div></> : activeView === "invite" ? <div className="mx-auto max-w-3xl"><AffiliatePanel />{session.walletAddress === AFFILIATE_PAYOUT_WALLET && <Link to="/admin" className="mt-6 flex items-center justify-center gap-2 rounded-2xl border border-primary/40 bg-primary/10 p-4 font-semibold text-primary"><ShieldCheck size={18} />{t("Abrir Panel de Control")}</Link>}</div> : activeView === "admin" ? <AdminDashboard /> : activeView === "account" ? <AccountSettings /> : activeView === "notifications" ? <div className="mx-auto max-w-3xl py-8"><h1 className="mb-6 font-display text-3xl font-semibold">{t("Notificaciones")}</h1><NotificationsCenter /></div> : activeView === "security" ? <div className="mx-auto max-w-3xl space-y-6 py-8"><h1 className="font-display text-3xl font-semibold">{t("Seguridad")}</h1><div className="rounded-2xl border border-border bg-card p-6 [&>section]:mt-0 [&>section]:border-t-0 [&>section]:pt-0"><AccountSecuritySettings /></div></div> : activeView === "activity" ? <><ActivityView trial={mode === "trial"} wallet={session.walletAddress} rows={activities} /></> : mode === "real" && !guest ? <>{activeView === "portfolio" && <PendingClaims />}<RealOverview portfolioOnly={activeView === "portfolio"} walletAddress={session.walletAddress} onDetails={setDetailsFor} />{activeView === "vaults" && <div className="mt-6"><StayUpdated dismissible /></div>}</> : user ? (
+        {activeView === "markets" ? <><MarketsPanel identity={identity ?? "anon"} />{!identity && <LoginNudge />}</> : activeView === "wallet" ? <><WalletPanel /><div className="mt-10 border-t border-border"><ActivityView trial={false} wallet={session.walletAddress} rows={[]} heading="Actividad del wallet" level={2} /></div></> : activeView === "invite" ? <div className="mx-auto max-w-3xl"><AffiliatePanel />{session.walletAddress === AFFILIATE_PAYOUT_WALLET && <Link to="/admin" className="mt-6 flex items-center justify-center gap-2 rounded-2xl border border-primary/40 bg-primary/10 p-4 font-semibold text-primary"><ShieldCheck size={18} />{t("Abrir Panel de Control")}</Link>}</div> : activeView === "admin" ? <AdminDashboard /> : activeView === "account" ? <AccountSettings /> : activeView === "notifications" ? <div className="mx-auto max-w-3xl py-8"><h1 className="mb-6 font-display text-3xl font-semibold">{t("Notificaciones")}</h1><NotificationsCenter /></div> : activeView === "security" ? <div className="mx-auto max-w-3xl space-y-6 py-8"><h1 className="font-display text-3xl font-semibold">{t("Seguridad")}</h1><div className="rounded-2xl border border-border bg-card p-6 [&>section]:mt-0 [&>section]:border-t-0 [&>section]:pt-0"><AccountSecuritySettings /></div></div> : activeView === "activity" ? <><ActivityView trial={mode === "trial"} wallet={session.walletAddress} rows={activities} /></> : mode === "real" && !guest ? <>{activeView === "portfolio" && <PendingClaims />}<RealOverview portfolioOnly={activeView === "portfolio"} walletAddress={session.walletAddress} onDetails={setDetailsFor} />{activeView === "vaults" && <div className="mt-6"><StayUpdated dismissible /></div>}</> : user ? (
           <>
             <section aria-label={t("Estado del modo Prueba")} className="border-y border-border py-8">
               <div className="flex items-center gap-3"><ShieldAlert className="shrink-0 text-primary" size={24} /><h1 className="font-display text-2xl font-semibold">{activeView === "portfolio" ? t("Tu portafolio · Prueba") : t("Bóvedas · Prueba")}</h1></div>
