@@ -211,6 +211,12 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
         <span className="shrink-0 text-xs font-semibold text-muted-foreground">{t("Jugada rápida")}</span>
         <div className="grid flex-1 grid-cols-4 gap-1.5">{QUICK.map((v) => { const on = Number(amount) === v; return <button key={v} type="button" aria-pressed={on} onClick={() => { setAmount(String(v)); setReview(null); }} className={`rounded-full border py-1.5 text-sm font-bold tabular-nums transition active:scale-95 ${on ? "border-foreground bg-foreground text-background" : "border-border bg-card text-foreground"}`}>${v}</button>; })}</div>
       </div>
+      {/* One-tap "go with the crowd": picks the side the live market odds favor and opens the same confirm sheet. */}
+      {(() => { const ou = round?.upPrice, od = round?.downPrice; if (!ou || !od) return null; const fav: PredictSide = ou >= od ? "up" : "down"; const fp = fav === "up" ? ou : od; const pct = Math.round((fp / (ou + od)) * 100); if (pct < 55) return <p className="rounded-2xl border border-border bg-muted px-3 py-2 text-center text-xs font-semibold text-muted-foreground">{t("⚖️ Ronda pareja: el mercado está dividido. Elige tú.")}</p>; const upFav = fav === "up"; return <button type="button" onClick={() => { if (!session.authenticated) { setAskLogin(true); return; } setSide(fav); setReview(null); }}
+        className={`cta-attn relative w-full overflow-hidden rounded-2xl border-2 px-4 py-3 text-left transition active:scale-[0.98] ${upFav ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "border-destructive bg-destructive text-destructive-foreground shadow-lg shadow-destructive/30"}`}>
+        <span className="flex items-center justify-between gap-2"><span className="font-display text-lg font-extrabold">🔥 {t("Ir con la mayoría")}</span><span className="font-display text-lg font-bold tabular-nums">{upFav ? "▲" : "▼"} {t(upFav ? "Sube" : "Baja")} {pct}%</span></span>
+        {amt > 0 && <span className="mt-0.5 block text-xs font-semibold tabular-nums opacity-90">{t("1 toque · Pones ${a} → recibes ≈${b} si acierta la mayoría", { a: amt % 1 ? amt.toFixed(2) : String(amt), b: (amt / fp).toFixed(2) })}</span>}
+      </button>; })()}
       <div className="grid grid-cols-2 gap-3">
         {(["up", "down"] as const).map((s) => {
           const p = priceOf(s), on = side === s, up = s === "up";
