@@ -236,3 +236,12 @@
 .hot-ring { background-image: linear-gradient(90deg, var(--hot-2), var(--hot), oklch(0.66 0.2 300), var(--hot-2)); background-size: 200% 100%; animation: hot-shift 6s linear infinite; }
 .hot-cta { background-image: linear-gradient(90deg, var(--hot-2), var(--hot), var(--hot-2)); background-size: 200% 100%; animation: hot-shift 3s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .hot-ring, .hot-cta { animation: none; } }
+
+/* Wallet total loading: sweeping shine, bouncing coins, fading step text. */
+@keyframes balance-sweep { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@keyframes balance-bounce { 0%, 80%, 100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-6px); opacity: 1; } }
+@keyframes balance-fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.balance-shimmer { background: linear-gradient(90deg, var(--muted) 0%, color-mix(in oklab, var(--primary) 22%, var(--muted)) 50%, var(--muted) 100%); background-size: 200% 100%; animation: balance-sweep 1.6s linear infinite; }
+.balance-coin { animation: balance-bounce 1s ease-in-out infinite; }
+.balance-step { animation: balance-fade 0.35s ease-out; }
+@media (prefers-reduced-motion: reduce) { .balance-shimmer, .balance-coin, .balance-step { animation: none; } }
