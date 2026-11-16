@@ -31,18 +31,18 @@ beforeEach(() => {
   let calls = 0;
   mocks.simulate.mockImplementation(async (tx) => {
     expect(tx.signatures.every((sig: Uint8Array) => sig.every((b) => b === 0))).toBe(true);
-    const final = ++calls >= 2;
+    ++calls;
     const account = (value: bigint, mint: PublicKey, accountOwner: PublicKey) => ({ owner: TOKEN_PROGRAM_ID.toBase58(), data: [tokenData(value, mint, accountOwner).toString("base64"), "base64"], lamports: 2_000_000 });
-    return { value: { err: null, accounts: [account(final ? 48_501_000n : 50_001_000n, usdc, owner), account(500n, token, owner), account(final ? 1_500_000n : 0n, usdc, feeOwner), { lamports: 3_000_000 }, { lamports: 20_000_000 }, { lamports: 2_000_000 }, { lamports: 2_000_000 }] } };
+    return { value: { err: null, accounts: [account(50_001_000n, usdc, owner), account(500n, token, owner), account(0n, usdc, feeOwner), { lamports: 3_000_000 }, { lamports: 20_000_000 }, { lamports: 2_000_000 }, { lamports: 2_000_000 }] } };
   });
 });
-it("prepares a new owner MET harvest, charging the 3% Basic tier on a 50 USDC harvest and preserving old balances", async () => {
+it("prepares a new owner MET harvest, with no fee: the full 50 USDC harvest reaches the owner and preserving old balances", async () => {
   const result = await simulateHarvest("test", input, options);
   expect(result.success).toBe(true);
   expect(result.prepared?.wallet).toBe(input.wallet);
   expect(result.prepared?.position).toBe(input.position);
-  expect(result.feeRaw).toBe("1500000");
-  expect(result.net).toBe("48.5");
+  expect(result.feeRaw).toBe("0");
+  expect(result.net).toBe("50");
   expect(result.tokenAmount).toBe("0.0003");
   expect(mocks.send).not.toHaveBeenCalled();
 });

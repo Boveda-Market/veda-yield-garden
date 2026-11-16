@@ -4,10 +4,10 @@ const SCALE = 1_000_000;
 /** Progressive tiers by gross amount (micro-USDC): smaller amounts pay a higher %, larger amounts less. */
 export type FeeKind = "deposit" | "exit" | "withdraw" | "harvest";
 export const FEE_TIERS = [
-  { name: "Básico", min: 0n, bps: { deposit: 0n, exit: 150n, withdraw: 200n, harvest: 300n } },
-  { name: "Plus", min: 100_000_000n, bps: { deposit: 0n, exit: 100n, withdraw: 125n, harvest: 200n } },
-  { name: "Pro", min: 500_000_000n, bps: { deposit: 0n, exit: 75n, withdraw: 75n, harvest: 150n } },
-  { name: "VIP", min: 2_500_000_000n, bps: { deposit: 0n, exit: 40n, withdraw: 50n, harvest: 100n } },
+  { name: "Básico", min: 0n, bps: { deposit: 0n, exit: 150n, withdraw: 200n, harvest: 0n } },
+  { name: "Plus", min: 100_000_000n, bps: { deposit: 0n, exit: 100n, withdraw: 125n, harvest: 0n } },
+  { name: "Pro", min: 500_000_000n, bps: { deposit: 0n, exit: 75n, withdraw: 75n, harvest: 0n } },
+  { name: "VIP", min: 2_500_000_000n, bps: { deposit: 0n, exit: 40n, withdraw: 50n, harvest: 0n } },
 ] as const;
 export function feeTier(units: bigint) { let t: (typeof FEE_TIERS)[number] = FEE_TIERS[0]; for (const x of FEE_TIERS) if (units >= x.min) t = x; return t; }
 export function tierBps(units: bigint, kind: FeeKind) { return feeTier(units).bps[kind]; }
