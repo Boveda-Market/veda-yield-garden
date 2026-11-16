@@ -185,6 +185,45 @@ export type Database = {
         }
         Relationships: []
       }
+      autopilot_enrollments: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          last_attempt_at: string | null
+          last_rebalance_at: string | null
+          last_result: string | null
+          last_signature: string | null
+          privy_user_id: string
+          updated_at: string
+          wallet: string
+          wallet_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          last_attempt_at?: string | null
+          last_rebalance_at?: string | null
+          last_result?: string | null
+          last_signature?: string | null
+          privy_user_id: string
+          updated_at?: string
+          wallet: string
+          wallet_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          last_attempt_at?: string | null
+          last_rebalance_at?: string | null
+          last_result?: string | null
+          last_signature?: string | null
+          privy_user_id?: string
+          updated_at?: string
+          wallet?: string
+          wallet_id?: string
+        }
+        Relationships: []
+      }
       coinbase_onramps: {
         Row: {
           first_at: string

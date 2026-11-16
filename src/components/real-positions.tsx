@@ -1,5 +1,5 @@
 import { useQueries } from "@tanstack/react-query";
-import { isOperableVault } from "@/lib/solana-data";
+import { isDlmmVault, isOperableVault } from "@/lib/solana-data";
 import { notify } from "@/lib/notify";
 import { Link } from "@tanstack/react-router";
 import { ArrowDownToLine, Plus, Repeat, Copy, ExternalLink, Sprout, Vault as VaultIcon } from "lucide-react";
@@ -17,6 +17,7 @@ import { PoweredBy } from "./powered-by";
 import type { Vault } from "@/lib/vaults";
 import { MigrateOffer } from "./migrate-banner";
 import { RebalanceButton } from "./rebalance-button";
+import { AutopilotToggle } from "./autopilot-toggle";
 import { MigratePicker } from "./migrate-picker";
 import { canHarvest } from "@/lib/harvest";
 import { HotBanner } from "./hot-vault-card";
@@ -50,7 +51,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
         {p.outOfRange && <p role="status" className="mt-2 rounded-lg border border-border bg-muted/50 p-2 text-xs leading-5 text-muted-foreground">{t("El precio salió del rango de esta bóveda: tu dinero sigue seguro pero no genera ganancias hasta que el precio vuelva o la cierres.")}</p>}
         {onMigrate && <MigrateOffer position={p} aprs={aprs} onMigrate={onMigrate} className="mt-3" />}
         <Button className="mt-4 w-full" disabled={!canHarvest(fees)} onClick={() => onAction(p, "harvest")}><Sprout size={16} />{t("Cosechar Ganancias")}</Button>{!canHarvest(fees) && <p className="mt-1 text-center text-xs text-muted-foreground">{t("Cosechar y reinvertir se activan desde $0.50 de ganancias.")}</p>}
-        <div className="mt-2 grid grid-cols-2 gap-2"><RebalanceButton position={p} className="col-span-2" />{onDeposit && isOperableVault(p.vaultId) && <Button size="sm" className="col-span-2 h-10 font-bold shadow-md" onClick={() => onDeposit(p)}><Plus size={16} strokeWidth={3} />{t("Depositar más")}</Button>}<Button size="sm" variant="secondary" className="col-span-2" disabled={!canHarvest(fees)} onClick={() => onAction(p, "compound")}><Repeat size={14} />{t("Cosechar y reinvertir todo")}</Button>{onMigrate && isOperableVault(p.vaultId) && !p.locked && <MigratePicker position={p} aprs={aprs} onPick={onMigrate} />}<Button size="sm" variant="outline" className="col-span-2" onClick={() => onAction(p, "exit")}><ArrowDownToLine size={14} />{t("Retirar o liquidar")}</Button></div>
+        <div className="mt-2 grid grid-cols-2 gap-2"><RebalanceButton position={p} className="col-span-2" />{isDlmmVault(p.vaultId) && !p.locked && <AutopilotToggle className="col-span-2" />}{onDeposit && isOperableVault(p.vaultId) && <Button size="sm" className="col-span-2 h-10 font-bold shadow-md" onClick={() => onDeposit(p)}><Plus size={16} strokeWidth={3} />{t("Depositar más")}</Button>}<Button size="sm" variant="secondary" className="col-span-2" disabled={!canHarvest(fees)} onClick={() => onAction(p, "compound")}><Repeat size={14} />{t("Cosechar y reinvertir todo")}</Button>{onMigrate && isOperableVault(p.vaultId) && !p.locked && <MigratePicker position={p} aprs={aprs} onPick={onMigrate} />}<Button size="sm" variant="outline" className="col-span-2" onClick={() => onAction(p, "exit")}><ArrowDownToLine size={14} />{t("Retirar o liquidar")}</Button></div>
         {!isOperableVault(p.vaultId) && <p className="mt-3 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
       </>;
       // High-octane vaults get the animated neon frame and sunset banner; actions stay identical to every other vault.

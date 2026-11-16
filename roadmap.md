@@ -5,3 +5,6 @@
 - [x] Estilo visual inspirado en GTA6 (atardecer Vice City, palmeras), sin logo ni marca oficial de Rockstar
 - [x] Título GTA6 con letra estilo GTA y botones con nombres normales (Depositar, Migrar…)
 - [x] Quitar «USDC» del botón de depositar
+- [x] Rebalanceo en 1 toque más rápido: la operación se prepara al abrir la ventana
+- [x] Piloto automático (firmas delegadas Privy) para bóvedas de rango: interruptor, permiso limitado, proceso cada 2 min, Telegram, Términos
+- [ ] Probar el piloto automático con una cuenta real en bovedamarket.app (necesita que el usuario lo active)

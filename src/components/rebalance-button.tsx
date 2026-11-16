@@ -15,6 +15,7 @@ import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import type { RebalanceResult } from "@/lib/dlmm";
 import { WorkingLine } from "@/components/move-steps";
+import { AutopilotToggle, useAutopilot } from "@/components/autopilot-toggle";
 
 /** One-tap, one-signature 50/50 rebalance for an out-of-range range-vault position. Renders nothing otherwise. */
 export function RebalanceButton({ position, className, autoOpen = false, size = "sm", label }: { position: ChainPosition; className?: string; autoOpen?: boolean; size?: "sm" | "lg"; label?: string }) {
@@ -37,6 +38,7 @@ export const needsRebalance = (p: ChainPosition) => p.outOfRange && !p.locked &&
 export function RangeUrgentBanner({ positions, openFor }: { positions: ChainPosition[]; openFor?: string | null }) {
   const t = useT();
   const out = positions.filter(needsRebalance);
+  const autopilotOn = !!useAutopilot().status?.enabled;
   if (!out.length) return null;
   return <div className="grid gap-3">{out.map((p) => {
     const name = VAULTS.find((v) => v.id === p.vaultId)?.name;
@@ -48,8 +50,10 @@ export function RangeUrgentBanner({ positions, openFor }: { positions: ChainPosi
           <p className="mt-1 text-sm leading-5 text-muted-foreground">{t("El precio salió de tu rango. Tu dinero sigue seguro, pero no cobras ganancias hasta que la vuelvas a centrar.")}</p>
         </div>
       </div>
+      {autopilotOn && <p className="mt-3 rounded-lg bg-primary/10 p-2 text-center text-xs font-medium text-primary">🤖 {t("Tu piloto automático la recentrará en unos minutos. Si prefieres, hazlo ya:")}</p>}
       <RebalanceButton position={p} size="lg" className="mt-3 w-full font-bold" autoOpen={openFor === p.address} label={t("Rebalancear ahora")} />
       <p className="mt-2 text-center text-xs text-muted-foreground">{t("Un toque y una firma · sin comisión")}</p>
+      {!autopilotOn && <AutopilotToggle className="mt-3" />}
     </section>;
   })}</div>;
 }
@@ -71,7 +75,8 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
 
   async function review() {
     setPending(true); setMessage(null);
-    try { const next = await prepare({ data: input }); setQuote(next); if (!next.success) setMessage(next.message); }
+    // Prepare the signable rebalance right away, so the confirm tap goes straight to the wallet approval.
+    try { const next = await prepare({ data: { ...input, prepare: true } }); setQuote(next); if (!next.success) setMessage(next.message); }
     catch { setMessage(t("No se pudo preparar el rebalanceo. No se firmó ni envió nada.")); }
     finally { setPending(false); }
   }
@@ -82,7 +87,8 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
     if (pending || done) return;
     setPending(true); setMessage(null); setStep(t("Preparando tu rebalanceo…"));
     try {
-      const next = await prepare({ data: { ...input, prepare: true } });
+      const fresh = quote?.success && quote.prepared && Date.now() < quote.prepared.expiresAt - 10_000;
+      const next = fresh ? quote! : await prepare({ data: { ...input, prepare: true } });
       setQuote(next);
       if (!next.success || !next.prepared) { setMessage(next.message); return; }
       if (next.prepared.wallet !== session.walletAddress) { setMessage(t("La wallet cambió. Revisa nuevamente.")); return; }

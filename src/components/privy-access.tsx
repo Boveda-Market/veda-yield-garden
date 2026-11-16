@@ -5,7 +5,8 @@ import { installPrivyApiFallback } from "@/lib/privy-api-fallback";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { setPrivyTokenGetter } from "@/lib/privy-token";
 import { sessionWalletAddress } from "@/lib/session-wallet";
-import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useMfaEnrollment, usePrivy } from "@privy-io/react-auth";
+import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useMfaEnrollment, usePrivy, useSigners } from "@privy-io/react-auth";
+import { AUTOPILOT_POLICY_ID, AUTOPILOT_SIGNER_ID } from "@/lib/autopilot";
 import { useUpdateEmail } from "@privy-io/react-auth/ui";
 import { toSolanaWalletConnectors, useExportWallet, useFundWallet, useSignMessage, useSignTransaction, useWallets } from "@privy-io/react-auth/solana";
 import bs58 from "bs58";
@@ -44,6 +45,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const { addFunds } = useAddFunds();
   const { exportWallet } = useExportWallet();
   const { fundWallet } = useFundWallet();
+  const { addSigners, removeSigners } = useSigners();
   const [error, setError] = useState<string | null>(null);
   const { login } = useLogin({
     onComplete: () => setError(null),
@@ -181,6 +183,11 @@ function SessionBridge({ children }: { children: ReactNode }) {
       // Dedicated MoonPay route: unified addFunds also quotes Stripe, which rejects native SOL.
       await fundWallet({ address: walletAddress, options: { chain: "solana:mainnet", asset: "native-currency", amount: solAmount ?? GAS_TOP_UP_SOL, defaultFundingMethod: "card", card: { preferredProvider: "moonpay" } } });
     },
+    // Autopilot: one Privy permission lets BÓVEDA's signer sign only range rebalances (Privy policy), revocable at any time.
+    autopilot: embedded && tradeBlock === null ? {
+      grant: async () => { await addSigners({ address: walletAddress!, signers: [{ signerId: AUTOPILOT_SIGNER_ID, policyIds: [AUTOPILOT_POLICY_ID] }] }); },
+      revoke: async () => { await removeSigners({ address: walletAddress! }); },
+    } : undefined,
     logout: doLogout,
   }}>{children}<IdleLogout active={ready && authenticated} signedOut={ready && !authenticated} onLogout={doLogout} /></BovedaSessionContext.Provider>;
 }

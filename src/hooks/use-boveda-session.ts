@@ -42,6 +42,8 @@ export type BovedaSession = {
   security?: AccountSecurity;
   /** Opens Privy's secure private-key export; only for Privy-created wallets. */
   exportWallet?: (() => Promise<void>) | undefined;
+  /** Autopilot permission on the embedded wallet (rebalance-only delegated signer); absent for external wallets. */
+  autopilot?: { grant: () => Promise<void>; revoke: () => Promise<void> } | undefined;
 };
 
 // The preview can reload this module before the lazy Privy provider reloads.

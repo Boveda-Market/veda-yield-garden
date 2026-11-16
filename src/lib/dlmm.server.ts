@@ -437,7 +437,7 @@ export type { RebalanceResult } from "@/lib/dlmm";
  * swap half the excess side inside the same pool, then re-centre the same position on the current price
  * with everything (capital + fees). 0% BÓVEDA fee; only the owner signs; the wallet never loses prior balances.
  */
-export async function simulateDlmmRebalance(connection: Connection, input: WithdrawalInput, options: { prepare?: boolean } = {}): Promise<RebalanceResult> {
+export async function simulateDlmmRebalance(connection: Connection, input: WithdrawalInput, options: { prepare?: boolean; maxImpactPct?: number } = {}): Promise<RebalanceResult> {
   const startedAt = Date.now();
   let stage = "Lectura de posición";
   const fail = (message: string): RebalanceResult => ({ success: false, message });
@@ -475,7 +475,7 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
       stage = "Cotización del intercambio";
       const binArrays = await pool.getBinArrayForSwap(plan.swapForY, 4);
       const quote = pool.swapQuote(new BN(plan.amountIn.toString()), plan.swapForY, new BN(100), binArrays);
-      if (Number(quote.priceImpact.toString()) > DLMM_MAX_SWAP_IMPACT_PCT) return fail("Ahora mismo el rebalanceo movería demasiado el precio de esta bóveda. Prueba en unos minutos.");
+      if (Number(quote.priceImpact.toString()) > (options.maxImpactPct ?? DLMM_MAX_SWAP_IMPACT_PCT)) return fail("Ahora mismo el rebalanceo movería demasiado el precio de esta bóveda. Prueba en unos minutos.");
       if (quote.minOutAmount.isZero()) return fail("No hay liquidez suficiente para rebalancear ahora.");
       outMin = BigInt(quote.minOutAmount.toString());
       const [inToken, outToken] = plan.swapForY ? [mintX, usdc] : [usdc, mintX];
