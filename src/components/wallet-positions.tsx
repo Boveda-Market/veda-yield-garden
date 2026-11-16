@@ -47,10 +47,11 @@ export function WalletRangeBanner({ wallet }: { wallet: string }) {
 }
 
 /** Compact open-vault cards for Mi Billetera; renders nothing without open positions. */
-export function WalletPositions({ wallet }: { wallet: string }) {
+export function WalletPositions({ wallet, only, bare }: { wallet: string; only?: string; bare?: boolean }) {
   const t = useT();
   const query = useWalletVaults(wallet);
-  const positions: ChainPosition[] = query.data?.success ? query.data.data.positions : [];
+  const all: ChainPosition[] = query.data?.success ? query.data.data.positions : [];
+  const positions = only ? all.filter((p) => p.vaultId === only) : all;
   const pools = positions.map((p) => VAULTS.find((v) => v.id === p.vaultId)?.pool ?? null);
   const stats = useQueries({ queries: pools.map((pool) => ({ queryKey: ["dexscreener-pool-stats", pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(pool as string, signal), enabled: Boolean(pool), staleTime: 60_000, retry: 1 })) });
   const yields = useQueries({ queries: pools.map((pool) => ({ ...poolYieldOptions(pool ?? ""), enabled: Boolean(pool) })) });
@@ -60,9 +61,9 @@ export function WalletPositions({ wallet }: { wallet: string }) {
   const [addTo, setAddTo] = useState<{ position: string; vaultId: Supported } | null>(null);
   if (positions.length === 0) return null;
   const addVault = addTo ? VAULTS.find((v) => v.id === addTo.vaultId) : undefined;
-  return <section aria-label={t("Tus posiciones abiertas")} className="rounded-2xl border border-border bg-card p-4">
-    <div className="flex items-center justify-between gap-2"><h3 className="font-display text-base font-semibold">{t("Tus posiciones abiertas")} · {positions.length}</h3><Link to="/portfolio" className="text-xs font-medium text-primary">{t("Ver en portafolio")}</Link></div>
-    <ul className="mt-3 space-y-3">{positions.map((p, i) => {
+  return <section aria-label={t("Tus posiciones abiertas")} className={bare ? "" : "rounded-2xl border border-border bg-card p-4"}>
+    {!bare && <div className="flex items-center justify-between gap-2"><h3 className="font-display text-base font-semibold">{t("Tus posiciones abiertas")} · {positions.length}</h3><Link to="/portfolio" className="text-xs font-medium text-primary">{t("Ver en portafolio")}</Link></div>}
+    <ul className={bare ? "space-y-3" : "mt-3 space-y-3"}>{positions.map((p, i) => {
       const s = stats[i]?.data;
       const price = s && s.baseSymbol.toUpperCase().includes(p.symbol.toUpperCase()) ? s.price : null;
       const value = estimateUsd(p.tokenAmount, p.usdcAmount, price);
@@ -88,7 +89,7 @@ export function WalletPositions({ wallet }: { wallet: string }) {
           </div>{p.outOfRange && <p className="mt-2 text-xs leading-5 text-muted-foreground">{p.vaultId === "gta6" ? t("El precio salió del rango: tu dinero sigue seguro pero no genera. Toca «Rebalancear» para volver a centrarla con un toque.") : t("El precio salió del rango de esta bóveda: tu dinero sigue seguro pero no genera ganancias hasta que el precio vuelva o la cierres.")}</p>}</> : <p className="mt-2 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
       </li>;
     })}</ul>
-    <p className="mt-3 text-[11px] leading-4 text-muted-foreground">{t("PNL = ganancias por cosechar, estimadas al precio actual. APR estimado con las últimas 24h.")}</p>
+    {!bare && <p className="mt-3 text-[11px] leading-4 text-muted-foreground">{t("PNL = ganancias por cosechar, estimadas al precio actual. APR estimado con las últimas 24h.")}</p>}
     {harvest && <HarvestDialog wallet={wallet} position={harvest.position} vaultId={harvest.vaultId} compound={harvest.compound} onClose={() => { setHarvest(null); void query.refetch(); }} />}
     {exit && <WithdrawalSimulation wallet={wallet} {...exit} onClose={() => { setExit(null); void query.refetch(); }} />}
     {addVault && addTo && <DepositSimulation key={addTo.position} vault={addVault} wallet={wallet} position={addTo.position} onClose={() => { setAddTo(null); void query.refetch(); }} />}

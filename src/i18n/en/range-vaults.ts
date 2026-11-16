@@ -170,4 +170,5 @@ export const rangeVaults: Record<string, string> = {
   "Tu piloto automático la recentrará en unos minutos. Si prefieres, hazlo ya:": "Your Autopilot will re-centre it in a few minutes. Or do it now:",
   "El piloto automático solo funciona con tu billetera protegida de BÓVEDA.": "Autopilot only works with your protected BÓVEDA wallet.",
   "El piloto automático no está disponible ahora mismo.": "Autopilot is not available right now.",
+  "Tu Bóveda GTA6": "Your GTA6 Vault",
 };
