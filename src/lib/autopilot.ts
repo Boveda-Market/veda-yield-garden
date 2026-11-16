@@ -54,8 +54,8 @@ export function autopilotDoneText(vaultName: string, valueUsd: string | undefine
 }
 
 /** Range vaults (GTA6) run on Autopilot by default: turn it on only for wallets that never had a choice recorded; a wallet that switched it off stays off. */
-export function shouldAutoEnableAutopilot(opts: { hasRangePosition: boolean; enrolled: boolean | null }) {
-  return opts.hasRangePosition && opts.enrolled === false;
+export function shouldAutoEnableAutopilot(opts: { hasRangePosition: boolean; enabled: boolean | null }) {
+  return opts.hasRangePosition && opts.enabled === false;
 }
 
 /** Informational bell/Telegram notice: the newest Autopilot event worth telling (rebalance first, then activation) within 7 days. */
@@ -63,7 +63,6 @@ export function autopilotNotice(s: { enabled: boolean; enabledAt: string | null;
   if (!s) return null;
   const fresh = (iso: string | null) => !!iso && now - Date.parse(iso) < 7 * 86_400_000;
   if (fresh(s.lastRebalanceAt)) return { id: `autopilot:rb:${s.lastRebalanceAt}`, kind: "rebalanced", at: s.lastRebalanceAt! };
-  if (s.enabled && fresh(s.enabledAt)) return { id: `autopilot:on:${s.enabledAt}`, kind: "on", at: s.enabledAt! };
   return null;
 }
 

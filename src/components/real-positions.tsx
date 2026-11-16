@@ -17,7 +17,6 @@ import { PoweredBy } from "./powered-by";
 import type { Vault } from "@/lib/vaults";
 import { MigrateOffer } from "./migrate-banner";
 import { RebalanceButton } from "./rebalance-button";
-import { AutopilotToggle } from "./autopilot-toggle";
 import { MigratePicker } from "./migrate-picker";
 import { canHarvest } from "@/lib/harvest";
 import { HotBanner } from "./hot-vault-card";
@@ -47,7 +46,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
         {p.locked && <p className="mt-2 text-xs text-muted-foreground">{t("Incluye liquidez bloqueada; no toda la posición es retirable.")}</p>}
         {onMigrate && <MigrateOffer position={p} aprs={aprs} onMigrate={onMigrate} className="mt-3" />}
         <Button className="mt-3 w-full" disabled={!canHarvest(fees)} onClick={() => onAction(p, "harvest")}><Sprout size={16} />{t("Cosechar Ganancias")}</Button>
-        <div className="mt-2 grid grid-cols-2 gap-2"><RebalanceButton position={p} className="col-span-2" />{isDlmmVault(p.vaultId) && !p.locked && <AutopilotToggle className="col-span-2" />}{onDeposit && isOperableVault(p.vaultId) && <Button size="sm" className="font-bold shadow-md" onClick={() => onDeposit(p)}><Plus size={16} strokeWidth={3} />{t("Depositar más")}</Button>}<Button size="sm" variant="secondary" disabled={!canHarvest(fees)} onClick={() => onAction(p, "compound")}><Repeat size={14} />{t("Reinvertir")}</Button>{onMigrate && isOperableVault(p.vaultId) && !p.locked && <MigratePicker position={p} aprs={aprs} onPick={onMigrate} />}<Button size="sm" variant="outline" onClick={() => onAction(p, "exit")}><ArrowDownToLine size={14} />{t("Retirar")}</Button></div>
+        <div className="mt-2 grid grid-cols-2 gap-2"><RebalanceButton position={p} className="col-span-2" />{onDeposit && isOperableVault(p.vaultId) && <Button size="sm" className="font-bold shadow-md" onClick={() => onDeposit(p)}><Plus size={16} strokeWidth={3} />{t("Depositar más")}</Button>}<Button size="sm" variant="secondary" disabled={!canHarvest(fees)} onClick={() => onAction(p, "compound")}><Repeat size={14} />{t("Reinvertir")}</Button>{onMigrate && isOperableVault(p.vaultId) && !p.locked && <MigratePicker position={p} aprs={aprs} onPick={onMigrate} />}<Button size="sm" variant="outline" onClick={() => onAction(p, "exit")}><ArrowDownToLine size={14} />{t("Retirar")}</Button></div>
         {/* Long explanations stay available but folded, so the card fits one phone screen. */}
         <details className="mt-3 text-xs text-muted-foreground"><summary className="cursor-pointer text-center underline-offset-2 hover:underline">{t("Ver detalles")}</summary><div className="mt-2 space-y-1">
           {p.tokenAmount !== null && <p className="break-all">{`${p.tokenAmount} ${p.symbol} + ${p.usdcAmount} USDC`}</p>}

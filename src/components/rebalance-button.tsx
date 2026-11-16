@@ -16,7 +16,7 @@ import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import type { RebalanceResult } from "@/lib/dlmm";
 import { FlowSteps, WorkingLine } from "@/components/move-steps";
-import { AutopilotToggle, useAutopilot } from "@/components/autopilot-toggle";
+import { useAutopilot } from "@/components/autopilot-toggle";
 
 /** One-tap, one-signature 50/50 rebalance for an out-of-range range-vault position. Renders nothing otherwise. */
 export function RebalanceButton({ position, className, autoOpen = false, size = "sm", label }: { position: ChainPosition; className?: string; autoOpen?: boolean; size?: "sm" | "lg"; label?: string }) {
@@ -54,7 +54,6 @@ export function RangeUrgentBanner({ positions, openFor }: { positions: ChainPosi
       {autopilotOn && <p className="mt-3 rounded-lg bg-primary/10 p-2 text-center text-xs font-medium text-primary">🤖 {t("Tu piloto automático la recentrará en unos minutos. Si prefieres, hazlo ya:")}</p>}
       <RebalanceButton position={p} size="lg" className="mt-3 w-full font-bold" autoOpen={openFor === p.address} label={t("Rebalancear ahora")} />
       <p className="mt-2 text-center text-xs text-muted-foreground">{t("Un toque y una firma · sin comisión")}</p>
-      {!autopilotOn && <AutopilotToggle className="mt-3" />}
     </section>;
   })}</div>;
 }

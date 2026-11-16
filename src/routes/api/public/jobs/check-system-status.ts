@@ -113,7 +113,8 @@ export const Route = createFileRoute("/api/public/jobs/check-system-status")({
             // Autopilot first (5 min out of range): when it re-centres a position, the 10-min alert below never fires.
             try {
               const { runAutopilot } = await import("@/lib/autopilot.server");
-              await runAutopilot({ db, connection, rows, now, vaultName, alert: (id, html, button) => tg.userAlert(id, html, "range", button) });
+              const { autopilotGlobalOn } = await import("@/lib/autopilot-policy.server");
+              if (await autopilotGlobalOn()) await runAutopilot({ db, connection, rows, now, vaultName, alert: (id, html, button) => tg.userAlert(id, html, "range", button) });
             } catch { /* best-effort: alerts below stay the fallback */ }
             const { data: links } = await db.from("telegram_links").select("privy_user_id, wallet").not("chat_id", "is", null).not("wallet", "is", null).eq("alerts_enabled", true).limit(200);
             for (const l of (links ?? []) as { privy_user_id: string; wallet: string }[]) {

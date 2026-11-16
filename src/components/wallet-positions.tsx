@@ -21,7 +21,6 @@ import { RebalanceButton, RangeUrgentBanner } from "@/components/rebalance-butto
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useRealWallet } from "@/hooks/use-real-wallet";
 import { canHarvest } from "@/lib/harvest";
-import { AutopilotToggle } from "@/components/autopilot-toggle";
 
 type Supported = OperableVault;
 const supported = isOperableVault;
@@ -81,7 +80,6 @@ export function WalletPositions({ wallet, only, bare }: { wallet: string; only?:
         {fees !== null && <LiveEarnings base={fees} ratePerMs={p.locked ? 0 : earningRatePerMs(value, apr)} since={since} label={t("Ganancias por cosechar · estimado en vivo")} />}
         {ok ? <><Button className="mt-3 w-full" disabled={!canHarvest(fees)} onClick={() => setHarvest({ position: p.address, vaultId: p.vaultId as Supported })}><Sprout size={16} />{t("Cosechar ganancias")}</Button>{!canHarvest(fees) && <p className="mt-1 text-center text-xs text-muted-foreground">{t("Cosechar y reinvertir se activan desde $0.50 de ganancias.")}</p>}
           <RebalanceButton position={p} className="mt-2 w-full" />
-          {isDlmmVault(p.vaultId) && !p.locked && <AutopilotToggle className="mt-2" />}
           <div className="mt-2 grid grid-cols-3 gap-2">
             <Button size="sm" variant="secondary" onClick={() => setAddTo({ position: p.address, vaultId: p.vaultId as Supported })}><Plus size={14} />{t("Depositar")}</Button>
             <Button size="sm" variant="secondary" disabled={p.outOfRange || !canHarvest(fees)} onClick={() => setHarvest({ position: p.address, vaultId: p.vaultId as Supported, compound: true })}><Repeat size={14} />{t("Reinvertir")}</Button>

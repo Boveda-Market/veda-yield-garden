@@ -37,7 +37,7 @@ export function AutopilotDefault() {
   const hasRange = (real.data?.success ? real.data.data.positions : []).some((p) => isDlmmVault(p.vaultId) && !p.locked);
   const tried = useRef(false);
   useEffect(() => {
-    if (tried.current || !available || !status || !shouldAutoEnableAutopilot({ hasRangePosition: hasRange, enrolled: status.enrolled })) return;
+    if (tried.current || !available || !status || !shouldAutoEnableAutopilot({ hasRangePosition: hasRange, enabled: status.enabled })) return;
     const key = `boveda:autopilot-default:${wallet}`;
     try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch { return; }
     tried.current = true;
@@ -45,7 +45,6 @@ export function AutopilotDefault() {
       try {
         try { await session.autopilot!.grant(); } catch (e) { if (!/already|exist/i.test(e instanceof Error ? e.message : "")) return; }
         queryClient.setQueryData(["autopilot", wallet], await enable({ data: { wallet, auto: true } }));
-        notify("success", t("Piloto automático activado"), t("Recentramos tus bóvedas de rango por ti"));
       } catch { /* the manual switch and range alerts remain available */ }
     })();
   }, [available, status, hasRange, wallet, session, enable, queryClient, t]);

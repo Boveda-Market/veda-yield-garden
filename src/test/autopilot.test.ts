@@ -41,15 +41,15 @@ describe("Privy request signing", () => {
 });
 
 describe("Autopilot default for range vaults", () => {
-  it("turns on by default for a range position with no recorded choice", () => expect(shouldAutoEnableAutopilot({ hasRangePosition: true, enrolled: false })).toBe(true));
-  it("never turns back on a wallet that already chose (including switching it off)", () => expect(shouldAutoEnableAutopilot({ hasRangePosition: true, enrolled: true })).toBe(false));
+  it("turns on by default for a range position with no recorded choice", () => expect(shouldAutoEnableAutopilot({ hasRangePosition: true, enabled: false })).toBe(true));
+  it("leaves an already-active wallet alone", () => expect(shouldAutoEnableAutopilot({ hasRangePosition: true, enabled: true })).toBe(false));
   it("does nothing without a range position or before the status loads", () => {
-    expect(shouldAutoEnableAutopilot({ hasRangePosition: false, enrolled: false })).toBe(false);
-    expect(shouldAutoEnableAutopilot({ hasRangePosition: true, enrolled: null })).toBe(false);
+    expect(shouldAutoEnableAutopilot({ hasRangePosition: false, enabled: false })).toBe(false);
+    expect(shouldAutoEnableAutopilot({ hasRangePosition: true, enabled: null })).toBe(false);
   });
   it("bell tells the latest event: rebalance before activation, only within 7 days", () => {
     expect(autopilotNotice({ enabled: true, enabledAt: ago(60), lastRebalanceAt: ago(5) }, now)?.kind).toBe("rebalanced");
-    expect(autopilotNotice({ enabled: true, enabledAt: ago(60), lastRebalanceAt: null }, now)?.kind).toBe("on");
+    expect(autopilotNotice({ enabled: true, enabledAt: ago(60), lastRebalanceAt: null }, now)).toBeNull();
     expect(autopilotNotice({ enabled: true, enabledAt: ago(8 * 1440), lastRebalanceAt: null }, now)).toBeNull();
     expect(autopilotNotice({ enabled: false, enabledAt: null, lastRebalanceAt: null }, now)).toBeNull();
   });

@@ -36,11 +36,11 @@ export const enableAutopilot = createServerFn({ method: "POST" })
     const now = new Date().toISOString();
     const { data: before } = await db.from("autopilot_enrollments").select("enabled").eq("wallet", data.wallet).maybeSingle();
     // A wallet that switched Autopilot off never gets it back from the default; only its own switch can.
-    if (data.auto && before) throw new Error("Ya elegiste cómo usar el piloto automático en esta billetera.");
+    if (data.auto && before?.enabled) throw new Error("El piloto automático ya está activo en esta billetera.");
     const { error } = await db.from("autopilot_enrollments").upsert({ wallet: data.wallet, privy_user_id: context.privyUserId, wallet_id: walletId, enabled: true, last_result: null, updated_at: now }, { onConflict: "wallet" });
     if (error) throw new Error("No se pudo activar el piloto automático. Inténtalo de nuevo.");
     // Information-only Telegram card (the bell shows the same notice from this status).
-    if (!before?.enabled) { const [{ userAlert }, { autopilotOnText }] = await Promise.all([import("@/lib/telegram.server"), import("@/lib/autopilot")]); await userAlert(context.privyUserId, autopilotOnText(!!data.auto), "range", { text: "👀 Ver mi bóveda", url: "https://bovedamarket.app/portfolio" }); }
+    // Transparent: no activation notice; users only hear about Autopilot when it re-centres a position.
     const { data: row } = await db.from("autopilot_enrollments").select("last_rebalance_at, last_signature").eq("wallet", data.wallet).maybeSingle();
     return { enabled: true, enrolled: true, enabledAt: now, lastRebalanceAt: row?.last_rebalance_at ?? null, lastSignature: row?.last_signature ?? null };
   });

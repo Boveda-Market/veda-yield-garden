@@ -1369,4 +1369,8 @@ export const extra: Record<string, string> = {
   "Tus ganancias en dólares ya llegaron. La otra parte no se pasó a dólares; puedes hacerlo en Mi Billetera → Cambiar.": "Your dollar earnings arrived. The other part wasn't converted; you can do it in My Wallet → Swap.",
   "+ la otra parte, convertida a dólares": "+ the other part, converted to dollars",
   "2 aprobaciones seguidas: cobrar y pasar todo a dólares.": "2 approvals in a row: collect and turn it all into dollars.",
+  "Piloto automático encendido para todos los usuarios.": "Autopilot turned on for all users.",
+  "Piloto automático apagado para todos: nadie se rebalancea solo hasta que lo enciendas.": "Autopilot off for everyone: no position re-centres by itself until you turn it on.",
+  "Piloto automático (todos los usuarios)": "Autopilot (all users)",
+  "Recentra solas las bóvedas de rango (como GTA6) que salen de rango. Viene incluido en todas las posiciones; los usuarios solo reciben aviso cuando rebalancea. Apágalo para detenerlo en todos.": "Automatically re-centres range vaults (like GTA6) that leave their range. Included in every position; users are only notified when it rebalances. Turn it off to stop it for everyone.",
 };
