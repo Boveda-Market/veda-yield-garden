@@ -11,7 +11,9 @@ export const operable = (p: ChainPosition) => isOperableVault(p.vaultId);
 /** Estimated USD value, pending fees and APR per position (shared cache with pool details). */
 export function usePositionRows(positions: ChainPosition[]) {
   const pools = positions.map((p) => VAULTS.find((v) => v.id === p.vaultId)?.pool ?? null);
-  const stats = useQueries({ queries: pools.map((pool) => ({ queryKey: ["dexscreener-pool-stats", pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(pool as string, signal), enabled: Boolean(pool), staleTime: 60_000, retry: 1 })) });
+  const stats = useQueries({ queries: pools.map((pool) => ({ queryKey: ["dexscreener-pool-stats", pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(pool as string, signal), enabled: Boolean(pool), staleTime: 60_000, retry: 1,
+    // A missing price retries on its own every 10 s, so the total fills in without the person reloading.
+    refetchInterval: (q: { state: { data?: unknown } }) => (q.state.data ? 60_000 : 10_000) })) });
   const yields = useQueries({ queries: pools.map((pool) => ({ ...poolYieldOptions(pool ?? ""), enabled: Boolean(pool) })) });
   const rows = positions.map((p, i) => {
     const s = stats[i]?.data;
