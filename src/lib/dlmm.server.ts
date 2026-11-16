@@ -462,7 +462,7 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     const feeAta = getAssociatedTokenAddressSync(usdc, new PublicKey(FEE_WALLET));
     const addresses = [usdcAta, tokenX, position, owner, feeAta];
     const before = await connection.getMultipleAccountsInfo(addresses);
-    // Tiered harvest fee on the claimed USDC (tier by position value); skipped if the treasury USDC account is missing.
+    // Tiered harvest fee on the claimed USDC (tier by harvested amount); skipped if the treasury USDC account is missing.
     const positionUnits = BigInt(Math.floor(Number(xAll) * price)) + yAll;
     const bovedaFee = before[4] ? harvestFee(BigInt(data.feeY.toString()), positionUnits) : 0n;
     const x = xAll, y = yAll - bovedaFee;
