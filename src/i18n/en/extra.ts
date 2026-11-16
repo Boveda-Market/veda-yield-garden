@@ -1,5 +1,6 @@
 /** English strings for the homepage, wallet, portfolio, operation dialogs, affiliates and account redesigns. */
 export const extra: Record<string, string> = {
+  "Marcas de terceros": "Third-party trademarks",
   "Tus fondos siempre bajo tu control. $0 para entrar\xa0 y retira todo en cualquier momento. Garantizado.": "Your funds always under your control. $0 to get in and withdraw everything anytime. Guaranteed.",
   "Conoce más": "Learn more",
   "100% autocustodia · Nadie custodia tus fondos": "100% self-custody · No one holds your funds",
