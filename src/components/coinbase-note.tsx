@@ -23,7 +23,7 @@ export function CoinbaseNote({ className }: { className?: string }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   return <span className={cn("block text-sm", className)}>
-    {t("Entra con Google en 1 segundo y recarga con")} <CoinbaseWordmark /> {t("usando tu tarjeta. Sin contraseñas.")} <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }} className="whitespace-nowrap font-medium text-primary underline underline-offset-2">{t("Más información")}</button>
+    {t("Entra con tu cuenta de Google en 1 segundo y recarga con")} <CoinbaseWordmark /> {t("usando tu tarjeta. Sin contraseñas.")} <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }} className="whitespace-nowrap font-medium text-primary underline underline-offset-2">{t("Más información")}</button>
     <Dialog open={open} onOpenChange={setOpen}><ActionSheetContent closeLabel={t("Cerrar")}>
       <DialogTitle className="flex items-center gap-2">{t("Así recargas con")} <CoinbaseWordmark /></DialogTitle>
       <DialogDescription className="sr-only">{t("Tres pasos para entrar y recargar dólares.")}</DialogDescription>
