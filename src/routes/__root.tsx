@@ -11,7 +11,7 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 
-const APP_PATHS = ["/app", "/portfolio", "/mercados", "/wallet", "/invita", "/cuenta", "/seguridad", "/notificaciones", "/actividad"];
+const APP_PATHS = ["/app", "/portfolio", "/mercados", "/wallet", "/invita", "/cuenta", "/seguridad", "/notificaciones", "/actividad", "/admin"];
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
@@ -159,10 +159,11 @@ function RootComponent() {
         <Outlet />
         <GoogleAnalytics />
         <Toaster />
+        {/* Top-right corner, scrolls with the page, so it never covers buttons such as Doble o Nada. */}
         {!APP_PATHS.includes(pathname) && (
-          <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
-            <ThemeToggle className="shadow-lg" />
-            <LanguageMenu className="shadow-lg" />
+          <div className="absolute right-4 top-[1.6rem] z-40 flex items-center gap-2 sm:right-6">
+            <ThemeToggle />
+            <LanguageMenu />
           </div>
         )}
       </LanguageProvider>
