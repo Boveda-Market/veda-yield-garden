@@ -99,6 +99,7 @@ export const extra: Record<string, string> = {
   // Account
   "Tu perfil": "Your profile",
   "Cuenta activa": "Active account",
+  "Titular BÓVEDA": "BÓVEDA Holder",
   "Nivel": "Level",
   "Tu nivel": "Your level",
   "Según tu saldo total en BÓVEDA:": "Based on your total BÓVEDA balance:",

@@ -2,17 +2,14 @@ import { useT } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
-import { Leaf, Sun, Gem, Waves, Vault, Shield, Zap, Flame, Star, Diamond, Crown, Lock, Camera, Trash2, EyeOff, Eye, Home, BookUser, Plus, Check, LogOut, Copy, Wallet, Gift, UserRound, Scale, ChevronRight, ShieldCheck, Languages, Bell } from "lucide-react";
+import { Leaf, Sun, Gem, Waves, Vault, Shield, Zap, Flame, Star, Diamond, Crown, Camera, Trash2, EyeOff, Eye, Home, BookUser, Plus, Check, LogOut, Copy, Wallet, Gift, UserRound, Scale, ChevronRight, ShieldCheck, Languages, Bell } from "lucide-react";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { Button } from "./ui/button";
-import { AVATAR_MIN_TIER, PHOTO_MAX_CHARS, defaultProfile, profileSchema, type AccountProfile } from "@/lib/account-profile";
+import { PHOTO_MAX_CHARS, defaultProfile, profileSchema, type AccountProfile } from "@/lib/account-profile";
 import { HOME_OPTIONS, useContacts, useHideBalances, useHomePath, validContact, type HomePath } from "@/lib/preferences";
-import { FEE_TIERS } from "@/lib/fees";
 import { getAccountProfile, saveAccountProfile } from "@/lib/account-profile.functions";
 import { LanguageMenu } from "./language-menu";
 import { ThemeToggle } from "./theme-toggle";
-import { TierBadge, TierCard } from "./tier-badge";
-import { useAccountTier } from "@/hooks/use-account-tier";
 
 const avatars = [{ id: "leaf", label: "Hoja", Icon: Leaf }, { id: "sun", label: "Sol", Icon: Sun }, { id: "gem", label: "Gema", Icon: Gem }, { id: "waves", label: "Olas", Icon: Waves }, { id: "vault", label: "Bóveda", Icon: Vault }, { id: "shield", label: "Escudo", Icon: Shield }, { id: "zap", label: "Rayo", Icon: Zap }, { id: "flame", label: "Fénix", Icon: Flame }, { id: "star", label: "Estrella Plus", Icon: Star }, { id: "diamond", label: "Diamante Pro", Icon: Diamond }, { id: "crown", label: "Corona VIP", Icon: Crown }] as const;
 const homeLabels: Record<HomePath, string> = { "/wallet": "Mi Billetera", "/portfolio": "Portafolio", "/app": "Bóvedas" };
@@ -65,8 +62,6 @@ export function AccountSettings() {
   }
   const AvatarIcon = avatars.find(a => a.id === profile.avatar)?.Icon ?? UserRound;
   const wallet = session.walletAddress;
-  const tier = useAccountTier(wallet);
-  const tierIndex = tier?.index ?? 0;
   const [hidden, setHidden] = useHideBalances();
   const [home, setHome] = useHomePath();
   const [contacts, setContacts] = useContacts();
@@ -93,7 +88,7 @@ export function AccountSettings() {
         <p className="mt-1 break-all text-sm text-muted-foreground">{session.label}</p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"><ShieldCheck size={14} />{t("Cuenta activa")}</span>
-          {tier && <TierBadge index={tier.index} name={tier.name} />}
+          <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-card px-3 py-1 text-xs font-semibold text-foreground"><Shield size={14} className="text-primary" />{t("Titular BÓVEDA")}</span>
           {wallet && <button type="button" onClick={copy} className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 font-mono text-xs hover:bg-muted" aria-label={t("Copiar dirección")}>{wallet.slice(0, 4)}…{wallet.slice(-4)}{copied ? <Check size={12} /> : <Copy size={12} />}</button>}
         </div>
       </div>
@@ -102,8 +97,6 @@ export function AccountSettings() {
         <Button asChild variant="outline" size="sm"><Link to="/invita"><Gift size={16} />{t("Invita y gana")}</Link></Button>
       </div>
     </div>
-
-    <TierCard wallet={wallet} />
 
     <div className={card}>
       <h2 className="flex items-center gap-2 font-display text-xl font-semibold"><UserRound size={20} className="text-primary" />{t("Perfil")}</h2>
@@ -114,7 +107,7 @@ export function AccountSettings() {
           <Button asChild type="button" variant="outline" size="sm"><label className="cursor-pointer"><Camera size={16} />{profile.photo ? t("Cambiar foto") : t("Subir foto")}<input type="file" accept="image/*" className="sr-only" onChange={(e) => { void pickPhoto(e.target.files?.[0]); e.target.value = ""; }} /></label></Button>
           {profile.photo && <Button type="button" variant="ghost" size="sm" onClick={() => setProfile({ ...profile, photo: "" })}><Trash2 size={16} />{t("Quitar foto")}</Button>}
         </div><p className="text-xs text-muted-foreground">{t("Se recorta en círculo y se reduce automáticamente. Si no subes una, se usa tu icono.")}</p></div>
-        <fieldset><legend className="mb-3 text-sm">{t("Elige tu avatar")}</legend><div className="flex flex-wrap gap-3">{avatars.map(({ id, label, Icon }) => { const min = AVATAR_MIN_TIER[id]; const locked = tierIndex < min; return <Button key={id} type="button" disabled={locked} variant={profile.avatar === id ? "default" : "outline"} size="icon" className="relative" title={locked ? t("Se desbloquea en nivel {tier}", { tier: FEE_TIERS[min]?.name ?? "" }) : t(label)} aria-label={t(label)} aria-pressed={profile.avatar === id} onClick={() => setProfile({ ...profile, avatar: id })}><Icon size={22} />{locked && <Lock size={10} className="absolute -right-1 -top-1 rounded-full bg-card" />}</Button>; })}</div><p className="mt-2 text-xs text-muted-foreground">{t("Los iconos con candado se desbloquean al subir de nivel (Plus, Pro y VIP).")}</p></fieldset>
+        <fieldset><legend className="mb-3 text-sm">{t("Elige tu avatar")}</legend><div className="flex flex-wrap gap-3">{avatars.map(({ id, label, Icon }) => { return <Button key={id} type="button" variant={profile.avatar === id ? "default" : "outline"} size="icon" className="relative" title={t(label)} aria-label={t(label)} aria-pressed={profile.avatar === id} onClick={() => setProfile({ ...profile, avatar: id })}><Icon size={22} /></Button>; })}</div></fieldset>
         <div className="flex items-center justify-between gap-3 text-sm"><span className="flex items-center gap-2"><Languages size={16} />{t("Idioma")}</span><LanguageMenu /></div>
         <div className="flex items-center justify-between gap-3 text-sm"><span>{t("Apariencia")}</span><ThemeToggle /></div>
         <Button type="submit" disabled={busy}><Check size={16} />{busy ? t("Un momento…") : t("Guardar cambios")}</Button>
