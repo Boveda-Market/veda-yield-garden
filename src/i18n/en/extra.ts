@@ -1509,4 +1509,11 @@ export const extra: Record<string, string> = {
   "No se pudo preparar la recarga.": "Couldn't prepare the top-up.",
   "finalizado": "finalized",
   "confirmado": "confirmed",
+  "Parece que el internet tuvo un hipo (o la antena se fue a tomar un café ☕)": "Looks like the internet hiccuped (or the antenna went for a coffee ☕)",
+  "La confirmación no alcanzó a pasar a tiempo. Échale un ojo a tu Wi-Fi o datos móviles y dale otro toque.": "The confirmation didn't make it in time. Check your Wi-Fi or mobile data and tap again.",
+  "¿Te quedaste sin señal o te entró una llamada?": "Lost signal or got a call?",
+  "La aprobación no se completó. Cuando tengas buena señal, puedes reanudar con un toque.": "The approval didn't finish. When your signal is good, resume with one tap.",
+  "Hora pico en la autopista digital": "Rush hour on the digital highway",
+  "Hubo mucho tráfico en este momento y la operación se pausó para protegerte. Espera unos segundos y vuelve a intentar.": "Traffic was heavy right now, so the operation paused to protect you. Wait a few seconds and try again.",
+  "Tus dólares están seguros. No se cobró nada.": "Your dollars are safe. Nothing was charged.",
 };

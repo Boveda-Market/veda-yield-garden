@@ -91,7 +91,7 @@ export function Gta6PromoPopup({ wallet, samplePositions }: { wallet: string | n
   return <Dialog open={open} onOpenChange={setOpen}>
     <DialogContent className="hot-ring overflow-hidden border-0 p-[2px] [&>button]:hidden">
       <div className="rounded-[inherit] bg-[image:var(--gradient-hot-surface)] p-5 text-hot-foreground">
-        <button type="button" aria-label={t("Cerrar")} onClick={() => setOpen(false)} className="float-right rounded-full p-1 text-hot-muted hover:text-hot-foreground"><X size={18} /></button>
+        <button type="button" aria-label={t("Cerrar")} onClick={() => setOpen(false)} className="float-right grid size-9 place-items-center rounded-full border border-hot-foreground/30 bg-hot-foreground/10 text-hot-foreground hover:bg-hot-foreground/20"><X size={18} /></button>
         <DialogTitle className="sr-only">{t("Bóveda GTA6: súper alto rendimiento")}</DialogTitle>
         <DialogDescription className="sr-only">{t("Ver estrategia y cambiar")}</DialogDescription>
         <Headline from={from ? t(from.name) : undefined} />

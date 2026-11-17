@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SignalErrorCard } from "@/components/signal-error";
 import { DetailsToggle } from "@/components/ui/details-toggle";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
@@ -133,7 +134,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
       {pending && signature && <FlowSteps current={2} />}
       {pending && step && quote?.success && <WorkingLine text={step} />}
       {quote?.success && <Button size="lg" disabled={pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Crosshair className="mr-2 h-4 w-4" />}{pending && step ? step : t("Rebalancear ahora")}</Button>}
-      {message && <p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm">{message}</p>}
+      {message && <SignalErrorCard message={message} />}
       {message && !pending && !quote?.success && <Button onClick={() => void review()}>{t("Intentar de nuevo")}</Button>}
       {message && !pending && <Button variant="outline" onClick={onClose}>{t("Cerrar")}</Button>}
     </>}

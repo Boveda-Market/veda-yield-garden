@@ -1,4 +1,5 @@
 import { ServiceFeeLabel } from "@/components/service-fee-label";
+import { SignalErrorCard } from "@/components/signal-error";
 import { DetailsToggle } from "@/components/ui/details-toggle";
 import { vaultSymbol, type OperableVault } from "@/lib/solana-data";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
@@ -135,7 +136,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
     {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : message && !finished ? t("Intentar de nuevo") : migrateTo ? t("Confirmar cambio") : two ? t("Confirmar retiro (2 aprobaciones)") : t("Confirmar retiro")}</Button><p className="text-center text-xs text-muted-foreground">{migrateTo || two ? t("Tu billetera te pedirá 2 aprobaciones seguidas.") : t("Una sola aprobación. Los dólares llegan en segundos.")}</p></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta liquidación. No hay movimientos hasta que firmes.")}</p>}
     {signature && pending && step && <WorkingLine text={step} />}
-    {message && <p role="alert" className="text-sm">{message}</p>}
+    {message && <SignalErrorCard message={message} />}
     {signature && !pending && <Link to="/wallet" onClick={onClose} className="text-xs underline">{t("Ver en tu billetera")}</Link>}
     </>}
   </ActionSheetContent></Dialog>;

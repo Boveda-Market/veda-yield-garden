@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SignalErrorCard } from "@/components/signal-error";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { HotVaultCard } from "@/components/hot-vault-card";
@@ -127,7 +128,7 @@ export function ActivationCardView({ stage, onActivate, onAddFunds, onOpenVault 
     <h2 className="font-display text-xl font-semibold">{t("Activa tu cuenta")}</h2>
     <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Preparamos tu billetera para invertir en bóvedas y hacer tus movimientos sin trabas.")}</p>
     <p className="mt-3 text-sm text-muted-foreground">{t("Total estimado")} <span className="ml-1 font-display text-2xl font-bold text-foreground">{total}</span></p>
-    {stage.error && <p role="alert" className="mt-2 text-sm text-muted-foreground">{stage.error}</p>}
+    {stage.error && <SignalErrorCard className="mt-2" message={stage.error} />}
     <Button className="mt-4 h-12 w-full text-base font-bold" disabled={stage.totalMicro === null} onClick={onActivate}><Sparkles size={16} />{t("Activar cuenta")} ({total})</Button>
   </section>;
 }

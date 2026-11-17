@@ -290,3 +290,11 @@
 .cta-wiggle { display: inline-flex; animation: cta-wiggle 3s ease-in-out infinite; }
 .cta-glow-hot { --cta-glow: var(--hot); } .cta-glow-invite { --cta-glow: var(--invite-2); }
 @media (prefers-reduced-motion: reduce) { .cta-attn, .cta-attn::after, .cta-wiggle { animation: none; } }
+
+@keyframes signal-wave { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(1.5); opacity: 0; } }
+@keyframes signal-bar { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+@keyframes signal-pop { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }
+.signal-wave { animation: signal-wave 1.8s ease-out infinite; }
+.signal-bar { animation: signal-bar 1.2s ease-in-out infinite; }
+.signal-pop { animation: signal-pop 0.35s ease-out; }
+@media (prefers-reduced-motion: reduce) { .signal-wave, .signal-bar, .signal-pop { animation: none; } }

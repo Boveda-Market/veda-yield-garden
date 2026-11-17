@@ -1,4 +1,5 @@
 import { TapAmount } from "@/components/ui/tap-amount";
+import { SignalErrorCard } from "@/components/signal-error";
 import { BalanceLoading } from "@/components/ui/balance-loading";
 import { ShieldCheck, Eye, EyeOff, LifeBuoy, Gift } from "lucide-react";
 import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
@@ -259,7 +260,7 @@ export function WalletPanel() {
         <p className="text-xs text-muted-foreground">{t("Revisa bien la dirección: los envíos no se pueden revertir. BÓVEDA no cobra comisión por enviar.")}</p>
         <Button className="w-full" disabled={busy || !units || !!amountError || !to || !!toError} onClick={() => void send()}>{busy ? t("Procesando…") : t("Revisar y firmar envío")}</Button>
       </div>}
-      {message && <p role="alert" className="text-sm text-destructive">{message}</p>}
+      {message && <SignalErrorCard message={message} />}
       </ActionSheetContent>
     </Dialog>
 

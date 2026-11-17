@@ -36,7 +36,7 @@ describe("phone back button with an open card", () => {
     await wait();
     const marked = (window.history.state as Record<string, unknown> | null)?.["__bovedaSheet"];
     expect(marked).toBeDefined();
-    fireEvent.click(screen.getByText("Close").closest("button")!);
+    fireEvent.click(screen.getByText("Cerrar").closest("button")!);
     await wait(200);
     expect((window.history.state as Record<string, unknown> | null)?.["__bovedaSheet"]).toBeUndefined();
   });

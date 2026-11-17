@@ -1,4 +1,5 @@
 import { ServiceFeeLabel } from "@/components/service-fee-label";
+import { SignalErrorCard } from "@/components/signal-error";
 import { DetailsToggle } from "@/components/ui/details-toggle";
 import { vaultSymbol, type OperableVault } from "@/lib/solana-data";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
@@ -110,7 +111,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
     {pending && step && <WorkingLine text={step} />}
     {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : compound ? t("Confirmar reinversión") : t("Confirmar cosecha")}</Button><p className="text-center text-xs text-muted-foreground">{compound ? t("Tu billetera te pedirá 2 aprobaciones seguidas.") : result.tokenRaw && BigInt(result.tokenRaw) > 0n ? t("2 aprobaciones seguidas: cobrar y pasar todo a dólares.") : t("Una sola aprobación. Tu depósito sigue invertido.")}</p></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta cosecha. No hay movimientos hasta que firmes.")}</p>}
-    {message && <p role="alert" className="text-sm">{message}</p>}
+    {message && <SignalErrorCard message={message} />}
     </>}
   </ActionSheetContent></Dialog>;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { SignalErrorCard } from "@/components/signal-error";
 import { type OperableVault } from "@/lib/solana-data";
 import { notify } from "@/lib/notify";
 import { useServerFn } from "@tanstack/react-start";
@@ -62,6 +63,6 @@ export function CompoundStep({ wallet, position, vaultId, usdcRaw, tokenRaw, net
     details={[{ label: t("Operación"), value: t("Reinversión de ganancias") }, ...(quote?.tokenUsed && quote.tokenUsed !== "0" ? [{ label: t("También sumado"), value: `${quote.tokenUsed} ${quote.tokenSymbol}` }] : [])]} />;
   return <div className="grid gap-3 text-sm">
     {pending && <WorkingLine text={step} />}
-    {message && <><p role="alert">{message}</p><Button size="lg" onClick={() => void sign()}>{t("Intentar de nuevo")}</Button><Button variant="ghost" onClick={onClose}>{t("Cerrar")}</Button></>}
+    {message && <><SignalErrorCard message={message} /><Button size="lg" onClick={() => void sign()}>{t("Intentar de nuevo")}</Button><Button variant="ghost" onClick={onClose}>{t("Cerrar")}</Button></>}
   </div>;
 }

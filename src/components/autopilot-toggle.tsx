@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { SignalErrorCard } from "@/components/signal-error";
 import { useRealWallet } from "@/hooks/use-real-wallet";
 import { isDlmmVault } from "@/lib/solana-data";
 import { shouldAutoEnableAutopilot } from "@/lib/autopilot";
@@ -111,7 +112,7 @@ export function AutopilotToggle({ className }: { className?: string }) {
         <li className="flex gap-3"><ShieldCheck size={18} className="mt-0.5 shrink-0 text-primary" aria-hidden /><span>{t("El permiso solo sirve para rebalancear: no puede retirar ni enviar tu dinero. Lo apagas cuando quieras.")}</span></li>
       </ul>
       <Button size="lg" className="font-bold" disabled={pending} onClick={() => void activate()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Bot className="mr-2 h-4 w-4" />}{t("Activar piloto automático")}</Button>
-      {error && <p role="alert" className="rounded-xl border border-border/80 bg-secondary/60 p-3 text-sm">{error}</p>}
+      {error && <SignalErrorCard message={error} />}
       {error && !pending && <Button variant="outline" onClick={() => setOpen(false)}>{t("Cerrar")}</Button>}
     </ActionSheetContent></Dialog>}
   </>;
