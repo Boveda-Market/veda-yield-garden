@@ -11,7 +11,7 @@ import { ActionSuccess } from "@/components/action-success";
 import { notify } from "@/lib/notify";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, ChevronRight, Plus } from "lucide-react";
+import { Copy, KeyRound, Send, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Banknote, Vault } from "lucide-react";
 import { OfframpButton } from "@/components/offramp-dialog";
@@ -159,11 +159,6 @@ export function WalletPanel() {
   const jupUsd = extra.data?.["JupUSD"] !== undefined ? Number(extra.data["JupUSD"]) / 1e6 : 0;
   const extraUsd = jupUsd + extraTokens.filter((x) => x.symbol !== "JupUSD").reduce((sum, x) => { const raw = extra.data?.[x.symbol]; const p = prices.data?.[x.symbol]; return raw && p ? sum + Number(raw) / 10 ** x.decimals * p : sum; }, 0);
   const fmt = (v: number, d = 2) => v.toLocaleString("en-US", { useGrouping: false, maximumFractionDigits: d });
-  const assets = [
-    { symbol: "USDC", label: t("Dólar digital"), raw: balances.data?.usdc, decimals: 6 },
-    { symbol: "SOL", label: t("Para costos de red"), raw: balances.data?.sol, decimals: 9 },
-    ...extraTokens.map((x) => ({ symbol: x.symbol, label: x.symbol === "JupUSD" ? t("Pagos de predicciones") : x.symbol, raw: extra.data?.[x.symbol], decimals: x.decimals })),
-  ].filter((a) => a.symbol === "USDC" || a.symbol === "SOL" || a.symbol === "MET" || (a.raw !== undefined && a.raw > 0n)).map((a) => { const amt = a.raw === undefined ? undefined : Number(a.raw) / 10 ** a.decimals; const p = prices.data?.[a.symbol]; return { ...a, amt, usd: amt !== undefined && p !== undefined ? amt * p : undefined }; });
   const openSwap = (from: string, amount = "") => { setTab("swap"); setSent(null); setMessage(null); setSwapFrom((v) => ({ key: v.key + 1, from, amount })); setSheet(true); };
   const openSend = (a: WalletAsset) => { setTab("send"); setSent(null); setMessage(null); setAsset(a); setSheet(true); };
   const decimals = asset === "SOL" ? 9 : 6;
@@ -233,18 +228,6 @@ export function WalletPanel() {
 
     <WalletPositions wallet={address} />
     <WalletOpenPredictions />
-
-    <section className="rounded-2xl border border-border bg-card p-2">
-      <h3 className="px-3 pt-3 pb-1 font-display text-lg">{t("Tus activos")}</h3>
-      <ul>{assets.map((a) => <li key={a.symbol} className="flex items-center gap-3 rounded-xl p-3 hover:bg-muted">
-        <TokenIcon symbol={a.symbol} size={40} />
-        <div className="min-w-0 flex-1"><p className="font-medium">{a.symbol}</p><p className="text-xs text-muted-foreground">{a.label}</p></div>
-        <div className="text-right"><p className="font-medium">{hidden ? "••••" : a.amt !== undefined ? fmt(a.amt, a.symbol === "USDC" ? 2 : 4) : "—"}</p><p className="text-xs text-muted-foreground">{hidden ? MASK : a.usd !== undefined ? `$${fmt(a.usd)}` : "—"}</p></div>
-        {a.symbol === "USDC" && <Button size="icon" variant="ghost" aria-label={t("Añadir dólares")} onClick={() => setBuyOpen((v) => v + 1)}><Plus size={16} /></Button>}
-        <Button size="icon" variant="ghost" aria-label={t("Cambiar")} onClick={() => openSwap(a.symbol)}><ArrowLeftRight size={16} /></Button>
-        {(a.symbol === "USDC" || a.symbol === "SOL") && <Button size="icon" variant="ghost" aria-label={t("Enviar")} onClick={() => openSend(a.symbol as WalletAsset)}><Send size={16} /></Button>}
-      </li>)}</ul>
-    </section>
 
     <Dialog open={sheet} onOpenChange={(o) => { if (!o && busy) return; setSheet(o); if (!o) { setSent(null); setMessage(null); } }}>
       <ActionSheetContent closeLabel={t("Cerrar")} onInteractOutside={(e) => { if (busy) e.preventDefault(); }}>
