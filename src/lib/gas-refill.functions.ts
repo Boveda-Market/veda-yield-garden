@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requirePrivyAuth } from "@/lib/privy-auth.middleware";
-import { gasRefillInput, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
+import { activationCharge, gasRefillInput, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
 
 const UNAVAILABLE = "La recarga automática no está disponible en este momento. Ya avisamos al equipo; inténtalo de nuevo más tarde. No se movió dinero.";
 let lastTreasuryAlert = 0;
@@ -11,7 +11,7 @@ type Fail = { success: false; error: string };
 export const prepareGasRefill = createServerFn({ method: "POST" })
   .middleware([requirePrivyAuth])
   .inputValidator((d: unknown) => gasRefillInput.parse(d))
-  .handler(async ({ data, context }): Promise<{ success: true; transaction: string; lamports: string; chargeMicro: string } | Fail> => {
+  .handler(async ({ data, context }): Promise<{ success: true; transaction: string | null; lamports: string; chargeMicro: string } | Fail> => {
     { const { assertTradingWallet } = await import("@/lib/trade-guard.server"); await assertTradingWallet(context.privyUserId, data.wallet); }
     const key = process.env["HELIUS_API_KEY"];
     const secret = process.env["AFFILIATE_PAYOUT_SECRET_KEY"];
@@ -20,7 +20,7 @@ export const prepareGasRefill = createServerFn({ method: "POST" })
       const { PublicKey } = await import("@solana/web3.js");
       const { heliusConnection } = await import("@/lib/solana-read.server");
       const sol = BigInt(await heliusConnection(key).getBalance(new PublicKey(data.wallet), "confirmed"));
-      const lamports = refillLamports(sol, data.target ?? "standard");
+      const lamports = refillLamports(sol, data.activation ? "vault" : (data.target ?? "standard"));
       if (lamports <= 0n) return { success: false, error: "Tu reserva para operaciones ya está bien." };
       const { FEE_WALLET } = await import("@/lib/fees");
       const { TREASURY_SOL_LOW } = await import("@/lib/treasury-reserve");
@@ -36,7 +36,9 @@ export const prepareGasRefill = createServerFn({ method: "POST" })
       const q = await fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${SOL}&outputMint=${USDC}&amount=${lamports}&slippageBps=50`);
       if (!q.ok) throw new Error("quote");
       const market = BigInt(((await q.json()) as { outAmount: string }).outAmount);
-      const charge = refillCharge(market);
+      // Activation charges reserve cost + fixed $5; regular refills keep the small cost-recovery margin.
+      const charge = data.activation ? activationCharge(market) : refillCharge(market);
+      if (data.quoteOnly) return { success: true, transaction: null, lamports: lamports.toString(), chargeMicro: charge.toString() };
       const { buildGasRefill } = await import("@/lib/affiliate.server");
       const transaction = await buildGasRefill(key, secret, FEE_WALLET, data.wallet, lamports, charge);
       return { success: true, transaction, lamports: lamports.toString(), chargeMicro: charge.toString() };

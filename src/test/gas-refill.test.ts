@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gasIsLow, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
+import { activationCharge, activationShortfallMicro, gasIsLow, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
 
 describe("gas refill", () => {
   it("is low below 0.003 SOL", () => { expect(gasIsLow(2_999_999n)).toBe(true); expect(gasIsLow(3_000_000n)).toBe(false); });
@@ -9,3 +9,13 @@ describe("gas refill", () => {
   it("tops a regular-vault deposit up to 0.02 SOL", () => { expect(refillLamports(2_500_000n, "deposit")).toBe(17_500_000n); expect(refillLamports(20_000_000n, "deposit")).toBe(0n); });
   it("treasury sponsors only while keeping its 0.003 SOL floor", () => { expect(treasuryCanRefill(13_000_000n, 10_000_000n, 3_000_000n)).toBe(true); expect(treasuryCanRefill(20_000_000n, 38_800_000n, 3_000_000n)).toBe(false); });
 });
+
+describe("first-time activation", () => {
+  it("charges reserve market value plus exactly $5", () => expect(activationCharge(8_800_000n)).toBe(13_800_000n));
+  it("delivers 0.065 SOL from an empty wallet", () => expect(refillLamports(0n, "vault")).toBe(65_000_000n));
+  it("asks for the missing dollars below $20", () => {
+    expect(activationShortfallMicro(12_000_000n)).toBe(8_000_000n);
+    expect(activationShortfallMicro(20_000_000n)).toBe(0n);
+  });
+});
+

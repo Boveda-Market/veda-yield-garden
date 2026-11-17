@@ -259,6 +259,9 @@
 .hot-cta { background-image: linear-gradient(90deg, var(--hot-2), var(--hot), var(--hot-2)); background-size: 200% 100%; animation: hot-shift 3s linear infinite; }
 .invite-ring { background-image: linear-gradient(90deg, var(--invite), var(--invite-2), var(--invite)); background-size: 200% 100%; animation: hot-shift 5s linear infinite; }
 .invite-cta { background-image: linear-gradient(90deg, var(--invite), var(--invite-2), var(--invite)); background-size: 200% 100%; animation: hot-shift 3s linear infinite; }
+@keyframes activation-turbo { 0% { width: 6%; } 60% { width: 82%; } 100% { width: 96%; } }
+.activation-turbo { width: 6%; background-image: linear-gradient(90deg, var(--hot-2), var(--hot), var(--hot-2)); background-size: 200% 100%; box-shadow: 0 0 12px var(--hot); animation: activation-turbo 9s cubic-bezier(.2,.8,.2,1) forwards, hot-shift 1.2s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .activation-turbo { animation: none; width: 70%; } }
 @media (prefers-reduced-motion: reduce) { .hot-ring, .duel-ring, .hot-cta, .invite-ring, .invite-cta { animation: none; } }
 
 /* Wallet total loading: sweeping shine, bouncing coins, fading step text. */

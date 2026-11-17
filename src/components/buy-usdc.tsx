@@ -90,6 +90,7 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
           <span className="text-xs text-muted-foreground">{t("Compra rápida de USDC vía MoonPay. El monto se escribe en dólares.")}</span></span>
         </button>}
       </div>
+      <p className="text-center text-xs text-muted-foreground">{t("Sugerido: $25 · $50 (recomendado para empezar) · $100. Mínimo sugerido $20 para activar tu cuenta y abrir tu primera bóveda sin interrupciones.")}</p>
     </ActionSheetContent></Dialog>
     {receipt && <div role="status" className="mt-3 rounded-xl border border-primary/40 bg-primary/10 p-4 text-sm">
       <p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} className="text-primary" />{t("¡Fondos añadidos!")}</p>

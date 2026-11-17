@@ -86,7 +86,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, autoStart = f
     setMessage(null); setStep("preparing");
     try {
       const r = await prepareRefill({ data: { wallet: walletAddress, target: rangeVault ? "vault" : "deposit" } });
-      if (!r.success) { setStep("error"); setMessage(t(r.error)); return; }
+      if (!r.success || !r.transaction) { setStep("error"); setMessage(t(r.success ? "No se pudo preparar la recarga." : r.error)); return; }
       setStep("signing");
       await signAndSend(Uint8Array.from(atob(r.transaction), (c) => c.charCodeAt(0)));
       notify("success", t("Garantía lista"), t("Usamos ${usd} de tus dólares", { usd: unitsToDecimal(BigInt(r.chargeMicro), 6) }));

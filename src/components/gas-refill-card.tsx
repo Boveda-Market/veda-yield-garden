@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { BuyUsdc } from "@/components/buy-usdc";
 import { notify } from "@/lib/notify";
 import { CheckCircle2, Fuel, Loader2, Sparkles } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
@@ -6,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { prepareGasRefill } from "@/lib/gas-refill.functions";
-import { gasIsLow, type RefillTarget } from "@/lib/gas-refill";
+import { activationShortfallMicro, gasIsLow, type RefillTarget } from "@/lib/gas-refill";
 import { MIN_USDC_MICRO, unitsToDecimal } from "@/lib/onboarding";
 
 /** `force` shows the card even above the low mark, for screens whose operation needs more reserve (refilled up to `target`). */
@@ -27,7 +29,7 @@ export function GasRefillCard({ sol, usdc, onDone, force, target }: Props) {
     setBusy(true); setMsg(null);
     try {
       const r = await prepare({ data: { wallet: session.walletAddress, ...(target ? { target } : {}) } });
-      if (!r.success) throw new Error(r.error);
+      if (!r.success) throw new Error(r.error); if (!r.transaction) throw new Error("No se pudo completar la recarga.");
       await session.signAndSend(Uint8Array.from(atob(r.transaction), (c) => c.charCodeAt(0)));
       notify("success", t("Reserva lista"), t("Ya puedes hacer movimientos"));
       setMsg({ ok: true, text: t("Listo: tu reserva para operaciones quedó activa (${usdc} de tus dólares). Ya puedes seguir usando tu cuenta con normalidad.", { usdc: unitsToDecimal(BigInt(r.chargeMicro), 6) }) });
@@ -35,19 +37,83 @@ export function GasRefillCard({ sol, usdc, onDone, force, target }: Props) {
     } catch (e) { setMsg({ ok: false, text: e instanceof Error ? t(e.message) : t("No se pudo completar la recarga.") }); }
     finally { setBusy(false); }
   }
-  if (activation) return <section aria-label={t("Activa tu cuenta")} className="rounded-2xl border border-primary/40 bg-primary/10 p-5">
-    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><CheckCircle2 size={14} />{t("Dólares recibidos")}</p>
-    <h2 className="mt-2 font-display text-xl font-semibold">{t("Activa tu cuenta para operar")}</h2>
-    <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Tus dólares ya están en tu cuenta. Para empezar a invertir y moverte libremente, apartamos unos $2 para tus próximos movimientos. BÓVEDA cubre el costo de esta primera activación.")}</p>
-    {msg && <p role={msg.ok ? "status" : "alert"} className={`mt-2 text-sm ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text}</p>}
-    {!msg?.ok && <Button className="mt-4 w-full" disabled={busy} onClick={() => void refill()}>{busy ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}{busy ? t("Activando…") : t("Activar mi cuenta")}</Button>}
-    <p className="mt-2 text-xs text-muted-foreground">{t("Confirmarás con tu huella o Face ID; al terminar verás cuánto se usó.")}</p>
-  </section>;
+  if (activation) return <ActivationFlow usdc={usdc} wallet={session.walletAddress} prepare={prepare} signAndSend={session.signAndSend} onDone={onDone} />;
   return <section aria-label={t("Reserva para costos de red")} className={`rounded-2xl border p-4 ${empty ? "border-destructive/50 bg-destructive/10" : "border-accent bg-accent/30"}`}>
     <p className="flex items-center gap-2 font-semibold"><Fuel size={16} />{empty ? t("Te quedaste sin saldo para movimientos") : t("Te queda poco saldo para movimientos")}</p>
     <p className="mt-1 text-sm text-foreground/85">{t("Con un toque apartamos una pequeña parte de tus dólares (unos $2) para cubrir tus próximas operaciones. BÓVEDA cubre el costo de esta recarga.")}</p>
     {msg && <p role={msg.ok ? "status" : "alert"} className={`mt-2 text-sm ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text}</p>}
     {!msg?.ok && <Button className="mt-3 w-full" disabled={busy || usdc <= 0n} onClick={() => void refill()}>{busy ? t("Preparando recarga…") : t("Recargar reserva de operaciones")}</Button>}
     {usdc <= 0n && <p className="mt-2 text-xs text-muted-foreground">{t("Necesitas tener dólares disponibles para recargar tu reserva.")}</p>}
+  </section>;
+}
+
+export const PENDING_DEPOSIT_KEY = "boveda:pending-deposit";
+const money = (micro: bigint) => `$${(Number(micro) / 1e6).toFixed(2)}`;
+export type ActivationStage = { kind: "short"; missingMicro: bigint } | { kind: "ready"; totalMicro: bigint | null; error?: string } | { kind: "working" } | { kind: "done" };
+
+/** First-time activation in one card: clean total → GTA6 wait → "Cuenta lista" that opens the GTA6 deposit. */
+function ActivationFlow({ usdc, wallet, prepare, signAndSend, onDone }: { usdc: bigint; wallet: string | null | undefined; prepare: ReturnType<typeof useServerFn<typeof prepareGasRefill>>; signAndSend: (tx: Uint8Array) => Promise<string>; onDone?: (() => void) | undefined }) {
+  const t = useT();
+  const navigate = useNavigate();
+  const missing = activationShortfallMicro(usdc);
+  const [total, setTotal] = useState<bigint | null>(null);
+  const [stage, setStage] = useState<"ready" | "working" | "done">("ready");
+  const [error, setError] = useState<string | undefined>();
+  const [buy, setBuy] = useState(0);
+  useEffect(() => {
+    if (!wallet || missing > 0n) return;
+    void prepare({ data: { wallet, activation: true, quoteOnly: true } }).then((r) => { if (r.success) setTotal(BigInt(r.chargeMicro)); }).catch(() => {});
+  }, [wallet, missing > 0n]); // eslint-disable-line react-hooks/exhaustive-deps
+  async function activate() {
+    if (!wallet) return;
+    setError(undefined); setStage("working");
+    try {
+      const r = await prepare({ data: { wallet, activation: true } });
+      if (!r.success) throw new Error(r.error);
+      if (!r.transaction) throw new Error("No se pudo preparar la activación.");
+      await signAndSend(Uint8Array.from(atob(r.transaction), (c) => c.charCodeAt(0)));
+      setStage("done"); onDone?.();
+    } catch (e) { setError(e instanceof Error ? t(e.message) : t("No se pudo completar la activación.")); setStage("ready"); }
+  }
+  function openGta6() { try { sessionStorage.setItem(PENDING_DEPOSIT_KEY, "gta6"); } catch { /* storage blocked */ } void navigate({ to: "/app" }); }
+  const view: ActivationStage = stage === "done" ? { kind: "done" } : stage === "working" ? { kind: "working" } : missing > 0n ? { kind: "short", missingMicro: missing } : { kind: "ready", totalMicro: total, ...(error ? { error } : {}) };
+  return <>
+    <ActivationCardView stage={view} onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={openGta6} />
+    {buy > 0 && <BuyUsdc auto={buy} className="mt-2" />}
+  </>;
+}
+
+/** Pure view of the activation card (also rendered in the admin preview). */
+export function ActivationCardView({ stage, onActivate, onAddFunds, onOpenVault }: { stage: ActivationStage; onActivate?: (() => void) | undefined; onAddFunds?: (() => void) | undefined; onOpenVault?: (() => void) | undefined }) {
+  const t = useT();
+  if (stage.kind === "working") return <section aria-label={t("Preparando tu acceso VIP")} aria-live="polite" className="hot-ring rounded-2xl p-[2px]">
+    <div className="rounded-[14px] p-5 text-hot-foreground" style={{ backgroundImage: "var(--gradient-hot-surface)" }}>
+      <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-hot-2"><Loader2 size={14} className="animate-spin" />{t("Vice City · Modo VIP")}</p>
+      <h2 className="mt-2 font-display text-2xl font-extrabold">{t("Preparando tu acceso VIP…")}</h2>
+      <p className="mt-1 text-sm leading-6 text-hot-muted">{t("Cargando tu reserva y configurando tu cuenta para que cobres como la casa. Esto toma solo unos segundos…")}</p>
+      <div className="mt-4 h-3 overflow-hidden rounded-full bg-hot-foreground/10"><div className="activation-turbo h-full rounded-full" /></div>
+      <p className="mt-2 text-xs text-hot-muted">{t("Confirma con tu huella o Face ID si te lo pide.")}</p>
+    </div>
+  </section>;
+  if (stage.kind === "done") return <section aria-label={t("Cuenta lista")} role="status" className="hot-ring rounded-2xl p-[2px]">
+    <div className="rounded-[14px] p-5 text-hot-foreground" style={{ backgroundImage: "var(--gradient-hot-surface)" }}>
+      <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-hot-2"><CheckCircle2 size={14} />{t("Completado")}</p>
+      <h2 className="mt-2 font-display text-2xl font-extrabold">{t("Cuenta lista, ya puedes comenzar")}</h2>
+      <p className="mt-1 text-sm leading-6 text-hot-muted">{t("Tu reserva de operaciones ya está activa. Tu billetera está 100% lista para generar comisiones.")}</p>
+      <Button className="hot-cta mt-4 h-12 w-full rounded-xl text-base font-extrabold text-hot-surface" onClick={onOpenVault}>🎰 {t("Abrir mi primera bóveda")} →</Button>
+    </div>
+  </section>;
+  if (stage.kind === "short") return <section aria-label={t("Estás a un paso de comenzar")} className="rounded-2xl border border-primary/40 bg-primary/10 p-5">
+    <h2 className="font-display text-xl font-semibold">{t("Estás a un paso de comenzar")}</h2>
+    <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Te faltan {amount} para activar tu cuenta y abrir tu primera bóveda.", { amount: money(stage.missingMicro) })}</p>
+    <Button className="mt-4 w-full" onClick={onAddFunds}><Sparkles size={16} />{t("Añadir lo que falta ({amount})", { amount: money(stage.missingMicro) })}</Button>
+  </section>;
+  const total = stage.totalMicro === null ? "…" : `~${money(stage.totalMicro)}`;
+  return <section aria-label={t("Activa tu cuenta")} className="rounded-2xl border border-primary/40 bg-primary/10 p-5">
+    <h2 className="font-display text-xl font-semibold">{t("Activa tu cuenta")}</h2>
+    <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Preparamos tu billetera para invertir en bóvedas y hacer tus movimientos sin trabas.")}</p>
+    <p className="mt-3 text-sm text-muted-foreground">{t("Total estimado")} <span className="ml-1 font-display text-2xl font-bold text-foreground">{total}</span></p>
+    {stage.error && <p role="alert" className="mt-2 text-sm text-destructive">{stage.error}</p>}
+    <Button className="mt-4 h-12 w-full text-base font-bold" disabled={stage.totalMicro === null} onClick={onActivate}><Sparkles size={16} />{t("Activar cuenta")} ({total})</Button>
   </section>;
 }

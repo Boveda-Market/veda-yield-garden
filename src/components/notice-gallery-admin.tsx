@@ -4,7 +4,7 @@ import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { notify, type NotifyTone } from "@/lib/notify";
 import { NewsList } from "@/components/news-bell";
-import { GasRefillCard } from "@/components/gas-refill-card";
+import { ActivationCardView, GasRefillCard } from "@/components/gas-refill-card";
 import { SolExcessCard } from "@/components/sol-excess-card";
 import { LoginAlert } from "@/components/login-alert";
 import { SafetyNotice } from "@/components/safety-notice";
@@ -40,6 +40,10 @@ export function NoticeGalleryAdmin() {
     { id: "rb-done", title: t("Rebalanceo · comprobante"), node: <ActionSuccess title={t("¡Posición rebalanceada!")} body={t("Tus ganancias se sumaron y tu posición quedó centrada en el precio actual. Ya vuelve a generar.")} amount={{ value: "$12.40", unit: "" }} details={[]} signature={null} onClose={() => undefined} /> },
     { id: "round", title: t("Tarjeta de jugada Sube/Baja"), node: <PredictPositionCard p={SAMPLE_ROUND} onSell={() => undefined} /> },
     { id: "won", title: t("Tarjeta de jugada ganada"), node: <PredictPositionCard p={{ ...SAMPLE_ROUND, status: "closed", result: "yes", closeTime: Math.floor(NOW / 1000) - 60 }} onClaim={() => undefined} /> },
+    { id: "act-1", title: t("Activación · 1 total"), node: <ActivationCardView stage={{ kind: "ready", totalMicro: 13_800_000n }} /> },
+    { id: "act-2", title: t("Activación · 2 espera"), node: <ActivationCardView stage={{ kind: "working" }} /> },
+    { id: "act-3", title: t("Activación · 3 lista"), node: <ActivationCardView stage={{ kind: "done" }} /> },
+    { id: "act-short", title: t("Activación · saldo menor a $20"), node: <ActivationCardView stage={{ kind: "short", missingMicro: 8_000_000n }} /> },
     { id: "gas", title: t("Recargar reserva de operaciones"), node: <GasRefillCard sol={1_000_000n} usdc={20_000_000n} force /> },
     { id: "excess", title: t("Exceso de reserva como sobrante"), node: <SolExcessCard sol={200_000_000n} usdc={5_000_000n} solPrice={140} onConvert={() => undefined} /> },
     { id: "login", title: t("Mensaje de acceso cerrable"), node: <LoginAlert message={t("No se pudo iniciar sesión. Inténtalo de nuevo.")} onDismiss={() => undefined} /> },

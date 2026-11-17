@@ -34,4 +34,15 @@ export function treasuryCanRefill(treasuryLamports: bigint, lamports: bigint, fl
   return treasuryLamports >= lamports + floor;
 }
 
-export const gasRefillInput = z.object({ wallet: solanaAddressSchema, target: z.enum(["standard", "vault", "deposit"]).optional() });
+/** First-time activation: the wallet receives the vault-ready reserve and pays its market value plus this fixed activation fee ($5), so the treasury recovers the reserve and always earns the same amount whatever the SOL price. */
+export const ACTIVATION_FEE_MICRO = 5_000_000n;
+/** Suggested starting balance: covers the activation and leaves room for a first vault deposit. */
+export const ACTIVATION_SUGGESTED_USD = 20;
+export function activationCharge(marketMicro: bigint) { return marketMicro + ACTIVATION_FEE_MICRO; }
+/** Dollars still missing to reach the suggested starting balance (0 when enough). */
+export function activationShortfallMicro(usdcMicro: bigint) {
+  const need = BigInt(ACTIVATION_SUGGESTED_USD) * 1_000_000n;
+  return usdcMicro >= need ? 0n : need - usdcMicro;
+}
+
+export const gasRefillInput = z.object({ wallet: solanaAddressSchema, target: z.enum(["standard", "vault", "deposit"]).optional(), activation: z.boolean().optional(), quoteOnly: z.boolean().optional() });
