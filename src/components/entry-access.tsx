@@ -24,13 +24,16 @@ function EntryButtons() {
   useEffect(() => {
     if (!session.ready || !session.authenticated) return;
     markReturning();
-    // Returning users go straight to their home screen.
-    if (wasReturning.current) void navigate({ to: home, replace: true });
+    if (isHeroReview()) return;
+    // Signed in: go straight to the screen they wanted (or their home), no extra "continue" tap.
+    let target: string = home;
+    try { const saved = sessionStorage.getItem("boveda:after-login"); if (saved && saved.startsWith("/") && !saved.startsWith("//")) target = saved; sessionStorage.removeItem("boveda:after-login"); } catch { /* ignore */ }
+    void navigate({ to: target, replace: true });
   }, [session.ready, session.authenticated, home, navigate]);
   // Returning visitors: cover the whole startup (secure access → redirect to their home) with one loading screen.
   if (wasReturning.current && (!session.ready || session.authenticated)) return <BootSplash />;
   if (session.ready && session.authenticated && isHeroReview()) return <div className="mt-8 w-full max-w-sm"><Button asChild className="h-12 w-full"><Link to={home}>{t("Continuar al app")}<ArrowRight size={16} /></Link></Button></div>;
-  if (session.ready && session.authenticated) return <div className="mt-8 w-full max-w-sm"><Button asChild className="h-12 w-full"><Link to={home}>{t("Continuar al app")}<ArrowRight size={16} /></Link></Button></div>;
+  if (session.ready && session.authenticated) return <BootSplash />;
   return <div className="mt-8 w-full max-w-sm space-y-3">
     <div role="tablist" className="mb-4 grid grid-cols-2 rounded-xl bg-secondary p-1 text-sm font-medium">
       <button role="tab" aria-selected={!signup} onClick={() => setSignup(false)} className={`rounded-lg py-2 ${!signup ? "bg-background shadow-sm" : "text-muted-foreground"}`}>{t("Iniciar sesión")}</button>

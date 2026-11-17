@@ -44,6 +44,16 @@ const PrivyAccess = lazyWithReload(() => import("@/components/privy-access"));
 
 function AccessLoading() { return <BootSplash />; }
 
+/** Signed-out visit to a private screen: go straight to sign-in (no intermediate button) and come back here after. */
+function ToSignIn() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    try { sessionStorage.setItem("boveda:after-login", window.location.pathname + window.location.search); } catch { /* ignore */ }
+    void navigate({ to: "/", hash: "acceso", replace: true });
+  }, [navigate]);
+  return <BootSplash />;
+}
+
 export function AppExperience({ guest = false, view = "vaults" }: { guest?: boolean; view?: "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets" | "admin" }) {
   const t = useT();
   return <ClientOnly fallback={<AccessLoading />}><Suspense fallback={<AccessLoading />}>{guest ? <BovedaSessionContext.Provider value={{ ready: true, authenticated: false, userId: null, label: t("Invitado"), walletAddress: null, error: null, login: () => {}, logout: async () => {}, signAndSend: async () => { throw new Error(t("Invitado solo puede usar Prueba")); } }}><SessionPage guest view={view} /></BovedaSessionContext.Provider> : <PrivyAccess><SessionPage view={view} /></PrivyAccess>}</Suspense></ClientOnly>;
@@ -57,7 +67,7 @@ function SessionPage({ guest = false, view }: { guest?: boolean; view: "vaults" 
   const [modeReady, setModeReady] = useState(false);
   useEffect(() => { try { sessionStorage.removeItem("boveda-mode"); } catch {} setMode("real"); setModeReady(true); }, []);
   if (!guest && (!session.ready || !modeReady)) return <AccessLoading />;
-  if (!guest && !session.authenticated && view !== "markets" && view !== "vaults") return <div className="mx-auto max-w-md px-5 py-12"><h1 className="font-display text-3xl">{t(VIEW_TITLES[view])}</h1><p className="mt-3 font-semibold">{t("Entra a BÓVEDA")}</p><p className="mt-1 text-muted-foreground">{t("Inicia sesión con Google o email para ver tu cuenta.")}</p><Button asChild className="mt-6"><Link to="/">{t("Ir al acceso")}</Link></Button></div>;
+  if (!guest && !session.authenticated && view !== "markets" && view !== "vaults") return <ToSignIn />;
   return <Dashboard key={`${session.userId ?? "guest"}:${guest ? "trial" : mode}`} mode={guest ? "trial" : mode} guest={guest} view={view} onModeChange={(value) => { if (guest) return; setMode(value); try { sessionStorage.setItem("boveda-mode", value); } catch {} }} />;
 }
 

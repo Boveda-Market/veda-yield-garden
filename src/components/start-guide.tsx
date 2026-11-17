@@ -58,7 +58,8 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
   // Funded with USDC but no network reserve: the activation card (treasury-sponsored refill) takes over.
   if (step === "sol" && q.data.usdc >= MIN_USDC_MICRO) return null;
   if (step === "sol") return <section aria-label={t("Añadir dólares")} className={box}>
-    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Sparkles size={14} />{t("Empieza aquí")}</p>
+    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Sparkles size={14} />{t("Paso 1 de 3")}</p>
+    <ol aria-hidden className="mt-2 grid grid-cols-3 gap-1.5">{[1, 2, 3].map((n) => <li key={n} className={`h-1.5 rounded-full ${n === 1 ? "bg-primary" : "bg-primary/20"}`} />)}</ol>
     <h2 className="mt-2 font-display text-xl font-semibold">{t("Añade tus primeros dólares")}</h2>
     <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Elige Coinbase (saldo, banco o tarjeta) o tarjeta y Apple Pay. Luego activas tu cuenta en segundos para empezar a generar.")}</p>
     <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck size={14} className="text-primary" />{t("Solo tú controlas tus fondos. BÓVEDA no puede moverlos sin tu firma.")}</p>

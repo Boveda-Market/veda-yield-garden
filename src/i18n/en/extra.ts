@@ -748,6 +748,7 @@ export const extra: Record<string, string> = {
   "Nuevo saldo": "New balance",
   "La pasarela de pago puede cobrar su propio cargo, que ves antes de pagar.": "The payment provider may charge its own fee, shown before you pay.",
   "Empieza aquí": "Start here",
+  "Paso 1 de 3": "Step 1 of 3",
   "Añade fondos con tu tarjeta": "Add funds with your card",
   "Pagas con tarjeta en una pasarela segura y el dinero llega solo a tu cuenta. Luego lo activamos en dólares con un toque.": "Pay by card through a secure checkout and the money lands in your account. Then we activate it in dollars with one tap.",
   "Solo tú controlas tus fondos. BÓVEDA no puede moverlos sin tu firma.": "Only you control your funds. BÓVEDA can't move them without your signature.",
