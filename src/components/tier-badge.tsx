@@ -27,6 +27,6 @@ export function TierCard({ wallet }: { wallet: string | null | undefined }) {
     </div>
     <p className="mt-2 text-sm text-muted-foreground">{t("Según tu saldo total en BÓVEDA:")} {usd(tier.total)}</p>
     <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${tier.progress}%` }} /></div>
-    <p className="mt-2 text-sm">{tier.next ? `${t("Te faltan")} ${usd(tier.missing)} ${t("para el nivel")} ${tier.next} ${t("y comisiones más bajas.")}` : t("Tienes las comisiones más bajas de BÓVEDA.")}</p>
+    <p className="mt-2 text-sm">{tier.next ? `${t("Te faltan")} ${usd(tier.missing)} ${t("para el nivel")} ${tier.next} ${t("y intereses más bajas.")}` : t("Tienes las comisiones más bajas de BÓVEDA.")}</p>
   </div>;
 }

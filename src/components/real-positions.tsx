@@ -58,7 +58,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
       // High-octane vaults get the animated neon frame and sunset banner; actions stay identical to every other vault.
       return hot ? <article key={p.address} className="hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)]"><div className="h-full overflow-hidden rounded-[calc(1rem-2px)] bg-card p-5">{body}</div></article> : <article key={p.address} className="rounded-lg border border-border bg-card p-5">{body}</article>;
     })}</div>
-    <p className="mt-4 text-xs leading-5 text-muted-foreground">{t("Valores en dólares estimados al precio actual; pueden cambiar antes de firmar.")} {t("El contador en vivo estima cómo crecen tus ganancias con el rendimiento reciente de la bóveda; el monto exacto se confirma al cosechar.")}</p>
+    <p className="mt-4 text-xs leading-5 text-muted-foreground">{t("Valores en dólares estimados al precio actual; pueden cambiar antes de firmar.")} {t("El contador en vivo estima cómo crecen tus ganancias con los intereses recientes de la bóveda; el monto exacto se confirma al cosechar.")}</p>
   </section>;
 }
 
@@ -66,7 +66,7 @@ export function PortfolioEmpty() {
   const t = useT();
   return <section className="my-8 flex flex-col items-center rounded-lg border border-border bg-card px-6 py-12 text-center">
     <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/15 text-primary"><VaultIcon size={30} /></span>
-    <h2 className="mt-5 font-display text-2xl font-semibold">{t("Tu dinero puede empezar a generar rendimientos")}</h2>
+    <h2 className="mt-5 font-display text-2xl font-semibold">{t("Tu dinero puede empezar a generar intereses")}</h2>
     <p className="mt-2 max-w-md text-sm text-muted-foreground">{t("Aún no tienes bóvedas abiertas. Elige una, deposita USDC y mira aquí cómo crecen tus ganancias.")}</p>
     <Button asChild className="mt-6"><Link to="/wallet">{t("Depositar en bóveda")}</Link></Button>
   </section>;

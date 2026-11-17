@@ -87,7 +87,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       {data && <Gta6PromoBanner positions={data.positions} onMigrate={migrate} />}{data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
     </section> : <section aria-label={t("Bóvedas de rendimiento")} className="border-b border-border pb-4 pt-2">
       <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Bóvedas de rendimiento")}</h1>{refresh}</div>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Pon tus USDC a generar comisiones diarias. Retiras o cosechas cuando quieras.")}</p>
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Pon tus USDC a generar intereses diarias. Retiras o cosechas cuando quieras.")}</p>
       {errors}
       {data && <Gta6PromoBanner positions={data.positions} onMigrate={migrate} />}{data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
     </section>}

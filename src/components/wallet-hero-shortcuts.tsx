@@ -36,7 +36,7 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
     {mine ? <button type="button" onClick={() => setOpen(true)} className="hot-ring cta-attn cta-glow-hot group relative block rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">
       <Gta6TileBody status={<span className="inline-flex w-fit items-center gap-1 rounded-full bg-hot-surface/80 px-2 py-0.5 text-[11px] font-bold leading-4">{mine.outOfRange ? <><Zap size={11} aria-hidden />{t("Rebalancear")}</> : <>{t("Activa")} · {t("Ver ganancias")} →</>}</span>} />
     </button> : <Link to="/app" className="hot-ring cta-attn cta-glow-hot group relative block rounded-2xl p-[2px] transition-transform active:scale-[0.98]">
-      <Gta6TileBody status={<span className="text-[11px] leading-4 text-hot-muted">{t("Comisiones brutales con el volumen de GTA6")}</span>} />
+      <Gta6TileBody status={<span className="text-[11px] leading-4 text-hot-muted">{t("Intereses brutales con el volumen de GTA6")}</span>} />
     </Link>}
     <Link to="/mercados" className="cta-attn group relative block rounded-2xl bg-primary p-[2px] shadow-[0_0_24px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
       <span className="relative isolate flex h-full flex-col gap-1.5 overflow-hidden rounded-[14px] bg-card p-3">

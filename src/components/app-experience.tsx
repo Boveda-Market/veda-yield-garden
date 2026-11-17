@@ -164,7 +164,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
             <section aria-label={t("Estado del modo Prueba")} className="border-y border-border py-8">
               <div className="flex items-center gap-3"><ShieldAlert className="shrink-0 text-primary" size={24} /><h1 className="font-display text-2xl font-semibold">{activeView === "portfolio" ? t("Tu portafolio · Prueba") : t("Bóvedas · Prueba")}</h1></div>
               <p role="status" className="mt-4 font-semibold">{t("Créditos ficticios · sin dinero real")}</p>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Comisiones ficticias progresivas en entradas y salidas, iguales a Real. Un crédito simula un USDC; no se puede retirar ni convertir en dinero.")}</p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Intereses ficticias progresivas en entradas y salidas, iguales a Real. Un crédito simula un USDC; no se puede retirar ni convertir en dinero.")}</p>
               {session.walletAddress && <p className="mt-4 break-all text-xs text-muted-foreground">{t("Wallet conectada:")} {session.walletAddress}</p>}
               <dl className="mt-6 grid gap-5 sm:grid-cols-3">
                 <div><dt className="text-sm text-muted-foreground">{t("Balance total · ficticio")}</dt><dd className="mt-1 break-all font-display text-xl">{fmt(wallet + invested + earned)} {t("créditos")}</dd></div>

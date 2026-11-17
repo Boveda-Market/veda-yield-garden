@@ -24,7 +24,7 @@ export function AffiliatePanel() {
   const finalize = useServerFn(finalizeAffiliateClaim);
   const cancel = useServerFn(cancelAffiliateClaim);
   async function collect(): Promise<{ success: boolean; error?: string }> {
-    if (!dash?.payoutWallet || session.walletAddress !== dash.payoutWallet) return { success: false, error: "Conecta la wallet donde cobras tus comisiones para firmar el cobro." };
+    if (!dash?.payoutWallet || session.walletAddress !== dash.payoutWallet) return { success: false, error: "Conecta la wallet donde cobras tus ganancias para firmar el cobro." };
     const prepared = await claim({ data: { token: await token() } });
     if (!prepared.success) return prepared;
     let signature: string;
@@ -84,16 +84,16 @@ export function AffiliatePanel() {
       {(() => { const p = payoutProgress(BigInt(dash.pendingRaw)); return <div className="mt-4 rounded-xl border border-border p-4">
         <div className="flex justify-between text-xs text-muted-foreground"><span>{t("Próximo pago")}</span><span className="font-semibold text-foreground">{usdc(dash.pendingRaw)} / {usdc(PAYOUT_MIN_MICRO.toString())} USDC</span></div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={p.pct} aria-valuemin={0} aria-valuemax={100}><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${p.pct}%` }} /></div>
-        <p className="mt-2 text-xs text-muted-foreground">{p.ready ? t("¡Listo! Ya puedes cobrar tus comisiones.") : `${t("Te faltan")} ${usdc(p.missingRaw.toString())} USDC ${t("para tu próximo pago.")}`}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{p.ready ? t("¡Listo! Ya puedes cobrar tus ganancias.") : `${t("Te faltan")} ${usdc(p.missingRaw.toString())} USDC ${t("para tu próximo pago.")}`}</p>
         {p.ready && !preview && <div className="mt-3">
           <p className="text-xs text-muted-foreground">{t("Recibes")} <span className="font-semibold text-foreground">{usdc(dash.pendingRaw)} USDC</span> · {t("la tarifa de red la pagas con tu SOL (≈0.003 SOL)")}</p>
-          <Button className="mt-2 w-full" disabled={busy} onClick={() => void act(collect, "¡Cobro enviado a tu wallet!")}>{busy ? t("Enviando…") : t("Cobrar comisiones")}</Button>
+          <Button className="mt-2 w-full" disabled={busy} onClick={() => void act(collect, "¡Cobro enviado a tu wallet!")}>{busy ? t("Enviando…") : t("Cobrar ganancias")}</Button>
         </div>}
       </div>; })()}
-      <p className="mt-4 text-xs text-muted-foreground">{t("Recibes el")} {dash.shareBps / 100}% {t("de las comisiones de tus invitados.")}</p>
+      <p className="mt-4 text-xs text-muted-foreground">{t("Recibes el")} {dash.shareBps / 100}% {t("de las ganancias de tus invitados.")}</p>
       <div className="mt-2"><AffiliateHow /></div>
       {(() => { const connected = session.walletAddress ?? null; const current = dash.payoutWallet ?? connected; const isConnected = !!current && current === connected; const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`; return <div className="mt-5 rounded-xl border border-border bg-card p-4">
-        <p className="text-sm font-semibold">{t("Destino de tus comisiones (USDC)")}</p>
+        <p className="text-sm font-semibold">{t("Destino de tus ganancias (USDC)")}</p>
         {current ? <p className="mt-2 flex items-center gap-2 text-sm"><span className="h-2 w-2 rounded-full bg-primary" aria-hidden />{isConnected ? t("Tu wallet conectada") : t("Wallet personalizada")}<span className="font-mono text-xs text-muted-foreground">{short(current)}</span></p> : <p className="mt-2 text-xs text-muted-foreground">{t("Conecta una wallet o escribe una dirección para recibir tus pagos.")}</p>}
         {!editingPayout ? <div className="mt-3 flex flex-wrap gap-2">
           <Button size="sm" variant="outline" onClick={() => { setPayout(current ?? ""); setEditingPayout(true); }}>{t("Cambiar wallet de destino")}</Button>
@@ -104,7 +104,7 @@ export function AffiliatePanel() {
           {connected && <p className="mt-2 text-xs text-muted-foreground">{t("Tu wallet original")}: <span className="font-mono">{short(connected)}</span></p>}
         </form>}
       </div>; })()}
-      <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Las comisiones se registran cuando la red confirma la operación. Desde 3 USDC las cobras tú mismo, completas, pagando la tarifa de red con tu SOL.")}</p>
+      <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Las ganancias se registran cuando la red confirma la operación. Desde 3 USDC las cobras tú mismo, completas, pagando la tarifa de red con tu SOL.")}</p>
       {dash.earnings.length > 0 && <ul className="mt-5 divide-y divide-border text-sm">{dash.earnings.map((e) => <li key={e.signature + e.level} className="flex justify-between gap-3 py-2"><span>{e.kind === "harvest" ? t("Cosecha") : e.kind === "deposit" ? t("Depósito") : t("Cierre")} · {new Date(e.createdAt).toLocaleDateString()}{e.level === 2 && <span className="ml-1 text-xs text-muted-foreground">· {t("Nivel 2")}</span>}</span><span>+{usdc(e.commissionRaw)} USDC · {t(e.status === "paid" ? "Pagado" : e.status === "rejected" ? "Rechazado" : "Por cobrar")}</span></li>)}</ul>}
       <form className="mt-6" onSubmit={(e) => { e.preventDefault(); const c = normalizeCode(code); if (!c) { setMessage(t("Código no válido.")); return; } void (async () => { if (busy) return; setBusy(true); setMessage(null); try { const r = await join({ data: { token: await token(), code: c } }); if (r.success) { setCode(""); setMessage(r.upgradedBps ? `${t("¡Código VIP activado! Tu comisión aumentó al")} ${r.upgradedBps / 100}%.` : t("Código aplicado. ¡Gracias!")); await refresh(); } else setMessage(t(r.error)); } catch { setMessage(t("No se pudo aplicar el código.")); } finally { setBusy(false); } })(); }}>
         <label className="block text-sm">{dash.joinedCode ? t("¿Tienes un código de socio? Escríbelo aquí") : t("¿Te invitó alguien o tienes un código de socio? Escríbelo")}<input value={code} maxLength={16} onChange={(e) => setCode(e.target.value)} className={field} /></label>

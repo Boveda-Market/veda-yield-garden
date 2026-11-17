@@ -30,7 +30,7 @@ export function LiveEarnings({ base, ratePerMs, since, unit = "$", suffix = "", 
   return <div className="mt-3 rounded-lg border border-primary/30 bg-primary/10 p-3">
     <div className="flex items-center gap-2 text-xs text-muted-foreground">
       {live && <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" /><span className="relative inline-flex h-2 w-2 rounded-full bg-primary" /></span>}
-      <span>{live ? t("En vivo · generando rendimientos") : label}</span>
+      <span>{live ? t("En vivo · generando intereses") : label}</span>
     </div>
     {live && <p className="mt-1 text-xs text-muted-foreground">{label}</p>}
     <p className={`mt-1 font-display text-2xl font-semibold tabular-nums text-primary transition-all duration-300 ${pulse ? "scale-[1.02] drop-shadow-[0_0_8px_hsl(var(--primary))]" : ""}`}>+{unit}{text.slice(0, -4)}<span className="opacity-60">{text.slice(-4)}</span>{suffix}</p>

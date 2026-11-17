@@ -51,7 +51,7 @@ export function InvitePromoCard() {
       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground"><Gift size={22} aria-hidden /></span>
       <div className="min-w-0 flex-1">
         <p className="font-display text-lg font-semibold">{t("Gana más compartiendo BÓVEDA")}</p>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("Llévate el 50% de las comisiones de tus invitados, en USDC directo a tu wallet. A ellos no les cuesta nada extra.")}</p>
+        <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("Llévate el 50% de las ganancias de tus invitados, en USDC directo a tu wallet. A ellos no les cuesta nada extra.")}</p>
       </div>
     </div>
     {code && <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm"><span className="text-muted-foreground">{t("Tu código")}: <span className="font-mono font-semibold text-foreground">{code}</span></span>{pending && <span className="text-muted-foreground">{t("Por cobrar")}: <span className="font-semibold text-foreground">{pending} USDC</span></span>}</div>}

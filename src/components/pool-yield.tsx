@@ -16,23 +16,23 @@ export function PoolYield({ address, compact = false }: { address: string; compa
     staleTime: 60_000, refetchInterval: 60_000, retry: 1,
   });
   const apr = query.data?.apr;
-  if (compact) return <div className="mt-2 flex items-baseline gap-2" aria-label={t("Rendimiento del pool")}>
+  if (compact) return <div className="mt-2 flex items-baseline gap-2" aria-label={t("Intereses del pool")}>
     <p className="font-display text-3xl font-bold text-primary">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 2, minimumFractionDigits: 2 })}%`}</p>
-    <p className="text-xs text-muted-foreground">{query.isPending ? t("Consultando el pool…") : t("APR estimado · comisiones 24 h")}</p>
+    <p className="text-xs text-muted-foreground">{query.isPending ? t("Consultando el pool…") : t("APR estimado · intereses 24 h")}</p>
   </div>;
-  return <div className="mt-5" aria-label={t("Rendimiento del pool")}>
+  return <div className="mt-5" aria-label={t("Intereses del pool")}>
     <div className="flex items-center justify-between gap-2">
       <p className="min-w-0 break-words font-display text-4xl font-bold text-primary">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 2, minimumFractionDigits: 2 })}%`}</p>
-      <Button size="icon" variant="ghost" aria-label={t("Actualizar rendimiento")} title={t("Actualizar rendimiento")} disabled={query.isFetching || stats.isFetching} onClick={() => { void query.refetch(); void stats.refetch(); }}><RefreshCw size={14} className={query.isFetching || stats.isFetching ? "animate-spin motion-reduce:animate-none" : ""} /></Button>
+      <Button size="icon" variant="ghost" aria-label={t("Actualizar intereses")} title={t("Actualizar intereses")} disabled={query.isFetching || stats.isFetching} onClick={() => { void query.refetch(); void stats.refetch(); }}><RefreshCw size={14} className={query.isFetching || stats.isFetching ? "animate-spin motion-reduce:animate-none" : ""} /></Button>
     </div>
-    <p className="mt-1 text-sm text-muted-foreground">{t("APR estimado · comisiones 24 h")}</p>
+    <p className="mt-1 text-sm text-muted-foreground">{t("APR estimado · intereses 24 h")}</p>
     <p role="status" className="mt-2 text-xs leading-5 text-muted-foreground">{query.isPending ? t("Consultando el pool…") : query.isError ? t("No se pudo actualizar la tasa. Inténtalo de nuevo.") : apr == null ? t("Tasa no disponible; no se muestran cifras ilustrativas.") : `Fuente: datos del pool · actualizado ${new Date(query.dataUpdatedAt).toLocaleTimeString("es-MX")}`}</p>
     <dl className="mt-3 space-y-2 text-xs">
-      <div className="flex flex-wrap justify-between gap-1"><dt className="text-muted-foreground">{t("Comisiones del pool · 24 h")}</dt><dd>{money(query.data?.fees24h)}</dd></div>
+      <div className="flex flex-wrap justify-between gap-1"><dt className="text-muted-foreground">{t("Intereses del pool · 24 h")}</dt><dd>{money(query.data?.fees24h)}</dd></div>
       <div className="flex flex-wrap justify-between gap-1"><dt className="text-muted-foreground">TVL</dt><dd>{money(query.data?.tvl)}</dd></div>
       <div className="flex flex-wrap justify-between gap-1"><dt className="text-muted-foreground">{t("Volumen · 24 h · DexScreener")}</dt><dd>{stats.isPending ? t("Consultando…") : money(stats.data?.volume24h)}</dd></div>
     </dl>
     {stats.isError && <p role="status" className="mt-2 text-xs text-muted-foreground">{t("No se pudo actualizar el volumen de DexScreener.")}</p>}
-    <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("Comisiones de 24 h ÷ TVL actual × 365 × 100. Proyección anual sin reinversión, no APY ni ganancias garantizadas.")}</p>
+    <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("Intereses de 24 h ÷ TVL actual × 365 × 100. Proyección anual sin reinversión, no APY ni ganancias garantizadas.")}</p>
   </div>;
 }

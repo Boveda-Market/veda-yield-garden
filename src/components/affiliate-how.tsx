@@ -20,7 +20,7 @@ export function AffiliateHow() {
   const faqs: [string, string][] = [
     [t("¿En qué operaciones gano?"), t("En depósitos, cosechas, cierres de bóveda, retiros y ganancias cobradas en Sube/Baja. Los cambios entre monedas y los envíos son gratis.")],
     [t("¿Cuánto le cuesta a mi invitado?"), t("Nada adicional. Paga la tarifa normal del app.")],
-    [t("¿Cómo y cuándo cobro?"), t("Al acumular 3 USDC o más, tocas «Cobrar comisiones» y el dinero llega a tu wallet en USDC.")],
+    [t("¿Cómo y cuándo cobro?"), t("Al acumular 3 USDC o más, tocas «Cobrar ganancias» y el dinero llega a tu wallet en USDC.")],
   ];
   return <Dialog>
     <DialogTrigger className="flex items-center gap-1 rounded-full border border-primary/50 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary hover:bg-primary/20"><HelpCircle size={14} />{t("¿Cómo funciona?")}</DialogTrigger>

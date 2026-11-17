@@ -7,9 +7,9 @@ import { LegalLayout } from "@/components/legal-layout";
 export const Route = createFileRoute("/faq")({ staticData: { sitemap: true },
   head: () => ({ meta: [
     { title: "Preguntas frecuentes — BÓVEDA" },
-    { name: "description", content: "Respuestas sobre Doble o Nada, bóvedas, comisiones, retiros, acceso y afiliados en BÓVEDA." },
+    { name: "description", content: "Respuestas sobre Doble o Nada, bóvedas, intereses, retiros, acceso y afiliados en BÓVEDA." },
     { property: "og:title", content: "Preguntas frecuentes — BÓVEDA" },
-    { property: "og:description", content: "Cómo funcionan Doble o Nada, las bóvedas, las comisiones y los retiros en BÓVEDA." },
+    { property: "og:description", content: "Cómo funcionan Doble o Nada, las bóvedas, los intereses y los retiros en BÓVEDA." },
     { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
     { property: "og:url", content: "https://bovedamarket.app/faq" },

@@ -115,7 +115,7 @@ export function ActivationCardView({ stage, onActivate, onAddFunds, onOpenVault,
     <div className="rounded-[14px] p-5 text-hot-foreground" style={{ backgroundImage: "var(--gradient-hot-surface)" }}>
       <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-hot-2"><CheckCircle2 size={14} />{t("Completado")}</p>
       <h2 className="mt-2 font-display text-2xl font-extrabold">{t("Cuenta lista, ya puedes comenzar")}</h2>
-      <p className="mt-1 text-sm leading-6 text-hot-muted">{t("Tu reserva de operaciones ya está activa. Tu billetera está 100% lista para generar comisiones.")}</p>
+      <p className="mt-1 text-sm leading-6 text-hot-muted">{t("Tu reserva de operaciones ya está activa. Tu billetera está 100% lista para generar intereses.")}</p>
       {continueMode ? <p className="mt-4 flex items-center gap-2 text-sm font-bold text-hot-2"><Loader2 size={14} className="animate-spin" />{t("Continuando…")}</p> : <Button className="hot-cta mt-4 h-12 w-full rounded-xl text-base font-extrabold text-hot-surface" onClick={onOpenVault}>🎰 {t("Abrir mi primera bóveda")} →</Button>}
     </div>
   </section>;

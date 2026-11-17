@@ -7,7 +7,7 @@ import { SafetyNotice } from "@/components/safety-notice";
 const ROWS: [string, string][] = [
   ["Guardan tu dinero en sus propias cuentas.", "Tu dinero está siempre en tu propia wallet. Solo tú tienes la llave."],
   ["Necesitas su aprobación para retirar y pueden congelar retiros.", "Retiras cuando quieras, sin pedir permiso a nadie."],
-  ["Prometen rendimientos fijos que no explican.", "Las ganancias vienen de comisiones reales y verificables; nunca garantizadas."],
+  ["Prometen intereses fijos que no explican.", "Las ganancias vienen de intereses reales y verificables; nunca garantizadas."],
   ["Si la empresa cae, tu dinero cae con ella.", "BÓVEDA nunca toca tu dinero: no puede perderlo ni bloquearlo."],
 ];
 

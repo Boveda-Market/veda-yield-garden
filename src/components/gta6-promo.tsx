@@ -34,8 +34,8 @@ function Headline({ from }: { from?: string | undefined }) {
   const apr = useGta6Apr();
   return <>
     <span className="hot-cta inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-hot-surface"><Flame size={12} aria-hidden />{t("Nueva")} · {apr}</span>
-    <p className="mt-2 font-display text-xl font-black leading-tight">{t("Bóveda GTA6: súper alto rendimiento")}</p>
-    <p className="mt-1 text-sm leading-5 text-hot-muted">{from ? t("Tu dinero en {v} puede cobrar muchas más comisiones aquí. Traslado en un solo paso.", { v: from }) : t("Tu dinero puede cobrar muchas más comisiones aquí. Traslado en un solo paso.")}</p>
+    <p className="mt-2 font-display text-xl font-black leading-tight">{t("Bóveda GTA6: súper altos intereses")}</p>
+    <p className="mt-1 text-sm leading-5 text-hot-muted">{from ? t("Tu dinero en {v} puede cobrar muchas más intereses aquí. Traslado en un solo paso.", { v: from }) : t("Tu dinero puede cobrar muchas más intereses aquí. Traslado en un solo paso.")}</p>
   </>;
 }
 
@@ -43,7 +43,7 @@ function Headline({ from }: { from?: string | undefined }) {
 export function Gta6Guide({ open, onOpenChange, onStart }: { open: boolean; onOpenChange: (o: boolean) => void; onStart: () => void }) {
   const t = useT();
   const steps = [
-    ["🎯", t("Tu dinero trabaja en la zona caliente"), t("Se concentra donde ocurren casi todos los intercambios. Por eso cobra tantas comisiones.")],
+    ["🎯", t("Tu dinero trabaja en la zona caliente"), t("Se concentra donde ocurren casi todos los intercambios. Por eso cobra tantas intereses.")],
     ["⏸️", t("Si el precio se mueve fuerte, se pausa"), t("Tu dinero sigue seguro. El sistema lo recentra en automático para que sigas cobrando.")],
     ["📲", t("Novedades directas en Telegram"), t("Recibe avisos al instante de tus ganancias y movimientos en tu móvil.")],
   ] as const;
@@ -92,7 +92,7 @@ export function Gta6PromoPopup({ wallet, samplePositions }: { wallet: string | n
     <DialogContent className="hot-ring overflow-hidden border-0 p-[2px] [&>button]:hidden">
       <div className="rounded-[inherit] bg-[image:var(--gradient-hot-surface)] p-5 text-hot-foreground">
         <button type="button" aria-label={t("Cerrar")} onClick={() => setOpen(false)} className="float-right grid size-9 place-items-center rounded-full border border-hot-foreground/30 bg-hot-foreground/10 text-hot-foreground hover:bg-hot-foreground/20"><X size={18} /></button>
-        <DialogTitle className="sr-only">{t("Bóveda GTA6: súper alto rendimiento")}</DialogTitle>
+        <DialogTitle className="sr-only">{t("Bóveda GTA6: súper altos intereses")}</DialogTitle>
         <DialogDescription className="sr-only">{t("Ver estrategia y cambiar")}</DialogDescription>
         <Headline from={from ? t(from.name) : undefined} />
         <Button size="lg" className="hot-cta mt-4 w-full font-bold text-hot-surface" onClick={go}>{t("Ver estrategia y cambiar")} →</Button>

@@ -52,7 +52,7 @@ export function NoticeGalleryAdmin() {
     { id: "steps", title: t("Pasos de bóvedas"), node: <VaultSteps /> },
     { id: "guide", title: t("Guía de inicio"), node: <StartGuide /> },
     { id: "dev", title: t("Nota del desarrollador"), node: <DevNote /> },
-    { id: "deposit", title: t("Comprobante de depósito"), node: <ActionSuccess title={t("¡Depósito exitoso!")} body={t("Tu posición ya está generando comisiones. Puedes cosecharlas cuando quieras desde tu Portafolio.")} amount={{ value: "10.00", unit: "$" }} details={[{ label: t("Operación"), value: t("Depósito en bóveda") }]} signature={null} destination={null} onClose={() => undefined} /> },
+    { id: "deposit", title: t("Comprobante de depósito"), node: <ActionSuccess title={t("¡Depósito exitoso!")} body={t("Tu posición ya está generando intereses. Puedes cosecharlos cuando quieras desde tu Portafolio.")} amount={{ value: "10.00", unit: "$" }} details={[{ label: t("Operación"), value: t("Depósito en bóveda") }]} signature={null} destination={null} onClose={() => undefined} /> },
     { id: "withdraw", title: t("Comprobante de retiro"), node: <ActionSuccess title={t("¡Retiro completado!")} body={t("Tus USDC ya están en tu wallet. También recuperaste el SOL de apertura de la posición.")} amount={{ value: "9.85", unit: "$", label: "≈" }} details={[{ label: t("Operación"), value: t("Retiro total de bóveda") }]} signature={null} destination={null} onClose={() => undefined} /> },
   ];
   const session = useBovedaSession();

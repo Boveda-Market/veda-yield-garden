@@ -56,7 +56,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
 
         <PoolYield address={vault.pool} />
         {holders != null && <div className="flex items-center gap-3 rounded-xl border border-primary/40 bg-primary/10 p-3"><Users className="h-6 w-6 shrink-0 text-primary" /><div><p className="font-display text-lg font-bold tabular-nums">+{number(holders, 0)} {t("poseedores")}</p><p className="text-xs text-muted-foreground">{t("Comunidad activa con alto volumen de intercambio.")}</p></div></div>}
-        {fees24h != null && <div className="rounded-xl bg-muted p-3"><p className="text-xs text-muted-foreground">💰 {t("Comisiones repartidas · 24 h")}</p><p className="font-display text-2xl font-bold tabular-nums text-primary">+{usd(fees24h)}</p></div>}
+        {fees24h != null && <div className="rounded-xl bg-muted p-3"><p className="text-xs text-muted-foreground">💰 {t("Intereses repartidas · 24 h")}</p><p className="font-display text-2xl font-bold tabular-nums text-primary">+{usd(fees24h)}</p></div>}
         {buys != null && sells != null && buys + sells > 0 && <div className="grid gap-1.5">
           <div className="flex justify-between text-xs font-semibold"><span className="text-primary">{t("Compras")} {Math.round(buys / (buys + sells) * 100)}% · {number(buys, 0)}</span><span className="text-destructive">{number(sells, 0)} · {Math.round(sells / (buys + sells) * 100)}% {t("Ventas")}</span></div>
           <div className="flex h-3 overflow-hidden rounded-full bg-muted" aria-label={t("Presión de mercado · 24 h")}><div className="bg-primary transition-all" style={{ width: `${buys / (buys + sells) * 100}%` }} /><div className="flex-1 bg-destructive" /></div>

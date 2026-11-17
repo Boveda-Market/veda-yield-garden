@@ -57,7 +57,7 @@ export function TelegramAlerts({ onLinkedChange }: { onLinkedChange?: (linked: b
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary"><Send size={18} /></span>
       <div className="flex-1">
         <h3 className="font-semibold">{t("Avisos de tu cuenta en Telegram")}</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{s.linked ? `${t("Conectado")}${s.username ? ` · @${s.username}` : ""}` : t("Recibe un mensaje privado con tus cosechas, ganancias de Sube/Baja, retiros y comisiones de invitados.")}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{s.linked ? `${t("Conectado")}${s.username ? ` · @${s.username}` : ""}` : t("Recibe un mensaje privado con tus cosechas, ganancias de Sube/Baja, retiros y ganancias de invitados.")}</p>
       </div>
     </div>
     {s.linked ? <div className="mt-3 space-y-3">

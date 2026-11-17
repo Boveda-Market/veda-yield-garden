@@ -61,10 +61,10 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
         <p className="text-[11px] font-semibold text-hot-muted">{vault.pair}</p>
         <div className="flex flex-wrap items-baseline gap-x-2">
           <p key={apr ?? "x"} className="animate-count-pop bg-[image:var(--gradient-hot)] bg-clip-text font-display text-4xl font-black leading-tight text-transparent tabular-nums">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 0 })}%`}</p>
-          <p className="text-[11px] font-medium text-hot-muted">{y.isPending ? t("Consultando el pool…") : t("APR estimado · comisiones 24 h")}</p>
+          <p className="text-[11px] font-medium text-hot-muted">{y.isPending ? t("Consultando el pool…") : t("APR estimado · intereses 24 h")}</p>
         </div>
         <dl className="mt-2 grid grid-cols-3 gap-1.5">
-          {[[t("Comisiones hoy"), usd(y.data?.fees24h)], [t("Intercambios hoy"), num(total)], [t("Poseedores"), num(y.data?.holders)]].map(([k, v]) => <div key={k} className="rounded-lg bg-hot-surface/60 px-2 py-1.5">
+          {[[t("Intereses hoy"), usd(y.data?.fees24h)], [t("Intercambios hoy"), num(total)], [t("Poseedores"), num(y.data?.holders)]].map(([k, v]) => <div key={k} className="rounded-lg bg-hot-surface/60 px-2 py-1.5">
             <dt className="truncate text-[9px] font-semibold uppercase tracking-wide text-hot-muted">{k}</dt>
             <dd className="font-display text-sm font-bold tabular-nums">{v}</dd>
           </div>)}
@@ -76,7 +76,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
           <button type="button" onClick={onDetails} className="h-11 rounded-xl border border-hot-foreground/25 bg-hot-foreground/10 px-3 text-sm font-semibold transition hover:bg-hot-foreground/20">{t("Detalles del pool")}</button>
           <button type="button" disabled={depositDisabled} onClick={onDeposit} className="hot-cta flex h-11 items-center justify-center gap-2 rounded-xl font-display text-base font-black text-hot-surface shadow-[var(--shadow-hot)] transition active:scale-95 disabled:opacity-70">{hasPosition ? <><Plus size={18} strokeWidth={3} />{t("Añadir más")}</> : t("Depositar")}</button>
         </div>
-        <p className="mt-2 text-[10px] leading-4 text-hot-muted">{t("No apuestas contra nadie: cobras comisiones de los intercambios. Tu saldo sube y baja con el precio de GTA6. Sin vínculo con Rockstar Games.")}</p>
+        <p className="mt-2 text-[10px] leading-4 text-hot-muted">{t("No apuestas contra nadie: cobras intereses de los intercambios. Tu saldo sube y baja con el precio de GTA6. Sin vínculo con Rockstar Games.")}</p>
       </div>
     </div>
   </article>;

@@ -36,11 +36,11 @@ export const Route = createFileRoute("/")({ staticData: { sitemap: true },
 });
 
 const FAQS = [
-  { q: "¿Qué es USDC?", a: "USDC es una moneda digital diseñada para mantener el mismo valor que el dólar estadounidense: 1 USDC busca valer 1 USD. En BÓVEDA tus saldos, depósitos y comisiones se muestran en USDC. No es un depósito bancario ni está asegurado." },
+  { q: "¿Qué es USDC?", a: "USDC es una moneda digital diseñada para mantener el mismo valor que el dólar estadounidense: 1 USDC busca valer 1 USD. En BÓVEDA tus saldos, depósitos y intereses se muestran en USDC. No es un depósito bancario ni está asegurado." },
   { q: "¿Necesito dinero para usar BÓVEDA?", a: "No para mirar. Puedes ver las bóvedas y Doble o Nada en vivo sin registrarte. Para jugar o depositar, entras con Google o email y añades dólares con tu tarjeta. Puedes empezar con poco." },
-  { q: "¿Cómo se generan las ganancias?", a: "Tu depósito se suma a una bóveda que cobra comisiones cada vez que otras personas cambian monedas en ella. Esas comisiones se reparten entre quienes aportan. Las tasas son estimaciones, cambian y puedes perder dinero." },
+  { q: "¿Cómo se generan las ganancias?", a: "Tu depósito se suma a una bóveda que cobra intereses cada vez que otras personas cambian monedas en ella. Esas intereses se reparten entre quienes aportan. Las tasas son estimaciones, cambian y puedes perder dinero." },
   { q: "¿Cuándo puedo retirar?", a: "Puedes cosechar tus ganancias o cerrar tu posición cuando quieras, sin plazos de permanencia. Cada operación se revisa antes de firmar con tu wallet." },
-  { q: "¿Qué comisiones cobra BÓVEDA?", a: "Depositar, enviar, cambiar monedas y entrar a Sube/Baja es gratis. Cosechar, cerrar, retirar y reclamar premios tienen una pequeña comisión que siempre ves antes de firmar. El detalle está en Términos y condiciones." },
+  { q: "¿Qué intereses cobra BÓVEDA?", a: "Depositar, enviar, cambiar monedas y entrar a Sube/Baja es gratis. Cosechar, cerrar, retirar y reclamar premios tienen una pequeña comisión que siempre ves antes de firmar. El detalle está en Términos y condiciones." },
 ];
 
 const GUARANTEES = [
@@ -81,7 +81,7 @@ function TrustTicker() {
 
 const TRUST = [
   { icon: Fingerprint, title: "Tus fondos, tu control", body: "Wallet de autocustodia con Face ID o huella, protegida por Privy. Nadie mueve tu dinero sin tu aprobación digital." },
-  { icon: Landmark, title: "1 USDC = $1 siempre", body: "Nada de monedas locas que hoy suben y mañana se desploman. Tu saldo se mantiene estable mientras genera comisiones reales." },
+  { icon: Landmark, title: "1 USDC = $1 siempre", body: "Nada de monedas locas que hoy suben y mañana se desploman. Tu saldo se mantiene estable mientras genera intereses reales." },
   { icon: Search, title: "Revisas antes de aprobar", body: "Cada operación se simula primero: ves exactamente qué entra, qué sale y el cargo." },
   { icon: ShieldCheck, title: "Sin cargos ocultos", body: "Recargas y retiros con Coinbase. Cargos de servicio reducidos y progresivos." },
 ];
@@ -187,7 +187,7 @@ export function Landing() {
           <h2 className="mt-4 font-display text-2xl font-bold">{t("Invita y gana: genera más compartiendo BÓVEDA")}</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Cualquier usuario puede ser socio. Comparte tu enlace y recibe en USDC una parte de la comisión de cada operación de tus invitados, sin costo extra para ellos.")}</p>
           <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">50%</p><p className="text-sm text-muted-foreground">{t("de las comisiones de tus invitados directos")}</p></li>
+            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">50%</p><p className="text-sm text-muted-foreground">{t("de las ganancias de tus invitados directos")}</p></li>
             <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">10%</p><p className="text-sm text-muted-foreground">{t("de los invitados de tus invitados")}</p></li>
           </ul>
           <Button asChild className="mt-5"><Link to="/invita">{t("Obtener mi enlace")}<ArrowRight size={16} /></Link></Button>

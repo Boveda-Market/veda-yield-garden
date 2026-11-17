@@ -31,7 +31,7 @@ function show(address: string, locked = false) {
 
 it("opens harvest review for the exact authorized pilot", () => {
   show(WITHDRAWAL_PILOT.position);
-  fireEvent.click(screen.getByRole("button", { name: "Cosechar Ganancias" }));
+  fireEvent.click(screen.getByRole("button", { name: "Cosechar dólares" }));
   expect(screen.getByText("Revisión de cosecha autorizada")).toBeInTheDocument();
 });
 it("opens close review for the exact unlocked authorized pilot", () => {
@@ -39,11 +39,11 @@ it("opens close review for the exact unlocked authorized pilot", () => {
   fireEvent.click(screen.getByRole("button", { name: "Retirar" }));
   expect(screen.getByText("Revisión de cierre autorizada")).toBeInTheDocument();
 });
-it.each(["Cosechar Ganancias", "Retirar"])("opens %s review for new owner positions", (name) => {
+it.each(["Cosechar dólares", "Retirar"])("opens %s review for new owner positions", (name) => {
   show("new-position");
   expect(screen.getByRole("button", { name })).toBeEnabled();
   fireEvent.click(screen.getByRole("button", { name }));
-  expect(screen.getByText(name === "Cosechar Ganancias" ? "Revisión de cosecha autorizada" : "Revisión de cierre autorizada")).toBeInTheDocument();
+  expect(screen.getByText(name === "Cosechar dólares" ? "Revisión de cosecha autorizada" : "Revisión de cierre autorizada")).toBeInTheDocument();
 });
 it("does not authorize closing locked pilot liquidity", () => {
   show(WITHDRAWAL_PILOT.position, true);
