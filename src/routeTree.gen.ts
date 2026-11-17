@@ -26,7 +26,6 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as WalletRouteImport } from './routes/wallet'
-import { Route as ZzSignalRouteImport } from './routes/zz-signal'
 import { Route as EnIndexRouteImport } from './routes/en/index'
 import { Route as EnFaqRouteImport } from './routes/en/faq'
 import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
@@ -128,11 +127,6 @@ const TerminosRoute = TerminosRouteImport.update({
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ZzSignalRoute = ZzSignalRouteImport.update({
-  id: '/zz-signal',
-  path: '/zz-signal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnIndexRoute = EnIndexRouteImport.update({
@@ -246,7 +240,6 @@ export interface FileRoutesByFullPath {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
-  '/zz-signal': typeof ZzSignalRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/status': typeof EnStatusRoute
@@ -283,7 +276,6 @@ export interface FileRoutesByTo {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
-  '/zz-signal': typeof ZzSignalRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/status': typeof EnStatusRoute
@@ -321,7 +313,6 @@ export interface FileRoutesById {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
-  '/zz-signal': typeof ZzSignalRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/status': typeof EnStatusRoute
@@ -360,7 +351,6 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
-    | '/zz-signal'
     | '/en/faq'
     | '/en/privacy'
     | '/en/status'
@@ -397,7 +387,6 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
-    | '/zz-signal'
     | '/en/faq'
     | '/en/privacy'
     | '/en/status'
@@ -434,7 +423,6 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
-    | '/zz-signal'
     | '/en/faq'
     | '/en/privacy'
     | '/en/status'
@@ -472,7 +460,6 @@ export interface RootRouteChildren {
   StatusRoute: typeof StatusRoute
   TerminosRoute: typeof TerminosRoute
   WalletRoute: typeof WalletRoute
-  ZzSignalRoute: typeof ZzSignalRoute
   EnFaqRoute: typeof EnFaqRoute
   EnPrivacyRoute: typeof EnPrivacyRoute
   EnStatusRoute: typeof EnStatusRoute
@@ -611,13 +598,6 @@ declare module '@tanstack/react-router' {
       path: '/wallet'
       fullPath: '/wallet'
       preLoaderRoute: typeof WalletRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/zz-signal': {
-      id: '/zz-signal'
-      path: '/zz-signal'
-      fullPath: '/zz-signal'
-      preLoaderRoute: typeof ZzSignalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/': {
@@ -760,7 +740,6 @@ const rootRouteChildren: RootRouteChildren = {
   StatusRoute: StatusRoute,
   TerminosRoute: TerminosRoute,
   WalletRoute: WalletRoute,
-  ZzSignalRoute: ZzSignalRoute,
   EnFaqRoute: EnFaqRoute,
   EnPrivacyRoute: EnPrivacyRoute,
   EnStatusRoute: EnStatusRoute,
