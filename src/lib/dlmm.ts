@@ -62,7 +62,7 @@ export function rangeAlertText(vaultName: string, above: boolean) {
     `📍 El precio ${above ? "subió por encima" : "bajó por debajo"} de tu rango hace más de 10 minutos.`,
     "🔒 Tu dinero sigue seguro, pero cada minuto fuera de rango son ganancias que no cobras.",
     "",
-    "👉 Toca <b>Rebalancear ahora</b>: un toque, una firma y sin comisión de BÓVEDA.",
+    "👉 Toca <b>Rebalancear ahora</b> para volver a generar.",
   ]);
 }
 

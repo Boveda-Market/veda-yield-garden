@@ -17,7 +17,7 @@ export function SignalErrorCard({ message, kind, className = "" }: { message?: s
   const k = kind ?? signalKind(message ?? "");
   const copy = {
     network: { icon: "📡", title: t("Parece que el internet tuvo un hipo (o la antena se fue a tomar un café ☕)"), body: t("La confirmación no alcanzó a pasar a tiempo. Échale un ojo a tu Wi-Fi o datos móviles y dale otro toque.") },
-    cancel: { icon: "📶", title: t("¿Te quedaste sin señal o te entró una llamada?"), body: t("La aprobación no se completó. Cuando tengas buena señal, puedes reanudar con un toque.") },
+    cancel: { icon: "📶", title: t("¿Te quedaste sin señal o te entró una llamada?"), body: t("La aprobación no se completó. Cuando tengas buena señal, puedes reanudar.") },
     busy: { icon: "🚦", title: t("Hora pico en la autopista digital"), body: t("Hubo mucho tráfico en este momento y la operación se pausó para protegerte. Espera unos segundos y vuelve a intentar.") },
   }[k];
   return <div role="alert" className={`signal-pop grid gap-2 rounded-2xl border border-border/80 bg-secondary/60 p-4 text-sm ${className}`}>

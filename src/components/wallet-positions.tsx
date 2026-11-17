@@ -84,7 +84,7 @@ export function WalletPositions({ wallet, only, bare }: { wallet: string; only?:
           <div className="mt-2 grid grid-cols-2 gap-2">
             <Button size="sm" variant="secondary" onClick={() => setAddTo({ position: p.address, vaultId: p.vaultId as Supported })}><Plus size={14} />{t("Depositar")}</Button>
             <Button size="sm" variant="outline" disabled={p.locked} onClick={() => setExit({ position: p.address, vaultId: p.vaultId as Supported })}><ArrowDownToLine size={14} />{t("Cerrar")}</Button>
-          </div>{p.outOfRange && <p className="mt-2 text-xs leading-5 text-muted-foreground">{p.vaultId === "gta6" ? t("El precio salió del rango: tu dinero sigue seguro pero no genera. Toca «Rebalancear» para volver a centrarla con un toque.") : t("El precio salió del rango de esta bóveda: tu dinero sigue seguro pero no genera ganancias hasta que el precio vuelva o la cierres.")}</p>}</> : <p className="mt-2 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
+          </div>{p.outOfRange && <p className="mt-2 text-xs leading-5 text-muted-foreground">{p.vaultId === "gta6" ? t("El precio salió del rango: tu dinero sigue seguro pero no genera. Toca «Rebalancear» para volver a centrarla.") : t("El precio salió del rango de esta bóveda: tu dinero sigue seguro pero no genera ganancias hasta que el precio vuelva o la cierres.")}</p>}</> : <p className="mt-2 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
       </li>;
     })}</ul>
     {!bare && <p className="mt-3 text-[11px] leading-4 text-muted-foreground">{t("PNL = ganancias por cosechar, estimadas al precio actual. APR estimado con las últimas 24h.")}</p>}

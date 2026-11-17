@@ -120,7 +120,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
       amount={quote?.valueUsd ? { value: `$${quote.valueUsd}`, unit: "" } : undefined}
       details={[]} /> : <>
       <DialogTitle>{t("Rebalancear posición")} · {symbol}</DialogTitle>
-      <DialogDescription>{t("Un toque y vuelve a generar ganancias.")}</DialogDescription>
+      <DialogDescription>{t("Vuelve a generar ganancias al centrar tu posición.")}</DialogDescription>
       {quote?.success && !pending && <ReceiveCard label={t("Se recoloca")} amount={quote.valueUsd ?? "—"} unit="$" />}
       {pending && !quote && <WorkingLine text={t("Preparando tu rebalanceo…")} />}
       {quote?.success && !pending && <DetailsToggle><dl className="grid gap-2 rounded-xl border border-border p-4 text-sm">
@@ -129,7 +129,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
         {quote.bovedaFeeUsdc && Number(quote.bovedaFeeUsdc) > 0 && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión")}</dt><dd>−${quote.bovedaFeeUsdc}</dd></div>}
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Nuevo reparto")}</dt><dd>{t("Mitad {s} · mitad dólares", { s: symbol })}</dd></div>
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Pequeño sobrante a tu billetera")}</dt><dd>${quote.usdcLeft} · {quote.tokenLeft} {symbol}</dd></div>
-      </dl><p className="text-xs leading-5 text-muted-foreground">{t("Tu posición salió del rango y no está generando. Con un toque cosechamos tus ganancias, dejamos mitad y mitad al precio actual y la volvemos a centrar.")} {t("Para dejar mitad y mitad se cambia una parte dentro de la misma bóveda, con un límite de precio para protegerte. Es una sola firma.")}</p></DetailsToggle>}
+      </dl><p className="text-xs leading-5 text-muted-foreground">{t("Tu posición salió del rango y no está generando. Cosechamos tus ganancias, dejamos mitad y mitad al precio actual y la volvemos a centrar.")} {t("Para dejar mitad y mitad se cambia una parte dentro de la misma bóveda, con un límite de precio para protegerte.")}</p></DetailsToggle>}
       {pending && signature && <FlowSteps current={2} />}
       {pending && step && quote?.success && <WorkingLine text={step} />}
       {quote?.success && <Button size="lg" disabled={pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Crosshair className="mr-2 h-4 w-4" />}{pending && step ? step : t("Rebalancear ahora")}</Button>}

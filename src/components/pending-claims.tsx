@@ -98,6 +98,5 @@ export function PendingClaims() {
           <Button size="sm" className="rounded-full" disabled={busy} onClick={() => void claim(p)}>{busy && flow?.p.pubkey === p.pubkey ? <Loader2 size={14} className="animate-spin" /> : `${t("Reclamar")} $${usdc(p.payoutMicro || "0")}`}</Button>
         </li>; })}
       </ul>
-      <p className="mt-3 text-[11px] text-muted-foreground">{t("Cobras tu premio en dólares con un solo toque.")}</p>
   </section>}{sheet}</>;
 }

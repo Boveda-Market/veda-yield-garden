@@ -111,7 +111,7 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
 
   return <div className="grid gap-2">
     <Button onClick={() => void open()} disabled={phase === "opening" || phase === "waiting"}>{phase === "idle" ? <ExternalLink size={16} /> : <LoaderCircle className="animate-spin" size={16} />}{phase === "waiting" ? t("Termina en Coinbase y vuelve aquí…") : t("Retirar a mi saldo de Coinbase")}</Button>
-    <p className="text-xs text-muted-foreground">{t("Tu saldo de Coinbase ya viene elegido: el dinero queda disponible al instante. Vuelve a BÓVEDA y confirma con un toque.")}</p>
+    <p className="text-xs text-muted-foreground">{t("Tu saldo de Coinbase ya viene elegido: el dinero queda disponible al instante. Vuelve a BÓVEDA y confirma.")}</p>
     {error && <p role="alert" className="text-sm text-muted-foreground">{error}</p>}
   </div>;
 }

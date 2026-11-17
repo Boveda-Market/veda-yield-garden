@@ -47,7 +47,7 @@ export function GasRefillCard({ sol, usdc, onDone, force, target }: Props) {
   if (activation) return <ActivationFlow usdc={usdc} wallet={session.walletAddress} prepare={prepare} signAndSend={session.signAndSend} onDone={onDone} />;
   return <section aria-label={t("Reserva para costos de red")} className={`rounded-2xl border p-4 ${empty ? "border-primary/20 bg-primary/5" : "border-accent bg-accent/30"}`}>
     <p className="flex items-center gap-2 font-semibold"><Fuel size={16} />{empty ? t("Te quedaste sin saldo para movimientos") : t("Te queda poco saldo para movimientos")}</p>
-    <p className="mt-1 text-sm text-foreground/85">{t("Con un toque apartamos una pequeña parte de tus dólares (unos $2) para cubrir tus próximas operaciones. BÓVEDA cubre el costo de esta recarga.")}</p>
+    <p className="mt-1 text-sm text-foreground/85">{t("Apartamos una pequeña parte de tus dólares (unos $2) para cubrir tus próximas operaciones. BÓVEDA cubre el costo de esta recarga.")}</p>
     {msg && <p role={msg.ok ? "status" : "alert"} className={`mt-2 text-sm ${msg.ok ? "text-primary" : "text-muted-foreground"}`}>{msg.text}</p>}
     {!msg?.ok && <Button className="mt-3 w-full" disabled={busy || usdc <= 0n} onClick={() => void refill()}>{busy ? t("Preparando recarga…") : t("Recargar reserva de operaciones")}</Button>}
     {usdc <= 0n && <p className="mt-2 text-xs text-muted-foreground">{t("Necesitas tener dólares disponibles para recargar tu reserva.")}</p>}

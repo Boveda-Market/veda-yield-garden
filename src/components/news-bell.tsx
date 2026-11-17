@@ -97,7 +97,7 @@ export function NewsList({ onNavigate, predict = [], refunds = [], ranges = [], 
     </div>}
     <ul className="space-y-3">
       {ranges.map((a) => <NoticeCard key={a.id} tone="urgent" icon="🚨" label={t("Bóvedas")} title={t("Bóveda {v} sin generar", { v: a.p.symbol })}>
-        <p className="mt-2 text-sm text-muted-foreground">{t("Lleva más de 10 minutos sin generar ganancias. Tu dinero sigue seguro; vuelve a centrarla con un toque y una firma.")}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{t("Lleva más de 10 minutos sin generar ganancias. Tu dinero sigue seguro; vuelve a centrarla cuando quieras.")}</p>
         <Link to="/wallet" search={{ rebalance: a.p.address }} onClick={onNavigate} className={ctaClass(true)}>🎯 {t("Rebalancear ahora")}</Link>
       </NoticeCard>)}
       {autopilot && !dismissed.includes(autopilot.id) && <NoticeCard tone="info" icon="🤖" label={t("Piloto automático")} date={autopilot.at} title={autopilot.kind === "rebalanced" ? t("Piloto automático rebalanceó tu bóveda") : t("Piloto automático activado")} onDismiss={() => dismiss(autopilot.id)}>
