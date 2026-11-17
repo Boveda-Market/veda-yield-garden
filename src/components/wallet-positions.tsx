@@ -26,6 +26,8 @@ type Supported = OperableVault;
 const supported = isOperableVault;
 
 /** Shared cached read of the wallet's open vault positions (same cache as every wallet screen). */
+import { useAutopilot } from "@/components/autopilot-toggle";
+import { showManualCompound } from "@/lib/autopilot";
 export function useWalletVaults(wallet: string) {
   return useRealWallet(wallet);
 }
@@ -49,6 +51,7 @@ export function WalletRangeBanner({ wallet }: { wallet: string }) {
 /** Compact open-vault cards for Mi Billetera; renders nothing without open positions. */
 export function WalletPositions({ wallet, only, bare }: { wallet: string; only?: string; bare?: boolean }) {
   const t = useT();
+  const manualCompound = showManualCompound(useAutopilot().status?.failures);
   const query = useWalletVaults(wallet);
   const all: ChainPosition[] = query.data?.success ? query.data.data.positions : [];
   const positions = only ? all.filter((p) => p.vaultId === only) : all;
@@ -79,7 +82,7 @@ export function WalletPositions({ wallet, only, bare }: { wallet: string; only?:
           <div className="rounded-lg bg-muted/50 p-2"><dt className="text-muted-foreground">{t("PNL")}</dt><dd className="mt-0.5 font-display text-sm font-semibold tabular-nums text-primary">{fees === null ? "—" : `+${formatUsd(fees)}`}</dd></div>
         </dl>
         {fees !== null && <LiveEarnings base={fees} ratePerMs={p.locked ? 0 : earningRatePerMs(value, apr)} since={since} label={t("Ganancias por cosechar · estimado en vivo")} />}
-        {ok ? <><Button variant="outline" className="cta-attn mt-3 h-14 w-full rounded-xl border-2 border-primary disabled:animate-none bg-primary/15 text-base font-extrabold text-primary shadow-md hover:bg-primary/25 disabled:border-border disabled:bg-muted disabled:text-muted-foreground" disabled={p.outOfRange || !canHarvest(fees)} onClick={() => setHarvest({ position: p.address, vaultId: p.vaultId as Supported, compound: true })}><span className="cta-wiggle"><Repeat size={18} strokeWidth={2.5} /></span>{t("Sumar ganancias a la bóveda")}</Button><Button className="mt-2 w-full" disabled={!canHarvest(fees)} onClick={() => setHarvest({ position: p.address, vaultId: p.vaultId as Supported })}><Sprout size={16} />{t("Cosechar dólares")}</Button>{!canHarvest(fees) && <p className="mt-1 text-center text-xs text-muted-foreground">{t("Cosechar y reinvertir se activan desde $0.50 de ganancias.")}</p>}
+        {ok ? <>{manualCompound && <Button variant="outline" className="cta-attn mt-3 h-14 w-full rounded-xl border-2 border-primary disabled:animate-none bg-primary/15 text-base font-extrabold text-primary shadow-md hover:bg-primary/25 disabled:border-border disabled:bg-muted disabled:text-muted-foreground" disabled={p.outOfRange || !canHarvest(fees)} onClick={() => setHarvest({ position: p.address, vaultId: p.vaultId as Supported, compound: true })}><span className="cta-wiggle"><Repeat size={18} strokeWidth={2.5} /></span>{t("Sumar ganancias a la bóveda")}</Button>}<Button className="mt-2 w-full" disabled={!canHarvest(fees)} onClick={() => setHarvest({ position: p.address, vaultId: p.vaultId as Supported })}><Sprout size={16} />{t("Cosechar dólares")}</Button>{!canHarvest(fees) && <p className="mt-1 text-center text-xs text-muted-foreground">{t("Cosechar y reinvertir se activan desde $0.50 de ganancias.")}</p>}
           <RebalanceButton position={p} size="lg" className="mt-2 w-full font-bold" label={t("Rebalancear ahora")} />
           <div className="mt-2 grid grid-cols-2 gap-2">
             <Button size="sm" variant="secondary" onClick={() => setAddTo({ position: p.address, vaultId: p.vaultId as Supported })}><Plus size={14} />{t("Depositar")}</Button>

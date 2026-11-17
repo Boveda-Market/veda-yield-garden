@@ -50,9 +50,8 @@ it("does not authorize closing locked pilot liquidity", () => {
   fireEvent.click(screen.getByRole("button", { name: "Retirar" }));
   expect(screen.getByRole("dialog")).toBeInTheDocument();
   expect(screen.queryByText("Revisión de cierre autorizada")).not.toBeInTheDocument();
-});it("opens the two-step reinvest flow from Reinvertir ganancias", () => {
+});it("hides «Sumar ganancias a la bóveda» while Auto-Compound has not failed 3 times", () => {
   show("new-position");
-  fireEvent.click(screen.getByRole("button", { name: "Sumar ganancias a la bóveda" }));
-  expect(screen.getByText("Revisión de reinversión autorizada")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Sumar ganancias a la bóveda" })).not.toBeInTheDocument();
 });
 

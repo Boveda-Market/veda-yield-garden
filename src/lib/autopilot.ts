@@ -80,3 +80,10 @@ export function autopilotNotice(s: { enabled: boolean; enabledAt: string | null;
   if (fresh(s.lastRebalanceAt)) return { id: `autopilot:rb:${s.lastRebalanceAt}`, kind: "rebalanced", at: s.lastRebalanceAt!, gainsUsd: gainsWorthQuoting(s.lastGainsUsd) ? s.lastGainsUsd : null };
   return null;
 }
+
+/** Consecutive failed Auto-Compound attempts are kept as a "[n] " prefix on last_result (reset by a confirmed rebalance). */
+export const AUTOPILOT_MANUAL_AFTER_FAILS = 3;
+export function autopilotFailures(lastResult: string | null | undefined): number { const m = /^\[(\d+)\] /.exec(lastResult ?? ""); return m ? Number(m[1]) : 0; }
+export function withFailure(prev: string | null | undefined, message: string): string { return `[${autopilotFailures(prev) + 1}] ${message}`.slice(0, 300); }
+/** The manual «Sumar ganancias a la bóveda» button only appears after Auto-Compound failed this many times in a row. */
+export const showManualCompound = (failures: number | null | undefined) => (failures ?? 0) >= AUTOPILOT_MANUAL_AFTER_FAILS;

@@ -1,10 +1,10 @@
 import type { Connection } from "@solana/web3.js";
 import type { MonitorRow } from "@/lib/status-monitor";
 import { AUTOPILOT_POLICY_ID, AUTOPILOT_PROGRAMS, AUTOPILOT_SIGNER_ID, PRIVY_APP_ID, privyWalletRpc } from "@/lib/privy-signer";
-import { AUTOPILOT_MEMO, AUTOPILOT_FEE_ATA, AUTOPILOT_MAX_IMPACT_PCT, AUTOPILOT_MAX_PER_RUN, autopilotDecision, autopilotDoneText, onlyAllowedPrograms, type AutopilotRow } from "@/lib/autopilot";
+import { AUTOPILOT_MEMO, AUTOPILOT_FEE_ATA, AUTOPILOT_MAX_IMPACT_PCT, AUTOPILOT_MAX_PER_RUN, autopilotDecision, autopilotDoneText, onlyAllowedPrograms, withFailure, type AutopilotRow } from "@/lib/autopilot";
 
 type Db = { from: (t: string) => any };
-type Enrollment = AutopilotRow & { wallet: string; privy_user_id: string; wallet_id: string };
+type Enrollment = AutopilotRow & { last_result?: string | null; wallet: string; privy_user_id: string; wallet_id: string };
 
 const basic = (secret: string) => ({ Authorization: `Basic ${btoa(`${PRIVY_APP_ID}:${secret}`)}`, "privy-app-id": PRIVY_APP_ID });
 
@@ -43,6 +43,7 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
   const { rangeKey } = await import("@/lib/dlmm");
   const iso = new Date(now).toISOString();
   const save = (wallet: string, patch: Record<string, unknown>) => db.from("autopilot_enrollments").update({ ...patch, updated_at: iso }).eq("wallet", wallet);
+  const fail = (e: Enrollment, msg: string) => { e.last_result = withFailure(e.last_result, msg); return save(e.wallet, { last_result: e.last_result }); };
   let done = 0;
   for (const e of list) {
     if (done >= AUTOPILOT_MAX_PER_RUN) break;
@@ -59,23 +60,23 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
       e.last_attempt_at = iso;
       if (!(await hasAutopilotSigner(e.wallet_id, appSecret))) { await save(e.wallet, { enabled: false, last_result: "Permiso retirado: el piloto se apagó." }); break; }
       const quote = await simulateDlmmRebalance(connection, { wallet: e.wallet, position: p.address, vaultId: p.vaultId as never }, { prepare: true, maxImpactPct: AUTOPILOT_MAX_IMPACT_PCT, memo: AUTOPILOT_MEMO });
-      if (!quote.success || !quote.prepared || quote.prepared.wallet !== e.wallet) { await save(e.wallet, { last_result: quote.message.slice(0, 300) }); continue; }
+      if (!quote.success || !quote.prepared || quote.prepared.wallet !== e.wallet) { await fail(e, quote.message); continue; }
       const tx = VersionedTransaction.deserialize(Buffer.from(quote.prepared.transaction, "base64"));
       const keys = tx.message.staticAccountKeys.map((k) => k.toBase58());
       const programs = [...new Set(tx.message.compiledInstructions.map((ix) => keys[ix.programIdIndex] ?? ""))];
       // Top-level token instructions may only be the fee: TransferChecked (opcode 12) into the treasury USDC account.
       const tokenIxs = tx.message.compiledInstructions.filter((ix) => keys[ix.programIdIndex] === "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
       const feeOnly = tokenIxs.length <= 1 && tokenIxs.every((ix) => ix.data[0] === 12 && keys[ix.accountKeyIndexes[2] ?? -1] === AUTOPILOT_FEE_ATA);
-      if (keys[0] !== e.wallet || tx.message.addressTableLookups.length || !feeOnly || !onlyAllowedPrograms(programs, AUTOPILOT_PROGRAMS)) { await save(e.wallet, { last_result: "Operación fuera de lo permitido; no se firmó." }); continue; }
+      if (keys[0] !== e.wallet || tx.message.addressTableLookups.length || !feeOnly || !onlyAllowedPrograms(programs, AUTOPILOT_PROGRAMS)) { await fail(e, "Operación fuera de lo permitido; no se firmó."); continue; }
       let signed: string;
       try {
         const out = await privyWalletRpc(e.wallet_id, { method: "signTransaction", chain_type: "solana", params: { transaction: quote.prepared.transaction, encoding: "base64" } }, { appSecret, seed });
         signed = out.data?.signed_transaction ?? "";
         if (!signed) throw new Error("sin firma");
-      } catch (err) { await save(e.wallet, { last_result: `No se pudo firmar: ${(err as Error).message}`.slice(0, 300) }); continue; }
+      } catch (err) { await fail(e, `No se pudo firmar: ${(err as Error).message}`); continue; }
       let signature: string;
       try { signature = await connection.sendRawTransaction(Buffer.from(signed, "base64"), { skipPreflight: false, maxRetries: 3 }); }
-      catch { await save(e.wallet, { last_result: "La red rechazó el envío; se reintentará." }); continue; }
+      catch { await fail(e, "La red rechazó el envío; se reintentará."); continue; }
       let ok = false;
       for (let i = 0; i < 20 && !ok; i++) {
         await new Promise((r) => setTimeout(r, 2000));
@@ -83,7 +84,7 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
         if (st?.err) break;
         ok = st?.confirmationStatus === "confirmed" || st?.confirmationStatus === "finalized";
       }
-      if (!ok) { await save(e.wallet, { last_signature: signature, last_result: "Sin confirmación; se revisará en el próximo ciclo." }); continue; }
+      if (!ok) { { await save(e.wallet, { last_signature: signature }); await fail(e, "Sin confirmación; se revisará en el próximo ciclo."); }; continue; }
       const gains = quote.gainsAddedUsd != null ? Number(quote.gainsAddedUsd) : null;
       await save(e.wallet, { last_rebalance_at: iso, last_signature: signature, last_result: "Rebalanceada", last_gains_usd: gains });
       e.last_rebalance_at = iso;
