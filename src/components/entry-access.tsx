@@ -28,6 +28,7 @@ function EntryButtons() {
     // Signed in: go straight to the screen they wanted (or their home), no extra "continue" tap.
     let target: string = home;
     try { const saved = sessionStorage.getItem("boveda:after-login"); if (saved && saved.startsWith("/") && !saved.startsWith("//")) target = saved; sessionStorage.removeItem("boveda:after-login"); } catch { /* ignore */ }
+    try { sessionStorage.setItem("boveda:auth-pending", String(Date.now())); } catch { /* ignore */ }
     void navigate({ to: target, replace: true });
   }, [session.ready, session.authenticated, home, navigate]);
   // Returning visitors: cover the whole startup (secure access → redirect to their home) with one loading screen.

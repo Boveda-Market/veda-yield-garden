@@ -57,6 +57,8 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const { loginWithPasskey } = useLoginWithPasskey({ onComplete: () => setError(null), onError: loginFailed });
   const startLogin = useCallback((m: "email" | "google" | "wallet" | "passkey") => {
     setError(null);
+    // Remember a sign-in is in progress so the next screen waits for the new wallet instead of bouncing back.
+    try { sessionStorage.setItem("boveda:auth-pending", String(Date.now())); } catch { /* ignore */ }
     if (m === "google") { initOAuth({ provider: "google" }).catch(loginFailed); return; }
     if (m === "passkey") { loginWithPasskey().catch(loginFailed); return; }
     login({ loginMethods: [m] });
@@ -69,7 +71,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const tradeBlock: "external" | "treasury" | null = !walletAddress ? null : walletAddress === FEE_WALLET ? "treasury" : embedded || !blockExternal ? null : "external";
   // If Privy never reports ready (blocked iframe, shields, slow network), stop waiting after 4s so buttons and screens never freeze.
   const [stalled, setStalled] = useState(false);
-  useEffect(() => { if (ready) { setStalled(false); return; } const oauth = typeof window !== "undefined" && /privy_oauth|privy_|code=|state=/.test(window.location.search); const id = setTimeout(() => setStalled(true), oauth ? 25000 : 5000); return () => clearTimeout(id); }, [ready]);
+  useEffect(() => { if (ready) { setStalled(false); if (authenticated) { try { sessionStorage.removeItem("boveda:auth-pending"); } catch { /* ignore */ } } return; } let oauth = typeof window !== "undefined" && /privy_oauth|privy_|code=|state=/.test(window.location.search); try { oauth ||= Date.now() - Number(sessionStorage.getItem("boveda:auth-pending") || 0) < 120000; } catch { /* ignore */ } const id = setTimeout(() => setStalled(true), oauth ? 25000 : 5000); return () => clearTimeout(id); }, [ready, authenticated]);
   // A click before Privy is ready is queued and opens the login as soon as it is (up to 15s) instead of failing instantly.
   const [pendingMethod, setPendingMethod] = useState<"email" | "google" | "wallet" | "passkey" | null>(null);
   useEffect(() => {
