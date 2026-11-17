@@ -19,9 +19,9 @@ export function BootSplash() {
     // Phones on slow data sometimes stall loading the secure-access files; a fresh load always works,
     // so retry once by itself before ever showing the "taking longer" notice.
     const retryId = setTimeout(() => {
-      try { const last = Number(sessionStorage.getItem(BOOT_RETRY_FLAG) || 0); if (Date.now() - last > 60000) { sessionStorage.setItem(BOOT_RETRY_FLAG, String(Date.now())); window.location.reload(); return; } } catch { /* ignore */ }
+      void BOOT_RETRY_FLAG;
       setSlow(true);
-    }, 10000);
+    }, 25000);
     return () => { clearInterval(id); clearTimeout(retryId); };
   }, []);
   return <div role="status" aria-live="polite" className="fixed inset-0 z-[60] grid place-items-center bg-background px-6 text-foreground">
