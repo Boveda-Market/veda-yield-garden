@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { isDlmmVault, isOperableVault } from "@/lib/solana-data";
 import { notify } from "@/lib/notify";
@@ -25,6 +26,7 @@ import { HotZoneMeter } from "./hot-zone-meter";
 import { useAutopilot } from "@/components/autopilot-toggle";
 import { showManualCompound } from "@/lib/autopilot";
 export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRotate, showHarvestBanner = true, bare = false }: { bare?: boolean; positions: ChainPosition[]; onAction: (p: ChainPosition, a: "harvest" | "exit" | "compound") => void; onDeposit?: (p: ChainPosition) => void; onMigrate?: (p: ChainPosition, target: Vault) => void; onRotate?: (p: ChainPosition, target: Vault) => void; showHarvestBanner?: boolean }) {
+  useEffect(() => { const m = /^#vault-(.+)$/.exec(window.location.hash); if (!m) return; const el = document.querySelector(`[data-vault="${CSS.escape(m[1])}"]`); if (el) { setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 150); history.replaceState(history.state, "", window.location.pathname + window.location.search); } }, [positions.length]);
   const t = useT();
   const manualCompound = showManualCompound(useAutopilot().status?.failures);
   const { rows, totalFees, top } = usePositionRows(positions);
@@ -59,7 +61,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
         {!isOperableVault(p.vaultId) && <p className="mt-3 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
       </>;
       // High-octane vaults get the animated neon frame and sunset banner; actions stay identical to every other vault.
-      return hot ? <article key={p.address} className="hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)]"><div className="h-full overflow-hidden rounded-[calc(1rem-2px)] bg-card p-5">{body}</div></article> : <article key={p.address} className="rounded-lg border border-border bg-card p-5">{body}</article>;
+      return hot ? <article key={p.address} data-vault={p.vaultId} className="scroll-mt-24 hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)]"><div className="h-full overflow-hidden rounded-[calc(1rem-2px)] bg-card p-5">{body}</div></article> : <article key={p.address} data-vault={p.vaultId} className="scroll-mt-24 rounded-lg border border-border bg-card p-5">{body}</article>;
     })}</div>
     <p className="mt-4 text-xs leading-5 text-muted-foreground">{t("Valores en dólares estimados al precio actual; pueden cambiar antes de firmar.")} {t("El contador en vivo estima cómo crecen tus ganancias con los intereses recientes de la bóveda; el monto exacto se confirma al cosechar.")}</p>
   </section>;
