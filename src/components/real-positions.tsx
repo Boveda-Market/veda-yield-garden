@@ -26,7 +26,7 @@ import { HotZoneMeter } from "./hot-zone-meter";
 import { useAutopilot } from "@/components/autopilot-toggle";
 import { showManualCompound } from "@/lib/autopilot";
 export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRotate, showHarvestBanner = true, bare = false }: { bare?: boolean; positions: ChainPosition[]; onAction: (p: ChainPosition, a: "harvest" | "exit" | "compound") => void; onDeposit?: (p: ChainPosition) => void; onMigrate?: (p: ChainPosition, target: Vault) => void; onRotate?: (p: ChainPosition, target: Vault) => void; showHarvestBanner?: boolean }) {
-  useEffect(() => { const m = /^#vault-(.+)$/.exec(window.location.hash); if (!m) return; const el = document.querySelector(`[data-vault="${CSS.escape(m[1])}"]`); if (el) { setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 150); history.replaceState(history.state, "", window.location.pathname + window.location.search); } }, [positions.length]);
+  useEffect(() => { const m = /^#vault-(.+)$/.exec(window.location.hash); if (!m) return; const el = document.querySelector(`[data-vault="${CSS.escape(m[1] ?? "")}"]`); if (el) { setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 150); history.replaceState(history.state, "", window.location.pathname + window.location.search); } }, [positions.length]);
   const t = useT();
   const manualCompound = showManualCompound(useAutopilot().status?.failures);
   const { rows, totalFees, top } = usePositionRows(positions);
