@@ -58,7 +58,7 @@ export function HomeCtas({ vaultsFirst = false }: { vaultsFirst?: boolean }) {
   const predict = <Link key="p" to="/mercados" className="group relative block min-w-0 rounded-2xl bg-primary p-[2px] shadow-[0_0_28px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
     <span className="relative isolate flex h-16 items-center justify-between gap-2 overflow-hidden rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
       <DuelLines />
-      <span className="flex min-w-0 flex-col items-start gap-0.5"><img src={dobleLogo} alt="" aria-hidden className="h-8 w-auto shrink-0 drop-shadow-[0_0_10px_var(--primary)] sm:h-9" /><LightningBadge className="bg-hot-surface/80" /><span className="sr-only">{t("Ver Doble o Nada")}</span></span>
+      <span className="flex min-w-0 flex-col items-start gap-0.5"><img src={dobleLogo} alt="" aria-hidden className="h-8 w-auto shrink-0 drop-shadow-[0_0_10px_var(--primary)] sm:h-9" /><LightningBadge /><span className="sr-only">{t("Ver Doble o Nada")}</span></span>
       <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary-foreground opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary-foreground" /></span>{t("En vivo")}</span>
     </span>
   </Link>;

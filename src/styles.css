@@ -67,6 +67,9 @@
   --color-strike: var(--strike);
   --color-hot: var(--hot);
   --color-hot-2: var(--hot-2);
+  --color-bolt: var(--bolt);
+  --color-bolt-ink: var(--bolt-ink);
+  --color-bolt-neon: var(--bolt-neon);
   --color-hot-surface: var(--hot-surface);
   --color-hot-foreground: var(--hot-foreground);
   --color-hot-muted: var(--hot-muted);
@@ -100,6 +103,9 @@
   /* High-octane (GTA6) vault: neon night palette, identical in Día and Noche so the card always pops. */
   --hot: oklch(0.68 0.26 355);
   --hot-2: oklch(0.8 0.17 60);
+  --bolt: oklch(0.88 0.18 95);
+  --bolt-ink: oklch(0.14 0.01 150);
+  --bolt-neon: oklch(0.8 0.2 150);
   --hot-surface: oklch(0.17 0.035 315);
   --hot-foreground: oklch(0.98 0.01 330);
   --hot-muted: oklch(0.8 0.04 330);
