@@ -49,7 +49,6 @@ export function CardPreviewAdmin() {
           <ReceiveCard label={t("Moverás aproximadamente")} amount="12.48" unit="$" sub={`${t("Mínimo garantizado:")} $12.23`} />
           <dl className="grid gap-2 rounded-xl border border-border p-4 text-sm"><div className="flex justify-between"><dt className="text-muted-foreground">{t("Valor de tu posición")}</dt><dd>$12.48</dd></div><div className="flex justify-between"><dt className="text-muted-foreground">{t("Comisión BÓVEDA")}</dt><dd>$0.00</dd></div></dl>
           <Button size="lg"><PenLine className="mr-2 h-4 w-4" />{t("Confirmar cambio")}</Button>
-          <p className="text-center text-xs text-muted-foreground">{t("Un solo toque: movemos todo a tu nueva bóveda.")}</p>
         </Frame>
         <Frame title={t("2 · Cerrando bóveda (firma 1)")}>
           <MoveSteps current={1} from="SOL" to={t("Bóveda MET")} />

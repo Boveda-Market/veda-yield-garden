@@ -133,7 +133,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
       </>}
     </div>}
     {result && !result.success && result.remainingTokenRaw && result.remainingTokenRaw !== "0" && <p role="alert" className="text-xs leading-5 text-destructive">{t("Diferencia de tokens tras la conversión:")}{" "}{result.remainingTokenRaw} {t("unidades mínimas. No es un importe en USD; la liquidación no está validada.")}</p>}
-    {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : message && !finished ? t("Intentar de nuevo") : migrateTo ? t("Confirmar cambio") : t("Confirmar retiro")}</Button><p className="text-center text-xs text-muted-foreground">{migrateTo ? t("Un solo toque: movemos todo a tu nueva bóveda.") : t("Un solo toque. Tus dólares llegan en segundos.")}</p></>}
+    {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : message && !finished ? t("Intentar de nuevo") : migrateTo ? t("Confirmar cambio") : t("Confirmar retiro")}</Button></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta liquidación. No hay movimientos hasta que firmes.")}</p>}
     {signature && pending && step && <WorkingLine text={step} />}
     {message && <SignalErrorCard message={message} />}

@@ -54,7 +54,6 @@ export function RangeUrgentBanner({ positions, openFor }: { positions: ChainPosi
       </div>
       {autopilotOn && <p className="mt-3 rounded-lg bg-primary/10 p-2 text-center text-xs font-medium text-primary">🤖 {t("Tu piloto automático la recentrará en unos minutos. Si prefieres, hazlo ya:")}</p>}
       <RebalanceButton position={p} size="lg" className="mt-3 w-full font-bold" autoOpen={openFor === p.address} label={t("Rebalancear ahora")} />
-      <p className="mt-2 text-center text-xs text-muted-foreground">{t("Un toque y una firma")}</p>
     </section>;
   })}</div>;
 }

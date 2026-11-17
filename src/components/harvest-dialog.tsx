@@ -109,7 +109,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
     </div>}
     {result && !result.success && !pending && <Button variant="outline" onClick={() => void run()}>{t("Intentar de nuevo")}</Button>}
     {pending && step && <WorkingLine text={step} />}
-    {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : compound ? t("Confirmar reinversión") : t("Confirmar cosecha")}</Button><p className="text-center text-xs text-muted-foreground">{compound ? t("Un solo toque. Tus ganancias se suman a tu inversión.") : t("Un solo toque. Tus ganancias van a tus dólares disponibles.")}</p></>}
+    {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : compound ? t("Confirmar reinversión") : t("Confirmar cosecha")}</Button></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta cosecha. No hay movimientos hasta que firmes.")}</p>}
     {message && <SignalErrorCard message={message} />}
     </>}

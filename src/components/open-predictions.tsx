@@ -141,7 +141,6 @@ function SellReview({ review, flow, onCancel, onConfirm }: { review: { p: Predic
         <Button variant="outline" onClick={onCancel}>{t("Mejor espero")}</Button>
         <Button onClick={onConfirm}>{t("Confirmar venta")}</Button>
       </div>
-      <p className="text-center text-xs text-muted-foreground">{t("Un solo toque. El total va a tus dólares disponibles.")}</p>
       </>}
     </ActionSheetContent>
   </Dialog>;
