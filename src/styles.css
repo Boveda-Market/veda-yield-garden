@@ -308,3 +308,12 @@
 /* Startup loading screen for returning visitors, visible from first paint until the home screen decides. */
 .boveda-returning-cover { display: none; }
 html.boveda-returning .boveda-returning-cover { display: contents; }
+
+/* Smart waiting screen: neon pulse + filling bar; screen fade-in on view change. */
+@keyframes neon-pulse { 0%,100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 60%, transparent); transform: scale(1); } 50% { box-shadow: 0 0 32px 8px color-mix(in oklab, var(--primary) 55%, transparent); transform: scale(1.06); } }
+@keyframes neon-fill { 0% { width: 4%; } 70% { width: 85%; } 100% { width: 96%; } }
+@keyframes view-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.neon-pulse { animation: neon-pulse 1.6s ease-in-out infinite; }
+.neon-fill { width: 4%; background-image: linear-gradient(90deg, var(--primary), color-mix(in oklab, var(--primary) 40%, var(--background)), var(--primary)); background-size: 200% 100%; box-shadow: 0 0 12px var(--primary); animation: neon-fill 6s cubic-bezier(.2,.8,.2,1) forwards, hot-shift 1.2s linear infinite; }
+.neon-loader-in, .view-in { animation: view-in 0.18s ease-out; }
+@media (prefers-reduced-motion: reduce) { .neon-pulse, .neon-fill, .neon-loader-in, .view-in { animation: none; } .neon-fill { width: 70%; } }
