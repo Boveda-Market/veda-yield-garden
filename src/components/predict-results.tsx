@@ -19,7 +19,7 @@ export function PredictResults({ asset, window }: { asset: PredictAsset; window:
     {q.data?.success && list.length === 0 && <p className="mt-3 text-sm text-muted-foreground">{t("Aún no hay rondas resueltas recientes para esta duración.")}</p>}
     <ul className="mt-3 divide-y divide-border">
       {list.map((r) => <li key={r.slug} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-        <span className="tabular-nums text-muted-foreground">{new Date(r.endTime * 1000).toLocaleString(locale, { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+        <span className="tabular-nums text-muted-foreground">{new Date(r.endTime * 1000).toLocaleString(locale, { day: "2-digit", month: "short", hour: "numeric", minute: "2-digit", hour12: true })}</span>
         <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${r.winner === "up" ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{r.winner === "up" ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}{t(r.winner === "up" ? "Ganó Sube" : "Ganó Baja")}</span>
       </li>)}
     </ul>
