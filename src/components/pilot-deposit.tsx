@@ -99,7 +99,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, autoStart = f
 
   if (!eligible) return <p className="border-t border-border pt-4 text-xs text-muted-foreground">{t("Los depósitos no están disponibles para esta bóveda.")}</p>;
   if (step === "done") return <>
-    <p role="status" className="sr-only">{t("Depósito confirmado en la red (")}{status === "finalized" ? "finalizado" : "confirmado"}).</p>
+    <p role="status" className="sr-only">{t("Depósito confirmado en la red (")}{t(status === "finalized" ? "finalizado" : "confirmado")}).</p>
     <ActionSuccess title={migrate ? t("¡Cambio de bóveda listo!") : t("¡Depósito exitoso!")} body={migrate ? t("Todo tu dinero ya está generando en la nueva bóveda. Comisión: $0.00.") : t("Tu posición ya está generando comisiones. Puedes cosecharlas cuando quieras desde tu Portafolio.")} amount={{ value: amount, unit: "$" }} details={[{ label: t("Operación"), value: migrate ? t("Cambio de bóveda") : t("Depósito en bóveda") }, { label: t("Destino"), value: t("Bóveda {v}", { v: vaultId.toUpperCase() }) }]} signature={signature} onClose={() => { if (onClose) onClose(); else setStep("idle"); }} />
   </>;
   return <section aria-labelledby="pilot-title" className="grid gap-3 text-sm">
