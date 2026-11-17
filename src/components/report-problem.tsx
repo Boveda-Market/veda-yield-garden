@@ -10,7 +10,6 @@ import { submitSuggestion } from "@/lib/suggestions.functions";
 import { SUGGESTION_MAX_CHARS } from "@/lib/suggestions";
 
 const TYPES = ["Depósito o compra de USDC", "Retiro o envío de fondos", "Bóvedas o cosecha de ganancias", "Fallo visual o error en la app", "Otro inconveniente"] as const;
-const TELEGRAM = "https://t.me/bovedamarket";
 
 /** Wallet-page problem report: stored as an "error" suggestion and alerted to the operator. Pass `trigger` to render a compact opener instead of the full card. */
 export function ReportProblem({ trigger }: { trigger?: (open: () => void) => ReactNode }) {
@@ -41,7 +40,6 @@ export function ReportProblem({ trigger }: { trigger?: (open: () => void) => Rea
         <DialogHeader><DialogTitle>{t("Reportar un problema")}</DialogTitle></DialogHeader>
         {done ? <div className="space-y-3">
           <p role="status" className="text-sm">{t("¡Recibido! El equipo revisará tu reporte lo antes posible.")}</p>
-          <Button asChild variant="outline" className="w-full"><a href={TELEGRAM} target="_blank" rel="noopener noreferrer">{t("¿Es urgente? Escríbenos en Telegram ↗")}</a></Button>
           <Button className="w-full" onClick={() => setOpen(false)}>{t("Cerrar")}</Button>
         </div> : <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
           <div className="flex flex-wrap gap-2">{TYPES.map((c) => <Button key={c} type="button" size="sm" variant={type === c ? "default" : "outline"} aria-pressed={type === c} onClick={() => setType(c)}>{t(c)}</Button>)}</div>
@@ -59,7 +57,6 @@ export function ReportProblem({ trigger }: { trigger?: (open: () => void) => Rea
     <p className="mt-1 text-sm text-muted-foreground">{t("Cuéntanos qué pasó y el equipo lo revisa directamente.")}</p>
     <div className="mt-4 flex flex-wrap items-center gap-3">
       <Button onClick={openDialog}><LifeBuoy size={16} />{t("Reportar un problema")}</Button>
-      <a href={TELEGRAM} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline">{t("¿Es urgente? Escríbenos en Telegram ↗")}</a>
     </div>
     {dialog}
   </section>;
