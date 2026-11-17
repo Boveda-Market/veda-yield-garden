@@ -25,7 +25,7 @@ export function Gta6VideoCard({ onEnter, onLater }: { onEnter: () => void; onLat
   const [muted, setMuted] = useState(true);
   return <>
     <span className="hot-cta inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-hot-surface"><Flame size={12} aria-hidden />{t("Nueva")} · {t("Alto rendimiento")}</span>
-    <DialogTitle className="mt-2 font-display text-xl font-black leading-tight">{t("Bóveda GTA6 en acción")}</DialogTitle>
+    <DialogTitle className="sr-only">{t("Bóveda GTA6 en acción")}</DialogTitle>
     <DialogDescription className="sr-only">{t("Video de cómo depositar en la bóveda GTA6")}</DialogDescription>
     <div className="hot-ring relative mt-3 overflow-hidden rounded-2xl p-[2px]">
       <video ref={ref} src={video.url} autoPlay muted={muted} loop playsInline preload="auto" className="block max-h-[52dvh] w-full rounded-[calc(1rem-2px)] bg-hot-surface object-contain" />
