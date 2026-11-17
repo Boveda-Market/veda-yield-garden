@@ -7,7 +7,7 @@ export function HotZoneMeter({ position, className = "" }: { position: ChainPosi
   const t = useT();
   const zone = position.bins ? hotZone(position.bins) : null;
   if (!zone) return null;
-  const msg = zone.status === "center" ? t("Centrado · cobrando a full") : zone.status === "edge" ? t("Sistema listo para rebalancear") : t("Sistema listo para rebalancear · también lo hace en automático");
+  const msg = zone.status === "center" ? "" : zone.status === "edge" ? t("Sistema listo para rebalancear") : t("Sistema listo para rebalancear · también lo hace en automático");
   const tone = zone.status === "center" ? "text-primary" : "text-primary";
   const icon = zone.status === "center" ? "" : "🔄 ";
   // Out of range: park the marker just past the edge it crossed.
