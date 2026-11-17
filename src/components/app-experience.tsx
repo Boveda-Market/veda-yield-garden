@@ -1,4 +1,5 @@
 import { LoginNudge } from "./login-nudge";
+import { BootSplash } from "./boot-splash";
 import { LoginAlert } from "@/components/login-alert";
 import { Dismissible } from "@/components/dismissible";
 import { PoweredBy } from "@/components/powered-by";
@@ -41,14 +42,7 @@ const PortfolioPanel = lazyWithReload(() => import("@/components/portfolio-panel
 const AdminDashboard = lazyWithReload(() => import("@/components/admin-dashboard").then((m) => ({ default: m.AdminDashboard })));
 const PrivyAccess = lazyWithReload(() => import("@/components/privy-access"));
 
-function AccessLoading() {
-  const t = useT();
-  const [slow, setSlow] = useState(false);
-  useEffect(() => { const id = setTimeout(() => setSlow(true), 5000); return () => clearTimeout(id); }, []);
-  return <div className="grid min-h-screen place-items-center bg-background px-5 text-foreground"><div className="max-w-sm text-center"><p role="status" className="font-display">{t("BÓVEDA · Conectando acceso…")}</p>
-    {slow && <><p className="mt-3 text-sm text-muted-foreground">{t("Está tardando más de lo normal. Revisa tu conexión o desactiva bloqueadores para este sitio.")}</p><div className="mt-4 flex flex-wrap justify-center gap-2"><Button onClick={() => window.location.reload()}>{t("Reintentar")}</Button><Button asChild variant="outline"><Link to="/">{t("Ir al inicio")}</Link></Button></div></>}
-  </div></div>;
-}
+function AccessLoading() { return <BootSplash />; }
 
 export function AppExperience({ guest = false, view = "vaults" }: { guest?: boolean; view?: "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets" | "admin" }) {
   const t = useT();

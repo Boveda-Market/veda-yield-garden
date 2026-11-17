@@ -33,6 +33,7 @@ import { Gta6VideoPopup } from "@/components/gta6-video-popup";
 import { BuyUsdc } from "@/components/buy-usdc";
 import { InstallAppBanner } from "@/components/install-app";
 import { GasRefillCard } from "@/components/gas-refill-card";
+import { PasskeyInvite } from "@/components/passkey-invite";
 import { PendingClaims } from "@/components/pending-claims";
 import { WalletPositions, useWalletVaults, WalletRangeBanner } from "@/components/wallet-positions";
 import { usePositionRows } from "@/hooks/use-position-rows";
@@ -187,6 +188,7 @@ export function WalletPanel() {
     <Gta6VideoPopup wallet={address} />
     <InstallAppBanner />
     <GasRefillCard sol={balances.data?.sol} usdc={balances.data?.usdc} onDone={() => void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] })} />
+    <PasskeyInvite />
     <PendingClaims />
     <WalletRangeBanner wallet={address} />
 

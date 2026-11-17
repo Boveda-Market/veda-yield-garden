@@ -5,7 +5,7 @@ import { installPrivyApiFallback } from "@/lib/privy-api-fallback";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { setPrivyTokenGetter } from "@/lib/privy-token";
 import { sessionWalletAddress } from "@/lib/session-wallet";
-import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useMfaEnrollment, usePrivy, useSigners } from "@privy-io/react-auth";
+import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useLoginWithOAuth, useLoginWithPasskey, useMfaEnrollment, usePrivy, useSigners } from "@privy-io/react-auth";
 import { AUTOPILOT_POLICY_ID, AUTOPILOT_SIGNER_ID } from "@/lib/autopilot";
 import { useUpdateEmail } from "@privy-io/react-auth/ui";
 import { toSolanaWalletConnectors, useExportWallet, useFundWallet, useSignMessage, useSignTransaction, useWallets } from "@privy-io/react-auth/solana";
@@ -51,6 +51,17 @@ function SessionBridge({ children }: { children: ReactNode }) {
     onComplete: () => setError(null),
     onError: () => setError(t("No se pudo iniciar sesión. Inténtalo de nuevo o prueba con otro método (Google, email o billetera).")),
   });
+  const loginFailed = () => setError(t("No se pudo iniciar sesión. Inténtalo de nuevo o prueba con otro método (Google, email o billetera)."));
+  // Google and Face ID / fingerprint open directly (no intermediate Privy screen); email and wallets keep the branded modal.
+  const { initOAuth } = useLoginWithOAuth({ onComplete: () => setError(null), onError: loginFailed });
+  const { loginWithPasskey } = useLoginWithPasskey({ onComplete: () => setError(null), onError: loginFailed });
+  const startLogin = useCallback((m: "email" | "google" | "wallet" | "passkey") => {
+    setError(null);
+    if (m === "google") { initOAuth({ provider: "google" }).catch(loginFailed); return; }
+    if (m === "passkey") { loginWithPasskey().catch(loginFailed); return; }
+    login({ loginMethods: [m] });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initOAuth, loginWithPasskey, login]);
   const walletAddress = sessionWalletAddress(wallets, authenticated, user?.linkedAccounts as Parameters<typeof sessionWalletAddress>[2]);
   const embedded = !!walletAddress && !!user?.linkedAccounts.some(a => a.type === "wallet" && a.address === walletAddress && (a.walletClientType === "privy" || a.walletClientType === "privy-v2"));
   const policy = useQuery({ queryKey: ["wallet-policy"], queryFn: () => getWalletPolicy().catch(() => ({ blockExternal: false })), staleTime: 30_000, refetchInterval: 60_000 });
@@ -63,10 +74,10 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const [pendingMethod, setPendingMethod] = useState<"email" | "google" | "wallet" | "passkey" | null>(null);
   useEffect(() => {
     if (!pendingMethod) return;
-    if (ready) { const m = pendingMethod; setPendingMethod(null); setError(null); login({ loginMethods: [m] }); return; }
+    if (ready) { const m = pendingMethod; setPendingMethod(null); startLogin(m); return; }
     const id = setTimeout(() => { setPendingMethod(null); setError(t("El acceso seguro no respondió. Revisa tu conexión y recarga la página.")); }, 15000);
     return () => clearTimeout(id);
-  }, [pendingMethod, ready, login, t]);
+  }, [pendingMethod, ready, startLogin, t]);
   // Registered during render (not only in an effect) so the first wallet reads fired by
   // freshly mounted screens already carry the session instead of failing as signed out.
   setPrivyTokenGetter(authenticated ? getAccessToken : null);
@@ -148,7 +159,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
         if (!isOfficialHost()) { setError(t("Abrimos bovedamarket.app en una pestaña nueva para que puedas entrar.")); window.open(OFFICIAL_ORIGIN + window.location.pathname, "_blank", "noopener"); return; }
         setError(null); setPendingMethod(method); return;
       }
-      setError(null); login({ loginMethods: [method] });
+      startLogin(method);
     },
     tradeBlock,
     signAndSendAdmin: walletAddress === FEE_WALLET ? (transaction) => sendRaw(transaction) : undefined,
@@ -195,7 +206,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
 export default function PrivyAccess({ children }: { children: ReactNode }) {
   return <PrivyProvider appId="cmw6ftcf900ge0hl0jyw3rc75" config={{
     loginMethods: ["email", "google", "wallet", "passkey"],
-    appearance: { theme: "#0d1117", accentColor: "#22c55e", walletChainType: "solana-only", walletList: ["phantom", "jupiter", "detected_solana_wallets", "solflare", "backpack", "okx_wallet", "coinbase_wallet", "wallet_connect"], logo: "/icon-512.png" },
+    appearance: { theme: "#0d1117", accentColor: "#22c55e", walletChainType: "solana-only", walletList: ["phantom", "jupiter", "detected_solana_wallets", "solflare", "backpack", "okx_wallet", "coinbase_wallet", "wallet_connect"], logo: "/icon-512.png", landingHeader: "Acceso seguro a BÓVEDA" },
     externalWallets: { solana: { connectors: solanaConnectors } },
     embeddedWallets: { showWalletUIs: false, solana: { createOnLogin: "users-without-wallets" }, ethereum: { createOnLogin: "off" } },
     solana: { rpcs: solanaRpcs },

@@ -12,7 +12,12 @@ import { gta6Candidate } from "./gta6-promo";
 import video from "@/assets/videos/gta6-en-accion.mp4.asset.json";
 
 const gta6 = VAULTS.find((v) => v.id === "gta6");
-const SEEN = "boveda:gta6-video-seen";
+const VISITS = "boveda:gta6-video-visits";
+
+/** No dollars yet: every Mi Billetera visit. Dollars but no vaults: visits 1, 4, 7… (once every 3). */
+export function gta6VideoDue(hasDollars: boolean, visit: number): boolean {
+  return !hasDollars || (visit - 1) % 3 === 0;
+}
 
 /** Video popup: wallets without a GTA6 position; holders of a movable vault get the migrate popup instead. */
 export function showGta6Video(positions: ChainPosition[]): boolean {
@@ -36,14 +41,23 @@ export function Gta6VideoCard({ onEnter, onLater }: { onEnter: () => void; onLat
   </>;
 }
 
-/** Once-per-session video popup in Mi Billetera for wallets with no GTA6 deposit. */
+/** Video popup in Mi Billetera for wallets with no vault: every visit without dollars, once every 3 visits with dollars. */
 export function Gta6VideoPopup({ wallet }: { wallet: string | null | undefined }) {
   const q = useRealWallet(wallet ?? null);
   const ready = !!wallet && !!q.data?.success;
   const eligible = ready && showGta6Video(q.data?.success ? q.data.data.positions : []);
   const [open, setOpen] = useState(false);
   const [deposit, setDeposit] = useState(false);
-  useEffect(() => { if (!eligible) return; try { if (sessionStorage.getItem(SEEN)) return; sessionStorage.setItem(SEEN, "1"); } catch { /* show anyway */ } setOpen(true); }, [eligible]);
+  const decided = useRef(false);
+  const hasDollars = q.data?.success ? Number(q.data.data.usdc) > 0 : false;
+  useEffect(() => {
+    if (!eligible) return;
+    // One decision per Mi Billetera visit (a refetch during the same visit never re-opens it).
+    if (decided.current) return; decided.current = true;
+    let visit = 1;
+    if (hasDollars) { try { visit = Number(localStorage.getItem(VISITS) || 0) + 1; localStorage.setItem(VISITS, String(visit)); } catch { /* show anyway */ } }
+    if (gta6VideoDue(hasDollars, visit)) setOpen(true);
+  }, [eligible, hasDollars]);
   if (!gta6) return null;
   return <>
     <Dialog open={open} onOpenChange={setOpen}>

@@ -298,3 +298,7 @@
 .signal-bar { animation: signal-bar 1.2s ease-in-out infinite; }
 .signal-pop { animation: signal-pop 0.35s ease-out; }
 @media (prefers-reduced-motion: reduce) { .signal-wave, .signal-bar, .signal-pop { animation: none; } }
+
+/* Startup loading screen for returning visitors, visible from first paint until the home screen decides. */
+.boveda-returning-cover { display: none; }
+html.boveda-returning .boveda-returning-cover { display: contents; }

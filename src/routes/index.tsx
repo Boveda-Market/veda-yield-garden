@@ -16,6 +16,12 @@ import { isReturning } from "@/lib/preferences";
 import { EntryAccess } from "@/components/entry-access";
 import { PredictPromo } from "@/components/predict-promo";
 import { DobleHero, Gta6Hero, HomeCtas } from "@/components/home-gta6";
+import { BootSplash } from "@/components/boot-splash";
+
+/** Before hydration, returning visitors (flag set by a tiny head script) see the loading screen instead of the full page flashing. */
+function ReturningCover() {
+  return <div className="boveda-returning-cover"><BootSplash /></div>;
+}
 
 export const Route = createFileRoute("/")({ staticData: { sitemap: true },
   head: () => ({ meta: [
@@ -83,7 +89,8 @@ const TRUST = [
 export function Landing() {
   const t = useT();
   const [compact, setCompact] = useState(false);
-  useEffect(() => { setCompact(isReturning() && !isHeroReview()); }, []);
+  const [decided, setDecided] = useState(false);
+  useEffect(() => { setCompact(isReturning() && !isHeroReview()); setDecided(true); }, []);
   const [heroIdx, setHeroIdx] = useState(0);
   useEffect(() => {
     let saved: string | null = null;
@@ -96,7 +103,7 @@ export function Landing() {
   const gtaHero = hero.theme === "gta6";
   const dobleHero = hero.theme === "doble";
   const plainHero = !gtaHero && !dobleHero;
-  if (compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-10 text-foreground">
+  if (decided && compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-10 text-foreground">
     <img src="/icon-512.png" alt="" className="h-14 w-14 rounded-2xl" />
     <h1 className="mt-4 text-center font-display text-3xl font-bold">{t("Bienvenido de nuevo")}</h1>
     <p className="mt-2 text-center text-sm text-muted-foreground">{t("Entra para ver tu wallet y tus ganancias.")}</p>
@@ -104,6 +111,7 @@ export function Landing() {
     <button type="button" onClick={() => setCompact(false)} className="mt-6 text-sm text-primary underline underline-offset-4">{t("Ver portada completa")}</button>
   </div>;
   return <div className="min-h-screen bg-background text-foreground">
+    {!decided && <ReturningCover />}
     <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-6 sm:px-6"><Link to="/" className="flex min-w-0 shrink-0 items-center gap-2 font-display text-lg font-bold sm:gap-3"><img src="/icon-512.png" alt="" className="h-9 w-9 shrink-0 rounded-lg" />BÓVEDA</Link><div className="flex min-w-0 items-center gap-1.5 sm:gap-2"></div></header>
     <main className="mx-auto max-w-5xl px-6">
       <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">

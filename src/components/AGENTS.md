@@ -6,3 +6,6 @@
 - Phone back closes the open card (lib/back-close.tsx, BackToClose inside ActionSheet/Dialog/Sheet Content): one silent same-URL history entry per open card, popstate handled before the router so the page underneath never changes; installed in router.tsx before createRouter.
 - Privy confirmation popups are off (showWalletUIs false globally and per signTransaction): BÓVEDA's own review card is the single confirmation; remaining Privy screens use BÓVEDA dark background and green accent.
 - GTA6 video popup (gta6-video-popup.tsx): once-per-session in Mi Billetera for wallets with no GTA6 position and no movable vault (those get the migrate popup instead); CTA opens the GTA6 deposit directly; video served as a CDN asset.
+- Startup uses one BootSplash (boot-splash.tsx) for every loading step (app access, returning-visitor redirect, pre-hydration cover via the html.boveda-returning head flag) so phones never flicker between screens.
+- BackButton («Atrás») uses real router history when this tab has a previous screen (__TSR_index > 0), else Mi Billetera for signed-in users or the public fallback.
+- Google and passkey sign-in go direct (useLoginWithOAuth / useLoginWithPasskey) with no intermediate Privy screen; email and external wallets keep the branded Privy modal. PasskeyInvite in Mi Billetera offers Face ID/fingerprint when the device supports it.

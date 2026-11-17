@@ -10,6 +10,7 @@ import { Button } from "./ui/button";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { CoinbaseNote } from "./coinbase-note";
 import { GoogleButton } from "./google-button";
+import { BootSplash } from "./boot-splash";
 const PrivyAccess = lazyWithReload(() => import("./privy-access"));
 
 function EntryButtons() {
@@ -26,7 +27,8 @@ function EntryButtons() {
     // Returning users go straight to their home screen.
     if (wasReturning.current) void navigate({ to: home, replace: true });
   }, [session.ready, session.authenticated, home, navigate]);
-  if (session.ready && session.authenticated && wasReturning.current) return <p role="status" className="mt-8 text-sm text-muted-foreground">{t("Abriendo tu cuenta…")}</p>;
+  // Returning visitors: cover the whole startup (secure access → redirect to their home) with one loading screen.
+  if (wasReturning.current && (!session.ready || session.authenticated)) return <BootSplash />;
   if (session.ready && session.authenticated && isHeroReview()) return <div className="mt-8 w-full max-w-sm"><Button asChild className="h-12 w-full"><Link to={home}>{t("Continuar al app")}<ArrowRight size={16} /></Link></Button></div>;
   if (session.ready && session.authenticated) return <div className="mt-8 w-full max-w-sm"><Button asChild className="h-12 w-full"><Link to={home}>{t("Continuar al app")}<ArrowRight size={16} /></Link></Button></div>;
   return <div className="mt-8 w-full max-w-sm space-y-3">

@@ -28,7 +28,8 @@ export function GasRefillCard({ sol, usdc, onDone, force, target }: Props) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   if (sol === undefined || usdc === undefined || (!gasIsLow(sol) && !force && !msg)) return null;
-  const empty = sol === 0n;
+  // No dollars yet (new account): nothing to refill, so no reserve notice at all.
+  if (usdc <= 0n && !force && !msg) return null;
   // New and existing wallets low on reserve get the same activation: vault-ready reserve + fixed fee, one tap.
   const activation = !force && gasIsLow(sol) && usdc >= MIN_USDC_MICRO;
   async function refill() {
@@ -45,9 +46,9 @@ export function GasRefillCard({ sol, usdc, onDone, force, target }: Props) {
     finally { setBusy(false); }
   }
   if (activation) return <ActivationFlow usdc={usdc} wallet={session.walletAddress} prepare={prepare} signAndSend={session.signAndSend} onDone={onDone} />;
-  return <section aria-label={t("Reserva para costos de red")} className={`rounded-2xl border p-4 ${empty ? "border-primary/20 bg-primary/5" : "border-accent bg-accent/30"}`}>
-    <p className="flex items-center gap-2 font-semibold"><Fuel size={16} />{empty ? t("Te quedaste sin saldo para movimientos") : t("Te queda poco saldo para movimientos")}</p>
-    <p className="mt-1 text-sm text-foreground/85">{t("Apartamos una pequeña parte de tus dólares (unos $2) para cubrir tus próximas operaciones. BÓVEDA cubre el costo de esta recarga.")}</p>
+  return <section aria-label={t("Reserva para costos de red")} className={`rounded-2xl border p-4 border-primary/20 bg-primary/5`}>
+    <p className="flex items-center gap-2 font-semibold"><Fuel size={16} />{t("Activa tu reserva para movimientos")}</p>
+    <p className="mt-1 text-sm text-foreground/85">{t("Apartamos una pequeña parte de tus dólares como reserva para que puedas hacer tus movimientos sin interrupciones.")}</p>
     {msg && <p role={msg.ok ? "status" : "alert"} className={`mt-2 text-sm ${msg.ok ? "text-primary" : "text-muted-foreground"}`}>{msg.text}</p>}
     {!msg?.ok && <Button className="mt-3 w-full" disabled={busy || usdc <= 0n} onClick={() => void refill()}>{busy ? t("Preparando recarga…") : t("Recargar reserva de operaciones")}</Button>}
     {usdc <= 0n && <p className="mt-2 text-xs text-muted-foreground">{t("Necesitas tener dólares disponibles para recargar tu reserva.")}</p>}

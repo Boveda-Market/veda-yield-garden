@@ -121,6 +121,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 const CHUNK_GUARD = `(function(){var K="boveda-chunk-reload",R=/Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Loading chunk .* failed|No factory registered for module/i;function h(e){var m=e&&(e.reason||e.error||e);m=m&&m.message?m.message:String(e&&e.message||m||"");if(!R.test(m))return;try{var l=Number(sessionStorage.getItem(K)||0);if(Date.now()-l<30000)return;sessionStorage.setItem(K,String(Date.now()))}catch(_){}location.reload()}addEventListener("unhandledrejection",h);addEventListener("error",h,true)})();`;
 
+const RETURNING_BOOT = `try{if(localStorage.getItem("boveda:returning")==="1")document.documentElement.classList.add("boveda-returning")}catch(e){}`;
+
 function RootShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
@@ -130,6 +132,8 @@ function RootShell({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: CHUNK_GUARD }} />
         {/* Apply the saved day/night choice before paint so the page never flashes. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
+        {/* Returning visitors: show the loading screen from the first paint instead of flashing the full home page. */}
+        <script dangerouslySetInnerHTML={{ __html: RETURNING_BOOT }} />
         <HeadContent />
       </head>
       <body>
