@@ -1159,7 +1159,7 @@ export const extra: Record<string, string> = {
   "Buscando el precio de algunas bóvedas; el total se actualiza solo.": "Looking up prices for some vaults; your total updates on its own.",
   "Ir con la mayoría": "Go with the crowd",
   "⚖️ Ronda pareja: el mercado está dividido. Elige tú.": "⚖️ Close round: the market is split. Your call.",
-  "1 toque · Pones ${a} → recibes ≈${b} si acierta la mayoría": "1 tap · Put ${a} → get ≈${b} if the crowd is right",
+  "Pones ${a} → recibes ≈${b} si acierta la mayoría": "Put ${a} → get ≈${b} if the crowd is right",
   "Con ${a} recibes": "With ${a} you get",
   "Próxima": "Next",
   "Rondas recientes y próximas": "Recent and upcoming rounds",

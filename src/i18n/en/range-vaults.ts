@@ -126,7 +126,7 @@ export const rangeVaults: Record<string, string> = {
   "Ahora no": "Not now",
   "Siempre lo encuentras en Bóvedas y Portafolio.": "You can always find it in Vaults and Portfolio.",
   "Mientras todos esperan el juego, tú cobras como la casa.": "While everyone waits for the game, you collect like the house.",
-  "Cada compra y venta de GTA6 te deja comisión. Deposita, recibe la alerta en Telegram y rebalancea con 1 toque.": "Every GTA6 buy and sell pays you a fee. Deposit, get the Telegram alert and rebalance with 1 tap.",
+  "Cada compra y venta de GTA6 te deja comisión. Deposita, recibe la alerta en Telegram y rebalancea cuando te toque.": "Every GTA6 buy and sell pays you a fee. Deposit, get the Telegram alert and rebalance when it's time.",
   "Te avisamos": "We alert you",
   "Rebalanceas": "You rebalance",
   "Entrar a la Bóveda GTA6": "Enter the GTA6 Vault",
