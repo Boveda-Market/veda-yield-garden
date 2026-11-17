@@ -81,12 +81,3 @@ export function autopilotNotice(s: { enabled: boolean; enabledAt: string | null;
   if (fresh(s.lastRebalanceAt)) return { id: `autopilot:rb:${s.lastRebalanceAt}`, kind: "rebalanced", at: s.lastRebalanceAt!, gainsUsd: gainsWorthQuoting(s.lastGainsUsd) ? s.lastGainsUsd : null };
   return null;
 }
-
-/** Personal Telegram card when Autopilot is switched on (information only). */
-export function autopilotOnText(auto: boolean) {
-  return tgCard("🤖", "Piloto automático activado", [
-    auto ? "✨ Tus bóvedas de rango (como GTA6) ya vienen con piloto automático." : "✨ Activaste el piloto automático en tus bóvedas de rango.",
-    "🎯 Si el precio sale de tu rango, la volvemos a centrar por ti, sin firmas.",
-    "🔒 Solo puede rebalancear: nunca retira ni envía tu dinero. Lo apagas cuando quieras en la tarjeta de tu bóveda.",
-  ]);
-}
