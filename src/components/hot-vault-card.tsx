@@ -50,7 +50,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
   const apr = y.data?.apr;
   const buys = s.data?.buys24h ?? null, sells = s.data?.sells24h ?? null;
   const total = buys != null && sells != null ? buys + sells : null;
-  const steps = [["💵", "Depositas"], ["📲", "Alerta al móvil"], ["🎯", "Rebalanceas con 1 toque"]] as const;
+  const steps = [["💵", "Depositas"], ["📲", "Alerta al móvil"], ["🎯", "Rebalanceas al instante"]] as const;
   return <article className="hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)]">
     <div className="relative isolate flex h-full flex-col overflow-hidden rounded-[calc(1rem-2px)] bg-[image:var(--gradient-hot-surface)] text-hot-foreground">
       <HotBanner vault={vault}>
