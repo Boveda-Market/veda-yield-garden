@@ -10,4 +10,4 @@
 - BackButton («Atrás») uses real router history when this tab has a previous screen (__TSR_index > 0), else Mi Billetera for signed-in users or the public fallback.
 - Google and passkey sign-in go direct (useLoginWithOAuth / useLoginWithPasskey) with no intermediate Privy screen; email and external wallets keep the branded Privy modal. PasskeyInvite in Mi Billetera offers Face ID/fingerprint when the device supports it.
 - One secure-session engine (session-host.tsx + lib/session-host.ts): the root mounts Privy once on first demand and publishes the session; screens read it via HostedSession, never mount their own provider, so home→Mi Billetera never restarts sign-in. BootSplash reloads once (≤1/min) only on private screens shortly after a sign-in.
-- Fingerprint/Face ID gate (lib/biometric-gate.ts) runs inside signAndSend/signOnly when this device remembers a passkey; Doble o Nada round entries pass quick:true, prize claims don't; button copy never mentions it.
+- No local fingerprint check before signing: browser WebAuthn without a server challenge/registered credential fails on phones and blocked every transaction; fingerprint is used for sign-in only.
