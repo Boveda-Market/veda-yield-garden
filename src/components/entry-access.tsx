@@ -28,8 +28,13 @@ function EntryButtons() {
     // Signed in: go straight to the screen they wanted (or their home), no extra "continue" tap.
     let target: string = home;
     try { const saved = sessionStorage.getItem("boveda:after-login"); if (saved && saved.startsWith("/") && !saved.startsWith("//")) target = saved; sessionStorage.removeItem("boveda:after-login"); } catch { /* ignore */ }
+    // Never land back on the home page (that left the loading screen waiting forever after switching accounts).
+    if (target === "/" || target.startsWith("/#") || target.startsWith("/?")) target = home;
     try { sessionStorage.setItem("boveda:auth-pending", String(Date.now())); } catch { /* ignore */ }
     void navigate({ to: target, replace: true });
+    // Safety net: if the screen hasn't changed shortly after, do a clean full load of the target (what "Reintentar" did).
+    const id = setTimeout(() => { if (window.location.pathname === "/") window.location.replace(target); }, 2500);
+    return () => clearTimeout(id);
   }, [session.ready, session.authenticated, home, navigate]);
   // Returning visitors: cover the whole startup (secure access → redirect to their home) with one loading screen.
   if (wasReturning.current && (!(session.sessionKnown || session.ready) || session.authenticated)) return <BootSplash />;
