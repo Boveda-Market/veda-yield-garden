@@ -31,7 +31,7 @@ function EntryButtons() {
     void navigate({ to: target, replace: true });
   }, [session.ready, session.authenticated, home, navigate]);
   // Returning visitors: cover the whole startup (secure access → redirect to their home) with one loading screen.
-  if (wasReturning.current && (!session.ready || session.authenticated)) return <BootSplash />;
+  if (wasReturning.current && (!(session.sessionKnown ?? session.ready) || session.authenticated)) return <BootSplash />;
   if (session.ready && session.authenticated && isHeroReview()) return <div className="mt-8 w-full max-w-sm"><Button asChild className="h-12 w-full"><Link to={home}>{t("Continuar al app")}<ArrowRight size={16} /></Link></Button></div>;
   if (session.ready && session.authenticated) return <BootSplash />;
   return <div className="mt-8 w-full max-w-sm space-y-3">

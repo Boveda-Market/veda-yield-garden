@@ -137,7 +137,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   };
   const doLogout = useCallback(async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError(t("No se pudo cerrar sesión. Inténtalo de nuevo.")); } }, [queryClient, logout]);
   return <BovedaSessionContext.Provider value={{
-    ready: ready || stalled, authenticated, userId: authenticated ? user?.id ?? null : null,
+    ready: ready || stalled, sessionKnown: ready, authenticated, userId: authenticated ? user?.id ?? null : null,
     label: user?.email?.address ?? user?.google?.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : t("Mi cuenta")),
     walletAddress, error: error ?? (pendingMethod && !ready ? t("Conectando el acceso seguro…") : stalled && !ready && !isOfficialHost() ? t("Para entrar, abre bovedamarket.app. En esta vista previa el acceso seguro no está disponible.") : null), getAccessToken,
     clearError: () => setError(null),

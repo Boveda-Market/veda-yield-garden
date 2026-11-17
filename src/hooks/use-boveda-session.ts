@@ -15,6 +15,8 @@ export type AccountSecurity = {
 
 export type BovedaSession = {
   ready: boolean;
+  /** True only once the secure session has really finished loading (ready may turn true early so buttons never freeze). */
+  sessionKnown?: boolean;
   authenticated: boolean;
   userId: string | null;
   label: string;
