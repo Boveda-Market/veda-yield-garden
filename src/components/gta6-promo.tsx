@@ -44,8 +44,8 @@ export function Gta6Guide({ open, onOpenChange, onStart }: { open: boolean; onOp
   const t = useT();
   const steps = [
     ["🎯", t("Tu dinero trabaja en la zona caliente"), t("Se concentra donde ocurren casi todos los intercambios. Por eso cobra tantas comisiones.")],
-    ["⏸️", t("Si el precio se mueve fuerte, se pausa"), t("Tu dinero sigue seguro, pero deja de cobrar hasta que rebalancees.")],
-    ["📲", t("Telegram te avisa, tú rebalanceas"), t("Te llega una alerta al móvil. Tocas 1 botón y vuelves a cobrar al instante.")],
+    ["⏸️", t("Si el precio se mueve fuerte, se pausa"), t("Tu dinero sigue seguro. El sistema lo recentra en automático para que sigas cobrando.")],
+    ["📲", t("Novedades directas en Telegram"), t("Recibe avisos al instante de tus ganancias y movimientos en tu móvil.")],
   ] as const;
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-h-[92dvh] overflow-y-auto">
@@ -53,7 +53,7 @@ export function Gta6Guide({ open, onOpenChange, onStart }: { open: boolean; onOp
       <DialogDescription>{t("3 pasos para mantener tu bóveda produciendo.")}</DialogDescription>
       <ol className="grid gap-3">{steps.map(([icon, title, body], i) => <li key={title} className="flex gap-3 rounded-xl border border-border p-3"><span aria-hidden className="text-2xl">{icon}</span><div><p className="text-sm font-bold">{i + 1}. {title}</p><p className="mt-0.5 text-xs leading-5 text-muted-foreground">{body}</p></div></li>)}</ol>
       <Suspense fallback={null}><RangeAlertsGate /></Suspense>
-      <p role="note" className="text-xs leading-5 text-muted-foreground">⚠️ {t("Recomendado: sin Telegram no te llegará el aviso si la bóveda se pausa y podrías dejar de ganar. Puedes continuar de todos modos.")}</p>
+      <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Opcional: conecta Telegram para recibir avisos de tus ganancias y novedades en tu móvil.")}</p>
       <Button size="lg" className="hot-cta w-full font-bold text-hot-surface" onClick={onStart}>{t("Entendido, cambiar")} →</Button>
     </DialogContent>
   </Dialog>;

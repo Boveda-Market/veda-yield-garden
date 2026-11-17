@@ -88,7 +88,7 @@ export function AutopilotToggle({ className }: { className?: string }) {
     try {
       await session.autopilot!.revoke().catch(() => undefined);
       store(await disable({ data: { wallet } }));
-      notify("success", t("Piloto automático apagado"), t("Te avisaremos para que rebalancees con un toque"));
+      notify("success", t("Piloto automático apagado"), t("Te avisaremos si tu bóveda necesita atención"));
     } catch { notify("error", t("No se pudo apagar el piloto automático"), t("Inténtalo de nuevo")); }
     finally { setPending(false); }
   }

@@ -1,5 +1,16 @@
 /** Range-based (GTA6) vault texts. */
 export const rangeVaults: Record<string, string> = {
+  "Alertas de Telegram activas": "Telegram alerts active",
+  "Alertas de Telegram en pausa": "Telegram alerts paused",
+  "Reactivar": "Resume",
+  "Mantente informado al instante": "Stay informed instantly",
+  "Recibe las novedades de tu bóveda y tus ganancias directamente en Telegram.": "Get your vault updates and earnings straight in Telegram.",
+  "Solo toca «Iniciar» en el bot oficial @bovedamarketbot.": "Just tap «Start» in the official @bovedamarketbot.",
+  "Tu dinero sigue seguro. El sistema lo recentra en automático para que sigas cobrando.": "Your money stays safe. The system re-centres it automatically so you keep earning.",
+  "Novedades directas en Telegram": "Updates straight to Telegram",
+  "Recibe avisos al instante de tus ganancias y movimientos en tu móvil.": "Get instant alerts about your earnings and moves on your phone.",
+  "Opcional: conecta Telegram para recibir avisos de tus ganancias y novedades en tu móvil.": "Optional: connect Telegram to get alerts about your earnings and updates on your phone.",
+  "Te avisaremos si tu bóveda necesita atención": "We'll let you know if your vault needs attention",
   "Sé la casa": "Be the house",
   "En la zona caliente": "In the hot zone",
   "Zona caliente": "Hot zone",

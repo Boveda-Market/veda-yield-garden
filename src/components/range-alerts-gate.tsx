@@ -34,12 +34,12 @@ export function RangeAlertsGate() {
     setBusy(true);
     try { const token = await session.getAccessToken?.(); if (token) { if (!s.enabled) await set({ data: { token, action: "on" } }); if (s.muted.includes("range")) await setKind({ data: { token, kind: "range", on: true } }); } await refresh(); } finally { setBusy(false); }
   };
-  if (s.linked && s.enabled && !s.muted.includes("range")) return <p role="status" className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 p-3 text-sm font-medium text-primary"><CheckCircle2 size={16} className="shrink-0" />{t("Alertas de Telegram activas · Te avisaremos al instante si toca rebalancear.")}</p>;
-  if (s.linked) return <div className="grid gap-2 rounded-xl border border-border bg-muted p-3 text-sm"><p className="font-semibold">⚠️ {t("Tus alertas de rebalanceo están en pausa.")}</p><Button size="sm" disabled={busy} onClick={() => void enable()}><BellRing size={16} />{t("Activar en 1 toque")}</Button></div>;
-  return <div className="grid gap-2 rounded-xl border-2 border-primary/60 bg-primary/10 p-3 text-sm">
-    <p className="font-display text-base font-bold">📲 {t("Activa tus alertas de rebalanceo")}</p>
-    <p className="text-muted-foreground">{t("Esta bóveda exige reflejos: cuando el mercado se mueve, te avisamos para volver a centrar tu dinero en 1 firma.")}</p>
-    <Button disabled={busy} onClick={() => void connect()}><Send size={16} />{waiting ? t("Esperando confirmación en Telegram…") : t("Conectar Telegram ahora")}</Button>
-    <p className="text-xs text-muted-foreground">👉 {t("En Telegram toca «Iniciar» y deja el chat sin silenciar para que los avisos te lleguen con sonido.")}</p>
+  if (s.linked && s.enabled && !s.muted.includes("range")) return <p role="status" className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 p-3 text-sm font-medium text-primary"><CheckCircle2 size={16} className="shrink-0" />{t("Alertas de Telegram activas")}</p>;
+  if (s.linked) return <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 p-3 text-sm"><p className="font-medium text-muted-foreground">{t("Alertas de Telegram en pausa")}</p><Button size="sm" variant="secondary" disabled={busy} onClick={() => void enable()}><BellRing size={16} />{t("Reactivar")}</Button></div>;
+  return <div className="grid gap-2 rounded-xl border border-border bg-muted/40 p-3 text-sm">
+    <p className="flex items-center gap-2 font-semibold"><Send size={15} className="text-primary" />{t("Mantente informado al instante")}</p>
+    <p className="text-muted-foreground">{t("Recibe las novedades de tu bóveda y tus ganancias directamente en Telegram.")}</p>
+    <Button size="sm" variant="secondary" disabled={busy} onClick={() => void connect()}>{waiting ? t("Esperando confirmación en Telegram…") : t("Conectar Telegram")}</Button>
+    <p className="text-xs text-muted-foreground">👉 {t("Solo toca «Iniciar» en el bot oficial @bovedamarketbot.")}</p>
   </div>;
 }
