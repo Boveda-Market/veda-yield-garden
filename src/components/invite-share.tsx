@@ -84,7 +84,7 @@ export function InviteHero({ link, code, referred, pending, preview, onCopied, r
   async function share(msg: string, url: string) { if (navigator.share) { try { await navigator.share({ title: "BÓVEDA", text: msg, url }); } catch { /* cancelled */ } return; } try { await navigator.clipboard.writeText(`${msg} ${url}`); } catch { /* ignore */ } flash(); }
   const cleanDraft = normalizeCode(draft);
   async function save() { if (!cleanDraft) { setEditMsg(t("Usa de 4 a 16 letras o números, sin espacios.")); return; } if (!onSaveCode) return; setSaving(true); setEditMsg(null); const err = await onSaveCode(cleanDraft); setSaving(false); if (err) setEditMsg(err); else setEditOpen(false); }
-  const steps: [string, string][] = [[t("Copia tu enlace"), t("Ya está listo. Un toque y es tuyo.")], [t("Compártelo"), t("Con amigos y familia, por WhatsApp o Telegram.")], [t("Gana hasta 60%"), t("De la comisión de cada movimiento, en dólares.")]];
+  const steps: [string, string][] = [[t("Copia tu enlace"), t("Ya está listo. Un toque y es tuyo.")], [t("Compártelo"), t("Con amigos y familia, por WhatsApp o Telegram.")], [t("Gana hasta 60%"), t("De las ganancias de cada movimiento, en dólares.")]];
   return <section aria-labelledby="invite-hero" className="invite-ring rounded-3xl p-[2px]">
     <div className="rounded-[22px] bg-[image:var(--gradient-invite-surface)] p-5 text-invite-foreground sm:p-7">
       <span className="invite-cta inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wide text-invite-surface"><Gift size={12} aria-hidden />{t("Invita y Gana")}</span>

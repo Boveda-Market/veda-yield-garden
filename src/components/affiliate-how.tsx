@@ -15,7 +15,7 @@ export function AffiliateHow() {
   const steps: [string, string][] = [
     [t("Comparte tu enlace"), t("Copias tu enlace y se lo envías a un amigo.")],
     [t("Tu amigo usa BÓVEDA"), t("Deposita en bóvedas, juega en Sube/Baja o retira dinero. A él no le cuesta ni un centavo extra.")],
-    [t("Tú ganas la mitad de la comisión"), t("Cada vez que hace un movimiento con comisión, BÓVEDA te da el 50% de esa comisión en USDC.")],
+    [t("Tú ganas la mitad de las ganancias"), t("Cada vez que hace un movimiento, BÓVEDA te da el 50% de esas ganancias en USDC.")],
   ];
   const faqs: [string, string][] = [
     [t("¿En qué operaciones gano?"), t("En depósitos, cosechas, cierres de bóveda, retiros y ganancias cobradas en Sube/Baja. Los cambios entre monedas y los envíos son gratis.")],

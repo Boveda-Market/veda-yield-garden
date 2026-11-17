@@ -1566,4 +1566,12 @@ export const extra: Record<string, string> = {
   "Entrar con otra cuenta de Google": "Sign in with another Google account",
   "Wallet externa": "External wallet",
   "Protegido por la seguridad biométrica de tu dispositivo": "Protected by your device's biometric security",
+  "de las ganancias": "of the earnings",
+  "¡Código VIP activado! Tus ganancias aumentaron al": "VIP code activated! Your earnings increased to",
+  "Tú ganas la mitad de las ganancias": "You earn half the earnings",
+  "Cada vez que hace un movimiento, BÓVEDA te da el 50% de esas ganancias en USDC.": "Every time they make a move, BÓVEDA gives you 50% of those earnings in USDC.",
+  "De las ganancias de cada movimiento, en dólares.": "Of the earnings on every move, in dollars.",
+  "Gana hasta 60% de las ganancias en dólares": "Earn up to 60% of the earnings in dollars",
+  "ganancias": "earnings",
+  "Ganancias actualizadas.": "Earnings updated.",
 };
