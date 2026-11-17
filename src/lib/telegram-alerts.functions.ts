@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { ALERT_KINDS, parseMuted, toggleMuted, type AlertKind } from "./alert-kinds";
-import { TG_SAFETY, tgCard } from "./telegram-format";
+import { TG_SAFETY, tgCard, tgRow } from "./telegram-format";
 
 export const TELEGRAM_BOT = "bovedamarketbot";
 const req = z.object({ token: z.string().min(20).max(12000) });
@@ -93,14 +93,24 @@ const ACTION_TEXT = {
   deposit: tgCard("🏦", "Depósito confirmado", ["Tu dinero ya está trabajando en la bóveda.", "🌾 Te avisamos aquí cada vez que cosechas."]),
 } as const;
 
+/** Exit alert: partial withdrawals say the vault keeps generating; never mentions fees. */
+export function exitAlertText(percent: number, amountUsd?: string, vault?: string) {
+  const amount = amountUsd ? tgRow("💵", "Dólares a tu billetera", `$${Number(amountUsd).toFixed(2)}`) : null;
+  const where = vault ? tgRow("🏦", "Bóveda", vault) : null;
+  return percent < 100
+    ? tgCard("💸", `Retiro completado (${percent}%)`, [where, amount, "", `✅ Tu bóveda sigue abierta y generando con el ${100 - percent}% restante.`])
+    : tgCard("🏁", "Retiro total de bóveda", [where, amount, "", "Tu dinero y tus ganancias ya están disponibles en tu billetera."]);
+}
+
 /** Personal alert for the signed-in user's own confirmed action; only ever reaches that user's linked chat. */
 export const notifyMyAction = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => req.extend({ kind: z.enum(["harvest", "exit", "withdraw", "predict", "deposit"]), signature: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,90}$/) }).parse(i))
+  .inputValidator((i: unknown) => req.extend({ kind: z.enum(["harvest", "exit", "withdraw", "predict", "deposit"]), signature: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,90}$/), percent: z.number().int().min(1).max(100).optional(), amountUsd: z.string().regex(/^\d{1,9}(\.\d{1,6})?$/).optional(), vault: z.string().regex(/^[A-Za-z0-9 ]{1,20}$/).optional() }).parse(i))
   .handler(async ({ data }): Promise<{ success: boolean }> => {
     try {
       const { id } = await admin(data.token);
       const tg = await import("./telegram.server");
-      await tg.userAlert(id, ACTION_TEXT[data.kind], data.kind, { text: "🧾 Ver comprobante", url: `https://orbmarkets.io/tx/${data.signature}` });
+      const text = data.kind === "exit" ? exitAlertText(data.percent ?? 100, data.amountUsd, data.vault) : ACTION_TEXT[data.kind];
+      await tg.userAlert(id, text, data.kind, { text: "🧾 Ver comprobante", url: `https://orbmarkets.io/tx/${data.signature}` });
       return { success: true };
     } catch { return { success: false }; }
   });

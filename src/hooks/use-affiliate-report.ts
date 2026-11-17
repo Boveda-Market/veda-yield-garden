@@ -16,12 +16,12 @@ export function useAffiliateReport() {
   const isVerified = useServerFn(walletIsVerified);
   const verify = useServerFn(verifyWalletOwnership);
   const notify = useServerFn(notifyMyAction);
-  return async (signature: string, kind: AffiliateKind) => {
+  return async (signature: string, kind: AffiliateKind, details?: { percent?: number; amountUsd?: string; vault?: string }) => {
     try {
       const token = await session.getAccessToken?.();
       const wallet = session.walletAddress;
       if (!token || !wallet || !session.userId) return;
-      void notify({ data: { token, kind, signature } }).catch(() => null);
+      void notify({ data: { token, kind, signature, ...details } }).catch(() => null);
       const stored = normalizeCode(localStorage.getItem(REF_STORAGE_KEY));
       if (stored) { await join({ data: { token, code: stored } }).catch(() => null); localStorage.removeItem(REF_STORAGE_KEY); }
       const { verified } = await isVerified({ data: { token, wallet } });

@@ -85,7 +85,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó el retiro. No se cobró comisión y tu dinero sigue en la bóveda.")); return; }
         if (status.status !== "pending") {
-          if (!migrateTo) void reportAffiliate(sig, "exit");
+          if (!migrateTo) void reportAffiliate(sig, "exit", { percent, amountUsd: (next.net ?? result?.net)?.replace(/,/g, ""), vault: vaultSymbol(vaultId) });
           // Convert leftover JupUSD / vault tokens to USDC too (free swaps, one signature each). The SOL network reserve stays.
           if (!migrateTo) {
             try {
