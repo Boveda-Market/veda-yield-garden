@@ -18,9 +18,40 @@ function decode58(value: string) {
 const rawAmount = (value: unknown) => { const raw = String(value); if (!/^\d+$/.test(raw)) throw new Error("Importe no válido"); return raw; };
 const address = (value: unknown) => new PublicKey(String(value)).toBase58();
 
+const DLMM_PROGRAM_ID = "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo";
+const DLMM_CLAIM_FEE = "4b7a9a308c4a7ba3", DLMM_CLAIM_FEE2 = "e8abf2613a4d232d", DLMM_REBALANCING = "006d75b33d5bc7c8";
+
+/**
+ * Concentrated-liquidity (GTA6) harvest events: ClaimFee/ClaimFee2 (manual or autopilot harvest) and the fees
+ * collected inside a Rebalancing. One claim emits both ClaimFee and ClaimFee2 with the same amounts, so ClaimFee
+ * is only kept when no ClaimFee2 exists for that position in the transaction. Token X = vault token, Y = USDC.
+ */
+export function decodeDlmmRecords(events: { id: string; data: Buffer }[], wallet: string, meta: { signature: string; at: number | null; slot: number }): MeteoraRecord[] {
+  const parsed: { id: string; tag: string; pool: string; position: string; x: bigint; y: bigint }[] = [];
+  for (const { id, data } of events) {
+    if (data.length < 16 || data.subarray(0, 8).toString("hex") !== "e445a52e51cb9a1d") continue;
+    const tag = data.subarray(8, 16).toString("hex"), d = data.subarray(16);
+    if (![DLMM_CLAIM_FEE, DLMM_CLAIM_FEE2, DLMM_REBALANCING].includes(tag) || d.length < 112) continue;
+    const key = (o: number) => new PublicKey(d.subarray(o, o + 32)).toBase58();
+    if (key(64) !== wallet) continue;
+    const pool = key(0);
+    if (!CHAIN_POOLS.some((c) => c.kind === "dlmm" && c.pool === pool)) continue;
+    if (tag === DLMM_REBALANCING) { if (d.length < 148) continue; parsed.push({ id, tag, pool, position: key(32), x: d.readBigUInt64LE(132), y: d.readBigUInt64LE(140) }); }
+    else parsed.push({ id, tag, pool, position: key(32), x: d.readBigUInt64LE(96), y: d.readBigUInt64LE(104) });
+  }
+  return parsed.filter((e) => !(e.tag === DLMM_CLAIM_FEE && parsed.some((o) => o.tag === DLMM_CLAIM_FEE2 && o.position === e.position)))
+    .filter((e) => e.x > 0n || e.y > 0n)
+    .map((e) => ({ id: e.id, signature: meta.signature, at: meta.at, slot: meta.slot, pool: e.pool, position: e.position, kind: "harvest" as const, tokenRaw: e.x.toString(), usdcRaw: e.y.toString() }));
+}
+
 export function decodeMeteoraRecords(tx: ParsedTransactionWithMeta, wallet: string, signature: string): MeteoraRecord[] {
   if (!tx.meta || tx.meta.err !== null || tx.transaction.signatures[0] !== signature) return [];
   const records: MeteoraRecord[] = [];
+  const dlmm: { id: string; data: Buffer }[] = [];
+  for (const group of tx.meta.innerInstructions ?? []) for (const [index, ix] of group.instructions.entries()) {
+    if (ix.programId.toBase58() === DLMM_PROGRAM_ID && "data" in ix) { try { dlmm.push({ id: `${signature}:${group.index}:${index}`, data: decode58(ix.data) }); } catch { /* not an event */ } }
+  }
+  records.push(...decodeDlmmRecords(dlmm, wallet, { signature, at: tx.blockTime ? tx.blockTime * 1000 : null, slot: tx.slot }));
   for (const group of tx.meta.innerInstructions ?? []) {
     for (const [index, ix] of group.instructions.entries()) {
       if (!ix.programId.equals(CP_AMM_PROGRAM_ID) || !("data" in ix)) continue;

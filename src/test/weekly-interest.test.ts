@@ -19,3 +19,12 @@ describe("alert texts", () => {
   it("harvest shows amount", () => expect(harvestAlertText("12.456", "GTA6")).toContain("+$12.46"));
   it("exit and rebalance say no action", () => { expect(exitAlertText(50, "10")).toContain("ninguna acción"); expect(autopilotDoneText("Bóveda GTA6", "100", 2)).toContain("ninguna acción"); });
 });
+
+describe("weekly interest views", () => {
+  it("adds harvested vault tokens valued at today's price and builds the running total", async () => {
+    const { cumulative } = await import("@/lib/weekly-interest");
+    const d = weeklyInterest([{ kind: "harvest", at: now - 1000, usdcRaw: "8110924", tokenRaw: "502048561678", pool: "p" }, { kind: "harvest", at: now - 86_400_000 * 3, usdcRaw: "1000000" }], now, 0, (r) => r.tokenRaw ? 8_950_000n : 0n);
+    expect(d[6]!.micro).toBe(17_060_924n);
+    expect(cumulative(d)).toEqual([0n, 0n, 0n, 1_000_000n, 1_000_000n, 1_000_000n, 18_060_924n]);
+  });
+});
