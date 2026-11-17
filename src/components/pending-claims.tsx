@@ -42,7 +42,7 @@ export function PendingClaims() {
   // One tap: approval 1 collects the prize, approval 2 turns it into dollars; the window shows both and ends on the receipt.
   const claim = async (p: PredictPosition) => {
     if (!wallet) return;
-    setFlow({ p, phase: 1, text: t("Aprueba en tu billetera (1 de 2)…") });
+    setFlow({ p, phase: 1, text: t("Procesando…") });
     try {
       if (!session.signOnly) throw new Error(t("Tu wallet no admite esta operación."));
       const r = await preparePredictClaim({ data: { wallet, position: p.pubkey } });
@@ -60,7 +60,7 @@ export function PendingClaims() {
         const bal = await readTokenBalance(wallet, JUPUSD_MINT);
         if (bal > 0n) {
           const quote = await quoteSwap("JupUSD", "USDC", bal, { feeUsdc });
-          setFlow({ p, phase: 2, text: t("Aprueba en tu billetera (2 de 2)…") });
+          setFlow({ p, phase: 2, text: t("Pasando a dólares…") });
           const s = await session.signAndSend(await buildSwap(wallet, quote));
           if (BigInt(quote.feeUsdc) > 0n) void reportAffiliate(s, "predict");
           setFlow({ p, phase: 2, text: "", receipt: { net: usdc(quote.outAmount), fee: usdc(quote.feeUsdc), sig: s } });
@@ -98,6 +98,6 @@ export function PendingClaims() {
           <Button size="sm" className="rounded-full" disabled={busy} onClick={() => void claim(p)}>{busy && flow?.p.pubkey === p.pubkey ? <Loader2 size={14} className="animate-spin" /> : `${t("Reclamar")} $${usdc(p.payoutMicro || "0")}`}</Button>
         </li>; })}
       </ul>
-      <p className="mt-3 text-[11px] text-muted-foreground">{t("Tu billetera te pedirá 2 aprobaciones seguidas: cobrar el premio y pasarlo a dólares.")}</p>
+      <p className="mt-3 text-[11px] text-muted-foreground">{t("Cobras tu premio en dólares con un solo toque.")}</p>
   </section>}{sheet}</>;
 }

@@ -135,8 +135,8 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
       {p.closeTime && <Row k={t("Cierre de la ronda")} v={new Date(p.closeTime * 1000).toLocaleString(locale, { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" })} />}
     </div>
     {open && <p className="text-xs text-muted-foreground">{t("Se cierra sola al expirar el tiempo. Si ganas, aparece tu premio para reclamar; si pierdes, desaparece.")}</p>}
-    {open && onSell && <p className="text-xs text-muted-foreground">{t("Para cerrar firmarás dos transacciones: 1) vender la posición y 2) pasarlo a dólares. Cerrar antes de tiempo no tiene comisión.")}</p>}
-    {!open && won && onClaim && <p className="text-xs text-muted-foreground">{t("Para reclamar firmarás dos transacciones: 1) cobrar el pago y 2) pasarlo a dólares.")}</p>}
+    {open && onSell && <p className="text-xs text-muted-foreground">{t("Cierras con un solo toque y el total pasa a dólares. Cerrar antes de tiempo no tiene comisión.")}</p>}
+    {!open && won && onClaim && <p className="text-xs text-muted-foreground">{t("Cobras tu premio en dólares con un solo toque.")}</p>}
     {!open && won && <p className="text-xs text-muted-foreground">{t("Normalmente se acredita solo. Si aún no lo ves en tu wallet, reclámalo aquí.")}</p>}
     </DetailsToggle></div>
   </article>;

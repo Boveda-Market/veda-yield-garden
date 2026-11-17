@@ -65,7 +65,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
       setResult(next);
       if (!next.success || !next.prepared) { setMessage(next.message); return; }
       if (next.prepared.expiresAt <= Date.now() || next.prepared.wallet !== session.walletAddress || next.prepared.position !== position) { setMessage(t("La preparación caducó o la wallet cambió. Revisa nuevamente.")); return; }
-      setStep(compound ? t("Aprueba en tu billetera (1 de 2)…") : t("Aprueba en tu billetera…"));
+      setStep(t("Procesando…"));
       let sig: string;
       try { sig = await session.signAndSend(Uint8Array.from(atob(next.prepared.transaction), (c) => c.charCodeAt(0))); }
       catch { setMessage(t("Cancelaste la aprobación. No se movió dinero.")); return; }
@@ -75,7 +75,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
         if (status.status === "failed") { setMessage(t("La red rechazó la cosecha. No se cobró comisión y tus ganancias siguen en la bóveda.")); return; }
         if (status.status !== "pending") {
           if (!compound && next.tokenRaw && BigInt(next.tokenRaw) > 0n && next.tokenSymbol) {
-            setStep(t("Cosecha lista. Aprueba en tu billetera (2 de 2) para pasar todo a dólares…"));
+            setStep(t("Cosecha lista. Pasando todo a dólares…"));
             try { const extra = await harvestedToUsdc(wallet, next.tokenSymbol, BigInt(next.tokenRaw), session.signAndSend); if (extra > 0n) setExtraUsd(Number(extra) / 1e6); }
             catch { setSweepNote(t("Tus ganancias en dólares ya llegaron. La otra parte no se pasó a dólares; puedes hacerlo en Mi Billetera → Cambiar.")); }
           }
@@ -109,7 +109,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
     </div>}
     {result && !result.success && !pending && <Button variant="outline" onClick={() => void run()}>{t("Intentar de nuevo")}</Button>}
     {pending && step && <WorkingLine text={step} />}
-    {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : compound ? t("Confirmar reinversión") : t("Confirmar cosecha")}</Button><p className="text-center text-xs text-muted-foreground">{compound ? t("Tu billetera te pedirá 2 aprobaciones seguidas.") : result.tokenRaw && BigInt(result.tokenRaw) > 0n ? t("2 aprobaciones seguidas: cobrar y pasar todo a dólares.") : t("Una sola aprobación. Tu depósito sigue invertido.")}</p></>}
+    {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : compound ? t("Confirmar reinversión") : t("Confirmar cosecha")}</Button><p className="text-center text-xs text-muted-foreground">{compound ? t("Un solo toque. Tus ganancias se suman a tu inversión.") : t("Un solo toque. Tus ganancias van a tus dólares disponibles.")}</p></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta cosecha. No hay movimientos hasta que firmes.")}</p>}
     {message && <SignalErrorCard message={message} />}
     </>}

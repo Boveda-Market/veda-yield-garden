@@ -76,7 +76,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
       setResult(next);
       if (!next.success || !next.prepared) { setAccepted(false); const moved = next.message.includes("cotización cambió"); setMessage(moved ? t("El precio se movió. Actualizamos el resumen; toca «Firmar» de nuevo.") : next.message); if (moved) { try { setResult(await simulate({ data: input.data })); } catch { /* keep message */ } } return; }
       if (next.prepared.expiresAt <= Date.now() || next.prepared.wallet !== session.walletAddress || next.prepared.position !== positionAddress) { setMessage(t("La preparación caducó o la wallet cambió. Revisa nuevamente el retiro.")); return; }
-      setStep(migrateTo || two ? t("Aprueba en tu billetera (1 de 2)…") : t("Aprueba en tu billetera…"));
+      setStep(migrateTo ? t("Procesando tu cambio…") : t("Procesando tu retiro…"));
       let sig: string;
       try { sig = await session.signAndSend(Uint8Array.from(atob(next.prepared.transaction), (c) => c.charCodeAt(0))); }
       catch { setMessage(t("Cancelaste la aprobación. No se movió dinero.")); return; }
@@ -89,7 +89,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
           // Convert leftover JupUSD / vault tokens to USDC too (free swaps, one signature each). The SOL network reserve stays.
           if (!migrateTo) {
             try {
-              const swept = await sweepLeftovers(address, session.signAndSend, (_symbol, i, n) => { setPhase(2); setStep(t("Retiro listo. Aprueba en tu billetera ({i} de {n}) para pasar los sobrantes a dólares…", { i: String(i + 1), n: String(n + 1) })); });
+              const swept = await sweepLeftovers(address, session.signAndSend, (_symbol, i, n) => { setPhase(2); setStep(t("Retiro listo. Pasando sobrantes a dólares…")); });
               if (swept.failed.length) setSweepNote(t("Tu retiro ya está en tu billetera. Los sobrantes no se pasaron a dólares; puedes hacerlo cuando quieras en Mi Billetera → Cambiar."));
               else if (swept.converted > 0) setSweepNote(t("También pasamos tus sobrantes a dólares: ~${v} más, sin comisión.", { v: (Number(swept.usdc) / 1e6).toFixed(2) }));
             } catch { setSweepNote(t("No se pudieron cambiar los sobrantes. Hazlo en Mi Billetera → Cambiar.")); }
@@ -133,7 +133,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
       </>}
     </div>}
     {result && !result.success && result.remainingTokenRaw && result.remainingTokenRaw !== "0" && <p role="alert" className="text-xs leading-5 text-destructive">{t("Diferencia de tokens tras la conversión:")}{" "}{result.remainingTokenRaw} {t("unidades mínimas. No es un importe en USD; la liquidación no está validada.")}</p>}
-    {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : message && !finished ? t("Intentar de nuevo") : migrateTo ? t("Confirmar cambio") : two ? t("Confirmar retiro (2 aprobaciones)") : t("Confirmar retiro")}</Button><p className="text-center text-xs text-muted-foreground">{migrateTo || two ? t("Tu billetera te pedirá 2 aprobaciones seguidas.") : t("Una sola aprobación. Los dólares llegan en segundos.")}</p></>}
+    {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void signWithdrawal()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : message && !finished ? t("Intentar de nuevo") : migrateTo ? t("Confirmar cambio") : t("Confirmar retiro")}</Button><p className="text-center text-xs text-muted-foreground">{migrateTo ? t("Un solo toque: movemos todo a tu nueva bóveda.") : t("Un solo toque. Tus dólares llegan en segundos.")}</p></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta liquidación. No hay movimientos hasta que firmes.")}</p>}
     {signature && pending && step && <WorkingLine text={step} />}
     {message && <SignalErrorCard message={message} />}

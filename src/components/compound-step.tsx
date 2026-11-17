@@ -40,7 +40,7 @@ export function CompoundStep({ wallet, position, vaultId, usdcRaw, tokenRaw, net
       setQuote(next);
       if (!next.success || !next.prepared) { setMessage(next.message || t("No se pudo preparar la reinversión.")); return; }
       if (next.prepared.wallet !== session.walletAddress) { setMessage(t("La wallet cambió. Revisa nuevamente.")); return; }
-      setStep(t("Aprueba en tu billetera (2 de 2)…"));
+      setStep(t("Sumando a tu inversión…"));
       let sig: string;
       try { sig = await session.signAndSend(Uint8Array.from(atob(next.prepared.transaction), (c) => c.charCodeAt(0))); }
       catch { setMessage(t("Cancelaste la aprobación. Tus ganancias siguen en tu billetera.")); return; }

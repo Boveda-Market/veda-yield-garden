@@ -62,7 +62,7 @@ export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPre
     if (!wallet || !review) return;
     const { p } = review;
     let { tx, context, estimateMicro } = review;
-    setHeld(p); setBusy(p.pubkey); setMsg(null); setFlow({ phase: 1, text: t("Aprueba en tu billetera (1 de 2)…") });
+    setHeld(p); setBusy(p.pubkey); setMsg(null); setFlow({ phase: 1, text: t("Procesando…") });
     try {
       if (!session.signOnly) throw new Error(t("Tu wallet no admite esta operación."));
       // The prepared sale expires quickly: rebuild it when the user took a while to decide.
@@ -82,7 +82,7 @@ export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPre
       try {
         let got = 0n;
         for (let i = 0; i < 4 && got <= 0n; i++) { await new Promise((res) => setTimeout(res, 2000)); got = (await readTokenBalance(wallet, JUPUSD_MINT)) - before; }
-        if (got > 0n) { const q = await quoteSwap("JupUSD", "USDC", got, { feeUsdc: 0n }); setFlow({ phase: 2, text: t("Aprueba en tu billetera (2 de 2)…") }); const s = await session.signAndSend(await buildSwap(wallet, q)); setFlow({ phase: 2, text: "", receipt: { amount: usdcText(q.outAmount), sig: s } }); notify("success", t("Posición cerrada"), t("${v} en tu billetera", { v: usdcText(q.outAmount) })); }
+        if (got > 0n) { const q = await quoteSwap("JupUSD", "USDC", got, { feeUsdc: 0n }); setFlow({ phase: 2, text: t("Pasando a dólares…") }); const s = await session.signAndSend(await buildSwap(wallet, q)); setFlow({ phase: 2, text: "", receipt: { amount: usdcText(q.outAmount), sig: s } }); notify("success", t("Posición cerrada"), t("${v} en tu billetera", { v: usdcText(q.outAmount) })); }
         else setFlow({ phase: 2, text: "", receipt: { amount: usdcText(estimateMicro ?? p.valueMicro ?? "0"), sig: x.signature } });
       } catch { setFlow({ phase: 2, text: "", receipt: { amount: usdcText(estimateMicro ?? p.valueMicro ?? "0"), sig: x.signature, partial: true } }); }
       setReview(null);
@@ -141,7 +141,7 @@ function SellReview({ review, flow, onCancel, onConfirm }: { review: { p: Predic
         <Button variant="outline" onClick={onCancel}>{t("Mejor espero")}</Button>
         <Button onClick={onConfirm}>{t("Confirmar venta")}</Button>
       </div>
-      <p className="text-center text-xs text-muted-foreground">{t("Tu billetera te pedirá 2 aprobaciones seguidas.")}</p>
+      <p className="text-center text-xs text-muted-foreground">{t("Un solo toque. El total va a tus dólares disponibles.")}</p>
       </>}
     </ActionSheetContent>
   </Dialog>;

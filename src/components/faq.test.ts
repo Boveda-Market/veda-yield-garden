@@ -4,7 +4,7 @@ import { filterQuestions, questions } from "./faq";
 describe("FAQ filter", () => {
   it("search ignores accents and matches answers", () => {
     expect(filterQuestions(questions, "all", "comision").length).toBeGreaterThan(0);
-    expect(filterQuestions(questions, "all", "dos transacciones").map((q) => q.id)).toContain("predict-claim");
+    expect(filterQuestions(questions, "all", "un solo toque").map((q) => q.id)).toContain("predict-claim");
   });
   it("category limits results", () => {
     expect(filterQuestions(questions, "affiliates", "").every((q) => q.cat === "affiliates")).toBe(true);
