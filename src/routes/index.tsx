@@ -25,22 +25,22 @@ function ReturningCover() {
 
 export const Route = createFileRoute("/")({ staticData: { sitemap: true },
   head: () => ({ meta: [
-    { title: "BÓVEDA — Billetera en dólares digitales (USDC) con rendimiento" },
-    { name: "description", content: "Guarda dólares digitales (USDC), genera rendimiento y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Depositar es gratis." },
-    { property: "og:title", content: "BÓVEDA — Billetera en dólares digitales (USDC) con rendimiento" },
-    { property: "og:description", content: "Guarda dólares digitales (USDC), genera rendimiento y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Depositar es gratis." },
+    { title: "BÓVEDA — Billetera en dólares digitales (USDC) que genera intereses" },
+    { name: "description", content: "Guarda dólares digitales (USDC), genera intereses y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Depositar es gratis." },
+    { property: "og:title", content: "BÓVEDA — Billetera en dólares digitales (USDC) que genera intereses" },
+    { property: "og:description", content: "Guarda dólares digitales (USDC), genera intereses y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Depositar es gratis." },
     { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
     { property: "og:url", content: "https://bovedamarket.app/" },
   ], links: langLinks("es", "/", "/en"),
-  scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"BÓVEDA","url":"https://bovedamarket.app/","logo":"https://bovedamarket.app/favicon.png","email":"admin@bovedamarket.app"},{"@type":"WebApplication","name":"BÓVEDA","url":"https://bovedamarket.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"es","description":"Guarda dólares digitales (USDC), genera rendimiento y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Depositar es gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}]}) }] }), component: Landing,
+  scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"BÓVEDA","url":"https://bovedamarket.app/","logo":"https://bovedamarket.app/favicon.png","email":"admin@bovedamarket.app"},{"@type":"WebApplication","name":"BÓVEDA","url":"https://bovedamarket.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"es","description":"Guarda dólares digitales (USDC), genera intereses y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Depositar es gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}]}) }] }), component: Landing,
 });
 
 const FAQS = [
   { q: "¿Qué es USDC?", a: "USDC es una moneda digital diseñada para mantener el mismo valor que el dólar estadounidense: 1 USDC busca valer 1 USD. En BÓVEDA tus saldos, depósitos y intereses se muestran en USDC. No es un depósito bancario ni está asegurado." },
   { q: "¿Necesito dinero para usar BÓVEDA?", a: "No para mirar. Puedes ver las bóvedas y Doble o Nada en vivo sin registrarte. Para jugar o depositar, entras con Google o email y añades dólares con tu tarjeta. Puedes empezar con poco." },
-  { q: "¿Cómo se generan las ganancias?", a: "Tu depósito se suma a una bóveda que cobra intereses cada vez que otras personas cambian monedas en ella. Esas intereses se reparten entre quienes aportan. Las tasas son estimaciones, cambian y puedes perder dinero." },
+  { q: "¿Cómo se generan las ganancias?", a: "Tu depósito se suma a una bóveda que cobra intereses cada vez que otras personas cambian monedas en ella. Esos intereses se reparten entre quienes aportan. Las tasas son estimaciones, cambian y puedes perder dinero." },
   { q: "¿Cuándo puedo retirar?", a: "Puedes cosechar tus ganancias o cerrar tu posición cuando quieras, sin plazos de permanencia. Cada operación se revisa antes de firmar con tu wallet." },
-  { q: "¿Qué intereses cobra BÓVEDA?", a: "Depositar, enviar, cambiar monedas y entrar a Sube/Baja es gratis. Cosechar, cerrar, retirar y reclamar premios tienen una pequeña comisión que siempre ves antes de firmar. El detalle está en Términos y condiciones." },
+  { q: "¿Cuánto cuesta usar BÓVEDA?", a: "Depositar, enviar, cambiar monedas y entrar a Sube/Baja es gratis. Cosechar, cerrar, retirar y reclamar premios tienen un pequeño cargo de servicio que siempre ves antes de firmar. El detalle está en Términos y condiciones." },
 ];
 
 const GUARANTEES = [
@@ -185,7 +185,7 @@ export function Landing() {
         <div className="rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card p-6 sm:p-8">
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground"><Gift size={20} /></span>
           <h2 className="mt-4 font-display text-2xl font-bold">{t("Invita y gana: genera más compartiendo BÓVEDA")}</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Cualquier usuario puede ser socio. Comparte tu enlace y recibe en USDC una parte de la comisión de cada operación de tus invitados, sin costo extra para ellos.")}</p>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Cualquier usuario puede ser socio. Comparte tu enlace y recibe en USDC una parte de las ganancias de cada operación de tus invitados, sin costo extra para ellos.")}</p>
           <ul className="mt-5 grid gap-3 sm:grid-cols-2">
             <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">50%</p><p className="text-sm text-muted-foreground">{t("de las ganancias de tus invitados directos")}</p></li>
             <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">10%</p><p className="text-sm text-muted-foreground">{t("de los invitados de tus invitados")}</p></li>
