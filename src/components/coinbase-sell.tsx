@@ -103,8 +103,8 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
       <div className="flex justify-between text-sm"><span>{t("Sale de tu wallet")}</span><b>{fmt(total)} USDC</b></div>
       {sell.fiat && <div className="flex justify-between text-sm"><span>{t("Recibes en tu saldo de Coinbase")}</span><b>{sell.fiat}</b></div>}
     </div>
-    {short && <p className="text-xs text-destructive">{t("Saldo insuficiente")}</p>}
-    {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+    {short && <p className="text-xs text-muted-foreground">{t("Saldo disponible insuficiente para esta cantidad")}</p>}
+    {error && <p role="alert" className="text-sm text-muted-foreground">{error}</p>}
     <Button disabled={short || phase === "sending"} onClick={() => void send()}>{phase === "sending" ? <LoaderCircle className="animate-spin" size={16} /> : <Send size={16} />}{phase === "sending" ? t("Firma en tu wallet…") : t("Confirmar retiro")}</Button>
     <Button variant="ghost" size="sm" disabled={phase === "sending"} onClick={() => { dismissed.current = sell.id; addDismissed(sell.id); autoSign.current = null; if (timer.current) window.clearInterval(timer.current); clearSellFlag(); setSell(null); setError(null); setPhase("idle"); unhold(); }}>{t("Descartar y empezar de nuevo")}</Button>
   </div>;
@@ -112,6 +112,6 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
   return <div className="grid gap-2">
     <Button onClick={() => void open()} disabled={phase === "opening" || phase === "waiting"}>{phase === "idle" ? <ExternalLink size={16} /> : <LoaderCircle className="animate-spin" size={16} />}{phase === "waiting" ? t("Termina en Coinbase y vuelve aquí…") : t("Retirar a mi saldo de Coinbase")}</Button>
     <p className="text-xs text-muted-foreground">{t("Tu saldo de Coinbase ya viene elegido: el dinero queda disponible al instante. Vuelve a BÓVEDA y confirma con un toque.")}</p>
-    {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+    {error && <p role="alert" className="text-sm text-muted-foreground">{error}</p>}
   </div>;
 }

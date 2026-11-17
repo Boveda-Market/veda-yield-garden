@@ -91,8 +91,8 @@ export function CashAppBtc({ wallet }: { wallet: string }) {
     <div className="grid gap-1 text-sm"><span className="font-medium">{t("Cantidad ($)")}</span><TapAmount label={t("Cantidad ($)")} prefix="$" value={amount} disabled={busy} onChange={(v) => setAmount(v.replace(",", ".").replace(/[^\d.]/g, ""))} /></div>
     <div className="flex items-center justify-between text-xs text-muted-foreground"><span>{t("Disponible")}: {balance == null ? "…" : `${balance.toFixed(2)} USDC`}</span></div>
     <div className="grid grid-cols-4 gap-2">{[[0.25,"25%"],[0.5,"50%"],[0.75,"75%"],[1,t("Máx")]].map(([f,l]) => <Button key={String(l)} type="button" size="sm" variant="outline" disabled={busy || !balance} onClick={() => pick(f as number)}>{l}</Button>)}</div>
-    {amount && !amountOk && <p className="text-xs text-destructive">{t("Mínimo")} {BTC_OFFRAMP_MIN_USDC} USDC · {t("Máximo")} {BTC_OFFRAMP_MAX_USDC} USDC</p>}
-    {balance != null && n > balance && <p className="text-xs text-destructive">{t("Saldo insuficiente")}</p>}
+    {amount && !amountOk && <p className="text-xs text-muted-foreground">{t("Mínimo")} {BTC_OFFRAMP_MIN_USDC} USDC · {t("Máximo")} {BTC_OFFRAMP_MAX_USDC} USDC</p>}
+    {balance != null && n > balance && <p className="text-xs text-muted-foreground">{t("Saldo disponible insuficiente para esta cantidad")}</p>}
     {quoting && !quote && <p className="flex items-center gap-2 text-xs"><LoaderCircle size={14} className="animate-spin" />{t("Cotizando…")}</p>}
     {quote && cost && <div className="grid gap-1 rounded-lg border p-3 text-sm">
       <div className="flex justify-between"><span>{t("Envías")}</span><b>{(Number(quote.depositAmount) + Number(feeUnits) / 1e6).toFixed(2)} USDC</b></div>
@@ -104,9 +104,9 @@ export function CashAppBtc({ wallet }: { wallet: string }) {
     </div>}
     <label className="grid gap-1 text-sm"><span className="font-medium">{t("Dirección de Bitcoin de tu Cash App")}</span><Input value={addr} onChange={(e) => setAddr(e.target.value.trim())} placeholder="bc1q…" disabled={busy} autoComplete="off" spellCheck={false} /></label>
     <p className="text-xs text-muted-foreground">{t("En Cash App: Dinero → Bitcoin → Depositar bitcoin. Copia la dirección (no uses Lightning).")}</p>
-    {addr && !addrOk && <p className="text-xs text-destructive">{t("Esa no es una dirección de Bitcoin válida.")}</p>}
+    {addr && !addrOk && <p className="text-xs text-muted-foreground">{t("Esa no es una dirección de Bitcoin válida.")}</p>}
     <label className="flex items-start gap-2 text-xs leading-5"><Checkbox checked={checked} onCheckedChange={(v) => setChecked(v === true)} disabled={busy} /><span>{t("Revisé que es mi dirección de Bitcoin de Cash App. Si es incorrecta, el dinero no se puede recuperar.")}</span></label>
-    {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+    {error && <p role="alert" className="text-sm text-muted-foreground">{error}</p>}
     <Button disabled={!canSend} onClick={() => void send()}>{busy ? <LoaderCircle className="animate-spin" size={16} /> : <Bitcoin size={16} />}{busy ? t("Firma en tu wallet…") : t("Enviar a Cash App")}</Button>
     <p className="text-xs text-muted-foreground">{t("El cambio a Bitcoin lo hace SideShift, un servicio externo. El mínimo de")} {BTC_OFFRAMP_MIN_USDC} {t("USDC evita que el costo fijo de la red Bitcoin se coma tu retiro.")}</p>
   </div>;

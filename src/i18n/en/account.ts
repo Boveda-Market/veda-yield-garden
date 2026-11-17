@@ -192,6 +192,7 @@ export const account: Record<string, string> = {
   "Todavía no hay una wallet conectada a tu cuenta.": "There's no wallet connected to your account yet.",
   "Monto no válido": "Invalid amount",
   "Saldo insuficiente": "Insufficient balance",
+  "Saldo disponible insuficiente para esta cantidad": "Your available balance isn't enough for this amount",
   "Dirección no válida": "Invalid address",
   "Listo. Operación enviada: {sig}": "Done. Transaction sent: {sig}",
   "No se pudo completar la operación.": "The operation could not be completed.",

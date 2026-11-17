@@ -13,7 +13,7 @@ const ICON_CLASS: Record<NotifyTone, string> = {
   secure: "bg-primary/15 text-primary",
   round: "bg-accent text-accent-foreground",
   info: "bg-muted text-muted-foreground",
-  error: "bg-destructive/15 text-destructive",
+  error: "bg-secondary text-foreground",
 };
 
 export function notify(tone: NotifyTone, title: string, description?: string) {

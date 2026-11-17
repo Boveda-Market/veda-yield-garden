@@ -127,8 +127,8 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
       </div>
     </div>
 
-    {amount && !units && !/^[0.]*$/.test(amount) && <p role="alert" className="text-sm text-destructive">{t("Monto no válido")}</p>}
-    {insufficient && <p role="alert" className="text-sm text-destructive">{feeShort ? t("Necesitas USDC para la comisión de este cambio.") : t("Saldo insuficiente")}</p>}
+    {amount && !units && !/^[0.]*$/.test(amount) && <p role="alert" className="text-sm text-muted-foreground">{t("Monto no válido")}</p>}
+    {insufficient && <p role="alert" className="text-sm text-muted-foreground">{feeShort ? t("Necesitas USDC para la comisión de este cambio.") : t("Saldo disponible insuficiente para esta cantidad")}</p>}
     {from === "SOL" && <p className="text-xs text-muted-foreground">{t("Guardamos 0.01 SOL para pagar los costos de red.")}</p>}
 
     {current && !loading && <>
@@ -145,7 +145,7 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
         <p className="mt-2 text-xs text-muted-foreground">{t("Los cambios no tienen comisión de BÓVEDA. Solo pagas el precio del mercado.")}</p>
       </details>
     </>}
-    {quote.isError && amount === debounced && <p role="alert" className="text-sm text-destructive">{t(quote.error.message)}</p>}
+    {quote.isError && amount === debounced && <p role="alert" className="text-sm text-muted-foreground">{t(quote.error.message)}</p>}
     {quote.isError && <Button variant="outline" className="w-full" disabled={busy || !units} onClick={() => void quote.refetch()}><RefreshCw />{t("Actualizar cotización")}</Button>}
     <Button className="w-full" size={compact ? "default" : "lg"} disabled={busy || loading || !current || expired || insufficient || max === undefined} onClick={() => {
       if (!current || Date.now() - quote.dataUpdatedAt >= QUOTE_TTL || insufficient || busy) return;
