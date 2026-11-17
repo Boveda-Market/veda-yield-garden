@@ -1,3 +1,4 @@
+import { langLinks } from "@/lib/seo-lang";
 import { useT } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalLayout, LegalSection } from "@/components/legal-layout";
@@ -9,12 +10,12 @@ export const Route = createFileRoute("/terminos")({ staticData: { sitemap: true 
     { name: "description", content: "Condiciones de uso de BÓVEDA: acceso, disponibilidad, comisiones progresivas, Doble o Nada y riesgos de Solana y Meteora." },
     { property: "og:title", content: "Términos y condiciones — BÓVEDA" },
     { property: "og:description", content: "Acceso, autorización, cargos operativos y riesgos de BÓVEDA." },
-    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+    { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
     { property: "og:url", content: "https://bovedamarket.app/terminos" },
-  ], links: [{ rel: "canonical", href: "https://bovedamarket.app/terminos" }] }), component: Terms,
+  ], links: langLinks("es", "/terminos", "/en/terms") }), component: Terms,
 });
 
-function Terms() {
+export function Terms() {
   const t = useT();
   return <LegalLayout title={t("Términos y condiciones")}>
     <LegalSection title={t("Acceso y transparencia")}><p>{t("Puedes ver las bóvedas y Doble o Nada sin registrarte; para operar debes iniciar sesión. El acceso con email, Google o wallet utiliza Privy; el primer acceso crea la cuenta. El nombre y avatar son opcionales y no prueban identidad ni autorizan operaciones. Portafolio muestra los saldos y posiciones de tu wallet; Actividad muestra comprobantes recientes de Solana, sin prometer un historial completo.")}</p><p>{t("La cosecha firmada está disponible para posiciones compatibles de SOL/MET de la wallet conectada: mantiene la liquidez, cobra el 1% de las comisiones USDC cosechadas y entrega el otro token sin convertir. Cada operación requiere comprobar la titularidad y superar una simulación reciente antes de solicitar la firma;")}</p></LegalSection>

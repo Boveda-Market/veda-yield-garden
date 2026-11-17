@@ -19,12 +19,13 @@ export function translate(lang: Lang, text: string, vars?: Vars): string {
 type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (text: string, vars?: Vars) => string };
 const I18nContext = createContext<Ctx>({ lang: "es", setLang: () => {}, t: (s, v) => translate("es", s, v) });
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("es");
+export function LanguageProvider({ children, forced }: { children: ReactNode; forced?: Lang | undefined }) {
+  const [lang, setLangState] = useState<Lang>(forced ?? "es");
   useEffect(() => {
+    if (forced) { setLangState(forced); return; }
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (saved === "en" || saved === "es") setLangState(saved);
-  }, []);
+  }, [forced]);
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
   const setLang = useCallback((l: Lang) => {
     setLangState(l);

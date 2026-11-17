@@ -26,6 +26,11 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as EnIndexRouteImport } from './routes/en/index'
+import { Route as EnFaqRouteImport } from './routes/en/faq'
+import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
+import { Route as EnStatusRouteImport } from './routes/en/status'
+import { Route as EnTermsRouteImport } from './routes/en/terms'
 import { Route as GuiasIndexRouteImport } from './routes/guias/index'
 import { Route as GuiasBovedasAltoRendimientoRouteImport } from './routes/guias/bovedas-alto-rendimiento'
 import { Route as GuiasInvertirSinEstafasRouteImport } from './routes/guias/invertir-sin-estafas'
@@ -124,6 +129,31 @@ const WalletRoute = WalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnIndexRoute = EnIndexRouteImport.update({
+  id: '/en/',
+  path: '/en/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnFaqRoute = EnFaqRouteImport.update({
+  id: '/en/faq',
+  path: '/en/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnPrivacyRoute = EnPrivacyRouteImport.update({
+  id: '/en/privacy',
+  path: '/en/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnStatusRoute = EnStatusRouteImport.update({
+  id: '/en/status',
+  path: '/en/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnTermsRoute = EnTermsRouteImport.update({
+  id: '/en/terms',
+  path: '/en/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GuiasIndexRoute = GuiasIndexRouteImport.update({
   id: '/guias/',
   path: '/guias/',
@@ -210,12 +240,17 @@ export interface FileRoutesByFullPath {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/en/faq': typeof EnFaqRoute
+  '/en/privacy': typeof EnPrivacyRoute
+  '/en/status': typeof EnStatusRoute
+  '/en/terms': typeof EnTermsRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/mercados-de-prediccion': typeof GuiasMercadosDePrediccionRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
+  '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -241,12 +276,17 @@ export interface FileRoutesByTo {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/en/faq': typeof EnFaqRoute
+  '/en/privacy': typeof EnPrivacyRoute
+  '/en/status': typeof EnStatusRoute
+  '/en/terms': typeof EnTermsRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/mercados-de-prediccion': typeof GuiasMercadosDePrediccionRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
+  '/en': typeof EnIndexRoute
   '/guias': typeof GuiasIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -273,12 +313,17 @@ export interface FileRoutesById {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/en/faq': typeof EnFaqRoute
+  '/en/privacy': typeof EnPrivacyRoute
+  '/en/status': typeof EnStatusRoute
+  '/en/terms': typeof EnTermsRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/mercados-de-prediccion': typeof GuiasMercadosDePrediccionRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
+  '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -306,12 +351,17 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/en/faq'
+    | '/en/privacy'
+    | '/en/status'
+    | '/en/terms'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/invertir-sin-estafas'
     | '/guias/mercados-de-prediccion'
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
+    | '/en/'
     | '/guias/'
     | '/api/public/jobs/check-system-status'
     | '/api/public/telegram/webhook'
@@ -337,12 +387,17 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/en/faq'
+    | '/en/privacy'
+    | '/en/status'
+    | '/en/terms'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/invertir-sin-estafas'
     | '/guias/mercados-de-prediccion'
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
+    | '/en'
     | '/guias'
     | '/api/public/jobs/check-system-status'
     | '/api/public/telegram/webhook'
@@ -368,12 +423,17 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/en/faq'
+    | '/en/privacy'
+    | '/en/status'
+    | '/en/terms'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/invertir-sin-estafas'
     | '/guias/mercados-de-prediccion'
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
+    | '/en/'
     | '/guias/'
     | '/api/public/jobs/check-system-status'
     | '/api/public/telegram/webhook'
@@ -400,12 +460,17 @@ export interface RootRouteChildren {
   StatusRoute: typeof StatusRoute
   TerminosRoute: typeof TerminosRoute
   WalletRoute: typeof WalletRoute
+  EnFaqRoute: typeof EnFaqRoute
+  EnPrivacyRoute: typeof EnPrivacyRoute
+  EnStatusRoute: typeof EnStatusRoute
+  EnTermsRoute: typeof EnTermsRoute
   GuiasBovedasAltoRendimientoRoute: typeof GuiasBovedasAltoRendimientoRoute
   GuiasInvertirSinEstafasRoute: typeof GuiasInvertirSinEstafasRoute
   GuiasMercadosDePrediccionRoute: typeof GuiasMercadosDePrediccionRoute
   GuiasQueEsUsdcRoute: typeof GuiasQueEsUsdcRoute
   GuiasRecargarConCoinbaseRoute: typeof GuiasRecargarConCoinbaseRoute
   GuiasRetirarCashAppBitcoinRoute: typeof GuiasRetirarCashAppBitcoinRoute
+  EnIndexRoute: typeof EnIndexRoute
   GuiasIndexRoute: typeof GuiasIndexRoute
   ApiPublicJobsCheckSystemStatusRoute: typeof ApiPublicJobsCheckSystemStatusRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
@@ -535,6 +600,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WalletRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/': {
+      id: '/en/'
+      path: '/en'
+      fullPath: '/en/'
+      preLoaderRoute: typeof EnIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/faq': {
+      id: '/en/faq'
+      path: '/en/faq'
+      fullPath: '/en/faq'
+      preLoaderRoute: typeof EnFaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/privacy': {
+      id: '/en/privacy'
+      path: '/en/privacy'
+      fullPath: '/en/privacy'
+      preLoaderRoute: typeof EnPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/status': {
+      id: '/en/status'
+      path: '/en/status'
+      fullPath: '/en/status'
+      preLoaderRoute: typeof EnStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/terms': {
+      id: '/en/terms'
+      path: '/en/terms'
+      fullPath: '/en/terms'
+      preLoaderRoute: typeof EnTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guias/': {
       id: '/guias/'
       path: '/guias'
@@ -640,12 +740,17 @@ const rootRouteChildren: RootRouteChildren = {
   StatusRoute: StatusRoute,
   TerminosRoute: TerminosRoute,
   WalletRoute: WalletRoute,
+  EnFaqRoute: EnFaqRoute,
+  EnPrivacyRoute: EnPrivacyRoute,
+  EnStatusRoute: EnStatusRoute,
+  EnTermsRoute: EnTermsRoute,
   GuiasBovedasAltoRendimientoRoute: GuiasBovedasAltoRendimientoRoute,
   GuiasInvertirSinEstafasRoute: GuiasInvertirSinEstafasRoute,
   GuiasMercadosDePrediccionRoute: GuiasMercadosDePrediccionRoute,
   GuiasQueEsUsdcRoute: GuiasQueEsUsdcRoute,
   GuiasRecargarConCoinbaseRoute: GuiasRecargarConCoinbaseRoute,
   GuiasRetirarCashAppBitcoinRoute: GuiasRetirarCashAppBitcoinRoute,
+  EnIndexRoute: EnIndexRoute,
   GuiasIndexRoute: GuiasIndexRoute,
   ApiPublicJobsCheckSystemStatusRoute: ApiPublicJobsCheckSystemStatusRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,

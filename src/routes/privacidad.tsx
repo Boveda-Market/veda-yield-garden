@@ -1,3 +1,4 @@
+import { langLinks } from "@/lib/seo-lang";
 import { useT } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalLayout, LegalSection } from "@/components/legal-layout";
@@ -8,12 +9,12 @@ export const Route = createFileRoute("/privacidad")({ staticData: { sitemap: tru
     { name: "description", content: "Cómo BÓVEDA trata el acceso con Privy, los datos de tu cuenta y la exposición pública en Solana." },
     { property: "og:title", content: "Política de privacidad — BÓVEDA" },
     { property: "og:description", content: "Privacidad en BÓVEDA: wallets, datos de cuenta, consentimiento y derechos." },
-    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+    { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
     { property: "og:url", content: "https://bovedamarket.app/privacidad" },
-  ], links: [{ rel: "canonical", href: "https://bovedamarket.app/privacidad" }] }), component: Privacy,
+  ], links: langLinks("es", "/privacidad", "/en/privacy") }), component: Privacy,
 });
 
-function Privacy() {
+export function Privacy() {
   const t = useT();
   return <LegalLayout title={t("Política de privacidad")}>
     <LegalSection title={t("Cuenta personalizada y actividad")}><p>{t("El nombre para mostrar, la foto de perfil y el avatar de icono son opcionales. Se guardan en un registro privado de Lovable Cloud asociado al identificador de Privy, y solo se consultan o modifican después de verificar tu acceso. No se guardan claves ni frases semilla.")}</p><p>{t("Actividad consulta hasta 20 transacciones recientes que incluyen la dirección de la wallet en Solana, con estados y enlaces a comprobantes públicos. Puede incluir operaciones fuera de BÓVEDA y no cubre necesariamente todos los movimientos de tokens.")}</p></LegalSection>
