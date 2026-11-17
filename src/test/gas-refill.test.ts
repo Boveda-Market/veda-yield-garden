@@ -19,3 +19,10 @@ describe("first-time activation", () => {
   });
 });
 
+
+describe("Doble o Nada activation need", () => {
+  it("asks for the bet plus $15 when the account still has to be activated", async () => {
+    const { playActivationNeedMicro } = await import("@/lib/gas-refill");
+    expect(playActivationNeedMicro(10_000_000n)).toBe(25_000_000n);
+  });
+});

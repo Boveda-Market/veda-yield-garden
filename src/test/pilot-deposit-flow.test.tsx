@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({ prepare: vi.fn(), status: vi.fn(), sign: vi.fn
 vi.mock("@tanstack/react-query", async (orig) => ({ ...(await orig<object>()), useQueryClient: () => ({ invalidateQueries: () => Promise.resolve() }), useQuery: () => ({ data: undefined }) }));
 vi.mock("@tanstack/react-router", () => ({ Link: ({ children }: { children: unknown }) => children, useRouter: () => null }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@/components/gas-refill-card", () => ({ ActivationSheet: ({ open }: { open: boolean }) => (open ? <div role="dialog">activation</div> : null) }));
 vi.mock("@/hooks/use-affiliate-report", () => ({ useAffiliateReport: () => async () => undefined }));
 vi.mock("@/lib/gas-refill.functions", () => ({ prepareGasRefill: vi.fn() }));
 vi.mock("@/lib/pilot-deposit.functions", () => ({ preparePilotDeposit: mocks.prepare, pilotDepositStatus: mocks.status }));
@@ -34,6 +35,14 @@ describe("selectable Real deposit review", () => {
     render(<PilotDeposit vaultId="sol" amount="10000" onBusyChange={() => {}} />);
     fireEvent.click(screen.getByRole("button", { name: /depositar/i }));
     await screen.findByRole("alert");
+    expect(mocks.sign).not.toHaveBeenCalled();
+  });
+  it("opens the activation popup instead of a guarantee box when the account lacks reserve", async () => {
+    mocks.prepare.mockResolvedValue({ success: false, stage: "reserve", message: "reserve" });
+    render(<PilotDeposit vaultId="gta6" amount="2" usdc={2_000_000n} onBusyChange={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: /depositar/i }));
+    await screen.findByRole("dialog");
+    expect(screen.queryByText(/garantía/i)).toBeNull();
     expect(mocks.sign).not.toHaveBeenCalled();
   });
   it("cannot authorize an amount above 10,000 USDC", () => {

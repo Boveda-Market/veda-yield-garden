@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { SignalErrorCard } from "@/components/signal-error";
-import { Dialog, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { HotVaultCard } from "@/components/hot-vault-card";
 import { DepositSimulation } from "@/components/deposit-simulation";
@@ -100,7 +100,7 @@ function ActivationFlow({ usdc, wallet, prepare, signAndSend, onDone }: { usdc: 
 }
 
 /** Pure view of the activation card (also rendered in the admin preview). */
-export function ActivationCardView({ stage, onActivate, onAddFunds, onOpenVault }: { stage: ActivationStage; onActivate?: (() => void) | undefined; onAddFunds?: (() => void) | undefined; onOpenVault?: (() => void) | undefined }) {
+export function ActivationCardView({ stage, onActivate, onAddFunds, onOpenVault, continueMode }: { continueMode?: boolean; stage: ActivationStage; onActivate?: (() => void) | undefined; onAddFunds?: (() => void) | undefined; onOpenVault?: (() => void) | undefined }) {
   const t = useT();
   if (stage.kind === "working") return <section aria-label={t("Preparando tu acceso VIP")} aria-live="polite" className="hot-ring rounded-2xl p-[2px]">
     <div className="rounded-[14px] p-5 text-hot-foreground" style={{ backgroundImage: "var(--gradient-hot-surface)" }}>
@@ -116,7 +116,7 @@ export function ActivationCardView({ stage, onActivate, onAddFunds, onOpenVault 
       <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-hot-2"><CheckCircle2 size={14} />{t("Completado")}</p>
       <h2 className="mt-2 font-display text-2xl font-extrabold">{t("Cuenta lista, ya puedes comenzar")}</h2>
       <p className="mt-1 text-sm leading-6 text-hot-muted">{t("Tu reserva de operaciones ya está activa. Tu billetera está 100% lista para generar comisiones.")}</p>
-      <Button className="hot-cta mt-4 h-12 w-full rounded-xl text-base font-extrabold text-hot-surface" onClick={onOpenVault}>🎰 {t("Abrir mi primera bóveda")} →</Button>
+      {continueMode ? <p className="mt-4 flex items-center gap-2 text-sm font-bold text-hot-2"><Loader2 size={14} className="animate-spin" />{t("Continuando…")}</p> : <Button className="hot-cta mt-4 h-12 w-full rounded-xl text-base font-extrabold text-hot-surface" onClick={onOpenVault}>🎰 {t("Abrir mi primera bóveda")} →</Button>}
     </div>
   </section>;
   if (stage.kind === "short") return <section aria-label={t("Estás a un paso de comenzar")} className="rounded-2xl border border-primary/40 bg-primary/10 p-5">
@@ -132,4 +132,41 @@ export function ActivationCardView({ stage, onActivate, onAddFunds, onOpenVault 
     {stage.error && <SignalErrorCard className="mt-2" message={stage.error} />}
     <Button className="mt-4 h-12 w-full text-base font-bold" disabled={stage.totalMicro === null} onClick={onActivate}><Sparkles size={16} />{t("Activar cuenta")} ({total})</Button>
   </section>;
+}
+
+/** Popup used by every deposit and Doble o Nada entry when the account still needs activation or more dollars; on success it closes and the original action continues on its own. */
+export function ActivationSheet({ open, usdc, needMicro, onClose, onActivated }: { open: boolean; usdc: bigint; needMicro?: bigint; onClose: () => void; onActivated: () => void }) {
+  const t = useT();
+  const session = useBovedaSession();
+  const prepare = useServerFn(prepareGasRefill);
+  const wallet = session.walletAddress;
+  const missing = activationShortfallMicro(usdc, needMicro);
+  const [total, setTotal] = useState<bigint | null>(null);
+  const [stage, setStage] = useState<"ready" | "working" | "done">("ready");
+  const [error, setError] = useState<string | undefined>();
+  const [buy, setBuy] = useState(0);
+  useEffect(() => { if (open) { setStage("ready"); setError(undefined); } }, [open]);
+  useEffect(() => {
+    if (!open || !wallet || missing > 0n) return;
+    void prepare({ data: { wallet, activation: true, quoteOnly: true } }).then((r) => { if (r.success) setTotal(BigInt(r.chargeMicro)); }).catch(() => {});
+  }, [open, wallet, missing > 0n]); // eslint-disable-line react-hooks/exhaustive-deps
+  async function activate() {
+    if (!wallet) return;
+    setError(undefined); setStage("working");
+    try {
+      const r = await prepare({ data: { wallet, activation: true } });
+      if (!r.success) throw new Error(r.error);
+      if (!r.transaction) throw new Error("No se pudo preparar la activación.");
+      await session.signAndSend(Uint8Array.from(atob(r.transaction), (c) => c.charCodeAt(0)));
+      setStage("done");
+      setTimeout(() => onActivated(), 1800);
+    } catch (e) { setError(e instanceof Error ? t(e.message) : t("No se pudo completar la activación.")); setStage("ready"); }
+  }
+  const view: ActivationStage = stage === "done" ? { kind: "done" } : stage === "working" ? { kind: "working" } : missing > 0n ? { kind: "short", missingMicro: missing } : { kind: "ready", totalMicro: total, ...(error ? { error } : {}) };
+  return <Dialog open={open} onOpenChange={(o) => { if (!o && stage !== "working") onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
+    <DialogTitle className="sr-only">{t("Activa tu cuenta")}</DialogTitle>
+    <DialogDescription className="sr-only">{t("Prepara tu cuenta y seguimos solos.")}</DialogDescription>
+    <ActivationCardView stage={view} continueMode onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={onActivated} />
+    {buy > 0 && <BuyUsdc auto={buy} className="mt-2" />}
+  </ActionSheetContent></Dialog>;
 }

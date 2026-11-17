@@ -40,9 +40,13 @@ export const ACTIVATION_FEE_MICRO = 5_000_000n;
 export const ACTIVATION_SUGGESTED_USD = 20;
 export function activationCharge(marketMicro: bigint) { return marketMicro + ACTIVATION_FEE_MICRO; }
 /** Dollars still missing to reach the suggested starting balance (0 when enough). */
-export function activationShortfallMicro(usdcMicro: bigint) {
-  const need = BigInt(ACTIVATION_SUGGESTED_USD) * 1_000_000n;
+export function activationShortfallMicro(usdcMicro: bigint, needMicro: bigint = BigInt(ACTIVATION_SUGGESTED_USD) * 1_000_000n) {
+  const need = needMicro;
   return usdcMicro >= need ? 0n : need - usdcMicro;
 }
 
 export const gasRefillInput = z.object({ wallet: solanaAddressSchema, target: z.enum(["standard", "vault", "deposit"]).optional(), activation: z.boolean().optional(), quoteOnly: z.boolean().optional() });
+
+/** Dollars a Doble o Nada entry needs when the account still has to be activated: the bet plus the activation (~$15). */
+export const ACTIVATION_PLAY_MICRO = 15_000_000n;
+export function playActivationNeedMicro(betMicro: bigint) { return betMicro + ACTIVATION_PLAY_MICRO; }

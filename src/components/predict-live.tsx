@@ -14,7 +14,9 @@ import { PredictPositionCard } from "@/components/predict-position-card";
 import { SolConvertShortcut } from "@/components/sol-convert-shortcut";
 import { ShareWin } from "@/components/share-win";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
-import { GasRefillCard } from "@/components/gas-refill-card";
+import { ActivationSheet } from "@/components/gas-refill-card";
+import { BuyUsdc } from "@/components/buy-usdc";
+import { playActivationNeedMicro } from "@/lib/gas-refill";
 import { useT } from "@/lib/i18n";
 import { PREDICT_MAX_USDC, PREDICT_MIN_USDC, assetOfTitle, positionWon, potentialProfit, type LiveRound, type PredictPosition, type PredictQuote, type PredictSide } from "@/lib/predict";
 import { executePredict, getPredictOrderStatus, getPredictPositions, preparePredictBuy, preparePredictClaim, preparePredictSell } from "@/lib/predict.functions";
@@ -108,6 +110,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   const [quoting, setQuoting] = useState(false);
   const [quoteErr, setQuoteErr] = useState<string | null>(null);
   const [needsReserve, setNeedsReserve] = useState(false);
+  const [retryQuote, setRetryQuote] = useState(0);
   const seq = useRef(0);
   const unitsKey = units?.toString() ?? "";
   useEffect(() => {
@@ -129,7 +132,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
     const iv = setInterval(run, 15_000);
     return () => { clearTimeout(d); clearInterval(iv); seq.current++; setQuoting(false); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallet, valid, round?.marketId, side, unitsKey]);
+  }, [wallet, valid, round?.marketId, side, unitsKey, retryQuote]);
   const confirm = async () => {
     if (!review || !wallet) return;
     setBusy("sign");
@@ -254,19 +257,19 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
           <TapAmount id="predict-amount" className="mt-1" label={t("Estás poniendo ($)")} prefix="$" value={amount} onChange={(v) => { setAmount(v.replace(",", ".").replace(/[^0-9.]/g, "")); setReview(null); }} />
           <div className="mt-2 grid grid-cols-5 gap-2">{[5, 10, 25, 50].map((v) => { const on = Number(amount) === v; return <Button key={v} type="button" variant={on ? "default" : "secondary"} size="sm" aria-pressed={on} onClick={() => { setAmount(String(v)); setReview(null); }}>${v}</Button>; })}<Button type="button" variant="outline" size="sm" disabled={!maxMicro || maxMicro <= 0n} onClick={() => { if (maxMicro) { setAmount((Math.floor(Number(maxMicro) / 1e4) / 100).toFixed(2)); setReview(null); } }}>{t("Máx")}</Button></div>
           {!inRange && <p className="mt-2 text-xs text-destructive">{t("Entre {min} y ${max}.", { min: PREDICT_MIN_USDC, max: PREDICT_MAX_USDC })}</p>}
-          {short && <p className="mt-2 text-xs text-destructive">{t("Saldo insuficiente: tienes ${v}.", { v: usdc(balance) })} <Link to="/wallet" className="underline">{t("Depositar o cambiar a dólares")}</Link></p>}
+          {short && <p className="mt-2 text-xs text-muted-foreground">{t("Estás a un paso de jugar: te faltan ${v} para esta ronda.", { v: usdc((units ?? 0n) - (balance ?? 0n)) })}</p>}
           {inRange && selPrice && !review && <div className="mt-3 rounded-xl bg-secondary/50 p-3 text-center">
             <p className="text-xs text-muted-foreground">{t("Si aciertas recibes aprox.")}</p>
             <p className="font-display text-2xl font-bold text-primary tabular-nums">${(amt / selPrice).toFixed(2)}</p>
             {short && <p className="pt-1 text-[11px] text-muted-foreground">{t("Cotización con el precio actual del mercado. Fondea tu wallet para firmarla.")}</p>}
           </div>}
           {short && <SolConvertShortcut className="mt-3" />}
-          {short && side && <Button asChild className="mt-3 h-12 w-full rounded-xl text-base font-bold"><Link to="/wallet">{t("Depositar o cambiar a dólares")}</Link></Button>}
+          {short && side && <BuyUsdc className="mt-3" />}
           {!side && <p className="mt-3 text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
           {!wallet ? <p className="mt-3 rounded-xl bg-secondary p-3 text-center text-sm font-semibold">{t("Entra con tu cuenta para predecir en vivo con los dólares de tu wallet.")}</p>
             : !review && !short && <Button disabled className="mt-3 h-12 w-full rounded-xl text-base font-bold">{quoting ? <><Loader2 className="animate-spin" /> {t("Cotizando en la red…")}</> : side ? t(side === "up" ? "Predecir Sube" : "Predecir Baja") : t("Elige Sube o Baja")}</Button>}
           {quoteErr && !needsReserve && <p className="mt-2 text-xs text-destructive">{t("No se pudo cotizar ahora mismo. Reintentando…")}</p>}
-          {needsReserve && wallet && <div className="mt-3"><GasRefillCard force target="deposit" sol={1n} usdc={units ?? 0n} onDone={() => setNeedsReserve(false)} /></div>}
+          {wallet && <ActivationSheet open={needsReserve} usdc={balance ?? 0n} needMicro={playActivationNeedMicro(units ?? 0n)} onClose={() => setNeedsReserve(false)} onActivated={() => { setNeedsReserve(false); setReview(null); setTimeout(() => setRetryQuote((n) => n + 1), 1500); }} />}
           {side && !review && <Button type="button" variant="ghost" className="mt-2 w-full" onClick={cancelQuote}>{t("Cancelar cotización")}</Button>}
         </section>
   

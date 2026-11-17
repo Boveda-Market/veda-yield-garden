@@ -10,11 +10,11 @@ import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { simulationDisplay } from "@/lib/deposit-simulation";
 import type { Vault } from "@/lib/vaults";
 import { PilotDeposit } from "@/components/pilot-deposit";
+import { BuyUsdc } from "@/components/buy-usdc";
 import { RangeAlertsGate } from "@/components/range-alerts-gate";
 import { getRealWallet } from "@/lib/solana.functions";
-import { decimalToUnits, MIN_SOL_LAMPORTS } from "@/lib/onboarding";
+import { decimalToUnits } from "@/lib/onboarding";
 import { poolYieldOptions } from "@/lib/pool-yield";
-import { Link } from "@tanstack/react-router";
 import { Wallet } from "lucide-react";
 
 const MAX_MICRO = 10_000_000_000n;
@@ -36,7 +36,6 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   let breakdown: ReturnType<typeof simulationDisplay> | null = null;
   try { breakdown = simulationDisplay(amount, migrate); } catch { /* Incomplete input. */ }
   const usdc = balances.data?.usdc;
-  const lowSol = balances.data ? balances.data.sol < MIN_SOL_LAMPORTS : false;
   const typed = decimalToUnits(amount || "0", 6);
   const overBalance = usdc != null && typed != null && typed > usdc;
   const pick = (pct: bigint) => { if (usdc == null) return; const cap = usdc < MAX_MICRO ? usdc : MAX_MICRO; setAmount(microToText((cap * pct) / 100n)); };
@@ -59,12 +58,8 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
       <div className="grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={p.toString()} type="button" size="sm" variant="secondary" disabled={busy || !usdc} onClick={() => pick(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
       <p className="text-xs text-muted-foreground">{migrate ? t("Traslado entre bóvedas: el detalle aparece antes de confirmar.") : t("Entre $1 y $10,000. Depositar es sin comisión.")}</p>
       {overBalance && <p role="alert" className="text-xs text-muted-foreground">{t("No tienes suficientes dólares para esta cantidad.")}</p>}
-      {(overBalance || usdc === 0n) && <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs"><span>{t("¿Necesitas dólares? Añádelos en Mi Billetera.")}</span><Button asChild size="sm" variant="outline"><Link to="/wallet">{t("Ir a Mi Billetera")} →</Link></Button></div>}
+      {(overBalance || usdc === 0n) && <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs"><span>{t("Estás a un paso de comenzar. Añade dólares y sigue aquí mismo.")}</span><BuyUsdc className="w-full" /></div>}
     </div>
-    {lowSol && <div role="note" className="grid gap-2 rounded-xl border border-primary/40 bg-primary/10 p-3 text-xs leading-5">
-      <p>{t("Recarga tu reserva de operaciones antes de depositar.")}</p>
-      <Button asChild size="sm" variant="outline"><Link to="/wallet">{t("Ir a Mi Billetera")} →</Link></Button>
-    </div>}
     {breakdown && <dl className="grid gap-2 rounded-xl bg-muted p-4 text-sm">
       <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Importe")}</dt><dd>${breakdown.gross}</dd></div>
       <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión de entrada")}</dt><dd className="font-semibold text-primary">$0.00</dd></div>
@@ -73,6 +68,6 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
     {!position && !migrate && <p role="note" className="rounded-xl border border-border p-3 text-xs leading-5 text-muted-foreground">{t("Tu capital se combina con la otra moneda de la bóveda y su valor fluctuará con el precio de mercado, mientras acumulas comisiones en cada operación.")} <a href="/faq#vaults-fluctuation" className="underline">{t("¿Por qué cambia mi balance?")}</a></p>}
     </>}
     {!done && !migrate && vault.id === "gta6" && <RangeAlertsGate />}
-    {wallet ? <PilotDeposit autoStart={migrate} vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onClose={onClose} onDoneChange={setDone} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
+    {wallet ? <PilotDeposit usdc={usdc} autoStart={migrate} vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onClose={onClose} onDoneChange={setDone} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
   </ActionSheetContent></Dialog>;
 }

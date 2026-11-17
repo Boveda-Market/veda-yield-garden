@@ -1555,4 +1555,8 @@ export const extra: Record<string, string> = {
   "Ahora no": "Not now",
   "¡Listo! La próxima vez entras con tu huella o Face ID.": "Done! Next time you sign in with your fingerprint or Face ID.",
   "Para dejar mitad y mitad se cambia una parte dentro de la misma bóveda, con un límite de precio para protegerte.": "To leave it half and half, part is swapped inside the same vault, with a price limit to protect you.",
+  "Estás a un paso de comenzar. Añade dólares y sigue aquí mismo.": "You're one step away. Add dollars and continue right here.",
+  "Continuando…": "Continuing…",
+  "Prepara tu cuenta y seguimos solos.": "Get your account ready and we'll continue on our own.",
+  "Estás a un paso de jugar: te faltan ${v} para esta ronda.": "You're one step away from playing: you need ${v} more for this round.",
 };
