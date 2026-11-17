@@ -62,7 +62,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, usdc, autoSta
         const { status: next } = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as PilotStatus }));
         setStatus(next);
         if (next === "failed") { setStep("error"); setMessage(t("La red rechazó el depósito. Tu dinero sigue en tu billetera.")); return; }
-        if (next !== "pending") { setStep("done"); notify("success", t("Depósito confirmado"), t("Tus dólares ya están rindiendo")); void reportAffiliate(sig, "deposit"); for (const k of ["real-solana", "my-wallet", "my-wallet-tokens", "meteora-history", "start-guide"]) void queryClient.invalidateQueries({ queryKey: [k, walletAddress] }); return; }
+        if (next !== "pending") { setStep("done"); notify("success", t("Depósito confirmado"), t("Tus dólares ya están rindiendo")); void reportAffiliate(sig, "deposit", { amountUsd: amount.replace(/,/g, ""), vault: vaultId.toUpperCase().slice(0, 20) }); for (const k of ["real-solana", "my-wallet", "my-wallet-tokens", "meteora-history", "start-guide"]) void queryClient.invalidateQueries({ queryKey: [k, walletAddress] }); return; }
         await new Promise((resolve) => setTimeout(resolve, attempt < 3 ? 400 : attempt < 8 ? 800 : 2_000));
       }
       setStep("error"); setMessage(t("La confirmación tarda más de lo habitual. Revisa tu billetera antes de intentarlo otra vez."));

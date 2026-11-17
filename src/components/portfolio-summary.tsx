@@ -8,6 +8,9 @@ import { formatUsd } from "@/lib/position-value";
 import { canHarvest } from "@/lib/harvest";
 import { VAULTS } from "@/lib/vaults";
 import { Button } from "./ui/button";
+import { useState } from "react";
+import { weeklyInterest, weekTotalMicro } from "@/lib/weekly-interest";
+import { useLocale } from "@/lib/i18n";
 
 const COLORS = ["bg-primary", "bg-chart-1", "bg-chart-2", "bg-chart-4", "bg-chart-3", "bg-chart-5"];
 
@@ -58,6 +61,32 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
         <p className="mt-1 text-xs text-muted-foreground">{t("Lo que ya cosechaste.")}</p>
       </div>
     </div>
+    <WeeklyChart records={history.records} money={money} />
     <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground"><Layers size={12} className="mt-0.5 shrink-0" />{t("Ganancias = lo que ya cosechaste, al precio de hoy. No incluye subidas o bajadas del precio de tu capital.")}</p>
   </section>;
+}
+
+/** «Intereses de la semana»: 7 daily bars from the dollars harvested each day (same shared history query). */
+function WeeklyChart({ records, money }: { records: Parameters<typeof weeklyInterest>[0]; money: (n: number | null) => string }) {
+  const t = useT();
+  const locale = useLocale();
+  const [sel, setSel] = useState<number | null>(null);
+  const days = weeklyInterest(records, Date.now(), -new Date().getTimezoneOffset());
+  const total = Number(weekTotalMicro(days)) / 1e6;
+  const max = Math.max(...days.map((d) => Number(d.micro)), 1);
+  const shown = sel ?? 6;
+  const fmtDay = (start: number, i: number) => i === 6 ? t("Hoy") : new Date(start).toLocaleDateString(locale, { weekday: "short" }).replace(".", "");
+  return <div className="mt-3 rounded-2xl border border-border bg-card p-4">
+    <div className="flex items-end justify-between gap-3">
+      <div><p className="text-xs text-muted-foreground">{t("Intereses de la semana")}</p><p className="mt-1 font-display text-2xl font-semibold tabular-nums text-primary">+{money(total)}</p></div>
+      <p className="text-xs text-muted-foreground tabular-nums">{t("~${v} / día", { v: (total / 7).toFixed(2) })}</p>
+    </div>
+    <div role="img" aria-label={t("Intereses cosechados por día, últimos 7 días")} className="mt-4 grid h-28 grid-cols-7 items-end gap-2">
+      {days.map((d, i) => { const h = d.micro > 0n ? Math.max(8, (Number(d.micro) / max) * 100) : 4; return <button key={d.key} type="button" onClick={() => setSel(i)} className="flex h-full flex-col items-center justify-end gap-1">
+        <span className={`w-full rounded-md transition-all ${i === shown ? "bg-primary" : d.micro > 0n ? "bg-primary/40" : "bg-muted"}`} style={{ height: `${h}%` }} />
+      </button>; })}
+    </div>
+    <div className="mt-1 grid grid-cols-7 gap-2 text-center text-[11px] capitalize text-muted-foreground">{days.map((d, i) => <span key={d.key} className={i === shown ? "font-semibold text-foreground" : ""}>{fmtDay(d.start, i)}</span>)}</div>
+    <p className="mt-3 text-center text-sm tabular-nums">{total > 0 ? <><span className="text-muted-foreground">{fmtDay(days[shown]!.start, shown)}: </span><strong className="text-primary">+{money(Number(days[shown]!.micro) / 1e6)}</strong></> : <span className="text-muted-foreground">{t("Tus intereses cosechados de los últimos 7 días se verán aquí día a día.")}</span>}</p>
+  </div>;
 }

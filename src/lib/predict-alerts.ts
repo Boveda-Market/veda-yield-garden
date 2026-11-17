@@ -18,5 +18,5 @@ export function predictAlertText(p: Pick<PredictPosition, "title" | "payoutMicro
   const round = p.title ? `🎯 <i>${p.title.replace(/[<>&]/g, "")}</i>` : null;
   return o === "won"
     ? tgCard("🏆", "¡Ganaste en Doble o Nada!", [round, tgRow("💵", "Premio", `$${usd(p.payoutMicro)}`), "", "Reclámalo en tu Portafolio cuando quieras.", '👉 <a href="https://bovedamarket.app/portfolio">Reclamar premio</a>'])
-    : tgCard("📉", "No acertaste en Doble o Nada", [round, tgRow("💸", "Jugaste", `$${usd(p.costMicro)}`), "", "La ronda terminó en tu contra y la posición se cerró sola."]);
+    : tgCard("📉", "No acertaste en Doble o Nada", [round, tgRow("💸", "Jugaste", `$${usd(p.costMicro)}`), "", "La ronda terminó en tu contra y la posición se cerró sola.", "✨ <b>No tienes que hacer ninguna acción.</b>"]);
 }

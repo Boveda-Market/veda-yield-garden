@@ -85,21 +85,35 @@ export const sendTelegramTest = createServerFn({ method: "POST" })
     } catch { return { success: false }; }
   });
 
+/** Line added to every alert about something the system already finished, so nobody wonders whether to tap anything. */
+export const NO_ACTION = "✨ <b>No tienes que hacer ninguna acción.</b>";
+
 const ACTION_TEXT = {
-  harvest: tgCard("🌾", "Cosecha completada", ["Tus ganancias ya están en tu billetera.", "✅ Tu bóveda sigue abierta y generando."]),
-  exit: tgCard("🏁", "Bóveda cerrada", ["Tu capital y tus ganancias ya están en dólares en tu billetera."]),
-  withdraw: tgCard("🏧", "Retiro enviado", ["Tu dinero va en camino a tu banco, tarjeta o Cash App."]),
-  predict: tgCard("⚡", "Premio de Doble o Nada cobrado", ["💵 Tu premio ya está en dólares en tu billetera."]),
-  deposit: tgCard("🏦", "Depósito confirmado", ["Tu dinero ya está trabajando en la bóveda.", "🌾 Te avisamos aquí cada vez que cosechas."]),
+  withdraw: tgCard("🏧", "Retiro enviado", ["Tu dinero va en camino a tu banco, tarjeta o Cash App.", "", `${NO_ACTION} Tu transferencia ya está en proceso.`]),
+  predict: tgCard("⚡", "Premio de Doble o Nada cobrado", ["💵 Tu premio ya está en dólares en tu billetera.", "", NO_ACTION]),
 } as const;
+
+const money = (v?: string) => (v && Number.isFinite(Number(v)) ? `$${Number(v).toFixed(2)}` : null);
+
+/** Deposit alert with vault and amount when known. */
+export function depositAlertText(amountUsd?: string, vault?: string) {
+  const amt = money(amountUsd);
+  return tgCard("🏦", "Depósito confirmado", [vault ? tgRow("🏦", "Bóveda", vault) : null, amt ? tgRow("💵", "Cantidad depositada", amt) : null, "", "✅ Tu dinero ya está trabajando y generando intereses.", `${NO_ACTION} Tus dólares ya están activos.`]);
+}
+
+/** Harvest alert with vault and harvested amount when known. */
+export function harvestAlertText(amountUsd?: string, vault?: string) {
+  const amt = money(amountUsd);
+  return tgCard("🌾", "Cosecha completada", [vault ? tgRow("🏦", "Bóveda", vault) : null, amt ? tgRow("💵", "Intereses cosechados", `+${amt}`) : null, "", "✅ Tus dólares ya están disponibles en tu billetera.", "🌱 Tu bóveda sigue abierta y generando intereses.", NO_ACTION]);
+}
 
 /** Exit alert: partial withdrawals say the vault keeps generating; never mentions fees. */
 export function exitAlertText(percent: number, amountUsd?: string, vault?: string) {
   const amount = amountUsd ? tgRow("💵", "Dólares a tu billetera", `$${Number(amountUsd).toFixed(2)}`) : null;
   const where = vault ? tgRow("🏦", "Bóveda", vault) : null;
   return percent < 100
-    ? tgCard("💸", `Retiro completado (${percent}%)`, [where, amount, "", `✅ Tu bóveda sigue abierta y generando con el ${100 - percent}% restante.`])
-    : tgCard("🏁", "Retiro total de bóveda", [where, amount, "", "Tu dinero y tus ganancias ya están disponibles en tu billetera."]);
+    ? tgCard("💸", `Retiro completado (${percent}%)`, [where, amount, "", `✅ Tu bóveda sigue abierta y generando con el ${100 - percent}% restante.`, NO_ACTION])
+    : tgCard("🏁", "Retiro total de bóveda", [where, amount, "", "Tu dinero y tus ganancias ya están disponibles en tu billetera.", NO_ACTION]);
 }
 
 /** Personal alert for the signed-in user's own confirmed action; only ever reaches that user's linked chat. */
@@ -109,7 +123,7 @@ export const notifyMyAction = createServerFn({ method: "POST" })
     try {
       const { id } = await admin(data.token);
       const tg = await import("./telegram.server");
-      const text = data.kind === "exit" ? exitAlertText(data.percent ?? 100, data.amountUsd, data.vault) : ACTION_TEXT[data.kind];
+      const text = data.kind === "exit" ? exitAlertText(data.percent ?? 100, data.amountUsd, data.vault) : data.kind === "deposit" ? depositAlertText(data.amountUsd, data.vault) : data.kind === "harvest" ? harvestAlertText(data.amountUsd, data.vault) : ACTION_TEXT[data.kind];
       await tg.userAlert(id, text, data.kind, { text: "🧾 Ver comprobante", url: `https://orbmarkets.io/tx/${data.signature}` });
       return { success: true };
     } catch { return { success: false }; }

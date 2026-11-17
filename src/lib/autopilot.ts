@@ -60,12 +60,14 @@ export function autopilotDoneText(vaultName: string, valueUsd: string | undefine
       `🎯 <b>Volvimos a centrar tu posición:</b> el precio se movió y la dejamos en el punto óptimo${valueUsd ? ` (≈ <b>$${valueUsd}</b>)` : ""}.`,
       `💰 <b>Ganancias sumadas a tu capital:</b> cosechamos <b>+$${gainsUsd.toFixed(2)}</b> de tus ganancias acumuladas y se agregaron a tu depósito para que sigan rindiendo.`,
       "✅ <b>Tu contador de ganancias empieza desde cero:</b> ya está generando intereses otra vez.",
+      "✨ <b>No tienes que hacer ninguna acción:</b> todo se hizo en automático.",
     ]);
   }
   return tgCard("🤖", `${vaultName} rebalanceada con éxito`, [
     "🎯 Centramos tu rango para que no dejes de generar intereses.",
     "📈 <b>Reinversión automática:</b> tus ganancias acumuladas se sumaron directamente a tu capital depositado.",
     "💡 <i>Nota:</i> tu contador de ganancias se reinicia porque tus dólares ya están trabajando en la bóveda.",
+    "✨ <b>No tienes que hacer ninguna acción:</b> todo se hizo en automático.",
   ]);
 }
 

@@ -79,7 +79,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
             try { const extra = await harvestedToUsdc(wallet, next.tokenSymbol, BigInt(next.tokenRaw), session.signAndSend); if (extra > 0n) setExtraUsd(Number(extra) / 1e6); }
             catch { setSweepNote(t("Tus ganancias en dólares ya llegaron. La otra parte no se pasó a dólares; puedes hacerlo en Mi Billetera → Cambiar.")); }
           }
-          if (!compound) notify("success", t("Ganancias cosechadas"), t("Ya están en tu billetera")); setFinished(true); setMessage(t("Cosecha confirmada en la red. Tu posición sigue abierta.")); void reportAffiliate(sig, "harvest"); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", wallet] }); return; }
+          if (!compound) notify("success", t("Ganancias cosechadas"), t("Ya están en tu billetera")); setFinished(true); setMessage(t("Cosecha confirmada en la red. Tu posición sigue abierta.")); void reportAffiliate(sig, "harvest", { ...(next.net ?? result?.net ? { amountUsd: String(Number(String(next.net ?? result?.net).replace(/,/g, ""))) } : {}), vault: vaultSymbol(vaultId) }); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", wallet] }); return; }
         await new Promise((resolve) => setTimeout(resolve, 2_000));
       }
       setMessage(t("La confirmación tarda más de lo habitual. Revisa tu billetera antes de intentarlo otra vez."));
