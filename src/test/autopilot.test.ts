@@ -56,13 +56,13 @@ describe("Autopilot rebalance notice explains the harvested earnings", () => {
   it("quotes the exact amount from $0.50 up (Telegram and bell)", () => {
     const text = autopilotDoneText("Bóveda GTA6", "250.00", 8.45);
     expect(text).toContain("+$8.45");
-    expect(text).toContain("empieza desde cero");
+    expect(text).toContain("se reinicia");
     expect(autopilotNotice({ enabled: true, enabledAt: null, lastRebalanceAt: ago(5), lastGainsUsd: 0.5 }, now)?.gainsUsd).toBe(0.5);
   });
   it("uses the short reassuring message for cents or unknown amounts", () => {
     for (const g of [0.49, 0, null, undefined]) {
       const text = autopilotDoneText("Bóveda GTA6", "250.00", g);
-      expect(text).toContain("rebalanceada con éxito");
+      expect(text).toContain("No tienes que hacer nada");
       expect(text).not.toContain("+$");
     }
     expect(autopilotNotice({ enabled: true, enabledAt: null, lastRebalanceAt: ago(5), lastGainsUsd: 0.2 }, now)?.gainsUsd).toBeNull();

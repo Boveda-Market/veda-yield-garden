@@ -36,6 +36,7 @@ export function SecurityWhyDialog({ trigger }: { trigger: (open: () => void) => 
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogTitle className="flex items-center gap-2 font-display"><ShieldCheck size={20} className="text-primary" />{t("¿Por qué tus fondos están seguros?")}</DialogTitle>
           <DialogDescription>{t("Otras apps han fallado por guardar el dinero de sus usuarios. BÓVEDA funciona distinto.")}</DialogDescription>
+          <p className="rounded-xl border border-primary/20 bg-primary/5 p-3 font-mono text-xs leading-5 text-muted-foreground">{t("Bajo el capó: tu wallet usa criptografía de clave pública. Tu llave privada vive solo en tu dispositivo y firma cada operación; BÓVEDA nunca la ve. Cada movimiento es una transacción atómica: se ejecuta completa o no se ejecuta, sin estados a medias. Todo queda registrado en una red pública verificable por cualquiera, sin servidores centrales que custodien tu dinero y sin puertas traseras.")}</p>
           <SafetyNotice />
           <h3 className="mt-2 font-display font-semibold">{t("Comparativa rápida")}</h3>
           <SecurityGuarantees />

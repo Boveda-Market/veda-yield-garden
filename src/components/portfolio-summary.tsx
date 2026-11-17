@@ -38,6 +38,7 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
 
   return <section aria-label={t("Rendimiento de tu portafolio")} className="py-8">
     <h2 className="flex items-center gap-2 font-display text-lg font-semibold"><TrendingUp size={18} className="text-primary" />{t("Tu rendimiento")}</h2>
+    <WeeklyChart records={history.records} poolPrices={history.poolPrices} money={money} />
 
     <div className={`${tile} mt-4`}>
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -62,7 +63,6 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
         <p className="mt-1 text-xs text-muted-foreground">{t("Lo que ya cosechaste.")}</p>
       </div>
     </div>
-    <WeeklyChart records={history.records} poolPrices={history.poolPrices} money={money} />
     <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground"><Layers size={12} className="mt-0.5 shrink-0" />{t("Ganancias = lo que ya cosechaste, al precio de hoy. No incluye subidas o bajadas del precio de tu capital.")}</p>
   </section>;
 }

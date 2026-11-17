@@ -125,32 +125,32 @@ describe("unsigned composed deposit simulation", () => {
     expect(new Uint8Array(getTransactionEncoder().encode(decoded))).toEqual(new Uint8Array(wire));
     expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
   });
-  it("pilot refuses deposits over 10,000 USDC", async () => {
-    await expect(simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "10000.000001" }, { preparePilot: true })).rejects.toThrow();
+  it("pilot refuses deposits over 5,000 USDC", async () => {
+    await expect(simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "5000.000001" }, { preparePilot: true })).rejects.toThrow();
     expect(mocks.connection.simulateTransaction).not.toHaveBeenCalled();
   });
-  it("charges no fee on a verified 10,000 USDC deposit without sending", async () => {
+  it("charges no fee on a verified 5,000 USDC deposit without sending", async () => {
     mocks.getAccount.mockReset();
-    mocks.getAccount.mockResolvedValue({ amount: 10_000_000_000n });
+    mocks.getAccount.mockResolvedValue({ amount: 5_000_000_000n });
     const fee = Buffer.alloc(AccountLayout.span);
-    AccountLayout.encode({ mint: usdc, owner: new PublicKey(FEE_WALLET), amount: 10_000_000_000n, delegateOption: 0, delegate: PublicKey.default, state: 1, isNativeOption: 0, isNative: 0n, delegatedAmount: 0n, closeAuthorityOption: 0, closeAuthority: PublicKey.default }, fee);
+    AccountLayout.encode({ mint: usdc, owner: new PublicKey(FEE_WALLET), amount: 5_000_000_000n, delegateOption: 0, delegate: PublicKey.default, state: 1, isNativeOption: 0, isNative: 0n, delegatedAmount: 0n, closeAuthorityOption: 0, closeAuthority: PublicKey.default }, fee);
     const base = await mocks.connection.simulateTransaction();
     mocks.connection.simulateTransaction.mockResolvedValue({ ...base, value: { ...base.value, accounts: [...base.value.accounts, { owner: TOKEN_PROGRAM_ID.toBase58(), data: [fee.toString("base64"), "base64"] }] } });
-    const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "10000" }, { preparePilot: true });
+    const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "5000" }, { preparePilot: true });
     expect(result.success).toBe(true);
     expect(result.prepared).toBeDefined();
     expect(result.fee).toBe("0");
-    expect(result.net).toBe("10000");
+    expect(result.net).toBe("5000");
     expect(mocks.connection.sendRawTransaction).not.toHaveBeenCalled();
   });
-  it("does not prepare 10,000 USDC when the wallet only has 2 USDC", async () => {
-    const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "10000" }, { preparePilot: true });
+  it("does not prepare 5,000 USDC when the wallet only has 2 USDC", async () => {
+    const result = await simulateDeposit("test-credential", { wallet, vaultId: "met", amount: "5000" }, { preparePilot: true });
     expect(result.success).toBe(false);
     expect(result.prepared).toBeUndefined();
     expect(mocks.connection.simulateTransaction).not.toHaveBeenCalled();
   });
   it("does not widen signable vaults to Token-2022", async () => {
-    await expect(simulateDeposit("test-credential", { wallet, vaultId: "rwa" as never, amount: "10000" }, { preparePilot: true })).rejects.toThrow();
+    await expect(simulateDeposit("test-credential", { wallet, vaultId: "rwa" as never, amount: "5000" }, { preparePilot: true })).rejects.toThrow();
   });
   it("pilot returns nothing when Solana rejects the simulation", async () => {
     mocks.connection.simulateTransaction.mockResolvedValue({ context: { slot: 123 }, value: { err: { InstructionError: [4, "Custom"] } } });

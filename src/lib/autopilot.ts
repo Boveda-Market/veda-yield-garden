@@ -55,19 +55,13 @@ export const gainsWorthQuoting = (gainsUsd: number | null | undefined): gainsUsd
  * so the card says how much was added (or, for cents, that the counter restarts) and nobody thinks earnings vanished.
  */
 export function autopilotDoneText(vaultName: string, valueUsd: string | undefined, gainsUsd?: number | null) {
-  if (gainsWorthQuoting(gainsUsd)) {
-    return tgCard("🤖", `Piloto automático rebalanceó tu ${vaultName}`, [
-      `🎯 <b>Volvimos a centrar tu posición:</b> el precio se movió y la dejamos en el punto óptimo${valueUsd ? ` (≈ <b>$${valueUsd}</b>)` : ""}.`,
-      `💰 <b>Ganancias sumadas a tu capital:</b> cosechamos <b>+$${gainsUsd.toFixed(2)}</b> de tus ganancias acumuladas y se agregaron a tu depósito para que sigan rindiendo.`,
-      "✅ <b>Tu contador de ganancias empieza desde cero:</b> ya está generando intereses otra vez.",
-      "✨ <b>No tienes que hacer ninguna acción:</b> todo se hizo en automático.",
-    ]);
-  }
-  return tgCard("🤖", `${vaultName} rebalanceada con éxito`, [
-    "🎯 Centramos tu rango para que no dejes de generar intereses.",
-    "📈 <b>Reinversión automática:</b> tus ganancias acumuladas se sumaron directamente a tu capital depositado.",
-    "💡 <i>Nota:</i> tu contador de ganancias se reinicia porque tus dólares ya están trabajando en la bóveda.",
-    "✨ <b>No tienes que hacer ninguna acción:</b> todo se hizo en automático.",
+  return tgCard("⚡", "Protocolo Autopilot: Rebalanceo ejecutado", [
+    `🎯 <b>Rango re-anclado:</b> tu posición en ${vaultName} fue re-centrada algorítmicamente en el punto óptimo de volumen${valueUsd ? ` (≈ <b>$${valueUsd}</b>)` : ""}.`,
+    gainsWorthQuoting(gainsUsd)
+      ? `📈 <b>Capitalización:</b> se cosecharon <b>+$${gainsUsd.toFixed(2)}</b> de ganancias y se sumaron directo a tu capital (interés compuesto).`
+      : "📈 <b>Capitalización:</b> tus ganancias acumuladas se sumaron directo a tu capital (interés compuesto).",
+    "✨ <b>No tienes que hacer nada:</b> el protocolo operó 100% en automático y tus dólares siguen rindiendo solos.",
+    "💡 <i>Tu contador «Por reclamar» se reinicia porque tus ganancias ya están dentro de la bóveda generando más.</i>",
   ]);
 }
 

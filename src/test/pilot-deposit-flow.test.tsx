@@ -16,23 +16,23 @@ afterEach(cleanup);
 beforeEach(() => { vi.resetAllMocks(); mocks.prepare.mockResolvedValue({ success: true, prepared: { transaction: "AQID" } }); mocks.sign.mockResolvedValue("signature"); mocks.status.mockResolvedValue({ status: "confirmed" }); });
 
 describe("selectable Real deposit review", () => {
-  it("prepares the reviewed 10,000 USDC and signs only after simulation succeeds", async () => {
-    render(<PilotDeposit vaultId="sol" amount="10000" onBusyChange={() => {}} />);
+  it("prepares the reviewed 5,000 USDC and signs only after simulation succeeds", async () => {
+    render(<PilotDeposit vaultId="sol" amount="5000" onBusyChange={() => {}} />);
     fireEvent.click(screen.getByRole("button", { name: /depositar/i }));
     await screen.findByText("Depósito confirmado en la red (confirmado).");
-    expect(mocks.prepare).toHaveBeenCalledWith({ data: { wallet: FEE_WALLET, vaultId: "sol", amount: "10000" } });
+    expect(mocks.prepare).toHaveBeenCalledWith({ data: { wallet: FEE_WALLET, vaultId: "sol", amount: "5000" } });
     expect(mocks.sign).toHaveBeenCalledWith(new Uint8Array([1, 2, 3]));
   });
   it("never prepares or signs until the user taps confirm", async () => {
     const view = render(<PilotDeposit vaultId="sol" amount="1" onBusyChange={() => {}} />);
-    view.rerender(<PilotDeposit vaultId="sol" amount="10000" onBusyChange={() => {}} />);
+    view.rerender(<PilotDeposit vaultId="sol" amount="5000" onBusyChange={() => {}} />);
     expect(screen.getByRole("button", { name: /depositar/i })).toBeEnabled();
     expect(mocks.prepare).not.toHaveBeenCalled();
     expect(mocks.sign).not.toHaveBeenCalled();
   });
-  it("does not sign when the fresh simulation rejects a 10,000 USDC deposit", async () => {
+  it("does not sign when the fresh simulation rejects a 5,000 USDC deposit", async () => {
     mocks.prepare.mockResolvedValue({ success: false, message: "Saldo insuficiente." });
-    render(<PilotDeposit vaultId="sol" amount="10000" onBusyChange={() => {}} />);
+    render(<PilotDeposit vaultId="sol" amount="5000" onBusyChange={() => {}} />);
     fireEvent.click(screen.getByRole("button", { name: /depositar/i }));
     await screen.findByRole("alert");
     expect(mocks.sign).not.toHaveBeenCalled();
@@ -45,8 +45,8 @@ describe("selectable Real deposit review", () => {
     expect(screen.queryByText(/garantía/i)).toBeNull();
     expect(mocks.sign).not.toHaveBeenCalled();
   });
-  it("cannot authorize an amount above 10,000 USDC", () => {
-    render(<PilotDeposit vaultId="sol" amount="10000.000001" onBusyChange={() => {}} />);
+  it("cannot authorize an amount above 5,000 USDC", () => {
+    render(<PilotDeposit vaultId="sol" amount="5000.000001" onBusyChange={() => {}} />);
     expect(screen.getByRole("button", { name: /depositar/i })).toBeDisabled();
   });
   it("passes MET deposits to the wallet and checks confirmation automatically", async () => {
