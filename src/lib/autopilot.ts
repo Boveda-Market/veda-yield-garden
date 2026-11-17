@@ -15,6 +15,9 @@ export const AUTOPILOT_PROGRAMS = [
 /** Treasury USDC account: the only destination a top-level token transfer in an Autopilot rebalance may use (the fee). */
 export const AUTOPILOT_FEE_ATA = "DXbXVtrEEyJ7zuanJNzyyj1D3PQBsUm65hdQ3DHiarQW";
 
+/** On-chain memo tagging Autopilot transactions so wallet activity labels them Auto-Compound. */
+export const AUTOPILOT_MEMO = "boveda:autopilot";
+
 /** Autopilot waits this long out of range before re-centring (the manual 10-min alert stays the fallback). */
 export const AUTOPILOT_WAIT_MS = 5 * 60_000;
 /** A failed attempt (price impact, low reserve, network) is retried after this pause. */

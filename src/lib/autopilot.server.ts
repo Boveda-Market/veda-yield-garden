@@ -1,7 +1,7 @@
 import type { Connection } from "@solana/web3.js";
 import type { MonitorRow } from "@/lib/status-monitor";
 import { AUTOPILOT_POLICY_ID, AUTOPILOT_PROGRAMS, AUTOPILOT_SIGNER_ID, PRIVY_APP_ID, privyWalletRpc } from "@/lib/privy-signer";
-import { AUTOPILOT_FEE_ATA, AUTOPILOT_MAX_IMPACT_PCT, AUTOPILOT_MAX_PER_RUN, autopilotDecision, autopilotDoneText, onlyAllowedPrograms, type AutopilotRow } from "@/lib/autopilot";
+import { AUTOPILOT_MEMO, AUTOPILOT_FEE_ATA, AUTOPILOT_MAX_IMPACT_PCT, AUTOPILOT_MAX_PER_RUN, autopilotDecision, autopilotDoneText, onlyAllowedPrograms, type AutopilotRow } from "@/lib/autopilot";
 
 type Db = { from: (t: string) => any };
 type Enrollment = AutopilotRow & { wallet: string; privy_user_id: string; wallet_id: string };
@@ -58,7 +58,7 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
       await save(e.wallet, { last_attempt_at: iso });
       e.last_attempt_at = iso;
       if (!(await hasAutopilotSigner(e.wallet_id, appSecret))) { await save(e.wallet, { enabled: false, last_result: "Permiso retirado: el piloto se apagó." }); break; }
-      const quote = await simulateDlmmRebalance(connection, { wallet: e.wallet, position: p.address, vaultId: p.vaultId as never }, { prepare: true, maxImpactPct: AUTOPILOT_MAX_IMPACT_PCT });
+      const quote = await simulateDlmmRebalance(connection, { wallet: e.wallet, position: p.address, vaultId: p.vaultId as never }, { prepare: true, maxImpactPct: AUTOPILOT_MAX_IMPACT_PCT, memo: AUTOPILOT_MEMO });
       if (!quote.success || !quote.prepared || quote.prepared.wallet !== e.wallet) { await save(e.wallet, { last_result: quote.message.slice(0, 300) }); continue; }
       const tx = VersionedTransaction.deserialize(Buffer.from(quote.prepared.transaction, "base64"));
       const keys = tx.message.staticAccountKeys.map((k) => k.toBase58());

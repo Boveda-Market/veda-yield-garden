@@ -11,5 +11,15 @@ export async function readWalletActivity(key: string, wallet: string): Promise<W
     const part = await Promise.all(rows.slice(i, i + 5).map((r) => connection.getTransaction(r.signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 }).catch(() => null)));
     txs.push(...part);
   }
-  return rows.map((row, i) => ({ signature: row.signature, at: row.blockTime ? row.blockTime * 1000 : null, failed: row.err !== null, status: row.confirmationStatus ?? "confirmed", kind: classifyActivity(txs[i]?.meta?.logMessages ?? []) }));
+  // Rebalances sent before the on-chain tag existed: the last Autopilot signature is kept server-side.
+  let autoSig: string | null = null;
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin.from("autopilot_enrollments").select("last_signature").eq("wallet", wallet).maybeSingle();
+    autoSig = (data as { last_signature?: string | null } | null)?.last_signature ?? null;
+  } catch { /* labels still work from the on-chain tag */ }
+  return rows.map((row, i) => {
+    const kind = classifyActivity(txs[i]?.meta?.logMessages ?? []);
+    return { signature: row.signature, at: row.blockTime ? row.blockTime * 1000 : null, failed: row.err !== null, status: row.confirmationStatus ?? "confirmed", kind: row.signature === autoSig && kind === "vault_rebalance" ? "autopilot_compound" : kind };
+  });
 }

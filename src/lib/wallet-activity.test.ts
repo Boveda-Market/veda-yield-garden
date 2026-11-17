@@ -18,3 +18,9 @@ describe("classifyActivity", () => {
   it("dlmm rebalance", () => expect(classifyActivity([...p(DLMM, "RemoveLiquidityByRange2"), "Program log: Instruction: AddLiquidityByStrategy2"])).toBe("vault_rebalance"));
   it("token transfer without instruction logs", () => expect(classifyActivity(["Program ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL invoke [1]", "Program log: CreateIdempotent", "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [1]"])).toBe("transfer"));
 });
+
+describe("autopilot tag", () => {
+  it("labels an Autopilot rebalance as Auto-Compound", () => {
+    expect(classifyActivity(["Program LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo invoke [1]", "Program log: Instruction: RemoveLiquidity", "Program log: Instruction: AddLiquidity", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]", 'Program log: Memo (len 16): "boveda:autopilot"'])).toBe("autopilot_compound");
+  });
+});

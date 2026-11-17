@@ -1,4 +1,4 @@
-export type ActivityKind = "swap" | "predict_claim" | "predict_buy" | "predict_fill" | "predict_sell" | "predict_close" | "predict_cancel" | "predict_unfilled" | "vault_deposit" | "vault_harvest" | "vault_exit" | "vault_rebalance" | "transfer" | "other";
+export type ActivityKind = "swap" | "predict_claim" | "predict_buy" | "predict_fill" | "predict_sell" | "predict_close" | "predict_cancel" | "predict_unfilled" | "vault_deposit" | "vault_harvest" | "vault_exit" | "vault_rebalance" | "autopilot_compound" | "transfer" | "other";
 export type WalletActivity = { signature: string; at: number | null; failed: boolean; status: string; kind: ActivityKind };
 
 const PREDICT = "3ZZuTbwC6aJbvteyVxXUS7gtFYdf7AuXeitx6VyvjvUp";
@@ -20,6 +20,7 @@ export function classifyActivity(logs: string[]): ActivityKind {
     if (i) ix.push(i[1]!);
   }
   const has = (re: RegExp) => ix.some((n) => re.test(n));
+  if (logs.some((l) => l.includes("boveda:autopilot"))) return "autopilot_compound";
   if (programs.has(PREDICT)) {
     if (has(/^ClaimPayout/)) return "predict_claim";
     if (has(/SellOrder/)) return "predict_sell";
@@ -56,6 +57,7 @@ export const ACTIVITY_LABEL: Record<ActivityKind, string> = {
   vault_harvest: "Cosecha de ganancias",
   vault_exit: "Cierre y liquidación",
   vault_rebalance: "Rebalanceo de bóveda",
+  autopilot_compound: "⚡ Auto-Compound · Piloto Automático",
   transfer: "Envío / transferencia",
   other: "Otra transacción",
 };

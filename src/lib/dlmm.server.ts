@@ -1,6 +1,6 @@
 import BN from "bn.js";
 import { Buffer } from "buffer";
-import { ComputeBudgetProgram, Keypair, PublicKey, TransactionMessage, VersionedTransaction, type AccountInfo, type AddressLookupTableAccount, type Connection, type TransactionInstruction } from "@solana/web3.js";
+import { ComputeBudgetProgram, Keypair, PublicKey, TransactionMessage, VersionedTransaction, type AccountInfo, type AddressLookupTableAccount, type Connection, TransactionInstruction } from "@solana/web3.js";
 import { AccountLayout, TOKEN_PROGRAM_ID, createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, getAccount, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { loadDlmmSdk } from "@/lib/dlmm-sdk.server";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount, type ChainPoolConfig, type ChainPosition } from "@/lib/solana-data";
@@ -437,7 +437,7 @@ export type { RebalanceResult } from "@/lib/dlmm";
  * swap half the excess side inside the same pool, then re-centre the same position on the current price
  * with everything (capital + fees). Tiered harvest fee on the claimed USDC only (same tiers as harvest) goes to the fee ATA; only the owner signs; the wallet never loses prior balances.
  */
-export async function simulateDlmmRebalance(connection: Connection, input: WithdrawalInput, options: { prepare?: boolean; maxImpactPct?: number } = {}): Promise<RebalanceResult> {
+export async function simulateDlmmRebalance(connection: Connection, input: WithdrawalInput, options: { prepare?: boolean; maxImpactPct?: number; memo?: string } = {}): Promise<RebalanceResult> {
   const startedAt = Date.now();
   let stage = "Lectura de posición";
   const fail = (message: string): RebalanceResult => ({ success: false, message });
@@ -498,8 +498,12 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     const rebalance = await pool.rebalancePosition(plannedRebalance, new BN(3), owner, 1);
     if (rebalance.initBinArrayInstructions.length) return fail("El precio actual está en una zona sin liquidez preparada. Prueba más tarde.");
     const feeIxs = bovedaFee > 0n ? [createTransferCheckedInstruction(usdcAta, usdc, feeAta, owner, bovedaFee, 6)] : [];
-    const instructions = stripBudget([...(claims[0]?.instructions ?? []), ...removals[0]!.instructions, ...feeIxs, ...swapIxs, ...rebalance.rebalancePositionInstruction]);
+    const core = stripBudget([...(claims[0]?.instructions ?? []), ...removals[0]!.instructions, ...feeIxs, ...swapIxs, ...rebalance.rebalancePositionInstruction]);
     const block = await connection.getLatestBlockhash();
+    // Optional on-chain tag (Autopilot) so activity can name it; dropped when it would exceed the size limit.
+    const memoIx = options.memo ? new TransactionInstruction({ programId: new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"), keys: [], data: Buffer.from(options.memo) }) : null;
+    const fits = (ixs: TransactionInstruction[]) => { try { return new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(MAX_COMPUTE_UNITS), ...ixs]) }).compileToV0Message()).serialize().length <= 1232; } catch { return false; } };
+    const instructions = memoIx && fits([...core, memoIx]) ? [...core, memoIx] : core;
     const simulate = async (units = MAX_COMPUTE_UNITS) => {
       const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...instructions]) }).compileToV0Message());
       if (tx.serialize().length > 1232) throw new Error("Tamaño excedido");
