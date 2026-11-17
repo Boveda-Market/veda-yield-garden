@@ -99,9 +99,10 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
 
   // Fast follow-up refreshes after a signed order so balances and cards update in about a second.
   const sync = () => { for (const ms of [600, 1500, 4000]) setTimeout(() => { void refresh(); void loadBalance(); for (const k of ["predict-positions", "my-wallet", "my-wallet-tokens"]) void qc.invalidateQueries({ queryKey: [k, wallet] }); }, ms); };
-  const sign = async (tx: string, context: string) => {
+  // Entering a round stays instant; only prize claims ask the device's fingerprint / Face ID.
+  const sign = async (tx: string, context: string, verify = false) => {
     if (!session.signOnly) throw new Error(t("Tu wallet no admite esta operación."));
-    const signed = await session.signOnly(fromB64(tx));
+    const signed = await session.signOnly(fromB64(tx), { quick: !verify });
     const r = await executePredict({ data: { wallet: wallet!, signed: toB64(signed), context } });
     if (!r.success) throw new Error(r.error);
     return r.signature;
@@ -188,7 +189,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
     try {
       const r = await preparePredictClaim({ data: { wallet, position: p.pubkey } });
       if (!r.success) throw new Error(r.error);
-      const sig = await sign(r.transaction, r.context);
+      const sig = await sign(r.transaction, r.context, true);
       setWin(usdc(BigInt(p.payoutMicro || "0") - BigInt(p.costMicro || "0")));
       doneRef.current.add(p.pubkey); annotateRecord(wallet, p.pubkey, { claimSig: sig });
       setMsg({ ok: true, text: t("Pago cobrado. Pasándolo a dólares…"), sig });

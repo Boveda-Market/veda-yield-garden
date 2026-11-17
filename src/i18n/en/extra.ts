@@ -269,7 +269,7 @@ export const extra: Record<string, string> = {
   "Pasar a disponibles": "Move to available",
   "Sobrante de red": "Network surplus",
   "Comisiones recuperadas": "Recovered fees",
-  "Reclamar dólares": "Claim dollars",
+  "Reclamar dólares": "Claim dollars", "Cosechar dólares": "Harvest dollars", "Reclamar premio ganado": "Claim your prize",
   "Recuperando…": "Recovering…",
   "No hay comisiones pendientes por recuperar.": "There are no fees waiting to be recovered.",
   "¡Listo! Tus dólares recuperados ya están disponibles": "Done! Your recovered dollars are now available",

@@ -1,3 +1,4 @@
+import { confirmWithDevice } from "@/lib/biometric-gate";
 import { CARD_MIN_USD, GAS_TOP_UP_SOL } from "@/lib/onboarding";
 import { useT } from "@/lib/i18n";
 import { installBufferPolyfill } from "@/lib/buffer-polyfill";
@@ -169,10 +170,12 @@ function SessionBridge({ children }: { children: ReactNode }) {
     signAndSendAdmin: walletAddress === FEE_WALLET ? (transaction) => sendRaw(transaction) : undefined,
     signAndSend: async (transaction) => {
       guard();
+      await confirmWithDevice().catch(() => { throw new Error(t("Cancelaste la firma.")); });
       return sendRaw(transaction);
     },
-    signOnly: async (transaction) => {
+    signOnly: async (transaction, opts) => {
       guard();
+      if (!opts?.quick) await confirmWithDevice().catch(() => { throw new Error(t("Cancelaste la firma.")); });
       const wallet = wallets[0];
       if (!authenticated || !wallet) throw new Error(t("Conecta una wallet de Solana"));
       try { return (await signTransaction({ transaction, wallet, chain: "solana:mainnet", options: { uiOptions: { showWalletUIs: false } } })).signedTransaction; }

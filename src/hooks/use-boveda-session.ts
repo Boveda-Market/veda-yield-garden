@@ -33,7 +33,7 @@ export type BovedaSession = {
   /** Operator-only signer for treasury payouts; never used by market flows. */
   signAndSendAdmin?: ((transaction: Uint8Array) => Promise<string>) | undefined;
   /** Asks the connected wallet to sign only (no broadcast); resolves to the signed bytes. */
-  signOnly?: (transaction: Uint8Array) => Promise<Uint8Array>;
+  signOnly?: (transaction: Uint8Array, opts?: { quick?: boolean }) => Promise<Uint8Array>;
   /** Asks the connected wallet to sign a plain text message (no funds move); resolves to base58. */
   signMessage?: (message: string) => Promise<string>;
   /** Opens the card/exchange purchase flow to receive USDC in the user's wallet. */

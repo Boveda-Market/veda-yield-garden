@@ -125,7 +125,7 @@ export function PredictPositionCard({ p, onSell, selling, disabled, onClaim, cla
     <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">{t("Pones")} ${usdcText(cost)} · {t("Ganancia posible")} +${usdcText(profit)}{cost > 0n ? ` (${(Number(payout) / Number(cost)).toFixed(2)}×)` : ""}</p></>}
     {open && onSell && <Button className="mt-3 w-full" variant="outline" disabled={disabled} onClick={onSell}>{selling ? <Loader2 className="animate-spin" size={16} /> : p.valueMicro ? t("Cerrar y vender ahora · ≈ ${v}", { v: usdcText(p.valueMicro) }) : t("Cerrar ahora")}</Button>}
     {!open && won && <div className="mt-3 rounded-xl bg-primary/10 p-3"><p className="text-xs text-muted-foreground">{t("Cantidad final para tu wallet")}</p><p className="font-display text-3xl font-bold text-primary tabular-nums">${usdcText(payout)}</p><p className="text-xs text-muted-foreground">{t("Ganancia neta")} +${usdcText(profit)}</p>
-      {onClaim && <Button className="mt-2 w-full" disabled={disabled} onClick={onClaim}>{claiming ? <Loader2 className="animate-spin" size={16} /> : t("Reclamar premio · ${v}", { v: usdcText(payout) })}</Button>}</div>}
+      {onClaim && <Button className="mt-2 w-full" disabled={disabled} onClick={onClaim}>{claiming ? <Loader2 className="animate-spin" size={16} /> : t("Reclamar premio ganado")}</Button>}</div>}
     {/* Breakdown and how-it-works notes stay one tap away so the card fits one phone screen. */}
     <div className="mt-2"><DetailsToggle>
     <div className="space-y-1.5 rounded-xl bg-secondary/50 p-3 text-sm">
