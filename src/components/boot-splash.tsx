@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 
 const STEPS = ["Conectando red…", "Verificando acceso seguro…", "Sincronizando billetera…"] as const;
 export const UPDATING_FLAG = "boveda-chunk-reload";
+const BOOT_RETRY_FLAG = "boveda-boot-retry";
 
 /** One full-screen animated loading screen that covers every startup step, so the phone never flickers between screens. */
 export function BootSplash() {
@@ -15,8 +16,13 @@ export function BootSplash() {
   useEffect(() => {
     try { const at = Number(sessionStorage.getItem(UPDATING_FLAG) || 0); setUpdating(Date.now() - at < 30000); } catch { /* ignore */ }
     const id = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), 1100);
-    const slowId = setTimeout(() => setSlow(true), 12000);
-    return () => { clearInterval(id); clearTimeout(slowId); };
+    // Phones on slow data sometimes stall loading the secure-access files; a fresh load always works,
+    // so retry once by itself before ever showing the "taking longer" notice.
+    const retryId = setTimeout(() => {
+      try { const last = Number(sessionStorage.getItem(BOOT_RETRY_FLAG) || 0); if (Date.now() - last > 60000) { sessionStorage.setItem(BOOT_RETRY_FLAG, String(Date.now())); window.location.reload(); return; } } catch { /* ignore */ }
+      setSlow(true);
+    }, 10000);
+    return () => { clearInterval(id); clearTimeout(retryId); };
   }, []);
   return <div role="status" aria-live="polite" className="fixed inset-0 z-[60] grid place-items-center bg-background px-6 text-foreground">
     <div className="flex max-w-xs flex-col items-center text-center">
