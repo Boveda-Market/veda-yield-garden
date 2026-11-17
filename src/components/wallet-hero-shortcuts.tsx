@@ -1,3 +1,4 @@
+import { LightningBadge } from "@/components/lightning-badge";
 import dobleLogo from "@/assets/doble-o-nada-logo.png";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -42,7 +43,7 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
         <DuelLines />
         <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-primary"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary" /></span>{t("En vivo")}</span>
         <span className="block"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} className="h-8 w-auto max-w-full" /></span>
-        <span className="text-[11px] leading-4 text-muted-foreground">{t("Rondas de 5 min · Hasta +90%")}</span>
+        <LightningBadge suffix="5 min" />
         <ChevronRight size={16} aria-hidden className="absolute right-2 top-2 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
       </span>
     </Link>

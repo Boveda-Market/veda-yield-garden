@@ -90,7 +90,7 @@ export function Landing() {
   const t = useT();
   const [compact, setCompact] = useState(false);
   const [decided, setDecided] = useState(false);
-  useEffect(() => { setCompact(isReturning() && !isHeroReview()); setDecided(true); }, []);
+  useEffect(() => { setCompact(isReturning() && !isHeroReview()); setDecided(true); void import("@/components/privy-access").catch(() => {}); }, []);
   const [heroIdx, setHeroIdx] = useState(0);
   useEffect(() => {
     let saved: string | null = null;

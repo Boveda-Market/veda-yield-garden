@@ -1,3 +1,4 @@
+import { LightningBadge } from "@/components/lightning-badge";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
@@ -57,7 +58,7 @@ export function HomeCtas({ vaultsFirst = false }: { vaultsFirst?: boolean }) {
   const predict = <Link key="p" to="/mercados" className="group relative block min-w-0 rounded-2xl bg-primary p-[2px] shadow-[0_0_28px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
     <span className="relative isolate flex h-16 items-center justify-between gap-2 overflow-hidden rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
       <DuelLines />
-      <span className="flex min-w-0 items-center gap-2"><img src={dobleLogo} alt="" aria-hidden className="h-10 w-auto shrink-0 drop-shadow-[0_0_10px_var(--primary)] sm:h-11" /><span className="sr-only">{t("Ver Doble o Nada")}</span></span>
+      <span className="flex min-w-0 flex-col items-start gap-0.5"><img src={dobleLogo} alt="" aria-hidden className="h-8 w-auto shrink-0 drop-shadow-[0_0_10px_var(--primary)] sm:h-9" /><LightningBadge className="bg-hot-surface/80" /><span className="sr-only">{t("Ver Doble o Nada")}</span></span>
       <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary-foreground opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary-foreground" /></span>{t("En vivo")}</span>
     </span>
   </Link>;
@@ -130,7 +131,7 @@ export function DobleHero({ title, sub }: { title: string; sub: string }) {
           <span className="flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-primary-foreground"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary-foreground opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary-foreground" /></span>{t("En vivo")} · BTC · ETH · SOL</span>
           <span className="rounded-full bg-hot-surface/80 px-2.5 py-0.5 font-display text-sm font-black tabular-nums" aria-label={t("Tiempo de la ronda")}>⏱️ {clock}</span>
         </div>
-        <img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} className="relative mx-auto mt-3 h-16 w-auto max-w-full -rotate-2 drop-shadow-[0_0_14px_var(--primary)] sm:mx-0 sm:h-20" />
+        <img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} className="relative mx-auto mt-3 h-16 w-auto max-w-full -rotate-2 drop-shadow-[0_0_14px_var(--primary)] sm:mx-0 sm:h-20" /><div className="relative mt-1 flex justify-center sm:justify-start"><LightningBadge suffix="5 MIN" /></div>
       </div>
       <div className="px-5 pb-5 pt-3 text-center sm:px-8 md:text-left">
         <h1 className="font-display text-[1.7rem] font-black leading-tight sm:text-4xl">{t(title)}</h1>
