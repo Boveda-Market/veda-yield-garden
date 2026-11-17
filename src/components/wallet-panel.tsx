@@ -1,3 +1,4 @@
+import { ActivityView } from "@/components/activity-view";
 import { TapAmount } from "@/components/ui/tap-amount";
 import { SignalErrorCard } from "@/components/signal-error";
 import { BalanceLoading } from "@/components/ui/balance-loading";
@@ -256,6 +257,8 @@ export function WalletPanel() {
     </Dialog>
 
     <ReportProblem />
+
+    <ActivityView trial={false} wallet={address} rows={[]} heading="Actividad de mi billetera" level={2} collapsed />
 
     <details className="group rounded-2xl border border-border bg-card p-5">
       <summary className="flex cursor-pointer list-none items-center justify-between font-display text-lg"><span className="flex items-center gap-2"><ShieldAlert size={18} />{t("Avanzado")}</span><ChevronDown size={18} className="transition-transform group-open:rotate-180" /></summary>
