@@ -23,7 +23,7 @@ import { MASK, useContacts, useHideBalances } from "@/lib/preferences";
 import { buildSwap, buildTransfer, readTokenBalance, spendable, STABLE_SYMBOLS, SWAP_TOKENS, toBaseUnits, type SwapQuote, type WalletAsset } from "@/lib/wallet-actions";
 import { WalletSwap } from "@/components/wallet-swap";
 import { solanaAddressSchema } from "@/lib/solana-data";
-import { decimalToUnits, solExcessLamports, PAYOUT_MOVE_MIN_USD, SOL_EXCESS_MOVE_MIN_USD } from "@/lib/onboarding";
+import { decimalToUnits, PAYOUT_MOVE_MIN_USD } from "@/lib/onboarding";
 import { StartGuide } from "@/components/start-guide";
 import { WalletHeroShortcuts } from "@/components/wallet-hero-shortcuts";
 import { Gta6PromoPopup } from "@/components/gta6-promo";
@@ -135,36 +135,17 @@ export function WalletPanel() {
     } catch (e) { fail(e); throw e; } finally { setBusy(false); }
   }
 
-  // One tap: fresh JupUSD → USDC quote (no BÓVEDA fee), wallet signs once, done.
+  // One tap: every extra coin (prize/refund dollars, vault leftovers) → USDC, no BÓVEDA fee. SOL is the network reserve and is never sold.
   async function convertPayouts() {
     if (!address || converting) return;
     setConverting(true);
     try {
-      const { quoteSwap, JUPUSD_MINT } = await import("@/lib/wallet-actions");
-      const raw = await readTokenBalance(address, JUPUSD_MINT);
-      if (raw <= 0n) throw new Error(t("No hay premios ni reembolsos para pasar."));
-      const q = await quoteSwap("JupUSD", "USDC", raw, { feeUsdc: 0n });
-      await session.signAndSend(await buildSwap(address, q));
-      notify("success", t("Listo: ya están en tus dólares disponibles"), `+$${(Number(q.outAmount) / 1e6).toFixed(2)} USDC`);
+      const { sweepLeftovers } = await import("@/lib/sweep-leftovers");
+      const r = await sweepLeftovers(address, session.signAndSend);
+      if (r.converted === 0 && r.failed.length === 0) throw new Error(t("No hay monedas extra para pasar."));
+      if (r.converted > 0) notify("success", t("Listo: ya están en tus dólares disponibles"), `+$${(Number(r.usdc) / 1e6).toFixed(2)} USDC`);
+      if (r.failed.length) notify("error", t("No se pudo pasar a disponibles"), r.failed.join(", "));
       refresh(); void extra.refetch();
-    } catch (e) { notify("error", t("No se pudo pasar a disponibles"), e instanceof Error ? e.message : undefined); }
-    finally { setConverting(false); }
-  }
-
-  // One tap: SOL above the network reserve → USDC (no BÓVEDA fee); the reserve stays untouched.
-  async function convertSolExcess() {
-    if (!address || converting) return;
-    setConverting(true);
-    try {
-      const { quoteSwap } = await import("@/lib/wallet-actions");
-      const r = await readWallet({ data: { wallet: address } });
-      if (!r.success) throw new Error(r.error);
-      const raw = solExcessLamports(decimalToUnits(r.data.sol, 9) ?? 0n, vaultPositions.length);
-      if (raw <= 0n) throw new Error(t("No hay sobrante de red para pasar."));
-      const q = await quoteSwap("SOL", "USDC", raw, { feeUsdc: 0n });
-      await session.signAndSend(await buildSwap(address, q));
-      notify("success", t("Listo: ya están en tus dólares disponibles"), `+$${(Number(q.outAmount) / 1e6).toFixed(2)} USDC`);
-      refresh(); void balances.refetch();
     } catch (e) { notify("error", t("No se pudo pasar a disponibles"), e instanceof Error ? e.message : undefined); }
     finally { setConverting(false); }
   }
@@ -173,7 +154,7 @@ export function WalletPanel() {
   // A recent refunded Sube/Baja order is named as such so the user knows their money came back.
   const refundReady = (refunds.data ?? []).length > 0;
   const jupUsd = extra.data?.["JupUSD"] !== undefined ? Number(extra.data["JupUSD"]) / 1e6 : 0;
-  const solExcessUsd = balances.data?.sol !== undefined && prices.data?.["SOL"] ? Number(solExcessLamports(balances.data.sol, vaultPositions.length)) / 1e9 * prices.data["SOL"] : 0;
+  const extraUsd = jupUsd + extraTokens.filter((x) => x.symbol !== "JupUSD").reduce((sum, x) => { const raw = extra.data?.[x.symbol]; const p = prices.data?.[x.symbol]; return raw && p ? sum + Number(raw) / 10 ** x.decimals * p : sum; }, 0);
   const fmt = (v: number, d = 2) => v.toLocaleString("en-US", { useGrouping: false, maximumFractionDigits: d });
   const assets = [
     { symbol: "USDC", label: t("Dólar digital"), raw: balances.data?.usdc, decimals: 6 },
@@ -213,7 +194,7 @@ export function WalletPanel() {
       {balances.data && balances.data.usdc === 0n && balances.data.sol === 0n && working === 0 ? <p role="status" className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"><RefreshCw size={12} className="animate-spin" />{t("Comprobando llegada de fondos…")}</p> : null}
       {vaultPositions.length > 0 && balances.data?.usdc !== undefined && <div className="mt-2 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{t("Disponible")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(Number(balances.data.usdc) / 1e6)}`}</span></span><Link to="/portfolio" className="rounded-full bg-primary/10 px-3 py-1 text-primary"><span>{t("Trabajando")}:</span> <span className="font-medium">{hidden ? MASK : working === null ? <BalanceLoading compact /> : `$${fmt(working)}`}</span></Link></div>}
       {unclaimed >= 0.01 && <Link to="/portfolio" className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs text-primary"><Gift size={12} aria-hidden />{t("Por reclamar")}: <span className="font-semibold">{hidden ? MASK : `+$${fmt(unclaimed)}`}</span> · {t("se suma al reclamar")}</Link>}
-      {(jupUsd >= PAYOUT_MOVE_MIN_USD || solExcessUsd >= SOL_EXCESS_MOVE_MIN_USD) && <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">{jupUsd >= PAYOUT_MOVE_MIN_USD && <><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{refundReady ? t("Reembolso listo") : t("Premios y reembolsos")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(jupUsd)}`}</span></span><button type="button" onClick={() => void convertPayouts()} disabled={converting} className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 font-semibold text-primary-foreground disabled:opacity-70">{converting && <RefreshCw size={12} className="animate-spin" />}{converting ? t("Firmando…") : t("Pasar a disponibles")}</button></>}{solExcessUsd >= SOL_EXCESS_MOVE_MIN_USD && <><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{t("Sobrante de red")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(solExcessUsd)}`}</span></span><button type="button" onClick={() => void convertSolExcess()} disabled={converting} className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 font-semibold text-primary-foreground disabled:opacity-70">{converting && <RefreshCw size={12} className="animate-spin" />}{converting ? t("Firmando…") : t("Pasar a disponibles")}</button></>}</div>}
+      {extraUsd >= PAYOUT_MOVE_MIN_USD && <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">{extraUsd >= PAYOUT_MOVE_MIN_USD && <><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{refundReady ? t("Reembolso listo") : t("Monedas extra")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(extraUsd)}`}</span></span><button type="button" onClick={() => void convertPayouts()} disabled={converting} className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 font-semibold text-primary-foreground disabled:opacity-70">{converting && <RefreshCw size={12} className="animate-spin" />}{converting ? t("Firmando…") : t("Pasar a disponibles")}</button></>}</div>}
       {vaultPositions.length > 0 && <details className="mt-2 text-xs text-muted-foreground"><summary className="cursor-pointer underline-offset-2 hover:underline">ⓘ {t("¿Por qué cambia el balance total?")}</summary><div className="mt-1 space-y-1 leading-5"><p>{t("Tu balance combina tus dólares disponibles en la billetera y el dinero que está trabajando en las bóvedas:")}</p><p>• <span className="font-medium text-foreground">{t("Disponible (USDC):")}</span> {t("dólares digitales exactos en tu billetera. No suben ni bajan.")}</p><p>• <span className="font-medium text-foreground">{t("Trabajando:")}</span> {t("capital en las bóvedas generando comisiones. Su valor se actualiza en vivo con el precio de mercado de las monedas.")}</p><p>{t("Nadie te descuenta dinero ni hay comisiones ocultas; todo está bajo el control de tu huella o Face ID.")}</p><a href="/faq#vaults-fluctuation" className="inline-block text-primary underline">{t("Ver explicación completa en Preguntas frecuentes")} →</a></div></details>}
       {vaultPositions.length > 0 && working === null && <p className="mt-1 text-xs text-muted-foreground">{t("Calculando el valor de tus bóvedas…")}</p>}
       {vaultPositions.length > 0 && partialWorking && <p className="mt-1 text-xs text-muted-foreground"><RefreshCw size={12} className="mr-1 inline animate-spin align-[-1px]" />{t("Buscando el precio de algunas bóvedas; el total se actualiza solo.")}</p>}

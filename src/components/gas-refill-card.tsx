@@ -28,7 +28,8 @@ export function GasRefillCard({ sol, usdc, onDone, force, target }: Props) {
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   if (sol === undefined || usdc === undefined || (!gasIsLow(sol) && !force && !msg)) return null;
   const empty = sol === 0n;
-  const activation = empty && usdc >= MIN_USDC_MICRO;
+  // New and existing wallets low on reserve get the same activation: vault-ready reserve + fixed fee, one tap.
+  const activation = !force && gasIsLow(sol) && usdc >= MIN_USDC_MICRO;
   async function refill() {
     if (!session.walletAddress) return;
     setBusy(true); setMsg(null);

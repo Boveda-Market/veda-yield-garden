@@ -13,3 +13,7 @@ describe("liquidation leftover sweep", () => {
     expect(worthSweeping(10_000n)).toBe(true);
   });
 });
+
+describe("extra coins cleanup never sells the network reserve", () => {
+  it("SOL is not a cleanup target", () => expect(sweepTargets().map((t) => t.symbol)).not.toContain("SOL"));
+});
