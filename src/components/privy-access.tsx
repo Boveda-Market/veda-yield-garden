@@ -93,7 +93,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
       // Sign first, then broadcast from the browser, so each stage fails with its own clear message.
       let signed: Uint8Array;
       try {
-        ({ signedTransaction: signed } = await signTransaction({ transaction, wallet, chain: "solana:mainnet" }));
+        ({ signedTransaction: signed } = await signTransaction({ transaction, wallet, chain: "solana:mainnet", options: { uiOptions: { showWalletUIs: false } } }));
       } catch (e) {
         console.error("[BÓVEDA] wallet signing failed", e);
         if (e instanceof Error && /reject|cancel|exited/i.test(e.message)) throw new Error(t("Cancelaste la firma."));
@@ -160,7 +160,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
       guard();
       const wallet = wallets[0];
       if (!authenticated || !wallet) throw new Error(t("Conecta una wallet de Solana"));
-      try { return (await signTransaction({ transaction, wallet, chain: "solana:mainnet" })).signedTransaction; }
+      try { return (await signTransaction({ transaction, wallet, chain: "solana:mainnet", options: { uiOptions: { showWalletUIs: false } } })).signedTransaction; }
       catch (e) {
         if (e instanceof Error && /reject|cancel|exited/i.test(e.message)) throw new Error(t("Cancelaste la firma."));
         throw new Error(`${t("La wallet no pudo firmar")}: ${e instanceof Error ? e.message : String(e)}`);
@@ -195,9 +195,9 @@ function SessionBridge({ children }: { children: ReactNode }) {
 export default function PrivyAccess({ children }: { children: ReactNode }) {
   return <PrivyProvider appId="cmw6ftcf900ge0hl0jyw3rc75" config={{
     loginMethods: ["email", "google", "wallet", "passkey"],
-    appearance: { theme: "dark", walletChainType: "solana-only", walletList: ["phantom", "jupiter", "detected_solana_wallets", "solflare", "backpack", "okx_wallet", "coinbase_wallet", "wallet_connect"], logo: "/icon-512.png" },
+    appearance: { theme: "#0d1117", accentColor: "#22c55e", walletChainType: "solana-only", walletList: ["phantom", "jupiter", "detected_solana_wallets", "solflare", "backpack", "okx_wallet", "coinbase_wallet", "wallet_connect"], logo: "/icon-512.png" },
     externalWallets: { solana: { connectors: solanaConnectors } },
-    embeddedWallets: { solana: { createOnLogin: "users-without-wallets" }, ethereum: { createOnLogin: "off" } },
+    embeddedWallets: { showWalletUIs: false, solana: { createOnLogin: "users-without-wallets" }, ethereum: { createOnLogin: "off" } },
     solana: { rpcs: solanaRpcs },
   }}><SessionBridge>{children}</SessionBridge></PrivyProvider>;
 }

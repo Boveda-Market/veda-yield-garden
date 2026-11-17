@@ -4,3 +4,4 @@
 - Official safety notice (safety-notice.tsx) is the only welcome disclaimer; visits are counted per browser session on the device and safety-reminder.ts decides when it reappears.
 - Amount entry uses the shared TapAmount (ui/tap-amount.tsx): the big number is itself the input (never autofocused), so there is no separate "Otra cantidad" button and the keyboard opens only when the person taps the number.
 - Phone back closes the open card (lib/back-close.tsx, BackToClose inside ActionSheet/Dialog/Sheet Content): one silent same-URL history entry per open card, popstate handled before the router so the page underneath never changes; installed in router.tsx before createRouter.
+- Privy confirmation popups are off (showWalletUIs false globally and per signTransaction): BÓVEDA's own review card is the single confirmation; remaining Privy screens use BÓVEDA dark background and green accent.
