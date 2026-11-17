@@ -15,7 +15,7 @@ export function BootSplash() {
   useEffect(() => {
     try { const at = Number(sessionStorage.getItem(UPDATING_FLAG) || 0); setUpdating(Date.now() - at < 30000); } catch { /* ignore */ }
     const id = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), 1100);
-    const slowId = setTimeout(() => setSlow(true), 25000);
+    const slowId = setTimeout(() => setSlow(true), 12000);
     return () => { clearInterval(id); clearTimeout(slowId); };
   }, []);
   return <div role="status" aria-live="polite" className="fixed inset-0 z-[60] grid place-items-center bg-background px-6 text-foreground">

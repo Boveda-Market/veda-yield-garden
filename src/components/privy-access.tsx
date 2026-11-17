@@ -69,7 +69,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const tradeBlock: "external" | "treasury" | null = !walletAddress ? null : walletAddress === FEE_WALLET ? "treasury" : embedded || !blockExternal ? null : "external";
   // If Privy never reports ready (blocked iframe, shields, slow network), stop waiting after 4s so buttons and screens never freeze.
   const [stalled, setStalled] = useState(false);
-  useEffect(() => { if (ready) { setStalled(false); return; } const id = setTimeout(() => setStalled(true), 4000); return () => clearTimeout(id); }, [ready]);
+  useEffect(() => { if (ready) { setStalled(false); return; } const id = setTimeout(() => setStalled(true), 5000); return () => clearTimeout(id); }, [ready]);
   // A click before Privy is ready is queued and opens the login as soon as it is (up to 15s) instead of failing instantly.
   const [pendingMethod, setPendingMethod] = useState<"email" | "google" | "wallet" | "passkey" | null>(null);
   useEffect(() => {
@@ -137,7 +137,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   };
   const doLogout = useCallback(async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError(t("No se pudo cerrar sesión. Inténtalo de nuevo.")); } }, [queryClient, logout]);
   return <BovedaSessionContext.Provider value={{
-    ready: ready || stalled, sessionKnown: ready, authenticated, userId: authenticated ? user?.id ?? null : null,
+    ready: ready || stalled, sessionKnown: ready || stalled, authenticated, userId: authenticated ? user?.id ?? null : null,
     label: user?.email?.address ?? user?.google?.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : t("Mi cuenta")),
     walletAddress, error: error ?? (pendingMethod && !ready ? t("Conectando el acceso seguro…") : stalled && !ready && !isOfficialHost() ? t("Para entrar, abre bovedamarket.app. En esta vista previa el acceso seguro no está disponible.") : null), getAccessToken,
     clearError: () => setError(null),
