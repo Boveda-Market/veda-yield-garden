@@ -24,3 +24,28 @@ export function decideTopup(input: { sol: bigint; usdcMicro: bigint; pendingMicr
   const tier = TOPUP_TIERS.find((x) => free >= x.minFree);
   return tier ? { kind: "swap", amountMicro: tier.amount } : { kind: "skip", reason: "no-dollars" };
 }
+
+const usd = (m: bigint) => (Number(m) / 1e6).toFixed(2), sol = (l: bigint) => (Number(l) / 1e9).toFixed(4);
+/** Detailed operator alert after a successful refill: amounts, rate, reserve before/after, protected vs free dollars, signature. */
+export function topupAlertHtml(r: { amountMicro: bigint; receivedLamports: bigint; solBefore: bigint; solAfter: bigint; usdcBefore: bigint; pendingMicro: bigint; signature: string }) {
+  const usdcAfter = r.usdcBefore - r.amountMicro;
+  const rate = r.receivedLamports > 0n ? (Number(r.amountMicro) / 1e6) / (Number(r.receivedLamports) / 1e9) : 0;
+  const free = freeDollarsMicro(usdcAfter, r.pendingMicro);
+  const status = r.solAfter >= TOPUP_TRIGGER_LAMPORTS ? "🟢 Óptimo" : "🟡 Aún bajo";
+  return [
+    "🔄 <b>Auto-recarga de Tesorería Completada</b>", "",
+    "📊 <b>Desglose de la Operación:</b>",
+    `• <b>USDC Convertido:</b> $${usd(r.amountMicro)} USDC`,
+    `• <b>SOL Recibido:</b> +${sol(r.receivedLamports)} SOL`,
+    `• <b>Tasa aproximada:</b> ~$${rate.toFixed(2)} / SOL`, "",
+    "⛽ <b>Estado de la Reserva (SOL):</b>",
+    `• <b>Antes:</b> ${sol(r.solBefore)} SOL (límite ${sol(TOPUP_TRIGGER_LAMPORTS)})`,
+    `• <b>Ahora:</b> ${sol(r.solAfter)} SOL (${status})`, "",
+    "💵 <b>Balance USDC en Tesorería:</b>",
+    `• <b>Saldo total:</b> $${usd(usdcAfter)} USDC`,
+    `• <b>Comisiones de afiliados protegidas:</b> $${usd(r.pendingMicro)} USDC`,
+    `• <b>Colchón de seguridad blindado:</b> $${usd(TOPUP_CUSHION_MICRO)} USDC`,
+    `• <b>Dólares libres restantes:</b> $${usd(free > 0n ? free : 0n)} USDC`, "",
+    "🔗 <b>Tx:</b>", `<code>${r.signature}</code>`,
+  ].join("\n");
+}

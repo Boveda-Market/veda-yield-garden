@@ -18,3 +18,15 @@ describe("treasury self-refill", () => {
   it("cannot swap below 0.0025 SOL", () => expect(decideTopup({ ...base, sol: 2_000_000n })).toEqual({ kind: "skip", reason: "no-sol" }));
   it("manual ignores threshold and cooldown", () => expect(decideTopup({ ...base, sol: 500_000_000n, lastAt: base.now, manual: true }).kind).toBe("swap"));
 });
+
+import { topupAlertHtml } from "@/lib/treasury-topup";
+describe("topupAlertHtml", () => {
+  it("shows converted dollars, free dollars after the $10 cushion and the signature", () => {
+    const h = topupAlertHtml({ amountMicro: 15_000_000n, receivedLamports: 209_532_579n, solBefore: 48_472_963n, solAfter: 258_005_542n, usdcBefore: 35_017_256n, pendingMicro: 0n, signature: "SIG" });
+    expect(h).toContain("$15.00 USDC");
+    expect(h).toContain("+0.2095 SOL");
+    expect(h).toContain("Saldo total:</b> $20.02");
+    expect(h).toContain("Dólares libres restantes:</b> $10.02");
+    expect(h).toContain("SIG");
+  });
+});

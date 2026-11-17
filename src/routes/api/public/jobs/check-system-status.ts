@@ -90,7 +90,8 @@ export const Route = createFileRoute("/api/public/jobs/check-system-status")({
           const r = await runTreasuryTopup({ lastAt: last ? Date.parse(last) : null });
           if (r.done) {
             await db.from("system_service_status").upsert({ service: "treasury_topup", first_down_at: new Date(now).toISOString(), operator_alerted: false, public_alerted: false, updated_at: new Date(now).toISOString() }, { onConflict: "service" });
-            await tg.treasuryAlert(`🔄 <b>Auto-recarga de tesorería</b>\n$${(Number(r.amountMicro) / 1e6).toFixed(2)} → ~${(Number(r.receivedLamports) / 1e9).toFixed(4)} SOL\nReserva antes: ${(Number(r.solBefore) / 1e9).toFixed(4)} SOL`);
+            const { topupAlertHtml } = await import("@/lib/treasury-topup");
+            await tg.treasuryAlert(topupAlertHtml(r));
           } else if (r.reason === "no-sol" || r.reason === "no-dollars") {
             const k = "treasury_topup_blocked", prev = rows.get(k)?.first_down_at;
             if (!prev || now - Date.parse(prev) > 6 * 3600_000) {

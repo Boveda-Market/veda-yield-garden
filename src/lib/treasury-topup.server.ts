@@ -44,10 +44,14 @@ export async function swapTreasuryToSol(apiKey: string, secret: string, amountMi
   const sim = await conn.simulateTransaction(tx, { sigVerify: false, replaceRecentBlockhash: true });
   if (sim.value.err) throw new Error("simulation failed");
   const signature = await conn.sendRawTransaction(tx.serialize(), { skipPreflight: true, maxRetries: 5 });
-  const { blockhash, lastValidBlockHeight } = { blockhash: tx.message.recentBlockhash, lastValidBlockHeight: (await conn.getLatestBlockhash("confirmed")).lastValidBlockHeight };
-  const c = await conn.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
-  if (c.value.err) throw new Error("swap failed on chain");
-  return { signature, expectedLamports: BigInt(quote.outAmount) };
+  // Poll status instead of a single websocket confirm: slow RPC acks must not hide a swap that landed.
+  for (let i = 0; i < 30; i++) {
+    const st = (await conn.getSignatureStatuses([signature], { searchTransactionHistory: true })).value[0];
+    if (st?.err) throw new Error("swap failed on chain");
+    if (st && (st.confirmationStatus === "confirmed" || st.confirmationStatus === "finalized")) return { signature, expectedLamports: BigInt(quote.outAmount) };
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  throw new Error("swap unconfirmed");
 }
 
 /** Runs one refill decision end to end. Returns what happened; never throws. */
@@ -59,7 +63,9 @@ export async function runTreasuryTopup(opts: { lastAt: number | null; manual?: b
     const d = decideTopup({ ...b, lastAt: opts.lastAt, now: Date.now(), manual: opts.manual ?? false });
     if (d.kind === "skip") return { done: false as const, reason: d.reason, sol: b.sol };
     const r = await swapTreasuryToSol(key, secret, d.amountMicro);
-    return { done: true as const, amountMicro: d.amountMicro, signature: r.signature, receivedLamports: r.expectedLamports, solBefore: b.sol };
+    let solAfter = b.sol + r.expectedLamports;
+    try { solAfter = (await treasuryBalances(key)).sol; } catch { /* keep estimate */ }
+    return { done: true as const, amountMicro: d.amountMicro, signature: r.signature, receivedLamports: solAfter > b.sol ? solAfter - b.sol : r.expectedLamports, solBefore: b.sol, solAfter, usdcBefore: b.usdcMicro, pendingMicro: b.pendingMicro };
   } catch (e) {
     console.error("treasury topup failed", e instanceof Error ? e.message : "unknown");
     return { done: false as const, reason: "error" };
