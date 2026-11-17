@@ -1559,4 +1559,11 @@ export const extra: Record<string, string> = {
   "Continuando…": "Continuing…",
   "Prepara tu cuenta y seguimos solos.": "Get your account ready and we'll continue on our own.",
   "Estás a un paso de jugar: te faltan ${v} para esta ronda.": "You're one step away from playing: you need ${v} more for this round.",
+  "Acceso seguro": "Secure access",
+  "Tu acceso biométrico está listo en este dispositivo": "Your biometric sign-in is ready on this device",
+  "Toca el sensor de tu teléfono para entrar al instante": "Touch your phone's sensor to sign in instantly",
+  "¿Quieres cambiar de cuenta?": "Switch account?",
+  "Entrar con otra cuenta de Google": "Sign in with another Google account",
+  "Wallet externa": "External wallet",
+  "Protegido por la seguridad biométrica de tu dispositivo": "Protected by your device's biometric security",
 };

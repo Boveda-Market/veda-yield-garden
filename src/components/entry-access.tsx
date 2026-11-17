@@ -11,12 +11,17 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { CoinbaseNote } from "./coinbase-note";
 import { GoogleButton } from "./google-button";
 import { BootSplash } from "./boot-splash";
+import { BankLoginSheet } from "./bank-login-sheet";
+import { deviceHasPasskey, rememberPasskey } from "@/lib/passkey-device";
 
 function EntryButtons() {
   const t = useT();
   const [home] = useHomePath();
   const session = useBovedaSession();
   const [signup, setSignup] = useState(false);
+  const [bio, setBio] = useState(false);
+  useEffect(() => { if (deviceHasPasskey()) setBio(true); }, []);
+  useEffect(() => { if ((session.security?.passkeyCount ?? 0) > 0) rememberPasskey(); }, [session.security?.passkeyCount]);
   const navigate = useNavigate();
   const wasReturning = useRef<boolean | null>(null);
   if (wasReturning.current === null && typeof window !== "undefined") wasReturning.current = isReturning() && !isHeroReview();
@@ -40,6 +45,7 @@ function EntryButtons() {
   if (session.ready && session.authenticated && isHeroReview()) return <div className="mt-8 w-full max-w-sm"><Button asChild className="h-12 w-full"><Link to={home}>{t("Continuar al app")}<ArrowRight size={16} /></Link></Button></div>;
   if (session.ready && session.authenticated) return <BootSplash />;
   return <div className="mt-8 w-full max-w-sm space-y-3">
+    <BankLoginSheet open={bio && !signup} onOpenChange={setBio} />
     <div role="tablist" className="mb-4 grid grid-cols-2 rounded-xl bg-secondary p-1 text-sm font-medium">
       <button role="tab" aria-selected={!signup} onClick={() => setSignup(false)} className={`rounded-lg py-2 ${!signup ? "bg-background shadow-sm" : "text-muted-foreground"}`}>{t("Iniciar sesión")}</button>
       <button role="tab" aria-selected={signup} onClick={() => setSignup(true)} className={`rounded-lg py-2 ${signup ? "bg-background shadow-sm" : "text-muted-foreground"}`}>{t("Crear cuenta")}</button>

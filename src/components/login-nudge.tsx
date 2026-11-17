@@ -6,6 +6,8 @@ import { GoogleButton } from "@/components/google-button";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { CoinbaseNote } from "@/components/coinbase-note";
 import { useT } from "@/lib/i18n";
+import { BankLoginSheet } from "@/components/bank-login-sheet";
+import { deviceHasPasskey } from "@/lib/passkey-device";
 
 const SEEN_KEY = "boveda:login-nudge";
 const DELAY_MS = 30_000;
@@ -47,6 +49,9 @@ export function LoginSheet({ open, onOpenChange, title, body }: { open: boolean;
   const session = useBovedaSession();
   useEffect(() => { if (session.authenticated && open) onOpenChange(false); }, [session.authenticated, open, onOpenChange]);
   const close = () => onOpenChange(false);
+  const [bio, setBio] = useState(false);
+  useEffect(() => { setBio(deviceHasPasskey()); }, [open]);
+  if (bio) return <BankLoginSheet open={open} onOpenChange={onOpenChange} />;
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <ActionSheetContent>
       <DialogTitle className="pr-10 font-display text-xl">{title ?? t("¿Listo para tu primera jugada?")}</DialogTitle>

@@ -3,6 +3,7 @@ import { CheckCircle2, Fingerprint } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { Button } from "./ui/button";
+import { rememberPasskey } from "@/lib/passkey-device";
 
 const LATER = "boveda:passkey-later";
 
@@ -20,6 +21,7 @@ export function PasskeyInvite() {
   }, []);
   const count = security?.passkeyCount ?? 0;
   // Success only when Face ID was added during this visit (0 → 1), never for people who already had it.
+  useEffect(() => { if (count > 0) rememberPasskey(); }, [count]);
   const sawNone = useRef(false);
   useEffect(() => { if (count === 0) sawNone.current = true; else if (sawNone.current) setDone(true); }, [count]);
   if (!security || !supported || !security.hasEmbeddedWallet) return null;
