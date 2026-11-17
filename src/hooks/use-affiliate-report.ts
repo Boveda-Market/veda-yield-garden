@@ -16,7 +16,7 @@ export function useAffiliateReport() {
   const isVerified = useServerFn(walletIsVerified);
   const verify = useServerFn(verifyWalletOwnership);
   const notify = useServerFn(notifyMyAction);
-  return async (signature: string, kind: AffiliateKind, details?: { percent?: number; amountUsd?: string; vault?: string }) => {
+  return async (signature: string, kind: AffiliateKind, details?: { percent?: number; amountUsd?: string | undefined; vault?: string }) => {
     try {
       const token = await session.getAccessToken?.();
       const wallet = session.walletAddress;
