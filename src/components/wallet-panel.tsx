@@ -28,6 +28,7 @@ import { decimalToUnits, PAYOUT_MOVE_MIN_USD } from "@/lib/onboarding";
 import { StartGuide } from "@/components/start-guide";
 import { WalletHeroShortcuts } from "@/components/wallet-hero-shortcuts";
 import { Gta6PromoPopup } from "@/components/gta6-promo";
+import { Gta6VideoPopup } from "@/components/gta6-video-popup";
 
 import { BuyUsdc } from "@/components/buy-usdc";
 import { InstallAppBanner } from "@/components/install-app";
@@ -183,6 +184,7 @@ export function WalletPanel() {
     </div>
     <WalletHeroShortcuts wallet={address} />
     <Gta6PromoPopup wallet={address} />
+    <Gta6VideoPopup wallet={address} />
     <InstallAppBanner />
     <GasRefillCard sol={balances.data?.sol} usdc={balances.data?.usdc} onDone={() => void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] })} />
     <PendingClaims />

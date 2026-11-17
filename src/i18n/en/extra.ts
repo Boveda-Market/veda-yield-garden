@@ -1531,4 +1531,11 @@ export const extra: Record<string, string> = {
   "Cosecha lista. Pasando todo a dólares…": "Harvest done. Converting everything to dollars…",
   "Pasando a dólares…": "Converting to dollars…",
   "Sumando a tu inversión…": "Adding to your investment…",
+  "Alto rendimiento": "High yield",
+  "Bóveda GTA6: cómo funciona en 3 pasos": "GTA6 Vault: how it works in 3 steps",
+  "Video de 3 pasos para depositar en la bóveda GTA6": "3-step video to deposit in the GTA6 vault",
+  "Activar sonido": "Turn sound on",
+  "Silenciar": "Mute",
+  "Entrar a la Bóveda GTA6": "Enter the GTA6 Vault",
+  "Ver más tarde": "Watch later",
 };
