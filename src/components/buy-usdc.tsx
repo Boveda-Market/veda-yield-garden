@@ -17,7 +17,7 @@ type Receipt = { added: bigint; total: bigint };
 const usdc = (v: bigint) => (Number(v) / 1e6).toFixed(2);
 
 /** One "Add funds" button: users with network reserve buy USDC directly; others get the starter card purchase (auto-activated by StartGuide). */
-export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" | "USDC"; auto?: number }) {
+export function BuyUsdc({ className, auto, hot }: { className?: string; only?: "SOL" | "USDC"; auto?: number; hot?: boolean }) {
   const t = useT();
   const session = useBovedaSession();
   const read = useServerFn(getRealWallet);
@@ -74,7 +74,7 @@ export function BuyUsdc({ className, auto }: { className?: string; only?: "SOL" 
 
   return <div className={className}>
     {auto ? waiting && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 size={16} className="animate-spin" />{t("Esperando tus dólares…")}</p> : <div className="flex flex-wrap gap-2">
-      <Button onClick={() => void add()} disabled={waiting}>{waiting ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}{waiting ? t("Esperando tus dólares…") : t("Añadir dólares")}</Button>
+      <Button onClick={() => void add()} disabled={waiting} className={hot ? "hot-cta w-full font-bold text-hot-surface" : undefined}>{waiting ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}{waiting ? t("Esperando tus dólares…") : t("Añadir dólares")}</Button>
     </div>}
     <Dialog open={choosing} onOpenChange={setChoosing}><ActionSheetContent closeLabel={t("Cerrar")}>
       <DialogHeader><DialogTitle>{t("Añadir dólares")}</DialogTitle><DialogDescription>{t("Compra con tu saldo de Coinbase, banco o tarjeta.")}</DialogDescription></DialogHeader>

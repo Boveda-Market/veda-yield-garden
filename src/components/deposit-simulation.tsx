@@ -16,6 +16,7 @@ import { getRealWallet } from "@/lib/solana.functions";
 import { decimalToUnits } from "@/lib/onboarding";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { Wallet } from "lucide-react";
+import { HotBanner } from "@/components/hot-vault-card";
 
 const MAX_MICRO = 10_000_000_000n;
 const microToText = (v: bigint) => { const w = v / 1_000_000n; const f = (v % 1_000_000n).toString().padStart(6, "0").replace(/0+$/, ""); return f ? `${w}.${f}` : `${w}`; };
@@ -41,14 +42,20 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   const pick = (pct: bigint) => { if (usdc == null) return; const cap = usdc < MAX_MICRO ? usdc : MAX_MICRO; setAmount(microToText((cap * pct) / 100n)); };
   const clean = (v: string) => { const s = v.replace(/,/g, ".").replace(/[^\d.]/g, ""); const [w, ...rest] = s.split("."); return rest.length ? `${w}.${rest.join("").slice(0, 6)}` : (w ?? ""); };
 
-  return <Dialog open onOpenChange={(open) => { if (!open && !busy) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
-    <DialogTitle className={done ? "sr-only" : undefined}>{migrate ? t("Cambiar a {v}", { v: t(vault.name) }) : <>{position ? t("Depositar más ·") : t("Depositar ·")}{" "}{t(vault.name)}</>}</DialogTitle>
+  const hot = vault.id === "gta6" && !migrate;
+  const showBanner = hot && !done;
+  return <Dialog open onOpenChange={(open) => { if (!open && !busy) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")} className={hot ? "border-hot/40 shadow-[var(--shadow-hot)]" : undefined}>
+    {showBanner && <HotBanner vault={vault} className="-mx-5 -mt-2 rounded-t-3xl pr-14 sm:-mx-6 sm:-mt-6">
+      <span className="rounded-full bg-hot-surface px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide">🎰 {t("Sé la casa")}</span>
+      <span className="flex items-center gap-1 rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-live shadow-[0_0_6px_var(--live)] motion-reduce:animate-none" />{t("En vivo")}</span>
+    </HotBanner>}
+    <DialogTitle className={done || showBanner ? "sr-only" : undefined}>{migrate ? t("Cambiar a {v}", { v: t(vault.name) }) : <>{position ? t("Depositar más ·") : t("Depositar ·")}{" "}{t(vault.name)}</>}</DialogTitle>
     <DialogDescription className={done ? "sr-only" : undefined}>{migrate ? t("Movemos todo tu dinero y ganancias.") : t("Elige cuánto quieres depositar y confirma.")}</DialogDescription>
     {migrate && !done && <MoveSteps current={2} to={t(vault.name)} />}
     {migrate && !done && <p className="text-center font-display text-3xl font-bold tabular-nums">${amount || "—"}</p>}
     {!done && !migrate && <>
-    <div className="flex items-center justify-between rounded-xl bg-muted p-3 text-sm">
-      <span className="text-muted-foreground">{t("Rendimiento estimado")}</span>
+    <div className={hot ? "flex items-center justify-between rounded-xl border border-hot/30 bg-hot-surface p-3 text-sm text-hot-foreground" : "flex items-center justify-between rounded-xl bg-muted p-3 text-sm"}>
+      <span className={hot ? "text-xs font-semibold uppercase tracking-wide text-hot-muted" : "text-muted-foreground"}>{t("Intereses estimados")}</span>
       <span className="font-display text-lg font-bold text-primary">{apr == null ? "—" : `${apr.toFixed(2)}% APR`}</span>
     </div>
     <div className="grid gap-2 rounded-xl border border-border p-4">
@@ -56,13 +63,12 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
       <span className="text-xs text-muted-foreground">{t("Cantidad ($)")}</span>
       <TapAmount label={t("Cantidad ($)")} prefix="$" value={amount} disabled={busy} onChange={(v) => setAmount(clean(v))} />
       <div className="grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={p.toString()} type="button" size="sm" variant="secondary" disabled={busy || !usdc} onClick={() => pick(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
-      <p className="text-xs text-muted-foreground">{migrate ? t("Traslado entre bóvedas: el detalle aparece antes de confirmar.") : t("Entre $1 y $10,000. Depositar es sin comisión.")}</p>
+      <p className="text-xs text-muted-foreground">{migrate ? t("Traslado entre bóvedas: el detalle aparece antes de confirmar.") : t("Entre $1 y $10,000.")}</p>
       {overBalance && <p role="alert" className="text-xs text-muted-foreground">{t("No tienes suficientes dólares para esta cantidad.")}</p>}
-      {(overBalance || usdc === 0n) && <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs"><span>{t("Estás a un paso de comenzar. Añade dólares y sigue aquí mismo.")}</span><BuyUsdc className="w-full" /></div>}
+      {(overBalance || usdc === 0n) && <div className={hot ? "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-hot/40 bg-hot/10 p-3 text-xs" : "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs"}><span>{hot ? t("Estás a un paso de comenzar. Añade dólares para entrar a la Bóveda GTA6.") : t("Estás a un paso de comenzar. Añade dólares y sigue aquí mismo.")}</span><BuyUsdc className="w-full" hot={hot} /></div>}
     </div>
     {breakdown && <dl className="grid gap-2 rounded-xl bg-muted p-4 text-sm">
       <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Importe")}</dt><dd>${breakdown.gross}</dd></div>
-      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión de entrada")}</dt><dd className="font-semibold text-primary">$0.00</dd></div>
       <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Invertido neto")}</dt><dd className="font-semibold">${breakdown.net}</dd></div>
     </dl>}
     {!position && !migrate && <p role="note" className="rounded-xl border border-border p-3 text-xs leading-5 text-muted-foreground">{t("Tu capital se combina con la otra moneda de la bóveda y su valor fluctuará con el precio de mercado, mientras acumulas intereses en cada operación.")} <a href="/faq#vaults-fluctuation" className="underline">{t("¿Por qué cambia mi balance?")}</a></p>}
