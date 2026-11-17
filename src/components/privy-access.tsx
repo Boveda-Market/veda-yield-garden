@@ -20,6 +20,8 @@ import { FEE_WALLET } from "@/lib/fees";
 import { useQuery } from "@tanstack/react-query";
 import { getWalletPolicy } from "@/lib/wallet-policy.functions";
 import { IdleLogout } from "@/components/idle-logout";
+import { publishSession } from "@/lib/session-host";
+import type { BovedaSession } from "@/hooks/use-boveda-session";
 
 // Privy only authorizes the official domains; preview/other hosts can never finish loading it.
 const OFFICIAL_ORIGIN = "https://bovedamarket.app";
@@ -138,7 +140,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
     if (tradeBlock === "external") throw new Error(t("Modo solo consulta: para operar, entra con Google, email o passkey y usa tu billetera protegida de BÓVEDA."));
   };
   const doLogout = useCallback(async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError(t("No se pudo cerrar sesión. Inténtalo de nuevo.")); } }, [queryClient, logout]);
-  return <BovedaSessionContext.Provider value={{
+  const value: BovedaSession = {
     ready: ready || stalled, sessionKnown: ready || stalled, authenticated, userId: authenticated ? user?.id ?? null : null,
     label: user?.email?.address ?? user?.google?.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : t("Mi cuenta")),
     walletAddress, error: error ?? (pendingMethod && !ready ? t("Conectando el acceso seguro…") : stalled && !ready && !isOfficialHost() ? t("Para entrar, abre bovedamarket.app. En esta vista previa el acceso seguro no está disponible.") : null), getAccessToken,
@@ -202,7 +204,11 @@ function SessionBridge({ children }: { children: ReactNode }) {
       revoke: async () => { await removeSigners({ address: walletAddress! }); },
     } : undefined,
     logout: doLogout,
-  }}>{children}<IdleLogout active={ready && authenticated} signedOut={ready && !authenticated} onLogout={doLogout} /></BovedaSessionContext.Provider>;
+  };
+  // Share this single session with every screen (the engine lives in the root and survives navigation).
+  useEffect(() => { publishSession(value); });
+  useEffect(() => () => publishSession(null), []);
+  return <BovedaSessionContext.Provider value={value}>{children}<IdleLogout active={ready && authenticated} signedOut={ready && !authenticated} onLogout={doLogout} /></BovedaSessionContext.Provider>;
 }
 
 export default function PrivyAccess({ children }: { children: ReactNode }) {

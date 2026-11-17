@@ -24,6 +24,7 @@ import { ThemeToggle } from "../components/theme-toggle";
 import { THEME_BOOT } from "../lib/theme";
 import { GoogleAnalytics } from "../components/google-analytics";
 import { Toaster } from "../components/ui/sonner";
+import { SessionEngineHost } from "../components/session-host";
 import { REF_STORAGE_KEY, normalizeCode } from "../lib/affiliate";
 
 function NotFoundComponent() {
@@ -163,6 +164,8 @@ function RootComponent() {
       <LanguageProvider forced={isEnglishPath(pathname) ? "en" : undefined}>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        {/* One secure-session engine for every screen: mounted on first need, never restarted by navigation. */}
+        <SessionEngineHost />
         <GoogleAnalytics />
         <Toaster />
         {/* Top-right corner, scrolls with the page, so it never covers buttons such as Doble o Nada. */}

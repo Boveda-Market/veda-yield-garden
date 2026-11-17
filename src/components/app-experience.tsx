@@ -33,6 +33,7 @@ import { PendingClaims } from "./pending-claims";
 import { VaultSteps } from "./vault-steps";
 import { BottomNav, ProfileMenu } from "./app-nav";
 import { BackButton } from "./back-button";
+import { HostedSession } from "./session-host";
 import { ActivityView } from "@/components/activity-view";
 import { guestDemoKey, readTrialActivity, trialActivityKey, trialHarvestSummary, type TrialActivity } from "@/lib/trial-activity";
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
@@ -40,7 +41,6 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 const PortfolioPanel = lazyWithReload(() => import("@/components/portfolio-panel").then((module) => ({ default: module.PortfolioPanel })));
 
 const AdminDashboard = lazyWithReload(() => import("@/components/admin-dashboard").then((m) => ({ default: m.AdminDashboard })));
-const PrivyAccess = lazyWithReload(() => import("@/components/privy-access"));
 
 function AccessLoading() { return <BootSplash />; }
 
@@ -56,7 +56,7 @@ function ToSignIn() {
 
 export function AppExperience({ guest = false, view = "vaults" }: { guest?: boolean; view?: "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets" | "admin" }) {
   const t = useT();
-  return <ClientOnly fallback={<AccessLoading />}><Suspense fallback={<AccessLoading />}>{guest ? <BovedaSessionContext.Provider value={{ ready: true, authenticated: false, userId: null, label: t("Invitado"), walletAddress: null, error: null, login: () => {}, logout: async () => {}, signAndSend: async () => { throw new Error(t("Invitado solo puede usar Prueba")); } }}><SessionPage guest view={view} /></BovedaSessionContext.Provider> : <PrivyAccess><SessionPage view={view} /></PrivyAccess>}</Suspense></ClientOnly>;
+  return <ClientOnly fallback={<AccessLoading />}><Suspense fallback={<AccessLoading />}>{guest ? <BovedaSessionContext.Provider value={{ ready: true, authenticated: false, userId: null, label: t("Invitado"), walletAddress: null, error: null, login: () => {}, logout: async () => {}, signAndSend: async () => { throw new Error(t("Invitado solo puede usar Prueba")); } }}><SessionPage guest view={view} /></BovedaSessionContext.Provider> : <HostedSession fallback={<AccessLoading />}><SessionPage view={view} /></HostedSession>}</Suspense></ClientOnly>;
 }
 const VIEW_TITLES = { vaults: "Bóvedas", portfolio: "Tu portafolio", activity: "Tu actividad", account: "Tu cuenta", security: "Seguridad", notifications: "Notificaciones", invite: "Invita y gana", wallet: "Mi Billetera", markets: "Predicciones", admin: "Panel de Control" } as const;
 

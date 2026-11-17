@@ -9,3 +9,4 @@
 - Startup uses one BootSplash (boot-splash.tsx) for every loading step (app access, returning-visitor redirect, pre-hydration cover via the html.boveda-returning head flag) so phones never flicker between screens.
 - BackButton («Atrás») uses real router history when this tab has a previous screen (__TSR_index > 0), else Mi Billetera for signed-in users or the public fallback.
 - Google and passkey sign-in go direct (useLoginWithOAuth / useLoginWithPasskey) with no intermediate Privy screen; email and external wallets keep the branded Privy modal. PasskeyInvite in Mi Billetera offers Face ID/fingerprint when the device supports it.
+- One secure-session engine (session-host.tsx + lib/session-host.ts): the root mounts Privy once on first demand and publishes the session; screens read it via HostedSession, never mount their own provider, so home→Mi Billetera never restarts sign-in. BootSplash reloads once (≤1/min) only on private screens shortly after a sign-in.

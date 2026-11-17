@@ -1,7 +1,7 @@
 import { LoginAlert } from "@/components/login-alert";
 import { useT } from "@/lib/i18n";
-import { Suspense, useEffect, useRef, useState } from "react";
-import { lazyWithReload } from "@/lib/lazy-reload";
+import { useEffect, useRef, useState } from "react";
+import { HostedSession } from "./session-host";
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
 import { Wallet, ArrowRight, Fingerprint } from "lucide-react";
 import { isReturning, markReturning, useHomePath } from "@/lib/preferences";
@@ -11,7 +11,6 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { CoinbaseNote } from "./coinbase-note";
 import { GoogleButton } from "./google-button";
 import { BootSplash } from "./boot-splash";
-const PrivyAccess = lazyWithReload(() => import("./privy-access"));
 
 function EntryButtons() {
   const t = useT();
@@ -56,5 +55,5 @@ function EntryButtons() {
 }
 export function EntryAccess() {
   const t = useT();
-  return <ClientOnly fallback={<p className="mt-8 text-sm text-muted-foreground">{t("Preparando acceso…")}</p>}><Suspense fallback={<p className="mt-8 text-sm text-muted-foreground">{t("Preparando acceso…")}</p>}><PrivyAccess><EntryButtons /></PrivyAccess></Suspense></ClientOnly>;
+  return <ClientOnly fallback={<p className="mt-8 text-sm text-muted-foreground">{t("Preparando acceso…")}</p>}><HostedSession fallback={<p className="mt-8 text-sm text-muted-foreground">{t("Preparando acceso…")}</p>}><EntryButtons /></HostedSession></ClientOnly>;
 }

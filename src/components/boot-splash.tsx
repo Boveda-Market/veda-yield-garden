@@ -7,6 +7,17 @@ const STEPS = ["Conectando red…", "Verificando acceso seguro…", "Sincronizan
 export const UPDATING_FLAG = "boveda-chunk-reload";
 const BOOT_RETRY_FLAG = "boveda-boot-retry";
 
+/** True only when a sign-in just happened, we are on a private screen and no rescue reload ran in the last minute. */
+export function shouldAutoRescue(now = Date.now(), path = window.location.pathname, search = window.location.search, store: Pick<Storage, "getItem" | "setItem"> = sessionStorage): boolean {
+  try {
+    if (path === "/" || path === "/en" || /privy_|code=|state=/.test(search)) return false;
+    if (now - Number(store.getItem("boveda:auth-pending") || 0) > 120000) return false;
+    if (now - Number(store.getItem(BOOT_RETRY_FLAG) || 0) < 60000) return false;
+    store.setItem(BOOT_RETRY_FLAG, String(now));
+    return true;
+  } catch { return false; }
+}
+
 /** One full-screen animated loading screen that covers every startup step, so the phone never flickers between screens. */
 export function BootSplash() {
   const t = useT();
@@ -16,13 +27,12 @@ export function BootSplash() {
   useEffect(() => {
     try { const at = Number(sessionStorage.getItem(UPDATING_FLAG) || 0); setUpdating(Date.now() - at < 30000); } catch { /* ignore */ }
     const id = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), 1100);
-    // Phones on slow data sometimes stall loading the secure-access files; a fresh load always works,
-    // so retry once by itself before ever showing the "taking longer" notice.
-    const retryId = setTimeout(() => {
-      void BOOT_RETRY_FLAG;
-      setSlow(true);
-    }, 25000);
-    return () => { clearInterval(id); clearTimeout(retryId); };
+        const slowId = setTimeout(() => setSlow(true), 25000);
+    // Safety net right after signing in: if a private screen is still loading after 3.5 s, do the same
+    // clean reload "Reintentar" does (once per minute). Never on the home page, where Google returns
+    // and a reload could interrupt the sign-in itself.
+    const rescueId = setTimeout(() => { if (shouldAutoRescue()) window.location.reload(); }, 3500);
+    return () => { clearInterval(id); clearTimeout(slowId); clearTimeout(rescueId); };
   }, []);
   return <div role="status" aria-live="polite" className="fixed inset-0 z-[60] grid place-items-center bg-background px-6 text-foreground">
     <div className="flex max-w-xs flex-col items-center text-center">
