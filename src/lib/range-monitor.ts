@@ -1,4 +1,4 @@
-import { rangeAlertButton, rangeAlertDue, rangeAlertText, rangeKey } from "@/lib/dlmm";
+import { rangeAlertDue, rangeKey } from "@/lib/dlmm";
 import type { ChainPosition } from "@/lib/solana-data";
 
 type Row = { service: string; first_down_at: string | null; operator_alerted: boolean };
@@ -16,8 +16,8 @@ export async function trackRangePositions(opts: { privyUserId: string; positions
     const since = prev?.first_down_at ?? new Date(opts.now).toISOString();
     let alerted = !!prev?.operator_alerted;
     if (rangeAlertDue(since, alerted, opts.now)) {
-      await opts.alert(opts.privyUserId, rangeAlertText(opts.vaultName(p.vaultId), p.priceAbove === true), rangeAlertButton(p.address));
-      alerted = true; sent++;
+      // The out-of-range Telegram notice is off by request; Autopilot re-centres on its own. Keep the clock for Autopilot.
+      alerted = true;
     }
     if (!prev || alerted !== !!prev.operator_alerted) await opts.store.save({ service: k, first_down_at: since, operator_alerted: alerted, public_alerted: false, updated_at: new Date(opts.now).toISOString() });
   }
