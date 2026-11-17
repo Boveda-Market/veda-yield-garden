@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { Dialog, DialogTitle } from "@/components/ui/dialog";
+import { ActionSheetContent } from "@/components/ui/action-sheet";
+import { HotVaultCard } from "@/components/hot-vault-card";
+import { DepositSimulation } from "@/components/deposit-simulation";
+import { PoolDetails } from "@/components/pool-details";
+import { VAULTS } from "@/lib/vaults";
 import { BuyUsdc } from "@/components/buy-usdc";
 import { notify } from "@/lib/notify";
 import { CheckCircle2, Fuel, Loader2, Sparkles } from "lucide-react";
@@ -54,7 +59,10 @@ export type ActivationStage = { kind: "short"; missingMicro: bigint } | { kind: 
 /** First-time activation in one card: clean total → GTA6 wait → "Cuenta lista" that opens the GTA6 deposit. */
 function ActivationFlow({ usdc, wallet, prepare, signAndSend, onDone }: { usdc: bigint; wallet: string | null | undefined; prepare: ReturnType<typeof useServerFn<typeof prepareGasRefill>>; signAndSend: (tx: Uint8Array) => Promise<string>; onDone?: (() => void) | undefined }) {
   const t = useT();
-  const navigate = useNavigate();
+  const [sheet, setSheet] = useState(false);
+  const [deposit, setDeposit] = useState(false);
+  const [details, setDetails] = useState(false);
+  const gta6 = VAULTS.find((v) => v.id === "gta6");
   const missing = activationShortfallMicro(usdc);
   const [total, setTotal] = useState<bigint | null>(null);
   const [stage, setStage] = useState<"ready" | "working" | "done">("ready");
@@ -75,11 +83,16 @@ function ActivationFlow({ usdc, wallet, prepare, signAndSend, onDone }: { usdc: 
       setStage("done"); onDone?.();
     } catch (e) { setError(e instanceof Error ? t(e.message) : t("No se pudo completar la activación.")); setStage("ready"); }
   }
-  function openGta6() { try { sessionStorage.setItem(PENDING_DEPOSIT_KEY, "gta6"); } catch { /* storage blocked */ } void navigate({ to: "/app" }); }
+  function openGta6() { setSheet(true); }
   const view: ActivationStage = stage === "done" ? { kind: "done" } : stage === "working" ? { kind: "working" } : missing > 0n ? { kind: "short", missingMicro: missing } : { kind: "ready", totalMicro: total, ...(error ? { error } : {}) };
   return <>
     <ActivationCardView stage={view} onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={openGta6} />
     {buy > 0 && <BuyUsdc auto={buy} className="mt-2" />}
+    {gta6 && <Dialog open={sheet} onOpenChange={setSheet}><ActionSheetContent><DialogTitle className="mb-3 text-lg font-bold">{t("Tu primera bóveda")}</DialogTitle>
+      <HotVaultCard vault={gta6} owned={null} ownedLink={null} hasPosition={false} depositDisabled={!wallet} onDeposit={() => { setSheet(false); setDeposit(true); }} onDetails={() => setDetails(true)} />
+    </ActionSheetContent></Dialog>}
+    {gta6 && deposit && <DepositSimulation vault={gta6} wallet={wallet ?? null} onClose={() => setDeposit(false)} />}
+    {gta6 && details && <PoolDetails vault={gta6} onClose={() => setDetails(false)} />}
   </>;
 }
 
