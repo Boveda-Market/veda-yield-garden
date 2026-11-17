@@ -1538,4 +1538,6 @@ export const extra: Record<string, string> = {
   "Silenciar": "Mute",
   "Entrar a la Bóveda GTA6": "Enter the GTA6 Vault",
   "Ver más tarde": "Watch later",
+  "Bóveda GTA6 en acción": "GTA6 Vault in action",
+  "Video de cómo depositar en la bóveda GTA6": "Video showing how to deposit in the GTA6 vault",
 };
