@@ -44,20 +44,18 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
     const ePts = earn.map((e, i) => ({ x: x(i), y: BOT - (e / emax) * (BOT - MID - 14) }));
     const eLine = smooth(ePts);
     const a = hover ?? list.length - 1;
-    const onMove = (ev: React.PointerEvent<SVGSVGElement>) => { const r = ev.currentTarget.getBoundingClientRect(); setHover(Math.max(0, Math.min(list.length - 1, Math.round(((ev.clientX - r.left) / r.width * W - L) / (R - L) * (list.length - 1))))); };
     chart = <>
       <p className="mt-3 text-xs text-muted-foreground">{new Date(list[a]!.t).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}</p>
       <div className="mt-1 grid grid-cols-2 gap-3">
         <div><p className="text-xs text-muted-foreground">{t("Precio de mercado")}</p><p className="font-display text-xl font-bold tabular-nums">{price(list[a]!.c)}</p></div>
         {earn.length > 0 && <div className="text-right"><p className="text-xs text-muted-foreground">{t("Intereses generados")} ↗</p><p className="font-display text-xl font-bold tabular-nums text-primary">+{usd(earn[a], 0)}</p></div>}
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="mt-2 h-80 w-full touch-none" role="img" aria-label={t("Precio de {s} frente a intereses generados", { s: symbol ?? "" })} onPointerMove={onMove} onPointerDown={onMove} onPointerLeave={() => setHover(null)}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="mt-2 h-80 w-full" role="img" aria-label={t("Precio de {s} frente a intereses generados", { s: symbol ?? "" })}>
         <defs><linearGradient id={gid} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.35" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient></defs>
         <path d={smooth(pPts)} fill="none" stroke="var(--muted-foreground)" strokeOpacity="0.85" strokeWidth="3" strokeLinecap="round" />
         <line x1={L} y1={MID} x2={R} y2={MID} stroke="var(--border)" strokeDasharray="3 6" />
         {eLine && <><path d={`${eLine} L${R},${BOT} L${L},${BOT} Z`} fill={`url(#${gid})`} />
           <path d={eLine} fill="none" stroke="var(--primary)" strokeWidth="4" strokeLinecap="round" style={{ filter: "drop-shadow(0 0 4px var(--primary))" }} /></>}
-        <line x1={x(a)} y1={TOP} x2={x(a)} y2={BOT} stroke="var(--muted-foreground)" strokeOpacity="0.5" strokeDasharray="4 4" />
         <circle cx={pPts[a]!.x} cy={pPts[a]!.y} r="6" fill="var(--muted-foreground)" />
         {ePts[a] && <circle cx={ePts[a]!.x} cy={ePts[a]!.y} r="7" fill="var(--background)" stroke="var(--primary)" strokeWidth="3" />}
       </svg>
