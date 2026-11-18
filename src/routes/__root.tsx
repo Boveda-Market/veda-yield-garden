@@ -170,7 +170,7 @@ function RootComponent() {
         <Toaster />
         {/* Top-right corner, scrolls with the page, so it never covers buttons such as Doble o Nada. */}
         {!APP_PATHS.includes(pathname) && (
-          <div className="absolute right-4 top-[1.6rem] z-40 flex items-center gap-2 sm:right-6">
+          <div className="absolute right-3 top-3 z-40 sm:right-6 sm:top-[1.6rem] flex items-center gap-2 sm:right-6">
             <ThemeToggle />
             <LanguageMenu />
           </div>

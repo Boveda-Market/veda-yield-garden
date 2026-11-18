@@ -21,6 +21,14 @@ function EntryButtons() {
   const [bio, setBio] = useState(false);
   useEffect(() => { if (deviceHasPasskey()) setBio(true); }, []);
   useEffect(() => { if ((session.security?.passkeyCount ?? 0) > 0) rememberPasskey(); }, [session.security?.passkeyCount]);
+  // Ask for the fingerprint once per visit; if the person cancels it never pops up again, so Google stays free to switch accounts.
+  useEffect(() => {
+    if (!bio || signup || !session.ready || session.authenticated) return;
+    try { if (sessionStorage.getItem("boveda:passkey-auto")) return; sessionStorage.setItem("boveda:passkey-auto", "1"); } catch { return; }
+    const id = setTimeout(() => session.login("passkey"), 400);
+    return () => clearTimeout(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bio, signup, session.ready, session.authenticated]);
   const navigate = useNavigate();
   const wasReturning = useRef<boolean | null>(null);
   if (wasReturning.current === null && typeof window !== "undefined") wasReturning.current = isReturning() && !isHeroReview();
@@ -48,8 +56,8 @@ function EntryButtons() {
       <button role="tab" aria-selected={!signup} onClick={() => setSignup(false)} className={`rounded-lg py-2 ${!signup ? "bg-background shadow-sm" : "text-muted-foreground"}`}>{t("Iniciar sesión")}</button>
       <button role="tab" aria-selected={signup} onClick={() => setSignup(true)} className={`rounded-lg py-2 ${signup ? "bg-background shadow-sm" : "text-muted-foreground"}`}>{t("Crear cuenta")}</button>
     </div>
-    {bio && !signup && <div className="rounded-xl border border-primary/50 bg-primary/10 p-2"><Button disabled={!session.ready} className="h-14 w-full text-base" onClick={() => session.login("passkey")}><Fingerprint size={22} />{t("Entrar con huella o Face ID")}</Button><p className="mt-2 text-center text-[11px] text-muted-foreground">{t("O usa otra cuenta de Google abajo")}</p></div>}
-    <div className="relative rounded-xl border border-primary/40 bg-primary/5 p-2 pt-4"><span className="absolute -top-2.5 left-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">{t("Recomendado · Mayor seguridad")}</span><GoogleButton disabled={!session.ready} arrow className="h-14 w-full text-base" onClick={() => session.login("google")}>{t("Continuar con Google")}</GoogleButton><p className="mt-2 text-center text-[11px] leading-4 text-muted-foreground">{t("Protegido por la verificación en 2 pasos de tu cuenta de Google. Sin contraseñas que puedan robarte.")}</p><CoinbaseNote className="mt-2 text-center text-xs text-muted-foreground" /></div>
+    {bio && !signup && <div className="rounded-xl border border-primary/50 bg-primary/10 p-2"><Button disabled={!session.ready} className="h-14 w-full text-base" onClick={() => session.login("passkey")}><Fingerprint size={22} />{t("Entrar con huella o Face ID")}</Button></div>}
+    <div className="relative rounded-xl border border-primary/40 bg-primary/5 p-2 pt-4"><span className="absolute -top-2.5 left-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">{bio && !signup ? t("¿Otra cuenta?") : t("Recomendado · Mayor seguridad")}</span><GoogleButton disabled={!session.ready} arrow className="h-14 w-full text-base" onClick={() => session.login("google")}>{bio && !signup ? t("Cambiar de cuenta con Google") : t("Continuar con Google")}</GoogleButton><p className="mt-2 text-center text-[11px] leading-4 text-muted-foreground">{bio && !signup ? t("Inicia sesión con otro correo de Google o cambia de perfil.") : t("Protegido por la verificación en 2 pasos de tu cuenta de Google. Sin contraseñas que puedan robarte.")}</p><CoinbaseNote className="mt-2 text-center text-xs text-muted-foreground" /></div>
     <Button disabled={!session.ready} variant="secondary" className="h-12 w-full" onClick={() => session.login("email")}>{signup ? t("Registrarme con email") : t("Entrar con email")}</Button>
     {!signup && !bio && <Button disabled={!session.ready} variant="outline" className="h-auto w-full flex-col gap-1 py-3" onClick={() => session.login("passkey")}><span className="flex items-center gap-2"><Fingerprint size={20} className="text-primary" />{t("Entrar con huella o Face ID")}</span><span className="text-xs font-normal text-muted-foreground">{t("Touch ID, Face ID o PIN de tu dispositivo")}</span></Button>}
     <button type="button" disabled={!session.ready} onClick={() => session.login("wallet")} className="flex w-full items-center justify-center gap-2 pt-1 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline disabled:opacity-50"><Wallet size={14} />{t("¿Usas wallet externa? Phantom, Jupiter u otras")}</button>
