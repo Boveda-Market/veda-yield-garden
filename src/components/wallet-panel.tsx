@@ -3,7 +3,6 @@ import { TapAmount } from "@/components/ui/tap-amount";
 import { SignalErrorCard } from "@/components/signal-error";
 import { BalanceLoading } from "@/components/ui/balance-loading";
 import { SyncPill } from "@/components/ui/sync-bar";
-import { useAutopilot } from "@/components/autopilot-toggle";
 import { ShieldCheck, Eye, EyeOff, LifeBuoy, Gift } from "lucide-react";
 import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
 import { TokenIcon } from "@/components/token-icon";
@@ -61,8 +60,6 @@ export function WalletPanel() {
   const predict = usePredictPositions(address);
   const unclaimedPrizes = (predict.data ?? []).filter((p) => p.status !== "open" && positionWon(p) === true).reduce((s, p) => s + Number(p.payoutMicro || "0") / 1e6, 0);
   const unclaimed = totalFees + unclaimedPrizes;
-  const apStatus = useAutopilot().status;
-  const reinvested = apStatus?.lastRebalanceAt && Date.now() - Date.parse(apStatus.lastRebalanceAt) < 7 * 86_400_000 && (apStatus.lastGainsUsd ?? 0) >= 0.01 ? apStatus.lastGainsUsd! : null;
   // Hold the last known vault value while prices refresh so the total never drops to cash only.
   const lastWorking = useRef<number | null>(null);
   const liveWorking = vaultPositions.length > 0 ? capital : 0;
@@ -215,7 +212,6 @@ export function WalletPanel() {
       <div className="mt-1 flex items-center gap-2">{balances.data?.usdc !== undefined && (hidden || working !== null) ? <p className="font-display text-4xl">{hidden ? MASK : `$${fmt((Number(balances.data.usdc) / 1e6) + jupUsd + (working ?? 0))}`}</p> : <BalanceLoading />}<button type="button" onClick={() => setHidden(!hidden)} aria-label={hidden ? t("Mostrar saldos") : t("Ocultar saldos")} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{hidden ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
       {balances.data && balances.data.usdc === 0n && balances.data.sol === 0n && working === 0 ? <p role="status" className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"><RefreshCw size={12} className="animate-spin" />{t("Comprobando llegada de fondos…")}</p> : null}
       {vaultPositions.length > 0 && balances.data?.usdc !== undefined && <div className="mt-2 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{t("Disponible")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(Number(balances.data.usdc) / 1e6)}`}</span></span><Link to="/portfolio" className="rounded-full bg-primary/10 px-3 py-1 text-primary"><span>{t("Trabajando")}:</span> <span className="font-medium">{hidden ? MASK : working === null ? <BalanceLoading compact /> : `$${fmt(working)}`}</span></Link></div>}
-      {reinvested !== null && <Link to="/portfolio" className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">⚡ {t("Ganancias reinvertidas en tu capital")} · <span className="font-semibold">{hidden ? MASK : `+$${fmt(reinvested)}`}</span> {t("trabajando")}</Link>}
       {(vaults.isLoading || (vaultPositions.length > 0 && pricesLoading && totalFees === 0)) && <SyncPill />}
       {unclaimedPrizes >= 0.01 && <Link to="/portfolio" className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs text-primary"><Gift size={12} aria-hidden />{t("Por reclamar")}: <span className="font-semibold">{hidden ? MASK : `+$${fmt(unclaimedPrizes)}`}</span></Link>}
       {vaultPositions.length > 0 && <details className="mt-2 text-xs text-muted-foreground"><summary className="cursor-pointer underline-offset-2 hover:underline">ⓘ {t("¿Por qué cambia el balance total?")}</summary><div className="mt-1 space-y-1 leading-5"><p>{t("Tu cuenta combina dos tipos de saldo:")}</p><p>• <span className="font-medium text-foreground">{t("Disponible:")}</span> {t("dólares estables en tu billetera que nunca cambian de valor.")}</p><p>• <span className="font-medium text-foreground">{t("Trabajando:")}</span> {t("capital en bóvedas cuya valoración y tasa estimada (APR) se actualizan en vivo con el ritmo de operaciones: a mayor volumen en el mercado, el APR sube y tu balance se mueve a la par mientras acumulas ganancias.")}</p><p className="font-medium text-foreground">{t("¿Por qué «Por reclamar» a veces vuelve a cero?")}</p><p>{t("El piloto automático cobra y reinvierte tus ganancias automáticamente dentro de tu bóveda para ayudar a crecer tu capital. No tienes que tocar ni rebalancear nada; tus fondos siempre están seguros bajo tu huella o Face ID.")}</p><a href="/faq#vaults-fluctuation" className="inline-block text-primary underline">{t("Ver explicación completa en Preguntas frecuentes")} →</a></div></details>}
