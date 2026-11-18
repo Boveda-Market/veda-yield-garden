@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { filterQuestions, questions } from "./faq";
 
 describe("FAQ", () => {
-  it("has fewer than 6 questions", () => {
-    expect(questions.length).toBe(5);
+  it("has 6 questions", () => {
+    expect(questions.length).toBe(6);
   });
   it("avoids crypto jargon", () => {
     const text = questions.map((q) => q.question + q.answer).join(" ");
