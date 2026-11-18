@@ -330,6 +330,6 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
 .sync-sweep { width: 40%; background-image: linear-gradient(90deg, transparent, var(--primary), transparent); box-shadow: 0 0 8px var(--primary); animation: sync-sweep 1.3s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .sync-sweep { animation: none; width: 60%; } }
 
-.brand-seal::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, color-mix(in oklab, var(--color-primary) 55%, white) 50%, transparent 70%); transform: translateX(-120%); animation: brand-shimmer 3.5s ease-in-out infinite; mix-blend-mode: screen; pointer-events: none; }
+.brand-seal::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, color-mix(in oklab, white 45%, transparent) 50%, transparent 70%); transform: translateX(-120%); animation: brand-shimmer 3.5s ease-in-out infinite; pointer-events: none; }
 @keyframes brand-shimmer { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
 @media (prefers-reduced-motion: reduce) { .brand-seal::after { animation: none; } }
