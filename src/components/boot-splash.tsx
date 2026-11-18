@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useT } from "@/lib/i18n";
@@ -36,11 +37,7 @@ export function BootSplash() {
   }, []);
   return <div role="status" aria-live="polite" className="fixed inset-0 z-[60] grid place-items-center bg-background px-6 text-foreground">
     <div className="flex max-w-xs flex-col items-center text-center">
-      <span className="relative grid size-20 place-items-center">
-        <span className="absolute inset-0 animate-ping rounded-3xl bg-primary/20" aria-hidden />
-        <img src="/icon-512.png" alt="" className="relative size-16 rounded-2xl shadow-lg" />
-      </span>
-      <p className="mt-6 font-display text-lg font-bold tracking-wide">BÓVEDA</p>
+      <span className="neon-pulse rounded-3xl p-1"><BrandLogo size="lg" /></span>
       <div className="mt-4 flex items-center gap-2" aria-hidden>
         {STEPS.map((_, i) => <span key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i <= step ? "w-8 bg-primary" : "w-3 bg-muted"}`} />)}
       </div>

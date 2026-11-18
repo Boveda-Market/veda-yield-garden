@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import { useEffect, useRef } from "react";
 import { Fingerprint, Mail, ShieldCheck, Wallet } from "lucide-react";
 import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -23,7 +24,7 @@ export function BankLoginSheet({ open, onOpenChange }: { open: boolean; onOpenCh
   const go = (m: "google" | "email" | "wallet") => { onOpenChange(false); session.login(m); };
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <ActionSheetContent>
-      <p className="text-center text-[11px] font-bold uppercase tracking-widest text-primary">● BÓVEDA · {t("Acceso seguro")}</p>
+      <div className="flex justify-center"><BrandLogo size="sm" /></div><p className="mt-2 text-center text-[11px] font-bold uppercase tracking-widest text-primary">{t("Acceso seguro")}</p>
       <DialogTitle className="mt-1 px-10 text-center font-display text-2xl sm:px-12">{t("Bienvenido de nuevo")}</DialogTitle>
       <DialogDescription className="text-center text-sm text-muted-foreground">{t("Tu acceso biométrico está listo en este dispositivo")}</DialogDescription>
       <button type="button" aria-label={t("Entrar con huella o Face ID")} disabled={!session.ready} onClick={() => session.login("passkey")} className="relative mx-auto mt-5 grid size-24 place-items-center rounded-full border-2 border-primary/60 bg-primary/10 text-primary">

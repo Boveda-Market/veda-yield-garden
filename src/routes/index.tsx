@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import { langLinks } from "@/lib/seo-lang";
 import dobleLogo from "@/assets/doble-o-nada-logo.png";
 import { HERO_VARIANTS, HERO_KEY, pickHeroVariant, isHeroReview } from "@/lib/hero-variants";
@@ -104,7 +105,7 @@ export function Landing() {
   const dobleHero = hero.theme === "doble";
   const plainHero = !gtaHero && !dobleHero;
   if (decided && compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-10 text-foreground">
-    <img src="/icon-512.png" alt="" className="h-14 w-14 rounded-2xl" />
+    <BrandLogo size="lg" />
     <h1 className="mt-4 text-center font-display text-3xl font-bold">{t("Bienvenido de nuevo")}</h1>
     <p className="mt-2 text-center text-sm text-muted-foreground">{t("Entra para ver tu wallet y tus ganancias.")}</p>
     <div className="mt-2 flex w-full max-w-sm flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0"><EntryAccess /></div>
@@ -112,7 +113,7 @@ export function Landing() {
   </div>;
   return <div className="min-h-screen bg-background text-foreground">
     {!decided && <ReturningCover />}
-    <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-6 sm:px-6"><Link to="/" className="flex min-w-0 shrink-0 items-center gap-2 font-display text-lg font-bold sm:gap-3"><img src="/icon-512.png" alt="" className="h-9 w-9 shrink-0 rounded-lg" />BÓVEDA</Link><div className="flex min-w-0 items-center gap-1.5 sm:gap-2"></div></header>
+    <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-6 sm:px-6"><Link to="/" className="flex min-w-0 shrink-0 items-center gap-2 font-display text-lg font-bold sm:gap-3"><BrandLogo /></Link><div className="flex min-w-0 items-center gap-1.5 sm:gap-2"></div></header>
     <main className="mx-auto max-w-5xl px-6">
       <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">
         {gtaHero && <div className="order-1 min-w-0 md:col-span-2"><Gta6Hero title={hero.title} sub={hero.sub} /></div>}
