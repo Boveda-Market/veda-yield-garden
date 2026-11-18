@@ -48,8 +48,9 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
   for (const e of list) {
     if (done >= AUTOPILOT_MAX_PER_RUN) break;
     // Reconcile: a rebalance sent last cycle that confirmed after we stopped waiting still gets its record and alert.
-    if (e.last_signature && /Sin confirmación/.test(e.last_result ?? "")) {
-      const st = (await connection.getSignatureStatuses([e.last_signature], { searchTransactionHistory: true }).catch(() => null))?.value[0];
+    const lastSig = (e as { last_signature?: string | null }).last_signature;
+    if (lastSig && /Sin confirmación/.test(e.last_result ?? "")) {
+      const st = (await connection.getSignatureStatuses([lastSig], { searchTransactionHistory: true }).catch(() => null))?.value[0];
       if (st && !st.err && (st.confirmationStatus === "confirmed" || st.confirmationStatus === "finalized")) {
         await save(e.wallet, { last_rebalance_at: iso, last_result: "Rebalanceada", last_gains_usd: null });
         e.last_rebalance_at = iso; e.last_result = "Rebalanceada";
