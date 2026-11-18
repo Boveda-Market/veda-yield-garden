@@ -30,6 +30,10 @@
  */
 
 @theme inline {
+  --color-zone-edge: var(--zone-edge);
+  --color-zone-out: var(--zone-out);
+  --zone-edge: oklch(0.72 0.16 75); /* calm amber: near range edge */
+  --zone-out: oklch(0.62 0.2 300); /* calm neon violet: waiting for rebalance */
   --live: oklch(0.87 0.29 145); /* bright live-dot green, same in both themes */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
