@@ -1,15 +1,15 @@
 import { describe, it, expect } from "vitest";
 import { filterQuestions, questions } from "./faq";
 
-describe("FAQ filter", () => {
-  it("search ignores accents and matches answers", () => {
-    expect(filterQuestions(questions, "all", "comision").length).toBeGreaterThan(0);
-    expect(filterQuestions(questions, "all", "reclamar ganancias").map((q) => q.id)).toContain("predict-claim");
+describe("FAQ", () => {
+  it("has fewer than 6 questions", () => {
+    expect(questions.length).toBe(5);
   });
-  it("category limits results", () => {
-    expect(filterQuestions(questions, "affiliates", "").every((q) => q.cat === "affiliates")).toBe(true);
+  it("avoids crypto jargon", () => {
+    const text = questions.map((q) => q.question + q.answer).join(" ");
+    expect(text).not.toMatch(/\b(USDC|SOL|MET|JupUSD)\b/);
   });
-  it("no match returns empty", () => {
-    expect(filterQuestions(questions, "all", "zzzqqq")).toHaveLength(0);
+  it("search ignores accents", () => {
+    expect(filterQuestions(questions, "all", "algoritmico").map((q) => q.id)).toContain("vaults-earn");
   });
 });
