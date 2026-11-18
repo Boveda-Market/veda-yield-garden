@@ -39,3 +39,24 @@ export function weeklySummaryText(o: { weekMicro: bigint; harvests: number; from
     "✨ <b>No tienes que hacer ninguna acción.</b>",
   ]);
 }
+
+export type CapitalDay = { start: number; capitalMicro: bigint; earnedMicro: bigint };
+/** Last `n` local days (oldest first): running capital put into vaults (deposits − withdrawals, never below 0) and running harvested earnings over the window. Loaded records only. */
+export function capitalSeries(records: readonly HarvestLike[], now: number, n: number, offsetMin = 0, tokenValue?: TokenValue): CapitalDay[] {
+  const today = dayStart(now, offsetMin), first = today - (n - 1) * DAY;
+  const val = (r: HarvestLike) => (/^\d{1,20}$/.test(r.usdcRaw) ? BigInt(r.usdcRaw) : 0n) + (tokenValue ? tokenValue(r) : 0n);
+  const sorted = records.filter((r) => r.at).slice().sort((a, b) => a.at! - b.at!);
+  let cap = 0n, earned = 0n, i = 0;
+  const apply = (r: HarvestLike, inWindow: boolean) => {
+    if (r.kind === "deposit") cap += val(r);
+    else if (r.kind === "withdraw") { cap -= val(r); if (cap < 0n) cap = 0n; }
+    else if (r.kind === "close") cap = 0n;
+    else if (r.kind === "harvest" && inWindow) earned += val(r);
+  };
+  while (i < sorted.length && sorted[i]!.at! < first) apply(sorted[i++]!, false);
+  return Array.from({ length: n }, (_, d) => {
+    const start = first + d * DAY, end = start + DAY;
+    while (i < sorted.length && sorted[i]!.at! < end) apply(sorted[i++]!, true);
+    return { start, capitalMicro: cap, earnedMicro: earned };
+  });
+}

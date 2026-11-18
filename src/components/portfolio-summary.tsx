@@ -10,7 +10,7 @@ import { VAULTS } from "@/lib/vaults";
 import { Button } from "./ui/button";
 import { useId, useState } from "react";
 import { CHAIN_POOLS } from "@/lib/solana-data";
-import { cumulative, weeklyInterest, weekTotalMicro } from "@/lib/weekly-interest";
+import { capitalSeries } from "@/lib/weekly-interest";
 import { useLocale } from "@/lib/i18n";
 
 const COLORS = ["bg-primary", "bg-chart-1", "bg-chart-2", "bg-chart-4", "bg-chart-3", "bg-chart-5"];
@@ -67,57 +67,58 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
   </section>;
 }
 
-/** «Intereses de la semana»: smooth neon line, «Acumulado» (running total) or «Por día» (each day's harvest). */
-function WeeklyChart({ records, poolPrices, money }: { records: Parameters<typeof weeklyInterest>[0]; poolPrices: Record<string, number | null>; money: (n: number | null) => string }) {
+/** «Capital vs. Ganancias»: capital in vaults (GTA6 neon) above, harvested earnings (always rising, brand green) below; 7 d / 30 d. */
+function WeeklyChart({ records, poolPrices, money }: { records: Parameters<typeof capitalSeries>[0]; poolPrices: Record<string, number | null>; money: (n: number | null) => string }) {
   const t = useT();
   const locale = useLocale();
   const gid = useId().replace(/:/g, "");
   const [sel, setSel] = useState<number | null>(null);
-  const [mode, setMode] = useState<"acc" | "day">("acc");
+  const [n, setN] = useState<7 | 30>(7);
   const tokenValue = (r: { tokenRaw?: string; pool?: string }) => {
     const cfg = CHAIN_POOLS.find((c) => c.pool === r.pool), price = r.pool ? poolPrices[r.pool] : null;
     if (!cfg || !price || !r.tokenRaw || !/^\d{1,30}$/.test(r.tokenRaw)) return 0n;
     return BigInt(Math.floor(Number(r.tokenRaw) / 10 ** cfg.decimals * price * 1e6));
   };
-  const days = weeklyInterest(records, Date.now(), -new Date().getTimezoneOffset(), tokenValue);
-  const acc = cumulative(days);
-  const values = (mode === "acc" ? acc : days.map((d) => d.micro)).map((m) => Number(m) / 1e6);
-  const total = Number(weekTotalMicro(days)) / 1e6;
-  const shown = sel ?? 6;
-  const fmtDay = (start: number, i: number) => i === 6 ? t("Hoy") : new Date(start).toLocaleDateString(locale, { weekday: "short" }).replace(".", "");
-  const W = 380, TOP = 20, BASE = 110, X0 = 15, X1 = 365;
-  const max = Math.max(...values, 0.000001);
-  const pts = values.map((v, i) => ({ x: X0 + (i * (X1 - X0)) / 6, y: BASE - (v / max) * (BASE - TOP) }));
-  let line = `M${pts[0]!.x},${pts[0]!.y}`;
-  for (let i = 1; i < pts.length; i++) { const p = pts[i - 1]!, c = pts[i]!, mx = (p.x + c.x) / 2; line += ` C${mx},${p.y} ${mx},${c.y} ${c.x},${c.y}`; }
-  const area = `${line} L${X1},${BASE} L${X0},${BASE} Z`;
-  const active = pts[shown]!;
-  const pick = (e: React.PointerEvent<SVGSVGElement>) => { const r = e.currentTarget.getBoundingClientRect(); const x = ((e.clientX - r.left) / r.width) * W; setSel(Math.max(0, Math.min(6, Math.round(((x - X0) / (X1 - X0)) * 6)))); };
-  const tab = (m: "acc" | "day", label: string) => <button type="button" onClick={() => setMode(m)} aria-pressed={mode === m} className={`rounded-lg px-2.5 py-1 transition ${mode === m ? "bg-primary font-bold text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>{label}</button>;
+  const days = capitalSeries(records, Date.now(), n, -new Date().getTimezoneOffset(), tokenValue);
+  const cap = days.map((d) => Number(d.capitalMicro) / 1e6), earn = days.map((d) => Number(d.earnedMicro) / 1e6);
+  const total = earn[earn.length - 1] ?? 0;
+  const shown = sel ?? n - 1;
+  const W = 380, L = 12, R = 368, CT = 16, CB = 120, ET = 150, EB = 250, H = 260;
+  const x = (i: number) => L + (i * (R - L)) / (n - 1);
+  const cmin = Math.min(...cap), cmax = Math.max(...cap), cr = Math.max(cmax - cmin, cmax * 0.02, 0.01);
+  const emax = Math.max(total, 0.000001);
+  const smooth = (pts: { x: number; y: number }[]) => { let d = `M${pts[0]!.x},${pts[0]!.y}`; for (let i = 1; i < pts.length; i++) { const p = pts[i - 1]!, c = pts[i]!, mx = (p.x + c.x) / 2; d += ` C${mx},${p.y} ${mx},${c.y} ${c.x},${c.y}`; } return d; };
+  const cPts = cap.map((v, i) => ({ x: x(i), y: CB - ((v - cmin) / cr) * (CB - CT) * 0.9 - 6 }));
+  const ePts = earn.map((v, i) => ({ x: x(i), y: EB - (v / emax) * (EB - ET) }));
+  const eLine = smooth(ePts), cLine = smooth(cPts);
+  const pick = (e: React.PointerEvent<SVGSVGElement>) => { const r = e.currentTarget.getBoundingClientRect(); const px = ((e.clientX - r.left) / r.width) * W; setSel(Math.max(0, Math.min(n - 1, Math.round(((px - L) / (R - L)) * (n - 1))))); };
+  const tab = (v: 7 | 30, label: string) => <button type="button" onClick={() => { setN(v); setSel(null); }} aria-pressed={n === v} className={`rounded-lg px-3 py-1 transition ${n === v ? "bg-primary font-bold text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>{label}</button>;
+  const day = new Date(days[shown]!.start).toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" });
   return <div className="relative mt-3 overflow-hidden rounded-3xl border border-border bg-card p-5">
-    <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full bg-primary/10 blur-3xl" />
-    <div className="relative flex items-start justify-between gap-2">
-      <div><p className="text-xs font-medium text-muted-foreground">{t("Intereses de la semana")}</p><p className="mt-1 font-display text-3xl font-extrabold tabular-nums text-primary drop-shadow-[0_0_8px_var(--primary)]">+{money(total)}</p></div>
-      <div className="inline-flex items-center rounded-xl border border-border bg-muted/60 p-1 text-[11px] font-medium">{tab("acc", t("Acumulado"))}{tab("day", t("Por día"))}</div>
+    <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full bg-hot/15 blur-3xl" />
+    <div className="relative flex items-center justify-between gap-2">
+      <p className="text-sm font-semibold">{t("Capital vs. Ganancias")}</p>
+      <div className="inline-flex items-center rounded-xl border border-border bg-muted/60 p-1 text-xs font-medium">{tab(7, t("7 días"))}{tab(30, t("30 días"))}</div>
     </div>
-    <div className="relative mt-3 flex items-center justify-between gap-2 border-b border-border/50 pb-2.5 text-xs">
-      {total > 0 ? <span className="text-muted-foreground">{mode === "acc" ? t("Hasta {d}", { d: fmtDay(days[shown]!.start, shown) }) : fmtDay(days[shown]!.start, shown)}: <strong className="text-primary">+{money(values[shown]!)}</strong></span> : <span className="text-muted-foreground">{t("Tus intereses se irán trazando día a día.")}</span>}
-      <span className="shrink-0 tabular-nums text-muted-foreground">{t("~${v} / día", { v: (total / 7).toFixed(2) })}</span>
+    <p className="relative mt-2 text-xs capitalize text-muted-foreground">{day}</p>
+    <div className="relative mt-1 grid grid-cols-2 gap-3">
+      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full bg-hot shadow-[0_0_6px_var(--hot)]" />{t("Capital en bóvedas")}</p><p className="font-display text-2xl font-extrabold tabular-nums text-hot">{money(cap[shown]!)}</p></div>
+      <div className="text-right"><p className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />{t("Ganancias cosechadas")}</p><p className="font-display text-2xl font-extrabold tabular-nums text-primary">+{money(earn[shown]!)}</p></div>
     </div>
-    <svg viewBox={`0 0 ${W} 130`} className="relative mt-4 h-32 w-full touch-none overflow-visible" role="img" aria-label={t("Intereses cosechados por día, últimos 7 días")} onPointerDown={pick} onPointerMove={(e) => e.buttons || e.pointerType === "mouse" ? pick(e) : undefined}>
+    <svg viewBox={`0 0 ${W} ${H}`} className="relative mt-3 h-72 w-full touch-none overflow-visible" role="img" aria-label={t("Capital en bóvedas frente a ganancias cosechadas")} onPointerDown={pick} onPointerMove={(e) => e.buttons || e.pointerType === "mouse" ? pick(e) : undefined}>
       <defs>
-        <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="70%" stopColor="var(--primary)" stopOpacity="0.06" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
-        <filter id={`g${gid}`} x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" result="b" /><feComposite in="SourceGraphic" in2="b" operator="over" /></filter>
+        <linearGradient id={`h${gid}`} x1="0" x2="1"><stop offset="0%" stopColor="var(--hot-2)" /><stop offset="100%" stopColor="var(--hot)" /></linearGradient>
+        <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
       </defs>
-      {[TOP, (TOP + BASE) / 2].map((y) => <line key={y} x1={10} y1={y} x2={370} y2={y} stroke="var(--border)" strokeDasharray="3 4" />)}
-      <line x1={10} y1={BASE} x2={370} y2={BASE} stroke="var(--border)" />
-      {total > 0 && <path d={area} fill={`url(#a${gid})`} />}
-      <path d={line} fill="none" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" strokeDasharray={total > 0 ? undefined : "6 8"} opacity={total > 0 ? 1 : 0.5} filter={`url(#g${gid})`} />
-      {pts.map((p, i) => i !== shown && <circle key={i} cx={p.x} cy={p.y} r="2.5" fill="var(--muted-foreground)" opacity="0.6" />)}
-      <line x1={active.x} y1={active.y} x2={active.x} y2={BASE} stroke="var(--primary)" strokeDasharray="2 3" strokeWidth="1.5" opacity="0.6" />
-      <circle cx={active.x} cy={active.y} r="8" fill="var(--primary)" fillOpacity="0.25" className={total > 0 ? "" : "animate-pulse"} />
-      <circle cx={active.x} cy={active.y} r="4.5" fill="var(--background)" stroke="var(--primary)" strokeWidth="2.5" />
+      <line x1={L} y1={(CB + ET) / 2} x2={R} y2={(CB + ET) / 2} stroke="var(--border)" strokeDasharray="3 6" />
+      <path d={cLine} fill="none" stroke={`url(#h${gid})`} strokeWidth="3.5" strokeLinecap="round" style={{ filter: "drop-shadow(0 0 5px var(--hot))" }} />
+      {total > 0 && <path d={`${eLine} L${R},${EB} L${L},${EB} Z`} fill={`url(#a${gid})`} />}
+      <path d={eLine} fill="none" stroke="var(--primary)" strokeWidth="3.5" strokeLinecap="round" strokeDasharray={total > 0 ? undefined : "6 8"} style={{ filter: "drop-shadow(0 0 5px var(--primary))" }} />
+      <line x1={x(shown)} y1={CT} x2={x(shown)} y2={EB} stroke="var(--muted-foreground)" strokeOpacity="0.5" strokeDasharray="3 4" />
+      <circle cx={cPts[shown]!.x} cy={cPts[shown]!.y} r="5.5" fill="var(--background)" stroke="var(--hot)" strokeWidth="3" />
+      <circle cx={ePts[shown]!.x} cy={ePts[shown]!.y} r="5.5" fill="var(--background)" stroke="var(--primary)" strokeWidth="3" />
     </svg>
-    <div className="relative mt-2 grid grid-cols-7 text-center text-[11px] font-medium capitalize text-muted-foreground">{days.map((d, i) => <button type="button" key={d.key} onClick={() => setSel(i)} className={i === shown ? "font-bold text-primary" : ""}>{fmtDay(d.start, i)}</button>)}</div>
+    <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{new Date(days[0]!.start).toLocaleDateString(locale, { day: "numeric", month: "short" })}</span><span>{t("Hoy")}</span></div>
+    <p className="relative mt-3 text-xs leading-5 text-muted-foreground">{t("Tu capital puede subir o bajar con el mercado; tus ganancias cosechadas solo suman.")}</p>
   </div>;
 }

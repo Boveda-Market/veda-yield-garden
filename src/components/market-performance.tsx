@@ -6,7 +6,7 @@ import { fetchPoolStats } from "@/lib/pool-stats";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import type { Vault } from "@/lib/vaults";
 
-const W = 720, H = 260, L = 8, R = 712, TOP = 16, MID = 150, BOT = 244;
+const W = 400, H = 300, L = 6, R = 394, TOP = 12, MID = 150, BOT = 290;
 const usd = (v: number | null | undefined, d = 0) => v == null ? "—" : `$${v.toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d })}`;
 const price = (v: number) => `$${v.toPrecision(4)}`;
 
@@ -40,27 +40,26 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
     const ps = list.map((c) => c.c), pmin = Math.min(...ps), pmax = Math.max(...ps), pr = Math.max(pmax - pmin, pmax * 1e-6);
     const emax = Math.max(earn[earn.length - 1] ?? 0, 1e-9);
     const x = (i: number) => L + (i / (list.length - 1)) * (R - L);
-    const pPts = list.map((c, i) => ({ x: x(i), y: TOP + (1 - (c.c - pmin) / pr) * (MID - TOP - 20) }));
-    const ePts = earn.map((e, i) => ({ x: x(i), y: BOT - (e / emax) * (BOT - MID - 10) }));
+    const pPts = list.map((c, i) => ({ x: x(i), y: TOP + (1 - (c.c - pmin) / pr) * (MID - TOP - 16) }));
+    const ePts = earn.map((e, i) => ({ x: x(i), y: BOT - (e / emax) * (BOT - MID - 14) }));
     const eLine = smooth(ePts);
     const a = hover ?? list.length - 1;
     const onMove = (ev: React.PointerEvent<SVGSVGElement>) => { const r = ev.currentTarget.getBoundingClientRect(); setHover(Math.max(0, Math.min(list.length - 1, Math.round(((ev.clientX - r.left) / r.width * W - L) / (R - L) * (list.length - 1))))); };
     chart = <>
-      <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2 text-xs">
-        <span className="text-muted-foreground">{new Date(list[a]!.t).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}</span>
-        <span className="tabular-nums"><span className="text-muted-foreground">{symbol} </span><strong>{price(list[a]!.c)}</strong>{earn.length > 0 && <> · <span className="font-semibold text-primary">+{usd(earn[a], 0)} {t("en intereses")}</span></>}</span>
+      <p className="mt-3 text-xs text-muted-foreground">{new Date(list[a]!.t).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}</p>
+      <div className="mt-1 grid grid-cols-2 gap-3">
+        <div><p className="text-xs text-muted-foreground">{t("Precio de mercado")}</p><p className="font-display text-xl font-bold tabular-nums">{price(list[a]!.c)}</p></div>
+        {earn.length > 0 && <div className="text-right"><p className="text-xs text-muted-foreground">{t("Intereses generados")} ↗</p><p className="font-display text-xl font-bold tabular-nums text-primary">+{usd(earn[a], 0)}</p></div>}
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="mt-1 h-56 w-full touch-none" role="img" aria-label={t("Precio de {s} frente a intereses generados", { s: symbol ?? "" })} onPointerMove={onMove} onPointerDown={onMove} onPointerLeave={() => setHover(null)}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="mt-2 h-80 w-full touch-none" role="img" aria-label={t("Precio de {s} frente a intereses generados", { s: symbol ?? "" })} onPointerMove={onMove} onPointerDown={onMove} onPointerLeave={() => setHover(null)}>
         <defs><linearGradient id={gid} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.35" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient></defs>
-        <text x={L} y={TOP + 4} fill="var(--muted-foreground)" fontSize="12">{t("Precio de mercado")}</text>
-        <path d={smooth(pPts)} fill="none" stroke="var(--muted-foreground)" strokeOpacity="0.7" strokeWidth="2" strokeLinecap="round" />
+        <path d={smooth(pPts)} fill="none" stroke="var(--muted-foreground)" strokeOpacity="0.85" strokeWidth="3" strokeLinecap="round" />
         <line x1={L} y1={MID} x2={R} y2={MID} stroke="var(--border)" strokeDasharray="3 6" />
-        {eLine && <><text x={L} y={MID + 16} fill="var(--primary)" fontSize="12" fontWeight="600">{t("Intereses generados")} ↗</text>
-          <path d={`${eLine} L${R},${BOT} L${L},${BOT} Z`} fill={`url(#${gid})`} />
-          <path d={eLine} fill="none" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" style={{ filter: "drop-shadow(0 0 4px var(--primary))" }} /></>}
+        {eLine && <><path d={`${eLine} L${R},${BOT} L${L},${BOT} Z`} fill={`url(#${gid})`} />
+          <path d={eLine} fill="none" stroke="var(--primary)" strokeWidth="4" strokeLinecap="round" style={{ filter: "drop-shadow(0 0 4px var(--primary))" }} /></>}
         <line x1={x(a)} y1={TOP} x2={x(a)} y2={BOT} stroke="var(--muted-foreground)" strokeOpacity="0.5" strokeDasharray="4 4" />
-        <circle cx={pPts[a]!.x} cy={pPts[a]!.y} r="4" fill="var(--muted-foreground)" />
-        {ePts[a] && <circle cx={ePts[a]!.x} cy={ePts[a]!.y} r="5" fill="var(--background)" stroke="var(--primary)" strokeWidth="3" />}
+        <circle cx={pPts[a]!.x} cy={pPts[a]!.y} r="6" fill="var(--muted-foreground)" />
+        {ePts[a] && <circle cx={ePts[a]!.x} cy={ePts[a]!.y} r="7" fill="var(--background)" stroke="var(--primary)" strokeWidth="3" />}
       </svg>
     </>;
   }
@@ -74,7 +73,7 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
     </div>
     <div className="rounded-2xl border border-border bg-card p-3">
       <div className="flex rounded-full bg-secondary p-0.5 w-fit" role="tablist" aria-label={t("Periodo")}>{(["24h", "7d"] as const).map((r) => <button key={r} type="button" role="tab" aria-selected={range === r} onClick={() => { setRange(r); setHover(null); }} className={pill(range === r)}>{r === "24h" ? "24 h" : "7 d"}</button>)}</div>
-      {chart ?? <div className="grid h-56 place-items-center text-sm text-muted-foreground">{candles.isPending ? <span className="h-2 w-40 animate-pulse rounded-full bg-muted" /> : t("Gráfica no disponible por ahora")}</div>}
+      {chart ?? <div className="grid h-80 place-items-center text-sm text-muted-foreground">{candles.isPending ? <span className="h-2 w-40 animate-pulse rounded-full bg-muted" /> : t("Gráfica no disponible por ahora")}</div>}
     </div>
     <p className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs leading-5">💡 {t("El precio de {s} sube y baja con la oferta y la demanda, pero cada intercambio genera intereses en dólares para la bóveda. La volatilidad es el motor que produce tus ganancias.", { s: symbol ?? "" })}</p>
     <p className="text-[10px] leading-4 text-muted-foreground">{t("Intereses del pool completo, estimados con su volumen. Tu parte depende de tu depósito.")}</p>
