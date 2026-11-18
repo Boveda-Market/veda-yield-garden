@@ -97,15 +97,15 @@ function WeeklyChart({ records, poolPrices, money }: { records: Parameters<typeo
   return <div className="relative mt-3 overflow-hidden rounded-3xl border border-border bg-card p-5">
     <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full bg-hot/15 blur-3xl" />
     <div className="relative flex items-center justify-between gap-2">
-      <p className="text-sm font-semibold">{t("Capital vs. Ganancias")}</p>
+      <p className="text-sm font-semibold">{t("Mercado global vs. Ganancias")}</p>
       <div className="inline-flex items-center rounded-xl border border-border bg-muted/60 p-1 text-xs font-medium">{tab(7, t("7 días"))}{tab(30, t("30 días"))}</div>
     </div>
     <p className="relative mt-2 text-xs capitalize text-muted-foreground">{day}</p>
     <div className="relative mt-1 grid grid-cols-2 gap-3">
-      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full bg-hot shadow-[0_0_6px_var(--hot)]" />{t("Capital en bóvedas")}</p><p className="font-display text-2xl font-extrabold tabular-nums text-hot">{money(cap[shown]!)}</p></div>
+      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full bg-hot shadow-[0_0_6px_var(--hot)]" />{t("Mercado global")}</p><p className="font-display text-2xl font-extrabold tabular-nums text-hot">{money(cap[shown]!)}</p></div>
       <div className="text-right"><p className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />{t("Ganancias cosechadas")}</p><p className="font-display text-2xl font-extrabold tabular-nums text-primary">+{money(earn[shown]!)}</p></div>
     </div>
-    <svg viewBox={`0 0 ${W} ${H}`} className="relative mt-3 h-72 w-full touch-none overflow-visible" role="img" aria-label={t("Capital en bóvedas frente a ganancias cosechadas")} onPointerDown={pick} onPointerMove={(e) => e.buttons || e.pointerType === "mouse" ? pick(e) : undefined}>
+    <svg viewBox={`0 0 ${W} ${H}`} className="relative mt-3 h-72 w-full touch-none overflow-visible" role="img" aria-label={t("Mercado global frente a ganancias cosechadas")} onPointerDown={pick} onPointerMove={(e) => e.buttons || e.pointerType === "mouse" ? pick(e) : undefined}>
       <defs>
         <linearGradient id={`h${gid}`} x1="0" x2="1"><stop offset="0%" stopColor="var(--hot-2)" /><stop offset="100%" stopColor="var(--hot)" /></linearGradient>
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
@@ -119,6 +119,6 @@ function WeeklyChart({ records, poolPrices, money }: { records: Parameters<typeo
       <circle cx={ePts[shown]!.x} cy={ePts[shown]!.y} r="5.5" fill="var(--background)" stroke="var(--primary)" strokeWidth="3" />
     </svg>
     <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{new Date(days[0]!.start).toLocaleDateString(locale, { day: "numeric", month: "short" })}</span><span>{t("Hoy")}</span></div>
-    <p className="relative mt-3 text-xs leading-5 text-muted-foreground">{t("Tu capital puede subir o bajar con el mercado; tus ganancias cosechadas solo suman.")}</p>
+    <p className="relative mt-3 text-xs leading-5 text-muted-foreground">{t("El mercado global puede subir o bajar; tus ganancias cosechadas solo suman.")}</p>
   </div>;
 }
