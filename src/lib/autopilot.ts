@@ -58,13 +58,11 @@ export const gainsWorthQuoting = (gainsUsd: number | null | undefined): gainsUsd
  * so the card says how much was added (or, for cents, that the counter restarts) and nobody thinks earnings vanished.
  */
 export function autopilotDoneText(vaultName: string, valueUsd: string | undefined, gainsUsd?: number | null) {
-  return tgCard("⚡", "Protocolo Autopilot: Rebalanceo ejecutado", [
-    `🎯 <b>Rango re-anclado:</b> tu posición en ${vaultName} fue re-centrada algorítmicamente en el punto óptimo de volumen${valueUsd ? ` (≈ <b>$${valueUsd}</b>)` : ""}.`,
-    gainsWorthQuoting(gainsUsd)
-      ? `📈 <b>Capitalización:</b> se cosecharon <b>+$${gainsUsd.toFixed(2)}</b> de ganancias y se sumaron directo a tu capital (interés compuesto).`
-      : "📈 <b>Capitalización:</b> tus ganancias acumuladas se sumaron directo a tu capital (interés compuesto).",
-    "✨ <b>No tienes que hacer nada:</b> el protocolo operó 100% en automático y tus dólares siguen rindiendo solos.",
-    "💡 <i>Tu contador «Por reclamar» se reinicia porque tus ganancias ya están dentro de la bóveda generando más.</i>",
+  const lead = gainsWorthQuoting(gainsUsd)
+    ? `Se sumaron <b>+$${gainsUsd.toFixed(2)}</b> de tus ganancias a tu inversión.`
+    : "Tus ganancias acumuladas se sumaron a tu inversión.";
+  return tgCard("🤖", "Piloto automático rebalanceó tu bóveda", [
+    `${lead} Tu contador de ganancias empieza desde cero porque esos dólares ya están rindiendo. No tienes que hacer ninguna acción.`,
   ]);
 }
 

@@ -17,7 +17,7 @@ describe("weekly interest", () => {
 describe("alert texts", () => {
   it("deposit shows amount and vault", () => { const s = depositAlertText("150", "GTA6"); expect(s).toContain("$150.00"); expect(s).toContain("GTA6"); expect(s).toContain("No tienes que hacer ninguna acción"); });
   it("harvest shows amount", () => expect(harvestAlertText("12.456", "GTA6")).toContain("+$12.46"));
-  it("exit and rebalance say no action", () => { expect(exitAlertText(50, "10")).toContain("ninguna acción"); expect(autopilotDoneText("Bóveda GTA6", "100", 2)).toContain("No tienes que hacer nada"); });
+  it("exit and rebalance say no action", () => { expect(exitAlertText(50, "10")).toContain("ninguna acción"); expect(autopilotDoneText("Bóveda GTA6", "100", 2)).toContain("No tienes que hacer ninguna acción"); });
 });
 
 describe("weekly interest views", () => {
