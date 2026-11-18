@@ -89,10 +89,9 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
           // Convert leftover JupUSD / vault tokens to USDC too (free swaps, one signature each). The SOL network reserve stays.
           if (!migrateTo) {
             try {
-              const swept = await sweepLeftovers(address, session.signAndSend, (_symbol, i, n) => { setPhase(2); setStep(t("Retiro listo. Pasando sobrantes a dólares…")); });
-              if (swept.failed.length) setSweepNote(t("Tu retiro ya está en tu billetera. Los sobrantes no se pasaron a dólares; puedes hacerlo cuando quieras en Mi Billetera → Cambiar."));
-              else if (swept.converted > 0) setSweepNote(t("También pasamos tus sobrantes a dólares: ~${v} más, sin comisión.", { v: (Number(swept.usdc) / 1e6).toFixed(2) }));
-            } catch { setSweepNote(t("No se pudieron cambiar los sobrantes. Hazlo en Mi Billetera → Cambiar.")); }
+              const swept = await sweepLeftovers(address, session.signAndSend, (_symbol, i, n) => { setPhase(2); setStep(t("Retiro listo. Terminando…")); });
+              void swept;
+            } catch { /* silent: leftovers stay in the wallet */ }
           }
           notify("success", t("Retiro confirmado"), t("Tus dólares ya están en tu billetera"));
           setFinished(true); setMessage(t("Retiro confirmado."));
@@ -117,7 +116,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
     {!migrateTo && !finished && !signature && <TapAmount label={t("Porcentaje a retirar")} inputMode="numeric" maxLength={3} suffix="%" value={pctText} disabled={pending} onChange={(v) => { const d = v.replace(/\D/g, "").slice(0, 3); setPctText(d); const n = Number(d); if (n >= 1 && n <= 100 && n !== percent) { setPercent(n); setResult(null); setAccepted(false); setMessage(null); } }} onCommit={() => setPctText(String(percent))} />}
     {!migrateTo && !finished && !signature && percent !== 100 && <p className="text-xs text-muted-foreground">{t("Retiras el {p}% y el resto sigue invirtiendo en la bóveda.", { p: String(percent) })}</p>}
     {migrateTo && signature && <MoveSteps current={finished ? 2 : 1} from={vaultSymbol(vaultId)} to={t((dest ?? migrateTo).name)} />}
-    {!migrateTo && two && signature && !finished && <ProgressSteps steps={[t("Retirar de la bóveda"), t("Pasar sobrantes a dólares")]} current={phase} />}
+    {!migrateTo && two && signature && !finished && <ProgressSteps steps={[t("Retirar de la bóveda"), t("Pasar a dólares")]} current={phase} />}
     {migrateTo && !signature && <div role="radiogroup" aria-label={t("Bóveda destino")} className="grid gap-2">{destOptions.map((v, i) => { const apr = destYields[i]?.data?.apr; const on = dest?.id === v.id; return <button key={v.id} type="button" role="radio" aria-checked={on} disabled={pending} onClick={() => setDest(v)} className={`flex items-center justify-between rounded-lg border p-3 text-left text-sm ${on ? "border-primary bg-primary/10" : "border-border"}`}><span className="font-semibold">{t(v.name)}</span><span className="tabular-nums text-primary">{apr == null ? "—" : `${apr.toFixed(1)}% APR`}</span></button>; })}</div>}
     {finished && migrateTo && onMigrated ? <div role="status" className="grid gap-3"><p className="flex items-center gap-2 font-semibold"><LoaderCircle className="h-4 w-4 animate-spin motion-reduce:animate-none" />{t("Cierre listo. Abriendo tu nueva bóveda…")}</p><Button size="lg" onClick={() => dest && onMigrated(result?.minimumNet ?? "", dest)}>{t("Paso 2: depositar en {v}", { v: t((dest ?? migrateTo).name) })}</Button></div> : finished ? <><p role="status" className="sr-only">{message}</p><ActionSuccess destination="/wallet" title={t("¡Retiro completado!")} amount={result?.net ? { value: result.net, unit: "$", label: "≈" } : undefined} details={[{ label: t("Operación"), value: percent === 100 ? t("Retiro total de bóveda") : t("Retiro del {p}% de bóveda", { p: String(percent) }) }, { label: t("Origen"), value: t("Bóveda {v}", { v: vaultSymbol(vaultId) }) }, { label: t("Destino"), value: t("Tu billetera") }, ...(percent === 100 && result?.rentSol ? [{ label: t("Garantía de apertura"), value: t("Devuelta") }] : [])]} body={percent === 100 ? t("Tus dólares ya están en tu billetera. También recuperaste la garantía de apertura.") : t("Tus dólares ya están en tu billetera. El resto sigue invertido.")} signature={signature} onClose={onClose} />{sweepNote && <p role="status" className="text-sm text-muted-foreground">{sweepNote}</p>}</> : <>
     {!prefilled && inputs}

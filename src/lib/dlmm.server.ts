@@ -12,6 +12,7 @@ import type { PreparedPilot } from "@/lib/pilot-deposit";
 import { harvestAmounts, type HarvestResult } from "@/lib/harvest";
 import { withdrawalAmounts, exitFeeMode, type WithdrawalInput, type WithdrawalResult } from "@/lib/withdrawal";
 import { ledgerSwapToUsdc } from "@/lib/ledger-swap.server";
+import { rebalanceGainsUsd } from "@/lib/autopilot";
 import { compoundSpendValid, type CompoundInput, type CompoundResult } from "@/lib/compound";
 import type { RebalanceResult } from "@/lib/dlmm";
 import { dlmmRange, dlmmSlippagePct, binsMoved, rebalanceSwapPlan, DLMM_MIN_SOL_LAMPORTS, DLMM_MAX_SWAP_IMPACT_PCT, DLMM_EXIT_MIN_PCT } from "@/lib/dlmm";
@@ -437,7 +438,7 @@ export type { RebalanceResult } from "@/lib/dlmm";
  * swap half the excess side inside the same pool, then re-centre the same position on the current price
  * with everything (capital + fees). Tiered harvest fee on the claimed USDC only (same tiers as harvest) goes to the fee ATA; only the owner signs; the wallet never loses prior balances.
  */
-export async function simulateDlmmRebalance(connection: Connection, input: WithdrawalInput, options: { prepare?: boolean; maxImpactPct?: number; memo?: string } = {}): Promise<RebalanceResult> {
+export async function simulateDlmmRebalance(connection: Connection, input: WithdrawalInput, options: { prepare?: boolean; maxImpactPct?: number; memo?: string; absorbWalletToken?: boolean } = {}): Promise<RebalanceResult> {
   const startedAt = Date.now();
   let stage = "Lectura de posición";
   const fail = (message: string): RebalanceResult => ({ success: false, message });
@@ -465,8 +466,10 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     // Tiered harvest fee on the claimed USDC (tier by harvested amount); skipped if the treasury USDC account is missing.
     const positionUnits = BigInt(Math.floor(Number(xAll) * price)) + yAll;
     const bovedaFee = before[4] ? harvestFee(BigInt(data.feeY.toString()), positionUnits) : 0n;
-    const x = xAll, y = yAll - bovedaFee;
     const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), xBefore = tokenBalance(asSim(before[1]), mintX, owner);
+    // Autopilot: leftover vault tokens already in the wallet join the re-centred position (never USDC, never SOL).
+    const absorbedX = options.absorbWalletToken ? xBefore : 0n;
+    const x = xAll + absorbedX, y = yAll - bovedaFee;
     if (await connection.getBalance(owner) < 10_000_000) return fail("Necesitas un poco más de reserva de operaciones para rebalancear.");
 
     stage = "Preparación del rebalanceo";
@@ -515,7 +518,7 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     stage = "Simulación del rebalanceo";
     const sized = await simulate();
     const final = await simulate(computeLimit(sized.units));
-    const usdcLeft = tokenBalance(final.accounts[0], usdc, owner) - usdcBefore, tokenLeft = tokenBalance(final.accounts[1], mintX, owner) - xBefore;
+    const usdcLeft = tokenBalance(final.accounts[0], usdc, owner) - usdcBefore, tokenLeft = tokenBalance(final.accounts[1], mintX, owner) - (xBefore - absorbedX);
     const pa = final.accounts[2];
     let rangeOk = false;
     if (pa?.data[0] && pa.owner === pool.program.programId.toBase58()) {
@@ -530,7 +533,7 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     if (!success) { log("rebalance", "checks", JSON.stringify({ ...checks, solSpent: solSpent.toString() })); return fail("El rebalanceo no superó todas las comprobaciones. No se pidió ninguna firma."); }
     if (options.prepare && Date.now() - startedAt > 45_000) return fail("La preparación tardó demasiado. Repite la revisión.");
     const valueUsd = (Number(x) * price + Number(y)) / 1e6;
-    const gainsAddedUsd = Math.max(0, (Number(data.feeX.toString()) * price + Number(data.feeY.toString()) - Number(bovedaFee)) / 1e6);
+    const gainsAddedUsd = rebalanceGainsUsd(BigInt(data.feeX.toString()), BigInt(data.feeY.toString()), absorbedX, price, bovedaFee);
     return {
       success: true, tokenSymbol: config.symbol, valueUsd: valueUsd.toFixed(2),
       feesUsdc: tokenAmount(data.feeY.toString(), 6), feesToken: tokenAmount(data.feeX.toString(), config.decimals),

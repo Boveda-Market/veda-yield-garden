@@ -71,7 +71,7 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
       await save(e.wallet, { last_attempt_at: iso });
       e.last_attempt_at = iso;
       if (!(await hasAutopilotSigner(e.wallet_id, appSecret))) { await save(e.wallet, { enabled: false, last_result: "Permiso retirado: el piloto se apagó." }); break; }
-      const quote = await simulateDlmmRebalance(connection, { wallet: e.wallet, position: p.address, vaultId: p.vaultId as never }, { prepare: true, maxImpactPct: AUTOPILOT_MAX_IMPACT_PCT, memo: AUTOPILOT_MEMO });
+      const quote = await simulateDlmmRebalance(connection, { wallet: e.wallet, position: p.address, vaultId: p.vaultId as never }, { prepare: true, maxImpactPct: AUTOPILOT_MAX_IMPACT_PCT, memo: AUTOPILOT_MEMO, absorbWalletToken: true });
       if (!quote.success || !quote.prepared || quote.prepared.wallet !== e.wallet) { await fail(e, quote.message); continue; }
       const tx = VersionedTransaction.deserialize(Buffer.from(quote.prepared.transaction, "base64"));
       const keys = tx.message.staticAccountKeys.map((k) => k.toBase58());

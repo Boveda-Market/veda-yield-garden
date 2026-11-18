@@ -85,3 +85,8 @@ export function autopilotFailures(lastResult: string | null | undefined): number
 export function withFailure(prev: string | null | undefined, message: string): string { return `[${autopilotFailures(prev) + 1}] ${message}`.slice(0, 300); }
 /** The manual «Sumar ganancias a la bóveda» button only appears after Auto-Compound failed this many times in a row. */
 export const showManualCompound = (failures: number | null | undefined) => (failures ?? 0) >= AUTOPILOT_MANUAL_AFTER_FAILS;
+
+/** Dollars a rebalance adds to the position: claimed fees plus absorbed wallet vault tokens, minus the treasury fee (USD, 6-decimal raw units). */
+export function rebalanceGainsUsd(feeX: bigint, feeY: bigint, absorbedX: bigint, price: number, bovedaFee: bigint): number {
+  return Math.max(0, (Number(feeX + absorbedX) * price + Number(feeY) - Number(bovedaFee)) / 1e6);
+}
