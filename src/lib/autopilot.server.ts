@@ -49,12 +49,13 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
     if (done >= AUTOPILOT_MAX_PER_RUN) break;
     // Reconcile: a rebalance sent last cycle that confirmed after we stopped waiting still gets its record and alert.
     const lastSig = (e as { last_signature?: string | null }).last_signature;
-    if (lastSig && /Sin confirmación/.test(e.last_result ?? "")) {
+    if (lastSig && /Sin confirmación|confirmando/.test(e.last_result ?? "")) {
       const st = (await connection.getSignatureStatuses([lastSig], { searchTransactionHistory: true }).catch(() => null))?.value[0];
       if (st && !st.err && (st.confirmationStatus === "confirmed" || st.confirmationStatus === "finalized")) {
-        await save(e.wallet, { last_rebalance_at: iso, last_result: "Rebalanceada", last_gains_usd: null });
+        const pendingGains = (e as { last_gains_usd?: number | null }).last_gains_usd ?? null;
+        await save(e.wallet, { last_rebalance_at: iso, last_result: "Rebalanceada" });
         e.last_rebalance_at = iso; e.last_result = "Rebalanceada";
-        await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName("gta6"), undefined, null), { text: "👀 Ver mi posición", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
+        await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName("gta6"), undefined, pendingGains != null ? Number(pendingGains) : null), { text: "👀 Ver mi posición", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
         done++;
         continue;
       }
@@ -94,15 +95,17 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
       let signature: string;
       try { signature = await connection.sendRawTransaction(Buffer.from(signed, "base64"), { skipPreflight: false, maxRetries: 3 }); }
       catch { await fail(e, "La red rechazó el envío; se reintentará."); continue; }
+      const gains = quote.gainsAddedUsd != null ? Number(quote.gainsAddedUsd) : null;
+      // Persist the sent signature before waiting, so a slow confirmation or an interrupted run is reconciled (record + alert) next cycle.
+      await save(e.wallet, { last_signature: signature, last_gains_usd: gains, last_result: `${e.last_result?.startsWith("[") ? e.last_result.split("]")[0] + "] " : ""}Enviada; confirmando…` });
       let ok = false;
-      for (let i = 0; i < 6 && !ok; i++) {
-        await new Promise((r) => setTimeout(r, 2000));
+      for (let i = 0; i < 12 && !ok; i++) {
+        await new Promise((r) => setTimeout(r, 2500));
         const st = (await connection.getSignatureStatuses([signature]).catch(() => null))?.value[0];
         if (st?.err) break;
         ok = st?.confirmationStatus === "confirmed" || st?.confirmationStatus === "finalized";
       }
-      if (!ok) { { await save(e.wallet, { last_signature: signature }); await fail(e, "Sin confirmación; se revisará en el próximo ciclo."); }; continue; }
-      const gains = quote.gainsAddedUsd != null ? Number(quote.gainsAddedUsd) : null;
+      if (!ok) { await fail(e, "Sin confirmación; se revisará en el próximo ciclo."); continue; }
       await save(e.wallet, { last_rebalance_at: iso, last_signature: signature, last_result: "Rebalanceada", last_gains_usd: gains });
       e.last_rebalance_at = iso;
       await db.from("system_service_status").delete().eq("service", k);
