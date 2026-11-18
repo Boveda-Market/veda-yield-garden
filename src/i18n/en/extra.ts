@@ -1370,7 +1370,6 @@ export const extra: Record<string, string> = {
   "No se pudo preparar la reinversión. Tus ganancias siguen en tu billetera.": "Couldn't prepare the reinvestment. Your earnings are still in your wallet.",
   "Pasar a dólares": "Convert to dollars",
   "Pasar sobrantes a dólares": "Convert leftovers to dollars",
-  "Pasar a dólares": "Convert to dollars",
   "Retiro listo. Terminando…": "Withdrawal done. Finishing…",
   "Pones ${a} · si aciertas recibes ${b}": "You put ${a} · if you're right you get ${b}",
   "Posición cerrada. Preparando el paso a dólares…": "Position closed. Preparing the switch to dollars…",
