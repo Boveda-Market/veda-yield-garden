@@ -9,8 +9,12 @@ export function HotZoneMeter({ position, className = "" }: { position: ChainPosi
   if (!zone) return null;
   // Damped position: the marker reflects the live price but always floats inside the zone (20%–80%).
   const left = `${20 + (zone.pct / 100) * 60}%`;
+  // Gradual reference tone: green at the center, blending to amber toward the edges, calm violet when out of range.
+  const dist = Math.abs(zone.pct - 50) / 50;
+  const mix = Math.round(Math.min(1, Math.max(0, (dist - 0.2) / 0.8)) * 100);
+  const tone = zone.status === "out" ? "var(--zone-out)" : `color-mix(in oklch, var(--zone-edge) ${mix}%, var(--primary))`;
   return <div className={`rounded-xl border border-border bg-muted/40 p-3 ${className}`} role="group" aria-label={t("Zona activa")}>
-    <div className="flex items-start justify-between gap-2 text-xs"><span className="shrink-0 whitespace-nowrap font-bold uppercase tracking-wide">🔥 {t("Zona activa")}</span><span className={`text-right font-semibold transition-colors duration-700 ${zone.status === "out" ? "text-zone-out" : zone.status === "edge" ? "text-zone-edge" : "text-primary"}`}>✨ {t("Generando ganancias")}</span></div>
+    <div className="flex items-start justify-between gap-2 text-xs"><span className="shrink-0 whitespace-nowrap font-bold uppercase tracking-wide">🔥 {t("Zona activa")}</span><span className="text-right font-semibold transition-colors duration-1000 ease-out" style={{ color: tone }}>✨ {t("Generando ganancias")}</span></div>
     <div className="relative mt-3 h-3">
       <div className="absolute inset-0 overflow-hidden rounded-full bg-[image:var(--gradient-hot)] opacity-90">
         <div className="zone-sweep absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-background/50 to-transparent motion-reduce:hidden" />
