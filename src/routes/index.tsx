@@ -1,6 +1,7 @@
 import { BrandLogo } from "@/components/brand-logo";
 import { langLinks } from "@/lib/seo-lang";
 import sharePreview from "@/assets/share/boveda_gta6_preview_es.jpg.asset.json";
+import shareVideo from "@/assets/share/og-preview-gta6.mp4.asset.json";
 import dobleLogo from "@/assets/doble-o-nada-logo.png";
 import { HERO_VARIANTS, HERO_KEY, pickHeroVariant, isHeroReview } from "@/lib/hero-variants";
 import { Fingerprint, Landmark } from "lucide-react";
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/")({ staticData: { sitemap: true },
     { property: "og:title", content: "BÓVEDA — Billetera en dólares digitales (USDC) que genera intereses" },
     { property: "og:description", content: "Guarda dólares digitales (USDC), genera intereses y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Depositar es gratis." },
     { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
-    { property: "og:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:image:width", content: "1200" }, { property: "og:image:height", content: "630" }, { property: "og:image:alt", content: "Bóveda GTA6 — Mientras todos esperan el juego, tú cobras como la casa." }, { name: "twitter:image", content: `https://bovedamarket.app${sharePreview.url}` },
+    { property: "og:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:image:width", content: "1200" }, { property: "og:image:height", content: "630" }, { property: "og:image:alt", content: "Bóveda GTA6 — Mientras todos esperan el juego, tú cobras como la casa." }, { name: "twitter:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:video", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:secure_url", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:type", content: "video/mp4" }, { property: "og:video:width", content: "1200" }, { property: "og:video:height", content: "630" },
     { property: "og:url", content: "https://bovedamarket.app/" },
   ], links: langLinks("es", "/", "/en"),
   scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"BÓVEDA","url":"https://bovedamarket.app/","logo":"https://bovedamarket.app/favicon.png","email":"admin@bovedamarket.app"},{"@type":"WebApplication","name":"BÓVEDA","url":"https://bovedamarket.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"es","description":"Guarda dólares digitales (USDC), genera intereses y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Depositar es gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}]}) }] }), component: Landing,
