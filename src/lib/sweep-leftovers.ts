@@ -18,9 +18,9 @@ export function worthSweeping(outMicro: bigint) { return outMicro >= SWEEP_MIN_M
  * Converts every leftover JupUSD / vault token in the wallet to USDC, one wallet-signed swap each,
  * with no BÓVEDA fee (swaps are free). Returns the USDC quoted and any symbols that could not be converted.
  */
-export async function sweepLeftovers(wallet: string, signAndSend: (tx: Uint8Array) => Promise<string>, onStep?: (symbol: string, index: number, total: number) => void) {
+export async function sweepLeftovers(wallet: string, signAndSend: (tx: Uint8Array) => Promise<string>, onStep?: (symbol: string, index: number, total: number) => void, only?: readonly string[]) {
   const { quoteSwap, buildSwap, readTokenBalance } = await import("@/lib/wallet-actions");
-  const balances = await Promise.all(sweepTargets().map(async (t) => ({ ...t, amount: await readTokenBalance(wallet, t.mint).catch(() => 0n) })));
+  const balances = await Promise.all(sweepTargets().filter((t) => !only || only.includes(t.symbol)).map(async (t) => ({ ...t, amount: await readTokenBalance(wallet, t.mint).catch(() => 0n) })));
   const quoted: { symbol: string; quote: Awaited<ReturnType<typeof quoteSwap>> }[] = [];
   const failed: string[] = [];
   for (const b of balances) {
@@ -51,4 +51,10 @@ export async function leftoverSymbols(wallet: string): Promise<string[]> {
     try { const q = await quoteSwap(t.symbol, "USDC", amount, { feeUsdc: 0n }); if (worthSweeping(BigInt(q.outAmount))) out.push(t.symbol); } catch { /* skip */ }
   }
   return out;
+}
+
+/** Sube/Baja dollars (prizes, refunds) are auto-converted to available USDC at most once per wallet per this window. */
+export const AUTO_JUPUSD_COOLDOWN_MS = 10 * 60_000;
+export function autoJupUsdDue(balanceMicro: bigint | undefined, lastAt: number | null, now: number) {
+  return balanceMicro !== undefined && worthSweeping(balanceMicro) && (lastAt === null || now - lastAt >= AUTO_JUPUSD_COOLDOWN_MS);
 }

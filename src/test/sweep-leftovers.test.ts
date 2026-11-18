@@ -17,3 +17,10 @@ describe("liquidation leftover sweep", () => {
 describe("extra coins cleanup never sells the network reserve", () => {
   it("SOL is not a cleanup target", () => expect(sweepTargets().map((t) => t.symbol)).not.toContain("SOL"));
 });
+
+import { autoJupUsdDue, AUTO_JUPUSD_COOLDOWN_MS } from "@/lib/sweep-leftovers";
+describe("automatic Sube/Baja dollar conversion", () => {
+  it("converts $0.01 or more when never tried", () => expect(autoJupUsdDue(10_000n, null, 0)).toBe(true));
+  it("skips dust below $0.01", () => expect(autoJupUsdDue(9_999n, null, 0)).toBe(false));
+  it("waits 10 minutes between attempts", () => { expect(autoJupUsdDue(5_000_000n, 0, AUTO_JUPUSD_COOLDOWN_MS - 1)).toBe(false); expect(autoJupUsdDue(5_000_000n, 0, AUTO_JUPUSD_COOLDOWN_MS)).toBe(true); });
+});

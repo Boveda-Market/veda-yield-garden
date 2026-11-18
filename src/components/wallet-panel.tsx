@@ -158,6 +158,23 @@ export function WalletPanel() {
     finally { setConverting(false); }
   }
 
+  // Sube/Baja prizes and refunds land as JupUSD: convert them silently to available dollars so the next round can use them.
+  const autoJup = useRef(false);
+  useEffect(() => {
+    const bal = extra.data?.["JupUSD"];
+    if (!address || autoJup.current || converting) return;
+    const key = `boveda:auto-jupusd:${address}`;
+    void import("@/lib/sweep-leftovers").then(async ({ autoJupUsdDue, sweepLeftovers }) => {
+      let last: number | null = null; try { const v = Number(sessionStorage.getItem(key)); last = v > 0 ? v : null; } catch { /* ignore */ }
+      if (autoJup.current || !autoJupUsdDue(bal, last, Date.now())) return;
+      autoJup.current = true;
+      try { sessionStorage.setItem(key, String(Date.now())); } catch { /* ignore */ }
+      try { const r = await sweepLeftovers(address, session.signAndSend, undefined, ["JupUSD"]); if (r.converted > 0) { refresh(); void extra.refetch(); } }
+      catch { /* silent: the balance still counts in the total and is retried later */ }
+      finally { autoJup.current = false; }
+    });
+  }, [address, extra.data, converting]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // JupUSD (prediction payouts and refunds of unfilled orders) is a 1:1 dollar: count it so the total never looks short.
   // A recent refunded Sube/Baja order is named as such so the user knows their money came back.
   const refundReady = (refunds.data ?? []).length > 0;
