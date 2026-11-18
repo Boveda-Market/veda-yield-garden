@@ -1603,4 +1603,9 @@ export const extra: Record<string, string> = {
   "¿Cómo funcionan las rondas de Doble o Nada?": "How do Double or Nothing rounds work?",
   "Son contratos binarios con liquidación atómica basados en oráculos de precio en tiempo real. Pronosticas si Bitcoin, Ethereum u otro activo terminará arriba o abajo en rondas de 5 minutos, 15 minutos o 4 horas. Cada contrato ganador liquida a $1.00 exacto; si no aciertas, pierdes lo que pusiste. BÓVEDA nunca es tu contraparte.": "They are binary contracts with atomic settlement based on real-time price oracles. You forecast whether Bitcoin, Ethereum or another asset will finish up or down in 5-minute, 15-minute or 4-hour rounds. Each winning contract settles at exactly $1.00; if you miss, you lose what you put in. BÓVEDA is never your counterparty.",
   "Dirección de tesorería del protocolo:": "Protocol treasury address:",
+"Oprime aquí para ver ganancias": "Tap here to see earnings",
+  "Oprime aquí para depositar": "Tap here to deposit",
+  "Intereses con el volumen de GTA6": "Interest from GTA6 trading volume",
+  "Ganando 24/7": "Earning 24/7",
+  "Ver mis ganancias": "See my earnings",
 };

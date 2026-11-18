@@ -14,7 +14,7 @@ import type { Vault } from "@/lib/vaults";
 import { ChevronRight, Zap } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { VAULTS } from "@/lib/vaults";
-import { DuelLines, Gta6TileBody } from "@/components/home-gta6";
+import { DuelLines, Gta6RotatingBanner } from "@/components/home-gta6";
 
 const gta6 = VAULTS.find((v) => v.id === "gta6");
 
@@ -32,21 +32,11 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
   const act = (p: ChainPosition, a: "harvest" | "exit" | "compound") => { if (!isOperableVault(p.vaultId)) return; setOpen(false); if (a === "exit") setWithdrawal({ position: p.address, vaultId: p.vaultId }); else setHarvest({ position: p.address, vaultId: p.vaultId, compound: a === "compound" }); };
   const move = (p: ChainPosition, target: Vault, rotate = false) => { if (!isOperableVault(p.vaultId) || !isOperableVault(target.id) || p.locked || (target.id === p.vaultId && !rotate)) return; setOpen(false); setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target, ...(rotate ? { rotate: true } : {}) }); };
   const refetch = () => void vaults.refetch();
-  return <section aria-label={t("Accesos rápidos")} className="grid grid-cols-2 gap-2 sm:gap-3">
-    {mine ? <button type="button" onClick={() => setOpen(true)} className="hot-ring cta-attn cta-glow-hot group relative block rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">
-      <Gta6TileBody status={<span className="inline-flex w-fit items-center gap-1 rounded-full bg-hot-surface/80 px-2 py-0.5 text-[11px] font-bold leading-4">{mine.outOfRange ? <><Zap size={11} aria-hidden />{t("Rebalancear")}</> : <>{t("Activa")} · {t("Ver ganancias")} →</>}</span>} />
-    </button> : <Link to="/app" className="hot-ring cta-attn cta-glow-hot group relative block rounded-2xl p-[2px] transition-transform active:scale-[0.98]">
-      <Gta6TileBody status={<span className="text-[11px] leading-4 text-hot-muted">{t("Intereses brutales con el volumen de GTA6")}</span>} />
-    </Link>}
-    <Link to="/mercados" className="cta-attn group relative block rounded-2xl bg-primary p-[2px] shadow-[0_0_24px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
-      <span className="relative isolate flex h-full flex-col gap-1.5 overflow-hidden rounded-[14px] bg-card p-3">
-        <DuelLines />
-        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-primary"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary" /></span>{t("En vivo")}</span>
-        <span className="block"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} className="h-8 w-auto max-w-full" /></span>
-        <LightningBadge suffix="5 min" />
-        <ChevronRight size={16} aria-hidden className="absolute right-2 top-2 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-      </span>
-    </Link>
+  const cta = mine ? <><span>{mine.outOfRange ? <><Zap size={14} aria-hidden className="mr-1 inline" />{t("Rebalancear")}</> : <>👉 {t("Oprime aquí para ver ganancias")}</>}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : <><span>👉 {t("Oprime aquí para depositar")}</span><ChevronRight size={16} aria-hidden /></>;
+  const sub = t("Intereses con el volumen de GTA6");
+  return <section aria-label={t("Bóveda GTA6")}>
+    {mine ? <button type="button" onClick={() => setOpen(true)} className="hot-ring cta-glow-hot block w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]"><Gta6RotatingBanner cta={cta} sub={sub} /></button>
+    : <Link to="/app" className="hot-ring cta-glow-hot block rounded-2xl p-[2px] transition-transform active:scale-[0.98]"><Gta6RotatingBanner cta={cta} sub={sub} /></Link>}
     <Dialog open={open} onOpenChange={setOpen}>
       <ActionSheetContent closeLabel={t("Cerrar")}>
         <DialogHeader className="pr-10 text-left"><DialogTitle className="font-display text-xl">{t("Tu Bóveda GTA6")}</DialogTitle><DialogDescription className="sr-only">{t("Ver ganancias")}</DialogDescription></DialogHeader>
@@ -57,4 +47,16 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
     {wallet && withdrawal && <WithdrawalSimulation wallet={wallet} {...withdrawal} onClose={() => { setWithdrawal(null); refetch(); }} onMigrated={(usdc, target) => { setWithdrawal(null); if (target) setDeposit({ vault: target, amount: usdc, migrate: true }); }} />}
     {wallet && deposit && <DepositSimulation key={`${deposit.vault.id}-${deposit.position ?? "new"}`} vault={deposit.vault} wallet={wallet} {...(deposit.position ? { position: deposit.position } : {})} initialAmount={deposit.amount ?? ""} migrate={Boolean(deposit.migrate)} onClose={() => { setDeposit(null); refetch(); }} />}
   </section>;
+}
+
+/** Full-width Doble o Nada shortcut, placed above Invita y Gana in Mi Billetera. */
+export function DobleShortcut() {
+  const t = useT();
+  return <Link to="/mercados" className="cta-attn group relative block rounded-2xl bg-primary p-[2px] shadow-[0_0_24px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
+    <span className="relative isolate flex items-center justify-between gap-3 overflow-hidden rounded-[14px] bg-card p-3.5">
+      <DuelLines />
+      <span className="relative flex min-w-0 flex-col gap-1.5"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} className="h-8 w-auto max-w-full self-start" /><LightningBadge suffix="5 min" /></span>
+      <span className="relative inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-black uppercase text-primary"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary" /></span>{t("En vivo")}</span>
+    </span>
+  </Link>;
 }

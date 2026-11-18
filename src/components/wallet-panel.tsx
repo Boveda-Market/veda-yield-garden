@@ -29,7 +29,7 @@ import { WalletSwap } from "@/components/wallet-swap";
 import { solanaAddressSchema } from "@/lib/solana-data";
 import { decimalToUnits, PAYOUT_MOVE_MIN_USD } from "@/lib/onboarding";
 import { StartGuide } from "@/components/start-guide";
-import { WalletHeroShortcuts } from "@/components/wallet-hero-shortcuts";
+import { DobleShortcut, WalletHeroShortcuts } from "@/components/wallet-hero-shortcuts";
 import { Gta6PromoPopup } from "@/components/gta6-promo";
 import { Gta6VideoPopup } from "@/components/gta6-video-popup";
 
@@ -212,6 +212,7 @@ export function WalletPanel() {
     </section>
 
     <section aria-label={t("Accesos rápidos")} className="grid gap-2">
+      <DobleShortcut />
       <Link to="/invita" className="invite-ring cta-attn cta-glow-invite group block rounded-2xl p-[2px] transition-transform active:scale-[0.98]">
         <span className="flex items-center gap-3 rounded-[14px] bg-[image:var(--gradient-invite-surface)] p-4 text-invite-foreground">
           <span className="invite-cta grid h-11 w-11 shrink-0 place-items-center rounded-xl text-invite-surface"><span className="cta-wiggle"><Gift size={22} aria-hidden /></span></span>

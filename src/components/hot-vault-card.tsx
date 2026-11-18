@@ -12,19 +12,14 @@ import type { Vault } from "@/lib/vaults";
 const num = (v: number | null | undefined) => v == null ? "—" : v.toLocaleString("es-MX", { maximumFractionDigits: 0 });
 const usd = (v: number | null | undefined) => v == null ? "—" : `$${v.toLocaleString("es-MX", { maximumFractionDigits: 0 })}`;
 
-/** Vice-City-style sunset sky with palm silhouettes (original art, no game logos). */
+/** Vice-City-style sunset sky (sun with horizon stripes, no palms; original art, no game logos). */
 export function Sunset() {
-  const palm = (x: number, h: number, flip = false) => <g transform={`translate(${x} ${100 - h})${flip ? " scale(-1 1)" : ""}`}>
-    <path d={`M0 ${h} C 4 ${h * 0.6}, 8 ${h * 0.3}, 3 0`} fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
-    {[[-30, 8], [-22, -4], [-6, -12], [12, -10], [28, 2], [22, 14], [-14, 16]].map(([dx, dy], i) => <path key={i} d={`M3 0 Q ${dx! * 0.5} ${dy! - 12}, ${dx} ${dy! + 10}`} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />)}
-  </g>;
   return <svg aria-hidden="true" viewBox="0 0 400 100" preserveAspectRatio="xMaxYMax meet" className="pointer-events-none absolute inset-0 h-full w-full text-hot-surface">
     <defs>
       <linearGradient id="hot-sun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="oklch(0.93 0.14 90)" /><stop offset="1" stopColor="var(--hot)" /></linearGradient>
       <mask id="hot-sun-cut"><rect width="400" height="100" fill="white" />{[62, 72, 80, 87, 93].map((y, i) => <rect key={y} y={y} width="400" height={2 + i * 0.8} fill="black" />)}</mask>
     </defs>
     <circle cx="300" cy="100" r="62" fill="url(#hot-sun)" mask="url(#hot-sun-cut)" />
-    {palm(232, 72, true)}{palm(352, 82)}{palm(384, 58)}
   </svg>;
 }
 
