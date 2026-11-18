@@ -1,3 +1,4 @@
+import { SyncBar } from "@/components/ui/sync-bar";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQueries } from "@tanstack/react-query";
@@ -79,8 +80,9 @@ export function WalletPositions({ wallet, only, bare }: { wallet: string; only?:
         <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
           <div className="rounded-lg bg-muted/50 p-2"><dt className="text-muted-foreground">{t("Valor")}</dt><dd className="mt-0.5 font-display text-sm font-semibold tabular-nums">{value === null ? "—" : `≈ ${formatUsd(value)}`}</dd></div>
           <div className="rounded-lg bg-muted/50 p-2"><dt className="text-muted-foreground">{t("Rendimiento")}</dt><dd className="mt-0.5 font-display text-sm font-semibold tabular-nums text-primary">{apr === null ? "—" : `${apr.toFixed(1)}% APR`}</dd></div>
-          <div className="rounded-lg bg-muted/50 p-2"><dt className="text-muted-foreground">{t("PNL")}</dt><dd className="mt-0.5 font-display text-sm font-semibold tabular-nums text-primary">{fees === null ? "—" : `+${formatUsd(fees)}`}</dd></div>
+          <div className="rounded-lg bg-muted/50 p-2"><dt className="text-muted-foreground">{t("PNL")}</dt><dd className="mt-0.5 font-display text-sm font-semibold tabular-nums text-primary">{fees === null ? <span className="animate-pulse">…</span> : `+${formatUsd(fees)}`}</dd></div>
         </dl>
+        {fees === null && <SyncBar className="mt-3" />}
         {fees !== null && <LiveEarnings base={fees} ratePerMs={p.locked ? 0 : earningRatePerMs(value, apr)} since={since} label={t("Ganancias por cosechar · estimado en vivo")} />}
         {ok ? <>{manualCompound && <Button variant="outline" className="cta-attn mt-3 h-14 w-full rounded-xl border-2 border-primary disabled:animate-none bg-primary/15 text-base font-extrabold text-primary shadow-md hover:bg-primary/25 disabled:border-border disabled:bg-muted disabled:text-muted-foreground" disabled={p.outOfRange || !canHarvest(fees)} onClick={() => setHarvest({ position: p.address, vaultId: p.vaultId as Supported, compound: true })}><span className="cta-wiggle"><Repeat size={18} strokeWidth={2.5} /></span>{t("Sumar ganancias a la bóveda")}</Button>}<Button className="mt-2 w-full" disabled={!canHarvest(fees)} onClick={() => setHarvest({ position: p.address, vaultId: p.vaultId as Supported })}><Sprout size={16} />{t("Cosechar dólares")}</Button>{!canHarvest(fees) && <p className="mt-1 text-center text-xs text-muted-foreground">{t("Cosechar y reinvertir se activan desde $0.50 de ganancias.")}</p>}
           <RebalanceButton position={p} size="lg" className="mt-2 w-full font-bold" label={t("Rebalancear ahora")} />

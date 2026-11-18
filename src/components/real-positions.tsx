@@ -1,3 +1,4 @@
+import { SyncBar } from "@/components/ui/sync-bar";
 import { useEffect } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { isDlmmVault, isOperableVault } from "@/lib/solana-data";
@@ -53,6 +54,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
         <p className={`font-display text-3xl font-semibold ${hot ? "w-fit bg-[image:var(--gradient-hot)] bg-clip-text font-black text-transparent" : ""}`}>{value === null ? t("No disponible") : `≈ ${formatUsd(value)}`}</p>
         {hot && <HotZoneMeter position={p} className="mt-3" />}
         {apr !== null && !p.locked && <p className="mt-2 text-xs tabular-nums text-muted-foreground"><span className="font-semibold text-primary">{apr.toFixed(2)}% APR</span> {t("estimado (24h)")} · {value === null ? "—" : `≈ +$${(value * apr / 36500).toFixed(2)}`} {t("próximas 24h")}</p>}
+        {fees === null && <SyncBar className="mt-3" />}
         {fees !== null && <LiveEarnings base={fees} ratePerMs={p.locked || p.outOfRange ? 0 : earningRatePerMs(value, apr)} since={since} label={t("Ganancias por cosechar · estimado en vivo")} />}
         {p.locked && <p className="mt-2 text-xs text-muted-foreground">{t("Incluye liquidez bloqueada; no toda la posición es retirable.")}</p>}
         {onMigrate && <MigrateOffer position={p} aprs={aprs} onMigrate={onMigrate} className="mt-3" />}
