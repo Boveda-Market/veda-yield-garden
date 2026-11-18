@@ -122,7 +122,7 @@ export function ActivationCardView({ stage, onActivate, onAddFunds, onOpenVault,
   if (stage.kind === "short") return <section aria-label={t("Estás a un paso de comenzar")} className="rounded-2xl border border-primary/40 bg-primary/10 p-5">
     <h2 className="font-display text-xl font-semibold">{t("Estás a un paso de comenzar")}</h2>
     <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Te faltan {amount} para activar tu cuenta y abrir tu primera bóveda.", { amount: money(stage.missingMicro) })}</p>
-    <Button className="mt-4 w-full" onClick={onAddFunds}><Sparkles size={16} />{t("Añadir lo que falta ({amount})", { amount: money(stage.missingMicro) })}</Button>
+    <Button className="mt-4 w-full" onClick={onAddFunds}><Sparkles size={16} />{t("Depositar lo que falta ({amount})", { amount: money(stage.missingMicro) })}</Button>
   </section>;
   const total = stage.totalMicro === null ? "…" : `~${money(stage.totalMicro)}`;
   return <section aria-label={t("Activa tu cuenta")} className="rounded-2xl border border-primary/40 bg-primary/10 p-5">

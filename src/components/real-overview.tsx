@@ -110,7 +110,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       {owned}
       {/* Full blurb and note live in pool details; the card keeps two lines so it fits one phone screen. */}<p className={`mt-2 flex-1 line-clamp-2 text-xs leading-5 ${vault.badge ? "font-medium text-foreground" : "text-muted-foreground"}`}>{t(vault.blurb)}</p>
       <div className="mt-3 grid grid-cols-2 gap-2"><Button variant="outline" className="h-10 w-full" onClick={() => onDetails(vault)}>{t("Detalles del pool")}</Button>
-      <Button variant="default" className="h-11 w-full text-base font-bold shadow-md ring-2 ring-primary/30" disabled={blocked} onClick={openDeposit}>{canAdd ? <><Plus size={18} strokeWidth={3} />{t("Añadir más")}</> : t("Depositar")}</Button></div>
+      <Button variant="default" className="h-11 w-full text-base font-bold shadow-md ring-2 ring-primary/30" disabled={blocked} onClick={openDeposit}>{canAdd ? <><Plus size={18} strokeWidth={3} />{t("Depositar más")}</> : t("Depositar")}</Button></div>
     </article>; })}</div>{!(data && data.positions.length > 0) && <><VaultSteps className="mt-6" /><StartGuide className="mt-4" /></>}</>}
     <LoginSheet open={!!loginFor} onOpenChange={(o) => { if (!o) setLoginFor(null); }} title={t("Entra para depositar")} body={loginFor ? t("Al entrar te llevamos directo a {v} para depositar.", { v: t(loginFor.name) }) : undefined} />
     {simulationVault && <DepositSimulation key={`${simulationVault.id}-${addTo ?? "new"}`} vault={simulationVault} wallet={walletAddress} {...(addTo ? { position: addTo } : {})} initialAmount={depositAmount} migrate={migrating} onClose={() => { setSimulationVault(null); setAddTo(null); setDepositAmount(""); setMigrating(false); }} />}

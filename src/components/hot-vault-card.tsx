@@ -69,7 +69,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
         {owned}
         <div className="mt-3 grid grid-cols-[auto_1fr] gap-2">
           <button type="button" onClick={onDetails} className="h-11 rounded-xl border border-hot-foreground/25 bg-hot-foreground/10 px-3 text-sm font-semibold transition hover:bg-hot-foreground/20">{t("Detalles del pool")}</button>
-          <button type="button" disabled={depositDisabled} onClick={onDeposit} className="hot-cta flex h-11 items-center justify-center gap-2 rounded-xl font-display text-base font-black text-hot-surface shadow-[var(--shadow-hot)] transition active:scale-95 disabled:opacity-70">{hasPosition ? <><Plus size={18} strokeWidth={3} />{t("Añadir más")}</> : t("Depositar")}</button>
+          <button type="button" disabled={depositDisabled} onClick={onDeposit} className="hot-cta flex h-11 items-center justify-center gap-2 rounded-xl font-display text-base font-black text-hot-surface shadow-[var(--shadow-hot)] transition active:scale-95 disabled:opacity-70">{hasPosition ? <><Plus size={18} strokeWidth={3} />{t("Depositar más")}</> : t("Depositar")}</button>
         </div>
         <p className="mt-2 text-[10px] leading-4 text-hot-muted">{t("No apuestas contra nadie: cobras intereses de los intercambios. Tu saldo sube y baja con el precio de GTA6. Sin vínculo con Rockstar Games.")}</p>
       </div>

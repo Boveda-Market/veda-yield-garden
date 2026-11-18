@@ -183,7 +183,7 @@ export function WalletPanel() {
   const decimals = asset === "SOL" ? 9 : 6;
   const setPct = (pct: bigint) => setAmount((Number((max * pct) / 100n) / 10 ** decimals).toString());
   const quick = [
-    { icon: CreditCard, label: t("Añadir dólares"), on: () => setBuyOpen((v) => v + 1) },
+    { icon: CreditCard, label: t("Depositar dólares"), on: () => setBuyOpen((v) => v + 1) },
     { icon: ArrowLeftRight, label: t("Cambiar"), on: () => openSwap("USDC") },
     { icon: Send, label: t("Enviar"), on: () => openSend("USDC") },
     { icon: QrCode, label: t("Recibir"), on: () => setReceiveOpen(true) },
