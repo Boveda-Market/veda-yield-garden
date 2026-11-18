@@ -212,7 +212,6 @@ export function WalletPanel() {
     </section>
 
     <section aria-label={t("Accesos rápidos")} className="grid gap-2">
-      <DobleShortcut />
       <Link to="/invita" className="invite-ring cta-attn cta-glow-invite group block rounded-2xl p-[2px] transition-transform active:scale-[0.98]">
         <span className="flex items-center gap-3 rounded-[14px] bg-[image:var(--gradient-invite-surface)] p-4 text-invite-foreground">
           <span className="invite-cta grid h-11 w-11 shrink-0 place-items-center rounded-xl text-invite-surface"><span className="cta-wiggle"><Gift size={22} aria-hidden /></span></span>
@@ -220,6 +219,7 @@ export function WalletPanel() {
           <ChevronRight size={18} className="shrink-0 text-invite transition-transform group-hover:translate-x-0.5" aria-hidden />
         </span>
       </Link>
+      <DobleShortcut />
       {shortcuts.map((s) => <Link key={s.to} to={s.to} className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-primary/5 sm:flex-col sm:items-start">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><s.icon size={20} aria-hidden /></span>
         <span className="min-w-0 flex-1"><span className="block font-display text-base font-semibold">{s.title}</span><span className="block text-xs text-muted-foreground">{s.sub}</span></span>

@@ -49,7 +49,7 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
   </section>;
 }
 
-/** Full-width Doble o Nada shortcut, placed above Invita y Gana in Mi Billetera. */
+/** Full-width Doble o Nada shortcut, placed below Invita y Gana in Mi Billetera. */
 export function DobleShortcut() {
   const t = useT();
   return <Link to="/mercados" className="cta-attn group relative block rounded-2xl bg-primary p-[2px] shadow-[0_0_24px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
