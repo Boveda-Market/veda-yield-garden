@@ -56,7 +56,8 @@ function SessionBridge({ children }: { children: ReactNode }) {
   const loginFailed = () => setError(t("No se pudo iniciar sesión. Inténtalo de nuevo o prueba con otro método (Google, email o billetera)."));
   // Google and Face ID / fingerprint open directly (no intermediate Privy screen); email and wallets keep the branded modal.
   const { initOAuth } = useLoginWithOAuth({ onComplete: () => setError(null), onError: loginFailed });
-  const { loginWithPasskey } = useLoginWithPasskey({ onComplete: () => setError(null), onError: loginFailed });
+  // Cancelling the phone sensor is a normal choice (e.g. to switch to Google): stay silent.
+  const { loginWithPasskey } = useLoginWithPasskey({ onComplete: () => setError(null), onError: () => setError(null) });
   const startLogin = useCallback((m: "email" | "google" | "wallet" | "passkey") => {
     setError(null);
     // Remember a sign-in is in progress so the next screen waits for the new wallet instead of bouncing back.

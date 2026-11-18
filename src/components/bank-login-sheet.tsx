@@ -1,5 +1,5 @@
 import { BrandLogo } from "@/components/brand-logo";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { Fingerprint, Mail, ShieldCheck, Wallet } from "lucide-react";
 import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
@@ -12,14 +12,6 @@ import { useT } from "@/lib/i18n";
 export function BankLoginSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const t = useT();
   const session = useBovedaSession();
-  const asked = useRef(false);
-  useEffect(() => {
-    if (!open) { asked.current = false; return; }
-    if (asked.current || !session.ready || session.authenticated) return;
-    asked.current = true;
-    const id = setTimeout(() => session.login("passkey"), 550);
-    return () => clearTimeout(id);
-  }, [open, session.ready, session.authenticated, session]);
   useEffect(() => { if (session.authenticated && open) onOpenChange(false); }, [session.authenticated, open, onOpenChange]);
   const go = (m: "google" | "email" | "wallet") => { onOpenChange(false); session.login(m); };
   return <Dialog open={open} onOpenChange={onOpenChange}>

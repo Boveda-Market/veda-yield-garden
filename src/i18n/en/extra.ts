@@ -1616,4 +1616,5 @@ export const extra: Record<string, string> = {
   "Intereses con el volumen de GTA6": "Interest from GTA6 trading volume",
   "Ganando 24/7": "Earning 24/7",
   "Ver mis ganancias": "See my earnings",
+  "O usa otra cuenta de Google abajo": "Or use another Google account below",
 };

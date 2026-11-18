@@ -11,7 +11,6 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { CoinbaseNote } from "./coinbase-note";
 import { GoogleButton } from "./google-button";
 import { BootSplash } from "./boot-splash";
-import { BankLoginSheet } from "./bank-login-sheet";
 import { deviceHasPasskey, rememberPasskey } from "@/lib/passkey-device";
 
 function EntryButtons() {
@@ -45,14 +44,14 @@ function EntryButtons() {
   if (session.ready && session.authenticated && isHeroReview()) return <div className="mt-8 w-full max-w-sm"><Button asChild className="h-12 w-full"><Link to={home}>{t("Continuar al app")}<ArrowRight size={16} /></Link></Button></div>;
   if (session.ready && session.authenticated) return <BootSplash />;
   return <div className="mt-8 w-full max-w-sm space-y-3">
-    <BankLoginSheet open={bio && !signup} onOpenChange={setBio} />
     <div role="tablist" className="mb-4 grid grid-cols-2 rounded-xl bg-secondary p-1 text-sm font-medium">
       <button role="tab" aria-selected={!signup} onClick={() => setSignup(false)} className={`rounded-lg py-2 ${!signup ? "bg-background shadow-sm" : "text-muted-foreground"}`}>{t("Iniciar sesión")}</button>
       <button role="tab" aria-selected={signup} onClick={() => setSignup(true)} className={`rounded-lg py-2 ${signup ? "bg-background shadow-sm" : "text-muted-foreground"}`}>{t("Crear cuenta")}</button>
     </div>
+    {bio && !signup && <div className="rounded-xl border border-primary/50 bg-primary/10 p-2"><Button disabled={!session.ready} className="h-14 w-full text-base" onClick={() => session.login("passkey")}><Fingerprint size={22} />{t("Entrar con huella o Face ID")}</Button><p className="mt-2 text-center text-[11px] text-muted-foreground">{t("O usa otra cuenta de Google abajo")}</p></div>}
     <div className="relative rounded-xl border border-primary/40 bg-primary/5 p-2 pt-4"><span className="absolute -top-2.5 left-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">{t("Recomendado · Mayor seguridad")}</span><GoogleButton disabled={!session.ready} arrow className="h-14 w-full text-base" onClick={() => session.login("google")}>{t("Continuar con Google")}</GoogleButton><p className="mt-2 text-center text-[11px] leading-4 text-muted-foreground">{t("Protegido por la verificación en 2 pasos de tu cuenta de Google. Sin contraseñas que puedan robarte.")}</p><CoinbaseNote className="mt-2 text-center text-xs text-muted-foreground" /></div>
     <Button disabled={!session.ready} variant="secondary" className="h-12 w-full" onClick={() => session.login("email")}>{signup ? t("Registrarme con email") : t("Entrar con email")}</Button>
-    {!signup && <Button disabled={!session.ready} variant="outline" className="h-auto w-full flex-col gap-1 py-3" onClick={() => session.login("passkey")}><span className="flex items-center gap-2"><Fingerprint size={20} className="text-primary" />{t("Entrar con huella o Face ID")}</span><span className="text-xs font-normal text-muted-foreground">{t("Touch ID, Face ID o PIN de tu dispositivo")}</span></Button>}
+    {!signup && !bio && <Button disabled={!session.ready} variant="outline" className="h-auto w-full flex-col gap-1 py-3" onClick={() => session.login("passkey")}><span className="flex items-center gap-2"><Fingerprint size={20} className="text-primary" />{t("Entrar con huella o Face ID")}</span><span className="text-xs font-normal text-muted-foreground">{t("Touch ID, Face ID o PIN de tu dispositivo")}</span></Button>}
     <button type="button" disabled={!session.ready} onClick={() => session.login("wallet")} className="flex w-full items-center justify-center gap-2 pt-1 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline disabled:opacity-50"><Wallet size={14} />{t("¿Usas wallet externa? Phantom, Jupiter u otras")}</button>
     {signup && <p className="text-xs leading-5 text-muted-foreground">{t("Tu primer acceso crea tu cuenta con Privy. Después puedes elegir tu nombre y avatar.")}</p>}
     {session.error && <LoginAlert message={session.error} onDismiss={() => session.clearError?.()} />}
