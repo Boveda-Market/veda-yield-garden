@@ -1,6 +1,8 @@
 import { Layers, PieChart, Sparkles, Sprout, TrendingUp } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { ChainPosition } from "@/lib/solana-data";
+import { useQueries } from "@tanstack/react-query";
+import { closesForDays, fetchDailyCloses, globalMarket } from "@/lib/pool-candles";
 import { useMeteoraHistory } from "@/hooks/use-meteora-history";
 import { usePositionRows } from "@/hooks/use-position-rows";
 import { MASK, useHideBalances } from "@/lib/preferences";
@@ -38,7 +40,7 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
 
   return <section aria-label={t("Rendimiento de tu portafolio")} className="py-8">
     <h2 className="flex items-center gap-2 font-display text-lg font-semibold"><TrendingUp size={18} className="text-primary" />{t("Tu rendimiento")}</h2>
-    <WeeklyChart records={history.records} poolPrices={history.poolPrices} money={money} />
+    <WeeklyChart records={history.records} poolPrices={history.poolPrices} money={money} vaults={byVault} />
 
     <div className={`${tile} mt-4`}>
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -67,58 +69,86 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
   </section>;
 }
 
-/** «Capital vs. Ganancias»: capital in vaults (GTA6 neon) above, harvested earnings (always rising, brand green) below; 7 d / 30 d. */
-function WeeklyChart({ records, poolPrices, money }: { records: Parameters<typeof capitalSeries>[0]; poolPrices: Record<string, number | null>; money: (n: number | null) => string }) {
+/** Theme per vault (golden rule: each vault tab uses that vault's own look). Badge vaults use the GTA6 neon. */
+function vaultTheme(id: string) {
+  if (VAULTS.find((v) => v.id === id)?.badge) return { a: "var(--hot-2)", b: "var(--hot)", text: "text-hot", on: "hot-cta text-primary-foreground shadow-[0_0_12px_var(--hot)]" };
+  const c = id === "met" ? "var(--chart-2)" : id === "sol" ? "var(--chart-1)" : "var(--chart-4)";
+  return { a: c, b: c, text: "", on: "bg-foreground text-background" };
+}
+
+/** «Mercado vs. Ganancias» with tabs: Global (all vaults, each moved by its own token price) + one tab per open vault (official token price vs. that vault's harvests). */
+function WeeklyChart({ records, poolPrices, money, vaults }: { records: Parameters<typeof capitalSeries>[0]; poolPrices: Record<string, number | null>; money: (n: number | null) => string; vaults: { id: string; label: string; value: number }[] }) {
   const t = useT();
   const locale = useLocale();
   const gid = useId().replace(/:/g, "");
   const [sel, setSel] = useState<number | null>(null);
   const [n, setN] = useState<7 | 30>(7);
+  const [tabId, setTab] = useState<string>("global");
+  const open = vaults.map((v) => ({ ...v, pool: VAULTS.find((x) => x.id === v.id)?.pool ?? "" })).filter((v) => v.pool);
+  const active = open.find((v) => v.id === tabId) ? tabId : "global";
+  const candleQ = useQueries({ queries: open.map((v) => ({ queryKey: ["pool-daily", v.pool, 30], queryFn: ({ signal }: { signal: AbortSignal }) => fetchDailyCloses(v.pool, 31, signal), staleTime: 10 * 60_000, retry: 1 })) });
   const tokenValue = (r: { tokenRaw?: string; pool?: string }) => {
     const cfg = CHAIN_POOLS.find((c) => c.pool === r.pool), price = r.pool ? poolPrices[r.pool] : null;
     if (!cfg || !price || !r.tokenRaw || !/^\d{1,30}$/.test(r.tokenRaw)) return 0n;
     return BigInt(Math.floor(Number(r.tokenRaw) / 10 ** cfg.decimals * price * 1e6));
   };
-  const days = capitalSeries(records, Date.now(), n, -new Date().getTimezoneOffset(), tokenValue);
-  const cap = days.map((d) => Number(d.capitalMicro) / 1e6), earn = days.map((d) => Number(d.earnedMicro) / 1e6);
+  const cur = open.find((v) => v.id === active);
+  const recs = cur ? records.filter((r) => r.pool === cur.pool) : records;
+  const days = capitalSeries(recs, Date.now(), n, -new Date().getTimezoneOffset(), tokenValue);
+  const starts = days.map((d) => d.start);
+  const closes = open.map((_, i) => closesForDays(candleQ[i]?.data ?? [], starts));
+  const curIdx = cur ? open.indexOf(cur) : -1;
+  const isPrice = curIdx >= 0;
+  const rawMarket = isPrice ? closes[curIdx]! : globalMarket(open.map((v, i) => ({ value: v.value, closes: closes[i]! })), n);
+  const firstKnown = rawMarket.find((v) => v != null) ?? 0;
+  const mk = rawMarket.map((v) => v ?? firstKnown) as number[];
+  const earn = days.map((d) => Number(d.earnedMicro) / 1e6);
   const total = earn[earn.length - 1] ?? 0;
   const shown = sel ?? n - 1;
+  const theme = vaultTheme(cur?.id ?? (open.length === 1 ? open[0]!.id : "gta6"));
   const W = 380, L = 12, R = 368, CT = 16, CB = 120, ET = 150, EB = 250, H = 260;
   const x = (i: number) => L + (i * (R - L)) / (n - 1);
-  const cmin = Math.min(...cap), cmax = Math.max(...cap), cr = Math.max(cmax - cmin, cmax * 0.02, 0.01);
+  const cmin = Math.min(...mk), cmax = Math.max(...mk), cr = Math.max(cmax - cmin, Math.abs(cmax) * 1e-6, 1e-9);
   const emax = Math.max(total, 0.000001);
   const smooth = (pts: { x: number; y: number }[]) => { let d = `M${pts[0]!.x},${pts[0]!.y}`; for (let i = 1; i < pts.length; i++) { const p = pts[i - 1]!, c = pts[i]!, mx = (p.x + c.x) / 2; d += ` C${mx},${p.y} ${mx},${c.y} ${c.x},${c.y}`; } return d; };
-  const cPts = cap.map((v, i) => ({ x: x(i), y: CB - ((v - cmin) / cr) * (CB - CT) * 0.9 - 6 }));
+  const cPts = mk.map((v, i) => ({ x: x(i), y: CB - ((v - cmin) / cr) * (CB - CT - 8) }));
   const ePts = earn.map((v, i) => ({ x: x(i), y: EB - (v / emax) * (EB - ET) }));
   const eLine = smooth(ePts), cLine = smooth(cPts);
   const pick = (e: React.PointerEvent<SVGSVGElement>) => { const r = e.currentTarget.getBoundingClientRect(); const px = ((e.clientX - r.left) / r.width) * W; setSel(Math.max(0, Math.min(n - 1, Math.round(((px - L) / (R - L)) * (n - 1))))); };
   const tab = (v: 7 | 30, label: string) => <button type="button" onClick={() => { setN(v); setSel(null); }} aria-pressed={n === v} className={`rounded-lg px-3 py-1 transition ${n === v ? "bg-primary font-bold text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>{label}</button>;
+  const vtab = (id: string, label: string) => { const th = vaultTheme(id === "global" ? "global" : id); const on = active === id; return <button key={id} type="button" role="tab" aria-selected={on} onClick={() => { setTab(id); setSel(null); }} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition ${on ? (id === "global" ? "border-primary bg-primary text-primary-foreground" : `border-transparent ${th.on}`) : "border-border bg-muted/60 text-muted-foreground hover:text-foreground"}`}>{label}</button>; };
   const day = new Date(days[shown]!.start).toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" });
+  const loading = candleQ.some((q) => q.isPending);
+  const mVal = mk[shown]!;
+  const mText = isPrice ? (mVal ? `$${mVal.toPrecision(4)}` : "—") : money(mVal);
+  const sym = cur ? (VAULTS.find((v) => v.id === cur.id)?.pair.split("/")[0] ?? "") : "";
   return <div className="relative mt-3 overflow-hidden rounded-3xl border border-border bg-card p-5">
-    <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full bg-hot/15 blur-3xl" />
+    <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full blur-3xl" style={{ background: `color-mix(in oklch, ${theme.b} 15%, transparent)` }} />
     <div className="relative flex items-center justify-between gap-2">
       <p className="text-sm font-semibold">{t("Mercado global vs. Ganancias")}</p>
       <div className="inline-flex items-center rounded-xl border border-border bg-muted/60 p-1 text-xs font-medium">{tab(7, t("7 días"))}{tab(30, t("30 días"))}</div>
     </div>
+    {open.length > 0 && <div role="tablist" aria-label={t("Bóvedas")} className="relative mt-3 flex gap-2 overflow-x-auto pb-1">{vtab("global", t("Global"))}{open.map((v) => vtab(v.id, `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}`))}</div>}
     <p className="relative mt-2 text-xs capitalize text-muted-foreground">{day}</p>
     <div className="relative mt-1 grid grid-cols-2 gap-3">
-      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full bg-hot shadow-[0_0_6px_var(--hot)]" />{t("Mercado global")}</p><p className="font-display text-2xl font-extrabold tabular-nums text-hot">{money(cap[shown]!)}</p></div>
+      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Precio {s}", { s: sym }) : t("Mercado global")}</p><p className={`font-display text-2xl font-extrabold tabular-nums ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !mVal ? "…" : mText}</p></div>
       <div className="text-right"><p className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />{t("Ganancias cosechadas")}</p><p className="font-display text-2xl font-extrabold tabular-nums text-primary">+{money(earn[shown]!)}</p></div>
     </div>
     <svg viewBox={`0 0 ${W} ${H}`} className="relative mt-3 h-72 w-full touch-none overflow-visible" role="img" aria-label={t("Mercado global frente a ganancias cosechadas")} onPointerDown={pick} onPointerMove={(e) => e.buttons || e.pointerType === "mouse" ? pick(e) : undefined}>
       <defs>
-        <linearGradient id={`h${gid}`} x1="0" x2="1"><stop offset="0%" stopColor="var(--hot-2)" /><stop offset="100%" stopColor="var(--hot)" /></linearGradient>
+        <linearGradient id={`h${gid}`} x1="0" x2="1"><stop offset="0%" stopColor={theme.a} /><stop offset="100%" stopColor={theme.b} /></linearGradient>
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
       </defs>
+      {cmax > cmin && <><text x={R} y={CT - 4} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? `$${cmax.toPrecision(3)}` : money(cmax)}</text><text x={R} y={CB + 12} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? `$${cmin.toPrecision(3)}` : money(cmin)}</text></>}
       <line x1={L} y1={(CB + ET) / 2} x2={R} y2={(CB + ET) / 2} stroke="var(--border)" strokeDasharray="3 6" />
-      <path d={cLine} fill="none" stroke={`url(#h${gid})`} strokeWidth="3.5" strokeLinecap="round" style={{ filter: "drop-shadow(0 0 5px var(--hot))" }} />
+      <path d={cLine} fill="none" stroke={`url(#h${gid})`} strokeWidth="3.5" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 5px ${theme.b})` }} />
       {total > 0 && <path d={`${eLine} L${R},${EB} L${L},${EB} Z`} fill={`url(#a${gid})`} />}
       <path d={eLine} fill="none" stroke="var(--primary)" strokeWidth="3.5" strokeLinecap="round" strokeDasharray={total > 0 ? undefined : "6 8"} style={{ filter: "drop-shadow(0 0 5px var(--primary))" }} />
       <line x1={x(shown)} y1={CT} x2={x(shown)} y2={EB} stroke="var(--muted-foreground)" strokeOpacity="0.5" strokeDasharray="3 4" />
-      <circle cx={cPts[shown]!.x} cy={cPts[shown]!.y} r="5.5" fill="var(--background)" stroke="var(--hot)" strokeWidth="3" />
+      <circle cx={cPts[shown]!.x} cy={cPts[shown]!.y} r="5.5" fill="var(--background)" stroke={theme.b} strokeWidth="3" />
       <circle cx={ePts[shown]!.x} cy={ePts[shown]!.y} r="5.5" fill="var(--background)" stroke="var(--primary)" strokeWidth="3" />
     </svg>
     <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{new Date(days[0]!.start).toLocaleDateString(locale, { day: "numeric", month: "short" })}</span><span>{t("Hoy")}</span></div>
-    <p className="relative mt-3 text-xs leading-5 text-muted-foreground">{t("El mercado global puede subir o bajar; tus ganancias cosechadas solo suman.")}</p>
+    <p className="relative mt-3 text-xs leading-5 text-muted-foreground">{isPrice ? t("El precio de {s} puede subir o bajar; tus ganancias cosechadas solo suman.", { s: sym }) : t("El mercado global puede subir o bajar; tus ganancias cosechadas solo suman.")}</p>
   </div>;
 }
