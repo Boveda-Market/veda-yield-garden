@@ -99,3 +99,17 @@ export function privyLimitError(message: string): "rate" | "plan" | null {
 }
 /** One operator alert per this window while Privy keeps refusing. */
 export const PRIVY_LIMIT_ALERT_MS = 60 * 60_000;
+
+/** Leftover tokens worth converting before a rebalance: at least $1 (micro-USDC), below that network costs eat the value. */
+export const AUTOPILOT_SWEEP_MIN_MICRO = 1_000_000n;
+/** Jupiter aggregator program, allowed only for the pre-rebalance leftover → USDC swap. */
+export const AUTOPILOT_SWEEP_PROGRAMS = ["ComputeBudget111111111111111111111111111111", "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL", "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"] as const;
+/** Never swept: USDC (cash), wrapped SOL (network reserve), JupUSD (Doble o Nada play money). */
+export const AUTOPILOT_SWEEP_EXCLUDED = ["EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", "So11111111111111111111111111111111111111112", "JuprjznTrTSp2UFa3ZBUFgwdAmtZCq4MQCwysN55USD"] as const;
+
+/** Verified tokens Autopilot may convert to USDC: the given list minus the exceptions and the vault's own token (absorbed directly). */
+export function sweepCandidates<T extends { mint: string }>(tokens: readonly T[], vaultMint: string): T[] {
+  return tokens.filter((t) => t.mint !== vaultMint && !(AUTOPILOT_SWEEP_EXCLUDED as readonly string[]).includes(t.mint));
+}
+/** True when a quoted conversion is worth doing. */
+export const sweepWorthIt = (usdcOutMicro: bigint) => usdcOutMicro >= AUTOPILOT_SWEEP_MIN_MICRO;

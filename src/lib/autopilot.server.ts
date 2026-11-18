@@ -39,7 +39,7 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
   const list = (data ?? []) as Enrollment[];
   if (!list.length) return 0;
   const { PublicKey, VersionedTransaction } = await import("@solana/web3.js");
-  const { readDlmmPositions, simulateDlmmRebalance } = await import("@/lib/dlmm.server");
+  const { readDlmmPositions, simulateDlmmRebalance, dlmmConfig } = await import("@/lib/dlmm.server");
   const { rangeKey } = await import("@/lib/dlmm");
   const iso = new Date(now).toISOString();
   const save = (wallet: string, patch: Record<string, unknown>) => db.from("autopilot_enrollments").update({ ...patch, updated_at: iso }).eq("wallet", wallet);
@@ -72,7 +72,11 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
       await save(e.wallet, { last_attempt_at: iso });
       e.last_attempt_at = iso;
       if (!(await hasAutopilotSigner(e.wallet_id, appSecret))) { await save(e.wallet, { enabled: false, last_result: "Permiso retirado: el piloto se apagó." }); break; }
-      const quote = await simulateDlmmRebalance(connection, { wallet: e.wallet, position: p.address, vaultId: p.vaultId as never }, { prepare: true, maxImpactPct: AUTOPILOT_MAX_IMPACT_PCT, memo: AUTOPILOT_MEMO, absorbWalletToken: true });
+      // Convert verified leftovers (≥ $1, never USDC/SOL/JupUSD) to USDC first; that USDC joins the vault below.
+      const { autopilotSweep } = await import("@/lib/autopilot-sweep.server");
+            const vaultMint = dlmmConfig(p.vaultId)?.mint ?? "";
+      const swept = vaultMint ? await autopilotSweep(connection, { wallet: e.wallet, walletId: e.wallet_id, vaultMint, appSecret, seed }).catch(() => 0n) : 0n;
+      const quote = await simulateDlmmRebalance(connection, { wallet: e.wallet, position: p.address, vaultId: p.vaultId as never }, { prepare: true, maxImpactPct: AUTOPILOT_MAX_IMPACT_PCT, memo: AUTOPILOT_MEMO, absorbWalletToken: true, absorbUsdc: swept });
       if (!quote.success || !quote.prepared || quote.prepared.wallet !== e.wallet) { await fail(e, quote.message); continue; }
       const tx = VersionedTransaction.deserialize(Buffer.from(quote.prepared.transaction, "base64"));
       const keys = tx.message.staticAccountKeys.map((k) => k.toBase58());
