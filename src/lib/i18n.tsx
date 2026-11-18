@@ -9,6 +9,12 @@ export const LANGS: { code: Lang; label: string }[] = [
 const STORAGE_KEY = "boveda-lang";
 const dictionaries: Record<Lang, Record<string, string>> = { es: {}, en };
 
+/** Device language for visitors with no saved choice: English phones get English, everything else Spanish. */
+export function detectDeviceLang(langs: readonly string[] = typeof navigator === "undefined" ? [] : navigator.languages?.length ? navigator.languages : [navigator.language]): Lang {
+  const first = langs.find((l) => /^(en|es)\b/i.test(l ?? ""));
+  return first && /^en/i.test(first) ? "en" : "es";
+}
+
 type Vars = Record<string, string | number>;
 export function translate(lang: Lang, text: string, vars?: Vars): string {
   let out = dictionaries[lang][text] ?? text;
@@ -24,7 +30,9 @@ export function LanguageProvider({ children, forced }: { children: ReactNode; fo
   useEffect(() => {
     if (forced) { setLangState(forced); return; }
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved === "en" || saved === "es") setLangState(saved);
+    if (saved === "en" || saved === "es") { setLangState(saved); return; }
+    // First visit (e.g. opening a shared link): follow the phone's language.
+    if (detectDeviceLang() === "en") setLangState("en");
   }, [forced]);
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
   const setLang = useCallback((l: Lang) => {
