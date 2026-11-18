@@ -893,6 +893,7 @@ export const extra: Record<string, string> = {
   "Disponible:": "Available:",
   "dólares estables en tu billetera que nunca cambian de valor.": "stable dollars in your wallet that never change in value.",
   "capital en bóvedas cuya valoración oscila en vivo con el pulso del mercado.": "capital in vaults whose value moves live with the pulse of the market.",
+  "capital en bóvedas cuya valoración y tasa estimada (APR) se actualizan en vivo con el ritmo de operaciones: a mayor volumen en el mercado, el APR sube y tu balance se mueve a la par mientras acumulas ganancias.": "capital in vaults whose value and estimated rate (APR) update live with trading activity: the more market volume, the higher the APR, and your balance moves along with it while you keep earning.",
   "¿Por qué «Por reclamar» a veces vuelve a cero?": "Why does “To claim” sometimes go back to zero?",
   "El piloto automático cobra y reinvierte tus ganancias automáticamente dentro de tu bóveda para hacer crecer tu capital. No tienes que tocar ni rebalancear nada; tus fondos siempre están seguros bajo tu huella o Face ID.": "Autopilot collects and reinvests your earnings automatically inside your vault to grow your capital. You don't have to touch or rebalance anything; your funds are always secured by your fingerprint or Face ID.",
   "Tu balance combina tus dólares disponibles en la billetera y el dinero que está trabajando en las bóvedas:": "Your balance combines the dollars available in your wallet and the money working in vaults:",
