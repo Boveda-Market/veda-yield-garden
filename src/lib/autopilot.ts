@@ -90,3 +90,12 @@ export const showManualCompound = (failures: number | null | undefined) => (fail
 export function rebalanceGainsUsd(feeX: bigint, feeY: bigint, absorbedX: bigint, price: number, bovedaFee: bigint): number {
   return Math.max(0, (Number(feeX + absorbedX) * price + Number(feeY) - Number(bovedaFee)) / 1e6);
 }
+
+/** Privy refusal that means the plan's limits were reached (429 rate limit, 402/403 quota/plan): the operator must act in Privy. */
+export function privyLimitError(message: string): "rate" | "plan" | null {
+  if (/Privy 429/.test(message)) return "rate";
+  if (/Privy 40[23]/.test(message)) return "plan";
+  return null;
+}
+/** One operator alert per this window while Privy keeps refusing. */
+export const PRIVY_LIMIT_ALERT_MS = 60 * 60_000;

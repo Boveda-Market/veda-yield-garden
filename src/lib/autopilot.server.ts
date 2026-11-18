@@ -1,7 +1,7 @@
 import type { Connection } from "@solana/web3.js";
 import type { MonitorRow } from "@/lib/status-monitor";
 import { AUTOPILOT_POLICY_ID, AUTOPILOT_PROGRAMS, AUTOPILOT_SIGNER_ID, PRIVY_APP_ID, privyWalletRpc } from "@/lib/privy-signer";
-import { AUTOPILOT_MEMO, AUTOPILOT_FEE_ATA, AUTOPILOT_MAX_IMPACT_PCT, AUTOPILOT_MAX_PER_RUN, autopilotDecision, autopilotDoneText, onlyAllowedPrograms, withFailure, type AutopilotRow } from "@/lib/autopilot";
+import { AUTOPILOT_MEMO, AUTOPILOT_FEE_ATA, AUTOPILOT_MAX_IMPACT_PCT, AUTOPILOT_MAX_PER_RUN, autopilotDecision, autopilotDoneText, onlyAllowedPrograms, privyLimitError, PRIVY_LIMIT_ALERT_MS, withFailure, type AutopilotRow } from "@/lib/autopilot";
 
 type Db = { from: (t: string) => any };
 type Enrollment = AutopilotRow & { last_result?: string | null; wallet: string; privy_user_id: string; wallet_id: string };
@@ -85,7 +85,12 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
         const out = await privyWalletRpc(e.wallet_id, { method: "signTransaction", chain_type: "solana", params: { transaction: quote.prepared.transaction, encoding: "base64" } }, { appSecret, seed });
         signed = out.data?.signed_transaction ?? "";
         if (!signed) throw new Error("sin firma");
-      } catch (err) { await fail(e, `No se pudo firmar: ${(err as Error).message}`); continue; }
+      } catch (err) {
+        const msg = (err as Error).message;
+        await fail(e, `No se pudo firmar: ${msg}`);
+        await privyLimitAlert(db, msg, now).catch(() => undefined);
+        continue;
+      }
       let signature: string;
       try { signature = await connection.sendRawTransaction(Buffer.from(signed, "base64"), { skipPreflight: false, maxRetries: 3 }); }
       catch { await fail(e, "La red rechazó el envío; se reintentará."); continue; }
@@ -108,4 +113,18 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
     }
   }
   return done;
+}
+
+/** Operator Telegram alert when Privy refuses Autopilot signatures for plan/rate limits; at most once per PRIVY_LIMIT_ALERT_MS. */
+async function privyLimitAlert(db: Db, message: string, now: number) {
+  const kind = privyLimitError(message);
+  if (!kind) return;
+  const { data } = await db.from("system_service_status").select("first_down_at").eq("service", "privy_limit").maybeSingle();
+  const last = data?.first_down_at ? Date.parse(data.first_down_at) : 0;
+  if (now - last < PRIVY_LIMIT_ALERT_MS) return;
+  await db.from("system_service_status").upsert({ service: "privy_limit", first_down_at: new Date(now).toISOString(), operator_alerted: true, public_alerted: false, updated_at: new Date(now).toISOString() }, { onConflict: "service" });
+  const tg = await import("@/lib/telegram.server");
+  await tg.treasuryAlert(kind === "rate"
+    ? "🚨 <b>Alerta Privy · Piloto automático</b>\nPrivy rechazó firmas por exceso de peticiones (429). Algunos rebalanceos se reintentarán en 5 min.\nRevisa el plan en dashboard.privy.io."
+    : "🚨 <b>Alerta Privy · Piloto automático</b>\nPrivy rechazó firmas por límite del plan (403). Los rebalanceos automáticos están detenidos.\nActiva producción en dashboard.privy.io.");
 }
