@@ -103,7 +103,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const isPrice = curIdx >= 0;
   // Vault tabs: the line follows the official daily price; the headline shows the live market cap only.
   const caps = open.map((_, i) => statsQ[i]?.data?.marketCap ?? null);
-  const liveCap = isPrice ? caps[curIdx] ?? null : (caps.length && caps.every((c) => c) ? caps.reduce((a, c) => a + (c as number), 0) : null);
+  const liveCap = isPrice ? caps[curIdx] ?? null : (caps.length && caps.every((c) => c) ? caps.reduce<number>((a, c) => a + (c ?? 0), 0) : null);
   const rawMarket = isPrice ? closes[curIdx]! : globalMarket(open.map((v, i) => ({ value: v.value, closes: closes[i]! })), n);
   const firstKnown = rawMarket.find((v) => v != null) ?? 0;
   const mk = rawMarket.map((v) => v ?? firstKnown) as number[];
@@ -127,7 +127,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const cap = (v: number) => `$${new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 2 }).format(v)}`;
   const mVal = mk[shown]!;
   const mText = liveCap ? cap(liveCap) : "—";
-  const pct = mk[0] ? (mVal / mk[0] - 1) * 100 : 0;
+  const pct = mk[0] ? (mVal / mk[0]! - 1) * 100 : 0;
   const sym = cur ? (VAULTS.find((v) => v.id === cur.id)?.pair.split("/")[0] ?? "") : "";
   return <div className="relative mt-3 overflow-hidden rounded-3xl border border-border bg-card p-5">
     <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full blur-3xl" style={{ background: `color-mix(in oklch, ${theme.b} 15%, transparent)` }} />
@@ -138,7 +138,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     {open.length > 0 && <div role="tablist" aria-label={t("Bóvedas")} className="relative mt-3 flex gap-2 overflow-x-auto pb-1">{vtab("global", t("Global"))}{open.map((v) => vtab(v.id, `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}`))}</div>}
     <p className="relative mt-2 text-xs capitalize text-muted-foreground">{day}</p>
     <div className="relative mt-1 grid grid-cols-2 gap-3">
-      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Market cap {s}", { s: sym }) : t("Market cap global")}</p><p className={`font-display text-2xl font-extrabold tabular-nums ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !liveCap ? "…" : mText}</p>{mk[0] > 0 && <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${pct >= 0 ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{pct >= 0 ? "+" : ""}{pct.toFixed(1)}%</span>}</div>
+      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Market cap {s}", { s: sym }) : t("Market cap global")}</p><p className={`font-display text-2xl font-extrabold tabular-nums ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !liveCap ? "…" : mText}</p>{(mk[0] ?? 0) > 0 && <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${pct >= 0 ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{pct >= 0 ? "+" : ""}{pct.toFixed(1)}%</span>}</div>
       <div className="text-right"><p className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />{t("Ganancias cosechadas")}</p><p className="font-display text-2xl font-extrabold tabular-nums text-primary">+{money(earn[shown]!)}</p></div>
     </div>
     <svg viewBox={`0 0 ${W} ${H}`} className="relative mt-3 h-72 w-full touch-none overflow-visible" role="img" aria-label={t("Mercado global frente a ganancias cosechadas")} onPointerDown={pick} onPointerMove={(e) => e.buttons || e.pointerType === "mouse" ? pick(e) : undefined}>
