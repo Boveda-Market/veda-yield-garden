@@ -47,6 +47,17 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
   let done = 0;
   for (const e of list) {
     if (done >= AUTOPILOT_MAX_PER_RUN) break;
+    // Reconcile: a rebalance sent last cycle that confirmed after we stopped waiting still gets its record and alert.
+    if (e.last_signature && /Sin confirmación/.test(e.last_result ?? "")) {
+      const st = (await connection.getSignatureStatuses([e.last_signature], { searchTransactionHistory: true }).catch(() => null))?.value[0];
+      if (st && !st.err && (st.confirmationStatus === "confirmed" || st.confirmationStatus === "finalized")) {
+        await save(e.wallet, { last_rebalance_at: iso, last_result: "Rebalanceada", last_gains_usd: null });
+        e.last_rebalance_at = iso; e.last_result = "Rebalanceada";
+        await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName("gta6"), undefined, null), { text: "👀 Ver mi posición", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
+        done++;
+        continue;
+      }
+    }
     const positions = await readDlmmPositions(connection, new PublicKey(e.wallet)).catch(() => null);
     if (!positions) continue;
     for (const p of positions) {
@@ -78,7 +89,7 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
       try { signature = await connection.sendRawTransaction(Buffer.from(signed, "base64"), { skipPreflight: false, maxRetries: 3 }); }
       catch { await fail(e, "La red rechazó el envío; se reintentará."); continue; }
       let ok = false;
-      for (let i = 0; i < 20 && !ok; i++) {
+      for (let i = 0; i < 6 && !ok; i++) {
         await new Promise((r) => setTimeout(r, 2000));
         const st = (await connection.getSignatureStatuses([signature]).catch(() => null))?.value[0];
         if (st?.err) break;
