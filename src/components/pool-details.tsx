@@ -9,12 +9,14 @@ import { fetchPoolStats } from "@/lib/pool-stats";
 import type { Vault } from "@/lib/vaults";
 import { isDlmmVault } from "@/lib/solana-data";
 import { PoolYield } from "@/components/pool-yield";
+import { MarketPerformance } from "@/components/market-performance";
 
 const number = (value: number | null | undefined, digits = 2) => value == null ? "—" : value.toLocaleString("es-MX", { maximumFractionDigits: digits });
 const usd = (value: number | null | undefined, digits = 2) => value == null ? "—" : `$${value.toLocaleString("es-MX", { minimumFractionDigits: Math.min(2, digits), maximumFractionDigits: digits })}`;
 
 export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => void }) {
   const t = useT();
+  const [tab, setTab] = useState<"perf" | "stats">(vault.badge ? "perf" : "stats");
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
   const query = useQuery({
@@ -54,6 +56,8 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
           </Button>
         </div>
 
+        <div className="grid grid-cols-2 rounded-full bg-secondary p-1" role="tablist">{([["perf", t("Rendimiento y Mercado")], ["stats", t("Estadísticas del Pool")]] as const).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={`rounded-full px-2 py-2 text-xs font-bold transition ${tab === k ? "bg-foreground text-background" : "text-muted-foreground"}`}>{l}</button>)}</div>
+        {tab === "perf" ? <MarketPerformance vault={vault} /> : <>
         <PoolYield address={vault.pool} />
         {holders != null && <div className="flex items-center gap-3 rounded-xl border border-primary/40 bg-primary/10 p-3"><Users className="h-6 w-6 shrink-0 text-primary" /><div><p className="font-display text-lg font-bold tabular-nums">+{number(holders, 0)} {t("poseedores")}</p><p className="text-xs text-muted-foreground">{t("Comunidad activa con alto volumen de intercambio.")}</p></div></div>}
         {fees24h != null && <div className="rounded-xl bg-muted p-3"><p className="text-xs text-muted-foreground">💰 {t("Intereses repartidas · 24 h")}</p><p className="font-display text-2xl font-bold tabular-nums text-primary">+{usd(fees24h)}</p></div>}
@@ -88,6 +92,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
           {copied && <p role="status" className="mt-2 text-xs text-primary">{t("URL copiada")}</p>}
           {copyError && <p role="status" className="mt-2 text-xs text-muted-foreground">{t("No se pudo copiar. Selecciona la URL para copiarla manualmente.")}</p>}
         </div>
+        </>}
         <div className="sticky -bottom-6 -mx-6 -mb-6 border-t border-border bg-card px-6 py-3">
           <DialogClose asChild><Button size="lg" className="w-full font-semibold">{t("Cerrar detalles")}</Button></DialogClose>
         </div>
