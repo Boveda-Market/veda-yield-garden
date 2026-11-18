@@ -2,6 +2,7 @@ import { Layers, PieChart, Sparkles, Sprout, TrendingUp } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { ChainPosition } from "@/lib/solana-data";
 import { useQueries } from "@tanstack/react-query";
+import { fetchPoolStats } from "@/lib/pool-stats";
 import { closesForDays, fetchDailyCloses, globalMarket } from "@/lib/pool-candles";
 import { useMeteoraHistory } from "@/hooks/use-meteora-history";
 import { usePositionRows } from "@/hooks/use-position-rows";
@@ -87,6 +88,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const open = vaults.map((v) => ({ ...v, pool: VAULTS.find((x) => x.id === v.id)?.pool ?? "" })).filter((v) => v.pool);
   const active = open.find((v) => v.id === tabId) ? tabId : "global";
   const candleQ = useQueries({ queries: open.map((v) => ({ queryKey: ["pool-daily", v.pool, 30], queryFn: ({ signal }: { signal: AbortSignal }) => fetchDailyCloses(v.pool, 31, signal), staleTime: 10 * 60_000, retry: 1 })) });
+  const statsQ = useQueries({ queries: open.map((v) => ({ queryKey: ["dexscreener-pool-stats", v.pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(v.pool, signal), staleTime: 60_000, retry: 1 })) });
   const tokenValue = (r: { tokenRaw?: string; pool?: string }) => {
     const cfg = CHAIN_POOLS.find((c) => c.pool === r.pool), price = r.pool ? poolPrices[r.pool] : null;
     if (!cfg || !price || !r.tokenRaw || !/^\d{1,30}$/.test(r.tokenRaw)) return 0n;
@@ -99,7 +101,10 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const closes = open.map((_, i) => closesForDays(candleQ[i]?.data ?? [], starts));
   const curIdx = cur ? open.indexOf(cur) : -1;
   const isPrice = curIdx >= 0;
-  const rawMarket = isPrice ? closes[curIdx]! : globalMarket(open.map((v, i) => ({ value: v.value, closes: closes[i]! })), n);
+  // Market cap per day = daily close × circulating supply (current market cap ÷ current price); unavailable without both.
+  const st = isPrice ? statsQ[curIdx]?.data : null;
+  const supply = st?.marketCap && st.price ? st.marketCap / st.price : null;
+  const rawMarket = isPrice ? (supply ? closes[curIdx]!.map((c) => (c == null ? null : c * supply)) : closes[curIdx]!.map(() => null)) : globalMarket(open.map((v, i) => ({ value: v.value, closes: closes[i]! })), n);
   const firstKnown = rawMarket.find((v) => v != null) ?? 0;
   const mk = rawMarket.map((v) => v ?? firstKnown) as number[];
   const earn = days.map((d) => Number(d.earnedMicro) / 1e6);
@@ -118,9 +123,10 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const tab = (v: 7 | 30, label: string) => <button type="button" onClick={() => { setN(v); setSel(null); }} aria-pressed={n === v} className={`rounded-lg px-3 py-1 transition ${n === v ? "bg-primary font-bold text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>{label}</button>;
   const vtab = (id: string, label: string) => { const th = vaultTheme(id === "global" ? "global" : id); const on = active === id; return <button key={id} type="button" role="tab" aria-selected={on} onClick={() => { setTab(id); setSel(null); }} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition ${on ? (id === "global" ? "border-primary bg-primary text-primary-foreground" : `border-transparent ${th.on}`) : "border-border bg-muted/60 text-muted-foreground hover:text-foreground"}`}>{label}</button>; };
   const day = new Date(days[shown]!.start).toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" });
-  const loading = candleQ.some((q) => q.isPending);
+  const loading = candleQ.some((q) => q.isPending) || (isPrice && statsQ[curIdx]?.isPending);
+  const cap = (v: number) => `$${new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 2 }).format(v)}`;
   const mVal = mk[shown]!;
-  const mText = isPrice ? (mVal ? `$${mVal.toPrecision(4)}` : "—") : money(mVal);
+  const mText = isPrice ? (mVal ? cap(mVal) : "—") : money(mVal);
   const sym = cur ? (VAULTS.find((v) => v.id === cur.id)?.pair.split("/")[0] ?? "") : "";
   return <div className="relative mt-3 overflow-hidden rounded-3xl border border-border bg-card p-5">
     <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full blur-3xl" style={{ background: `color-mix(in oklch, ${theme.b} 15%, transparent)` }} />
@@ -131,7 +137,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     {open.length > 0 && <div role="tablist" aria-label={t("Bóvedas")} className="relative mt-3 flex gap-2 overflow-x-auto pb-1">{vtab("global", t("Global"))}{open.map((v) => vtab(v.id, `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}`))}</div>}
     <p className="relative mt-2 text-xs capitalize text-muted-foreground">{day}</p>
     <div className="relative mt-1 grid grid-cols-2 gap-3">
-      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Precio {s}", { s: sym }) : t("Mercado global")}</p><p className={`font-display text-2xl font-extrabold tabular-nums ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !mVal ? "…" : mText}</p></div>
+      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Market cap {s}", { s: sym }) : t("Mercado global")}</p><p className={`font-display text-2xl font-extrabold tabular-nums ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !mVal ? "…" : mText}</p></div>
       <div className="text-right"><p className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />{t("Ganancias cosechadas")}</p><p className="font-display text-2xl font-extrabold tabular-nums text-primary">+{money(earn[shown]!)}</p></div>
     </div>
     <svg viewBox={`0 0 ${W} ${H}`} className="relative mt-3 h-72 w-full touch-none overflow-visible" role="img" aria-label={t("Mercado global frente a ganancias cosechadas")} onPointerDown={pick} onPointerMove={(e) => e.buttons || e.pointerType === "mouse" ? pick(e) : undefined}>
@@ -139,7 +145,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
         <linearGradient id={`h${gid}`} x1="0" x2="1"><stop offset="0%" stopColor={theme.a} /><stop offset="100%" stopColor={theme.b} /></linearGradient>
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
       </defs>
-      {cmax > cmin && <><text x={R} y={CT - 4} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? `$${cmax.toPrecision(3)}` : money(cmax)}</text><text x={R} y={CB + 12} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? `$${cmin.toPrecision(3)}` : money(cmin)}</text></>}
+      {cmax > cmin && <><text x={R} y={CT - 4} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? cap(cmax) : money(cmax)}</text><text x={R} y={CB + 12} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? cap(cmin) : money(cmin)}</text></>}
       <line x1={L} y1={(CB + ET) / 2} x2={R} y2={(CB + ET) / 2} stroke="var(--border)" strokeDasharray="3 6" />
       <path d={cLine} fill="none" stroke={`url(#h${gid})`} strokeWidth="3.5" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 5px ${theme.b})` }} />
       {total > 0 && <path d={`${eLine} L${R},${EB} L${L},${EB} Z`} fill={`url(#a${gid})`} />}
@@ -149,6 +155,6 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
       <circle cx={ePts[shown]!.x} cy={ePts[shown]!.y} r="5.5" fill="var(--background)" stroke="var(--primary)" strokeWidth="3" />
     </svg>
     <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{new Date(days[0]!.start).toLocaleDateString(locale, { day: "numeric", month: "short" })}</span><span>{t("Hoy")}</span></div>
-    <p className="relative mt-3 text-xs leading-5 text-muted-foreground">{isPrice ? t("El precio de {s} puede subir o bajar; tus ganancias cosechadas solo suman.", { s: sym }) : t("El mercado global puede subir o bajar; tus ganancias cosechadas solo suman.")}</p>
+    <p className="relative mt-3 text-xs leading-5 text-muted-foreground">{isPrice ? t("El market cap de {s} puede subir o bajar; tus ganancias cosechadas solo suman.", { s: sym }) : t("El mercado global puede subir o bajar; tus ganancias cosechadas solo suman.")}</p>
   </div>;
 }
