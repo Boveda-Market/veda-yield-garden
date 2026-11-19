@@ -26,7 +26,6 @@ export const rangeVaults: Record<string, string> = {
   "Cosechas intereses": "You harvest interest",
   "Ganancias automáticas": "Automatic earnings",
   "Deposita, recibe la alerta en Telegram y rebalancea con 1 botón para mantener tu capital concentrado donde más intereses se cobran.": "Deposit, get the Telegram alert and rebalance with 1 button to keep your money concentrated where most interest are earned.",
-  "Piloto automático": "Autopilot",
   "Holders": "Holders",
   "No apuestas contra nadie: cobras intereses de los intercambios. Tu saldo sube y baja con el precio de GTA6. Sin vínculo con Rockstar Games.": "You don't bet against anyone: you collect interest. Your balance moves up and down with the GTA6 price. Not affiliated with Rockstar Games.",
   "⚡ Alto Octanaje · Rango Activo": "⚡ High Octane · Active Range",
