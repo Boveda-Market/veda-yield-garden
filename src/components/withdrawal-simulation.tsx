@@ -1,3 +1,4 @@
+import { ackRankLineup } from "@/lib/rank-ack";
 import { ServiceFeeLabel } from "@/components/service-fee-label";
 import { SignalErrorCard } from "@/components/signal-error";
 import { DetailsToggle } from "@/components/ui/details-toggle";
@@ -53,7 +54,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
   const [message, setMessage] = useState<string | null>(null);
   const [finished, setFinished] = useState(false);
   // Migration: chain step 2 automatically as soon as the exit is confirmed.
-  useEffect(() => { if (finished && dest && onMigrated) onMigrated(result?.minimumNet ?? "", dest); }, [finished]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (finished && dest) ackRankLineup(); if (finished && dest && onMigrated) onMigrated(result?.minimumNet ?? "", dest); }, [finished]); // eslint-disable-line react-hooks/exhaustive-deps
   const [sweepNote, setSweepNote] = useState<string | null>(null);
   const [phase, setPhase] = useState<1 | 2>(1);
   const [leftovers, setLeftovers] = useState<string[]>([]);

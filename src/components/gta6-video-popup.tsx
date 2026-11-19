@@ -13,6 +13,7 @@ import { WithdrawalSimulation } from "./withdrawal-simulation";
 import { DctySkyline, VaultTitle, vaultSkin } from "./vault-skin";
 import { Sunset } from "./hot-vault-card";
 import { gta6Candidate } from "./gta6-promo";
+import { RANK_ACKED } from "@/lib/rank-ack";
 
 const gta6 = VAULTS.find((v) => v.id === "gta6");
 const HOT = VAULTS.filter((v) => v.badge && isDlmmVault(v.id));
@@ -32,12 +33,25 @@ export function showGta6Video(positions: ChainPosition[]): boolean {
   return !!gta6 && !positions.some((p) => p.vaultId === gta6.id) && !gta6Candidate(positions);
 }
 
-/** Holders with vaults: only while a high-octane vault is still missing, at most once a week. */
-export const HOLDER_GAP_MS = 7 * 24 * 3600_000;
-export function holderRankDue(positions: ChainPosition[], lastShown: number | null, now: number): boolean {
+/** Launch date (UTC ms) of each high-octane vault; announcements fade out over 3 weeks after it. */
+export const LAUNCH: Record<string, number> = { dcty: Date.UTC(2026, 10, 19) };
+const DAY = 24 * 3600_000;
+/** Week 1: every 2 days; week 2: every 4 days; week 3: once; after 21 days: never. */
+export function campaignGap(launch: number | undefined, now: number): number | null {
+  if (launch == null) return null;
+  const age = now - launch;
+  if (age < 0 || age >= 21 * DAY) return null;
+  return age < 7 * DAY ? 2 * DAY : age < 14 * DAY ? 4 * DAY : 7 * DAY;
+}
+/** Kept for compatibility: the widest gap used by the campaign. */
+export const HOLDER_GAP_MS = 7 * DAY;
+/** Holders: only for a missing vault still in its launch campaign, and never after they moved vaults for this lineup. */
+export function holderRankDue(positions: ChainPosition[], lastShown: number | null, now: number, acked: string[] = []): boolean {
   if (!positions.length || gta6Candidate(positions)) return false;
-  if (!HOT.some((v) => !positions.some((p) => p.vaultId === v.id))) return false;
-  return lastShown == null || now - lastShown >= HOLDER_GAP_MS;
+  if (HOT.every((v) => acked.includes(v.id))) return false;
+  const gaps = HOT.filter((v) => !positions.some((p) => p.vaultId === v.id)).map((v) => campaignGap(LAUNCH[v.id], now)).filter((g): g is number => g != null);
+  if (!gaps.length) return false;
+  return lastShown == null || now - lastShown >= Math.min(...gaps);
 }
 const HOLDER_SEEN = "boveda:rank-holder-seen";
 /** Dollars below which the card suggests moving funds instead of depositing new ones. */
@@ -108,7 +122,9 @@ export function Gta6VideoPopup({ wallet }: { wallet: string | null | undefined }
     }
     let last: number | null = null;
     try { const v = localStorage.getItem(HOLDER_SEEN); last = v ? Number(v) : null; } catch { return; }
-    if (holderRankDue(positions, last, Date.now())) { try { localStorage.setItem(HOLDER_SEEN, String(Date.now())); } catch { /* ignore */ } setOpen(true); }
+    let acked: string[] = [];
+    try { acked = JSON.parse(localStorage.getItem(RANK_ACKED) || "[]"); } catch { /* none */ }
+    if (holderRankDue(positions, last, Date.now(), acked)) { try { localStorage.setItem(HOLDER_SEEN, String(Date.now())); } catch { /* ignore */ } setOpen(true); }
   }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!gta6) return null;
   return <>
