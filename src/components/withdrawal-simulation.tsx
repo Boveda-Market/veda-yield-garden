@@ -27,6 +27,9 @@ import { poolYieldOptions } from "@/lib/pool-yield";
 import { Link } from "@tanstack/react-router";
 import { sweepLeftovers, leftoverSymbols } from "@/lib/sweep-leftovers";
 
+/** Quick move amounts between vaults. */
+const MOVE_PERCENTS = [25, 50, 100] as const;
+
 export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migrateTo, rotate = false, onMigrated }: { wallet: string | null; position?: string; vaultId: OperableVault; onClose: () => void; migrateTo?: Vault; rotate?: boolean; onMigrated?: (usdc: string, target: Vault) => void }) {
   const t = useT();
   const [dest, setDest] = useState<Vault | undefined>(migrateTo);
@@ -111,10 +114,11 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
   </>;
   return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
     <DialogTitle>{migrateTo ? t("Cambiar a {v}", { v: t((dest ?? migrateTo).name) }) : <>{t("Retirar ·")}{" "}{vaultSymbol(vaultId)}</>}</DialogTitle>
-    <DialogDescription>{migrateTo ? t("Movemos todo tu dinero y ganancias.") : t("Elige cuánto retirar a tus dólares disponibles.")}</DialogDescription>
+    <DialogDescription>{migrateTo ? (rotate || percent === 100 ? t("Movemos todo tu dinero y ganancias.") : t("Mueves el {p}% y el resto sigue en tu bóveda actual.", { p: String(percent) })) : t("Elige cuánto retirar a tus dólares disponibles.")}</DialogDescription>
     {!migrateTo && !finished && !signature && <div role="radiogroup" aria-label={t("Cuánto retirar")} className="grid grid-cols-4 gap-2">{EXIT_PERCENTS.map((p) => <Button key={p} type="button" role="radio" aria-checked={percent === p} variant={percent === p ? "default" : "outline"} disabled={pending} onClick={() => { setPercent(p); setPctText(String(p)); setResult(null); setAccepted(false); setMessage(null); }}>{p === 100 ? t("Todo") : `${p}%`}</Button>)}</div>}
     {!migrateTo && !finished && !signature && <TapAmount label={t("Porcentaje a retirar")} inputMode="numeric" maxLength={3} suffix="%" value={pctText} disabled={pending} onChange={(v) => { const d = v.replace(/\D/g, "").slice(0, 3); setPctText(d); const n = Number(d); if (n >= 1 && n <= 100 && n !== percent) { setPercent(n); setResult(null); setAccepted(false); setMessage(null); } }} onCommit={() => setPctText(String(percent))} />}
     {!migrateTo && !finished && !signature && percent !== 100 && <p className="text-xs text-muted-foreground">{t("Retiras el {p}% y el resto sigue invirtiendo en la bóveda.", { p: String(percent) })}</p>}
+    {migrateTo && !rotate && !finished && !signature && <div role="radiogroup" aria-label={t("Cuánto mover")} className="grid grid-cols-3 gap-2">{MOVE_PERCENTS.map((p) => <Button key={p} type="button" role="radio" aria-checked={percent === p} variant={percent === p ? "default" : "outline"} className="min-h-11" disabled={pending} onClick={() => { setPercent(p); setPctText(String(p)); setResult(null); setAccepted(false); setMessage(null); }}>{p === 100 ? t("Todo") : `${p}%`}</Button>)}</div>}
     {migrateTo && signature && <MoveSteps current={finished ? 2 : 1} from={vaultSymbol(vaultId)} to={t((dest ?? migrateTo).name)} />}
     {!migrateTo && two && signature && !finished && <ProgressSteps steps={[t("Retirar de la bóveda"), t("Pasar a dólares")]} current={phase} />}
     {migrateTo && !signature && <div role="radiogroup" aria-label={t("Bóveda destino")} className="grid gap-2">{destOptions.map((v, i) => { const apr = destYields[i]?.data?.apr; const on = dest?.id === v.id; return <button key={v.id} type="button" role="radio" aria-checked={on} disabled={pending} onClick={() => setDest(v)} className={`flex items-center justify-between rounded-lg border p-3 text-left text-sm ${on ? "border-primary bg-primary/10" : "border-border"}`}><span className="font-semibold">{t(v.name)}</span><span className="tabular-nums text-primary">{apr == null ? "—" : `${apr.toFixed(1)}% APR`}</span></button>; })}</div>}
