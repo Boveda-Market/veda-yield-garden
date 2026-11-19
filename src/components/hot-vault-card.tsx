@@ -44,23 +44,23 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
   const steps = [["💵", "Depositas"], ["⚡", "Piloto automático"], ["📈", "Ganancias automáticas"]] as const;
   return <article className={`hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)] ${vaultSkin(vault.id)}`}>
     <div className="relative isolate flex h-full flex-col overflow-hidden rounded-[calc(1rem-2px)] bg-[image:var(--gradient-hot-surface)] text-hot-foreground">
-      <HotBanner vault={vault}>
+      <HotBanner vault={vault} className="py-3">
         <span className="hidden rounded-full bg-hot-surface px-2.5 py-0.5 text-[10px] sm:inline font-black uppercase tracking-wide">⚡ {t("Sé la casa")}</span>
         <span className="flex items-center gap-1 rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-live shadow-[0_0_6px_var(--live)] motion-reduce:animate-none" />{t("En vivo")}</span>
       </HotBanner>
       <div className="flex flex-1 flex-col p-2 sm:p-3">
         <p className="text-[11px] font-semibold text-hot-muted">{vault.pair}</p>
         <div className="flex flex-wrap items-baseline gap-x-2">
-          <p key={apr ?? "x"} className="animate-count-pop bg-[image:var(--gradient-hot)] bg-clip-text font-display text-2xl font-black sm:text-4xl leading-tight text-transparent tabular-nums">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 0 })}%`}</p>
+          <p key={apr ?? "x"} className="animate-count-pop bg-[image:var(--gradient-hot)] bg-clip-text font-display text-4xl font-black leading-tight text-transparent tabular-nums">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 0 })}%`}</p>
           <p className="text-[10px] font-medium leading-tight text-hot-muted sm:text-[11px]">{y.isPending ? t("Consultando el pool…") : t("APR estimado · intereses 24 h")}</p>
         </div>
-        <dl className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-3 sm:gap-1.5">
-          {[[t("Intereses hoy"), usd(y.data?.fees24h)], [t("Intercambios hoy"), num(total)], [t("Holders"), num(y.data?.holders)]].map(([k, v]) => <div key={k} className="flex items-baseline justify-between gap-1 rounded-lg bg-hot-surface/60 px-2 py-1 sm:block sm:py-1.5">
+        <dl className="mt-2 grid grid-cols-3 gap-1.5">
+          {[[t("Intereses hoy"), usd(y.data?.fees24h)], [t("Intercambios hoy"), num(total)], [t("Holders"), num(y.data?.holders)]].map(([k, v]) => <div key={k} className="rounded-lg bg-hot-surface/60 px-2 py-1.5">
             <dt className="truncate text-[9px] font-semibold uppercase tracking-wide text-hot-muted">{k}</dt>
             <dd className="font-display text-sm font-bold tabular-nums">{v}</dd>
           </div>)}
         </dl>
-        <div className="hidden sm:block"><TokenLinks vault={vault} /></div>
+        <TokenLinks vault={vault} />
         {!hasPosition && <ol className="mt-3 hidden flex-wrap gap-1.5">{steps.map(([icon, label]) => <li key={label} className="flex items-center gap-1 rounded-full bg-hot-surface/60 px-2.5 py-1 text-[11px] font-bold">{icon} {t(label)}</li>)}</ol>}
         {ownedLink}
         {owned}
