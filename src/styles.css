@@ -333,3 +333,8 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
 .brand-seal::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, color-mix(in oklab, white 45%, transparent) 50%, transparent 70%); transform: translateX(-120%); animation: brand-shimmer 3.5s ease-in-out infinite; pointer-events: none; }
 @keyframes brand-shimmer { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
 @media (prefers-reduced-motion: reduce) { .brand-seal::after { animation: none; } }
+
+.reinvest-attn { animation: reinvest-pulse 3.5s ease-in-out infinite; }
+.reinvest-attn::after { content: ""; position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--primary) 35%, transparent), transparent); animation: cta-shimmer 3.5s ease-in-out infinite; pointer-events: none; }
+@keyframes reinvest-pulse { 0%,70%,100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; } 85% { transform: scale(1.03); box-shadow: 0 0 14px 1px color-mix(in oklab, var(--primary) 40%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .reinvest-attn, .reinvest-attn::after { animation: none; } }
