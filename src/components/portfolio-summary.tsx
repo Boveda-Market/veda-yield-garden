@@ -3,7 +3,7 @@ import { useT } from "@/lib/i18n";
 import type { ChainPosition } from "@/lib/solana-data";
 import { useQueries } from "@tanstack/react-query";
 import { fetchPoolStats } from "@/lib/pool-stats";
-import { closesForDays, fetchDailyCloses, globalMarket } from "@/lib/pool-candles";
+import { closesForDays, fetchDailyCloses, fetchIntradayCloses, globalMarket } from "@/lib/pool-candles";
 import { useMeteoraHistory } from "@/hooks/use-meteora-history";
 import { usePositionRows } from "@/hooks/use-position-rows";
 import { MASK, useHideBalances } from "@/lib/preferences";
@@ -88,6 +88,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const open = vaults.map((v) => ({ ...v, pool: VAULTS.find((x) => x.id === v.id)?.pool ?? "" })).filter((v) => v.pool);
   const active = open.find((v) => v.id === tabId) ? tabId : "global";
   const candleQ = useQueries({ queries: open.map((v) => ({ queryKey: ["pool-daily", v.pool, 30], queryFn: ({ signal }: { signal: AbortSignal }) => fetchDailyCloses(v.pool, 31, signal), staleTime: 10 * 60_000, retry: 1 })) });
+  const introQ = useQueries({ queries: open.map((v) => ({ queryKey: ["pool-4h", v.pool, 30], queryFn: ({ signal }: { signal: AbortSignal }) => fetchIntradayCloses(v.pool, 31, signal), staleTime: 10 * 60_000, retry: 1 })) });
   const statsQ = useQueries({ queries: open.map((v) => ({ queryKey: ["dexscreener-pool-stats", v.pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(v.pool, signal), staleTime: 60_000, retry: 1 })) });
   const tokenValue = (r: { tokenRaw?: string; pool?: string }) => {
     const cfg = CHAIN_POOLS.find((c) => c.pool === r.pool), price = r.pool ? poolPrices[r.pool] : null;
@@ -123,9 +124,17 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const cmin = Math.min(...mk), cmax = Math.max(...mk), cr = Math.max(cmax - cmin, Math.abs(cmax) * 1e-6, 1e-9);
   const emax = Math.max(total, 0.000001);
   const smooth = (pts: { x: number; y: number }[]) => { let d = `M${pts[0]!.x},${pts[0]!.y}`; for (let i = 1; i < pts.length; i++) { const p = pts[i - 1]!, c = pts[i]!, mx = (p.x + c.x) / 2; d += ` C${mx},${p.y} ${mx},${c.y} ${c.x},${c.y}`; } return d; };
-  const cPts = mk.map((v, i) => ({ x: x(i), y: CB - ((v - cmin) / cr) * (CB - CT - 8) }));
+  let cPts = mk.map((v, i) => ({ x: x(i), y: CB - ((v - cmin) / cr) * (CB - CT - 8) }));
   const ePts = earn.map((v, i) => ({ x: x(i), y: EB - (v / emax) * (EB - ET) }));
-  const eLine = smooth(ePts), cLine = smooth(cPts);
+  const angular = (pts: { x: number; y: number }[]) => pts.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+  // Vault tabs: 4-hour closes placed by time so every real spike and drop shows; else daily points, straight segments.
+  const t0 = days[0]!.start, tEnd = days[n - 1]!.start, span = Math.max(tEnd - t0, 1);
+  const intra = isPrice ? (introQ[curIdx]?.data ?? []).filter((c) => c.t >= t0 && c.t <= tEnd + 86_400_000) : [];
+  const iMin = intra.length ? Math.min(cmin, ...intra.map((c) => c.c)) : cmin, iMax = intra.length ? Math.max(cmax, ...intra.map((c) => c.c)) : cmax, ir = Math.max(iMax - iMin, Math.abs(iMax) * 1e-6, 1e-9);
+  const iy = (v: number) => CB - ((v - iMin) / ir) * (CB - CT - 8);
+  if (intra.length >= 4) cPts.splice(0, cPts.length, ...mk.map((v, i) => ({ x: x(i), y: iy(v) })));
+  const cLine = intra.length >= 4 ? angular(intra.map((c) => ({ x: Math.min(R, L + ((c.t - t0) / span) * (R - L)), y: iy(c.c) }))) : angular(cPts);
+  const eLine = smooth(ePts);
   const tmin = Math.min(...capArr, ...totArr), tmax = Math.max(...totArr), tr = Math.max(tmax - tmin, Math.abs(tmax) * 0.02, 1e-6);
   const ty = (v: number) => TB - ((v - tmin) / tr) * (TB - TT);
   const tPts = totArr.map((v, i) => ({ x: x(i), y: ty(v) }));
@@ -157,9 +166,9 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
         <linearGradient id={`h${gid}`} x1="0" x2="1"><stop offset="0%" stopColor={theme.a} /><stop offset="100%" stopColor={theme.b} /></linearGradient>
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
       </defs>
-      {cmax > cmin && <><text x={R} y={CT - 4} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? `$${cmax.toPrecision(3)}` : money(cmax)}</text><text x={R} y={CB + 12} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? `$${cmin.toPrecision(3)}` : money(cmin)}</text></>}
+      {cmax > cmin && <><text x={R} y={CT - 4} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? `$${iMax.toPrecision(3)}` : money(cmax)}</text><text x={R} y={CB + 12} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? `$${iMin.toPrecision(3)}` : money(cmin)}</text></>}
       <line x1={L} y1={(CB + ET) / 2} x2={R} y2={(CB + ET) / 2} stroke="var(--border)" strokeDasharray="3 6" />
-      <path d={cLine} fill="none" stroke={`url(#h${gid})`} strokeWidth="3.5" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 5px ${theme.b})` }} />
+      <path d={cLine} fill="none" stroke={`url(#h${gid})`} strokeWidth="2" strokeLinejoin="miter" strokeLinecap="butt" style={{ filter: `drop-shadow(0 0 4px ${theme.b})` }} />
       {total > 0 && <path d={`${eLine} L${R},${EB} L${L},${EB} Z`} fill={`url(#a${gid})`} />}
       <path d={eLine} fill="none" stroke="var(--primary)" strokeWidth="3.5" strokeLinecap="round" strokeDasharray={total > 0 ? undefined : "6 8"} style={{ filter: "drop-shadow(0 0 5px var(--primary))" }} />
       <circle cx={cPts[shown]!.x} cy={cPts[shown]!.y} r="5.5" fill="var(--background)" stroke={theme.b} strokeWidth="3" />
