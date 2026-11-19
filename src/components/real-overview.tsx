@@ -1,5 +1,4 @@
 import { MigrateBanner } from "./migrate-banner";
-import { Gta6PromoBanner } from "./gta6-promo";
 import { LoginSheet } from "./login-nudge";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { MigratePicker } from "./migrate-picker";
@@ -28,7 +27,7 @@ import { DepositSimulation } from "@/components/deposit-simulation";
 import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
 import { PoolYield } from "@/components/pool-yield";
 import { HarvestDialog } from "@/components/harvest-dialog";
-import { RealPositions, PortfolioEmpty } from "@/components/real-positions";
+import { RealPositions, PortfolioEmpty, VaultMiniCards } from "@/components/real-positions";
 import { StartGuide } from "@/components/start-guide";
 import { VaultSteps } from "@/components/vault-steps";
 import { OpenPredictions, useOpenPredictions } from "@/components/open-predictions";
@@ -88,7 +87,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Tu portafolio")}</h1>{refresh}</div>
       {!walletAddress && <p className="mt-3 text-sm text-muted-foreground">{t("Conecta tu wallet para ver tu portafolio.")}</p>}
       {errors}
-      {data && <Gta6PromoBanner positions={data.positions} onMigrate={migrate} />}{data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
+      {data && <VaultMiniCards positions={data.positions} />}{data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
     </section> : <section aria-label={t("Bóvedas de rendimiento")} className="pb-1 pt-1">
       <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Bóvedas de rendimiento")}</h1>{refresh}</div>
       <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">{t("Pon tus dólares a generar intereses diarios. Retiras o cosechas cuando quieras.")}</p>

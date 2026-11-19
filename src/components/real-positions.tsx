@@ -70,7 +70,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
         {!isOperableVault(p.vaultId) && <p className="mt-3 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
       </>;
       // High-octane vaults get the animated neon frame and sunset banner; actions stay identical to every other vault.
-      return hot ? <article key={p.address} data-vault={p.vaultId} className={`scroll-mt-24 hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)] ${vaultSkin(p.vaultId)}`}><div className="h-full overflow-hidden rounded-[calc(1rem-2px)] bg-card p-5">{body}</div></article> : <article key={p.address} data-vault={p.vaultId} className="scroll-mt-24 rounded-lg border border-border bg-card p-5">{body}</article>;
+      return hot ? <article key={p.address} id={`pos-${p.address}`} data-vault={p.vaultId} className={`scroll-mt-24 transition-shadow hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)] ${vaultSkin(p.vaultId)}`}><div className="h-full overflow-hidden rounded-[calc(1rem-2px)] bg-card p-5">{body}</div></article> : <article key={p.address} id={`pos-${p.address}`} data-vault={p.vaultId} className="scroll-mt-24 transition-shadow rounded-lg border border-border bg-card p-5">{body}</article>;
     })}</div>
     <p className="mt-4 text-xs leading-5 text-muted-foreground">{t("Valores en dólares estimados al precio actual; pueden cambiar antes de firmar.")} {t("El contador en vivo estima cómo crecen tus ganancias con los intereses recientes de la bóveda; el monto exacto se confirma al cosechar.")}</p>
   </section>;
@@ -84,4 +84,22 @@ export function PortfolioEmpty() {
     <p className="mt-2 max-w-md text-sm text-muted-foreground">{t("Aún no tienes bóvedas abiertas. Elige una, deposita USDC y mira aquí cómo crecen tus ganancias.")}</p>
     <Button asChild className="mt-6"><Link to="/wallet">{t("Depositar en bóveda")}</Link></Button>
   </section>;
+}
+
+/** Compact grid of open vaults (capital + earnings); «Ver más» scrolls to that vault's full card. Renders nothing when there are none. */
+export function VaultMiniCards({ positions }: { positions: ChainPosition[] }) {
+  const t = useT();
+  const { rows } = usePositionRows(positions);
+  if (rows.length === 0) return null;
+  const go = (address: string) => { const el = document.getElementById(`pos-${address}`); if (!el) return; el.scrollIntoView({ behavior: "smooth", block: "start" }); el.classList.add("ring-4", "ring-primary"); window.setTimeout(() => el.classList.remove("ring-4", "ring-primary"), 1400); };
+  return <div aria-label={t("Tus bóvedas abiertas")} className="mt-4 grid grid-cols-2 gap-2.5 md:grid-cols-3 lg:grid-cols-4">{rows.map(({ p, value, fees }) => {
+    const vault = VAULTS.find((v) => v.id === p.vaultId);
+    const hot = Boolean(vault?.badge);
+    return <button key={p.address} type="button" onClick={() => go(p.address)} className={`flex min-w-0 flex-col rounded-xl border bg-card p-3 text-left transition hover:bg-secondary ${hot ? `border-hot/60 shadow-[var(--shadow-hot)] ${vaultSkin(p.vaultId)}` : "border-border"}`}>
+      <span className="truncate text-sm font-bold">{vault ? t(vault.name) : `${p.symbol}/USDC`}</span>
+      <span className="mt-1.5 font-display text-lg font-semibold tabular-nums">{value === null ? "—" : `≈ ${formatUsd(value)}`}</span>
+      <span className="text-[12px] font-semibold tabular-nums text-primary">{fees === null ? t("Consultando…") : `+${formatUsd(fees)} ${t("por cosechar")}`}</span>
+      <span className="mt-2 text-xs font-semibold text-muted-foreground">{t("Ver más")} ↓</span>
+    </button>;
+  })}</div>;
 }
