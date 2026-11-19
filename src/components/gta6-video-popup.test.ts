@@ -6,7 +6,7 @@ describe("GTA6 video popup", () => {
   it("hides once the user has a GTA6 deposit", () => expect(showGta6Video([pos("gta6")])).toBe(false));
   it("shows on every visit when the user has no dollars", () => expect([1, 2, 3, 4].every((v) => gta6VideoDue(false, v))).toBe(true));
   it("shows once every 3 visits when the user has dollars but no vaults", () => expect([1, 2, 3, 4, 5, 6, 7].map((v) => gta6VideoDue(true, v))).toEqual([true, false, false, true, false, false, true]));
-  const D = 24 * 3600_000, L = LAUNCH.dcty ?? 0;
+  const D = 24 * 3600_000, L = LAUNCH["dcty"] ?? 0;
   it("new vault campaign: every 2 days in week 1, every 4 in week 2, once in week 3, then off", () => {
     expect(campaignGap(L, L + D)).toBe(2 * D);
     expect(campaignGap(L, L + 8 * D)).toBe(4 * D);
