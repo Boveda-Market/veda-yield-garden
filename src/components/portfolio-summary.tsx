@@ -11,7 +11,6 @@ import { formatUsd } from "@/lib/position-value";
 import { canHarvest } from "@/lib/harvest";
 import { VAULTS } from "@/lib/vaults";
 import { Button } from "./ui/button";
-import { MarginPill } from "./ui/margin-pill";
 import { useId, useState } from "react";
 import { CHAIN_POOLS } from "@/lib/solana-data";
 import { capitalSeries } from "@/lib/weekly-interest";
@@ -46,7 +45,7 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
 
     <div className={`${tile} mt-4`}>
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div><p className={label}><PieChart size={14} />{t("Capital trabajando")}</p><p className="mt-1 font-display text-3xl font-semibold tabular-nums">{total > 0 ? money(total) : "—"}</p>{!hidden && <MarginPill harvested={pnl} capital={vaultTotal} className="mt-1" />}</div>
+        <div><p className={label}><PieChart size={14} />{t("Capital trabajando")}</p><p className="mt-1 font-display text-3xl font-semibold tabular-nums">{total > 0 ? money(total) : "—"}</p></div>
         {aprWeighted !== null && <div className="text-right"><p className="text-xs text-muted-foreground">{t("APR promedio")}</p><p className="font-display text-2xl font-bold tabular-nums text-primary">{aprWeighted.toFixed(1)}%</p></div>}
       </div>
       {total > 0 ? <>
