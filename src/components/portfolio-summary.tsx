@@ -132,10 +132,12 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const ePts = earn.map((v, i) => ({ x: x(i), y: EB - (v / emax) * (EB - ET) }));
   const angular = (pts: { x: number; y: number }[]) => pts.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
   // Market line: 1-minute (24 h), 15-minute (7 d) or 1-hour (30 d) closes placed by time with straight segments, so every real spike and drop shows; Global sums each vault moved by its own price.
-  const now = Date.now(), w0 = n === 1 ? now - 86_400_000 : days[0]!.start, wSpan = Math.max(now - w0, 1);
-  const inWin = (i: number) => (introQ[i]?.data ?? []).filter((c) => c.t >= w0);
+  const now = Date.now(), wBase = n === 1 ? now - 86_400_000 : days[0]!.start;
+  const inWin = (i: number) => (introQ[i]?.data ?? []).filter((c) => c.t >= wBase);
   const mSeries = isPrice ? inWin(curIdx).map((c) => ({ t: c.t, v: c.c })) : intradayGlobal(open.map((v, i) => ({ value: v.value, candles: inWin(i) })));
   const live = mSeries.length >= 4;
+  // Young tokens: stretch the line edge to edge from their first candle instead of leaving the left side empty.
+  const w0 = live ? Math.max(wBase, mSeries[0]!.t) : wBase, wSpan = Math.max(now - w0, 1), young = n !== 1 && live && w0 - wBase > 86_400_000;
   const ms = live ? mSeries.map((p) => p.v) : mk;
   const cmin = Math.min(...ms), cmax = Math.max(...ms), cr = Math.max(cmax - cmin, Math.abs(cmax) * 1e-6, 1e-9);
   const my = (v: number) => CB - ((v - cmin) / cr) * (CB - CT - 8);
@@ -190,7 +192,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
       <p className="flex items-center gap-1.5 text-muted-foreground"><span className="h-0.5 w-4 rounded bg-foreground" />{t("Total del portafolio")} <strong className="tabular-nums text-foreground">{money(totArr[shown]!)}</strong></p>
       <p className="flex items-center justify-end gap-1.5 text-muted-foreground"><span className="w-4 border-t-2 border-dashed border-chart-4" />{t("Capital depositado")} <strong className="tabular-nums text-foreground">{money(baseCap)}</strong></p>
     </div>}
-    <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{n === 1 ? t("Hace 24 h") : new Date(days[0]!.start).toLocaleDateString(locale, { day: "numeric", month: "short" })}</span><span>{n === 1 ? t("Ahora") : t("Hoy")}</span></div>
+    <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{n === 1 ? t("Hace 24 h") : young ? t("Desde lanzamiento") : new Date(days[0]!.start).toLocaleDateString(locale, { day: "numeric", month: "short" })}</span><span>{n === 1 ? t("Ahora") : t("Hoy")}</span></div>
     <p className="relative mt-3 text-xs leading-5 text-muted-foreground">{isPrice ? t("El precio de {s} puede subir o bajar; tus ganancias cosechadas solo suman.", { s: sym }) : t("El mercado global puede subir o bajar; tus ganancias cosechadas solo suman.")}</p>
   </div>;
 }

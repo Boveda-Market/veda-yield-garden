@@ -157,6 +157,7 @@ export const app: Record<string, string> = {
   "30 días": "30 days",
   "24 h": "24 h",
   "Hace 24 h": "24 h ago",
+  "Desde lanzamiento": "Since launch",
   "0% entrada": "0% entry",
   "1% salida": "1% exit",
   "Medio": "Medium",
