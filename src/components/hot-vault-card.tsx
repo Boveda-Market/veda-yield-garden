@@ -60,6 +60,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
             <dd className="font-display text-sm font-bold tabular-nums">{v}</dd>
           </div>)}
         </dl>
+        <TokenLinks vault={vault} />
         {!hasPosition && <ol className="mt-3 flex flex-wrap gap-1.5">{steps.map(([icon, label]) => <li key={label} className="flex items-center gap-1 rounded-full bg-hot-surface/60 px-2.5 py-1 text-[11px] font-bold">{icon} {t(label)}</li>)}</ol>}
         {ownedLink}
         {owned}
@@ -70,4 +71,16 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
       </div>
     </div>
   </article>;
+}
+
+/** Web · X · GMGN pills for the vault token; opens in a new tab. */
+export function TokenLinks({ vault }: { vault: Vault }) {
+  const l = vault.links;
+  if (!l) return null;
+  const pill = "flex h-7 items-center justify-center gap-1 rounded-full border border-hot-foreground/15 bg-hot-surface/65 px-2 text-[11px] font-bold transition hover:bg-hot-surface active:scale-95";
+  return <div className="mt-2 grid grid-cols-3 gap-1.5">
+    <a href={l.web} target="_blank" rel="noopener noreferrer" className={pill}>🌐 Web</a>
+    <a href={l.x} target="_blank" rel="noopener noreferrer" className={pill} aria-label="X">𝕏</a>
+    <a href={l.gmgn} target="_blank" rel="noopener noreferrer" className={pill}><img src="/gmgn-logo.png" alt="" width={16} height={16} className="h-4 w-4 rounded-sm" />GMGN</a>
+  </div>;
 }
