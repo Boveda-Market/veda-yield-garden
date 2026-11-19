@@ -23,9 +23,9 @@ export function Sunset() {
 
 /** Sunset banner with the GTA-style title, shared by the vault card and the active portfolio card. */
 export function HotBanner({ vault, children, className = "" }: { vault: Vault; children?: ReactNode; className?: string }) {
-  return <div className={`relative flex items-center justify-between gap-3 overflow-hidden bg-[image:var(--gradient-hot)] px-4 py-3 text-hot-foreground ${vaultSkin(vault.id)} ${className}`}>
+  return <div className={`relative flex items-center justify-between gap-3 overflow-hidden bg-[image:var(--gradient-hot)] px-2.5 py-2 text-hot-foreground sm:px-4 sm:py-3 ${vaultSkin(vault.id)} ${className}`}>
     {vault.id === "dcty" ? <DctySkyline /> : <Sunset />}
-    <h3 className="relative min-w-0"><VaultTitle vault={vault} className="h-8 sm:h-9" /></h3>
+    <h3 className="relative min-w-0"><VaultTitle vault={vault} className="h-6 sm:h-9" /></h3>
     {children && <div className="relative flex shrink-0 flex-col items-end gap-1">{children}</div>}
   </div>;
 }
@@ -45,28 +45,28 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
   return <article className={`hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)] ${vaultSkin(vault.id)}`}>
     <div className="relative isolate flex h-full flex-col overflow-hidden rounded-[calc(1rem-2px)] bg-[image:var(--gradient-hot-surface)] text-hot-foreground">
       <HotBanner vault={vault}>
-        <span className="rounded-full bg-hot-surface px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide">⚡ {t("Sé la casa")}</span>
+        <span className="hidden rounded-full bg-hot-surface px-2.5 py-0.5 text-[10px] sm:inline font-black uppercase tracking-wide">⚡ {t("Sé la casa")}</span>
         <span className="flex items-center gap-1 rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-live shadow-[0_0_6px_var(--live)] motion-reduce:animate-none" />{t("En vivo")}</span>
       </HotBanner>
-      <div className="flex flex-1 flex-col p-3">
+      <div className="flex flex-1 flex-col p-2 sm:p-3">
         <p className="text-[11px] font-semibold text-hot-muted">{vault.pair}</p>
         <div className="flex flex-wrap items-baseline gap-x-2">
-          <p key={apr ?? "x"} className="animate-count-pop bg-[image:var(--gradient-hot)] bg-clip-text font-display text-4xl font-black leading-tight text-transparent tabular-nums">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 0 })}%`}</p>
-          <p className="text-[11px] font-medium text-hot-muted">{y.isPending ? t("Consultando el pool…") : t("APR estimado · intereses 24 h")}</p>
+          <p key={apr ?? "x"} className="animate-count-pop bg-[image:var(--gradient-hot)] bg-clip-text font-display text-2xl font-black sm:text-4xl leading-tight text-transparent tabular-nums">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 0 })}%`}</p>
+          <p className="text-[10px] font-medium leading-tight text-hot-muted sm:text-[11px]">{y.isPending ? t("Consultando el pool…") : t("APR estimado · intereses 24 h")}</p>
         </div>
-        <dl className="mt-2 grid grid-cols-3 gap-1.5">
-          {[[t("Intereses hoy"), usd(y.data?.fees24h)], [t("Intercambios hoy"), num(total)], [t("Holders"), num(y.data?.holders)]].map(([k, v]) => <div key={k} className="rounded-lg bg-hot-surface/60 px-2 py-1.5">
+        <dl className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-3 sm:gap-1.5">
+          {[[t("Intereses hoy"), usd(y.data?.fees24h)], [t("Intercambios hoy"), num(total)], [t("Holders"), num(y.data?.holders)]].map(([k, v]) => <div key={k} className="flex items-baseline justify-between gap-1 rounded-lg bg-hot-surface/60 px-2 py-1 sm:block sm:py-1.5">
             <dt className="truncate text-[9px] font-semibold uppercase tracking-wide text-hot-muted">{k}</dt>
             <dd className="font-display text-sm font-bold tabular-nums">{v}</dd>
           </div>)}
         </dl>
-        <TokenLinks vault={vault} />
-        {!hasPosition && <ol className="mt-3 flex flex-wrap gap-1.5">{steps.map(([icon, label]) => <li key={label} className="flex items-center gap-1 rounded-full bg-hot-surface/60 px-2.5 py-1 text-[11px] font-bold">{icon} {t(label)}</li>)}</ol>}
+        <div className="hidden sm:block"><TokenLinks vault={vault} /></div>
+        {!hasPosition && <ol className="mt-3 hidden flex-wrap gap-1.5">{steps.map(([icon, label]) => <li key={label} className="flex items-center gap-1 rounded-full bg-hot-surface/60 px-2.5 py-1 text-[11px] font-bold">{icon} {t(label)}</li>)}</ol>}
         {ownedLink}
         {owned}
-        <div className="mt-3 grid grid-cols-[auto_1fr] gap-2">
-          <button type="button" onClick={onDetails} className="h-11 rounded-xl border border-hot-foreground/25 bg-hot-foreground/10 px-3 text-sm font-semibold transition hover:bg-hot-foreground/20">{t("Detalles del pool")}</button>
-          <button type="button" disabled={depositDisabled} onClick={onDeposit} className="hot-cta flex h-11 items-center justify-center gap-2 rounded-xl font-display text-base font-black text-hot-surface shadow-[var(--shadow-hot)] transition active:scale-95 disabled:opacity-70">{hasPosition ? <><Plus size={18} strokeWidth={3} />{t("Depositar más")}</> : t("Depositar")}</button>
+        <div className="mt-auto grid grid-cols-1 gap-1.5 pt-2 sm:grid-cols-[auto_1fr] sm:gap-2 sm:pt-3">
+          <button type="button" onClick={onDetails} className="order-2 h-9 rounded-xl border sm:order-none sm:h-11 border-hot-foreground/25 bg-hot-foreground/10 px-2 text-xs font-semibold transition sm:px-3 sm:text-sm hover:bg-hot-foreground/20">{t("Detalles del pool")}</button>
+          <button type="button" disabled={depositDisabled} onClick={onDeposit} className="hot-cta flex h-10 items-center justify-center gap-1 rounded-xl font-display text-sm sm:h-11 sm:gap-2 sm:text-base font-black text-hot-surface shadow-[var(--shadow-hot)] transition active:scale-95 disabled:opacity-70">{hasPosition ? <><Plus size={18} strokeWidth={3} />{t("Depositar más")}</> : t("Depositar")}</button>
         </div>
       </div>
     </div>
