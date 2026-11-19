@@ -75,12 +75,13 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
 
 /** Web · X · GMGN pills for the vault token; opens in a new tab. */
 export function TokenLinks({ vault }: { vault: Vault }) {
+  const t = useT();
   const l = vault.links;
   if (!l) return null;
   const pill = "flex h-7 items-center justify-center gap-1 rounded-full border border-hot-foreground/15 bg-hot-surface/65 px-2 text-[11px] font-bold transition hover:bg-hot-surface active:scale-95";
   return <div className="mt-2 grid grid-cols-3 gap-1.5">
     <a href={l.web} target="_blank" rel="noopener noreferrer" className={pill}>🌐 Web</a>
     <a href={l.x} target="_blank" rel="noopener noreferrer" className={pill} aria-label="X">𝕏</a>
-    <a href={l.gmgn} target="_blank" rel="noopener noreferrer" className={pill}><img src="/gmgn-logo.png" alt="" width={16} height={16} className="h-4 w-4 rounded-sm" />GMGN</a>
+    <a href={l.gmgn} target="_blank" rel="noopener noreferrer" className={pill}><img src="/gmgn-logo.png" alt="" width={16} height={16} className="h-4 w-4 rounded-sm" />{t("Ver gráfica")}</a>
   </div>;
 }
