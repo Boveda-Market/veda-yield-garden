@@ -487,8 +487,10 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     // Autopilot: leftover vault tokens already in the wallet join the re-centred position (never USDC, never SOL).
     const absorbedX = options.absorbWalletToken ? xBefore : 0n;
     // Autopilot: USDC just converted from verified leftovers joins too (capped to what the wallet holds).
-    const absorbedY = options.absorbUsdc && options.absorbUsdc > 0n ? (options.absorbUsdc < usdcBefore ? options.absorbUsdc : usdcBefore) : 0n;
-    const x = xAll + absorbedX, y = yAll - bovedaFee + absorbedY;
+    // Price fell below the range: harvested/leftover USDC stays free in the wallet; only the base capital re-centres.
+    const fellBelow = active < data.lowerBinId;
+    const absorbedY = !fellBelow && options.absorbUsdc && options.absorbUsdc > 0n ? (options.absorbUsdc < usdcBefore ? options.absorbUsdc : usdcBefore) : 0n;
+    const x = xAll + absorbedX, y = fellBelow ? rawFloor(data.totalYAmount) : yAll - bovedaFee + absorbedY;
     if (await connection.getBalance(owner) < 10_000_000) return fail("Necesitas un poco más de reserva de operaciones para rebalancear.");
 
     stage = "Preparación del rebalanceo";
