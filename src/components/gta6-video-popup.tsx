@@ -72,7 +72,7 @@ export function HotRankCard({ onEnter, onLater, positions = [], usdc = 0, onMove
             <VaultTitle vault={vault} className="h-6" />
             <span className="flex items-center gap-1">{owned && <span className="rounded-full bg-hot-surface px-2 py-0.5 text-[10px] font-bold">{t("Tu bóveda activa")}</span>}{i === 0 && <span className="flex items-center gap-1 rounded-full bg-hot-surface px-2 py-0.5 text-[10px] font-black uppercase"><Crown size={11} aria-hidden />#1</span>}</span>
           </span>
-          <span className="relative mt-1 block text-[11px] font-semibold">{t(HOOK[vault.id] ?? vault.pair)}</span>
+          <span className="relative mt-1.5 inline-block rounded-lg bg-hot-surface/70 px-2 py-0.5 text-[12.5px] font-bold leading-snug text-hot-foreground shadow-sm backdrop-blur-[2px]">{t(HOOK[vault.id] ?? vault.pair)}</span>
           <span className="relative mt-1.5 flex items-end justify-between gap-2">
             <span><span className="block font-display text-2xl font-black leading-none tabular-nums">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 0 })}%`}</span><span className="text-[10px] font-medium opacity-80">{t("APR estimado · 24 h")}</span></span>
             <span className="flex items-center gap-1 rounded-xl bg-hot-surface px-3 py-2 text-xs font-black">{moveFirst ? t("Mover capital ⇄") : owned ? t("Añadir") : t("Depositar")}{!moveFirst && <ArrowRight size={14} aria-hidden />}</span>

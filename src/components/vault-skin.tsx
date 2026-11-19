@@ -31,8 +31,8 @@ export function VaultTitle({ vault, className = "h-8 sm:h-9" }: { vault: Pick<Va
   const t = useT();
   const { lang } = useI18n();
   if (vault.id === "dcty") return <span className={`flex items-center gap-1.5 ${className}`}>
-    <img src={dctyLogo} alt="" aria-hidden width={160} height={160} className="h-full w-auto shrink-0 rounded-full drop-shadow-[0_0_10px_var(--hot)]" />
-    <span className="-rotate-2 whitespace-nowrap font-display text-[1.35em] font-black italic uppercase leading-none tracking-tight text-hot-foreground drop-shadow-[0_2px_0_var(--hot)]">{lang === "en" ? <><span className="bg-[image:var(--gradient-hot)] bg-clip-text text-transparent">DCTY</span> Vault</> : <>Bóveda <span className="bg-[image:var(--gradient-hot)] bg-clip-text text-transparent">DCTY</span></>}</span>
+    <img src={dctyLogo} alt="" aria-hidden width={160} height={160} className="h-[115%] w-auto shrink-0 rounded-full ring-2 ring-hot-2 drop-shadow-[0_0_10px_var(--hot-2)]" />
+    <span className="-rotate-2 whitespace-nowrap font-display text-[1.35em] font-black italic uppercase leading-none tracking-tight text-hot-foreground [text-shadow:0_2px_0_var(--hot-surface),0_0_8px_var(--hot-surface)]">{lang === "en" ? <><span className="text-hot-2 [text-shadow:0_0_10px_var(--hot-2),0_2px_0_var(--hot-surface)]">DCTY</span> Vault</> : <>Bóveda <span className="text-hot-2 [text-shadow:0_0_10px_var(--hot-2),0_2px_0_var(--hot-surface)]">DCTY</span></>}</span>
     <span className="sr-only">{t(vault.name)}</span>
   </span>;
   return <img src={lang === "en" ? gtaTitleEn : gtaTitleEs} alt={t(vault.name)} width={lang === "en" ? 935 : 1074} height={lang === "en" ? 233 : 228} className={`w-auto max-w-full -rotate-2 ${className}`} />;
