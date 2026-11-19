@@ -12,6 +12,7 @@ describe("gas refill", () => {
 
 describe("first-time activation", () => {
   it("charges reserve market value plus exactly $5", () => expect(activationCharge(8_800_000n)).toBe(13_800_000n));
+  it("charges reserve market value plus exactly $2 for an additional vault", () => expect(activationCharge(8_800_000n, true)).toBe(10_800_000n));
   it("delivers 0.065 SOL from an empty wallet", () => expect(refillLamports(0n, "vault")).toBe(65_000_000n));
   it("asks for the missing dollars below $20", () => {
     expect(activationShortfallMicro(12_000_000n)).toBe(8_000_000n);

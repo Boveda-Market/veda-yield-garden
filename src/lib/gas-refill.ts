@@ -38,7 +38,9 @@ export function treasuryCanRefill(treasuryLamports: bigint, lamports: bigint, fl
 export const ACTIVATION_FEE_MICRO = 5_000_000n;
 /** Suggested starting balance: covers the activation and leaves room for a first vault deposit. */
 export const ACTIVATION_SUGGESTED_USD = 20;
-export function activationCharge(marketMicro: bigint) { return marketMicro + ACTIVATION_FEE_MICRO; }
+/** Wallets that already hold a vault pay this smaller fee to activate an additional vault ($2). */
+export const EXTRA_VAULT_FEE_MICRO = 2_000_000n;
+export function activationCharge(marketMicro: bigint, extraVault = false) { return marketMicro + (extraVault ? EXTRA_VAULT_FEE_MICRO : ACTIVATION_FEE_MICRO); }
 /** Dollars still missing to reach the suggested starting balance (0 when enough). */
 export function activationShortfallMicro(usdcMicro: bigint, needMicro: bigint = BigInt(ACTIVATION_SUGGESTED_USD) * 1_000_000n) {
   const need = needMicro;

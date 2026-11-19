@@ -11,7 +11,7 @@ type Fail = { success: false; error: string };
 export const prepareGasRefill = createServerFn({ method: "POST" })
   .middleware([requirePrivyAuth])
   .inputValidator((d: unknown) => gasRefillInput.parse(d))
-  .handler(async ({ data, context }): Promise<{ success: true; transaction: string | null; lamports: string; chargeMicro: string } | Fail> => {
+  .handler(async ({ data, context }): Promise<{ success: true; transaction: string | null; lamports: string; chargeMicro: string; extraVault?: boolean } | Fail> => {
     { const { assertTradingWallet } = await import("@/lib/trade-guard.server"); await assertTradingWallet(context.privyUserId, data.wallet); }
     const key = process.env["HELIUS_API_KEY"];
     const secret = process.env["AFFILIATE_PAYOUT_SECRET_KEY"];
@@ -37,11 +37,14 @@ export const prepareGasRefill = createServerFn({ method: "POST" })
       if (!q.ok) throw new Error("quote");
       const market = BigInt(((await q.json()) as { outAmount: string }).outAmount);
       // Activation charges reserve cost + fixed $5; regular refills keep the small cost-recovery margin.
-      const charge = data.activation ? activationCharge(market) : refillCharge(market);
-      if (data.quoteOnly) return { success: true, transaction: null, lamports: lamports.toString(), chargeMicro: charge.toString() };
+      // Wallets that already hold a vault pay the smaller additional-vault fee (verified on-chain, never trusted from the client).
+      let extraVault = false;
+      if (data.activation) { try { const { readDlmmPositions } = await import("@/lib/dlmm.server"); extraVault = (await readDlmmPositions(heliusConnection(key), new PublicKey(data.wallet))).length > 0; } catch { extraVault = false; } }
+      const charge = data.activation ? activationCharge(market, extraVault) : refillCharge(market);
+      if (data.quoteOnly) return { success: true, transaction: null, lamports: lamports.toString(), chargeMicro: charge.toString(), extraVault };
       const { buildGasRefill } = await import("@/lib/affiliate.server");
       const transaction = await buildGasRefill(key, secret, FEE_WALLET, data.wallet, lamports, charge);
-      return { success: true, transaction, lamports: lamports.toString(), chargeMicro: charge.toString() };
+      return { success: true, transaction, lamports: lamports.toString(), chargeMicro: charge.toString(), extraVault };
     } catch (e) {
       console.error("gas refill failed", e instanceof Error ? e.message : "unknown");
       return { success: false, error: "No se pudo preparar la recarga. Revisa que tengas suficientes dólares disponibles e inténtalo de nuevo." };
