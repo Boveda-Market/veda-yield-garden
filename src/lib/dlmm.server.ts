@@ -5,7 +5,7 @@ import { AccountLayout, ExtensionType, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, 
 import { loadDlmmSdk } from "@/lib/dlmm-sdk.server";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount, type ChainPoolConfig, type ChainPosition } from "@/lib/solana-data";
 import { FEE_WALLET, harvestFee } from "@/lib/fees";
-import { compactDepositInstructions } from "@/lib/compact-deposit";
+import { compactDepositInstructions, dropExistingAtaCreates } from "@/lib/compact-deposit";
 import { computeBudgetIxs, computeLimit, MAX_COMPUTE_UNITS, networkFeeOf } from "@/lib/compute-budget";
 import { simulationAmounts, simulationDisplay, type SimulationInput, type SimulationResult, type SimulationStage } from "@/lib/deposit-simulation";
 import type { PreparedPilot } from "@/lib/pilot-deposit";
@@ -154,7 +154,7 @@ export async function simulateDlmmDeposit(connection: Connection, input: Simulat
     let minBinId: number, maxBinId: number;
     if (existing) {
       minBinId = existing.lb.positionData.lowerBinId; maxBinId = existing.lb.positionData.upperBinId;
-      if (active + moved < minBinId || active + moved >= maxBinId || active < minBinId) return result(false, "El precio salió del rango de tu posición, así que ya no está generando. Ciérrala y abre una nueva para seguir ganando.");
+      if (active + moved < minBinId || active + moved >= maxBinId || active < minBinId) return { ...result(false, "Tu bóveda está fuera de la zona de ganancias; primero la recentramos."), outOfRange: true };
     } else {
       // Only use bin arrays that already exist: creating new ones costs non-refundable rent.
       const wanted = dlmmRange(active, moved);
@@ -518,7 +518,9 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     const rebalance = await pool.rebalancePosition(plannedRebalance, new BN(3), owner, 1);
     if (rebalance.initBinArrayInstructions.length) return fail("El precio actual está en una zona sin liquidez preparada. Prueba más tarde.");
     const feeIxs = bovedaFee > 0n ? [createTransferCheckedInstruction(usdcAta, usdc, feeAta, owner, bovedaFee, 6)] : [];
-    const core = stripBudget([...(claims[0]?.instructions ?? []), ...removals[0]!.instructions, ...feeIxs, ...swapIxs, ...rebalance.rebalancePositionInstruction]);
+    // Both wallet token accounts already exist: drop their idempotent re-creation so Token-2022 vaults fit in 1232 bytes.
+    const existingAtas = new Set([before[0] ? usdcAta.toBase58() : "", before[1] ? tokenX.toBase58() : ""].filter(Boolean));
+    const core = dropExistingAtaCreates(stripBudget([...(claims[0]?.instructions ?? []), ...removals[0]!.instructions, ...feeIxs, ...swapIxs, ...rebalance.rebalancePositionInstruction]), existingAtas);
     const block = await connection.getLatestBlockhash();
     // Optional on-chain tag (Autopilot) so activity can name it; dropped when it would exceed the size limit.
     const memoIx = options.memo ? new TransactionInstruction({ programId: new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"), keys: [], data: Buffer.from(options.memo) }) : null;

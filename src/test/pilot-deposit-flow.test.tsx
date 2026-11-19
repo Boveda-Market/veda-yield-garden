@@ -3,13 +3,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PilotDeposit } from "@/components/pilot-deposit";
 import { FEE_WALLET } from "@/lib/fees";
 
-const mocks = vi.hoisted(() => ({ prepare: vi.fn(), status: vi.fn(), sign: vi.fn() }));
+const mocks = vi.hoisted(() => ({ prepare: vi.fn(), status: vi.fn(), sign: vi.fn(), rebalance: vi.fn() }));
 vi.mock("@tanstack/react-query", async (orig) => ({ ...(await orig<object>()), useQueryClient: () => ({ invalidateQueries: () => Promise.resolve() }), useQuery: () => ({ data: undefined }) }));
 vi.mock("@tanstack/react-router", () => ({ Link: ({ children }: { children: unknown }) => children, useRouter: () => null }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@/components/gas-refill-card", () => ({ ActivationSheet: ({ open }: { open: boolean }) => (open ? <div role="dialog">activation</div> : null) }));
 vi.mock("@/hooks/use-affiliate-report", () => ({ useAffiliateReport: () => async () => undefined }));
 vi.mock("@/lib/gas-refill.functions", () => ({ prepareGasRefill: vi.fn() }));
+vi.mock("@/lib/rebalance.functions", () => ({ prepareRealRebalance: mocks.rebalance }));
 vi.mock("@/lib/pilot-deposit.functions", () => ({ preparePilotDeposit: mocks.prepare, pilotDepositStatus: mocks.status }));
 vi.mock("@/hooks/use-boveda-session", () => ({ useBovedaSession: () => ({ walletAddress: FEE_WALLET, signAndSend: mocks.sign }) }));
 afterEach(cleanup);
@@ -71,5 +72,16 @@ describe("selectable Real deposit review", () => {
     await screen.findByRole("alert");
     expect(screen.queryByText("Depósito confirmado en la red (confirmado).")).toBeNull();
     expect(mocks.sign).toHaveBeenCalledTimes(1);
+  });
+  it("re-centres an out-of-range vault first, then deposits the new dollars", async () => {
+    const pos = "7bKZXfDvsMEoFnRy8SdCZGBvUEyjzw3HKoce5rr4UH4R";
+    mocks.prepare.mockResolvedValueOnce({ success: false, outOfRange: true, message: "fuera" }).mockResolvedValueOnce({ success: true, prepared: { transaction: "AQID" } });
+    mocks.rebalance.mockResolvedValue({ success: true, prepared: { transaction: "BAUG" } });
+    render(<PilotDeposit vaultId="dcty" amount="5" position={pos} onBusyChange={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: /depositar/i }));
+    await screen.findByText("Depósito confirmado en la red (confirmado).");
+    expect(mocks.rebalance).toHaveBeenCalledWith({ data: { wallet: FEE_WALLET, position: pos, vaultId: "dcty", prepare: true } });
+    expect(mocks.sign).toHaveBeenNthCalledWith(1, new Uint8Array([4, 5, 6]));
+    expect(mocks.sign).toHaveBeenNthCalledWith(2, new Uint8Array([1, 2, 3]));
   });
 });

@@ -12,6 +12,7 @@ import { notify } from "@/lib/notify";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { pilotDepositStatus, preparePilotDeposit } from "@/lib/pilot-deposit.functions";
+import { prepareRealRebalance } from "@/lib/rebalance.functions";
 import { PILOT_VAULTS, pilotInput, type PilotStatus } from "@/lib/pilot-deposit";
 
 type Step = "idle" | "preparing" | "signing" | "confirming" | "done" | "error";
@@ -22,6 +23,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, usdc, autoSta
   const t = useT();
   const { walletAddress, signAndSend } = useBovedaSession();
   const prepare = useServerFn(preparePilotDeposit);
+  const prepareRebalance = useServerFn(prepareRealRebalance);
   const reportAffiliate = useAffiliateReport();
   const readStatus = useServerFn(pilotDepositStatus);
   const queryClient = useQueryClient();
@@ -45,7 +47,27 @@ export function PilotDeposit({ vaultId, amount, position, migrate, usdc, autoSta
     if (!walletAddress || busy || !eligible || !valid.success) return;
     setMessage(null); setSignature(null); setStatus(null); setStep("preparing");
     try {
-      const prepared = await prepare({ data: valid.data });
+      let prepared = await prepare({ data: valid.data });
+      // Out-of-range position: re-centre it first (one approval), then add the new dollars to the centred position.
+      if (!prepared.success && prepared.outOfRange && position && !migrate) {
+        const rb = await prepareRebalance({ data: { wallet: walletAddress, position, vaultId: vaultId as never, prepare: true } });
+        if (!rb.success || !rb.prepared) { setStep("error"); setMessage(`${rb.message} ${t("No se movió dinero.")}`); return; }
+        setStep("signing");
+        let rbSig: string;
+        try { rbSig = await signAndSend(Uint8Array.from(atob(rb.prepared.transaction), (c) => c.charCodeAt(0))); }
+        catch { setStep("error"); setMessage(t("Cancelaste la aprobación. No se movió dinero.")); return; }
+        setStep("confirming"); notify("secure", t("Recentrando tu bóveda"), t("Luego sumamos tu depósito…"));
+        let ok = false;
+        for (let attempt = 0; attempt < 40 && !ok; attempt++) {
+          const { status: next } = await readStatus({ data: { signature: rbSig } }).catch(() => ({ status: "pending" as PilotStatus }));
+          if (next === "failed") { setStep("error"); setMessage(t("La red rechazó el recentrado. Tu dinero sigue en tu billetera.")); return; }
+          if (next !== "pending") ok = true; else await new Promise((resolve) => setTimeout(resolve, attempt < 3 ? 400 : attempt < 8 ? 800 : 2_000));
+        }
+        if (!ok) { setStep("error"); setMessage(t("La confirmación tarda más de lo habitual. Revisa tu billetera antes de intentarlo otra vez.")); return; }
+        for (const k of ["real-solana", "my-wallet"]) void queryClient.invalidateQueries({ queryKey: [k, walletAddress] });
+        setStep("preparing");
+        prepared = await prepare({ data: valid.data });
+      }
       if (!prepared.success && prepared.stage === "reserve") { setStep("idle"); setNeedsReserve(true); return; }
       if (!prepared.success || !prepared.prepared) { setStep("error"); setMessage(`${prepared.message} ${t("No se movió dinero.")}`); return; }
       setStep("signing");

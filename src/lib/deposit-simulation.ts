@@ -21,6 +21,8 @@ export type SimulationResult = {
   success: boolean;
   stage: SimulationStage;
   message: string;
+  /** The existing position is out of range: re-centre it first, then deposit. */
+  outOfRange?: boolean;
   gross: string;
   fee: string;
   net: string;
