@@ -1619,4 +1619,13 @@ export const extra: Record<string, string> = {
   "Ganando 24/7": "Earning 24/7",
   "Ver mis ganancias": "See my earnings",
   "O usa otra cuenta de Google abajo": "Or use another Google account below",
+  "Duplica tu jugada en 5 minutos": "Double your play in 5 minutes",
+  "Si aciertas, cobras al instante en dólares.": "Call it right and get paid instantly in dollars.",
+  "Oprime aquí para jugar": "Tap here to play",
+  "¿Bitcoin sube o baja? Elige tu bando.": "Will Bitcoin go up or down? Pick your side.",
+  "Hasta +90%": "Up to +90%",
+  "Entrar al duelo": "Enter the duel",
+  "$10 pueden ser $20 antes del café": "$10 could be $20 before your coffee",
+  "Rondas cada 5 min · premio directo a tu saldo": "Rounds every 5 min · prize straight to your balance",
+  "Probar una jugada": "Try a play",
 };

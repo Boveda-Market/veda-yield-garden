@@ -112,19 +112,22 @@ export function Gta6TileBody({ status }: { status?: React.ReactNode }) {
 const BANNER_KEY = "boveda:gta6-banner";
 
 /** Wide GTA6 banner for Mi Billetera: three styles (poster, neon billboard, mini promo) rotate every 7 s, starting on a different one each visit. */
-export function Gta6RotatingBanner({ cta, sub }: { cta: React.ReactNode; sub?: React.ReactNode }) {
+export function Gta6RotatingBanner({ cta, sub, index, dots = true }: { cta: React.ReactNode; sub?: React.ReactNode; index?: number; dots?: boolean }) {
   const t = useT();
   const apr = useGta6AprLabel();
   const { lang } = useI18n();
-  const [i, setI] = useState(0);
+  const [own, setI] = useState(0);
+  const i = index ?? own;
+  const controlled = index !== undefined;
   useEffect(() => {
+    if (controlled) return;
     let start = 0;
     try { start = (Number(sessionStorage.getItem(BANNER_KEY) ?? localStorage.getItem(BANNER_KEY) ?? -1) + 1) % 3; if (!sessionStorage.getItem(BANNER_KEY)) { localStorage.setItem(BANNER_KEY, String(start)); sessionStorage.setItem(BANNER_KEY, String(start)); } else start = Number(sessionStorage.getItem(BANNER_KEY)) % 3; } catch { /* storage blocked */ }
     setI(start);
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     const id = setInterval(() => setI((v) => (v + 1) % 3), 7000);
     return () => clearInterval(id);
-  }, []);
+  }, [controlled]);
   const title = <img src={lang === "en" ? titleEn : titleEs} alt={t("Bóveda GTA6")} className="h-9 w-auto max-w-[70%] -rotate-2 drop-shadow-[0_0_12px_var(--hot)]" />;
   const aprNum = apr.endsWith(" APR") ? apr.replace(" APR", "") : apr;
   const slides = [
@@ -146,7 +149,7 @@ export function Gta6RotatingBanner({ cta, sub }: { cta: React.ReactNode; sub?: R
   ];
   return <span className="relative isolate grid overflow-hidden rounded-[14px] text-hot-foreground">
     {slides.map((s, k) => <span key={k} aria-hidden={k !== i} className={`col-start-1 row-start-1 transition-opacity duration-700 ${k === i ? "opacity-100" : "pointer-events-none opacity-0"}`}>{s}</span>)}
-    <span aria-hidden className="absolute right-3 top-3 z-10 flex gap-1">{[0, 1, 2].map((k) => <span key={k} className={`h-1.5 rounded-full bg-hot-foreground transition-all ${k === i ? "w-4" : "w-1.5 opacity-50"}`} />)}</span>
+    {dots && <span aria-hidden className="absolute right-3 top-3 z-10 flex gap-1">{[0, 1, 2].map((k) => <span key={k} className={`h-1.5 rounded-full bg-hot-foreground transition-all ${k === i ? "w-4" : "w-1.5 opacity-50"}`} />)}</span>}
   </span>;
 }
 

@@ -1,7 +1,8 @@
 import { LightningBadge } from "@/components/lightning-badge";
 import dobleLogo from "@/assets/doble-o-nada-logo.png";
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { DobleBannerSlide } from "@/components/doble-banners";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { useWalletVaults } from "@/components/wallet-positions";
@@ -17,6 +18,27 @@ import { VAULTS } from "@/lib/vaults";
 import { DuelLines, Gta6RotatingBanner } from "@/components/home-gta6";
 
 const gta6 = VAULTS.find((v) => v.id === "gta6");
+
+const STEPS = 6;
+const STEP_KEY = "boveda:wallet-banner";
+
+/** Top rotation step: GTA6 and Doble o Nada slides alternate every 7 s (GTA6 on even steps), starting on the next one each visit. */
+function useBannerStep() {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    let start = 0;
+    try {
+      const seen = sessionStorage.getItem(STEP_KEY);
+      if (seen != null) start = Number(seen) % STEPS;
+      else { start = (Number(localStorage.getItem(STEP_KEY) ?? -1) + 1) % STEPS; localStorage.setItem(STEP_KEY, String(start)); sessionStorage.setItem(STEP_KEY, String(start)); }
+    } catch { /* storage blocked */ }
+    setStep(Number.isFinite(start) ? start : 0);
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const id = setInterval(() => setStep((v) => (v + 1) % STEPS), 7000);
+    return () => clearInterval(id);
+  }, []);
+  return step;
+}
 
 /** Two compact, high-energy entry tiles kept at the top of Mi Billetera so they stay in the phone's first screen. APR is the live estimate, never hardcoded. */
 export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
@@ -34,9 +56,21 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
   const refetch = () => void vaults.refetch();
   const cta = mine ? <><span>{mine.outOfRange ? <><Zap size={14} aria-hidden className="mr-1 inline" />{t("Rebalancear")}</> : <>👉 {t("Oprime aquí para ver ganancias")}</>}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : <><span>👉 {t("Oprime aquí para depositar")}</span><ChevronRight size={16} aria-hidden /></>;
   const sub = t("Intereses con el volumen de GTA6");
+  const step = useBannerStep();
+  const isGta = step % 2 === 0;
+  const layer = (on: boolean) => `col-start-1 row-start-1 transition-opacity duration-700 ${on ? "opacity-100" : "pointer-events-none opacity-0"}`;
+  const gtaBanner = <Gta6RotatingBanner cta={cta} sub={sub} index={Math.floor(step / 2)} dots={false} />;
   return <section aria-label={t("Bóveda GTA6")}>
-    {mine ? <button type="button" onClick={() => setOpen(true)} className="hot-ring cta-glow-hot block w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]"><Gta6RotatingBanner cta={cta} sub={sub} /></button>
-    : <Link to="/app" className="hot-ring cta-glow-hot block rounded-2xl p-[2px] transition-transform active:scale-[0.98]"><Gta6RotatingBanner cta={cta} sub={sub} /></Link>}
+    <div className="grid">
+      <div className={layer(isGta)} inert={!isGta}>
+        {mine ? <button type="button" onClick={() => setOpen(true)} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{gtaBanner}</button>
+        : <Link to="/app" className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{gtaBanner}</Link>}
+      </div>
+      <div className={layer(!isGta)} inert={isGta}>
+        <Link to="/mercados" className="duel-ring block h-full rounded-2xl p-[2px] shadow-[var(--shadow-duel)] transition-transform active:scale-[0.98]"><DobleBannerSlide index={Math.floor(step / 2)} /></Link>
+      </div>
+    </div>
+    <div aria-hidden className="mt-2 flex justify-center gap-1">{Array.from({ length: STEPS }, (_, k) => <span key={k} className={`h-1.5 rounded-full transition-all ${k === step ? "w-4" : "w-1.5 opacity-40"} ${k % 2 === 0 ? "bg-hot" : "bg-bolt-neon"}`} />)}</div>
     <Dialog open={open} onOpenChange={setOpen}>
       <ActionSheetContent closeLabel={t("Cerrar")}>
         <DialogHeader className="pr-10 text-left"><DialogTitle className="font-display text-xl">{t("Tu Bóveda GTA6")}</DialogTitle><DialogDescription className="sr-only">{t("Ver ganancias")}</DialogDescription></DialogHeader>
