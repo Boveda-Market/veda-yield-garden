@@ -55,7 +55,7 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
         const pendingGains = (e as { last_gains_usd?: number | null }).last_gains_usd ?? null;
         await save(e.wallet, { last_rebalance_at: iso, last_result: "Rebalanceada" });
         e.last_rebalance_at = iso; e.last_result = "Rebalanceada";
-        await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName("gta6"), undefined, pendingGains != null ? Number(pendingGains) : null), { text: "👀 Ver mi posición", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
+        await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName("gta6"), undefined, pendingGains != null ? Number(pendingGains) : null), { text: "👀 Ver Mi Billetera", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
         done++;
         continue;
       }
@@ -114,7 +114,7 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
       e.last_rebalance_at = iso;
       await db.from("system_service_status").delete().eq("service", k);
       opts.rows.delete(k);
-      await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName(p.vaultId), quote.valueUsd, gains), { text: "👀 Ver mi posición", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
+      await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName(p.vaultId), quote.valueUsd, gains), { text: "👀 Ver Mi Billetera", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
       done++;
       break; // one rebalance per wallet per pass
     }
