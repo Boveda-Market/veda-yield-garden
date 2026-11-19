@@ -15,7 +15,7 @@ import { ledgerSwapToUsdc } from "@/lib/ledger-swap.server";
 import { rebalanceGainsUsd } from "@/lib/autopilot";
 import { compoundSpendValid, type CompoundInput, type CompoundResult } from "@/lib/compound";
 import type { RebalanceResult } from "@/lib/dlmm";
-import { dlmmRange, dlmmSlippagePct, binsMoved, rebalanceSwapPlan, DLMM_MIN_SOL_LAMPORTS, DLMM_MAX_SWAP_IMPACT_PCT, DLMM_EXIT_MIN_PCT } from "@/lib/dlmm";
+import { dlmmRange, dlmmSlippagePct, binsMoved, rebalanceSwapPlan, feesToUsdcSwapPlan, DLMM_MIN_SOL_LAMPORTS, DLMM_MAX_SWAP_IMPACT_PCT, DLMM_EXIT_MIN_PCT } from "@/lib/dlmm";
 
 type Sdk = Awaited<ReturnType<typeof loadDlmmSdk>>;
 type Pool = Awaited<ReturnType<Sdk["DLMM"]["create"]>>;
@@ -496,7 +496,9 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     const removals = await pool.removeLiquidity({ user: owner, position, fromBinId: data.lowerBinId, toBinId: data.upperBinId, bps: new BN(10_000), shouldClaimAndClose: false });
     if (claims.length > 1 || removals.length !== 1) return fail("Este rebalanceo necesitaría varias firmas; no se preparó.");
     // Withdrawn amounts are SDK estimates; keep a small margin so the swap never touches prior wallet balances.
-    const plan = rebalanceSwapPlan(x * 995n / 1000n, y * 995n / 1000n, price);
+    // Base capital re-centres 50/50; harvested fees and absorbed leftovers all go in as dollars (single-side).
+    const baseX = rawFloor(data.totalXAmount), baseY = rawFloor(data.totalYAmount);
+    const plan = feesToUsdcSwapPlan(x * 995n / 1000n, y * 995n / 1000n, baseX * 995n / 1000n, baseY * 995n / 1000n, price);
     let swapIxs: TransactionInstruction[] = [], outMin = 0n;
     if (plan.amountIn > 0n) {
       stage = "Cotización del intercambio";

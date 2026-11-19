@@ -56,6 +56,22 @@ export function rebalanceSwapPlan(x: bigint, y: bigint, price: number): { swapFo
   return { swapForY: false, amountIn: inY > y ? y : inY };
 }
 
+/**
+ * Rebalance swap where only the base capital is split 50/50 and every harvested gain ends as dollars:
+ * the token side is sized to half the base value, the rest (fees included) stays/turns USDC. One swap, net direction.
+ */
+export function feesToUsdcSwapPlan(x: bigint, y: bigint, baseX: bigint, baseY: bigint, price: number): { swapForY: boolean; amountIn: bigint } {
+  if (!(price > 0) || !Number.isFinite(price)) return { swapForY: true, amountIn: 0n };
+  const targetXValue = (Number(baseX) * price + Number(baseY)) / 2, xValue = Number(x) * price, total = xValue + Number(y);
+  if (total <= 0 || Math.abs(xValue - targetXValue) < total / 100) return { swapForY: true, amountIn: 0n };
+  if (xValue > targetXValue) {
+    const inX = BigInt(Math.floor((xValue - targetXValue) / price));
+    return { swapForY: true, amountIn: inX > x ? x : inX };
+  }
+  const inY = BigInt(Math.floor(targetXValue - xValue));
+  return { swapForY: false, amountIn: inY > y ? y : inY };
+}
+
 /** Personal alert text when a range position has been out of range for 10 minutes. */
 export function rangeAlertText(vaultName: string, above: boolean) {
   return tgCard("🚨", `Tu ${vaultName} dejó de generar ganancias`, [

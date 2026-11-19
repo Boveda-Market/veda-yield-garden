@@ -45,3 +45,15 @@ describe("50/50 rebalance plan", () => {
     expect(rebalanceSwapPlan(500n, 1000n, 2).amountIn).toBe(0n);
   });
 });
+
+import { feesToUsdcSwapPlan } from "./dlmm";
+describe("autopilot fees go in as dollars", () => {
+  it("balances base 50/50 and converts token fees to USDC", () => {
+    // base: 100 X @1 + 100 Y; fees: 20 X + 10 Y → keep 100 X, swap the 20 fee X to USDC
+    expect(feesToUsdcSwapPlan(120n, 110n, 100n, 100n, 1)).toEqual({ swapForY: true, amountIn: 20n });
+  });
+  it("buys token only up to half the base value", () => {
+    // base all USDC 200; fees 10 Y → buy 100 X worth, keep 110 USDC
+    expect(feesToUsdcSwapPlan(0n, 210n, 0n, 200n, 1)).toEqual({ swapForY: false, amountIn: 100n });
+  });
+});
