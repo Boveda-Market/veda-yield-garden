@@ -71,6 +71,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   }
   const [tab, setTab] = useState<"all" | "vaults" | "predict">("all");
   const [hotPick, setHotPick] = useState<string | null>(null);
+  const [portPick, setPortPick] = useState<string | null>(null);
   const predictions = useOpenPredictions();
   const query = useRealWallet(walletAddress);
   const data = query.data?.success ? query.data.data : null;
@@ -87,7 +88,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Mi Portafolio")}</h1>{refresh}</div>
       {!walletAddress && <p className="mt-3 text-sm text-muted-foreground">{t("Conecta tu wallet para ver tu portafolio.")}</p>}
       {errors}
-      {data && <VaultMiniCards positions={data.positions} />}{data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
+      {data && <VaultMiniCards positions={data.positions} onOpen={setPortPick} />}{data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
     </section> : <section aria-label={t("Bóvedas de rendimiento")} className="pb-1 pt-1">
       <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Bóvedas de rendimiento")}</h1>{refresh}</div>
       <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">{t("Pon tus dólares a generar intereses diarios. Retiras o cosechas cuando quieras.")}</p>
@@ -97,7 +98,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
     {portfolioOnly && (() => { const nv = data?.positions.length ?? 0, np = predictions.items.length; const tabs = [{ id: "all", label: t("Todas"), n: nv + np }, { id: "vaults", label: t("Bóvedas"), n: nv }, { id: "predict", label: t("Sube / Baja"), n: np }] as const; return <div role="tablist" aria-label={t("Posiciones abiertas")} className="mt-8 flex gap-2 overflow-x-auto">{tabs.map((x) => <button key={x.id} role="tab" aria-selected={tab === x.id} onClick={() => setTab(x.id)} className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${tab === x.id ? "border-primary bg-primary text-primary-foreground shadow-md" : "border-border bg-card text-foreground hover:bg-secondary"}`}>{x.label}<span className={`rounded-full px-2 text-xs ${tab === x.id ? "bg-primary-foreground/20" : "bg-muted"}`}>{x.n}</span></button>)}</div>; })()}
     {portfolioOnly && tab !== "vaults" && predictions.items.length > 0 && <section aria-label={t("Predicciones abiertas")} className="border-b border-border py-8"><OpenPredictions state={predictions} /></section>}
     {portfolioOnly && tab !== "predict" && walletAddress && !data && query.isFetching && <div className="mt-6 space-y-4"><Skeleton className="h-48" /><Skeleton className="h-48" /></div>}
-    {portfolioOnly && tab !== "predict" && data && data.positions.length > 0 && <RealPositions showHarvestBanner={false} positions={data.positions} onAction={openPositionAction} onMigrate={migrate} onRotate={(p, v) => migrate(p, v, true)} onDeposit={(p) => { const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) { setAddTo(p.address); setSimulationVault(v); } }} />}
+    {portfolioOnly && data && (() => { const pp = data.positions.filter((p) => p.address === portPick); return <Dialog open={pp.length > 0} onOpenChange={(o) => { if (!o) setPortPick(null); }}><ActionSheetContent><DialogTitle className="sr-only">{t("Tu bóveda")}</DialogTitle><DialogDescription className="sr-only">{t("Detalles de tu bóveda")}</DialogDescription>{pp.length > 0 && <RealPositions showHarvestBanner={false} positions={pp} onAction={(p, k) => { setPortPick(null); openPositionAction(p, k); }} onMigrate={(p, v) => { setPortPick(null); migrate(p, v); }} onRotate={(p, v) => { setPortPick(null); migrate(p, v, true); }} onDeposit={(p) => { setPortPick(null); const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) { setAddTo(p.address); setSimulationVault(v); } }} />}</ActionSheetContent></Dialog>; })()}
     {portfolioOnly && <Suspense fallback={<NeonLoader minHeight="min-h-40" />}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
     {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && tab !== "predict" && <PortfolioEmpty />}
     {!portfolioOnly && <><div className="mb-1 mt-1 flex justify-end"><PoweredBy brand="meteora" /></div>

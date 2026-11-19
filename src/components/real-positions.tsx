@@ -85,7 +85,7 @@ export function PortfolioEmpty() {
 }
 
 /** Compact grid of open vaults (capital + earnings); «Ver más» scrolls to that vault's full card. Renders nothing when there are none. */
-export function VaultMiniCards({ positions }: { positions: ChainPosition[] }) {
+export function VaultMiniCards({ positions, onOpen }: { positions: ChainPosition[]; onOpen?: (address: string) => void }) {
   const t = useT();
   const { rows } = usePositionRows(positions);
   if (rows.length === 0) return null;
@@ -93,11 +93,11 @@ export function VaultMiniCards({ positions }: { positions: ChainPosition[] }) {
   return <div aria-label={t("Tus bóvedas abiertas")} className="mt-4 grid grid-cols-2 gap-2.5 md:grid-cols-3 lg:grid-cols-4">{rows.map(({ p, value, fees }) => {
     const vault = VAULTS.find((v) => v.id === p.vaultId);
     const hot = Boolean(vault?.badge);
-    return <button key={p.address} type="button" onClick={() => go(p.address)} className={`flex min-w-0 flex-col rounded-xl border bg-card p-3 text-left transition hover:bg-secondary ${hot ? `border-hot/60 shadow-[var(--shadow-hot)] ${vaultSkin(p.vaultId)}` : "border-border"}`}>
+    return <button key={p.address} type="button" onClick={() => (onOpen ? onOpen(p.address) : go(p.address))} className={`flex min-w-0 flex-col rounded-xl border bg-card p-3 text-left transition hover:bg-secondary ${hot ? `border-hot/60 shadow-[var(--shadow-hot)] ${vaultSkin(p.vaultId)}` : "border-border"}`}>
       <span className="truncate text-sm font-bold">{vault ? t(vault.name) : `${p.symbol}/USDC`}</span>
       <span className="mt-1.5 font-display text-lg font-semibold tabular-nums">{value === null ? "—" : `≈ ${formatUsd(value)}`}</span>
       <span className="text-[12px] font-semibold tabular-nums text-primary">{fees === null ? t("Consultando…") : `+${formatUsd(fees)} ${t("por cosechar")}`}</span>
-      <span className="mt-2 text-xs font-semibold text-muted-foreground">{t("Ver más")} ↓</span>
+      <span className="mt-2 text-xs font-semibold text-muted-foreground">{t("Ver más")} {onOpen ? "→" : "↓"}</span>
     </button>;
   })}</div>;
 }
