@@ -28,6 +28,8 @@ import { WalletSwap } from "@/components/wallet-swap";
 import { solanaAddressSchema } from "@/lib/solana-data";
 import { decimalToUnits, PAYOUT_MOVE_MIN_USD } from "@/lib/onboarding";
 import { StartGuide } from "@/components/start-guide";
+import { MarginPill } from "@/components/ui/margin-pill";
+import { useMeteoraHistory } from "@/hooks/use-meteora-history";
 import { DobleShortcut, WalletHeroShortcuts } from "@/components/wallet-hero-shortcuts";
 import { Gta6PromoPopup } from "@/components/gta6-promo";
 import { Gta6VideoPopup } from "@/components/gta6-video-popup";
@@ -66,6 +68,8 @@ export function WalletPanel() {
   if (liveWorking !== null) lastWorking.current = liveWorking;
   // If a price stays unavailable after lookups settle, show the known part instead of loading forever.
   const partialWorking = liveWorking === null && lastWorking.current === null && !pricesLoading;
+  const harvestHist = useMeteoraHistory(vaultPositions.length > 0 ? address : null);
+  const harvestedUsd = harvestHist.pnl ? Number(harvestHist.pnl.replace(/,/g, "")) : null;
   const working = liveWorking ?? lastWorking.current ?? (pricesLoading ? null : knownCapital);
   const balances = useQuery({ queryKey: ["my-wallet", address], enabled: !!address, refetchOnWindowFocus: "always", refetchInterval: (qq) => { const d = qq.state.data; return !d || (d.usdc === 0n && d.sol === 0n) ? 3_000 : 20_000; }, queryFn: async () => {
     if (!address) throw new Error(t("Todavía no hay una wallet conectada a tu cuenta."));
@@ -209,7 +213,7 @@ export function WalletPanel() {
     <StartGuide />
     <section className="rounded-3xl border border-border bg-card p-6">
       <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{vaultPositions.length > 0 || jupUsd > 0 ? t("Balance total") : t("Balance en USDC")}</p><Button variant="ghost" size="sm" onClick={() => { void balances.refetch(); void extra.refetch(); void prices.refetch(); void queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); void queryClient.invalidateQueries({ queryKey: ["predict-positions", address] }); }} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
-      <div className="mt-1 flex items-center gap-2">{balances.data?.usdc !== undefined && (hidden || working !== null) ? <p className="font-display text-4xl">{hidden ? MASK : `$${fmt((Number(balances.data.usdc) / 1e6) + jupUsd + (working ?? 0))}`}</p> : <BalanceLoading />}<button type="button" onClick={() => setHidden(!hidden)} aria-label={hidden ? t("Mostrar saldos") : t("Ocultar saldos")} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{hidden ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
+      <div className="mt-1 flex items-center gap-2">{balances.data?.usdc !== undefined && (hidden || working !== null) ? <p className="font-display text-4xl">{hidden ? MASK : `$${fmt((Number(balances.data.usdc) / 1e6) + jupUsd + (working ?? 0))}`}</p> : <BalanceLoading />}{!hidden && <MarginPill harvested={harvestedUsd} capital={working} />}<button type="button" onClick={() => setHidden(!hidden)} aria-label={hidden ? t("Mostrar saldos") : t("Ocultar saldos")} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{hidden ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
       {balances.data && balances.data.usdc === 0n && balances.data.sol === 0n && working === 0 ? <p role="status" className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"><RefreshCw size={12} className="animate-spin" />{t("Comprobando llegada de fondos…")}</p> : null}
       {vaultPositions.length > 0 && balances.data?.usdc !== undefined && <div className="mt-2 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{t("Disponible")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(Number(balances.data.usdc) / 1e6)}`}</span></span>{balances.data.usdc >= 20_000_000n && <Link to="/app" className="reinvest-attn relative inline-flex items-center gap-1 overflow-hidden rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-medium text-primary transition-colors hover:bg-primary/15"><ArrowLeft size={14} strokeWidth={2.75} aria-hidden />{t("Reinvertir")}</Link>}<Link to="/portfolio" className="rounded-full bg-primary/10 px-3 py-1 text-primary"><span>{t("Trabajando")}:</span> <span className="font-medium">{hidden ? MASK : working === null ? <BalanceLoading compact /> : `$${fmt(working)}`}</span></Link></div>}
       {(vaults.isLoading || (vaultPositions.length > 0 && pricesLoading && totalFees === 0)) && <SyncPill />}
