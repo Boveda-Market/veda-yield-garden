@@ -1,0 +1,22 @@
+/** Guide pages chrome, error pages and remaining wallet copy. */
+export const guides: Record<string, string> = {
+  "Migas de pan": "Breadcrumb",
+  "Página de inicio": "Home",
+  "Lectura de {n} min · Guía de BÓVEDA": "{n} min read · BÓVEDA guide",
+  "Empieza a tu ritmo": "Start at your own pace",
+  "Abre tu billetera en dólares en un minuto con Google y empieza con poco. Retiras cuando quieras.": "Open your dollar wallet in a minute with Google and start small. Withdraw whenever you want.",
+  "Abrir mi billetera": "Open my wallet",
+  "Más guías": "More guides",
+  "Contenido educativo, no es asesoría financiera. Las bóvedas pueden perder capital y no hay ganancias garantizadas. ¿Dudas?": "Educational content, not financial advice. Vaults can lose capital and there are no guaranteed earnings. Questions?",
+  "Lo esencial para usar tus dólares digitales con seguridad.": "The essentials for using your digital dollars safely.",
+  "Página no encontrada": "Page not found",
+  "La página que buscas no existe o se movió.": "The page you're looking for doesn't exist or has been moved.",
+  "Ir al inicio": "Go home",
+  "Esta página no cargó": "This page didn't load",
+  "Algo falló de nuestro lado. Puedes intentar de nuevo o volver al inicio.": "Something went wrong on our end. You can try again or head back home.",
+  "Tu cuenta combina dos dinámicas:": "Your account combines two dynamics:",
+  "dólares líquidos 1:1 que nunca oscilan.": "liquid 1:1 dollars that never fluctuate.",
+  "tu capital cotiza en vivo como liquidez de mercado. Su valuación fluctúa con las compras y ventas del activo (la línea de mercado de tu gráfica), pero cada intercambio genera microtarifas algorítmicas en dólares (la línea verde que solo suma).": "your capital is priced live as market liquidity. Its value moves with the asset's buying and selling (the market line on your chart), but every trade generates algorithmic micro-fees in dollars (the green line that only adds up).",
+  "El piloto automático cobra y reinvierte esas ganancias en tu capital automáticamente.": "Autopilot collects those earnings and reinvests them into your capital automatically.",
+  "Ver la gráfica en Portafolio": "See the chart in Portfolio",
+};

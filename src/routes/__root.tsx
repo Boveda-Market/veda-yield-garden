@@ -17,7 +17,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { isChunkLoadError, reloadForNewVersion } from "../lib/lazy-reload";
-import { LanguageProvider } from "../lib/i18n";
+import { LanguageProvider, useT } from "../lib/i18n";
 import { isEnglishPath } from "../lib/seo-lang";
 import { LanguageMenu } from "../components/language-menu";
 import { ThemeToggle } from "../components/theme-toggle";
@@ -28,20 +28,21 @@ import { SessionEngineHost } from "../components/session-host";
 import { REF_STORAGE_KEY, normalizeCode } from "../lib/affiliate";
 
 function NotFoundComponent() {
+  const t = useT();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">{t("Página no encontrada")}</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          {t("La página que buscas no existe o se movió.")}
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Go home
+            {t("Ir al inicio")}
           </Link>
         </div>
       </div>
@@ -50,6 +51,7 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
+  const t = useT();
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -61,10 +63,10 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+          {t("Esta página no cargó")}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          {t("Algo falló de nuestro lado. Puedes intentar de nuevo o volver al inicio.")}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -74,13 +76,13 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Try again
+            {t("Intentar de nuevo")}
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Go home
+            {t("Ir al inicio")}
           </a>
         </div>
       </div>
