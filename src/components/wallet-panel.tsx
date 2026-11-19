@@ -188,9 +188,6 @@ export function WalletPanel() {
     { icon: Send, label: t("Enviar"), on: () => openSend("USDC") },
     { icon: QrCode, label: t("Recibir"), on: () => setReceiveOpen(true) },
   ];
-  const shortcuts = [
-    { to: "/app", icon: Vault, title: t("Depositar en Bóvedas"), sub: t("Elige una bóveda y pon tu dinero a trabajar") },
-  ] as const;
 
   return <div className="mx-auto max-w-2xl space-y-5">
     <div className="flex items-center justify-between gap-3">
@@ -224,19 +221,21 @@ export function WalletPanel() {
     </section>
 
     <section aria-label={t("Accesos rápidos")} className="grid gap-2">
+      <Link to="/app" className="explore-ring cta-attn group block rounded-2xl p-[2px] transition-transform active:scale-[0.98]">
+        <span className="flex items-center gap-3 rounded-[14px] bg-[image:var(--gradient-explore-surface)] p-4 text-explore-foreground">
+          <span className="explore-cta grid h-11 w-11 shrink-0 place-items-center rounded-xl text-explore-surface"><span className="cta-wiggle"><Vault size={22} aria-hidden /></span></span>
+          <span className="min-w-0 flex-1"><span className="block font-display text-lg font-extrabold">{t("Explorar Bóvedas")}</span><span className="block text-xs font-semibold text-explore-muted">{t("Elige una bóveda y pon tus dólares a trabajar")}</span></span>
+          <ChevronRight size={18} className="shrink-0 text-explore transition-transform group-hover:translate-x-0.5" aria-hidden />
+        </span>
+      </Link>
       <Link to="/invita" className="invite-ring cta-attn cta-glow-invite group block rounded-2xl p-[2px] transition-transform active:scale-[0.98]">
         <span className="flex items-center gap-3 rounded-[14px] bg-[image:var(--gradient-invite-surface)] p-4 text-invite-foreground">
           <span className="invite-cta grid h-11 w-11 shrink-0 place-items-center rounded-xl text-invite-surface"><span className="cta-wiggle"><Gift size={22} aria-hidden /></span></span>
-          <span className="min-w-0 flex-1"><span className="block font-display text-lg font-extrabold">{t("Invita y Gana")}</span><span className="block text-xs font-semibold text-invite-muted">{t("Gana hasta 60% de las ganancias en dólares")}</span></span>
+          <span className="min-w-0 flex-1"><span className="block font-display text-lg font-extrabold">{t("Comparte y Gana")}</span><span className="block text-xs font-semibold text-invite-muted">{t("Gana hasta 60% de las ganancias en dólares")}</span></span>
           <ChevronRight size={18} className="shrink-0 text-invite transition-transform group-hover:translate-x-0.5" aria-hidden />
         </span>
       </Link>
       <DobleShortcut />
-      {shortcuts.map((s) => <Link key={s.to} to={s.to} className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-primary/5 sm:flex-col sm:items-start">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><s.icon size={20} aria-hidden /></span>
-        <span className="min-w-0 flex-1"><span className="block font-display text-base font-semibold">{s.title}</span><span className="block text-xs text-muted-foreground">{s.sub}</span></span>
-        <ChevronRight size={16} className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 sm:hidden" aria-hidden />
-      </Link>)}
     </section>
 
     {address === AFFILIATE_PAYOUT_WALLET && <Link to="/invita" hash="tesoreria" className="flex items-center gap-3 rounded-2xl border border-primary/40 bg-primary/10 p-4 hover:bg-primary/15">

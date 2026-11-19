@@ -75,6 +75,10 @@
   --color-bolt: var(--bolt);
   --color-bolt-ink: var(--bolt-ink);
   --color-bolt-neon: var(--bolt-neon);
+  --color-explore: var(--explore);
+  --color-explore-foreground: var(--explore-foreground);
+  --color-explore-muted: var(--explore-muted);
+  --color-explore-surface: var(--explore-surface);
   --color-hot-surface: var(--hot-surface);
   --color-hot-foreground: var(--hot-foreground);
   --color-hot-muted: var(--hot-muted);
@@ -129,6 +133,13 @@
   --invite-foreground: oklch(0.98 0.01 150);
   --invite-muted: oklch(0.8 0.04 170);
   --gradient-invite-surface: radial-gradient(100% 80% at 100% 0%, oklch(0.55 0.17 155 / 0.45), transparent 60%), radial-gradient(80% 70% at 0% 100%, oklch(0.6 0.14 85 / 0.3), transparent 60%), linear-gradient(var(--invite-surface), var(--invite-surface));
+  /* Explorar Bóvedas: electric blue + violet, identical in both themes so it stands apart from invite/duel. */
+  --explore: oklch(0.72 0.19 250);
+  --explore-2: oklch(0.72 0.22 300);
+  --explore-surface: oklch(0.18 0.05 265);
+  --explore-foreground: oklch(0.98 0.01 260);
+  --explore-muted: oklch(0.82 0.05 260);
+  --gradient-explore-surface: radial-gradient(100% 80% at 100% 0%, oklch(0.5 0.2 250 / 0.5), transparent 60%), radial-gradient(80% 70% at 0% 100%, oklch(0.5 0.2 300 / 0.35), transparent 60%), linear-gradient(var(--explore-surface), var(--explore-surface));
   --shadow-hot: 0 18px 50px -18px oklch(0.68 0.26 355 / 0.7);
   --gradient-duel-surface: radial-gradient(110% 90% at 100% 0%, oklch(0.55 0.2 150 / 0.45), transparent 55%), radial-gradient(90% 80% at 0% 100%, oklch(0.5 0.2 25 / 0.4), transparent 60%), linear-gradient(var(--hot-surface), var(--hot-surface));
   --shadow-duel: 0 18px 50px -18px oklch(0.7 0.2 150 / 0.75);
@@ -270,12 +281,14 @@
 .hot-ring { background-image: linear-gradient(90deg, var(--hot-2), var(--hot), var(--hot-3, oklch(0.66 0.2 300)), var(--hot-2)); background-size: 200% 100%; animation: hot-shift 6s linear infinite; }
 .duel-ring { background-image: linear-gradient(90deg, var(--primary), oklch(0.85 0.2 125), var(--destructive), var(--primary)); background-size: 200% 100%; animation: hot-shift 5s linear infinite; }
 .hot-cta { background-image: linear-gradient(90deg, var(--hot-2), var(--hot), var(--hot-2)); background-size: 200% 100%; animation: hot-shift 3s linear infinite; }
+.explore-ring { background-image: linear-gradient(90deg, var(--explore), var(--explore-2), var(--explore)); background-size: 200% 100%; animation: hot-shift 5s linear infinite; box-shadow: 0 14px 40px -16px oklch(0.65 0.2 260 / 0.8); }
+.explore-cta { background-image: linear-gradient(135deg, var(--explore), var(--explore-2)); }
 .invite-ring { background-image: linear-gradient(90deg, var(--invite), var(--invite-2), var(--invite)); background-size: 200% 100%; animation: hot-shift 5s linear infinite; }
 .invite-cta { background-image: linear-gradient(90deg, var(--invite), var(--invite-2), var(--invite)); background-size: 200% 100%; animation: hot-shift 3s linear infinite; }
 @keyframes activation-turbo { 0% { width: 6%; } 60% { width: 82%; } 100% { width: 96%; } }
 .activation-turbo { width: 6%; background-image: linear-gradient(90deg, var(--hot-2), var(--hot), var(--hot-2)); background-size: 200% 100%; box-shadow: 0 0 12px var(--hot); animation: activation-turbo 9s cubic-bezier(.2,.8,.2,1) forwards, hot-shift 1.2s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .activation-turbo { animation: none; width: 70%; } }
-@media (prefers-reduced-motion: reduce) { .hot-ring, .duel-ring, .hot-cta, .invite-ring, .invite-cta { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .hot-ring, .duel-ring, .hot-cta, .explore-ring, .invite-ring, .invite-cta { animation: none; } }
 
 /* Wallet total loading: sweeping shine, bouncing coins, fading step text. */
 @keyframes balance-sweep { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
