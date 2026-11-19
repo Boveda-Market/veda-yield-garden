@@ -26,8 +26,8 @@ export type AppView = "vaults" | "portfolio" | "activity" | "account" | "securit
 const MAIN = [
   { key: "vaults", label: "Bóvedas", icon: LayoutDashboard, to: "/app" },
   { key: "markets", label: "Doble o Nada", icon: Zap, to: "/mercados" },
-  { key: "portfolio", label: "Ganancias", icon: PieChart, to: "/portfolio" },
-  { key: "wallet", label: "Mi Billetera", icon: Wallet, to: "/wallet" },
+  { key: "portfolio", label: "Mi Portafolio", icon: PieChart, to: "/portfolio" },
+  { key: "wallet", label: "Billetera", icon: Wallet, to: "/wallet" },
 ] as const;
 
 export function BottomNav({ active, guest, onSelect }: { active: AppView; guest: boolean; onSelect: (v: AppView) => void }) {
@@ -76,7 +76,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
           </> : <>
             {operator && <Link to="/admin" className={`${row} border border-primary/40 bg-primary/10 font-semibold text-primary`} onClick={() => setOpen(false)}><ShieldCheck size={18} />{t("Panel de Control")}</Link>}
             <Link to="/wallet" className={row} onClick={() => setOpen(false)}><Home size={18} />{t("Inicio")}</Link>
-            <Link to="/portfolio" className={row} onClick={() => setOpen(false)}><PieChart size={18} />{t("Ganancias")}</Link>
+            <Link to="/portfolio" className={row} onClick={() => setOpen(false)}><PieChart size={18} />{t("Mi Portafolio")}</Link>
             <Link to="/notificaciones" className={row} onClick={() => setOpen(false)}><Bell size={18} />{t("Notificaciones")}</Link>
             <Link to="/cuenta" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Mi cuenta")}</Link>
             <Link to="/seguridad" className={row} onClick={() => setOpen(false)}><ShieldCheck size={18} />{t("Seguridad")}</Link>

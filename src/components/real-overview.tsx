@@ -84,7 +84,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       {data && !data.positionsComplete && <p role="status" className="mt-3 text-sm text-muted-foreground">{t("La consulta de posiciones está incompleta. No se puede concluir que no tengas posiciones.")}</p>}</>;
   return <>
     {portfolioOnly ? <section aria-label={t("Resumen del portafolio")} className="border-y border-border py-8">
-      <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Tu portafolio")}</h1>{refresh}</div>
+      <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Mi Portafolio")}</h1>{refresh}</div>
       {!walletAddress && <p className="mt-3 text-sm text-muted-foreground">{t("Conecta tu wallet para ver tu portafolio.")}</p>}
       {errors}
       {data && <VaultMiniCards positions={data.positions} />}{data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}

@@ -192,7 +192,7 @@ export function WalletPanel() {
 
   return <div className="mx-auto max-w-2xl space-y-5">
     <div className="flex items-center justify-between gap-3">
-      <h1 className="font-display text-3xl font-semibold">{t("Mi Billetera")}</h1>
+      <h1 className="font-display text-3xl font-semibold">{t("Billetera")}</h1>
       <ReportProblem trigger={(open) => <button type="button" onClick={open} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"><LifeBuoy size={14} className="text-primary" />{t("Reportar")}</button>} />
     </div>
     <WalletHeroShortcuts wallet={address} />
