@@ -1645,4 +1645,5 @@ export const extra: Record<string, string> = {
   "Rondas cada 5 min · premio directo a tu saldo": "Rounds every 5 min · prize straight to your balance",
   "Probar una jugada": "Try a play",
   "Bóvedas destacadas": "Featured vaults",
+  "Bóvedas disponibles": "Available vaults",
 };
