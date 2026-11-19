@@ -1,6 +1,6 @@
 import { useT } from "@/lib/i18n";
 import { useState } from "react";
-import { Fingerprint, Mail, ShieldCheck, Smartphone } from "lucide-react";
+import { Fingerprint, Trash2, Mail, ShieldCheck, Smartphone } from "lucide-react";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { Button } from "./ui/button";
 
@@ -10,6 +10,7 @@ export function AccountSecuritySettings() {
   const security = session.security;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [confirming, setConfirming] = useState(false);
   if (!session.authenticated || !security) return null;
   const mfaEnabled = security.enrolledMfa.length > 0;
   const canManageMfa = security.hasEmbeddedWallet && (security.availableMfa.length > 0 || mfaEnabled);
@@ -18,6 +19,13 @@ export function AccountSecuritySettings() {
     setBusy(true); setError("");
     try { await security.manageMfa(); }
     catch { setError(t("No se pudo abrir la doble verificación. Inténtalo de nuevo.")); }
+    finally { setBusy(false); }
+  }
+  async function removePasskeys() {
+    if (!security?.unlinkPasskeys || busy) return;
+    setBusy(true); setError("");
+    try { await security.unlinkPasskeys(); setConfirming(false); }
+    catch { setError(t("No se pudo desvincular la huella. Inténtalo de nuevo.")); }
     finally { setBusy(false); }
   }
   const methods = security.enrolledMfa.map(method => method === "totp" ? t("Autenticador") : method === "passkey" ? "Passkey" : "SMS");
@@ -35,6 +43,11 @@ export function AccountSecuritySettings() {
         <p className="mt-2 text-sm text-muted-foreground">{security.passkeyCount ? t("Huella o Face ID activado") : t("Sin huella ni Face ID configurado")}</p>
         <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Entra con la huella, el rostro o el PIN de tu dispositivo, sin contraseña. Necesitas un dispositivo y navegador compatibles.")}</p>
         <Button type="button" variant="outline" className="mt-3" onClick={() => security.linkPasskey()}><Fingerprint size={16} />{t("Vincular huella o Face ID")}</Button>
+        {security.passkeyCount > 0 && (security.unlinkPasskeys
+          ? (confirming
+            ? <div className="mt-3 rounded-xl border border-destructive/40 bg-destructive/5 p-3"><p className="text-sm">{t("¿Desvincular tu huella o Face ID? Podrás volver a activarlo cuando quieras.")}</p><div className="mt-2 flex gap-2"><Button type="button" size="sm" variant="destructive" disabled={busy} onClick={() => void removePasskeys()}>{busy ? t("Un momento…") : t("Sí, desvincular")}</Button><Button type="button" size="sm" variant="ghost" disabled={busy} onClick={() => setConfirming(false)}>{t("Cancelar")}</Button></div></div>
+            : <Button type="button" variant="ghost" className="mt-3 ml-2 text-destructive hover:text-destructive" onClick={() => setConfirming(true)}><Trash2 size={16} />{t("Desvincular huella")}</Button>)
+          : <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Para desvincular la huella, primero vincula un correo o Google, así nunca pierdes el acceso a tu cuenta.")}</p>)}
       </div>
       <div className="py-5">
         <h3 className="flex items-center gap-2 font-medium"><Smartphone size={18} />{t("Doble verificación · 2FA")}</h3>

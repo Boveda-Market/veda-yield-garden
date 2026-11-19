@@ -10,6 +10,8 @@ export type AccountSecurity = {
   linkEmail: () => void;
   updateEmail: () => void;
   linkPasskey: () => void;
+  /** Removes every Face ID / fingerprint sign-in; undefined when it is the only sign-in method left. */
+  unlinkPasskeys?: () => Promise<void>;
   manageMfa: () => Promise<void>;
 };
 

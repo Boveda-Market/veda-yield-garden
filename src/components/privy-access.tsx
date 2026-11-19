@@ -21,6 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getWalletPolicy } from "@/lib/wallet-policy.functions";
 import { IdleLogout } from "@/components/idle-logout";
 import { publishSession } from "@/lib/session-host";
+import { rememberPasskey } from "@/lib/passkey-device";
 import type { BovedaSession } from "@/hooks/use-boveda-session";
 
 // Privy only authorizes the official domains; preview/other hosts can never finish loading it.
@@ -32,7 +33,7 @@ const solanaConnectors = toSolanaWalletConnectors({ shouldAutoConnect: true });
 
 function SessionBridge({ children }: { children: ReactNode }) {
   const t = useT();
-  const { ready, authenticated, user, logout, getAccessToken, mfaMethods } = usePrivy();
+  const { ready, authenticated, user, logout, getAccessToken, mfaMethods, unlinkPasskey } = usePrivy();
   const [securityMessage, setSecurityMessage] = useState<string | null>(null);
   const { linkEmail, linkPasskey } = useLinkAccount({
     onSuccess: () => setSecurityMessage(t("Método vinculado y verificado.")),
@@ -157,6 +158,13 @@ function SessionBridge({ children }: { children: ReactNode }) {
       linkEmail: () => { setSecurityMessage(null); linkEmail(); },
       updateEmail: () => { setSecurityMessage(null); update(); },
       linkPasskey: () => { setSecurityMessage(null); linkPasskey({ name: "BÓVEDA" }); },
+      unlinkPasskeys: user && user.linkedAccounts.some(a => a.type === "passkey") && user.linkedAccounts.some(a => a.type === "email" || a.type === "google_oauth") ? async () => {
+        setSecurityMessage(null);
+        for (const a of user.linkedAccounts) if (a.type === "passkey") await unlinkPasskey(a.credentialId);
+        rememberPasskey(false);
+        try { localStorage.removeItem("boveda:passkey-later"); } catch { /* ignore */ }
+        setSecurityMessage(t("Huella o Face ID desvinculado. Puedes volver a activarlo cuando quieras."));
+      } : undefined,
       manageMfa: async () => { setSecurityMessage(null); await showMfaEnrollmentModal(); },
     },
     login: (method) => {
