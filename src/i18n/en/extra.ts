@@ -1129,7 +1129,7 @@ export const extra: Record<string, string> = {
   // Floating pill notifications and operation receipts
   "Bóveda {v}": "{v} vault", "Cambio de moneda": "Currency swap", "Confirmando en la red…": "Confirming on the network…",
   "Depósito confirmado": "Deposit confirmed", "El dinero está en tu billetera": "The dollars is in your wallet", "Fecha y hora": "Date and time",
-  "Firma aprobada": "Signature approved", "Ganancias cosechadas": "Earnings harvested", "Ganancias reinvertidas": "Earnings reinvested",
+  "Firma aprobada": "Signature approved", "Ganancias cosechadas": "Earnings harvested", "Total del portafolio": "Portfolio total", "Capital depositado": "Deposited capital", "Ganancias reinvertidas": "Earnings reinvested",
   "Operación": "Operation", "Origen": "From", "Pagaste": "You paid", "Predicción confirmada": "Prediction confirmed",
   "Premio cobrado": "Prize collected", "Reserva lista": "Reserve ready", "Retiro confirmado": "Withdrawal confirmed",
   "Retiro del {p}% de bóveda": "{p}% vault withdrawal", "Retiro total de bóveda": "Full vault withdrawal",
