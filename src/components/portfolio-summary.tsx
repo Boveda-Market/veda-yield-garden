@@ -17,6 +17,9 @@ import { useId, useState } from "react";
 import { CHAIN_POOLS } from "@/lib/solana-data";
 import { capitalSeries } from "@/lib/weekly-interest";
 import { useLocale } from "@/lib/i18n";
+import { TokenIcon } from "@/components/token-icon";
+import dctyLogo from "@/assets/dcty-logo.png";
+import { Check, Copy } from "lucide-react";
 
 const COLORS = ["bg-primary", "bg-chart-1", "bg-chart-2", "bg-chart-4", "bg-chart-3", "bg-chart-5"];
 
@@ -125,7 +128,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const totArr = capArr.map((c, i) => c + earn[i]!);
   const hasTotal = capArr.some((c) => c > 0);
   const baseCap = capArr[shown] ?? 0;
-  const W = 380, L = 12, R = 368, CT = 16, CB = 120, ET = 150, EB = 250, TT = 290, TB = 370, H = hasTotal ? 380 : 260;
+  const W = 380, L = 12, R = 368, CT = 16, CB = 180, ET = 150, EB = 250, TT = 290, TB = 370, H = 200;
   const x = (i: number) => L + (i * (R - L)) / (dn - 1);
   const emax = Math.max(total, 0.000001);
   const smooth = (pts: { x: number; y: number }[]) => { let d = `M${pts[0]!.x},${pts[0]!.y}`; for (let i = 1; i < pts.length; i++) { const p = pts[i - 1]!, c = pts[i]!, mx = (p.x + c.x) / 2; d += ` C${mx},${p.y} ${mx},${c.y} ${c.x},${c.y}`; } return d; };
@@ -156,43 +159,36 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const cap = (v: number) => `$${new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 2 }).format(v)}`;
   const mText = liveCap ? cap(liveCap) : "—";
   const pct = ms[0] ? ((ms[ms.length - 1] ?? 0) / ms[0]! - 1) * 100 : 0;
+  const [copied, setCopied] = useState(false);
+  const chain = cur ? CHAIN_POOLS.find((c) => c.id === cur.id) : undefined;
+  const vinfo = cur ? VAULTS.find((v) => v.id === cur.id) : undefined;
+  const copyMint = () => { if (!chain) return; void navigator.clipboard?.writeText(chain.mint).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }); };
   const sym = cur ? (VAULTS.find((v) => v.id === cur.id)?.pair.split("/")[0] ?? "") : "";
   return <div className="relative mt-3 overflow-hidden rounded-3xl border border-border bg-card p-5">
     <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full blur-3xl" style={{ background: `color-mix(in oklch, ${theme.b} 15%, transparent)` }} />
     <div className="relative flex items-center justify-between gap-2">
-      <p className="text-sm font-semibold">{t("Mercado global vs. Ganancias")}</p>
+      <p className="text-sm font-semibold">{isPrice ? t("Mercado {s}", { s: sym }) : t("Mercado global")}</p>
       <div className="inline-flex items-center rounded-xl border border-border bg-muted/60 p-1 text-xs font-medium">{tab(1, t("24 h"))}{tab(7, t("7 días"))}{tab(30, t("30 días"))}</div>
     </div>
     {open.length > 0 && <div role="tablist" aria-label={t("Bóvedas")} className="relative mt-3 flex gap-2 overflow-x-auto pb-1">{vtab("global", t("Global"))}{open.map((v) => vtab(v.id, `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}`))}</div>}
-    <p className="relative mt-2 text-xs capitalize text-muted-foreground">{day}</p>
-    <div className="relative mt-1 grid grid-cols-2 gap-3">
+    {cur && chain && <div className="relative mt-3 flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-muted/40 p-2.5">
+      {cur.id === "dcty" ? <img src={dctyLogo} alt="DCTY" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" /> : <TokenIcon symbol={chain.symbol} size={36} />}
+      <div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-bold">{chain.symbol} <span className="font-normal text-muted-foreground">/ USDC</span></p>
+        <button type="button" onClick={copyMint} aria-label={t("Copiar contrato")} className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-background/70 px-2 py-0.5 font-mono text-[11px] text-muted-foreground hover:text-foreground">{copied ? <><Check size={11} className="text-primary" />{t("Copiado")}</> : <><Copy size={11} />{chain.mint.slice(0, 4)}…{chain.mint.slice(-4)}</>}</button></div>
+      {vinfo?.links && <a href={vinfo.links.gmgn} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-bold"><img src="/gmgn-logo.png" alt="" width={16} height={16} className="h-4 w-4 rounded-sm" />{t("Ver gráfica")}</a>}
+    </div>}
+    <div className="relative mt-1">
       <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Market cap {s}", { s: sym }) : t("Market cap global")}</p><p className={`font-display text-2xl font-extrabold tabular-nums ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !liveCap ? "…" : mText}</p>{(ms[0] ?? 0) > 0 && <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${pct >= 0 ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{pct >= 0 ? "+" : ""}{pct.toFixed(1)}%</span>}</div>
-      <div className="text-right"><p className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />{t("Ganancias cosechadas")}</p><p className="font-display text-2xl font-extrabold tabular-nums text-primary">+{money(earn[shown]!)}</p></div>
     </div>
-    <svg viewBox={`0 0 ${W} ${H}`} className={`relative mt-3 w-full overflow-visible ${hasTotal ? "h-96" : "h-72"}`} role="img" aria-label={t("Mercado global frente a ganancias cosechadas")}>
+    <svg viewBox={`0 0 ${W} ${H}`} className={`relative mt-3 w-full overflow-visible h-52`} role="img" aria-label={t("Mercado global frente a ganancias cosechadas")}>
       <defs>
         <linearGradient id={`h${gid}`} x1="0" x2="1"><stop offset="0%" stopColor={theme.a} /><stop offset="100%" stopColor={theme.b} /></linearGradient>
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
       </defs>
       {cmax > cmin && <><text x={R} y={CT - 4} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? `$${cmax.toPrecision(3)}` : money(cmax)}</text><text x={R} y={CB + 12} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? `$${cmin.toPrecision(3)}` : money(cmin)}</text></>}
-      <line x1={L} y1={(CB + ET) / 2} x2={R} y2={(CB + ET) / 2} stroke="var(--border)" strokeDasharray="3 6" />
       <path d={cLine} fill="none" stroke={`url(#h${gid})`} strokeWidth="2" strokeLinejoin="miter" strokeLinecap="butt" style={{ filter: `drop-shadow(0 0 4px ${theme.b})` }} />
-      {total > 0 && <path d={`${eLine} L${R},${EB} L${L},${EB} Z`} fill={`url(#a${gid})`} />}
-      <path d={eLine} fill="none" stroke="var(--primary)" strokeWidth="3.5" strokeLinecap="round" strokeDasharray={total > 0 ? undefined : "6 8"} style={{ filter: "drop-shadow(0 0 5px var(--primary))" }} />
       <circle cx={cEnd.x} cy={cEnd.y} r="5.5" fill="var(--background)" stroke={theme.b} strokeWidth="3" />
-      <circle cx={ePts[shown]!.x} cy={ePts[shown]!.y} r="5.5" fill="var(--background)" stroke="var(--primary)" strokeWidth="3" />
-      {hasTotal && <g>
-        <line x1={L} y1={(EB + TT) / 2} x2={R} y2={(EB + TT) / 2} stroke="var(--border)" strokeDasharray="3 6" />
-        <path d={bLine} fill="none" stroke="var(--chart-4)" strokeWidth="2.5" strokeDasharray="6 5" />
-        <path d={tLine} fill="none" stroke="var(--foreground)" strokeWidth="3" strokeLinecap="round" />
-        <circle cx={tPts[shown]!.x} cy={tPts[shown]!.y} r="5.5" fill="var(--background)" stroke="var(--foreground)" strokeWidth="3" />
-      </g>}
     </svg>
-    {hasTotal && <div className="relative mt-2 grid grid-cols-2 gap-3 text-xs">
-      <p className="flex items-center gap-1.5 text-muted-foreground"><span className="h-0.5 w-4 rounded bg-foreground" />{t("Total del portafolio")} <strong className="tabular-nums text-foreground">{money(totArr[shown]!)}</strong></p>
-      <p className="flex items-center justify-end gap-1.5 text-muted-foreground"><span className="w-4 border-t-2 border-dashed border-chart-4" />{t("Capital depositado")} <strong className="tabular-nums text-foreground">{money(baseCap)}</strong></p>
-    </div>}
     <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{n === 1 ? t("Hace 24 h") : young ? t("Desde lanzamiento") : new Date(days[0]!.start).toLocaleDateString(locale, { day: "numeric", month: "short" })}</span><span>{n === 1 ? t("Ahora") : t("Hoy")}</span></div>
-    <p className="relative mt-3 text-xs leading-5 text-muted-foreground">{isPrice ? t("El precio de {s} puede subir o bajar; tus ganancias cosechadas solo suman.", { s: sym }) : t("El mercado global puede subir o bajar; tus ganancias cosechadas solo suman.")}</p>
-  </div>;
+      </div>;
 }
