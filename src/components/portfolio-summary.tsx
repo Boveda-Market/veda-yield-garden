@@ -166,14 +166,14 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
       <circle cx={ePts[shown]!.x} cy={ePts[shown]!.y} r="5.5" fill="var(--background)" stroke="var(--primary)" strokeWidth="3" />
       {hasTotal && <g>
         <line x1={L} y1={(EB + TT) / 2} x2={R} y2={(EB + TT) / 2} stroke="var(--border)" strokeDasharray="3 6" />
-        <path d={bLine} fill="none" stroke="var(--muted-foreground)" strokeWidth="2.5" strokeDasharray="6 5" />
+        <path d={bLine} fill="none" stroke="var(--chart-4)" strokeWidth="2.5" strokeDasharray="6 5" />
         <path d={tLine} fill="none" stroke="var(--foreground)" strokeWidth="3" strokeLinecap="round" />
         <circle cx={tPts[shown]!.x} cy={tPts[shown]!.y} r="5.5" fill="var(--background)" stroke="var(--foreground)" strokeWidth="3" />
       </g>}
     </svg>
     {hasTotal && <div className="relative mt-2 grid grid-cols-2 gap-3 text-xs">
       <p className="flex items-center gap-1.5 text-muted-foreground"><span className="h-0.5 w-4 rounded bg-foreground" />{t("Total del portafolio")} <strong className="tabular-nums text-foreground">{money(totArr[shown]!)}</strong></p>
-      <p className="flex items-center justify-end gap-1.5 text-muted-foreground"><span className="w-4 border-t-2 border-dashed border-muted-foreground" />{t("Capital depositado")} <strong className="tabular-nums text-foreground">{money(baseCap)}</strong></p>
+      <p className="flex items-center justify-end gap-1.5 text-muted-foreground"><span className="w-4 border-t-2 border-dashed border-chart-4" />{t("Capital depositado")} <strong className="tabular-nums text-foreground">{money(baseCap)}</strong></p>
     </div>}
     <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{new Date(days[0]!.start).toLocaleDateString(locale, { day: "numeric", month: "short" })}</span><span>{t("Hoy")}</span></div>
     <p className="relative mt-3 text-xs leading-5 text-muted-foreground">{isPrice ? t("El precio de {s} puede subir o bajar; tus ganancias cosechadas solo suman.", { s: sym }) : t("El mercado global puede subir o bajar; tus ganancias cosechadas solo suman.")}</p>
