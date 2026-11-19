@@ -52,7 +52,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
       <span className="flex items-center gap-1 rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-live shadow-[0_0_6px_var(--live)] motion-reduce:animate-none" />{t("En vivo")}</span>
     </HotBanner>}
     <DialogTitle className={done || showBanner ? "sr-only" : undefined}>{migrate ? t("Cambiar a {v}", { v: t(vault.name) }) : <>{position ? t("Depositar más ·") : t("Depositar ·")}{" "}{t(vault.name)}</>}</DialogTitle>
-    <DialogDescription className={done ? "sr-only" : undefined}>{migrate ? t("Movemos todo tu dinero y ganancias.") : t("Elige cuánto quieres depositar y confirma.")}</DialogDescription>
+    <DialogDescription className={done ? "sr-only" : undefined}>{migrate ? t("Depositamos en la nueva bóveda lo que moviste.") : t("Elige cuánto quieres depositar y confirma.")}</DialogDescription>
     {migrate && !done && <MoveSteps current={2} to={t(vault.name)} />}
     {migrate && !done && <p className="text-center font-display text-3xl font-bold tabular-nums">${amount || "—"}</p>}
     {!done && !migrate && <>
