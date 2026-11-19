@@ -3,6 +3,9 @@ const LOGOS: Record<string, string> = {
   JUP: "/tokens/jup.png", JUPUSD: "/tokens/jupusd.png", BONK: "/tokens/bonk.jpg", WIF: "/tokens/wif.jpg", MET: "/tokens/met.svg",
 };
 
+/** True when an official logo is bundled; without one the icon falls back to the symbol's letters, which would repeat the name next to it. */
+export const hasTokenLogo = (symbol: string) => Boolean(LOGOS[symbol.toUpperCase()]);
+
 /** Official coin logo, falling back to the symbol's initials when no logo is bundled. */
 export function TokenIcon({ symbol, size = 24, className = "" }: { symbol: string; size?: number; className?: string }) {
   const src = LOGOS[symbol.toUpperCase()];

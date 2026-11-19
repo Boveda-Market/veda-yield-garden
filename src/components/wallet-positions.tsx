@@ -12,7 +12,7 @@ import { earningRatePerMs } from "@/lib/live-earnings";
 import { VAULTS } from "@/lib/vaults";
 import { isDlmmVault, isOperableVault, type ChainPosition, type OperableVault } from "@/lib/solana-data";
 import { Button } from "@/components/ui/button";
-import { TokenIcon } from "@/components/token-icon";
+import { TokenIcon, hasTokenLogo } from "@/components/token-icon";
 import { LiveEarnings } from "@/components/live-earnings";
 import { HarvestDialog } from "@/components/harvest-dialog";
 import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
@@ -76,7 +76,7 @@ export function WalletPositions({ wallet, only, bare }: { wallet: string; only?:
       const v = VAULTS.find((x) => x.id === p.vaultId);
       const ok = supported(p.vaultId);
       return <li key={p.address} className="rounded-xl border border-border bg-background/40 p-3">
-        <div className="flex items-center gap-2"><TokenIcon symbol={p.symbol} size={28} /><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{v ? t(v.name) : `${p.symbol}/USDC`}</p><p className="text-xs text-muted-foreground">{p.symbol}/USDC{p.locked ? ` · ${t("Con liquidez bloqueada")}` : ""}</p><PoweredBy brand="meteora" className="mt-0.5 !justify-start" /></div></div>
+        <div className="flex items-center gap-2">{hasTokenLogo(p.symbol) && <TokenIcon symbol={p.symbol} size={28} />}<div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{v ? t(v.name) : `${p.symbol}/USDC`}</p>{p.locked && <p className="text-xs text-muted-foreground">{t("Con liquidez bloqueada")}</p>}<PoweredBy brand="meteora" className="mt-0.5 !justify-start" /></div></div>
         <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
           <div className="rounded-lg bg-muted/50 p-2"><dt className="text-muted-foreground">{t("Valor")}</dt><dd className="mt-0.5 font-display text-sm font-semibold tabular-nums">{value === null ? "—" : `≈ ${formatUsd(value)}`}</dd></div>
           <div className="rounded-lg bg-muted/50 p-2"><dt className="text-muted-foreground">{t("Rendimiento")}</dt><dd className="mt-0.5 font-display text-sm font-semibold tabular-nums text-primary">{apr === null ? "—" : `${apr.toFixed(1)}% APR`}</dd></div>

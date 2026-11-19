@@ -9,3 +9,4 @@
 - [x] Piloto automático (firmas delegadas Privy) para bóvedas de rango: interruptor, permiso limitado, proceso cada 2 min, Telegram, Términos
 - [ ] Probar el piloto automático con una cuenta real en bovedamarket.app (necesita que el usuario lo active)
 - [x] Bóveda DCTY (DacityCoin) copia de GTA6 con 3 banners
+- [x] Área de bóvedas: fichas con solo el nombre (sin APR, sin tags, sin icono)
