@@ -140,15 +140,17 @@ export async function simulateDlmmDeposit(connection: Connection, input: Simulat
     stage = "reserve";
     if (await connection.getBalance(owner) < (existing ? 10_000_000 : DLMM_MIN_SOL_LAMPORTS)) return result(false, "Esta bóveda necesita una garantía de apertura en tu reserva de operaciones; casi toda vuelve a ti al cerrarla.");
 
+    // In-range top-up: add USDC single-sided (no swap, no price impact) into the position's bins at/below the price.
+    const singleSide = !!existing && pool.lbPair.activeId >= existing.lb.positionData.lowerBinId && pool.lbPair.activeId <= existing.lb.positionData.upperBinId;
     stage = "jupiter";
-    const swapIn = amounts.net / 2n;
-    if (swapIn <= 0n) return result(false, "El importe es demasiado pequeño.");
-    const binArrays = await pool.getBinArrayForSwap(false, 4);
-    const quote = pool.swapQuote(new BN(swapIn.toString()), false, new BN(50), binArrays);
-    if (Number(quote.priceImpact.toString()) > DLMM_MAX_SWAP_IMPACT_PCT) return result(false, "Este importe movería demasiado el precio de esta bóveda. Prueba con una cantidad menor.");
-    if (quote.minOutAmount.isZero()) return result(false, "No hay liquidez suficiente para este depósito.");
+    const swapIn = singleSide ? 0n : amounts.net / 2n;
+    if (!singleSide && swapIn <= 0n) return result(false, "El importe es demasiado pequeño.");
+    if (singleSide && amounts.net <= 0n) return result(false, "El importe es demasiado pequeño.");
+    const quote = singleSide ? null : pool.swapQuote(new BN(swapIn.toString()), false, new BN(50), await pool.getBinArrayForSwap(false, 4));
+    if (quote && Number(quote.priceImpact.toString()) > DLMM_MAX_SWAP_IMPACT_PCT) return result(false, "Este importe movería demasiado el precio de esta bóveda. Prueba con una cantidad menor.");
+    if (quote && quote.minOutAmount.isZero()) return result(false, "No hay liquidez suficiente para este depósito.");
     const active = pool.lbPair.activeId, binStep = pool.lbPair.binStep;
-    const moved = binsMoved(Number(sdk.getPriceOfBinByBinId(active, binStep).toString()), Number(quote.endPrice.toString()), binStep);
+    const moved = quote ? binsMoved(Number(sdk.getPriceOfBinByBinId(active, binStep).toString()), Number(quote.endPrice.toString()), binStep) : 0;
 
     stage = "composition";
     let minBinId: number, maxBinId: number;
@@ -170,14 +172,14 @@ export async function simulateDlmmDeposit(connection: Connection, input: Simulat
       if (minBinId >= active || maxBinId <= active + moved) return result(false, "Esta bóveda no tiene liquidez preparada alrededor del precio actual.");
     }
     const slippage = dlmmSlippagePct(moved, binStep);
-    const swapTx = await pool.swap({ inToken: usdc, outToken: mintX, inAmount: new BN(swapIn.toString()), minOutAmount: quote.minOutAmount, lbPair: pool.pubkey, user: owner, binArraysPubkey: quote.binArraysPubkey });
+    const swapTx = quote ? await pool.swap({ inToken: usdc, outToken: mintX, inAmount: new BN(swapIn.toString()), minOutAmount: quote.minOutAmount, lbPair: pool.pubkey, user: owner, binArraysPubkey: quote.binArraysPubkey }) : { instructions: [] as TransactionInstruction[] };
     const positionKey = existing ? null : Keypair.generate(); // Ephemeral position identity; partially signs only after verification.
     const positionAddress = existing ? existing.lb.publicKey : positionKey!.publicKey;
     const strategy = { minBinId, maxBinId, strategyType: sdk.StrategyType.Spot };
     const totalYAmount = new BN((amounts.net - swapIn).toString());
     const addTx = existing
-      ? await pool.addLiquidityByStrategy({ positionPubKey: positionAddress, totalXAmount: quote.minOutAmount, totalYAmount, strategy, user: owner, slippage })
-      : await pool.initializePositionAndAddLiquidityByStrategy({ positionPubKey: positionAddress, totalXAmount: quote.minOutAmount, totalYAmount, strategy, user: owner, slippage });
+      ? await pool.addLiquidityByStrategy({ positionPubKey: positionAddress, totalXAmount: quote ? quote.minOutAmount : new BN(0), totalYAmount, strategy, user: owner, slippage })
+      : await pool.initializePositionAndAddLiquidityByStrategy({ positionPubKey: positionAddress, totalXAmount: quote!.minOutAmount, totalYAmount, strategy, user: owner, slippage });
     const feeOwner = new PublicKey(FEE_WALLET), feeAta = getAssociatedTokenAddressSync(usdc, feeOwner);
     const feeBefore = amounts.fee > 0n ? await getAccount(connection, feeAta).then((a) => a.amount).catch(() => null) : null;
     const feeIxs = amounts.fee > 0n ? [
