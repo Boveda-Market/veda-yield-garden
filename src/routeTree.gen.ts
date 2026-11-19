@@ -38,6 +38,13 @@ import { Route as GuiasMercadosDePrediccionRouteImport } from './routes/guias/me
 import { Route as GuiasQueEsUsdcRouteImport } from './routes/guias/que-es-usdc'
 import { Route as GuiasRecargarConCoinbaseRouteImport } from './routes/guias/recargar-con-coinbase'
 import { Route as GuiasRetirarCashAppBitcoinRouteImport } from './routes/guias/retirar-cash-app-bitcoin'
+import { Route as EnGuidesIndexRouteImport } from './routes/en/guides/index'
+import { Route as EnGuidesAddDollarsWithCoinbaseRouteImport } from './routes/en/guides/add-dollars-with-coinbase'
+import { Route as EnGuidesAvoidInvestmentScamsRouteImport } from './routes/en/guides/avoid-investment-scams'
+import { Route as EnGuidesHighYieldVaultsRouteImport } from './routes/en/guides/high-yield-vaults'
+import { Route as EnGuidesPredictionMarketsRouteImport } from './routes/en/guides/prediction-markets'
+import { Route as EnGuidesWhatIsUsdcRouteImport } from './routes/en/guides/what-is-usdc'
+import { Route as EnGuidesWithdrawToCashAppBitcoinRouteImport } from './routes/en/guides/withdraw-to-cash-app-bitcoin'
 import { Route as ApiPublicJobsCheckSystemStatusRouteImport } from './routes/api/public/jobs/check-system-status'
 import { Route as ApiPublicJobsWeeklySummaryRouteImport } from './routes/api/public/jobs/weekly-summary'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
@@ -194,6 +201,45 @@ const GuiasRetirarCashAppBitcoinRoute =
     path: '/guias/retirar-cash-app-bitcoin',
     getParentRoute: () => rootRouteImport,
   } as any)
+const EnGuidesIndexRoute = EnGuidesIndexRouteImport.update({
+  id: '/en/guides/',
+  path: '/en/guides/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnGuidesAddDollarsWithCoinbaseRoute =
+  EnGuidesAddDollarsWithCoinbaseRouteImport.update({
+    id: '/en/guides/add-dollars-with-coinbase',
+    path: '/en/guides/add-dollars-with-coinbase',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EnGuidesAvoidInvestmentScamsRoute =
+  EnGuidesAvoidInvestmentScamsRouteImport.update({
+    id: '/en/guides/avoid-investment-scams',
+    path: '/en/guides/avoid-investment-scams',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EnGuidesHighYieldVaultsRoute = EnGuidesHighYieldVaultsRouteImport.update({
+  id: '/en/guides/high-yield-vaults',
+  path: '/en/guides/high-yield-vaults',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnGuidesPredictionMarketsRoute =
+  EnGuidesPredictionMarketsRouteImport.update({
+    id: '/en/guides/prediction-markets',
+    path: '/en/guides/prediction-markets',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EnGuidesWhatIsUsdcRoute = EnGuidesWhatIsUsdcRouteImport.update({
+  id: '/en/guides/what-is-usdc',
+  path: '/en/guides/what-is-usdc',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnGuidesWithdrawToCashAppBitcoinRoute =
+  EnGuidesWithdrawToCashAppBitcoinRouteImport.update({
+    id: '/en/guides/withdraw-to-cash-app-bitcoin',
+    path: '/en/guides/withdraw-to-cash-app-bitcoin',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsCheckSystemStatusRoute =
   ApiPublicJobsCheckSystemStatusRouteImport.update({
     id: '/api/public/jobs/check-system-status',
@@ -259,6 +305,13 @@ export interface FileRoutesByFullPath {
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
+  '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
+  '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
+  '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
+  '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
+  '/en/guides/what-is-usdc': typeof EnGuidesWhatIsUsdcRoute
+  '/en/guides/withdraw-to-cash-app-bitcoin': typeof EnGuidesWithdrawToCashAppBitcoinRoute
+  '/en/guides/': typeof EnGuidesIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -296,6 +349,13 @@ export interface FileRoutesByTo {
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/en': typeof EnIndexRoute
   '/guias': typeof GuiasIndexRoute
+  '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
+  '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
+  '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
+  '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
+  '/en/guides/what-is-usdc': typeof EnGuidesWhatIsUsdcRoute
+  '/en/guides/withdraw-to-cash-app-bitcoin': typeof EnGuidesWithdrawToCashAppBitcoinRoute
+  '/en/guides': typeof EnGuidesIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -334,6 +394,13 @@ export interface FileRoutesById {
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
+  '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
+  '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
+  '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
+  '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
+  '/en/guides/what-is-usdc': typeof EnGuidesWhatIsUsdcRoute
+  '/en/guides/withdraw-to-cash-app-bitcoin': typeof EnGuidesWithdrawToCashAppBitcoinRoute
+  '/en/guides/': typeof EnGuidesIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -373,6 +440,13 @@ export interface FileRouteTypes {
     | '/guias/retirar-cash-app-bitcoin'
     | '/en/'
     | '/guias/'
+    | '/en/guides/add-dollars-with-coinbase'
+    | '/en/guides/avoid-investment-scams'
+    | '/en/guides/high-yield-vaults'
+    | '/en/guides/prediction-markets'
+    | '/en/guides/what-is-usdc'
+    | '/en/guides/withdraw-to-cash-app-bitcoin'
+    | '/en/guides/'
     | '/api/public/jobs/check-system-status'
     | '/api/public/jobs/weekly-summary'
     | '/api/public/telegram/webhook'
@@ -410,6 +484,13 @@ export interface FileRouteTypes {
     | '/guias/retirar-cash-app-bitcoin'
     | '/en'
     | '/guias'
+    | '/en/guides/add-dollars-with-coinbase'
+    | '/en/guides/avoid-investment-scams'
+    | '/en/guides/high-yield-vaults'
+    | '/en/guides/prediction-markets'
+    | '/en/guides/what-is-usdc'
+    | '/en/guides/withdraw-to-cash-app-bitcoin'
+    | '/en/guides'
     | '/api/public/jobs/check-system-status'
     | '/api/public/jobs/weekly-summary'
     | '/api/public/telegram/webhook'
@@ -447,6 +528,13 @@ export interface FileRouteTypes {
     | '/guias/retirar-cash-app-bitcoin'
     | '/en/'
     | '/guias/'
+    | '/en/guides/add-dollars-with-coinbase'
+    | '/en/guides/avoid-investment-scams'
+    | '/en/guides/high-yield-vaults'
+    | '/en/guides/prediction-markets'
+    | '/en/guides/what-is-usdc'
+    | '/en/guides/withdraw-to-cash-app-bitcoin'
+    | '/en/guides/'
     | '/api/public/jobs/check-system-status'
     | '/api/public/jobs/weekly-summary'
     | '/api/public/telegram/webhook'
@@ -485,6 +573,13 @@ export interface RootRouteChildren {
   GuiasRetirarCashAppBitcoinRoute: typeof GuiasRetirarCashAppBitcoinRoute
   EnIndexRoute: typeof EnIndexRoute
   GuiasIndexRoute: typeof GuiasIndexRoute
+  EnGuidesAddDollarsWithCoinbaseRoute: typeof EnGuidesAddDollarsWithCoinbaseRoute
+  EnGuidesAvoidInvestmentScamsRoute: typeof EnGuidesAvoidInvestmentScamsRoute
+  EnGuidesHighYieldVaultsRoute: typeof EnGuidesHighYieldVaultsRoute
+  EnGuidesPredictionMarketsRoute: typeof EnGuidesPredictionMarketsRoute
+  EnGuidesWhatIsUsdcRoute: typeof EnGuidesWhatIsUsdcRoute
+  EnGuidesWithdrawToCashAppBitcoinRoute: typeof EnGuidesWithdrawToCashAppBitcoinRoute
+  EnGuidesIndexRoute: typeof EnGuidesIndexRoute
   ApiPublicJobsCheckSystemStatusRoute: typeof ApiPublicJobsCheckSystemStatusRoute
   ApiPublicJobsWeeklySummaryRoute: typeof ApiPublicJobsWeeklySummaryRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
@@ -698,6 +793,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuiasRetirarCashAppBitcoinRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/guides/': {
+      id: '/en/guides/'
+      path: '/en/guides'
+      fullPath: '/en/guides/'
+      preLoaderRoute: typeof EnGuidesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/guides/add-dollars-with-coinbase': {
+      id: '/en/guides/add-dollars-with-coinbase'
+      path: '/en/guides/add-dollars-with-coinbase'
+      fullPath: '/en/guides/add-dollars-with-coinbase'
+      preLoaderRoute: typeof EnGuidesAddDollarsWithCoinbaseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/guides/avoid-investment-scams': {
+      id: '/en/guides/avoid-investment-scams'
+      path: '/en/guides/avoid-investment-scams'
+      fullPath: '/en/guides/avoid-investment-scams'
+      preLoaderRoute: typeof EnGuidesAvoidInvestmentScamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/guides/high-yield-vaults': {
+      id: '/en/guides/high-yield-vaults'
+      path: '/en/guides/high-yield-vaults'
+      fullPath: '/en/guides/high-yield-vaults'
+      preLoaderRoute: typeof EnGuidesHighYieldVaultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/guides/prediction-markets': {
+      id: '/en/guides/prediction-markets'
+      path: '/en/guides/prediction-markets'
+      fullPath: '/en/guides/prediction-markets'
+      preLoaderRoute: typeof EnGuidesPredictionMarketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/guides/what-is-usdc': {
+      id: '/en/guides/what-is-usdc'
+      path: '/en/guides/what-is-usdc'
+      fullPath: '/en/guides/what-is-usdc'
+      preLoaderRoute: typeof EnGuidesWhatIsUsdcRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/guides/withdraw-to-cash-app-bitcoin': {
+      id: '/en/guides/withdraw-to-cash-app-bitcoin'
+      path: '/en/guides/withdraw-to-cash-app-bitcoin'
+      fullPath: '/en/guides/withdraw-to-cash-app-bitcoin'
+      preLoaderRoute: typeof EnGuidesWithdrawToCashAppBitcoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/check-system-status': {
       id: '/api/public/jobs/check-system-status'
       path: '/api/public/jobs/check-system-status'
@@ -773,6 +917,13 @@ const rootRouteChildren: RootRouteChildren = {
   GuiasRetirarCashAppBitcoinRoute: GuiasRetirarCashAppBitcoinRoute,
   EnIndexRoute: EnIndexRoute,
   GuiasIndexRoute: GuiasIndexRoute,
+  EnGuidesAddDollarsWithCoinbaseRoute: EnGuidesAddDollarsWithCoinbaseRoute,
+  EnGuidesAvoidInvestmentScamsRoute: EnGuidesAvoidInvestmentScamsRoute,
+  EnGuidesHighYieldVaultsRoute: EnGuidesHighYieldVaultsRoute,
+  EnGuidesPredictionMarketsRoute: EnGuidesPredictionMarketsRoute,
+  EnGuidesWhatIsUsdcRoute: EnGuidesWhatIsUsdcRoute,
+  EnGuidesWithdrawToCashAppBitcoinRoute: EnGuidesWithdrawToCashAppBitcoinRoute,
+  EnGuidesIndexRoute: EnGuidesIndexRoute,
   ApiPublicJobsCheckSystemStatusRoute: ApiPublicJobsCheckSystemStatusRoute,
   ApiPublicJobsWeeklySummaryRoute: ApiPublicJobsWeeklySummaryRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,

@@ -6,7 +6,7 @@ const T = "Guía completa de bóvedas de alto rendimiento (como la Bóveda GTA6)
 const D = "Qué son las bóvedas de alto rendimiento, de dónde sale su APR, por qué hay que rebalancear, cómo activar alertas y qué riesgos tienen. Explicado simple.";
 export const Route = createFileRoute("/guias/bovedas-alto-rendimiento")({ staticData: { sitemap: true }, head: () => guideHead({ path: P, title: T, description: D }), component: Page });
 
-function Page() {
+export function Page() {
   return <GuideLayout current={P} title={T} en={EN} minutes={7} intro="Las bóvedas de alto rendimiento, como la Bóveda GTA6, pueden mostrar tasas estimadas de cientos por ciento al año. No es magia ni una promesa: son comisiones reales de intercambios. Aquí te explicamos cómo funcionan, cómo mantenerlas produciendo y qué puede salir mal.">
     <section><h2>¿Qué es una bóveda de alto rendimiento?</h2><p>Es una bóveda donde tu dinero ayuda a que otras personas puedan comprar y vender un token. Cada vez que alguien intercambia, paga una pequeña comisión, y una parte va a quienes pusieron dinero en la bóveda. Tú cobras <strong>como la casa</strong>: no apuestas contra nadie.</p><p>Se llaman de “alto rendimiento” porque concentran tu dinero en un <strong>rango de precios</strong> donde ocurre la mayoría de los intercambios. Así cobras mucho más por cada dólar, mientras el precio se mantenga dentro de ese rango.</p></section>
     <section><h2>¿De dónde sale el APR que ves?</h2><p>Calculamos el APR con datos reales: <strong>comisiones de las últimas 24 horas ÷ dinero total en la bóveda × 365</strong>. Es una tasa estimada simple, no garantizada. Si mañana hay menos intercambios, la tasa baja; si hay más, sube. Por eso cambia durante el día.</p></section>

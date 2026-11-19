@@ -6,7 +6,7 @@ const T = "¿Qué es USDC y cómo comprarlo con tarjeta?";
 const D = "Qué es USDC, por qué vale siempre 1 dólar y cómo comprarlo con tarjeta en minutos sin confundirlo con otras criptomonedas.";
 export const Route = createFileRoute("/guias/que-es-usdc")({ staticData: { sitemap: true }, head: () => guideHead({ path: P, title: T, description: D }), component: Page });
 
-function Page() {
+export function Page() {
   return <GuideLayout current={P} title={T} en={EN} minutes={4} intro="USDC es un dólar digital: cada unidad está pensada para valer 1 dólar estadounidense. Te permite guardar y mover dólares por internet, a cualquier hora, sin depender de un banco.">
     <section><h2>¿Qué es USDC?</h2><p>USDC es una “moneda estable” emitida por la empresa Circle. A diferencia de Bitcoin, su precio no sube ni baja: <strong>1 USDC ≈ 1 dólar</strong>. Circle mantiene reservas en efectivo y bonos del Tesoro de EE. UU. de corto plazo, y publica informes periódicos de esas reservas.</p></section>
     <section><h2>¿Por qué usar dólares digitales?</h2><ul><li>Su valor no fluctúa como otras criptomonedas.</li><li>Envíos en segundos, también fines de semana.</li><li>Tú controlas tu dinero: nadie puede congelarlo en tu billetera.</li></ul></section>

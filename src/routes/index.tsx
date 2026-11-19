@@ -10,7 +10,8 @@ import reviewValeria from "@/assets/review-valeria.jpg";
 import reviewDavid from "@/assets/review-david.jpg";
 import reviewMarisol from "@/assets/review-marisol.jpg";
 import { Lock, Gift, Search, Star, Quote, MessageSquare, Send, Activity } from "lucide-react";
-import { useT } from "@/lib/i18n";
+import { useI18n, useT } from "@/lib/i18n";
+import { guideHref, guidesIndexHref } from "@/components/guide-layout";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ShieldCheck, Sparkles, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -91,7 +92,7 @@ const TRUST = [
 ];
 
 export function Landing() {
-  const t = useT();
+  const { t, lang } = useI18n();
   const [compact, setCompact] = useState(false);
   const [decided, setDecided] = useState(false);
   useEffect(() => { setCompact(isReturning() && !isHeroReview()); setDecided(true); void import("@/components/privy-access").catch(() => {}); }, []);
@@ -139,7 +140,7 @@ export function Landing() {
       </section>
 
       <section aria-label={t("Doble o Nada")} className="mb-4 grid items-center gap-6 py-8 md:grid-cols-2">
-        <div className="text-center md:text-left"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} loading="lazy" className="mx-auto h-16 w-auto md:mx-0 sm:h-20" /><p className="mt-1 text-xs font-bold uppercase tracking-widest text-primary">{t("Rondas relámpago")}</p><h2 className="mt-2 font-display text-3xl font-bold">{t("Haz dinero en minutos prediciendo el mercado.")}</h2><p className="mt-3 text-muted-foreground">{t("Bitcoin, Ethereum y Solana en rondas relámpago, sin comprar la moneda: juegas en dólares. Si aciertas el movimiento, cobras el premio al instante.")}</p><Link to="/guias/mercados-de-prediccion" className="mt-3 inline-block text-sm font-semibold text-primary underline underline-offset-4">{t("¿Cómo funciona? Lee la guía")} →</Link></div>
+        <div className="text-center md:text-left"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} loading="lazy" className="mx-auto h-16 w-auto md:mx-0 sm:h-20" /><p className="mt-1 text-xs font-bold uppercase tracking-widest text-primary">{t("Rondas relámpago")}</p><h2 className="mt-2 font-display text-3xl font-bold">{t("Haz dinero en minutos prediciendo el mercado.")}</h2><p className="mt-3 text-muted-foreground">{t("Bitcoin, Ethereum y Solana en rondas relámpago, sin comprar la moneda: juegas en dólares. Si aciertas el movimiento, cobras el premio al instante.")}</p><Link to={guideHref("/guias/mercados-de-prediccion", lang)} className="mt-3 inline-block text-sm font-semibold text-primary underline underline-offset-4">{t("¿Cómo funciona? Lee la guía")} →</Link></div>
         <PredictPromo />
       </section>
       <section id="opiniones" className="scroll-mt-4 py-12">
@@ -206,6 +207,6 @@ export function Landing() {
         </details>)}
       </section>
     </main>
-    <footer className="mx-auto max-w-5xl border-t border-border px-6 py-6 text-xs leading-5 text-muted-foreground"><nav className="flex flex-wrap justify-center gap-5"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to="/guias">{t("Guías")}</Link><Link to="/status">{t("Estado del sistema")}</Link><Link to="/terminos">{t("Términos")}</Link><Link to="/privacidad">{t("Privacidad")}</Link></nav><p className="mt-4 text-center"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer" className="text-primary underline">{t("Soporte en Telegram")}</a>{" · "}<a href="mailto:admin@bovedamarket.app" className="text-primary underline">admin@bovedamarket.app</a></p><p className="mt-2 text-center">© {new Date().getFullYear()} Boveda Technologies</p></footer>
+    <footer className="mx-auto max-w-5xl border-t border-border px-6 py-6 text-xs leading-5 text-muted-foreground"><nav className="flex flex-wrap justify-center gap-5"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to={guidesIndexHref(lang)}>{t("Guías")}</Link><Link to="/status">{t("Estado del sistema")}</Link><Link to="/terminos">{t("Términos")}</Link><Link to="/privacidad">{t("Privacidad")}</Link></nav><p className="mt-4 text-center"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer" className="text-primary underline">{t("Soporte en Telegram")}</a>{" · "}<a href="mailto:admin@bovedamarket.app" className="text-primary underline">admin@bovedamarket.app</a></p><p className="mt-2 text-center">© {new Date().getFullYear()} Boveda Technologies</p></footer>
   </div>;
 }

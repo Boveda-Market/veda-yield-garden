@@ -6,7 +6,7 @@ const T = "Cómo recargar dólares con Coinbase en BÓVEDA";
 const D = "Entra con Google y recarga dólares con tu tarjeta, banco o saldo de Coinbase en minutos. Paso a paso, costos y seguridad.";
 export const Route = createFileRoute("/guias/recargar-con-coinbase")({ staticData: { sitemap: true }, head: () => guideHead({ path: P, title: T, description: D }), component: Page });
 
-function Page() {
+export function Page() {
   return <GuideLayout current={P} title={T} en={EN} minutes={3} intro="Con BÓVEDA entras con Google en un segundo y recargas dólares a través de Coinbase, una de las plataformas más conocidas de Estados Unidos. Así funciona.">
     <section><h2>¿Por qué Coinbase?</h2><p>Coinbase es una empresa estadounidense que cotiza en bolsa (Nasdaq: COIN). La compra se hace en su propia página oficial: BÓVEDA nunca ve tu tarjeta ni los datos de tu banco.</p></section>
     <section><h2>Paso a paso</h2><ol><li><strong>Entra con Google.</strong> Tu billetera protegida se crea al instante, sin contraseñas.</li><li>Toca <strong>Depositar dólares</strong> y elige <strong>Coinbase</strong>.</li><li>Escribe el monto <strong>en dólares</strong> y paga con tarjeta, banco o tu saldo de Coinbase.</li><li>Tus dólares llegan a tu billetera en minutos, listos para Doble o Nada o las Bóvedas.</li></ol></section>

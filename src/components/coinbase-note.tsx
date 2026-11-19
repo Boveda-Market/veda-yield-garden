@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
-import { useT } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
+import { guideHref } from "@/components/guide-layout";
 import { cn } from "@/lib/utils";
 
 /** Coinbase brand mark (official blue circle with white "C"). */
@@ -20,7 +21,7 @@ export function CoinbaseWordmark() {
 
 /** Sign-in sheet line: enter with Google and top up with Coinbase. */
 export function CoinbaseNote({ className }: { className?: string }) {
-  const t = useT();
+  const { t, lang } = useI18n();
   const [open, setOpen] = useState(false);
   return <span className={cn("block text-sm", className)}>
     {t("Entra con tu cuenta de Google en 1 segundo y recarga con")} <CoinbaseWordmark /> {t("usando tu tarjeta. Sin contraseñas.")} <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }} className="whitespace-nowrap font-medium text-primary underline underline-offset-2">{t("Más información")}</button>
@@ -31,7 +32,7 @@ export function CoinbaseNote({ className }: { className?: string }) {
         {[["🔐", t("Entra con Google en segundos"), t("Tu billetera protegida se crea al instante, sin contraseñas.")], ["🏦", t("Paga en la página oficial de Coinbase"), t("Con tarjeta, banco o tu saldo de Coinbase. BÓVEDA nunca ve tus datos de pago.")], ["⚡", t("Tus dólares, listos en minutos"), t("Juega Doble o Nada con rondas relámpago de 5 minutos o haz rendir tu dinero. Solo tú puedes moverlo.")]].map(([i, h, d]) => <li key={h} className="flex gap-3 rounded-xl border border-border p-3"><span className="text-xl">{i}</span><span><span className="block font-semibold">{h}</span><span className="text-muted-foreground">{d}</span></span></li>)}
       </ol>
       <p className="text-xs text-muted-foreground">{t("BÓVEDA no cobra por recargar; Coinbase muestra su cargo antes de pagar.")}</p>
-      <Link to="/guias/recargar-con-coinbase" target="_blank" className="text-sm font-medium text-primary underline underline-offset-2">{t("Ver la guía completa")}</Link>
+      <Link to={guideHref("/guias/recargar-con-coinbase", lang)} target="_blank" className="text-sm font-medium text-primary underline underline-offset-2">{t("Ver la guía completa")}</Link>
     </ActionSheetContent></Dialog>
   </span>;
 }
