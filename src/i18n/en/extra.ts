@@ -1646,4 +1646,7 @@ export const extra: Record<string, string> = {
   "Probar una jugada": "Try a play",
   "Bóvedas destacadas": "Featured vaults",
   "Bóvedas disponibles": "Available vaults",
+  "Alto riesgo": "High risk",
+  "Riesgo medio": "Medium risk",
+  "El valor de tu posición cambia con las compras y ventas rápidas del mercado.": "Your position's value changes with fast market buying and selling.",
 };

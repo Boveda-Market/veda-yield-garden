@@ -49,7 +49,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
         <span className="flex items-center gap-1 rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-live shadow-[0_0_6px_var(--live)] motion-reduce:animate-none" />{t("En vivo")}</span>
       </HotBanner>
       <div className="flex flex-1 flex-col p-2 sm:p-3">
-        <p className="text-[11px] font-semibold text-hot-muted">{vault.pair}</p>
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold text-hot-muted">{vault.pair}<span className="rounded-full border border-hot-foreground/15 bg-hot-surface/50 px-1.5 py-px text-[10px] font-normal">{t("Alto riesgo")}</span></p>
         <div className="flex flex-wrap items-baseline gap-x-2">
           <p key={apr ?? "x"} className="animate-count-pop bg-[image:var(--gradient-hot)] bg-clip-text font-display text-4xl font-black leading-tight text-transparent tabular-nums">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 0 })}%`}</p>
           <p className="text-[10px] font-medium leading-tight text-hot-muted sm:text-[11px]">{y.isPending ? t("Consultando el pool…") : t("APR estimado · intereses 24 h")}</p>
@@ -61,6 +61,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
           </div>)}
         </dl>
         <TokenLinks vault={vault} />
+        <p className="mt-1.5 text-[10px] leading-snug text-hot-muted">{t("El valor de tu posición cambia con las compras y ventas rápidas del mercado.")}</p>
         {!hasPosition && <ol className="mt-3 hidden flex-wrap gap-1.5">{steps.map(([icon, label]) => <li key={label} className="flex items-center gap-1 rounded-full bg-hot-surface/60 px-2.5 py-1 text-[11px] font-bold">{icon} {t(label)}</li>)}</ol>}
         {ownedLink}
         {owned}
