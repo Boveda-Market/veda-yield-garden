@@ -7,3 +7,14 @@ describe("cumulativeInterest", () => {
     expect(out).toEqual([10, 40]);
   });
 });
+
+describe("intradayGlobal", () => {
+  it("moves each vault by its own price and keeps vaults without candles flat", async () => {
+    const { intradayGlobal } = await import("@/lib/pool-candles");
+    const out = intradayGlobal([
+      { value: 100, candles: [{ t: 1, c: 1, v: 0 }, { t: 2, c: 2, v: 0 }] },
+      { value: 50, candles: [] },
+    ]);
+    expect(out).toEqual([{ t: 1, v: 100 }, { t: 2, v: 150 }]);
+  });
+});

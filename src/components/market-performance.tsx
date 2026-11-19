@@ -17,6 +17,11 @@ function smooth(pts: { x: number; y: number }[]) {
   return d;
 }
 
+/** Straight point-to-point segments: the price line stays choppy like a trading chart. */
+function angular(pts: { x: number; y: number }[]) {
+  return pts.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+}
+
 /** «Rendimiento y Mercado»: token price (calm, top) vs. interest the pool paid (always rising, bottom). */
 export function MarketPerformance({ vault }: { vault: Vault }) {
   const t = useT();
@@ -24,7 +29,7 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const gid = useId().replace(/:/g, "");
   const [range, setRange] = useState<CandleRange>("24h");
   const [hover, setHover] = useState<number | null>(null);
-  const candles = useQuery({ queryKey: ["pool-candles", vault.pool, range], queryFn: ({ signal }) => fetchPoolCandles(vault.pool, range, signal), staleTime: 5 * 60_000, retry: 1 });
+  const candles = useQuery({ queryKey: ["pool-candles", vault.pool, range], queryFn: ({ signal }) => fetchPoolCandles(vault.pool, range, signal), staleTime: (range === "24h" ? 2 : 5) * 60_000, retry: 1 });
   const stats = useQuery({ queryKey: ["dexscreener-pool-stats", vault.pool], queryFn: ({ signal }) => fetchPoolStats(vault.pool, signal), staleTime: 60_000, retry: 1 });
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
   const symbol = stats.data?.baseSymbol ?? vault.pair.split("/")[0];
@@ -52,7 +57,7 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="mt-2 h-80 w-full" role="img" aria-label={t("Precio de {s} frente a intereses generados", { s: symbol ?? "" })}>
         <defs><linearGradient id={gid} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.35" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient></defs>
-        <path d={smooth(pPts)} fill="none" stroke="var(--muted-foreground)" strokeOpacity="0.85" strokeWidth="3" strokeLinecap="round" />
+        <path d={angular(pPts)} fill="none" stroke="var(--muted-foreground)" strokeOpacity="0.9" strokeWidth="1.75" strokeLinejoin="miter" strokeLinecap="butt" />
         <line x1={L} y1={MID} x2={R} y2={MID} stroke="var(--border)" strokeDasharray="3 6" />
         {eLine && <><path d={`${eLine} L${R},${BOT} L${L},${BOT} Z`} fill={`url(#${gid})`} />
           <path d={eLine} fill="none" stroke="var(--primary)" strokeWidth="4" strokeLinecap="round" style={{ filter: "drop-shadow(0 0 4px var(--primary))" }} /></>}
