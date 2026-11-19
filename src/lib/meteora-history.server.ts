@@ -26,7 +26,7 @@ const DLMM_CLAIM_FEE = "4b7a9a308c4a7ba3", DLMM_CLAIM_FEE2 = "e8abf2613a4d232d",
  * collected inside a Rebalancing. One claim emits both ClaimFee and ClaimFee2 with the same amounts, so ClaimFee
  * is only kept when no ClaimFee2 exists for that position in the transaction. Token X = vault token, Y = USDC.
  */
-export function decodeDlmmRecords(events: { id: string; data: Buffer }[], wallet: string, meta: { signature: string; at: number | null; slot: number }): MeteoraRecord[] {
+export function decodeDlmmRecords(events: { id: string; data: Buffer }[], wallet: string, meta: { signature: string; at: number | null; slot: number; auto?: boolean }): MeteoraRecord[] {
   const parsed: { id: string; tag: string; pool: string; position: string; x: bigint; y: bigint }[] = [];
   for (const { id, data } of events) {
     if (data.length < 16 || data.subarray(0, 8).toString("hex") !== "e445a52e51cb9a1d") continue;
@@ -40,8 +40,8 @@ export function decodeDlmmRecords(events: { id: string; data: Buffer }[], wallet
     else parsed.push({ id, tag, pool, position: key(32), x: d.readBigUInt64LE(96), y: d.readBigUInt64LE(104) });
   }
   return parsed.filter((e) => !(e.tag === DLMM_CLAIM_FEE && parsed.some((o) => o.tag === DLMM_CLAIM_FEE2 && o.position === e.position)))
-    .filter((e) => e.x > 0n || e.y > 0n)
-    .map((e) => ({ id: e.id, signature: meta.signature, at: meta.at, slot: meta.slot, pool: e.pool, position: e.position, kind: "harvest" as const, tokenRaw: e.x.toString(), usdcRaw: e.y.toString() }));
+    .filter((e) => meta.auto || e.x > 0n || e.y > 0n)
+    .map((e) => ({ id: e.id, signature: meta.signature, at: meta.at, slot: meta.slot, pool: e.pool, position: e.position, kind: "harvest" as const, tokenRaw: e.x.toString(), usdcRaw: e.y.toString(), ...(meta.auto ? { auto: true } : {}) }));
 }
 
 export function decodeMeteoraRecords(tx: ParsedTransactionWithMeta, wallet: string, signature: string): MeteoraRecord[] {
@@ -51,7 +51,7 @@ export function decodeMeteoraRecords(tx: ParsedTransactionWithMeta, wallet: stri
   for (const group of tx.meta.innerInstructions ?? []) for (const [index, ix] of group.instructions.entries()) {
     if (ix.programId.toBase58() === DLMM_PROGRAM_ID && "data" in ix) { try { dlmm.push({ id: `${signature}:${group.index}:${index}`, data: decode58(ix.data) }); } catch { /* not an event */ } }
   }
-  records.push(...decodeDlmmRecords(dlmm, wallet, { signature, at: tx.blockTime ? tx.blockTime * 1000 : null, slot: tx.slot }));
+  records.push(...decodeDlmmRecords(dlmm, wallet, { signature, at: tx.blockTime ? tx.blockTime * 1000 : null, slot: tx.slot, auto: (tx.meta.logMessages ?? []).some((l) => l.includes("boveda:autopilot")) }));
   for (const group of tx.meta.innerInstructions ?? []) {
     for (const [index, ix] of group.instructions.entries()) {
       if (!ix.programId.equals(CP_AMM_PROGRAM_ID) || !("data" in ix)) continue;

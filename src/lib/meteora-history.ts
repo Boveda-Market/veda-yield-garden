@@ -2,7 +2,7 @@ import { z } from "zod";
 import { CHAIN_POOLS, realWalletInput, tokenAmount, vaultDecimals } from "./solana-data";
 
 export const meteoraHistoryInput = realWalletInput.extend({ before: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,88}$/).optional() }).strict();
-export type MeteoraRecord = { id: string; signature: string; at: number | null; slot: number; pool: string; position: string; kind: "deposit" | "withdraw" | "harvest" | "close"; tokenRaw: string; usdcRaw: string };
+export type MeteoraRecord = { id: string; signature: string; at: number | null; slot: number; pool: string; position: string; kind: "deposit" | "withdraw" | "harvest" | "close"; tokenRaw: string; usdcRaw: string; auto?: boolean };
 export type MeteoraHistoryPage = { records: MeteoraRecord[]; scanned: number; next: string | null; missing: number };
 
 export function meteoraMetrics(records: MeteoraRecord[]) {
