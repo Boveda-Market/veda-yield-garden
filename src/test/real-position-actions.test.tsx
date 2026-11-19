@@ -27,6 +27,7 @@ afterEach(cleanup);
 function show(address: string, locked = false) {
   mocks.positions = [{ address, vaultId: "sol", symbol: "SOL", tokenAmount: "1", usdcAmount: "1", feeTokenAmount: "0", feeUsdcAmount: "0", locked }];
   render(<RealOverview portfolioOnly walletAddress={WITHDRAWAL_PILOT.wallet} onDetails={vi.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: /Ver más/ }));
 }
 
 it("opens harvest review for the exact authorized pilot", () => {
