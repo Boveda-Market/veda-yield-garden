@@ -90,7 +90,7 @@ function ActivationFlow({ usdc, wallet, prepare, signAndSend, onDone }: { usdc: 
   const view: ActivationStage = stage === "done" ? { kind: "done" } : stage === "working" ? { kind: "working" } : missing > 0n ? { kind: "short", missingMicro: missing } : { kind: "ready", totalMicro: total, ...(error ? { error } : {}) };
   return <>
     <ActivationCardView stage={view} onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={openGta6} />
-    {buy > 0 && <BuyUsdc auto={buy} className="mt-2" />}
+    {buy > 0 && <BuyUsdc auto={buy} needMicro={missing} className="mt-2" />}
     {gta6 && <Dialog open={sheet} onOpenChange={setSheet}><ActionSheetContent><DialogTitle className="mb-3 text-lg font-bold">{t("Tu primera bóveda")}</DialogTitle>
       <HotVaultCard vault={gta6} owned={null} ownedLink={null} hasPosition={false} depositDisabled={!wallet} onDeposit={() => { setSheet(false); setDeposit(true); }} onDetails={() => setDetails(true)} />
     </ActionSheetContent></Dialog>}
@@ -178,6 +178,6 @@ export function ActivationSheet({ open, usdc, needMicro, onClose, onActivated }:
     <DialogTitle className="sr-only">{t("Activa tu cuenta")}</DialogTitle>
     <DialogDescription className="sr-only">{t("Prepara tu cuenta y seguimos solos.")}</DialogDescription>
     <ActivationCardView stage={view} continueMode onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={onActivated} />
-    {buy > 0 && <BuyUsdc auto={buy} className="mt-2" />}
+    {buy > 0 && <BuyUsdc auto={buy} needMicro={missing} className="mt-2" />}
   </ActionSheetContent></Dialog>;
 }

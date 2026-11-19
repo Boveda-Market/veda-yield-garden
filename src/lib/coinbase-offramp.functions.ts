@@ -30,13 +30,13 @@ export const coinbaseSellStatus = createServerFn({ method: "POST" })
 
 export const startCoinbaseBuy = createServerFn({ method: "POST" })
   .middleware([requirePrivyAuth])
-  .inputValidator((d) => z.object({ wallet: solanaAddressSchema, asset: z.literal("USDC"), origin: z.string().url() }).parse(d))
+  .inputValidator((d) => z.object({ wallet: solanaAddressSchema, asset: z.literal("USDC"), origin: z.string().url(), amountUsd: z.number().positive().max(5000).optional() }).parse(d))
   .handler(async ({ data }) => {
     try {
       const { coinbaseBuyUrl } = await import("@/lib/coinbase-offramp.server");
       const back = ORIGINS.includes(data.origin) ? data.origin : ORIGINS[0];
       const ip = getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for")?.split(",")[0]?.trim();
-      return { success: true as const, url: await coinbaseBuyUrl(data.wallet, data.asset, ip, `${back}/wallet`) };
+      return { success: true as const, url: await coinbaseBuyUrl(data.wallet, data.asset, ip, `${back}/wallet`, data.amountUsd) };
     } catch (e) { return { success: false as const, error: e instanceof Error ? e.message : "Coinbase no respondió." }; }
   });
 

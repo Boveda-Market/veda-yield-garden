@@ -17,7 +17,7 @@ type Receipt = { added: bigint; total: bigint };
 const usdc = (v: bigint) => (Number(v) / 1e6).toFixed(2);
 
 /** One "Add funds" button: users with network reserve buy USDC directly; others get the starter card purchase (auto-activated by StartGuide). */
-export function BuyUsdc({ className, auto, hot }: { className?: string; only?: "SOL" | "USDC"; auto?: number; hot?: boolean }) {
+export function BuyUsdc({ className, auto, hot, needMicro }: { className?: string; only?: "SOL" | "USDC"; auto?: number; hot?: boolean; needMicro?: bigint | undefined }) {
   const t = useT();
   const session = useBovedaSession();
   const read = useServerFn(getRealWallet);
@@ -51,7 +51,7 @@ export function BuyUsdc({ className, auto, hot }: { className?: string; only?: "
       const before = await balances();
       if (provider === "coinbase") {
         // Always USDC in US dollars (never SOL); the network reserve refills from USDC.
-        const r = await cbBuy({ data: { wallet: address!, asset: "USDC", origin: window.location.origin } });
+        const r = await cbBuy({ data: { wallet: address!, asset: "USDC", origin: window.location.origin, ...(needMicro && needMicro > 0n ? { amountUsd: Number(needMicro) / 1e6 } : {}) } });
         if (!r.success) { tab?.close(); throw new Error(r.error); }
         if (tab) tab.location.href = r.url; else window.location.href = r.url;
       } else {
