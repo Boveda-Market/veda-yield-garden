@@ -1437,7 +1437,6 @@ export const extra: Record<string, string> = {
   "De la comisión de cada movimiento, en dólares.": "Of the fee on every move, in dollars.",
   "Invita y Gana": "Invite & Earn",
   "Comparte y Gana": "Share & Earn",
-  "Explorar Bóvedas": "Explore Vaults",
   "Elige una bóveda y pon tus dólares a trabajar": "Pick a vault and put your dollars to work",
   "Comparte BÓVEDA y gana": "Share BÓVEDA and earn",
   "hasta 60%": "up to 60%",
