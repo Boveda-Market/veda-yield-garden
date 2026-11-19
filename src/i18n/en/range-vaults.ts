@@ -248,4 +248,11 @@ export const rangeVaults: Record<string, string> = {
   "La cripto que viste en GTA 6, ahora cobrando para ti.": "The crypto you saw in GTA 6, now earning for you.",
   "Intereses de cada intercambio": "Interest from every trade",
   "Sé la casa en cada intercambio.": "Be the house on every trade.",
+  "Alto octanaje": "High octane",
+  "Bóvedas que más rinden hoy": "Top-earning vaults today",
+  "Bóvedas de alto octanaje ordenadas por rendimiento": "High-octane vaults ranked by yield",
+  "La moneda que viste en el juego GTA 6": "The currency you saw in GTA 6",
+  "La bóveda insignia · Zona ultra concentrada": "The flagship vault · Ultra-concentrated zone",
+  "APR estimado · 24 h": "Estimated APR · 24 h",
+  "Ambas con Piloto Automático: trabajan en la zona activa y se rebalancean solas 24/7.": "Both with Autopilot: they work in the active zone and rebalance themselves 24/7.",
 };
