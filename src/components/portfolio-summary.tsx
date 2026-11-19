@@ -39,7 +39,7 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
   const label = "flex items-center gap-1.5 text-xs text-muted-foreground";
   const loading = history.query.isFetching ? t("Calculando…") : "—";
 
-  return <section aria-label={t("Rendimiento de tu portafolio")} className="py-8">
+  return <section id="rendimiento" aria-label={t("Rendimiento de tu portafolio")} className="scroll-mt-20 py-8">
     <h2 className="flex items-center gap-2 font-display text-lg font-semibold"><TrendingUp size={18} className="text-primary" />{t("Tu rendimiento")}</h2>
     <WeeklyChart records={history.records} poolPrices={history.poolPrices} money={money} vaults={byVault} />
 
