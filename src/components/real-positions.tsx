@@ -48,7 +48,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
       const vault = VAULTS.find((v) => v.id === p.vaultId);
       const hot = Boolean(vault?.badge);
       const body = <>
-        {hot && vault ? <HotBanner vault={vault} className="-mx-5 -mt-5 mb-2"><span className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide ${p.outOfRange ? "bg-primary text-primary-foreground" : "bg-hot-surface"}`}>{p.locked ? t("Con liquidez bloqueada") : p.outOfRange ? `🔄 ${t("Sistema listo para rebalancear")}` : `🎯 ${t("En la zona caliente")}`}</span><span className="rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase">🎰 {t("Sé la casa")}</span></HotBanner> : null}
+        {hot && vault ? <HotBanner vault={vault} className="-mx-5 -mt-5 mb-2"><span className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide ${p.outOfRange ? "bg-primary text-primary-foreground" : "bg-hot-surface"}`}>{p.locked ? t("Con liquidez bloqueada") : p.outOfRange ? `🔄 ${t("Fuera de rango")}` : `🎯 ${t("En la zona caliente")}`}</span><span className="rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase">🎰 {t("Sé la casa")}</span></HotBanner> : null}
         <div className="flex items-start justify-between gap-3"><div>{!hot && <h3 className="font-display font-semibold">{vault ? t(vault.name) : `${p.symbol}/USDC`}</h3>}<p className="mt-1 text-xs text-muted-foreground">{p.symbol}/USDC{hot ? "" : ` · ${p.locked ? t("Con liquidez bloqueada") : p.outOfRange ? t("Fuera de rango") : t("Activa")}`}</p><PoweredBy brand="meteora" className="mt-1 !justify-start" /></div></div>
         <p className="mt-1 text-xs text-muted-foreground">{t("Valor estimado")}</p>
         <p className={`font-display text-3xl font-semibold ${hot ? "w-fit bg-[image:var(--gradient-hot)] bg-clip-text font-black text-transparent" : ""}`}>{value === null ? t("No disponible") : `≈ ${formatUsd(value)}`}</p>
@@ -63,7 +63,6 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
         {/* Long explanations stay available but folded, so the card fits one phone screen. */}
         <details className="mt-3 text-xs text-muted-foreground"><summary className="cursor-pointer text-center underline-offset-2 hover:underline">{t("Ver detalles")}</summary><div className="mt-2 space-y-1">
           {!canHarvest(fees) && <p>{t("Cosechar y reinvertir se activan desde $0.50 de ganancias.")}</p>}
-          {p.outOfRange && <p role="status" className="mt-2 leading-5 text-primary">{t("Sistema listo para rebalancear · también lo hace en automático")}</p>}
           <div className="flex justify-center gap-1"><Button size="icon" variant="ghost" aria-label={t("Copiar identificador")} title={t("Copiar identificador")} onClick={() => copy(p.address)}><Copy size={14} /></Button><Button asChild size="icon" variant="ghost"><a href={`https://orbmarkets.io/address/${p.address}`} target="_blank" rel="noopener noreferrer" aria-label={t("Ver en el explorador")} title={t("Ver en el explorador")}><ExternalLink size={14} /></a></Button></div>
         </div></details>
         {!isOperableVault(p.vaultId) && <p className="mt-3 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
