@@ -72,6 +72,8 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   const [tab, setTab] = useState<"all" | "vaults" | "predict">("all");
   const [hotPick, setHotPick] = useState<string | null>(null);
   const [portPick, setPortPick] = useState<string | null>(null);
+  // Banners link to /app#open-<vault> so the chosen vault's card opens right away.
+  useEffect(() => { const m = /^#open-([\w-]+)$/.exec(window.location.hash); if (m && VAULTS.some((v) => v.id === m[1])) { setHotPick(m[1]!); history.replaceState(history.state, "", window.location.pathname + window.location.search); } }, []);
   const predictions = useOpenPredictions();
   const query = useRealWallet(walletAddress);
   const data = query.data?.success ? query.data.data : null;

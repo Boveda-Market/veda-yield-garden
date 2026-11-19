@@ -70,14 +70,14 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
     <div className="grid">
       <div className={layer(isGta)} inert={!isGta}>
         {mine ? <button type="button" onClick={() => setOpenId("gta6")} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{gtaBanner}</button>
-        : <Link to="/app" className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{gtaBanner}</Link>}
+        : <Link to="/app" hash="open-gta6" className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{gtaBanner}</Link>}
       </div>
       <div className={layer(isDoble)} inert={!isDoble}>
         <Link to="/mercados" className="duel-ring block h-full rounded-2xl p-[2px] shadow-[var(--shadow-duel)] transition-transform active:scale-[0.98]"><DobleBannerSlide index={Math.floor(step / 3)} /></Link>
       </div>
       <div className={`${layer(isDcty)} vault-dcty`} inert={!isDcty}>
         {mineDcty ? <button type="button" onClick={() => setOpenId("dcty")} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{dctyBanner}</button>
-        : <Link to="/app" className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{dctyBanner}</Link>}
+        : <Link to="/app" hash="open-dcty" className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{dctyBanner}</Link>}
       </div>
     </div>
     <div aria-hidden className="mt-2 flex justify-center gap-1">{Array.from({ length: STEPS }, (_, k) => <span key={k} className={`h-1.5 rounded-full transition-all ${k === step ? "w-4" : "w-1.5 opacity-40"} ${k % 3 === 0 ? "bg-hot" : k % 3 === 1 ? "bg-bolt-neon" : "bg-dcty"}`} />)}</div>
