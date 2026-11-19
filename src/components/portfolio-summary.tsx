@@ -111,7 +111,10 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const total = earn[earn.length - 1] ?? 0;
   const shown = sel ?? n - 1;
   const theme = vaultTheme(cur?.id ?? (open.length === 1 ? open[0]!.id : "gta6"));
-  const capArr = days.map((d) => Number(d.capitalMicro) / 1e6);
+  const nowCap = cur ? cur.value : open.reduce((a, v) => a + v.value, 0);
+  const series = days.map((d) => Number(d.capitalMicro) / 1e6);
+  // History may be partial; when it has no deposits, use today's capital as a flat baseline.
+  const capArr = series.some((c) => c > 0) ? series : series.map(() => nowCap);
   const totArr = capArr.map((c, i) => c + earn[i]!);
   const hasTotal = capArr.some((c) => c > 0);
   const baseCap = capArr[shown] ?? 0;
@@ -163,7 +166,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
       <circle cx={ePts[shown]!.x} cy={ePts[shown]!.y} r="5.5" fill="var(--background)" stroke="var(--primary)" strokeWidth="3" />
       {hasTotal && <g>
         <line x1={L} y1={(EB + TT) / 2} x2={R} y2={(EB + TT) / 2} stroke="var(--border)" strokeDasharray="3 6" />
-        <path d={bLine} fill="none" stroke="var(--muted-foreground)" strokeWidth="1.5" strokeDasharray="5 5" />
+        <path d={bLine} fill="none" stroke="var(--muted-foreground)" strokeWidth="2.5" strokeDasharray="6 5" />
         <path d={tLine} fill="none" stroke="var(--foreground)" strokeWidth="3" strokeLinecap="round" />
         <circle cx={tPts[shown]!.x} cy={tPts[shown]!.y} r="5.5" fill="var(--background)" stroke="var(--foreground)" strokeWidth="3" />
       </g>}
