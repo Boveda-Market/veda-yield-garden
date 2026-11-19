@@ -1,5 +1,9 @@
 /** Range-based (GTA6) vault texts. */
 export const rangeVaults: Record<string, string> = {
+  "Toca una bóveda para ver todo y depositar.": "Tap a vault to see everything and deposit.",
+  "Tienes capital": "You have funds",
+  "Zona caliente 🔥": "Hot zone 🔥",
+  "Detalles y depósito de la bóveda": "Vault details and deposit",
   "Alertas de Telegram activas": "Telegram alerts active",
   "Alertas de Telegram en pausa": "Telegram alerts paused",
   "Reactivar": "Resume",
