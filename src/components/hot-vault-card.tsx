@@ -48,7 +48,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
         <span className="rounded-full bg-hot-surface px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide">⚡ {t("Sé la casa")}</span>
         <span className="flex items-center gap-1 rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-live shadow-[0_0_6px_var(--live)] motion-reduce:animate-none" />{t("En vivo")}</span>
       </HotBanner>
-      <div className="flex flex-1 flex-col p-3.5">
+      <div className="flex flex-1 flex-col p-3">
         <p className="text-[11px] font-semibold text-hot-muted">{vault.pair}</p>
         <div className="flex flex-wrap items-baseline gap-x-2">
           <p key={apr ?? "x"} className="animate-count-pop bg-[image:var(--gradient-hot)] bg-clip-text font-display text-4xl font-black leading-tight text-transparent tabular-nums">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 0 })}%`}</p>
@@ -67,7 +67,6 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
           <button type="button" onClick={onDetails} className="h-11 rounded-xl border border-hot-foreground/25 bg-hot-foreground/10 px-3 text-sm font-semibold transition hover:bg-hot-foreground/20">{t("Detalles del pool")}</button>
           <button type="button" disabled={depositDisabled} onClick={onDeposit} className="hot-cta flex h-11 items-center justify-center gap-2 rounded-xl font-display text-base font-black text-hot-surface shadow-[var(--shadow-hot)] transition active:scale-95 disabled:opacity-70">{hasPosition ? <><Plus size={18} strokeWidth={3} />{t("Depositar más")}</> : t("Depositar")}</button>
         </div>
-        <p className="mt-2 text-[10px] leading-4 text-hot-muted">{vault.id === "dcty" ? t("No apuestas contra nadie: cobras intereses de los intercambios. Tu saldo sube y baja con el precio de DacityCoin. Moneda independiente sin vínculo con Rockstar Games.") : t("No apuestas contra nadie: cobras intereses de los intercambios. Tu saldo sube y baja con el precio de GTA6. Sin vínculo con Rockstar Games.")}</p>
       </div>
     </div>
   </article>;

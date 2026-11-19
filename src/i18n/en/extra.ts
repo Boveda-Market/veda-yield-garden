@@ -1636,4 +1636,5 @@ export const extra: Record<string, string> = {
   "$10 pueden ser $20 antes del café": "$10 could be $20 before your coffee",
   "Rondas cada 5 min · premio directo a tu saldo": "Rounds every 5 min · prize straight to your balance",
   "Probar una jugada": "Try a play",
+  "Bóvedas destacadas": "Featured vaults",
 };
