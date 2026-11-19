@@ -2,7 +2,7 @@ import { z } from "zod";
 import { solanaAddressSchema } from "@/lib/solana-data";
 import { progressiveFee, rotateFee } from "@/lib/fees";
 
-export const withdrawalInput = z.object({ wallet: solanaAddressSchema, position: solanaAddressSchema, vaultId: z.enum(["sol", "met", "gta6"]) }).strict();
+export const withdrawalInput = z.object({ wallet: solanaAddressSchema, position: solanaAddressSchema, vaultId: z.enum(["sol", "met", "gta6", "dcty"]) }).strict();
 export type WithdrawalInput = z.infer<typeof withdrawalInput>;
 export const WITHDRAWAL_PILOT = { wallet: "GZ3wFmrMdXJAigwooa8GTginE6tLeTzgGLbXhgYTp7HR", position: "2pugCpz54EYthPuCma2C7XBViHWeYWBrA5QALiPaXhvV", nft: "HRsmPKBacA87JcnvLiHhXsnFUJariZmsTzoANydrVZUv", vaultId: "sol" } as const;
 /** Exit share of unlocked liquidity: 100 closes the position, 1–99 keeps it open. */

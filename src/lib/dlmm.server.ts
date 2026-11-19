@@ -1,7 +1,7 @@
 import BN from "bn.js";
 import { Buffer } from "buffer";
 import { ComputeBudgetProgram, Keypair, PublicKey, TransactionMessage, VersionedTransaction, type AccountInfo, type AddressLookupTableAccount, type Connection, TransactionInstruction } from "@solana/web3.js";
-import { AccountLayout, TOKEN_PROGRAM_ID, createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, getAccount, getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { AccountLayout, ExtensionType, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, getAccount, getAssociatedTokenAddressSync, getExtensionTypes, getMint } from "@solana/spl-token";
 import { loadDlmmSdk } from "@/lib/dlmm-sdk.server";
 import { CHAIN_POOLS, USDC_MINT, tokenAmount, type ChainPoolConfig, type ChainPosition } from "@/lib/solana-data";
 import { FEE_WALLET, harvestFee } from "@/lib/fees";
@@ -24,6 +24,14 @@ type DlmmConfig = Extract<ChainPoolConfig, { kind: "dlmm" }>;
 export const dlmmConfigs = () => CHAIN_POOLS.filter((p): p is DlmmConfig => p.kind === "dlmm");
 export const dlmmConfig = (id: string) => dlmmConfigs().find((p) => p.id === id) ?? null;
 
+/** Token program of the vault token: classic SPL unless the config marks it Token-2022 (validated extensions only). */
+export const xProgram = (config: DlmmConfig) => ("tokenProgram" in config && config.tokenProgram === "token2022" ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID);
+/** Wallet account of the vault token, derived with its own token program. */
+const xAta = (config: DlmmConfig, owner: PublicKey) => getAssociatedTokenAddressSync(new PublicKey(config.mint), owner, false, xProgram(config));
+/** Token-2022 extensions that never change amounts or transfers (name/logo only). Anything else (fees, hooks, freeze defaults…) blocks the vault. */
+export const SAFE_TOKEN_2022_EXTENSIONS: readonly ExtensionType[] = [ExtensionType.MetadataPointer, ExtensionType.TokenMetadata];
+export const token2022ExtensionsSafe = (types: readonly ExtensionType[]) => types.every((t) => SAFE_TOKEN_2022_EXTENSIONS.includes(t));
+
 /** Opens the exact configured pool and re-validates mints, token programs, status and absence of farm rewards. */
 async function openPool(connection: Connection, config: DlmmConfig): Promise<{ sdk: Sdk; pool: Pool } | null> {
   const sdk = await loadDlmmSdk();
@@ -31,9 +39,15 @@ async function openPool(connection: Connection, config: DlmmConfig): Promise<{ s
   const lb = pool.lbPair;
   const valid = pool.pubkey.toBase58() === config.pool
     && lb.tokenXMint.toBase58() === config.mint && lb.tokenYMint.toBase58() === USDC_MINT
-    && pool.tokenX.owner.equals(TOKEN_PROGRAM_ID) && pool.tokenY.owner.equals(TOKEN_PROGRAM_ID)
+    && pool.tokenX.owner.equals(xProgram(config)) && pool.tokenY.owner.equals(TOKEN_PROGRAM_ID)
     && lb.rewardInfos.every((r) => r.mint.equals(PublicKey.default)) && lb.status === 0;
-  return valid ? { sdk, pool } : null;
+  if (!valid) return null;
+  if (xProgram(config).equals(TOKEN_2022_PROGRAM_ID)) {
+    // Live re-check: a transfer fee, hook or any other new extension would make amounts unverifiable.
+    const mint = await getMint(connection, lb.tokenXMint, "confirmed", TOKEN_2022_PROGRAM_ID).catch(() => null);
+    if (!mint || mint.decimals !== config.decimals || mint.freezeAuthority || !token2022ExtensionsSafe(getExtensionTypes(mint.tlvData))) return null;
+  }
+  return { sdk, pool };
 }
 
 /** Integer raw amount from the SDK's decimal strings (never rounds up). */
@@ -84,10 +98,11 @@ export async function readDlmmPositions(connection: Connection, wallet: PublicKe
 const MAINNET = "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d";
 const stripBudget = (ixs: TransactionInstruction[]) => ixs.filter((ix) => !ix.programId.equals(ComputeBudgetProgram.programId));
 type SimAccount = { owner: string; lamports: number; data: string[] } | null | undefined;
-function tokenBalance(account: SimAccount, mint: PublicKey, accountOwner: PublicKey) {
+function tokenBalance(account: SimAccount, mint: PublicKey, accountOwner: PublicKey, program: PublicKey = TOKEN_PROGRAM_ID) {
   if (!account || !account.data[0]) return 0n;
-  if (account.owner !== TOKEN_PROGRAM_ID.toBase58()) throw new Error("Programa de cuenta inválido");
-  const decoded = AccountLayout.decode(Buffer.from(account.data[0], "base64"));
+  if (account.owner !== program.toBase58()) throw new Error("Programa de cuenta inválido");
+  // Token-2022 accounts keep the classic 165-byte layout first; extensions (validated on the mint) follow it.
+  const decoded = AccountLayout.decode(Buffer.from(account.data[0], "base64").subarray(0, AccountLayout.span));
   if (!decoded.mint.equals(mint) || !decoded.owner.equals(accountOwner) || decoded.state !== 1) throw new Error("Cuenta de token inválida");
   return decoded.amount;
 }
@@ -113,7 +128,7 @@ export async function simulateDlmmDeposit(connection: Connection, input: Simulat
     if (!opened) return result(false, "Los tokens o programas de este pool no están validados.");
     const { sdk, pool } = opened;
     const owner = new PublicKey(input.wallet), usdc = new PublicKey(USDC_MINT), mintX = new PublicKey(config.mint);
-    const source = getAssociatedTokenAddressSync(usdc, owner), tokenX = getAssociatedTokenAddressSync(mintX, owner);
+    const source = getAssociatedTokenAddressSync(usdc, owner), tokenX = xAta(config, owner);
     const balance = await getAccount(connection, source).catch(() => null);
     if (!balance || balance.amount < amounts.gross) return result(false, "Tu saldo en dólares no alcanza para este depósito.");
     let existing: Awaited<ReturnType<typeof ownedPosition>> = null;
@@ -196,7 +211,7 @@ export async function simulateDlmmDeposit(connection: Connection, input: Simulat
     }
     // Network budget: only the refundable position, a missing token account and fees may cost reserve.
     const spent = BigInt(before[0]?.lamports ?? 0) - BigInt(ownerAccount?.lamports ?? 0);
-    const allowed = rent + (before[1] ? 0n : 2_039_280n) + (feeBefore === null && amounts.fee > 0n ? 2_039_280n : 0n) + 200_000n;
+    const allowed = rent + (before[1] ? 0n : xProgram(config).equals(TOKEN_2022_PROGRAM_ID) ? 2_074_080n : 2_039_280n) + (feeBefore === null && amounts.fee > 0n ? 2_039_280n : 0n) + 200_000n;
     const budgetVerified = spent <= allowed;
     const verified = feeVerified && positionVerified && budgetVerified;
     const prepared = verified && options.preparePilot ? (() => { if (positionKey) transaction.sign([positionKey]); return { transaction: Buffer.from(transaction.serialize()).toString("base64"), lastValidBlockHeight: block.lastValidBlockHeight, position: positionAddress.toBase58() }; })() : undefined;
@@ -224,12 +239,12 @@ export async function simulateDlmmHarvest(connection: Connection, input: Withdra
     if (!owned) return fail("La posición no pertenece a esta wallet y bóveda.");
     const data = owned.lb.positionData;
     if (data.feeX.isZero() && data.feeY.isZero()) return fail("Esta posición aún no tiene comisiones acumuladas para cosechar.");
-    const source = getAssociatedTokenAddressSync(usdc, owner), tokenX = getAssociatedTokenAddressSync(mintX, owner);
+    const source = getAssociatedTokenAddressSync(usdc, owner), tokenX = xAta(config, owner);
     const feeOwner = new PublicKey(FEE_WALLET), recipient = getAssociatedTokenAddressSync(usdc, feeOwner);
     if (recipient.equals(source)) return fail("La wallet de recaudo no puede usarse para esta comprobación de comisión.");
     const addresses = [source, tokenX, recipient, position, owner];
     const before = await connection.getMultipleAccountsInfo(addresses);
-    const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), xBefore = tokenBalance(asSim(before[1]), mintX, owner), feeBefore = tokenBalance(asSim(before[2]), usdc, feeOwner);
+    const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), xBefore = tokenBalance(asSim(before[1]), mintX, owner, xProgram(config)), feeBefore = tokenBalance(asSim(before[2]), usdc, feeOwner);
     stage = "Preparación de la cosecha";
     const claims = data.feeX.isZero() && data.feeY.isZero() ? [] : await pool.claimSwapFee({ owner, position: owned.lb });
     if (claims.length !== 1) return fail("Esta cosecha necesitaría varias firmas; no se preparó.");
@@ -246,7 +261,7 @@ export async function simulateDlmmHarvest(connection: Connection, input: Withdra
     stage = "Simulación de la cosecha";
     const claimed = await simulate(claimIxs);
     const usdcClaimed = tokenBalance(claimed.accounts[0], usdc, owner) - usdcBefore;
-    const tokenClaimed = tokenBalance(claimed.accounts[1], mintX, owner) - xBefore;
+    const tokenClaimed = tokenBalance(claimed.accounts[1], mintX, owner, xProgram(config)) - xBefore;
     if (usdcClaimed < 0n || tokenClaimed < 0n) return fail("La cosecha consumiría saldos previos; no se autoriza ninguna firma.");
     if (usdcClaimed === 0n && tokenClaimed === 0n) return fail("Esta posición aún no tiene comisiones acumuladas para cosechar.");
     // Tier by capital invested: USDC side plus GTA6 side valued at the active bin price (raw units).
@@ -267,7 +282,7 @@ export async function simulateDlmmHarvest(connection: Connection, input: Withdra
     const final = await simulate(instructions, computeLimit(sized.units));
     const feeDelta = tokenBalance(final.accounts[2], usdc, feeOwner) - feeBefore;
     const netDelta = tokenBalance(final.accounts[0], usdc, owner) - usdcBefore;
-    const tokenDelta = tokenBalance(final.accounts[1], mintX, owner) - xBefore;
+    const tokenDelta = tokenBalance(final.accounts[1], mintX, owner, xProgram(config)) - xBefore;
     const checks = { position: (final.accounts[3]?.lamports ?? 0) > 0, usdc: netDelta === breakdown.net, fee: feeDelta === breakdown.fee, token: tokenDelta === tokenClaimed };
     const success = Object.values(checks).every(Boolean);
     if (options.prepare && Date.now() - startedAt > 45_000) return fail("La preparación tardó demasiado. Repite la revisión.");
@@ -276,7 +291,7 @@ export async function simulateDlmmHarvest(connection: Connection, input: Withdra
       gross: tokenAmount(usdcClaimed.toString(), 6), fee: tokenAmount(feeDelta.toString(), 6), net: tokenAmount(netDelta.toString(), 6), feeRaw: breakdown.fee.toString(), netRaw: netDelta.toString(), tokenRaw: tokenClaimed.toString(),
       tokenSymbol: config.symbol, tokenAmount: tokenAmount(tokenClaimed.toString(), config.decimals),
       ...(success && options.prepare ? { prepared: { transaction: Buffer.from(final.tx.serialize()).toString("base64"), expiresAt: startedAt + 45_000, wallet: input.wallet, position: input.position } } : {}),
-      message: success ? "Cosecha verificada en simulación. Tu dinero sigue en la bóveda; la comisión por niveles se aplica a los dólares cosechados y la parte en GTA6 se entrega sin convertir." : "La cosecha no superó todas las comprobaciones. No se autoriza ninguna firma.",
+      message: success ? `Cosecha verificada en simulación. Tu dinero sigue en la bóveda; la comisión por niveles se aplica a los dólares cosechados y la parte en ${config.symbol} se entrega sin convertir.` : "La cosecha no superó todas las comprobaciones. No se autoriza ninguna firma.",
     };
   } catch (error) {
     log("harvest", stage, error);
@@ -306,12 +321,12 @@ export async function simulateDlmmWithdrawal(connection: Connection, input: With
     const owned = await ownedPosition(connection, sdk, pool, owner, position);
     if (!owned) return fail("La posición no pertenece a esta wallet y bóveda.");
     if (owned.locked) return fail("La posición tiene liquidez bloqueada; no se cerrará ni se prometerá recuperar su renta.");
-    const source = getAssociatedTokenAddressSync(usdc, owner), tokenX = getAssociatedTokenAddressSync(mintX, owner);
+    const source = getAssociatedTokenAddressSync(usdc, owner), tokenX = xAta(config, owner);
     const feeOwner = new PublicKey(FEE_WALLET), recipient = getAssociatedTokenAddressSync(usdc, feeOwner);
     if (recipient.equals(source)) return fail("La wallet de recaudo no puede usarse para esta comprobación de comisión.");
     const addresses = [source, tokenX, recipient, position, owner];
     const before = await connection.getMultipleAccountsInfo(addresses);
-    const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), xBefore = tokenBalance(asSim(before[1]), mintX, owner), feeBefore = tokenBalance(asSim(before[2]), usdc, feeOwner);
+    const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), xBefore = tokenBalance(asSim(before[1]), mintX, owner, xProgram(config)), feeBefore = tokenBalance(asSim(before[2]), usdc, feeOwner);
     stage = "Preparación del cierre";
     const { lowerBinId, upperBinId } = owned.lb.positionData;
     const removals = await pool.removeLiquidity({ user: owner, position, fromBinId: lowerBinId, toBinId: upperBinId, bps: new BN(percent * 100), shouldClaimAndClose: full });
@@ -330,7 +345,7 @@ export async function simulateDlmmWithdrawal(connection: Connection, input: With
     };
     stage = "Simulación del cierre";
     const removed = await simulate(removalIxs);
-    const xReceived = tokenBalance(removed.accounts[1], mintX, owner) - xBefore;
+    const xReceived = tokenBalance(removed.accounts[1], mintX, owner, xProgram(config)) - xBefore;
     const yReceived = tokenBalance(removed.accounts[0], usdc, owner) - usdcBefore;
     if (xReceived < 0n || yReceived < 0n) return fail("El retiro consumió tokens ajenos a la posición.");
     // Removal has no on-chain minimum; protect a conservative share of what the simulation released.
@@ -365,7 +380,7 @@ export async function simulateDlmmWithdrawal(connection: Connection, input: With
     const netDelta = tokenBalance(final.accounts[0], usdc, owner) - usdcBefore;
     const realizedGross = netDelta + feeDelta;
     if (netDelta < 0n || feeDelta < 0n || realizedGross <= 0n) return fail("La liquidación no conserva los saldos de USDC anteriores; no se autoriza ninguna firma.");
-    const remainingToken = tokenBalance(final.accounts[1], mintX, owner) - xBefore;
+    const remainingToken = tokenBalance(final.accounts[1], mintX, owner, xProgram(config)) - xBefore;
     const closed = full ? !final.accounts[3] || final.accounts[3]?.lamports === 0 : (final.accounts[3]?.lamports ?? 0) > 0;
     const rentLamports = full ? BigInt(before[3]?.lamports ?? 0) : 0n;
     const newAccountRent = [0, 1, 2].reduce((sum, i) => sum + BigInt(before[i] ? 0 : final.accounts[i]?.lamports ?? 0), 0n);
@@ -397,10 +412,10 @@ export async function prepareDlmmCompound(connection: Connection, input: Compoun
     if (owned.locked) return fail("Esta posición está bloqueada y no admite reinversión.");
     const { lowerBinId, upperBinId } = owned.lb.positionData, active = pool.lbPair.activeId;
     if (active < lowerBinId || active >= upperBinId) return fail("El precio salió del rango de tu posición; tus ganancias quedan en tu wallet.");
-    const source = getAssociatedTokenAddressSync(usdc, owner), tokenX = getAssociatedTokenAddressSync(mintX, owner);
+    const source = getAssociatedTokenAddressSync(usdc, owner), tokenX = xAta(config, owner);
     const addresses = [source, tokenX, position];
     const before = await connection.getMultipleAccountsInfo(addresses);
-    const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), tokenBefore = tokenBalance(asSim(before[1]), mintX, owner);
+    const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), tokenBefore = tokenBalance(asSim(before[1]), mintX, owner, xProgram(config));
     const usdcRaw = BigInt(input.usdcRaw) <= usdcBefore ? BigInt(input.usdcRaw) : usdcBefore;
     const tokenRaw = BigInt(input.tokenRaw) <= tokenBefore ? BigInt(input.tokenRaw) : tokenBefore;
     if (usdcRaw === 0n || tokenRaw === 0n) return fail("Necesitas ambas monedas cosechadas en tu wallet para reinvertir.");
@@ -416,7 +431,7 @@ export async function prepareDlmmCompound(connection: Connection, input: Compoun
     };
     const sized = await simulate(ixs);
     const final = await simulate(ixs, computeLimit(sized.units));
-    const usdcSpent = usdcBefore - tokenBalance(final.accounts[0], usdc, owner), tokenSpent = tokenBefore - tokenBalance(final.accounts[1], mintX, owner);
+    const usdcSpent = usdcBefore - tokenBalance(final.accounts[0], usdc, owner), tokenSpent = tokenBefore - tokenBalance(final.accounts[1], mintX, owner, xProgram(config));
     if ((final.accounts[2]?.lamports ?? 0) <= 0 || !compoundSpendValid(usdcSpent, tokenSpent, usdcRaw, tokenRaw)) return fail("La reinversión no superó las comprobaciones. No se pidió ninguna firma.");
     if (Date.now() - startedAt > 45_000) return fail("La preparación tardó demasiado. Repite la revisión.");
     return {
@@ -459,14 +474,14 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     const xAll = rawFloor(data.totalXAmount) + BigInt(data.feeX.toString()), yAll = rawFloor(data.totalYAmount) + BigInt(data.feeY.toString());
     if (xAll === 0n && yAll === 0n) return fail("Esta posición no tiene saldo para rebalancear.");
     const price = Number(sdk.getPriceOfBinByBinId(active, pool.lbPair.binStep).toString());
-    const usdcAta = getAssociatedTokenAddressSync(usdc, owner), tokenX = getAssociatedTokenAddressSync(mintX, owner);
+    const usdcAta = getAssociatedTokenAddressSync(usdc, owner), tokenX = xAta(config, owner);
     const feeAta = getAssociatedTokenAddressSync(usdc, new PublicKey(FEE_WALLET));
     const addresses = [usdcAta, tokenX, position, owner, feeAta];
     const before = await connection.getMultipleAccountsInfo(addresses);
     // Tiered harvest fee on the claimed USDC (tier by harvested amount); skipped if the treasury USDC account is missing.
     const positionUnits = BigInt(Math.floor(Number(xAll) * price)) + yAll;
     const bovedaFee = before[4] ? harvestFee(BigInt(data.feeY.toString()), positionUnits) : 0n;
-    const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), xBefore = tokenBalance(asSim(before[1]), mintX, owner);
+    const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), xBefore = tokenBalance(asSim(before[1]), mintX, owner, xProgram(config));
     // Autopilot: leftover vault tokens already in the wallet join the re-centred position (never USDC, never SOL).
     const absorbedX = options.absorbWalletToken ? xBefore : 0n;
     // Autopilot: USDC just converted from verified leftovers joins too (capped to what the wallet holds).
@@ -520,7 +535,7 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     stage = "Simulación del rebalanceo";
     const sized = await simulate();
     const final = await simulate(computeLimit(sized.units));
-    const usdcLeft = tokenBalance(final.accounts[0], usdc, owner) - (usdcBefore - absorbedY), tokenLeft = tokenBalance(final.accounts[1], mintX, owner) - (xBefore - absorbedX);
+    const usdcLeft = tokenBalance(final.accounts[0], usdc, owner) - (usdcBefore - absorbedY), tokenLeft = tokenBalance(final.accounts[1], mintX, owner, xProgram(config)) - (xBefore - absorbedX);
     const pa = final.accounts[2];
     let rangeOk = false;
     if (pa?.data[0] && pa.owner === pool.program.programId.toBase58()) {

@@ -3,6 +3,8 @@ import dobleLogo from "@/assets/doble-o-nada-logo.png";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { DobleBannerSlide } from "@/components/doble-banners";
+import { DctyBannerSlide } from "@/components/dcty-banners";
+import { vaultSkin } from "@/components/vault-skin";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { useWalletVaults } from "@/components/wallet-positions";
@@ -17,12 +19,10 @@ import { useT } from "@/lib/i18n";
 import { VAULTS } from "@/lib/vaults";
 import { DuelLines, Gta6RotatingBanner } from "@/components/home-gta6";
 
-const gta6 = VAULTS.find((v) => v.id === "gta6");
-
-const STEPS = 6;
+const STEPS = 9;
 const STEP_KEY = "boveda:wallet-banner";
 
-/** Top rotation step: GTA6 and Doble o Nada slides alternate every 7 s (GTA6 on even steps), starting on the next one each visit. */
+/** Top rotation step: GTA6, Doble o Nada and DCTY slides take turns every 7 s (step % 3), starting on the next one each visit. */
 function useBannerStep() {
   const [step, setStep] = useState(0);
   useEffect(() => {
@@ -44,37 +44,47 @@ function useBannerStep() {
 export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
   const t = useT();
   const vaults = useWalletVaults(wallet ?? "");
-  const mine = wallet && vaults.data?.success ? vaults.data.data.positions.find((p) => p.vaultId === "gta6") : undefined;
-  const [open, setOpen] = useState(false);
+  const all = wallet && vaults.data?.success ? vaults.data.data.positions : [];
+  const mine = all.find((p) => p.vaultId === "gta6"), mineDcty = all.find((p) => p.vaultId === "dcty");
+  // Which high-octane vault popup is open (GTA6 or DCTY); null when closed.
+  const [openId, setOpenId] = useState<string | null>(null);
+  const open = openId !== null, setOpen = (v: boolean) => { if (!v) setOpenId(null); };
+  const openVault = VAULTS.find((v) => v.id === openId);
   const [harvest, setHarvest] = useState<{ position: string; vaultId: OperableVault; compound?: boolean } | null>(null);
   const [withdrawal, setWithdrawal] = useState<{ position: string; vaultId: OperableVault; migrateTo?: Vault; rotate?: boolean } | null>(null);
   const [deposit, setDeposit] = useState<{ vault: Vault; position?: string; amount?: string; migrate?: boolean } | null>(null);
-  const mineAll = wallet && vaults.data?.success ? vaults.data.data.positions.filter((p) => p.vaultId === "gta6") : [];
+  const mineAll = all.filter((p) => p.vaultId === openId);
   // Every action closes the popup first so only one sheet is ever on screen.
   const act = (p: ChainPosition, a: "harvest" | "exit" | "compound") => { if (!isOperableVault(p.vaultId)) return; setOpen(false); if (a === "exit") setWithdrawal({ position: p.address, vaultId: p.vaultId }); else setHarvest({ position: p.address, vaultId: p.vaultId, compound: a === "compound" }); };
   const move = (p: ChainPosition, target: Vault, rotate = false) => { if (!isOperableVault(p.vaultId) || !isOperableVault(target.id) || p.locked || (target.id === p.vaultId && !rotate)) return; setOpen(false); setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target, ...(rotate ? { rotate: true } : {}) }); };
   const refetch = () => void vaults.refetch();
+  const ctaFor = (m: ChainPosition | undefined) => m ? <><span>{m.outOfRange ? <><Zap size={14} aria-hidden className="mr-1 inline" />{t("Rebalancear")}</> : <>👉 {t("Oprime aquí para ver ganancias")}</>}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : <><span>👉 {t("Oprime aquí para depositar")}</span><ChevronRight size={16} aria-hidden /></>;
   const cta = mine ? <><span>{mine.outOfRange ? <><Zap size={14} aria-hidden className="mr-1 inline" />{t("Rebalancear")}</> : <>👉 {t("Oprime aquí para ver ganancias")}</>}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : <><span>👉 {t("Oprime aquí para depositar")}</span><ChevronRight size={16} aria-hidden /></>;
   const sub = t("Intereses con el volumen de GTA6");
   const step = useBannerStep();
-  const isGta = step % 2 === 0;
+  const kind = step % 3, isGta = kind === 0, isDoble = kind === 1, isDcty = kind === 2;
   const layer = (on: boolean) => `col-start-1 row-start-1 transition-opacity duration-700 ${on ? "opacity-100" : "pointer-events-none opacity-0"}`;
-  const gtaBanner = <Gta6RotatingBanner cta={cta} sub={sub} index={Math.floor(step / 2)} dots={false} />;
+  const gtaBanner = <Gta6RotatingBanner cta={cta} sub={sub} index={Math.floor(step / 3)} dots={false} />;
+  const dctyBanner = <DctyBannerSlide index={Math.floor(step / 3)} cta={ctaFor(mineDcty)} />;
   return <section aria-label={t("Bóveda GTA6")}>
     <div className="grid">
       <div className={layer(isGta)} inert={!isGta}>
-        {mine ? <button type="button" onClick={() => setOpen(true)} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{gtaBanner}</button>
+        {mine ? <button type="button" onClick={() => setOpenId("gta6")} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{gtaBanner}</button>
         : <Link to="/app" className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{gtaBanner}</Link>}
       </div>
-      <div className={layer(!isGta)} inert={isGta}>
-        <Link to="/mercados" className="duel-ring block h-full rounded-2xl p-[2px] shadow-[var(--shadow-duel)] transition-transform active:scale-[0.98]"><DobleBannerSlide index={Math.floor(step / 2)} /></Link>
+      <div className={layer(isDoble)} inert={!isDoble}>
+        <Link to="/mercados" className="duel-ring block h-full rounded-2xl p-[2px] shadow-[var(--shadow-duel)] transition-transform active:scale-[0.98]"><DobleBannerSlide index={Math.floor(step / 3)} /></Link>
+      </div>
+      <div className={`${layer(isDcty)} vault-dcty`} inert={!isDcty}>
+        {mineDcty ? <button type="button" onClick={() => setOpenId("dcty")} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{dctyBanner}</button>
+        : <Link to="/app" className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{dctyBanner}</Link>}
       </div>
     </div>
-    <div aria-hidden className="mt-2 flex justify-center gap-1">{Array.from({ length: STEPS }, (_, k) => <span key={k} className={`h-1.5 rounded-full transition-all ${k === step ? "w-4" : "w-1.5 opacity-40"} ${k % 2 === 0 ? "bg-hot" : "bg-bolt-neon"}`} />)}</div>
+    <div aria-hidden className="mt-2 flex justify-center gap-1">{Array.from({ length: STEPS }, (_, k) => <span key={k} className={`h-1.5 rounded-full transition-all ${k === step ? "w-4" : "w-1.5 opacity-40"} ${k % 3 === 0 ? "bg-hot" : k % 3 === 1 ? "bg-bolt-neon" : "bg-dcty"}`} />)}</div>
     <Dialog open={open} onOpenChange={setOpen}>
-      <ActionSheetContent closeLabel={t("Cerrar")}>
-        <DialogHeader className="pr-10 text-left"><DialogTitle className="font-display text-xl">{t("Tu Bóveda GTA6")}</DialogTitle><DialogDescription className="sr-only">{t("Ver ganancias")}</DialogDescription></DialogHeader>
-        {open && wallet && <RealPositions bare showHarvestBanner={false} positions={mineAll} onAction={act} onMigrate={(p, v) => move(p, v)} onRotate={(p, v) => move(p, v, true)} onDeposit={(p) => { if (!gta6) return; setOpen(false); setDeposit({ vault: gta6, position: p.address }); }} />}
+      <ActionSheetContent closeLabel={t("Cerrar")} className={vaultSkin(openId ?? undefined)}>
+        <DialogHeader className="pr-10 text-left"><DialogTitle className="font-display text-xl">{openId === "dcty" ? t("Tu Bóveda DCTY") : t("Tu Bóveda GTA6")}</DialogTitle><DialogDescription className="sr-only">{t("Ver ganancias")}</DialogDescription></DialogHeader>
+        {open && wallet && <RealPositions bare showHarvestBanner={false} positions={mineAll} onAction={act} onMigrate={(p, v) => move(p, v)} onRotate={(p, v) => move(p, v, true)} onDeposit={(p) => { if (!openVault) return; setOpen(false); setDeposit({ vault: openVault, position: p.address }); }} />}
       </ActionSheetContent>
     </Dialog>
     {wallet && harvest && <HarvestDialog wallet={wallet} position={harvest.position} vaultId={harvest.vaultId} compound={harvest.compound} onClose={() => { setHarvest(null); refetch(); }} />}

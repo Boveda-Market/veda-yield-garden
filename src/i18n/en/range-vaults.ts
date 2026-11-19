@@ -237,4 +237,15 @@ export const rangeVaults: Record<string, string> = {
   "Gráfica no disponible por ahora": "Chart unavailable right now",
   "El precio de {s} sube y baja con la oferta y la demanda, pero cada intercambio genera intereses en dólares para la bóveda. La volatilidad es el motor que produce tus ganancias.": "{s}'s price moves up and down with supply and demand, but every trade generates dollar interest for the vault. Volatility is the engine behind your earnings.",
   "Intereses del pool completo, estimados con su volumen. Tu parte depende de tu depósito.": "Whole-pool interest, estimated from its volume. Your share depends on your deposit.",
+  // DCTY vault (DacityCoin)
+  "Bóveda DCTY": "DCTY Vault",
+  "Tu Bóveda DCTY": "Your DCTY Vault",
+  "Intereses brutales impulsados por el volumen de DacityCoin, la cripto que viste en GTA 6. Tu dinero trabaja concentrado en la zona caliente de intercambio: mientras el precio esté en rango, cosechas a máxima velocidad. Si el mercado se mueve fuerte, el piloto automático rebalancea y reinvierte tus ganancias para mantenerte en la jugada.": "Brutal interest powered by DacityCoin volume, the crypto you saw in GTA 6. Your money works concentrated in the hot trading zone: while the price is in range, you harvest at full speed. If the market moves hard, Autopilot rebalances and reinvests your earnings to keep you in the game.",
+  "Moneda comunitaria independiente de alta volatilidad, sin vínculo con Rockstar Games ni Take-Two Interactive.": "Independent, high-volatility community coin, not affiliated with Rockstar Games or Take-Two Interactive.",
+  "No apuestas contra nadie: cobras intereses de los intercambios. Tu saldo sube y baja con el precio de DacityCoin. Moneda independiente sin vínculo con Rockstar Games.": "You don't bet against anyone: you earn interest from trades. Your balance rises and falls with the DacityCoin price. Independent coin, not affiliated with Rockstar Games.",
+  "Estás a un paso de comenzar. Deposita dólares para entrar a la {v}.": "You are one step away. Deposit dollars to enter the {v}.",
+  "Las acrobacias solo fueron el comienzo.": "The stunts were just the beginning.",
+  "La cripto que viste en GTA 6, ahora cobrando para ti.": "The crypto you saw in GTA 6, now earning for you.",
+  "Intereses de cada intercambio": "Interest from every trade",
+  "Sé la casa en cada intercambio.": "Be the house on every trade.",
 };

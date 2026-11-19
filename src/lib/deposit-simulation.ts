@@ -8,7 +8,7 @@ export const depositAmountSchema = z.string().regex(/^\d{1,5}(\.\d{1,6})?$/).ref
 
 export const simulationInput = z.object({
   wallet: solanaAddressSchema,
-  vaultId: z.enum(["sol", "met", "gta6"]),
+  vaultId: z.enum(["sol", "met", "gta6", "dcty"]),
   amount: depositAmountSchema,
   position: solanaAddressSchema.optional(),
   /** Moving between vaults: no BÓVEDA entry fee. */

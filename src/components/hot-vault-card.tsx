@@ -1,10 +1,8 @@
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { useI18n, useT } from "@/lib/i18n";
-// Title lettering is pre-rendered artwork (classic GTA-style display face), never shipped as a webfont.
-import titleEs from "@/assets/gta6-vault-title.png";
-import titleEn from "@/assets/gta6-vault-title-en.png";
+import { useT } from "@/lib/i18n";
+import { DctySkyline, VaultTitle, vaultSkin } from "@/components/vault-skin";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { fetchPoolStats } from "@/lib/pool-stats";
 import type { Vault } from "@/lib/vaults";
@@ -25,11 +23,9 @@ export function Sunset() {
 
 /** Sunset banner with the GTA-style title, shared by the vault card and the active portfolio card. */
 export function HotBanner({ vault, children, className = "" }: { vault: Vault; children?: ReactNode; className?: string }) {
-  const t = useT();
-  const { lang } = useI18n();
-  return <div className={`relative flex items-center justify-between gap-3 overflow-hidden bg-[image:var(--gradient-hot)] px-4 py-3 text-hot-foreground ${className}`}>
-    <Sunset />
-    <h3 className="relative min-w-0"><img src={lang === "en" ? titleEn : titleEs} alt={t(vault.name)} width={lang === "en" ? 935 : 1074} height={lang === "en" ? 233 : 228} className="h-8 w-auto max-w-full -rotate-2 sm:h-9" /></h3>
+  return <div className={`relative flex items-center justify-between gap-3 overflow-hidden bg-[image:var(--gradient-hot)] px-4 py-3 text-hot-foreground ${vaultSkin(vault.id)} ${className}`}>
+    {vault.id === "dcty" ? <DctySkyline /> : <Sunset />}
+    <h3 className="relative min-w-0"><VaultTitle vault={vault} className="h-8 sm:h-9" /></h3>
     {children && <div className="relative flex shrink-0 flex-col items-end gap-1">{children}</div>}
   </div>;
 }
@@ -46,7 +42,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
   const buys = s.data?.buys24h ?? null, sells = s.data?.sells24h ?? null;
   const total = buys != null && sells != null ? buys + sells : null;
   const steps = [["💵", "Depositas"], ["⚡", "Piloto automático"], ["📈", "Ganancias automáticas"]] as const;
-  return <article className="hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)]">
+  return <article className={`hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)] ${vaultSkin(vault.id)}`}>
     <div className="relative isolate flex h-full flex-col overflow-hidden rounded-[calc(1rem-2px)] bg-[image:var(--gradient-hot-surface)] text-hot-foreground">
       <HotBanner vault={vault}>
         <span className="rounded-full bg-hot-surface px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide">⚡ {t("Sé la casa")}</span>
@@ -71,7 +67,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
           <button type="button" onClick={onDetails} className="h-11 rounded-xl border border-hot-foreground/25 bg-hot-foreground/10 px-3 text-sm font-semibold transition hover:bg-hot-foreground/20">{t("Detalles del pool")}</button>
           <button type="button" disabled={depositDisabled} onClick={onDeposit} className="hot-cta flex h-11 items-center justify-center gap-2 rounded-xl font-display text-base font-black text-hot-surface shadow-[var(--shadow-hot)] transition active:scale-95 disabled:opacity-70">{hasPosition ? <><Plus size={18} strokeWidth={3} />{t("Depositar más")}</> : t("Depositar")}</button>
         </div>
-        <p className="mt-2 text-[10px] leading-4 text-hot-muted">{t("No apuestas contra nadie: cobras intereses de los intercambios. Tu saldo sube y baja con el precio de GTA6. Sin vínculo con Rockstar Games.")}</p>
+        <p className="mt-2 text-[10px] leading-4 text-hot-muted">{vault.id === "dcty" ? t("No apuestas contra nadie: cobras intereses de los intercambios. Tu saldo sube y baja con el precio de DacityCoin. Moneda independiente sin vínculo con Rockstar Games.") : t("No apuestas contra nadie: cobras intereses de los intercambios. Tu saldo sube y baja con el precio de GTA6. Sin vínculo con Rockstar Games.")}</p>
       </div>
     </div>
   </article>;

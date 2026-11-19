@@ -23,6 +23,7 @@ import { MigratePicker } from "./migrate-picker";
 import { canHarvest } from "@/lib/harvest";
 import { HotBanner } from "./hot-vault-card";
 import { HotZoneMeter } from "./hot-zone-meter";
+import { vaultSkin } from "./vault-skin";
 
 import { useAutopilot } from "@/components/autopilot-toggle";
 import { showManualCompound } from "@/lib/autopilot";
@@ -69,7 +70,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
         {!isOperableVault(p.vaultId) && <p className="mt-3 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
       </>;
       // High-octane vaults get the animated neon frame and sunset banner; actions stay identical to every other vault.
-      return hot ? <article key={p.address} data-vault={p.vaultId} className="scroll-mt-24 hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)]"><div className="h-full overflow-hidden rounded-[calc(1rem-2px)] bg-card p-5">{body}</div></article> : <article key={p.address} data-vault={p.vaultId} className="scroll-mt-24 rounded-lg border border-border bg-card p-5">{body}</article>;
+      return hot ? <article key={p.address} data-vault={p.vaultId} className={`scroll-mt-24 hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)] ${vaultSkin(p.vaultId)}`}><div className="h-full overflow-hidden rounded-[calc(1rem-2px)] bg-card p-5">{body}</div></article> : <article key={p.address} data-vault={p.vaultId} className="scroll-mt-24 rounded-lg border border-border bg-card p-5">{body}</article>;
     })}</div>
     <p className="mt-4 text-xs leading-5 text-muted-foreground">{t("Valores en dólares estimados al precio actual; pueden cambiar antes de firmar.")} {t("El contador en vivo estima cómo crecen tus ganancias con los intereses recientes de la bóveda; el monto exacto se confirma al cosechar.")}</p>
   </section>;

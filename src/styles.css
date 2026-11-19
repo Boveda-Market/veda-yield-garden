@@ -71,6 +71,7 @@
   --color-strike: var(--strike);
   --color-hot: var(--hot);
   --color-hot-2: var(--hot-2);
+  --color-dcty: var(--dcty);
   --color-bolt: var(--bolt);
   --color-bolt-ink: var(--bolt-ink);
   --color-bolt-neon: var(--bolt-neon);
@@ -107,6 +108,8 @@
   /* High-octane (GTA6) vault: neon night palette, identical in Día and Noche so the card always pops. */
   --hot: oklch(0.68 0.26 355);
   --hot-2: oklch(0.8 0.17 60);
+  /* DCTY accent (electric cyan) for elements outside the .vault-dcty skin, e.g. rotation dots. */
+  --dcty: oklch(0.84 0.14 205);
   --bolt: oklch(0.88 0.18 95);
   --bolt-ink: oklch(0.14 0.01 150);
   --bolt-neon: oklch(0.8 0.2 150);
@@ -264,7 +267,7 @@
 
 /* High-octane vault card: slow neon ring + shimmer on the main button. */
 @keyframes hot-shift { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
-.hot-ring { background-image: linear-gradient(90deg, var(--hot-2), var(--hot), oklch(0.66 0.2 300), var(--hot-2)); background-size: 200% 100%; animation: hot-shift 6s linear infinite; }
+.hot-ring { background-image: linear-gradient(90deg, var(--hot-2), var(--hot), var(--hot-3, oklch(0.66 0.2 300)), var(--hot-2)); background-size: 200% 100%; animation: hot-shift 6s linear infinite; }
 .duel-ring { background-image: linear-gradient(90deg, var(--primary), oklch(0.85 0.2 125), var(--destructive), var(--primary)); background-size: 200% 100%; animation: hot-shift 5s linear infinite; }
 .hot-cta { background-image: linear-gradient(90deg, var(--hot-2), var(--hot), var(--hot-2)); background-size: 200% 100%; animation: hot-shift 3s linear infinite; }
 .invite-ring { background-image: linear-gradient(90deg, var(--invite), var(--invite-2), var(--invite)); background-size: 200% 100%; animation: hot-shift 5s linear infinite; }
@@ -338,3 +341,21 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
 .reinvest-attn::after { content: ""; position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--primary) 35%, transparent), transparent); animation: cta-shimmer 3.5s ease-in-out infinite; pointer-events: none; }
 @keyframes reinvest-pulse { 0%,70%,100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; } 85% { transform: scale(1.03); box-shadow: 0 0 14px 1px color-mix(in oklab, var(--primary) 40%, transparent); } }
 @media (prefers-reduced-motion: reduce) { .reinvest-attn, .reinvest-attn::after { animation: none; } }
+
+/* DCTY vault skin: DacityCoin night city (deep navy, hot pink, electric cyan). Re-declares the derived gradients/shadow
+   because custom properties referencing --hot are resolved where they are declared (:root). Same in Día and Noche. */
+.vault-dcty {
+  --hot: oklch(0.7 0.27 350);
+  --hot-2: oklch(0.84 0.14 205);
+  --hot-3: oklch(0.62 0.24 295);
+  --hot-surface: oklch(0.16 0.045 275);
+  --hot-foreground: oklch(0.98 0.01 260);
+  --hot-muted: oklch(0.8 0.05 260);
+  --gradient-hot: linear-gradient(100deg, var(--hot-2), var(--hot-3) 45%, var(--hot));
+  --gradient-hot-surface: radial-gradient(110% 90% at 100% 0%, oklch(0.45 0.22 350 / 0.5), transparent 55%), radial-gradient(90% 80% at 0% 100%, oklch(0.5 0.14 205 / 0.4), transparent 60%), linear-gradient(var(--hot-surface), var(--hot-surface));
+  --shadow-hot: 0 18px 50px -18px oklch(0.7 0.27 350 / 0.7);
+}
+@keyframes dcty-drive { from { transform: translateX(-30%); } to { transform: translateX(130%); } }
+.dcty-boat { animation: dcty-drive 9s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .dcty-boat { animation: none; } }
+
