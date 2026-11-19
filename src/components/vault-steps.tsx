@@ -5,11 +5,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 /** High-contrast 3-step guide plus a simple "how it works" dialog for vaults. */
 export function VaultSteps({ className = "" }: { className?: string }) {
   const t = useT();
-  const steps = [t("Elige tu bóveda: SOL o MET"), t("Deposita tus USDC, desde 1 USDC"), t("¡Cosecha ganancias o retira cuando quieras!")];
+  const steps = [t("Elige tu bóveda: GTA6, SOL o MET"), t("Deposita en dólares, desde $1"), t("¡Cosecha ganancias o retira cuando quieras!")];
   const points = [
-    [t("Tu dinero trabaja"), t("Tus USDC se suman a una bóveda donde otras personas cambian monedas.")],
-    [t("Ganas intereses"), t("Cada cambio paga una comisión y recibes tu parte proporcional.")],
-    [t("Cosechar o liquidar"), t("Cosechar cobra solo tus ganancias y tu depósito sigue trabajando. Liquidar retira tu dinero a USDC.")],
+    [t("Tu dinero trabaja"), t("Tus dólares se suman a una bóveda donde otras personas cambian monedas.")],
+    [t("Ganas intereses"), t("Cada intercambio genera intereses y recibes tu parte proporcional.")],
+    [t("Cosechar o liquidar"), t("Cosechar cobra solo tus ganancias y tu depósito sigue trabajando. Liquidar retira tu capital e intereses en dólares a tu billetera.")],
     [t("Tú tienes el control"), t("Sin plazos de permanencia. Revisas y firmas cada operación. Las ganancias no están garantizadas y puedes perder dinero.")],
   ];
   return <div className={`space-y-3 ${className}`}>

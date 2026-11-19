@@ -45,11 +45,11 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
   const apr = y.data?.apr;
   const buys = s.data?.buys24h ?? null, sells = s.data?.sells24h ?? null;
   const total = buys != null && sells != null ? buys + sells : null;
-  const steps = [["💵", "Depositas"], ["📲", "Alerta al móvil"], ["🎯", "Rebalanceas al instante"]] as const;
+  const steps = [["💵", "Depositas"], ["⚡", "Piloto automático"], ["📈", "Ganancias automáticas"]] as const;
   return <article className="hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)]">
     <div className="relative isolate flex h-full flex-col overflow-hidden rounded-[calc(1rem-2px)] bg-[image:var(--gradient-hot-surface)] text-hot-foreground">
       <HotBanner vault={vault}>
-        <span className="rounded-full bg-hot-surface px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide">🎰 {t("Sé la casa")}</span>
+        <span className="rounded-full bg-hot-surface px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide">⚡ {t("Sé la casa")}</span>
         <span className="flex items-center gap-1 rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-live shadow-[0_0_6px_var(--live)] motion-reduce:animate-none" />{t("En vivo")}</span>
       </HotBanner>
       <div className="flex flex-1 flex-col p-3.5">
@@ -59,7 +59,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
           <p className="text-[11px] font-medium text-hot-muted">{y.isPending ? t("Consultando el pool…") : t("APR estimado · intereses 24 h")}</p>
         </div>
         <dl className="mt-2 grid grid-cols-3 gap-1.5">
-          {[[t("Intereses hoy"), usd(y.data?.fees24h)], [t("Intercambios hoy"), num(total)], [t("Poseedores"), num(y.data?.holders)]].map(([k, v]) => <div key={k} className="rounded-lg bg-hot-surface/60 px-2 py-1.5">
+          {[[t("Intereses hoy"), usd(y.data?.fees24h)], [t("Intercambios hoy"), num(total)], [t("Holders"), num(y.data?.holders)]].map(([k, v]) => <div key={k} className="rounded-lg bg-hot-surface/60 px-2 py-1.5">
             <dt className="truncate text-[9px] font-semibold uppercase tracking-wide text-hot-muted">{k}</dt>
             <dd className="font-display text-sm font-bold tabular-nums">{v}</dd>
           </div>)}
