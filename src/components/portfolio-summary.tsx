@@ -1,3 +1,5 @@
+import { AnimatedMoney } from "@/components/ui/animated-money";
+import { earningRatePerMs } from "@/lib/live-earnings";
 import { Layers, PieChart, Sparkles, Sprout, TrendingUp } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { ChainPosition } from "@/lib/solana-data";
@@ -34,6 +36,8 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
   const total = slices.reduce((s, x) => s + x.value, 0);
   const vaultTotal = byVault.reduce((s, x) => s + x.value, 0);
   const aprWeighted = vaultTotal > 0 && byVault.every((x) => x.apr !== null) ? byVault.reduce((s, x) => s + x.value * (x.apr ?? 0), 0) / vaultTotal : null;
+  const liveRate = rows.reduce((s, r) => s + (r.p.locked || r.p.outOfRange ? 0 : earningRatePerMs(r.value, r.apr)), 0);
+  const anim = (n: number, rate = 0) => hidden ? MASK : <AnimatedMoney value={n} ratePerMs={rate} prefix="" format={rate > 0 ? undefined : formatUsd} />;
   const pnl = history.pnl ? Number(history.pnl.replace(/,/g, "")) : null;
   const tile = "rounded-2xl border border-border bg-card p-4";
   const label = "flex items-center gap-1.5 text-xs text-muted-foreground";
@@ -45,7 +49,7 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
 
     <div className={`${tile} mt-4`}>
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div><p className={label}><PieChart size={14} />{t("Capital trabajando")}</p><p className="mt-1 font-display text-3xl font-semibold tabular-nums">{total > 0 ? money(total) : "—"}</p></div>
+        <div><p className={label}><PieChart size={14} />{t("Capital trabajando")}</p><p className="mt-1 font-display text-3xl font-semibold tabular-nums">{total > 0 ? anim(total) : "—"}</p></div>
         {aprWeighted !== null && <div className="text-right"><p className="text-xs text-muted-foreground">{t("APR promedio")}</p><p className="font-display text-2xl font-bold tabular-nums text-primary">{aprWeighted.toFixed(1)}%</p></div>}
       </div>
       {total > 0 ? <>
@@ -57,12 +61,12 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
     <div className="mt-3 grid grid-cols-2 gap-3">
       <div className={tile}>
         <p className={label}><Sprout size={14} />{t("Por cosechar")}</p>
-        <p className="mt-2 font-display text-xl font-semibold tabular-nums text-primary">{totalFees > 0 ? `+${money(totalFees)}` : money(0)}</p>
+        <p className="mt-2 font-display text-xl font-semibold tabular-nums text-primary">{totalFees > 0 ? <>+${anim(totalFees, liveRate)}</> : money(0)}</p>
         {top && canHarvest(top.fees) ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvest(top.p)}>{t("Cosechar ahora")}</Button> : <p className="mt-1 text-xs text-muted-foreground">{t("Se activa desde $0.50.")}</p>}
       </div>
       <div className={tile}>
         <p className={label}><Sparkles size={14} />{t("Ganancias (PNL)")}</p>
-        <p className="mt-2 font-display text-xl font-semibold tabular-nums text-primary">{pnl !== null ? `+${money(pnl)}` : loading}</p>
+        <p className="mt-2 font-display text-xl font-semibold tabular-nums text-primary">{pnl !== null ? <>+{anim(pnl)}</> : loading}</p>
         <p className="mt-1 text-xs text-muted-foreground">{t("Lo que ya cosechaste.")}</p>
       </div>
     </div>
