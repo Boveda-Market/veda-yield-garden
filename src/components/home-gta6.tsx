@@ -128,23 +128,23 @@ export function Gta6RotatingBanner({ cta, sub, index, dots = true }: { cta: Reac
     const id = setInterval(() => setI((v) => (v + 1) % 3), 7000);
     return () => clearInterval(id);
   }, [controlled]);
-  const title = <img src={lang === "en" ? titleEn : titleEs} alt={t("Bóveda GTA6")} className="h-9 w-auto max-w-[70%] -rotate-2 drop-shadow-[0_0_12px_var(--hot)]" />;
+  const title = <img src={lang === "en" ? titleEn : titleEs} alt={t("Bóveda GTA6")} className="h-7 w-auto max-w-[70%] -rotate-2 drop-shadow-[0_0_12px_var(--hot)]" />;
   const aprNum = apr.endsWith(" APR") ? apr.replace(" APR", "") : apr;
   const slides = [
     <span key="a" className="flex h-full flex-col bg-[image:var(--gradient-hot)]">
-      <span className="relative block h-32 p-3.5"><Sunset />
+      <span className="relative block h-24 px-3.5 py-2.5"><Sunset />
         <span className="relative flex flex-col gap-2"><span className="w-fit rounded-full bg-hot-surface/80 px-2 py-0.5 text-[10px] font-black uppercase">🎰 {t("Sé la casa")} · ● {t("En vivo")}</span>{title}</span>
         <span className="hot-cta absolute bottom-3 left-3.5 flex items-end gap-1 rounded-xl px-2.5 py-1 leading-none text-hot-surface"><Flame size={18} aria-hidden className="flame-flicker" /><span className="font-display text-2xl font-black tabular-nums">{aprNum}</span>{apr.endsWith(" APR") && <span className="text-[10px] font-black">APR</span>}</span>
       </span>
-      <span className="flex items-center justify-between gap-2 bg-hot-surface px-3.5 py-3 text-sm font-extrabold">{cta}</span>
+      <span className="flex items-center justify-between gap-2 bg-hot-surface px-3.5 py-2 text-sm font-extrabold">{cta}</span>
     </span>,
-    <span key="b" className="flex h-full flex-col justify-between gap-3 bg-[image:var(--gradient-hot-surface)] p-4">
+    <span key="b" className="flex h-full flex-col justify-between gap-2 bg-[image:var(--gradient-hot-surface)] px-3.5 py-2.5">
       <span className="flex items-center justify-between gap-3"><span className="flex min-w-0 flex-col gap-1.5">{title}{sub && <span className="text-[11px] font-bold text-hot-muted">{sub}</span>}</span><span className="text-right"><span className="block font-display text-2xl font-black tabular-nums text-hot drop-shadow-[0_0_12px_var(--hot)]">{aprNum}</span>{apr.endsWith(" APR") && <span className="text-[9px] font-black uppercase text-hot-muted">APR 24h</span>}</span></span>
-      <span className="flex items-center justify-center gap-2 rounded-xl border-2 border-hot bg-hot-surface px-3 py-2.5 text-sm font-extrabold shadow-[0_0_18px_-4px_var(--hot)]">{cta}</span>
+      <span className="flex items-center justify-center gap-2 rounded-xl border-2 border-hot bg-hot-surface px-3 py-1.5 text-sm font-extrabold shadow-[0_0_18px_-4px_var(--hot)]">{cta}</span>
     </span>,
     <span key="c" className="flex h-full flex-col bg-hot-surface">
-      <span className="relative block h-24 bg-[image:var(--gradient-hot)] p-3.5"><Sunset /><span className="relative">{title}</span></span>
-      <span className="flex items-center justify-between gap-2 px-3.5 py-3"><span><span className="block font-display text-xl font-black tabular-nums text-live">{apr}</span><span className="text-[10px] font-bold uppercase text-hot-muted">● {t("Ganando 24/7")}</span></span><span className="rounded-xl bg-primary px-3 py-2 text-xs font-black text-primary-foreground">{t("Ver mis ganancias")} →</span></span>
+      <span className="relative block h-16 bg-[image:var(--gradient-hot)] px-3.5 py-2.5"><Sunset /><span className="relative">{title}</span></span>
+      <span className="flex items-center justify-between gap-2 px-3.5 py-2"><span><span className="block font-display text-xl font-black tabular-nums text-live">{apr}</span><span className="text-[10px] font-bold uppercase text-hot-muted">● {t("Ganando 24/7")}</span></span><span className="rounded-xl bg-primary px-3 py-2 text-xs font-black text-primary-foreground">{t("Ver mis ganancias")} →</span></span>
     </span>,
   ];
   return <span className="relative isolate grid overflow-hidden rounded-[14px] text-hot-foreground">
