@@ -114,7 +114,11 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   // Vault tabs: the line follows the official daily price; the headline shows the live market cap only.
   const caps = open.map((_, i) => statsQ[i]?.data?.marketCap ?? null);
   const liveCap = isPrice ? caps[curIdx] ?? null : (caps.length && caps.every((c) => c) ? caps.reduce<number>((a, c) => a + (c ?? 0), 0) : null);
-  const rawMarket = isPrice ? closes[curIdx]! : globalMarket(open.map((v, i) => ({ value: v.value, closes: closes[i]! })), dn);
+  // Line scale = market cap: price × circulating supply (live cap / latest price); Global sums each vault's cap.
+  const lastPx = (i: number) => { const c = introQ[i]?.data; return c?.length ? c[c.length - 1]!.c : (closes[i]?.filter((v) => v != null).pop() ?? null); };
+  const supply = (i: number) => { const c = caps[i], p = lastPx(i); return c && p ? c / p : null; };
+  const capW = open.map((v, i) => caps[i] ?? v.value);
+  const rawMarket = isPrice ? closes[curIdx]!.map((v) => v != null && supply(curIdx) ? v * supply(curIdx)! : v) : globalMarket(open.map((v, i) => ({ value: capW[i]!, closes: closes[i]! })), dn);
   const firstKnown = rawMarket.find((v) => v != null) ?? 0;
   const mk = rawMarket.map((v) => v ?? firstKnown) as number[];
   const earn = days.map((d) => Number(d.earnedMicro) / 1e6);
@@ -137,7 +141,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   // Market line: 1-minute (24 h), 15-minute (7 d) or 1-hour (30 d) closes placed by time with straight segments, so every real spike and drop shows; Global sums each vault moved by its own price.
   const now = Date.now(), wBase = n === 1 ? now - 86_400_000 : days[0]!.start;
   const inWin = (i: number) => (introQ[i]?.data ?? []).filter((c) => c.t >= wBase);
-  const mSeries = isPrice ? inWin(curIdx).map((c) => ({ t: c.t, v: c.c })) : intradayGlobal(open.map((v, i) => ({ value: v.value, candles: inWin(i) })));
+  const mSeries = isPrice ? inWin(curIdx).map((c) => ({ t: c.t, v: c.c * (supply(curIdx) ?? 1) })) : intradayGlobal(open.map((v, i) => ({ value: capW[i]!, candles: inWin(i) })));
   const live = mSeries.length >= 4;
   // Young tokens: stretch the line edge to edge from their first candle instead of leaving the left side empty.
   const w0 = live ? Math.max(wBase, mSeries[0]!.t) : wBase, wSpan = Math.max(now - w0, 1), young = n !== 1 && live && w0 - wBase > 86_400_000;
@@ -185,7 +189,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
         <linearGradient id={`h${gid}`} x1="0" x2="1"><stop offset="0%" stopColor={theme.a} /><stop offset="100%" stopColor={theme.b} /></linearGradient>
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
       </defs>
-      {cmax > cmin && <><text x={R} y={CT - 4} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? `$${cmax.toPrecision(3)}` : money(cmax)}</text><text x={R} y={CB + 12} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{isPrice ? `$${cmin.toPrecision(3)}` : money(cmin)}</text></>}
+      {cmax > cmin && <><text x={R} y={CT - 4} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{cap(cmax)}</text><text x={R} y={CB + 12} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{cap(cmin)}</text></>}
       <path d={cLine} fill="none" stroke={`url(#h${gid})`} strokeWidth="2" strokeLinejoin="miter" strokeLinecap="butt" style={{ filter: `drop-shadow(0 0 4px ${theme.b})` }} />
       <circle cx={cEnd.x} cy={cEnd.y} r="5.5" fill="var(--background)" stroke={theme.b} strokeWidth="3" />
     </svg>
