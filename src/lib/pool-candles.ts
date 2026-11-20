@@ -3,9 +3,9 @@ import { getPoolCandles } from "./pool-candles.functions";
 export type PoolCandle = { t: number; c: number; v: number };
 export type CandleRange = "24h" | "7d" | "30d";
 
-/** Chart resolutions: 1-minute for 24 h, 15-minute for 7 d, 1-hour for 30 d, so every spike and drop of a volatile token shows. */
+/** Chart resolutions (reference trend, not live): 5-minute for 24 h, 15-minute for 7 d, 1-hour for 30 d. */
 export const RANGE_RES = {
-  "24h": { tf: "minute", agg: 1, count: 1440, ms: 86_400_000 },
+  "24h": { tf: "minute", agg: 5, count: 288, ms: 86_400_000 },
   "7d": { tf: "minute", agg: 15, count: 672, ms: 7 * 86_400_000 },
   "30d": { tf: "hour", agg: 1, count: 720, ms: 30 * 86_400_000 },
 } as const;
@@ -17,7 +17,7 @@ export async function fetchRangeCandles(pool: string, range: ChartRange, _signal
   return getPoolCandles({ data: { pool, range } });
 }
 
-/** Candles for «Rendimiento y Mercado»: 1-minute for 24 h, 15-minute for 7 d. */
+/** Candles for «Rendimiento y Mercado»: 5-minute for 24 h, 15-minute for 7 d. */
 export function fetchPoolCandles(pool: string, range: CandleRange, signal?: AbortSignal): Promise<PoolCandle[]> {
   return fetchRangeCandles(pool, range, signal);
 }
