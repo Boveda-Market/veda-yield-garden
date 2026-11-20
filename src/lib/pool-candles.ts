@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export type PoolCandle = { t: number; c: number; v: number };
-export type CandleRange = "24h" | "7d";
+export type CandleRange = "24h" | "7d" | "30d";
 
 const schema = z.object({ data: z.object({ attributes: z.object({ ohlcv_list: z.array(z.tuple([z.number(), z.number(), z.number(), z.number(), z.number(), z.number()])) }) }) });
 

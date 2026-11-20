@@ -13,7 +13,9 @@ import { Dialog, DialogDescription, DialogHeader, DialogTitle } from "@/componen
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { ActionSuccess } from "@/components/action-success";
 import { notify } from "@/lib/notify";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
+import { fetchDailyCloses } from "@/lib/pool-candles";
+import { changeSinceUsd } from "@/lib/position-value";
 import { useServerFn } from "@tanstack/react-start";
 import { Copy, KeyRound, Send, ArrowLeft, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -56,6 +58,19 @@ export function WalletPanel() {
   const refunds = usePredictRefunds(address);
   const vaultPositions = vaults.data?.success ? vaults.data.data.positions : [];
   const { rows: vaultRows, capital, knownCapital, loading: pricesLoading, totalFees, change24h } = usePositionRows(vaultPositions);
+  const [movePeriod, setMovePeriod] = useState<1 | 7 | 30>(1);
+  const dailyQ = useQueries({ queries: vaultRows.map((r) => ({ queryKey: ["pool-daily", r.pool, 30], queryFn: ({ signal }: { signal: AbortSignal }) => fetchDailyCloses(r.pool ?? "", 31, signal), enabled: movePeriod > 1 && Boolean(r.pool), staleTime: 10 * 60_000, retry: 1 })) });
+  const changeN = movePeriod === 1 ? change24h : (() => {
+    const cutoff = Date.now() - movePeriod * 86_400_000;
+    let sum = 0;
+    for (let i = 0; i < vaultRows.length; i++) {
+      const c = dailyQ[i]?.data; if (!c?.length) return null;
+      const then = [...c].reverse().find((x) => x.t <= cutoff)?.c ?? c[0]!.c;
+      const v = changeSinceUsd(vaultRows[i]!.p.tokenAmount, vaultRows[i]!.price, then); if (v === null) return null;
+      sum += v;
+    }
+    return sum;
+  })();
   const liveRate = vaultRows.reduce((s, r) => s + (r.p.locked || r.p.outOfRange ? 0 : earningRatePerMs(r.value, r.apr)), 0);
   // Accumulated vault earnings count in the total (they are the person's money); won-but-unclaimed prizes stay apart.
   const predict = usePredictPositions(address);
@@ -210,13 +225,14 @@ export function WalletPanel() {
         if (hidden || balances.data?.usdc === undefined || working === null) return null;
         const total = (Number(balances.data.usdc) / 1e6) + jupUsd + working + totalFees;
         const solPrice = prices.data?.["SOL"];
-        const move = vaultPositions.length > 0 ? change24h : null;
+        const move = vaultPositions.length > 0 ? changeN : null;
         const base = move !== null ? total - move : 0;
         const pct = move !== null && base > 0 ? (move / base) * 100 : null;
         const up = (move ?? 0) >= 0;
-        if (move === null && !solPrice) return null;
+        if (move === null && !solPrice && vaultPositions.length === 0) return null;
         return <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs tabular-nums">
-          {move !== null && <span className={`font-medium ${up ? "text-primary" : "text-destructive"}`}>{up ? "+" : "-"}${fmt(Math.abs(move))}{pct !== null && ` (${up ? "+" : "-"}${Math.abs(pct).toFixed(2)}%)`} <span className="font-normal text-muted-foreground">{t("en 24 h")}</span></span>}
+          {move !== null && <span className={`font-medium ${up ? "text-primary" : "text-destructive"}`}>{up ? "+" : "-"}${fmt(Math.abs(move))}{pct !== null && ` (${up ? "+" : "-"}${Math.abs(pct).toFixed(2)}%)`} </span>}
+          {vaultPositions.length > 0 && <span className="inline-flex rounded-full bg-muted p-0.5" role="group" aria-label={t("Periodo")}>{([1, 7, 30] as const).map((d) => <button key={d} type="button" aria-pressed={movePeriod === d} onClick={() => setMovePeriod(d)} className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${movePeriod === d ? "bg-foreground text-background" : "text-muted-foreground"}`}>{d === 1 ? "24 h" : `${d} d`}</button>)}</span>}
           {solPrice ? <span className="text-muted-foreground">≈ {fmt(total / solPrice, 3)} SOL</span> : null}
         </div>;
       })()}

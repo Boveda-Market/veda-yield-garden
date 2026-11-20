@@ -70,12 +70,12 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   return <div className="space-y-3">
     <div className="grid grid-cols-3 gap-2">
       {[[`${t("Precio")} ${symbol}`, stats.data?.price != null ? price(stats.data.price) : "—", stats.data?.change24h != null ? `${stats.data.change24h > 0 ? "+" : ""}${stats.data.change24h.toFixed(1)}% · 24 h` : ""],
-        [t("Volumen operado"), usd(list.length ? volume : vol24h), range === "24h" ? "24 h" : "7 d"],
-        [t("Intereses generados"), earn.length ? `+${usd(earn[earn.length - 1], 0)}` : "—", range === "24h" ? "24 h" : "7 d"]].map(([k, v, s], i) =>
+        [t("Volumen operado"), usd(list.length ? volume : vol24h), range === "24h" ? "24 h" : range === "7d" ? "7 d" : "30 d"],
+        [t("Intereses generados"), earn.length ? `+${usd(earn[earn.length - 1], 0)}` : "—", range === "24h" ? "24 h" : range === "7d" ? "7 d" : "30 d"]].map(([k, v, s], i) =>
         <div key={k} className={`min-w-0 rounded-xl p-2.5 ${i === 2 ? "bg-primary/10" : "bg-muted"}`}><p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{k}</p><p className={`truncate font-display text-base font-bold tabular-nums ${i === 2 ? "text-primary" : ""}`}>{v}</p><p className="truncate text-[10px] text-muted-foreground">{s}</p></div>)}
     </div>
     <div className="rounded-2xl border border-border bg-card p-3">
-      <div className="flex rounded-full bg-secondary p-0.5 w-fit" role="tablist" aria-label={t("Periodo")}>{(["24h", "7d"] as const).map((r) => <button key={r} type="button" role="tab" aria-selected={range === r} onClick={() => { setRange(r); setHover(null); }} className={pill(range === r)}>{r === "24h" ? "24 h" : "7 d"}</button>)}</div>
+      <div className="flex rounded-full bg-secondary p-0.5 w-fit" role="tablist" aria-label={t("Periodo")}>{(["24h", "7d", "30d"] as const).map((r) => <button key={r} type="button" role="tab" aria-selected={range === r} onClick={() => { setRange(r); setHover(null); }} className={pill(range === r)}>{r === "24h" ? "24 h" : r === "7d" ? "7 d" : "30 d"}</button>)}</div>
       {chart ?? <div className="grid h-80 place-items-center text-sm text-muted-foreground">{candles.isPending ? <span className="h-2 w-40 animate-pulse rounded-full bg-muted" /> : t("Gráfica no disponible por ahora")}</div>}
     </div>
     <p className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs leading-5">💡 {t("El precio de {s} sube y baja con la oferta y la demanda, pero cada intercambio genera intereses en dólares para la bóveda. La volatilidad es el motor que produce tus ganancias.", { s: symbol ?? "" })}</p>

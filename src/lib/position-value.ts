@@ -18,3 +18,10 @@ export function change24hUsd(token: string | null, price: number | null, changeP
   const now = t * price;
   return now - now / (1 + changePct / 100);
 }
+
+/** Dollar move of a vault's coin part since a past price: coin amount × (price now − price then). */
+export function changeSinceUsd(token: string | null, price: number | null, then: number | null): number | null {
+  if (token === null || price === null || then === null || !(price > 0) || !(then > 0)) return null;
+  const t = Number(token); if (!Number.isFinite(t) || t < 0) return null;
+  return t * (price - then);
+}

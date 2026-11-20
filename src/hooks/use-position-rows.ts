@@ -18,7 +18,7 @@ export function usePositionRows(positions: ChainPosition[]) {
   const rows = positions.map((p, i) => {
     const s = stats[i]?.data;
     const price = s && s.baseSymbol.toUpperCase().includes(p.symbol.toUpperCase()) ? s.price : null;
-    return { p, value: estimateUsd(p.tokenAmount, p.usdcAmount, price), fees: estimateUsd(p.feeTokenAmount, p.feeUsdcAmount, price), apr: yields[i]?.data?.apr ?? null, change24h: change24hUsd(p.tokenAmount, price, s?.change24h ?? null) };
+    return { p, value: estimateUsd(p.tokenAmount, p.usdcAmount, price), fees: estimateUsd(p.feeTokenAmount, p.feeUsdcAmount, price), apr: yields[i]?.data?.apr ?? null, price, pool: pools[i] ?? null, change24h: change24hUsd(p.tokenAmount, price, s?.change24h ?? null) };
   });
   const loading = stats.some((s) => s?.isLoading);
   const ready = rows.filter((r) => r.fees !== null && r.fees > 0 && operable(r.p));
