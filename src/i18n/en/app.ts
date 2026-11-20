@@ -52,6 +52,7 @@ export const app: Record<string, string> = {
   "APY ilustrativo": "Illustrative APY",
   "Ejemplo de simulación · no es una tasa verificada del pool.": "Simulation example · not a verified pool rate.",
   "Detalles del pool": "Pool details",
+  "Detalles de la bóveda": "Vault details",
   "Ver gráfica": "View chart",
   "Copiar contrato": "Copy contract",
   "Tienes capital aquí": "You have capital here",

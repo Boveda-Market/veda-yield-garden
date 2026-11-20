@@ -189,7 +189,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
               <p className="mt-2 text-xs text-muted-foreground">{t("Ejemplo de simulación · no es una tasa verificada del pool.")}</p>
               <p className="mt-5 flex-1 text-sm leading-6 text-muted-foreground">{t(v.blurb)}</p>
               {(() => { const own = positions.find((x) => x.vaultId === v.id); if (!own) return null; const a = accrued(own, v.apy, now); return <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-2"><Button className="h-11 w-full text-base font-semibold" disabled={transactionAmounts(a).gross <= 0} onClick={() => setReview({ kind: "harvest", position: own, amount: a })}><Sprout size={18} />{t("Cosechar ganancias")}</Button><Button variant="outline" className="mt-2 h-10 w-full border-primary/40 font-semibold" onClick={() => setReview({ kind: "exit", position: own, amount: own.principal + a })}><ArrowDownToLine size={16} />{t("Liquidar")}</Button></div>; })()}
-              <Button variant="outline" className="mt-4 w-full" onClick={() => setDetailsFor(v)}>{t("Detalles del pool")}</Button>
+              <Button variant="outline" className="mt-4 w-full" onClick={() => setDetailsFor(v)}>{t("Detalles de la bóveda")}</Button>
               <Button variant={positions.some((x) => x.vaultId === v.id) ? "secondary" : "default"} className="mt-2 w-full font-semibold" onClick={() => { setAddToId(positions.find((x) => x.vaultId === v.id)?.id ?? null); setDepositFor(v); }}>{positions.some((x) => x.vaultId === v.id) ? t("Depositar más") : t("Depositar créditos")}</Button>
             </article>)}</div></>}
           </>

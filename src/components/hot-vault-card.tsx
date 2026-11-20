@@ -66,7 +66,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
         {ownedLink}
         {owned}
         <div className="mt-auto grid grid-cols-1 gap-1.5 pt-2 sm:grid-cols-[auto_1fr] sm:gap-2 sm:pt-3">
-          <button type="button" onClick={onDetails} className="order-2 h-9 rounded-xl border sm:order-none sm:h-11 border-hot-foreground/25 bg-hot-foreground/10 px-2 text-xs font-semibold transition sm:px-3 sm:text-sm hover:bg-hot-foreground/20">{t("Detalles del pool")}</button>
+          <button type="button" onClick={onDetails} className="order-2 h-9 rounded-xl border sm:order-none sm:h-11 border-hot-foreground/25 bg-hot-foreground/10 px-2 text-xs font-semibold transition sm:px-3 sm:text-sm hover:bg-hot-foreground/20">{t("Detalles de la bóveda")}</button>
           <button type="button" disabled={depositDisabled} onClick={onDeposit} className="hot-cta flex h-10 items-center justify-center gap-1 rounded-xl font-display text-sm sm:h-11 sm:gap-2 sm:text-base font-black text-hot-surface shadow-[var(--shadow-hot)] transition active:scale-95 disabled:opacity-70">{hasPosition ? <><Plus size={18} strokeWidth={3} />{t("Depositar más")}</> : t("Depositar")}</button>
         </div>
       </div>
