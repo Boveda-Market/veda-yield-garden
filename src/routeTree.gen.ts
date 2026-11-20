@@ -25,6 +25,7 @@ import { Route as SeguridadRouteImport } from './routes/seguridad'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as TerminosRouteImport } from './routes/terminos'
+import { Route as TmpTrumpPreviewRouteImport } from './routes/tmp-trump-preview'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as EnIndexRouteImport } from './routes/en/index'
 import { Route as EnFaqRouteImport } from './routes/en/faq'
@@ -130,6 +131,11 @@ const StatusRoute = StatusRouteImport.update({
 const TerminosRoute = TerminosRouteImport.update({
   id: '/terminos',
   path: '/terminos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TmpTrumpPreviewRoute = TmpTrumpPreviewRouteImport.update({
+  id: '/tmp-trump-preview',
+  path: '/tmp-trump-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WalletRoute = WalletRouteImport.update({
@@ -292,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
+  '/tmp-trump-preview': typeof TmpTrumpPreviewRoute
   '/wallet': typeof WalletRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
@@ -336,6 +343,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
+  '/tmp-trump-preview': typeof TmpTrumpPreviewRoute
   '/wallet': typeof WalletRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
@@ -381,6 +389,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
+  '/tmp-trump-preview': typeof TmpTrumpPreviewRoute
   '/wallet': typeof WalletRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
@@ -427,6 +436,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/status'
     | '/terminos'
+    | '/tmp-trump-preview'
     | '/wallet'
     | '/en/faq'
     | '/en/privacy'
@@ -471,6 +481,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/status'
     | '/terminos'
+    | '/tmp-trump-preview'
     | '/wallet'
     | '/en/faq'
     | '/en/privacy'
@@ -515,6 +526,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/status'
     | '/terminos'
+    | '/tmp-trump-preview'
     | '/wallet'
     | '/en/faq'
     | '/en/privacy'
@@ -560,6 +572,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StatusRoute: typeof StatusRoute
   TerminosRoute: typeof TerminosRoute
+  TmpTrumpPreviewRoute: typeof TmpTrumpPreviewRoute
   WalletRoute: typeof WalletRoute
   EnFaqRoute: typeof EnFaqRoute
   EnPrivacyRoute: typeof EnPrivacyRoute
@@ -700,6 +713,13 @@ declare module '@tanstack/react-router' {
       path: '/terminos'
       fullPath: '/terminos'
       preLoaderRoute: typeof TerminosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tmp-trump-preview': {
+      id: '/tmp-trump-preview'
+      path: '/tmp-trump-preview'
+      fullPath: '/tmp-trump-preview'
+      preLoaderRoute: typeof TmpTrumpPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/wallet': {
@@ -904,6 +924,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StatusRoute: StatusRoute,
   TerminosRoute: TerminosRoute,
+  TmpTrumpPreviewRoute: TmpTrumpPreviewRoute,
   WalletRoute: WalletRoute,
   EnFaqRoute: EnFaqRoute,
   EnPrivacyRoute: EnPrivacyRoute,

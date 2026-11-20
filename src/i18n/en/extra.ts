@@ -1658,4 +1658,7 @@ export const extra: Record<string, string> = {
   "Alto riesgo": "High risk",
   "Riesgo medio": "Medium risk",
   "El valor de tu posición cambia con las compras y ventas rápidas del mercado.": "Your position's value changes with fast market buying and selling.",
+  "Tu Bóveda TRUMP": "Your TRUMP Vault",
+  "La moneda del presidente, cobrando para ti.": "The president's coin, earning for you.",
+  "Cada compra y venta de TRUMP te deja intereses.": "Every TRUMP buy and sell earns you interest.",
 };
