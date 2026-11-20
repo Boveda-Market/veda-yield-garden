@@ -43,7 +43,7 @@ function useBannerStep() {
     return () => clearInterval(id);
   }, [tick]);
   // Manual swipe: jump to that slide and restart the 7 s timer so it doesn't move right away.
-  const pick = (kind: number) => { setStep((v) => v - (v % 4) + kind); setTick((x) => x + 1); };
+  const pick = (k: number) => { setStep(((k % STEPS) + STEPS) % STEPS); setTick((x) => x + 1); };
   return [step, pick] as const;
 }
 
@@ -73,31 +73,24 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
   const [step, pickSlide] = useBannerStep();
   const rail = useRef<HTMLDivElement>(null);
   const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const kind = step % 4, isGta = kind === 0, isDoble = kind === 1, isDcty = kind === 2, isTrump = kind === 3;
-  const layer = (_on: boolean) => "w-full shrink-0 snap-center";
-  // Auto-rotation slides the rail; a finger swipe picks the slide it settles on.
-  useEffect(() => { const el = rail.current; if (!el) return; const left = kind * el.clientWidth; if (Math.abs(el.scrollLeft - left) > 4) el.scrollTo({ left, behavior: "smooth" }); }, [kind]);
-  const onRailScroll = () => { if (scrollTimer.current) clearTimeout(scrollTimer.current); scrollTimer.current = setTimeout(() => { const el = rail.current; if (!el || !el.clientWidth) return; const idx = Math.round(el.scrollLeft / el.clientWidth); if (idx !== kind && idx >= 0 && idx < 4) pickSlide(idx); }, 120); };
-  const gtaBanner = <Gta6RotatingBanner cta={cta} sub={sub} index={Math.floor(step / 4)} dots={false} />;
-  const trumpBanner = <TrumpBannerSlide index={Math.floor(step / 4)} cta={ctaFor(mineTrump)} />;
-  const dctyBanner = <DctyBannerSlide index={Math.floor(step / 4)} cta={ctaFor(mineDcty)} />;
+  const layer = "w-full shrink-0 snap-center";
+  // Auto-rotation slides the rail across all 12 slides; a finger swipe picks the slide it settles on.
+  useEffect(() => { const el = rail.current; if (!el) return; const left = step * el.clientWidth; if (Math.abs(el.scrollLeft - left) > 4) el.scrollTo({ left, behavior: "smooth" }); }, [step]);
+  const onRailScroll = () => { if (scrollTimer.current) clearTimeout(scrollTimer.current); scrollTimer.current = setTimeout(() => { const el = rail.current; if (!el || !el.clientWidth) return; const idx = Math.round(el.scrollLeft / el.clientWidth); if (idx !== step && idx >= 0 && idx < STEPS) pickSlide(idx); }, 120); };
+  const slide = (k: number) => {
+    const kd = k % 4, i = Math.floor(k / 4);
+    if (kd === 1) return <div key={k} className={layer}><Link to="/mercados" className="duel-ring block h-full rounded-2xl p-[2px] shadow-[var(--shadow-duel)] transition-transform active:scale-[0.98]"><DobleBannerSlide index={i} /></Link></div>;
+    const id = kd === 0 ? "gta6" : kd === 2 ? "dcty" : "trump";
+    const m = kd === 0 ? mine : kd === 2 ? mineDcty : mineTrump;
+    const body = kd === 0 ? <Gta6RotatingBanner cta={cta} sub={sub} index={i} dots={false} /> : kd === 2 ? <DctyBannerSlide index={i} cta={ctaFor(mineDcty)} /> : <TrumpBannerSlide index={i} cta={ctaFor(mineTrump)} />;
+    return <div key={k} className={`${layer} ${kd === 2 ? "vault-dcty" : kd === 3 ? "vault-trump" : ""}`}>
+      {m ? <button type="button" onClick={() => setOpenId(id)} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{body}</button>
+      : <Link to="/app" hash={`open-${id}`} className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{body}</Link>}
+    </div>;
+  };
   return <section aria-label={t("Bóveda GTA6")}>
     <div ref={rail} onScroll={onRailScroll} className="flex snap-x snap-mandatory items-stretch gap-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <div className={layer(isGta)}>
-        {mine ? <button type="button" onClick={() => setOpenId("gta6")} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{gtaBanner}</button>
-        : <Link to="/app" hash="open-gta6" className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{gtaBanner}</Link>}
-      </div>
-      <div className={layer(isDoble)}>
-        <Link to="/mercados" className="duel-ring block h-full rounded-2xl p-[2px] shadow-[var(--shadow-duel)] transition-transform active:scale-[0.98]"><DobleBannerSlide index={Math.floor(step / 4)} /></Link>
-      </div>
-      <div className={`${layer(isDcty)} vault-dcty`}>
-        {mineDcty ? <button type="button" onClick={() => setOpenId("dcty")} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{dctyBanner}</button>
-        : <Link to="/app" hash="open-dcty" className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{dctyBanner}</Link>}
-      </div>
-      <div className={`${layer(isTrump)} vault-trump`}>
-        {mineTrump ? <button type="button" onClick={() => setOpenId("trump")} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{trumpBanner}</button>
-        : <Link to="/app" hash="open-trump" className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{trumpBanner}</Link>}
-      </div>
+      {Array.from({ length: STEPS }, (_, k) => slide(k))}
     </div>
     <div aria-hidden className="mt-2 flex justify-center gap-1">{Array.from({ length: STEPS }, (_, k) => <span key={k} className={`h-1.5 rounded-full transition-all ${k === step ? "w-4" : "w-1.5 opacity-40"} ${k % 4 === 0 ? "bg-hot" : k % 4 === 1 ? "bg-bolt-neon" : k % 4 === 2 ? "bg-dcty" : "bg-[#c8102e]"}`} />)}</div>
     <Dialog open={open} onOpenChange={setOpen}>
