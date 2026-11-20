@@ -64,7 +64,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
     // Remember a sign-in is in progress so the next screen waits for the new wallet instead of bouncing back.
     try { sessionStorage.setItem("boveda:auth-pending", String(Date.now())); } catch { /* ignore */ }
     if (m === "google") { initOAuth({ provider: "google" }).catch(loginFailed); return; }
-    if (m === "passkey") { loginWithPasskey().catch(loginFailed); return; }
+    if (m === "passkey") { loginWithPasskey().catch(() => setError(null)); return; }
     login({ loginMethods: [m] });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initOAuth, loginWithPasskey, login]);
