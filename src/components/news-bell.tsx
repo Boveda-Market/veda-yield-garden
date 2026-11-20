@@ -10,6 +10,7 @@ import { usePredictAlerts, type PredictAlert, type RefundAlert } from "@/hooks/u
 import type { RangeAlert } from "@/hooks/use-range-alerts";
 import { useAutopilot } from "@/components/autopilot-toggle";
 import { autopilotNotice } from "@/lib/autopilot";
+import { VAULTS } from "@/lib/vaults";
 import { ANNOUNCEMENTS, DISMISSED_KEY, SEEN_KEY, announcementSections, latestAnnouncementId, shortDate, type Announcement, type AnnouncementKind } from "@/lib/announcements";
 
 const LABEL: Record<AnnouncementKind, string> = { vault: "Nueva bóveda", market: "Nuevo mercado", policy: "Aviso legal", update: "Novedad" };
@@ -88,6 +89,7 @@ export function NewsList({ onNavigate, predict = [], refunds = [], ranges = [], 
   const dismiss = (id: string) => writeDismissed([...new Set([...dismissed, id])]);
   const clearAll = () => { setShowAll(false); writeDismissed(ANNOUNCEMENTS.map((a) => a.id)); };
   const latest = latestAnnouncementId();
+  const apName = autopilot?.vaultId ? VAULTS.find((v) => v.id === autopilot.vaultId)?.name ?? null : null;
   return <div className="mt-2">
     {items.length > 0 && !showAll && <div className="mb-2 flex justify-end">
       <button type="button" onClick={clearAll} className="text-xs font-medium text-muted-foreground hover:text-foreground">{t("Borrar todas")}</button>
@@ -100,9 +102,9 @@ export function NewsList({ onNavigate, predict = [], refunds = [], ranges = [], 
         <p className="mt-2 text-sm text-muted-foreground">{t("Lleva más de 10 minutos sin generar ganancias. Tu dinero sigue seguro; vuelve a centrarla cuando quieras.")}</p>
         <Link to="/wallet" search={{ rebalance: a.p.address }} onClick={onNavigate} className={ctaClass(true)}>🎯 {t("Rebalancear ahora")}</Link>
       </NoticeCard>)}
-      {autopilot && !dismissed.includes(autopilot.id) && <NoticeCard tone="info" icon="🤖" label={t("Piloto automático")} date={autopilot.at} title={autopilot.kind === "rebalanced" ? t("Piloto automático rebalanceó tu bóveda") : t("Piloto automático activado")} onDismiss={() => dismiss(autopilot.id)}>
+      {autopilot && !dismissed.includes(autopilot.id) && <NoticeCard tone="info" icon="🤖" label={t("Piloto automático")} date={autopilot.at} title={autopilot.kind === "rebalanced" ? (apName ? t("Piloto automático rebalanceó {v}", { v: apName }) : t("Piloto automático rebalanceó tu bóveda")) : t("Piloto automático activado")} onDismiss={() => dismiss(autopilot.id)}>
         <p className="mt-2 text-sm text-muted-foreground">{autopilot.kind === "rebalanced" ? (autopilot.gainsUsd != null ? t("Se sumaron +${amount} de tus ganancias a tu inversión. Tu contador de ganancias empieza desde cero porque esos dólares ya están rindiendo. No tienes que hacer ninguna acción.", { amount: autopilot.gainsUsd.toFixed(2) }) : t("Centramos tu rango y tus ganancias acumuladas se sumaron a tu inversión. Tu contador de ganancias se reinicia porque ya están trabajando en la bóveda. No tienes que hacer ninguna acción.")) : t("Si el precio sale de tu rango, la volvemos a centrar por ti, sin firmas. Lo apagas cuando quieras en la tarjeta de tu bóveda.")}</p>
-        <Link to="/portfolio" hash="vault-gta6" onClick={onNavigate} className={ctaClass(false)}>{t("Ver mi bóveda")} →</Link>
+        <Link to="/portfolio" hash={`vault-${autopilot.vaultId ?? "gta6"}`} onClick={onNavigate} className={ctaClass(false)}>{t("Ver mi bóveda")} →</Link>
       </NoticeCard>}
       {refunded.map((a) => <NoticeCard key={a.id} tone="win" icon="↩️" label={t("Doble o Nada")} title={t("Orden reembolsada")} onDismiss={() => dismiss(a.id)}>
         {a.r.title && <p className="mt-2 text-xs text-muted-foreground">🎯 {assetOfTitle(a.r.title) ?? ""} · {roundWindowText(a.r.title, null)}</p>}

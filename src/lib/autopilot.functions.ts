@@ -17,8 +17,8 @@ export const autopilotStatus = createServerFn({ method: "POST" })
     const db = await adminDb();
     const { data: row } = await db.from("autopilot_enrollments").select("enabled, updated_at, last_rebalance_at, last_signature, last_gains_usd, last_result").eq("wallet", data.wallet).eq("privy_user_id", context.privyUserId).maybeSingle();
     const r = row as { enabled: boolean; updated_at: string; last_rebalance_at: string | null; last_signature: string | null; last_gains_usd: number | string | null; last_result: string | null } | null;
-    const { autopilotFailures } = await import("@/lib/autopilot");
-    return { enabled: !!r?.enabled, enrolled: !!r, enabledAt: r?.enabled ? r.updated_at : null, lastRebalanceAt: r?.last_rebalance_at ?? null, lastSignature: r?.last_signature ?? null, lastGainsUsd: r?.last_gains_usd != null ? Number(r.last_gains_usd) : null, failures: autopilotFailures(r?.last_result) };
+    const { autopilotFailures, vaultFromResult } = await import("@/lib/autopilot");
+    return { enabled: !!r?.enabled, enrolled: !!r, enabledAt: r?.enabled ? r.updated_at : null, lastRebalanceAt: r?.last_rebalance_at ?? null, lastSignature: r?.last_signature ?? null, lastGainsUsd: r?.last_gains_usd != null ? Number(r.last_gains_usd) : null, failures: autopilotFailures(r?.last_result), lastVaultId: vaultFromResult(r?.last_result) };
   });
 
 /** Turns Autopilot on after the client attached the signer: verifies the caller's own embedded wallet and the signer at Privy. `auto` marks the range-vault default. */

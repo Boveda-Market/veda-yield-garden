@@ -1,4 +1,4 @@
-import { tgCard } from "@/lib/telegram-format";
+import { tgCard, tgRow } from "@/lib/telegram-format";
 
 /** Key quorum registered with Privy for Autopilot; its private key lives only in the server secret PRIVY_AUTOPILOT_KEY_SEED. */
 export const AUTOPILOT_SIGNER_ID = "u68gefvvseqxvwfchw7h5qc0";
@@ -58,13 +58,21 @@ export const gainsWorthQuoting = (gainsUsd: number | null | undefined): gainsUsd
  * so the card says how much was added (or, for cents, that the counter restarts) and nobody thinks earnings vanished.
  */
 export function autopilotDoneText(vaultName: string, valueUsd: string | undefined, gainsUsd?: number | null) {
-  const lead = gainsWorthQuoting(gainsUsd)
-    ? `Se sumaron <b>+$${gainsUsd.toFixed(2)}</b> de tus ganancias a tu inversión.`
-    : "Tus ganancias acumuladas se sumaron a tu inversión.";
-  return tgCard("🤖", "Piloto automático rebalanceó tu bóveda", [
-    `${lead} Tu contador de ganancias empieza desde cero porque esos dólares ya están rindiendo. No tienes que hacer ninguna acción.`,
+  const value = valueUsd && Number.isFinite(Number(valueUsd)) && Number(valueUsd) > 0 ? `$${Number(valueUsd).toFixed(2)}` : null;
+  return tgCard("🤖", `Piloto automático rebalanceó ${vaultName}`, [
+    tgRow("🏦", "Bóveda", vaultName),
+    gainsWorthQuoting(gainsUsd) ? tgRow("💵", "Ganancias sumadas", `+$${gainsUsd.toFixed(2)}`) : "💵 Ganancias: centavos acumulados sumados",
+    value ? tgRow("📊", "Posición activa", value) : null,
+    tgRow("🎯", "Estado", "Centrada en el precio actual"),
+    "",
+    "✅ Tu contador de ganancias empieza desde cero porque esos dólares ya están rindiendo.",
+    "✨ <b>No tienes que hacer ninguna acción.</b>",
   ]);
 }
+
+/** Vault id tagged on autopilot_enrollments.last_result as " ·v=<id>" so bell and reconcile name the right vault. */
+export const vaultTag = (id: string) => ` ·v=${id}`;
+export const vaultFromResult = (r: string | null | undefined) => /·v=([a-z0-9]+)/.exec(r ?? "")?.[1] ?? null;
 
 /** Range vaults (GTA6) run on Autopilot by default: turn it on only for wallets that never had a choice recorded; a wallet that switched it off stays off. */
 export function shouldAutoEnableAutopilot(opts: { hasRangePosition: boolean; enabled: boolean | null }) {
@@ -72,10 +80,10 @@ export function shouldAutoEnableAutopilot(opts: { hasRangePosition: boolean; ena
 }
 
 /** Informational bell/Telegram notice: the newest Autopilot event worth telling (rebalance first, then activation) within 7 days. */
-export function autopilotNotice(s: { enabled: boolean; enabledAt: string | null; lastRebalanceAt: string | null; lastGainsUsd?: number | null } | null, now: number): { id: string; kind: "rebalanced" | "on"; at: string; gainsUsd: number | null } | null {
+export function autopilotNotice(s: { enabled: boolean; enabledAt: string | null; lastRebalanceAt: string | null; lastGainsUsd?: number | null; lastVaultId?: string | null } | null, now: number): { id: string; kind: "rebalanced" | "on"; at: string; gainsUsd: number | null; vaultId: string | null } | null {
   if (!s) return null;
   const fresh = (iso: string | null) => !!iso && now - Date.parse(iso) < 7 * 86_400_000;
-  if (fresh(s.lastRebalanceAt)) return { id: `autopilot:rb:${s.lastRebalanceAt}`, kind: "rebalanced", at: s.lastRebalanceAt!, gainsUsd: gainsWorthQuoting(s.lastGainsUsd) ? s.lastGainsUsd : null };
+  if (fresh(s.lastRebalanceAt)) return { id: `autopilot:rb:${s.lastRebalanceAt}`, kind: "rebalanced", at: s.lastRebalanceAt!, gainsUsd: gainsWorthQuoting(s.lastGainsUsd) ? s.lastGainsUsd : null, vaultId: s.lastVaultId ?? null };
   return null;
 }
 

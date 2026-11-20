@@ -68,3 +68,11 @@ describe("Autopilot rebalance notice explains the harvested earnings", () => {
     expect(autopilotNotice({ enabled: true, enabledAt: null, lastRebalanceAt: ago(5), lastGainsUsd: 0.2 }, now)?.gainsUsd).toBeNull();
   });
 });
+
+describe("Autopilot notice names the vault", () => {
+  it("title and breakdown include the vault name and active value", () => {
+    const text = autopilotDoneText("Bóveda DCTY", "118.25", 0.6);
+    expect(text).toContain("rebalanceó Bóveda DCTY");
+    expect(text).toContain("$118.25");
+  });
+});
