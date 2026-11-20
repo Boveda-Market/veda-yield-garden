@@ -13,6 +13,7 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { pilotDepositStatus, preparePilotDeposit } from "@/lib/pilot-deposit.functions";
 import { prepareRealRebalance } from "@/lib/rebalance.functions";
+import { decimalToUnits } from "@/lib/onboarding";
 import { PILOT_VAULTS, pilotInput, type PilotStatus } from "@/lib/pilot-deposit";
 
 type Step = "idle" | "preparing" | "signing" | "confirming" | "done" | "error";
@@ -34,6 +35,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, usdc, autoSta
   const [status, setStatus] = useState<PilotStatus | null>(null);
   const eligible = (PILOT_VAULTS as readonly string[]).includes(vaultId);
   const busy = step === "preparing" || step === "signing" || step === "confirming";
+  const depositMicro = decimalToUnits(amount.replace(/,/g, "") || "0", 6) ?? undefined;
   const valid = pilotInput.safeParse({ wallet: walletAddress, vaultId, amount, ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) });
   useEffect(() => { setMessage(null); }, [amount, walletAddress]);
   useEffect(() => { onBusyChange(busy); }, [busy, onBusyChange]);
@@ -103,7 +105,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, usdc, autoSta
       {step === "error" && message && <SignalErrorCard message={message} />}
       <Button size="lg" disabled={busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? t(labels[step]) : step === "error" ? t("Intentar de nuevo") : t("Confirmar y depositar")}</Button>
     </>}
-    {walletAddress && <ActivationSheet open={needsReserve} usdc={usdc ?? 0n} resume={{ vaultId, amount, ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) }} onClose={() => setNeedsReserve(false)} onActivated={() => { setNeedsReserve(false); void queryClient.invalidateQueries({ queryKey: ["my-wallet", walletAddress] }); setTimeout(() => void run(autoStart), 1500); }} />}
+    {walletAddress && <ActivationSheet open={needsReserve} usdc={usdc ?? 0n} {...(depositMicro != null ? { depositMicro } : {})} autoActivate={autoStart} resume={{ vaultId, amount, ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) }} onClose={() => setNeedsReserve(false)} onActivated={() => { setNeedsReserve(false); void queryClient.invalidateQueries({ queryKey: ["my-wallet", walletAddress] }); setTimeout(() => void run(autoStart), 1500); }} />}
     {message && step !== "error" && <p role="alert" className="text-muted-foreground">{message}</p>}
     {signature && <a className="text-xs underline" href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("Ver comprobante")}</a>}
   </section>;

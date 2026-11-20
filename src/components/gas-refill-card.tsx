@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SignalErrorCard } from "@/components/signal-error";
 import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
@@ -16,7 +16,8 @@ import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { prepareGasRefill } from "@/lib/gas-refill.functions";
 import { activationShortfallMicro, gasIsLow, type RefillTarget } from "@/lib/gas-refill";
-import { MIN_USDC_MICRO, unitsToDecimal } from "@/lib/onboarding";
+import { MIN_USDC_MICRO, decimalToUnits, unitsToDecimal } from "@/lib/onboarding";
+import { getRealWallet } from "@/lib/solana.functions";
 
 /** `force` shows the card even above the low mark, for screens whose operation needs more reserve (refilled up to `target`). */
 type Props = { sol: bigint | undefined; usdc: bigint | undefined; onDone?: () => void; force?: boolean; target?: RefillTarget };
@@ -146,22 +147,37 @@ export function ActivationCardView({ stage, onActivate, onAddFunds, onOpenVault,
 }
 
 /** Popup used by every deposit and Doble o Nada entry when the account still needs activation or more dollars; on success it closes and the original action continues on its own. */
-export function ActivationSheet({ open, usdc, needMicro, resume, onClose, onActivated }: { open: boolean; usdc: bigint; needMicro?: bigint; resume?: Omit<ResumeDeposit, "at">; onClose: () => void; onActivated: () => void }) {
+export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActivate, resume, onClose, onActivated }: { open: boolean; usdc: bigint; needMicro?: bigint; depositMicro?: bigint; autoActivate?: boolean; resume?: Omit<ResumeDeposit, "at">; onClose: () => void; onActivated: () => void }) {
   const t = useT();
   const session = useBovedaSession();
   const prepare = useServerFn(prepareGasRefill);
+  const readWallet = useServerFn(getRealWallet);
   const wallet = session.walletAddress;
-  const missing = activationShortfallMicro(usdc, needMicro);
   const [total, setTotal] = useState<bigint | null>(null);
+  const [fresh, setFresh] = useState<bigint | null>(null);
+  // Always judge against a fresh balance read: a just-finished vault exit may not be reflected yet in the screen's cached balance.
+  useEffect(() => {
+    if (!open || !wallet) return;
+    setFresh(null);
+    void readWallet({ data: { wallet } }).then((r) => { if (r.success) setFresh(decimalToUnits(r.data.usdc, 6) ?? 0n); }).catch(() => {});
+  }, [open, wallet]); // eslint-disable-line react-hooks/exhaustive-deps
+  const balance = fresh ?? usdc;
+  // With a known deposit, the need is the deposit plus the real activation charge; Coinbase only appears when available dollars truly fall short.
+  const need = depositMicro != null ? (total == null ? null : depositMicro + total) : needMicro;
+  const missing = need === null || (depositMicro != null && fresh === null) ? 0n : activationShortfallMicro(balance, need);
+  const checking = depositMicro != null && (fresh === null || total === null);
   const [stage, setStage] = useState<"ready" | "working" | "done">("ready");
   const [error, setError] = useState<string | undefined>();
   const [extra, setExtra] = useState(false);
   const [buy, setBuy] = useState(0);
   useEffect(() => { if (open) { setStage("ready"); setError(undefined); } }, [open]);
   useEffect(() => {
-    if (!open || !wallet || missing > 0n) return;
+    if (!open || !wallet) return;
     void prepare({ data: { wallet, activation: true, quoteOnly: true } }).then((r) => { if (r.success) { setTotal(BigInt(r.chargeMicro)); setExtra(!!r.extraVault); } }).catch(() => {});
-  }, [open, wallet, missing > 0n]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open, wallet]); // eslint-disable-line react-hooks/exhaustive-deps
+  const autoDone = useRef(false);
+  useEffect(() => { if (!open) autoDone.current = false; }, [open]);
+  useEffect(() => { if (open && autoActivate && !checking && missing === 0n && total !== null && stage === "ready" && !error && !autoDone.current) { autoDone.current = true; void activate(); } }); // eslint-disable-line react-hooks/exhaustive-deps
   async function activate() {
     if (!wallet) return;
     setError(undefined); setStage("working");
@@ -174,7 +190,7 @@ export function ActivationSheet({ open, usdc, needMicro, resume, onClose, onActi
       setTimeout(() => onActivated(), 1800);
     } catch (e) { setError(e instanceof Error ? t(e.message) : t("No se pudo completar la activación.")); setStage("ready"); }
   }
-  const view: ActivationStage = stage === "done" ? { kind: "done" } : stage === "working" ? { kind: "working" } : missing > 0n ? { kind: "short", missingMicro: missing } : { kind: "ready", totalMicro: total, extraVault: extra, ...(error ? { error } : {}) };
+  const view: ActivationStage = stage === "done" ? { kind: "done" } : stage === "working" || checking ? { kind: "working" } : missing > 0n ? { kind: "short", missingMicro: missing } : { kind: "ready", totalMicro: total, extraVault: extra, ...(error ? { error } : {}) };
   return <Dialog open={open} onOpenChange={(o) => { if (!o && stage !== "working") onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
     <DialogTitle className="sr-only">{t("Activa tu cuenta")}</DialogTitle>
     <DialogDescription className="sr-only">{t("Prepara tu cuenta y seguimos solos.")}</DialogDescription>
