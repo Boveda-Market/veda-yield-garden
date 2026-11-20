@@ -15,7 +15,6 @@ import { simulateRealHarvest, prepareRealHarvest } from "@/lib/harvest.functions
 import { harvestedToUsdc, type HarvestResult } from "@/lib/harvest";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { ActionSuccess, ReceiveCard } from "@/components/action-success";
-import { notify } from "@/lib/notify";
 import { CompoundStep } from "@/components/compound-step";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { ProgressSteps, WorkingLine } from "@/components/move-steps";
@@ -69,7 +68,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
       let sig: string;
       try { sig = await session.signAndSend(Uint8Array.from(atob(next.prepared.transaction), (c) => c.charCodeAt(0))); }
       catch { setMessage(t("Cancelaste la aprobación. No se movió dinero.")); return; }
-      setSignature(sig); notify("secure", t("Firma aprobada"), t("Confirmando en la red…")); setStep(t("Cobrando tus ganancias…"));
+      setSignature(sig); setStep(t("Cobrando tus ganancias…"));
       for (let attempt = 0; attempt < 30; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó la cosecha. No se cobró comisión y tus ganancias siguen en la bóveda.")); return; }
@@ -79,7 +78,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
             try { const extra = await harvestedToUsdc(wallet, next.tokenSymbol, BigInt(next.tokenRaw), session.signAndSend); if (extra > 0n) setExtraUsd(Number(extra) / 1e6); }
             catch { setSweepNote(t("Tus ganancias en dólares ya llegaron. La otra parte no se pasó a dólares; puedes hacerlo en Mi Billetera → Cambiar.")); }
           }
-          if (!compound) notify("success", t("Ganancias cosechadas"), t("Ya están en tu billetera")); setFinished(true); setMessage(t("Cosecha confirmada en la red. Tu posición sigue abierta.")); void reportAffiliate(sig, "harvest", { ...(next.net ?? result?.net ? { amountUsd: String(Number(String(next.net ?? result?.net).replace(/,/g, ""))) } : {}), vault: vaultSymbol(vaultId) }); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", wallet] }); return; }
+          setFinished(true); setMessage(t("Cosecha confirmada en la red. Tu posición sigue abierta.")); void reportAffiliate(sig, "harvest", { ...(next.net ?? result?.net ? { amountUsd: String(Number(String(next.net ?? result?.net).replace(/,/g, ""))) } : {}), vault: vaultSymbol(vaultId) }); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", wallet] }); return; }
         await new Promise((resolve) => setTimeout(resolve, 2_000));
       }
       setMessage(t("La confirmación tarda más de lo habitual. Revisa tu billetera antes de intentarlo otra vez."));

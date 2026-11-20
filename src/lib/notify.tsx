@@ -3,7 +3,7 @@ import { AlertCircle, BellRing, CheckCircle2, Info, ShieldCheck, type LucideIcon
 
 /**
  * Floating "pill" notifications (Cash App / Robinhood style): one calm capsule at the top,
- * auto-hides after ~6s (errors 8s), swipe or tap to dismiss. Pass already-translated text.
+ * only one at a time (each replaces the last), auto-hides after 3s (errors 5s), swipe or tap to dismiss. Pass already-translated text.
  */
 export type NotifyTone = "success" | "secure" | "round" | "info" | "error";
 
@@ -27,5 +27,5 @@ export function notify(tone: NotifyTone, title: string, description?: string) {
         {description && <span className="block truncate text-sm text-popover-foreground/80">{description}</span>}
       </span>
     </button>
-  ), { duration: tone === "error" ? 8000 : 6000 });
+  ), { id: "boveda-notify", duration: tone === "error" ? 5000 : 3000 });
 }

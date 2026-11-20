@@ -20,7 +20,6 @@ import { exitInput, EXIT_PERCENTS, type WithdrawalResult } from "@/lib/withdrawa
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import type { Vault } from "@/lib/vaults";
 import { ActionSuccess, ReceiveCard } from "@/components/action-success";
-import { notify } from "@/lib/notify";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { useQueryClient, useQueries } from "@tanstack/react-query";
 import { VAULTS } from "@/lib/vaults";
@@ -88,7 +87,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
       let sig: string;
       try { sig = await session.signAndSend(Uint8Array.from(atob(next.prepared.transaction), (c) => c.charCodeAt(0))); }
       catch { setMessage(t("Cancelaste la aprobación. No se movió dinero.")); return; }
-      setSignature(sig); notify("secure", t("Firma aprobada"), t("Confirmando en la red…")); setStep(migrateTo ? t("Cerrando tu bóveda actual…") : t("Confirmando tu retiro…"));
+      setSignature(sig); setStep(migrateTo ? t("Cerrando tu bóveda actual…") : t("Confirmando tu retiro…"));
       for (let attempt = 0; attempt < 60; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó el retiro. No se cobró comisión y tu dinero sigue en la bóveda.")); return; }
@@ -101,8 +100,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
               void swept;
             } catch { /* silent: leftovers stay in the wallet */ }
           }
-          notify("success", t("Retiro confirmado"), t("Tus dólares ya están en tu billetera"));
-          setFinished(true); setMessage(t("Retiro confirmado."));
+                    setFinished(true); setMessage(t("Retiro confirmado."));
           for (const k of ["real-solana", "meteora-history", "my-wallet", "my-wallet-tokens", "start-guide"]) await queryClient.invalidateQueries({ queryKey: [k, address] });
           return;
         }

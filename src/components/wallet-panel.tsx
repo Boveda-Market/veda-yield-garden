@@ -145,7 +145,7 @@ export function WalletPanel() {
     if (!address) return;
     try {
       const sig = await session.signAndSend(await buildTransfer({ from: address, to, asset, amount: units }));
-      setSent({ amount, asset, to, sig }); notify("success", t("Envío realizado"), `${amount} ${asset} → ${to.slice(0, 4)}…${to.slice(-4)}`); reset(); refresh();
+      setSent({ amount, asset, to, sig }); reset(); refresh();
     } catch (e) { fail(e); } finally { setBusy(false); }
   }
   async function swap(quote: SwapQuote) {

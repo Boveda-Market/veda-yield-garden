@@ -8,7 +8,6 @@ import { LoaderCircle, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ActionSuccess } from "@/components/action-success";
 import { WorkingLine } from "@/components/move-steps";
-import { notify } from "@/lib/notify";
 import { markTrumpTouched } from "@/lib/weekly-ad";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
@@ -66,7 +65,7 @@ export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, 
         let rbSig: string;
         try { rbSig = await signAndSend(Uint8Array.from(atob(rb.prepared.transaction), (c) => c.charCodeAt(0))); }
         catch { setStep("error"); setMessage(t("Cancelaste la aprobación. No se movió dinero.")); return; }
-        setStep("confirming"); notify("secure", t("Recentrando tu bóveda"), t("Luego sumamos tu depósito…"));
+        setStep("confirming"); 
         let ok = false;
         for (let attempt = 0; attempt < 40 && !ok; attempt++) {
           const { status: next } = await readStatus({ data: { signature: rbSig } }).catch(() => ({ status: "pending" as PilotStatus }));
@@ -88,13 +87,13 @@ export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, 
         console.error("[pilot-deposit] wallet", detail);
         setStep("error"); setMessage(t("Cancelaste la aprobación. No se movió dinero.")); return;
       }
-      setSignature(sig); setStep("confirming"); notify("secure", t("Firma aprobada"), t("Confirmando en la red…"));
+      setSignature(sig); setStep("confirming"); 
       await new Promise((resolve) => setTimeout(resolve, 400));
       for (let attempt = 0; attempt < 40; attempt++) {
         const { status: next } = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as PilotStatus }));
         setStatus(next);
         if (next === "failed") { setStep("error"); setMessage(t("La red rechazó el depósito. Tu dinero sigue en tu billetera.")); return; }
-        if (next !== "pending") { setStep("done"); notify("success", t("Depósito confirmado"), t("Tus dólares ya están rindiendo")); void reportAffiliate(sig, "deposit", { amountUsd: amount.replace(/,/g, ""), vault: vaultId.toUpperCase().slice(0, 20) }); for (const k of ["real-solana", "my-wallet", "my-wallet-tokens", "meteora-history", "start-guide"]) void queryClient.invalidateQueries({ queryKey: [k, walletAddress] }); return; }
+        if (next !== "pending") { setStep("done"); void reportAffiliate(sig, "deposit", { amountUsd: amount.replace(/,/g, ""), vault: vaultId.toUpperCase().slice(0, 20) }); for (const k of ["real-solana", "my-wallet", "my-wallet-tokens", "meteora-history", "start-guide"]) void queryClient.invalidateQueries({ queryKey: [k, walletAddress] }); return; }
         await new Promise((resolve) => setTimeout(resolve, attempt < 3 ? 400 : attempt < 8 ? 800 : 2_000));
       }
       setStep("error"); setMessage(t("La confirmación tarda más de lo habitual. Revisa tu billetera antes de intentarlo otra vez."));

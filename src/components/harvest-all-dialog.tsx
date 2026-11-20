@@ -15,7 +15,6 @@ import { vaultSymbol, type OperableVault } from "@/lib/solana-data";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
-import { notify } from "@/lib/notify";
 
 export type HarvestTarget = { position: string; vaultId: OperableVault };
 type Quote = HarvestTarget & { r: HarvestResult };
@@ -76,7 +75,7 @@ export function HarvestAllDialog({ wallet, targets, onClose }: { wallet: string;
       } catch { failed.push(coin); if (!sigs.length && i === 0) { setError(t("Cancelaste la aprobación. No se movió dinero.")); setBusy(false); setStep(""); return; } }
     }
     await qc.invalidateQueries({ queryKey: ["real-solana", wallet] }); await qc.invalidateQueries({ queryKey: ["meteora-history", wallet] });
-    if (sigs.length) { notify("success", t("Ganancias cosechadas"), t("Ya están en la billetera")); setDone({ total, sigs, failed, refillMicro }); }
+    if (sigs.length) { setDone({ total, sigs, failed, refillMicro }); }
     else setError(t("No se pudo completar la cosecha. No se movió dinero."));
     setBusy(false); setStep("");
   }

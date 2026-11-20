@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { SignalErrorCard } from "@/components/signal-error";
 import { type OperableVault } from "@/lib/solana-data";
-import { notify } from "@/lib/notify";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -48,7 +47,7 @@ export function CompoundStep({ wallet, position, vaultId, usdcRaw, tokenRaw, net
       for (let attempt = 0; attempt < 30; attempt++) {
         const status = await readStatus({ data: { signature: sig } }).catch(() => ({ status: "pending" as const }));
         if (status.status === "failed") { setMessage(t("La red rechazó la reinversión; tus ganancias siguen en tu billetera.")); return; }
-        if (status.status !== "pending") { notify("success", t("Ganancias reinvertidas"), t("Se sumaron a tu posición")); setDone(true); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", wallet] }); return; }
+        if (status.status !== "pending") { setDone(true); await queryClient.invalidateQueries({ queryKey: ["real-solana", wallet] }); await queryClient.invalidateQueries({ queryKey: ["meteora-history", wallet] }); return; }
         await new Promise((r) => setTimeout(r, 2_000));
       }
       setMessage(t("La confirmación tarda más de lo habitual. Revisa tu billetera antes de intentarlo otra vez."));

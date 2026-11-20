@@ -1,5 +1,4 @@
 import { ServiceFeeLabel } from "@/components/service-fee-label";
-import { notify } from "@/lib/notify";
 import { ActionSuccess } from "@/components/action-success";
 import { TokenIcon } from "@/components/token-icon";
 import { useEffect, useState } from "react";
@@ -149,7 +148,7 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
     {quote.isError && <Button variant="outline" className="w-full" disabled={busy || !units} onClick={() => void quote.refetch()}><RefreshCw />{t("Actualizar cotización")}</Button>}
     <Button className="w-full" size={compact ? "default" : "lg"} disabled={busy || loading || !current || expired || insufficient || max === undefined} onClick={() => {
       if (!current || Date.now() - quote.dataUpdatedAt >= QUOTE_TTL || insufficient || busy) return;
-      void onConfirm(current).then(() => { notify("success", t("Cambio enviado"), `${format(current.amount, current.from)} ${current.from} → ${current.to}`); setDone(current); clear(); }).catch(() => {});
+      void onConfirm(current).then(() => { setDone(current); clear(); }).catch(() => {});
     }}>{busy ? t("Procesando…") : t("Confirmar y firmar cambio")}</Button>
     {!compact && <p className="text-xs text-muted-foreground">{t("La cotización no mueve tus fondos. El costo de red se paga aparte en SOL y lo verás en tu wallet antes de firmar.")}</p>}
   </div>;
