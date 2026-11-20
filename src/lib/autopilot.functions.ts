@@ -5,7 +5,7 @@ import { requirePrivyAuth } from "@/lib/privy-auth.middleware";
 const walletInput = z.object({ wallet: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/) }).strict();
 const enableInput = z.object({ wallet: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/), auto: z.boolean().optional() }).strict();
 /** `enrolled` = a choice was ever recorded for this wallet (on or off), so the default never overrides a user who switched it off. */
-export type AutopilotStatus = { enabled: boolean; enrolled: boolean; enabledAt: string | null; lastRebalanceAt: string | null; lastSignature: string | null; lastGainsUsd?: number | null; failures?: number };
+export type AutopilotStatus = { enabled: boolean; enrolled: boolean; enabledAt: string | null; lastRebalanceAt: string | null; lastSignature: string | null; lastGainsUsd?: number | null; failures?: number; lastVaultId?: string | null };
 
 const adminDb = async () => { const { supabaseAdmin } = await import("@/integrations/supabase/client.server"); return supabaseAdmin as unknown as { from: (t: string) => any }; };
 
