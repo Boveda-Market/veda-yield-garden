@@ -21,7 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getWalletPolicy } from "@/lib/wallet-policy.functions";
 import { IdleLogout } from "@/components/idle-logout";
 import { publishSession } from "@/lib/session-host";
-import { clearDeviceSession, rememberPasskey } from "@/lib/passkey-device";
+import { rememberPasskey } from "@/lib/passkey-device";
 import type { BovedaSession } from "@/hooks/use-boveda-session";
 
 // Privy only authorizes the official domains; preview/other hosts can never finish loading it.
@@ -141,7 +141,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
     if (tradeBlock === "treasury") throw new Error(t("Modo operador: la wallet de tesorería no puede operar en BÓVEDA."));
     if (tradeBlock === "external") throw new Error(t("Modo solo consulta: para operar, entra con Google, email o passkey y usa tu billetera protegida de BÓVEDA."));
   };
-  const doLogout = useCallback(async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); clearDeviceSession(); } catch { setError(t("No se pudo cerrar sesión. Inténtalo de nuevo.")); } }, [queryClient, logout]);
+  const doLogout = useCallback(async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError(t("No se pudo cerrar sesión. Inténtalo de nuevo.")); } }, [queryClient, logout]);
   const value: BovedaSession = {
     ready: ready || stalled, sessionKnown: ready || stalled, authenticated, userId: authenticated ? user?.id ?? null : null,
     label: user?.email?.address ?? user?.google?.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : t("Mi cuenta")),
@@ -157,7 +157,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
       message: securityMessage,
       linkEmail: () => { setSecurityMessage(null); linkEmail(); },
       updateEmail: () => { setSecurityMessage(null); update(); },
-      linkPasskey: () => { setSecurityMessage(null); linkPasskey({ name: (user?.email?.address ?? user?.google?.email) ? `${user?.email?.address ?? user?.google?.email} (BÓVEDA)` : "BÓVEDA" } as Parameters<typeof linkPasskey>[0]); },
+      linkPasskey: () => { setSecurityMessage(null); linkPasskey({ name: "BÓVEDA" }); },
       unlinkPasskeys: user && user.linkedAccounts.some(a => a.type === "passkey") && user.linkedAccounts.some(a => a.type === "email" || a.type === "google_oauth") ? async () => {
         setSecurityMessage(null);
         for (const a of user.linkedAccounts) if (a.type === "passkey") await unlinkPasskey(a.credentialId);
