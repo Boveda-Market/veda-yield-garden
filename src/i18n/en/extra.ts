@@ -1675,4 +1675,5 @@ export const extra: Record<string, string> = {
   "Explorar Bóveda TRUMP": "Explore TRUMP Vault",
   "Entrar con otra cuenta": "Sign in with another account",
   "Piloto automático rebalanceó {v}": "Autopilot rebalanced {v}",
+  "Vinculado": "Linked",
 };

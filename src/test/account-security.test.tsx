@@ -55,6 +55,12 @@ describe("verified account security", () => {
     expect(security.linkPasskey).toHaveBeenCalledOnce();
     expect(security.passkeyCount).toBe(0);
   });
+  it("shows Vinculado and only the unlink option when a fingerprint is linked", () => {
+    mount({ passkeyCount: 1, unlinkPasskeys: vi.fn(async () => {}) });
+    expect(screen.getByText("Vinculado")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Vincular huella o Face ID" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Desvincular huella" })).toBeTruthy();
+  });
   it("does not expose security settings to a guest", () => {
     mount({}, false);
     expect(screen.queryByRole("button")).toBeNull();

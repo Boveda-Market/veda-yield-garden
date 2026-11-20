@@ -21,7 +21,14 @@ function EntryButtons() {
   const [bio, setBio] = useState(false);
   useEffect(() => { if (deviceHasPasskey()) setBio(true); }, []);
   useEffect(() => { if ((session.security?.passkeyCount ?? 0) > 0) rememberPasskey(); }, [session.security?.passkeyCount]);
-  // Fingerprint opens only from a real tap: browsers reject sensor requests without one.
+  // Ask for the fingerprint once per visit; cancelling stays silent and it won't pop up again, so Google stays free to switch accounts.
+  useEffect(() => {
+    if (!bio || signup || !session.ready || session.authenticated) return;
+    try { if (sessionStorage.getItem("boveda:passkey-auto")) return; sessionStorage.setItem("boveda:passkey-auto", "1"); } catch { return; }
+    const id = setTimeout(() => session.login("passkey"), 400);
+    return () => clearTimeout(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bio, signup, session.ready, session.authenticated]);
   const navigate = useNavigate();
   const wasReturning = useRef<boolean | null>(null);
   if (wasReturning.current === null && typeof window !== "undefined") wasReturning.current = isReturning() && !isHeroReview();

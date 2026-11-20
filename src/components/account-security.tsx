@@ -1,6 +1,6 @@
 import { useT } from "@/lib/i18n";
 import { useState } from "react";
-import { Fingerprint, Trash2, Mail, ShieldCheck, Smartphone } from "lucide-react";
+import { CheckCircle2, Fingerprint, Trash2, Mail, ShieldCheck, Smartphone } from "lucide-react";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { Button } from "./ui/button";
 
@@ -40,13 +40,13 @@ export function AccountSecuritySettings() {
       </div>
       <div className="py-5">
         <h3 className="flex items-center gap-2 font-medium"><Fingerprint size={18} />{t("Acceso biométrico")}</h3>
-        <p className="mt-2 text-sm text-muted-foreground">{security.passkeyCount ? t("Huella o Face ID activado") : t("Sin huella ni Face ID configurado")}</p>
+        {security.passkeyCount ? <p className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary"><CheckCircle2 size={16} />{t("Vinculado")}</p> : <p className="mt-2 text-sm text-muted-foreground">{t("Sin huella ni Face ID configurado")}</p>}
         <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Entra con la huella, el rostro o el PIN de tu dispositivo, sin contraseña. Necesitas un dispositivo y navegador compatibles.")}</p>
-        <Button type="button" variant="outline" className="mt-3" onClick={() => security.linkPasskey()}><Fingerprint size={16} />{t("Vincular huella o Face ID")}</Button>
+        {security.passkeyCount === 0 && <Button type="button" variant="outline" className="mt-3" onClick={() => security.linkPasskey()}><Fingerprint size={16} />{t("Vincular huella o Face ID")}</Button>}
         {security.passkeyCount > 0 && (security.unlinkPasskeys
           ? (confirming
             ? <div className="mt-3 rounded-xl border border-destructive/40 bg-destructive/5 p-3"><p className="text-sm">{t("¿Desvincular tu huella o Face ID? Podrás volver a activarlo cuando quieras.")}</p><div className="mt-2 flex gap-2"><Button type="button" size="sm" variant="destructive" disabled={busy} onClick={() => void removePasskeys()}>{busy ? t("Un momento…") : t("Sí, desvincular")}</Button><Button type="button" size="sm" variant="ghost" disabled={busy} onClick={() => setConfirming(false)}>{t("Cancelar")}</Button></div></div>
-            : <Button type="button" variant="ghost" className="mt-3 ml-2 text-destructive hover:text-destructive" onClick={() => setConfirming(true)}><Trash2 size={16} />{t("Desvincular huella")}</Button>)
+            : <Button type="button" variant="ghost" className="mt-3 text-destructive hover:text-destructive" onClick={() => setConfirming(true)}><Trash2 size={16} />{t("Desvincular huella")}</Button>)
           : <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Para desvincular la huella, primero vincula un correo o Google, así nunca pierdes el acceso a tu cuenta.")}</p>)}
       </div>
       <div className="py-5">

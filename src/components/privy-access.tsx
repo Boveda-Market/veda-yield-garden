@@ -157,7 +157,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
       message: securityMessage,
       linkEmail: () => { setSecurityMessage(null); linkEmail(); },
       updateEmail: () => { setSecurityMessage(null); update(); },
-      linkPasskey: () => { setSecurityMessage(null); linkPasskey({ name: "BÓVEDA" }); },
+      linkPasskey: () => { if (user?.linkedAccounts.some(a => a.type === "passkey")) return; setSecurityMessage(null); linkPasskey({ name: "BÓVEDA" }); },
       unlinkPasskeys: user && user.linkedAccounts.some(a => a.type === "passkey") && user.linkedAccounts.some(a => a.type === "email" || a.type === "google_oauth") ? async () => {
         setSecurityMessage(null);
         for (const a of user.linkedAccounts) if (a.type === "passkey") await unlinkPasskey(a.credentialId);
