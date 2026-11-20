@@ -132,9 +132,9 @@ export function Gta6RotatingBanner({ cta, sub, index, dots = true }: { cta: Reac
   const aprNum = apr.endsWith(" APR") ? apr.replace(" APR", "") : apr;
   const slides = [
     <span key="a" className="flex h-full flex-col bg-[image:var(--gradient-hot)]">
-      <span className="relative block h-24 px-3.5 py-2.5"><Sunset />
-        <span className="relative flex flex-col gap-2"><span className="w-fit rounded-full bg-hot-surface/80 px-2 py-0.5 text-[10px] font-black uppercase">🎰 {t("Sé la casa")} · ● {t("En vivo")}</span>{title}</span>
-        <span className="hot-cta absolute bottom-3 left-3.5 flex items-end gap-1 rounded-xl px-2.5 py-1 leading-none text-hot-surface"><Flame size={18} aria-hidden className="flame-flicker" /><span className="font-display text-2xl font-black tabular-nums">{aprNum}</span>{apr.endsWith(" APR") && <span className="text-[10px] font-black">APR</span>}</span>
+      <span className="relative block flex-1 px-3.5 py-2"><Sunset />
+        <span className="relative flex flex-col gap-1"><span className="w-fit rounded-full bg-hot-surface/80 px-2 py-0.5 text-[10px] font-black uppercase">🎰 {t("Sé la casa")} · ● {t("En vivo")}</span>{title}</span>
+        <span className="hot-cta absolute bottom-2 right-3.5 flex items-end gap-1 rounded-xl px-2.5 py-1 leading-none text-hot-surface"><Flame size={18} aria-hidden className="flame-flicker" /><span className="font-display text-2xl font-black tabular-nums">{aprNum}</span>{apr.endsWith(" APR") && <span className="text-[10px] font-black">APR</span>}</span>
       </span>
       <span className="flex items-center justify-between gap-2 bg-hot-surface px-3.5 py-2 text-sm font-extrabold">{cta}</span>
     </span>,

@@ -969,6 +969,8 @@ export const extra: Record<string, string> = {
   "Manejar posiciones": "Manage positions",
   "Cerrar detalles": "Close details",
   "Ver ganancias": "View earnings",
+  "Piloto activo": "Autopilot on",
+  "Moneda del presidente": "The president's coin",
   "Elige una bóveda y pon tu dinero a trabajar": "Pick a vault and put your money to work",
   "Cosecha ganancias y retira capital": "Harvest earnings and withdraw capital",
   "Ganas si sube, ganas si baja · Cobra cuando quieras": "Win if it rises, win if it falls · Claim anytime",

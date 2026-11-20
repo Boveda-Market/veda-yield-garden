@@ -67,13 +67,13 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
   const act = (p: ChainPosition, a: "harvest" | "exit" | "compound") => { if (!isOperableVault(p.vaultId)) return; setOpen(false); if (a === "exit") setWithdrawal({ position: p.address, vaultId: p.vaultId }); else setHarvest({ position: p.address, vaultId: p.vaultId, compound: a === "compound" }); };
   const move = (p: ChainPosition, target: Vault, rotate = false) => { if (!isOperableVault(p.vaultId) || !isOperableVault(target.id) || p.locked || (target.id === p.vaultId && !rotate)) return; setOpen(false); setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target, ...(rotate ? { rotate: true } : {}) }); };
   const refetch = () => void vaults.refetch();
-  const ctaFor = (m: ChainPosition | undefined) => m ? <><span>{m.outOfRange ? <><Zap size={14} aria-hidden className="mr-1 inline" />{t("Piloto automático la recentra")}</> : <>👉 {t("Oprime aquí para ver ganancias")}</>}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : <><span>👉 {t("Oprime aquí para depositar")}</span><ChevronRight size={16} aria-hidden /></>;
-  const cta = mine ? <><span>{mine.outOfRange ? <><Zap size={14} aria-hidden className="mr-1 inline" />{t("Piloto automático la recentra")}</> : <>👉 {t("Oprime aquí para ver ganancias")}</>}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : <><span>👉 {t("Oprime aquí para depositar")}</span><ChevronRight size={16} aria-hidden /></>;
+  const ctaFor = (m: ChainPosition | undefined) => m ? <><span className="truncate">{m.outOfRange ? <><Zap size={14} aria-hidden className="mr-1 inline" />{t("Piloto activo")}</> : <>👉 {t("Ver ganancias")}</>}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : <><span>👉 {t("Oprime aquí para depositar")}</span><ChevronRight size={16} aria-hidden /></>;
+  const cta = mine ? <><span className="truncate">{mine.outOfRange ? <><Zap size={14} aria-hidden className="mr-1 inline" />{t("Piloto activo")}</> : <>👉 {t("Ver ganancias")}</>}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : <><span>👉 {t("Oprime aquí para depositar")}</span><ChevronRight size={16} aria-hidden /></>;
   const sub = t("Intereses con el volumen de GTA6");
   const [step, pickSlide] = useBannerStep();
   const rail = useRef<HTMLDivElement>(null);
   const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const layer = "w-full shrink-0 snap-center";
+  const layer = "h-32 w-full shrink-0 snap-center overflow-hidden";
   // Auto-rotation slides the rail across all 12 slides; a finger swipe picks the slide it settles on.
   useEffect(() => { const el = rail.current; if (!el) return; const left = step * el.clientWidth; if (Math.abs(el.scrollLeft - left) > 4) el.scrollTo({ left, behavior: "smooth" }); }, [step]);
   const onRailScroll = () => { if (scrollTimer.current) clearTimeout(scrollTimer.current); scrollTimer.current = setTimeout(() => { const el = rail.current; if (!el || !el.clientWidth) return; const idx = Math.round(el.scrollLeft / el.clientWidth); if (idx !== step && idx >= 0 && idx < STEPS) pickSlide(idx); }, 120); };
@@ -82,14 +82,14 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
     if (kd === 1) return <div key={k} className={layer}><Link to="/mercados" className="duel-ring block h-full rounded-2xl p-[2px] shadow-[var(--shadow-duel)] transition-transform active:scale-[0.98]"><DobleBannerSlide index={i} /></Link></div>;
     const id = kd === 0 ? "gta6" : kd === 2 ? "dcty" : "trump";
     const m = kd === 0 ? mine : kd === 2 ? mineDcty : mineTrump;
-    const body = kd === 0 ? <Gta6RotatingBanner cta={cta} sub={sub} index={i} dots={false} /> : kd === 2 ? <DctyBannerSlide index={i} cta={ctaFor(mineDcty)} /> : <TrumpBannerSlide index={i} cta={mineTrump ? <><span className="trump-gold font-display text-sm font-black uppercase tracking-wide">🇺🇸 {t("La moneda oficial del presidente")}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : ctaFor(mineTrump)} />;
+    const body = kd === 0 ? <Gta6RotatingBanner cta={cta} sub={sub} index={i} dots={false} /> : kd === 2 ? <DctyBannerSlide index={i} cta={ctaFor(mineDcty)} /> : <TrumpBannerSlide index={i} cta={mineTrump ? <><span className="trump-gold truncate font-display text-xs font-black uppercase">🇺🇸 {t("Moneda del presidente")}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : ctaFor(mineTrump)} />;
     return <div key={k} className={`${layer} ${kd === 2 ? "vault-dcty" : kd === 3 ? "vault-trump" : ""}`}>
       {m ? <button type="button" onClick={() => setOpenId(id)} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{body}</button>
       : <Link to="/app" hash={`open-${id}`} className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{body}</Link>}
     </div>;
   };
   return <section aria-label={t("Bóveda GTA6")}>
-    <div ref={rail} onScroll={onRailScroll} className="flex snap-x snap-mandatory items-stretch gap-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div ref={rail} onScroll={onRailScroll} className="flex h-32 snap-x snap-mandatory items-stretch gap-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {Array.from({ length: STEPS }, (_, k) => slide(k))}
     </div>
     <div aria-hidden className="mt-2 flex justify-center gap-1">{Array.from({ length: STEPS }, (_, k) => <span key={k} className={`h-1.5 rounded-full transition-all ${k === step ? "w-4" : "w-1.5 opacity-40"} ${k % 4 === 0 ? "bg-hot" : k % 4 === 1 ? "bg-bolt-neon" : k % 4 === 2 ? "bg-dcty" : "bg-[#c8102e]"}`} />)}</div>
