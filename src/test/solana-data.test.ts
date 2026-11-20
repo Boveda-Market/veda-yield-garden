@@ -19,6 +19,7 @@ describe("Real chain amounts and supported pools", () => {
       "BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1",
       "99bL7ZdcQxcrkdJDKGoGpAhqZUMYEHzhMvtNadiZJpE8",
       "F7jNbQWivmiBDjzHDxQq32oWLW6cju4CdGyVw9RZV6tX",
+      "3C5YE97HADPDxZehYq9Cis8AXr9aNyrUsczKzE1nDbW9",
     ]);
     expect(USDC_MINT).toBe("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
   });

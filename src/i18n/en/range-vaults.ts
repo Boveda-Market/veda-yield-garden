@@ -242,6 +242,9 @@ export const rangeVaults: Record<string, string> = {
   "Intereses del pool completo, estimados con su volumen. Tu parte depende de tu depósito.": "Whole-pool interest, estimated from its volume. Your share depends on your deposit.",
   // DCTY vault (DacityCoin)
   "Bóveda DCTY": "DCTY Vault",
+  "Bóveda TRUMP": "TRUMP Vault",
+  "Tu Bóveda TRUMP": "Your TRUMP Vault",
+  "La moneda OFFICIAL TRUMP · Volumen gigante": "The OFFICIAL TRUMP coin · Huge volume",
   "Tu Bóveda DCTY": "Your DCTY Vault",
   "Intereses brutales impulsados por el volumen de DacityCoin, la cripto que viste en GTA 6. Tu dinero trabaja concentrado en la zona caliente de intercambio: mientras el precio esté en rango, cosechas a máxima velocidad. Si el mercado se mueve fuerte, el piloto automático rebalancea y reinvierte tus ganancias para mantenerte en la jugada.": "Brutal interest powered by DacityCoin volume, the crypto you saw in GTA 6. Your money works concentrated in the hot trading zone: while the price is in range, you harvest at full speed. If the market moves hard, Autopilot rebalances and reinvests your earnings to keep you in the game.",
   "Moneda comunitaria independiente de alta volatilidad, sin vínculo con Rockstar Games ni Take-Two Interactive.": "Independent, high-volatility community coin, not affiliated with Rockstar Games or Take-Two Interactive.",

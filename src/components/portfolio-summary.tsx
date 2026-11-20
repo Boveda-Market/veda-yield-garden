@@ -19,6 +19,7 @@ import { capitalSeries } from "@/lib/weekly-interest";
 import { useLocale } from "@/lib/i18n";
 import { TokenIcon } from "@/components/token-icon";
 import dctyLogo from "@/assets/dcty-logo.png";
+import trumpLogo from "@/assets/trump-logo.png";
 import { Check, Copy } from "lucide-react";
 
 const COLORS = ["bg-primary", "bg-chart-1", "bg-chart-2", "bg-chart-4", "bg-chart-3", "bg-chart-5"];
@@ -176,7 +177,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     </div>
     {open.length > 0 && <div role="tablist" aria-label={t("Bóvedas")} className="relative mt-3 flex gap-2 overflow-x-auto pb-1">{vtab("global", t("Global"))}{open.map((v) => vtab(v.id, `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}`))}</div>}
     {cur && chain && <div className="relative mt-3 flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-muted/40 p-2.5">
-      {cur.id === "dcty" ? <img src={dctyLogo} alt="DCTY" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" /> : <TokenIcon symbol={chain.symbol} size={36} />}
+      {cur.id === "trump" ? <img src={trumpLogo} alt="TRUMP" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" /> : cur.id === "dcty" ? <img src={dctyLogo} alt="DCTY" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" /> : <TokenIcon symbol={chain.symbol} size={36} />}
       <div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-bold">{chain.symbol} <span className="font-normal text-muted-foreground">/ USDC</span></p>
         <button type="button" onClick={copyMint} aria-label={t("Copiar contrato")} className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-background/70 px-2 py-0.5 font-mono text-[11px] text-muted-foreground hover:text-foreground">{copied ? <><Check size={11} className="text-primary" />{t("Copiado")}</> : <><Copy size={11} />{chain.mint.slice(0, 4)}…{chain.mint.slice(-4)}</>}</button></div>
       {vinfo?.links && <a href={vinfo.links.gmgn} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-bold"><img src="/gmgn-logo.png" alt="" width={16} height={16} className="h-4 w-4 rounded-sm" />{t("Ver gráfica")}</a>}

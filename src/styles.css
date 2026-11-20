@@ -368,6 +368,17 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
   --gradient-hot-surface: radial-gradient(110% 90% at 100% 0%, oklch(0.45 0.22 350 / 0.5), transparent 55%), radial-gradient(90% 80% at 0% 100%, oklch(0.5 0.14 205 / 0.4), transparent 60%), linear-gradient(var(--hot-surface), var(--hot-surface));
   --shadow-hot: 0 18px 50px -18px oklch(0.7 0.27 350 / 0.7);
 }
+.vault-trump {
+  --hot: oklch(0.82 0.15 85);
+  --hot-2: oklch(0.88 0.13 92);
+  --hot-3: oklch(0.6 0.22 27);
+  --hot-surface: oklch(0.2 0.06 262);
+  --hot-foreground: oklch(0.98 0.01 90);
+  --hot-muted: oklch(0.82 0.04 260);
+  --gradient-hot: linear-gradient(100deg, var(--hot-3), var(--hot) 50%, var(--hot-2));
+  --gradient-hot-surface: radial-gradient(110% 90% at 100% 0%, oklch(0.6 0.14 85 / 0.45), transparent 55%), radial-gradient(90% 80% at 0% 100%, oklch(0.5 0.2 27 / 0.35), transparent 60%), linear-gradient(var(--hot-surface), var(--hot-surface));
+  --shadow-hot: 0 18px 50px -18px oklch(0.82 0.15 85 / 0.6);
+}
 @keyframes dcty-drive { from { transform: translateX(-30%); } to { transform: translateX(130%); } }
 .dcty-boat { animation: dcty-drive 9s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .dcty-boat { animation: none; } }
