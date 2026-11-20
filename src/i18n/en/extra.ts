@@ -1661,4 +1661,9 @@ export const extra: Record<string, string> = {
   "Tu Bóveda TRUMP": "Your TRUMP Vault",
   "La moneda del presidente, cobrando para ti.": "The president's coin, earning for you.",
   "Cada compra y venta de TRUMP te deja intereses.": "Every TRUMP buy and sell earns you interest.",
+  "Deja de adivinar qué sube.": "Stop guessing what goes up.",
+  "Cobra de cada compra y venta.": "Earn from every buy and sell.",
+  "Mientras todos especulan, tú estás del lado de la casa: tus dólares recogen intereses en piloto automático.": "While everyone speculates, you're on the house's side: your dollars collect interest on autopilot.",
+  "Bóvedas de alto riesgo: el valor de tu depósito sube y baja con el mercado.": "High-risk vaults: your deposit's value rises and falls with the market.",
+  "Ver bóvedas de alto octanaje": "See high-octane vaults",
 };
