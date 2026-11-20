@@ -1660,6 +1660,7 @@ export const extra: Record<string, string> = {
   "El valor de tu posición cambia con las compras y ventas rápidas del mercado.": "Your position's value changes with fast market buying and selling.",
   "Tu Bóveda TRUMP": "Your TRUMP Vault",
   "La moneda del presidente, cobrando para ti.": "The president's coin, earning for you.",
+  "La moneda oficial del presidente": "The president's official coin",
   "Cada compra y venta de TRUMP te deja intereses.": "Every TRUMP buy and sell earns you interest.",
   "Deja de adivinar qué sube.": "Stop guessing what goes up.",
   "Cobra de cada compra y venta.": "Earn from every buy and sell.",

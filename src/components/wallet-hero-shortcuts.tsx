@@ -82,7 +82,7 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
     if (kd === 1) return <div key={k} className={layer}><Link to="/mercados" className="duel-ring block h-full rounded-2xl p-[2px] shadow-[var(--shadow-duel)] transition-transform active:scale-[0.98]"><DobleBannerSlide index={i} /></Link></div>;
     const id = kd === 0 ? "gta6" : kd === 2 ? "dcty" : "trump";
     const m = kd === 0 ? mine : kd === 2 ? mineDcty : mineTrump;
-    const body = kd === 0 ? <Gta6RotatingBanner cta={cta} sub={sub} index={i} dots={false} /> : kd === 2 ? <DctyBannerSlide index={i} cta={ctaFor(mineDcty)} /> : <TrumpBannerSlide index={i} cta={ctaFor(mineTrump)} />;
+    const body = kd === 0 ? <Gta6RotatingBanner cta={cta} sub={sub} index={i} dots={false} /> : kd === 2 ? <DctyBannerSlide index={i} cta={ctaFor(mineDcty)} /> : <TrumpBannerSlide index={i} cta={mineTrump ? <><span className="trump-gold font-display text-sm font-black uppercase tracking-wide">🇺🇸 {t("La moneda oficial del presidente")}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : ctaFor(mineTrump)} />;
     return <div key={k} className={`${layer} ${kd === 2 ? "vault-dcty" : kd === 3 ? "vault-trump" : ""}`}>
       {m ? <button type="button" onClick={() => setOpenId(id)} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{body}</button>
       : <Link to="/app" hash={`open-${id}`} className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{body}</Link>}
