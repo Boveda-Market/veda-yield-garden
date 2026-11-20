@@ -1475,6 +1475,7 @@ export const extra: Record<string, string> = {
   "Estás a un paso de comenzar": "You're one step away",
   "Te faltan {amount} para activar tu cuenta y abrir tu primera bóveda.": "You need {amount} more to activate your account and open your first vault.",
   "Depositar lo que falta ({amount})": "Deposit what's missing ({amount})",
+  "en 24 h": "in 24 h",
   "Continuar para depositar": "Continue to deposit",
   "Preparamos tu billetera para invertir en bóvedas y hacer tus movimientos sin trabas.": "We get your wallet ready to invest in vaults and move freely.",
   "Activar cuenta": "Activate account",

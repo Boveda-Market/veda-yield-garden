@@ -55,7 +55,7 @@ export function WalletPanel() {
   const vaults = useWalletVaults(address ?? "");
   const refunds = usePredictRefunds(address);
   const vaultPositions = vaults.data?.success ? vaults.data.data.positions : [];
-  const { rows: vaultRows, capital, knownCapital, loading: pricesLoading, totalFees } = usePositionRows(vaultPositions);
+  const { rows: vaultRows, capital, knownCapital, loading: pricesLoading, totalFees, change24h } = usePositionRows(vaultPositions);
   const liveRate = vaultRows.reduce((s, r) => s + (r.p.locked || r.p.outOfRange ? 0 : earningRatePerMs(r.value, r.apr)), 0);
   // Accumulated vault earnings count in the total (they are the person's money); won-but-unclaimed prizes stay apart.
   const predict = usePredictPositions(address);
@@ -206,6 +206,20 @@ export function WalletPanel() {
     <section className="rounded-3xl border border-border bg-card p-6">
       <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{vaultPositions.length > 0 || jupUsd > 0 ? t("Balance total") : t("Balance en USDC")}</p><Button variant="ghost" size="sm" onClick={() => { void balances.refetch(); void extra.refetch(); void prices.refetch(); void queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); void queryClient.invalidateQueries({ queryKey: ["predict-positions", address] }); }} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
       <div className="mt-1 flex items-center gap-2">{balances.data?.usdc !== undefined && (hidden || working !== null) ? <p className="font-display text-4xl">{hidden ? MASK : <AnimatedMoney value={(Number(balances.data.usdc) / 1e6) + jupUsd + (working ?? 0) + totalFees} ratePerMs={liveRate} />}</p> : <BalanceLoading />}<button type="button" onClick={() => setHidden(!hidden)} aria-label={hidden ? t("Mostrar saldos") : t("Ocultar saldos")} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{hidden ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
+      {(() => {
+        if (hidden || balances.data?.usdc === undefined || working === null) return null;
+        const total = (Number(balances.data.usdc) / 1e6) + jupUsd + working + totalFees;
+        const solPrice = prices.data?.["SOL"];
+        const move = vaultPositions.length > 0 ? change24h : null;
+        const base = move !== null ? total - move : 0;
+        const pct = move !== null && base > 0 ? (move / base) * 100 : null;
+        const up = (move ?? 0) >= 0;
+        if (move === null && !solPrice) return null;
+        return <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs tabular-nums">
+          {move !== null && <span className={`font-medium ${up ? "text-primary" : "text-destructive"}`}>{up ? "+" : "-"}${fmt(Math.abs(move))}{pct !== null && ` (${up ? "+" : "-"}${Math.abs(pct).toFixed(2)}%)`} <span className="font-normal text-muted-foreground">{t("en 24 h")}</span></span>}
+          {solPrice ? <span className="text-muted-foreground">≈ {fmt(total / solPrice, 3)} SOL</span> : null}
+        </div>;
+      })()}
       {balances.data && balances.data.usdc === 0n && balances.data.sol === 0n && working === 0 ? <p role="status" className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"><RefreshCw size={12} className="animate-spin" />{t("Comprobando llegada de fondos…")}</p> : null}
       {vaultPositions.length > 0 && balances.data?.usdc !== undefined && <div className="mt-2 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{t("Disponible")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(Number(balances.data.usdc) / 1e6)}`}</span></span>{balances.data.usdc >= 20_000_000n && <Link to="/app" className="reinvest-attn relative inline-flex items-center gap-1 overflow-hidden rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-medium text-primary transition-colors hover:bg-primary/15"><ArrowLeft size={14} strokeWidth={2.75} aria-hidden />{t("Reinvertir")}</Link>}<Link to="/portfolio" className="rounded-full bg-primary/10 px-3 py-1 text-primary"><span>{t("Trabajando")}:</span> <span className="font-medium">{hidden ? MASK : working === null ? <BalanceLoading compact /> : `$${fmt(working)}`}</span></Link></div>}
       {(vaults.isLoading || (vaultPositions.length > 0 && pricesLoading && totalFees === 0)) && <SyncPill />}
