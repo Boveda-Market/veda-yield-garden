@@ -1,7 +1,7 @@
 import { LightningBadge } from "@/components/lightning-badge";
 import dobleLogo from "@/assets/doble-o-nada-logo.png";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DobleBannerSlide } from "@/components/doble-banners";
 import { DctyBannerSlide } from "@/components/dcty-banners";
 import { TrumpBannerSlide } from "@/components/trump-banners";
@@ -27,6 +27,7 @@ const STEP_KEY = "boveda:wallet-banner";
 /** Top rotation step: GTA6, Doble o Nada and DCTY slides take turns every 7 s (step % 4), starting on the next one each visit. */
 function useBannerStep() {
   const [step, setStep] = useState(0);
+  const [tick, setTick] = useState(0);
   useEffect(() => {
     let start = 0;
     try {
@@ -35,11 +36,15 @@ function useBannerStep() {
       else { start = (Number(localStorage.getItem(STEP_KEY) ?? -1) + 1) % STEPS; localStorage.setItem(STEP_KEY, String(start)); sessionStorage.setItem(STEP_KEY, String(start)); }
     } catch { /* storage blocked */ }
     setStep(Number.isFinite(start) ? start : 0);
+  }, []);
+  useEffect(() => {
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     const id = setInterval(() => setStep((v) => (v + 1) % STEPS), 7000);
     return () => clearInterval(id);
-  }, []);
-  return step;
+  }, [tick]);
+  // Manual swipe: jump to that slide and restart the 7 s timer so it doesn't move right away.
+  const pick = (kind: number) => { setStep((v) => v - (v % 4) + kind); setTick((x) => x + 1); };
+  return [step, pick] as const;
 }
 
 /** Two compact, high-energy entry tiles kept at the top of Mi Billetera so they stay in the phone's first screen. APR is the live estimate, never hardcoded. */
@@ -65,26 +70,31 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
   const ctaFor = (m: ChainPosition | undefined) => m ? <><span>{m.outOfRange ? <><Zap size={14} aria-hidden className="mr-1 inline" />{t("Piloto automático la recentra")}</> : <>👉 {t("Oprime aquí para ver ganancias")}</>}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : <><span>👉 {t("Oprime aquí para depositar")}</span><ChevronRight size={16} aria-hidden /></>;
   const cta = mine ? <><span>{mine.outOfRange ? <><Zap size={14} aria-hidden className="mr-1 inline" />{t("Piloto automático la recentra")}</> : <>👉 {t("Oprime aquí para ver ganancias")}</>}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : <><span>👉 {t("Oprime aquí para depositar")}</span><ChevronRight size={16} aria-hidden /></>;
   const sub = t("Intereses con el volumen de GTA6");
-  const step = useBannerStep();
+  const [step, pickSlide] = useBannerStep();
+  const rail = useRef<HTMLDivElement>(null);
+  const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const kind = step % 4, isGta = kind === 0, isDoble = kind === 1, isDcty = kind === 2, isTrump = kind === 3;
-  const layer = (on: boolean) => `col-start-1 row-start-1 transition-opacity duration-700 ${on ? "opacity-100" : "pointer-events-none opacity-0"}`;
+  const layer = (_on: boolean) => "w-full shrink-0 snap-center";
+  // Auto-rotation slides the rail; a finger swipe picks the slide it settles on.
+  useEffect(() => { const el = rail.current; if (!el) return; const left = kind * el.clientWidth; if (Math.abs(el.scrollLeft - left) > 4) el.scrollTo({ left, behavior: "smooth" }); }, [kind]);
+  const onRailScroll = () => { if (scrollTimer.current) clearTimeout(scrollTimer.current); scrollTimer.current = setTimeout(() => { const el = rail.current; if (!el || !el.clientWidth) return; const idx = Math.round(el.scrollLeft / el.clientWidth); if (idx !== kind && idx >= 0 && idx < 4) pickSlide(idx); }, 120); };
   const gtaBanner = <Gta6RotatingBanner cta={cta} sub={sub} index={Math.floor(step / 4)} dots={false} />;
   const trumpBanner = <TrumpBannerSlide index={Math.floor(step / 4)} cta={ctaFor(mineTrump)} />;
   const dctyBanner = <DctyBannerSlide index={Math.floor(step / 4)} cta={ctaFor(mineDcty)} />;
   return <section aria-label={t("Bóveda GTA6")}>
-    <div className="grid">
-      <div className={layer(isGta)} inert={!isGta}>
+    <div ref={rail} onScroll={onRailScroll} className="flex snap-x snap-mandatory items-stretch gap-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className={layer(isGta)}>
         {mine ? <button type="button" onClick={() => setOpenId("gta6")} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{gtaBanner}</button>
         : <Link to="/app" hash="open-gta6" className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{gtaBanner}</Link>}
       </div>
-      <div className={layer(isDoble)} inert={!isDoble}>
+      <div className={layer(isDoble)}>
         <Link to="/mercados" className="duel-ring block h-full rounded-2xl p-[2px] shadow-[var(--shadow-duel)] transition-transform active:scale-[0.98]"><DobleBannerSlide index={Math.floor(step / 4)} /></Link>
       </div>
-      <div className={`${layer(isDcty)} vault-dcty`} inert={!isDcty}>
+      <div className={`${layer(isDcty)} vault-dcty`}>
         {mineDcty ? <button type="button" onClick={() => setOpenId("dcty")} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{dctyBanner}</button>
         : <Link to="/app" hash="open-dcty" className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{dctyBanner}</Link>}
       </div>
-      <div className={`${layer(isTrump)} vault-trump`} inert={!isTrump}>
+      <div className={`${layer(isTrump)} vault-trump`}>
         {mineTrump ? <button type="button" onClick={() => setOpenId("trump")} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{trumpBanner}</button>
         : <Link to="/app" hash="open-trump" className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{trumpBanner}</Link>}
       </div>

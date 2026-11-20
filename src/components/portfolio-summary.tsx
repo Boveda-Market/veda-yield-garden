@@ -20,7 +20,8 @@ import { useLocale } from "@/lib/i18n";
 import { TokenIcon } from "@/components/token-icon";
 import dctyLogo from "@/assets/dcty-logo.png";
 import trumpLogo from "@/assets/trump-logo.png";
-import { Check, Copy } from "lucide-react";
+import { Check, CheckCircle2, ChevronDown, Copy } from "lucide-react";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 
 const COLORS = ["bg-primary", "bg-chart-1", "bg-chart-2", "bg-chart-4", "bg-chart-3", "bg-chart-5"];
 
@@ -48,7 +49,7 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
   const loading = history.query.isFetching ? t("Calculando…") : "—";
 
   return <section id="rendimiento" aria-label={t("Rendimiento de tu portafolio")} className="scroll-mt-20 py-8">
-    <h2 className="flex items-center gap-2 font-display text-lg font-semibold"><TrendingUp size={18} className="text-primary" />{t("Tu rendimiento")}</h2>
+    <h2 className="flex items-center gap-2 font-display text-lg font-semibold"><TrendingUp size={18} className="text-primary" />{t("Mi rendimiento")}</h2>
     <WeeklyChart records={history.records} poolPrices={history.poolPrices} money={money} vaults={byVault} />
 
     <div className={`${tile} mt-4`}>
@@ -95,6 +96,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const dn = n === 1 ? 2 : n;
   const range: ChartRange = n === 1 ? "24h" : n === 7 ? "7d" : "30d";
   const [tabId, setTab] = useState<string>("global");
+  const [pickOpen, setPickOpen] = useState(false);
   const open = vaults.map((v) => ({ ...v, pool: VAULTS.find((x) => x.id === v.id)?.pool ?? "" })).filter((v) => v.pool);
   const active = open.find((v) => v.id === tabId) ? tabId : "global";
   const candleQ = useQueries({ queries: open.map((v) => ({ queryKey: ["pool-daily", v.pool, 30], queryFn: ({ signal }: { signal: AbortSignal }) => fetchDailyCloses(v.pool, 31, signal), staleTime: 10 * 60_000, retry: 1 })) });
@@ -175,7 +177,9 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
       <p className="text-sm font-semibold">{isPrice ? t("Mercado {s}", { s: sym }) : t("Mercado global")}</p>
       <div className="inline-flex items-center rounded-xl border border-border bg-muted/60 p-1 text-xs font-medium">{tab(1, t("24 h"))}{tab(7, t("7 días"))}{tab(30, t("30 días"))}</div>
     </div>
-    {open.length > 0 && <div role="tablist" aria-label={t("Bóvedas")} className="relative mt-3 flex gap-2 overflow-x-auto pb-1">{vtab("global", t("Global"))}{open.map((v) => vtab(v.id, `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}`))}</div>}
+    {open.length > 2 && (() => { const opts = [{ id: "global", label: t("Global") }, ...open.map((v) => ({ id: v.id, label: `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}` }))]; const curLabel = opts.find((o) => o.id === active)?.label ?? t("Global"); return <Drawer open={pickOpen} onOpenChange={setPickOpen}><DrawerTrigger asChild><button type="button" aria-label={t("Bóvedas")} className="relative mt-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 py-1.5 text-xs font-bold">{curLabel}<ChevronDown size={14} aria-hidden /></button></DrawerTrigger>
+      <DrawerContent><DrawerHeader><DrawerTitle>{t("Bóvedas")}</DrawerTitle></DrawerHeader><div className="grid gap-2 px-4 pb-6">{opts.map((o) => <button key={o.id} type="button" aria-pressed={active === o.id} onClick={() => { setTab(o.id); setSel(null); setPickOpen(false); }} className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium ${active === o.id ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>{o.label}{active === o.id && <CheckCircle2 size={16} />}</button>)}</div></DrawerContent></Drawer>; })()}
+    {open.length > 0 && open.length <= 2 && <div role="tablist" aria-label={t("Bóvedas")} className="relative mt-3 flex gap-2 overflow-x-auto pb-1">{vtab("global", t("Global"))}{open.map((v) => vtab(v.id, `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}`))}</div>}
     {cur && chain && <div className="relative mt-3 flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-muted/40 p-2.5">
       {cur.id === "trump" ? <img src={trumpLogo} alt="TRUMP" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" /> : cur.id === "dcty" ? <img src={dctyLogo} alt="DCTY" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" /> : <TokenIcon symbol={chain.symbol} size={36} />}
       <div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-bold">{chain.symbol} <span className="font-normal text-muted-foreground">/ USDC</span></p>

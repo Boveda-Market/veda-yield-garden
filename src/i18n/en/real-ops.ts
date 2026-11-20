@@ -298,6 +298,7 @@ export const realOps: Record<string, string> = {
   "próximas 24h": "next 24h",
   "Rendimiento de tu portafolio": "Your portfolio performance",
   "Tu rendimiento": "Your performance",
+  "Mi rendimiento": "My performance",
   "APR promedio": "Average APR",
   "Distribución de tu capital": "How your capital is split",
   "Cuando tengas dinero en bóvedas o jugadas verás aquí cómo se reparte.": "Once you have money in vaults or plays, you'll see how it's split here.",
