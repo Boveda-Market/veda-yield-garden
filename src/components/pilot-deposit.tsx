@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ActionSuccess } from "@/components/action-success";
 import { WorkingLine } from "@/components/move-steps";
 import { notify } from "@/lib/notify";
+import { markTrumpTouched } from "@/lib/weekly-ad";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { pilotDepositStatus, preparePilotDeposit } from "@/lib/pilot-deposit.functions";
@@ -101,6 +102,7 @@ export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, 
   }
 
   if (!eligible) return <p className="border-t border-border pt-4 text-xs text-muted-foreground">{t("Los depósitos no están disponibles para esta bóveda.")}</p>;
+  if (step === "done" && vaultId === "trump") markTrumpTouched();
   if (step === "done") return <>
     <p role="status" className="sr-only">{t("Depósito confirmado en la red (")}{t(status === "finalized" ? "finalizado" : "confirmado")}).</p>
     <ActionSuccess title={migrate ? t("¡Cambio de bóveda listo!") : t("¡Depósito exitoso!")} body={migrate ? t("Lo que moviste ya está generando en la nueva bóveda.") : t("Tu posición ya está generando intereses. Puedes cosecharlos cuando quieras desde tu Portafolio.")} amount={{ value: amount, unit: "$" }} details={[{ label: t("Operación"), value: migrate ? t("Cambio de bóveda") : t("Depósito en bóveda") }, { label: t("Destino"), value: t("Bóveda {v}", { v: vaultId.toUpperCase() }) }, ...(charge ? [{ label: t("Cargo por servicio de activación"), value: `$${(Number(charge.feeMicro) / 1e6).toFixed(2)}` }, { label: t("Reserva de operaciones"), value: `$${(Number(charge.reserveMicro) / 1e6).toFixed(2)}` }] : [])]} signature={signature} onClose={() => { if (onClose) onClose(); else setStep("idle"); }} />

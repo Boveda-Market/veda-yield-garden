@@ -14,3 +14,10 @@ export function nextWeeklyAd(now: number, rand: number = Math.random()): number 
   const r = Math.min(Math.max(rand, 0), 1);
   return now + MIN_GAP + Math.round(r * (MAX_GAP - MIN_GAP));
 }
+
+/** Set once a person opens, holds or closes a TRUMP position on this device: the TRUMP ad stops for good. */
+export const TRUMP_AD_DONE = "boveda:trump-ad-done";
+export function markTrumpTouched() { try { localStorage.setItem(TRUMP_AD_DONE, "1"); } catch { /* storage blocked */ } }
+export function trumpTouched(): boolean { try { return localStorage.getItem(TRUMP_AD_DONE) === "1"; } catch { return false; } }
+/** Positions read from the wallet include the TRUMP vault. */
+export const holdsTrump = (positions: { vaultId: string }[] | undefined) => Boolean(positions?.some((p) => p.vaultId === "trump"));

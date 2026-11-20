@@ -6,7 +6,7 @@ import { VAULTS } from "@/lib/vaults";
 import { Dialog, DialogDescription, DialogTitle } from "./ui/dialog";
 import { ActionSheetContent } from "./ui/action-sheet";
 import { TrumpFlag, VaultTitle, vaultSkin } from "./vault-skin";
-import { WEEKLY_AD_KEY, nextWeeklyAd, weeklyAdDue } from "@/lib/weekly-ad";
+import { WEEKLY_AD_KEY, nextWeeklyAd, trumpTouched, weeklyAdDue } from "@/lib/weekly-ad";
 
 
 const TRUMP = VAULTS.find((v) => v.id === "trump");
@@ -35,11 +35,12 @@ export function WeeklyAd() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   useEffect(() => {
-    if (pathname.startsWith("/admin")) return;
+    if (pathname.startsWith("/admin") || trumpTouched()) return;
     let next: number | null = null;
     try { const raw = localStorage.getItem(WEEKLY_AD_KEY); next = raw ? Number(raw) : null; } catch { return; }
     if (!weeklyAdDue(next, Date.now())) return;
     const id = window.setTimeout(() => {
+      if (trumpTouched()) return;
       try { localStorage.setItem(WEEKLY_AD_KEY, String(nextWeeklyAd(Date.now()))); } catch { /* storage blocked */ }
       setOpen(true);
     }, 2500);

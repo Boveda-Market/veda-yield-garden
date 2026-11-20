@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getRealWallet } from "@/lib/solana.functions";
 import { readCache, writeCache } from "@/lib/cached-query";
+import { holdsTrump, markTrumpTouched } from "@/lib/weekly-ad";
 import type { RealWalletResult } from "@/lib/solana-data";
 
 /** Keeps the last complete read when a newer one failed or came back with incomplete positions. */
@@ -24,6 +25,7 @@ export function useRealWallet(wallet: string | null | undefined) {
     queryFn: async () => {
       const next = await read({ data: { wallet: wallet as string } });
       const picked = pickWalletRead(next, queryClient.getQueryData<RealWalletResult>(key) ?? readCache<RealWalletResult>(`vaults:${wallet}`) ?? undefined);
+      if (picked.success && holdsTrump(picked.data.positions)) markTrumpTouched();
       if (picked.success && picked.data.positionsComplete) writeCache(`vaults:${wallet}`, picked);
       return picked;
     },
