@@ -4,9 +4,10 @@ import type { Vault } from "@/lib/vaults";
 import gtaTitleEs from "@/assets/gta6-vault-title.png";
 import gtaTitleEn from "@/assets/gta6-vault-title-en.png";
 import dctyLogo from "@/assets/dcty-logo.png";
+import trumpLogo from "@/assets/trump-logo.png";
 
 /** CSS skin that re-colours the shared high-octane (--hot) tokens per vault; GTA6 keeps the default sunset palette. */
-export const vaultSkin = (id: string | undefined) => (id === "dcty" ? "vault-dcty" : "");
+export const vaultSkin = (id: string | undefined) => (id === "dcty" ? "vault-dcty" : id === "trump" ? "vault-trump" : "");
 
 /** DacityCoin night city: neon skyline over the water with a pink speedboat crossing (original art, no game assets). */
 export function DctySkyline() {
@@ -30,6 +31,11 @@ export function DctySkyline() {
 export function VaultTitle({ vault, className = "h-8 sm:h-9" }: { vault: Pick<Vault, "id" | "name">; className?: string }) {
   const t = useT();
   const { lang } = useI18n();
+  if (vault.id === "trump") return <span className={`flex items-center gap-1.5 ${className}`}>
+    <img src={trumpLogo} alt="" aria-hidden width={160} height={160} className="h-[115%] w-auto shrink-0 rounded-full ring-2 ring-hot-2 drop-shadow-[0_0_10px_var(--hot-2)]" />
+    <span className="-rotate-2 whitespace-nowrap font-display text-[1.35em] font-black italic uppercase leading-none tracking-tight text-hot-foreground [text-shadow:0_2px_0_var(--hot-surface),0_0_8px_var(--hot-surface)]">{lang === "en" ? <><span className="text-hot-2 [text-shadow:0_0_10px_var(--hot-2),0_2px_0_var(--hot-surface)]">TRUMP</span> Vault</> : <>Bóveda <span className="text-hot-2 [text-shadow:0_0_10px_var(--hot-2),0_2px_0_var(--hot-surface)]">TRUMP</span></>}</span>
+    <span className="sr-only">{t(vault.name)}</span>
+  </span>;
   if (vault.id === "dcty") return <span className={`flex items-center gap-1.5 ${className}`}>
     <img src={dctyLogo} alt="" aria-hidden width={160} height={160} className="h-[115%] w-auto shrink-0 rounded-full ring-2 ring-hot-2 drop-shadow-[0_0_10px_var(--hot-2)]" />
     <span className="-rotate-2 whitespace-nowrap font-display text-[1.35em] font-black italic uppercase leading-none tracking-tight text-hot-foreground [text-shadow:0_2px_0_var(--hot-surface),0_0_8px_var(--hot-surface)]">{lang === "en" ? <><span className="text-hot-2 [text-shadow:0_0_10px_var(--hot-2),0_2px_0_var(--hot-surface)]">DCTY</span> Vault</> : <>Bóveda <span className="text-hot-2 [text-shadow:0_0_10px_var(--hot-2),0_2px_0_var(--hot-surface)]">DCTY</span></>}</span>

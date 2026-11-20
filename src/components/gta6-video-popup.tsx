@@ -20,6 +20,7 @@ const HOT = VAULTS.filter((v) => v.badge && isDlmmVault(v.id));
 const VISITS = "boveda:gta6-video-visits";
 const HOOK: Record<string, string> = {
   dcty: "La moneda que viste en el juego GTA 6",
+  trump: "La moneda OFFICIAL TRUMP · Volumen gigante",
   gta6: "La bóveda insignia · Zona ultra concentrada",
 };
 
@@ -34,7 +35,7 @@ export function showGta6Video(positions: ChainPosition[]): boolean {
 }
 
 /** Launch date (UTC ms) of each high-octane vault; announcements fade out over 3 weeks after it. */
-export const LAUNCH: Record<string, number> = { dcty: Date.UTC(2026, 10, 19) };
+export const LAUNCH: Record<string, number> = { dcty: Date.UTC(2026, 10, 19), trump: Date.UTC(2026, 10, 20) };
 const DAY = 24 * 3600_000;
 /** Week 1: every 2 days; week 2: every 4 days; week 3: once; after 21 days: never. */
 export function campaignGap(launch: number | undefined, now: number): number | null {

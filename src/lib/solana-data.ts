@@ -13,10 +13,12 @@ export const CHAIN_POOLS = [
   { id: "gta6", kind: "dlmm", pool: "99bL7ZdcQxcrkdJDKGoGpAhqZUMYEHzhMvtNadiZJpE8", mint: "4kjruqGHDsSqkMdFfCjV7Vb62HPFhtXyWc2t6JpQzDnz", symbol: "GTA6", decimals: 9, swapDecimals: 9 },
   // DLMM DCTY (Token-2022, metadata-only extensions re-verified live on every operation, 6 decimals) / USDC, no farm rewards.
   { id: "dcty", kind: "dlmm", pool: "F7jNbQWivmiBDjzHDxQq32oWLW6cju4CdGyVw9RZV6tX", mint: "9hjBLBrc7WZW2H8UQvBAvG5WiTZotXUv2Bdcn4f4pump", symbol: "DCTY", decimals: 6, swapDecimals: 6, tokenProgram: "token2022" },
+  // DLMM OFFICIAL TRUMP (classic SPL, 6 decimals) / USDC, no farm rewards.
+  { id: "trump", kind: "dlmm", pool: "3C5YE97HADPDxZehYq9Cis8AXr9aNyrUsczKzE1nDbW9", mint: "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN", symbol: "TRUMP", decimals: 6, swapDecimals: 6 },
 ] as const;
 export type ChainPoolConfig = (typeof CHAIN_POOLS)[number];
 /** Vaults whose positions BÓVEDA can open, harvest and close. */
-export const OPERABLE_VAULTS = ["sol", "met", "gta6", "dcty"] as const;
+export const OPERABLE_VAULTS = ["sol", "met", "gta6", "dcty", "trump"] as const;
 export type OperableVault = (typeof OPERABLE_VAULTS)[number];
 export const isOperableVault = (id: string): id is OperableVault => (OPERABLE_VAULTS as readonly string[]).includes(id);
 export const isDlmmVault = (id: string) => CHAIN_POOLS.some((p) => p.id === id && p.kind === "dlmm");
