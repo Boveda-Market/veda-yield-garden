@@ -259,7 +259,6 @@ export const extra: Record<string, string> = {
   "Importe": "Amount",
   "Reserva de operaciones": "Operations reserve",
   "Cargo por servicio de activación": "Activation service fee",
-  "Cargo de activación": "Activation fee",
   "Entra a la bóveda": "Goes into the vault",
   "Desglose": "Breakdown",
   "Comisión de entrada": "Entry fee",
