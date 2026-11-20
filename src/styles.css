@@ -372,12 +372,14 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
   --hot: oklch(0.8 0.15 82);
   --hot-2: oklch(0.9 0.13 92);
   --hot-3: oklch(0.55 0.23 27);
-  --trump-red: oklch(0.55 0.23 27);
-  --hot-surface: oklch(0.2 0.07 262);
+  --trump-red: #c8102e;
+  --trump-white: #ffffff;
+  --trump-blue: #0a2255;
+  --hot-surface: #0a2255;
   --hot-foreground: oklch(0.98 0.01 90);
   --hot-muted: oklch(0.82 0.04 260);
   --gradient-hot: linear-gradient(100deg, var(--trump-red), oklch(0.97 0.01 90) 30%, oklch(0.35 0.12 262) 60%, var(--hot));
-  --gradient-hot-surface: radial-gradient(110% 90% at 100% 0%, oklch(0.75 0.15 85 / 0.45), transparent 55%), radial-gradient(90% 80% at 0% 100%, oklch(0.55 0.23 27 / 0.45), transparent 60%), repeating-linear-gradient(180deg, oklch(0.55 0.23 27 / 0.12) 0 6px, transparent 6px 12px), linear-gradient(var(--hot-surface), var(--hot-surface));
+  --gradient-hot-surface: radial-gradient(110% 90% at 100% 0%, oklch(0.75 0.15 85 / 0.45), transparent 55%), radial-gradient(90% 80% at 0% 100%, oklch(0.55 0.23 27 / 0.45), transparent 60%), linear-gradient(90deg, var(--trump-blue) 0 38%, transparent 38%), repeating-linear-gradient(180deg, oklch(0.55 0.23 27 / 0.75) 0 6px, oklch(1 0 0 / 0.35) 6px 12px), linear-gradient(var(--hot-surface), var(--hot-surface));
   --shadow-hot: 0 18px 50px -18px oklch(0.8 0.15 82 / 0.65), 0 6px 22px -12px oklch(0.55 0.23 27 / 0.7);
 }
 .trump-gold {
