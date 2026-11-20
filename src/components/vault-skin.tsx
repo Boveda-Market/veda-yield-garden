@@ -30,17 +30,7 @@ export function DctySkyline() {
 
 /** TRUMP presidential flag: navy canton with stars and waving red/white stripes (original vector art). */
 export function TrumpFlag() {
-  const stars = Array.from({ length: 15 }, (_, i) => [14 + (i % 5) * 22 + (Math.floor(i / 5) % 2) * 11, 14 + Math.floor(i / 5) * 18] as const);
-  return <svg aria-hidden="true" viewBox="0 0 400 100" preserveAspectRatio="xMaxYMid slice" className="pointer-events-none absolute inset-0 h-full w-full">
-    <defs><linearGradient id="trump-cloth" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#000" stopOpacity="0" /><stop offset="0.3" stopColor="#000" stopOpacity="0.18" /><stop offset="0.55" stopColor="#fff" stopOpacity="0.12" /><stop offset="0.8" stopColor="#000" stopOpacity="0.2" /><stop offset="1" stopColor="#000" stopOpacity="0" /></linearGradient></defs>
-    <rect width="400" height="100" fill="var(--trump-white)" />
-    {Array.from({ length: 7 }, (_, i) => <path key={i} d={`M120 ${i * 14.3} q70 -8 140 0 t140 0 v7.15 q-70 8 -140 0 t-140 0 z`} fill="var(--trump-red)" />)}
-    <rect x="120" width="280" height="100" fill="url(#trump-cloth)" />
-    <rect width="130" height="100" fill="var(--trump-blue)" />
-    {stars.map(([x, y]) => <path key={`${x}-${y}`} transform={`translate(${x} ${y}) scale(0.34)`} d="M0 -10 L2.9 -3.1 L9.5 -3.1 L4.2 1.2 L6.2 8.1 L0 4 L-6.2 8.1 L-4.2 1.2 L-9.5 -3.1 L-2.9 -3.1 Z" fill="var(--trump-white)" />)}
-    <rect width="400" height="100" fill="var(--trump-blue)" opacity="0.35" />
-    <rect y="96" width="400" height="4" fill="var(--hot)" />
-  </svg>;
+  return <svg aria-hidden="true" viewBox="0 0 400 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full"><rect y="96" width="400" height="4" fill="var(--hot)" /></svg>;
 }
 
 /** Per-vault title lettering used by banners, cards and the deposit sheet. */
