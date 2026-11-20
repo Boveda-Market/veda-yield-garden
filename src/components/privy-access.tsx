@@ -149,7 +149,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
     clearError: () => setError(null),
     exportWallet: user?.linkedAccounts.some(account => account.type === "wallet" && account.address === walletAddress && (account.walletClientType === "privy" || account.walletClientType === "privy-v2")) ? async () => { await exportWallet({ address: walletAddress! }); } : undefined,
     security: {
-      email: user?.email?.address ?? null,
+      email: user?.email?.address ?? user?.google?.email ?? null,
       passkeyCount: user?.linkedAccounts.filter(account => account.type === "passkey").length ?? 0,
       enrolledMfa: user?.mfaMethods ?? [],
       availableMfa: mfaMethods,

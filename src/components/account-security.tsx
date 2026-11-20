@@ -34,7 +34,7 @@ export function AccountSecuritySettings() {
     <div className="mt-4 divide-y divide-border">
       <div className="py-5">
         <h3 className="flex items-center gap-2 font-medium"><Mail size={18} />{t("Correo de acceso")}</h3>
-        <p className="mt-2 break-all text-sm text-muted-foreground">{security.email ?? t("Aún no has vinculado un correo.")}</p>
+        {security.email ? <><p className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary"><CheckCircle2 size={16} />{t("Vinculado")}</p><p className="mt-2 break-all text-sm text-muted-foreground">{security.email}</p></> : <p className="mt-2 text-sm text-muted-foreground">{t("Aún no has vinculado un correo.")}</p>}
         <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Verifica tu correo con un código para entrar a tu cuenta.")}</p>
         <Button type="button" variant="outline" className="mt-3" onClick={() => security.email ? security.updateEmail() : security.linkEmail()}><Mail size={16} />{security.email ? t("Cambiar correo") : t("Vincular correo")}</Button>
       </div>
@@ -51,7 +51,7 @@ export function AccountSecuritySettings() {
       </div>
       <div className="py-5">
         <h3 className="flex items-center gap-2 font-medium"><Smartphone size={18} />{t("Doble verificación · 2FA")}</h3>
-        <p className="mt-2 text-sm text-muted-foreground">{mfaEnabled ? t("Activada: {methods}", { methods: methods.join(", ") }) : t("No activada")}</p>
+        {mfaEnabled ? <><p className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary"><CheckCircle2 size={16} />{t("Vinculado")}</p><p className="mt-2 text-sm text-muted-foreground">{t("Activada: {methods}", { methods: methods.join(", ") })}</p></> : <p className="mt-2 text-sm text-muted-foreground">{t("No activada")}</p>}
         <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Protege las operaciones de la wallet creada en tu cuenta con una app autenticadora, como Google Authenticator, o los métodos disponibles. No añade un segundo paso al inicio de sesión.")}</p>
         {!security.hasEmbeddedWallet && <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Si usas Phantom o Jupiter Wallet, administra su seguridad directamente allí. Esta opción no protege las firmas de wallets externas.")}</p>}
         {security.hasEmbeddedWallet && !canManageMfa && <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("La doble verificación todavía no está habilitada para esta aplicación.")}</p>}

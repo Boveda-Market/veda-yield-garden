@@ -61,6 +61,16 @@ describe("verified account security", () => {
     expect(screen.queryByRole("button", { name: "Vincular huella o Face ID" })).toBeNull();
     expect(screen.getByRole("button", { name: "Desvincular huella" })).toBeTruthy();
   });
+  it("marks a linked email as Vinculado with only the change option", () => {
+    mount({ email: "owner@example.com" });
+    expect(screen.getByText("Vinculado")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Vincular correo" })).toBeNull();
+  });
+  it("marks active 2FA as Vinculado with only the manage option", () => {
+    mount({ enrolledMfa: ["totp"] });
+    expect(screen.getByText("Vinculado")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Configurar 2FA" })).toBeNull();
+  });
   it("does not expose security settings to a guest", () => {
     mount({}, false);
     expect(screen.queryByRole("button")).toBeNull();
