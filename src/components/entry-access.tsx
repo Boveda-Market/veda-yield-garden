@@ -11,7 +11,7 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { CoinbaseNote } from "./coinbase-note";
 import { GoogleButton } from "./google-button";
 import { BootSplash } from "./boot-splash";
-import { deviceHasPasskey, lastAccount, rememberAccount, rememberPasskey } from "@/lib/passkey-device";
+import { deviceHasPasskey, lastAccount, rememberAccount, rememberPasskey, shouldAutoPasskey } from "@/lib/passkey-device";
 
 function EntryButtons() {
   const t = useT();
@@ -27,6 +27,13 @@ function EntryButtons() {
   // One sensor prompt per tap: ignore repeat taps while the phone sensor is open (no automatic prompt).
   const busy = useRef(false);
   const passkey = () => { if (busy.current) return; busy.current = true; session.login("passkey"); setTimeout(() => { busy.current = false; }, 4000); };
+  // Devices with a saved fingerprint get the sensor once by itself (never after signing out); one prompt only.
+  useEffect(() => {
+    if (!bio || signup || !session.ready || session.authenticated || document.visibilityState !== "visible") return;
+    const id = setTimeout(() => { if (shouldAutoPasskey()) passkey(); }, 500);
+    return () => clearTimeout(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bio, signup, session.ready, session.authenticated]);
   const navigate = useNavigate();
   const wasReturning = useRef<boolean | null>(null);
   if (wasReturning.current === null && typeof window !== "undefined") wasReturning.current = isReturning() && !isHeroReview();
