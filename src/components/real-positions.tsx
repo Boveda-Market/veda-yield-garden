@@ -94,7 +94,7 @@ export function VaultMiniCards({ positions, onOpen }: { positions: ChainPosition
     const vault = VAULTS.find((v) => v.id === p.vaultId);
     const hot = Boolean(vault?.badge);
     return <button key={p.address} type="button" onClick={() => (onOpen ? onOpen(p.address) : go(p.address))} className={`flex min-w-0 flex-col rounded-xl border bg-card p-3 text-left transition hover:bg-secondary ${hot ? `border-hot/60 shadow-[var(--shadow-hot)] ${vaultSkin(p.vaultId)}` : "border-border"}`}>
-      <span className="truncate text-sm font-bold">{vault ? t(vault.name) : `${p.symbol}/USDC`}</span>
+      <span className="flex items-center justify-between gap-1.5"><span className="truncate text-sm font-bold">{vault ? t(vault.name) : `${p.symbol}/USDC`}</span><span className="flex shrink-0 items-center gap-1 rounded-full bg-background/80 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-foreground"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-live shadow-[0_0_6px_var(--live)] motion-reduce:animate-none" />Live</span></span>
       <span className="mt-1.5 font-display text-lg font-semibold tabular-nums">{value === null ? "—" : `≈ ${formatUsd(value)}`}</span>
       <span className="text-[12px] font-semibold tabular-nums text-primary">{fees === null ? t("Consultando…") : `+${formatUsd(fees)} ${t("por cosechar")}`}</span>
       <span className="mt-2 text-xs font-semibold text-muted-foreground">{t("Ver más")} {onOpen ? "→" : "↓"}</span>
