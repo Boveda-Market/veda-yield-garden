@@ -147,7 +147,7 @@ export function ActivationCardView({ stage, onActivate, onAddFunds, onOpenVault,
 }
 
 /** Popup used by every deposit and Doble o Nada entry when the account still needs activation or more dollars; on success it closes and the original action continues on its own. */
-export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActivate, resume, onClose, onActivated }: { open: boolean; usdc: bigint; needMicro?: bigint; depositMicro?: bigint; autoActivate?: boolean; resume?: Omit<ResumeDeposit, "at">; onClose: () => void; onActivated: () => void }) {
+export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActivate, resume, onClose, onActivated }: { open: boolean; usdc: bigint; needMicro?: bigint; depositMicro?: bigint; autoActivate?: boolean; resume?: Omit<ResumeDeposit, "at">; onClose: () => void; onActivated: (depositMicro?: bigint) => void }) {
   const t = useT();
   const session = useBovedaSession();
   const prepare = useServerFn(prepareGasRefill);
@@ -163,7 +163,9 @@ export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActiv
   }, [open, wallet]); // eslint-disable-line react-hooks/exhaustive-deps
   const balance = fresh ?? usdc;
   // With a known deposit, the need is the deposit plus the real activation charge; Coinbase only appears when available dollars truly fall short.
-  const need = depositMicro != null ? (total == null ? null : depositMicro + total) : needMicro;
+  // Known deposit: the activation is taken from the same dollars and the deposit shrinks to fit, so Coinbase only appears when the balance cannot even cover the activation plus $1.
+  const need = depositMicro != null ? (total == null ? null : total + 1_000_000n) : needMicro;
+  const fitted = depositMicro != null && total != null && balance - total < depositMicro ? balance - total : undefined;
   const missing = need === null || (depositMicro != null && fresh === null) ? 0n : activationShortfallMicro(balance, need);
   const checking = depositMicro != null && (fresh === null || total === null);
   const [stage, setStage] = useState<"ready" | "working" | "done">("ready");
@@ -187,14 +189,14 @@ export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActiv
       if (!r.transaction) throw new Error("No se pudo preparar la activación.");
       await session.signAndSend(Uint8Array.from(atob(r.transaction), (c) => c.charCodeAt(0)));
       setStage("done");
-      setTimeout(() => onActivated(), 1800);
+      setTimeout(() => onActivated(fitted), 1800);
     } catch (e) { setError(e instanceof Error ? t(e.message) : t("No se pudo completar la activación.")); setStage("ready"); }
   }
   const view: ActivationStage = stage === "done" ? { kind: "done" } : stage === "working" || checking ? { kind: "working" } : missing > 0n ? { kind: "short", missingMicro: missing } : { kind: "ready", totalMicro: total, extraVault: extra, ...(error ? { error } : {}) };
   return <Dialog open={open} onOpenChange={(o) => { if (!o && stage !== "working") onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
     <DialogTitle className="sr-only">{t("Activa tu cuenta")}</DialogTitle>
     <DialogDescription className="sr-only">{t("Prepara tu cuenta y seguimos solos.")}</DialogDescription>
-    <ActivationCardView stage={view} continueMode onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={onActivated} />
+    <ActivationCardView stage={view} continueMode onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={() => onActivated(fitted)} />
     {buy > 0 && <BuyUsdc auto={buy} needMicro={missing} className="mt-2" {...(resume ? { resume } : {})} />}
   </ActionSheetContent></Dialog>;
 }

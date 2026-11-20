@@ -13,14 +13,14 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { pilotDepositStatus, preparePilotDeposit } from "@/lib/pilot-deposit.functions";
 import { prepareRealRebalance } from "@/lib/rebalance.functions";
-import { decimalToUnits } from "@/lib/onboarding";
+import { decimalToUnits, unitsToDecimal } from "@/lib/onboarding";
 import { PILOT_VAULTS, pilotInput, type PilotStatus } from "@/lib/pilot-deposit";
 
 type Step = "idle" | "preparing" | "signing" | "confirming" | "done" | "error";
 const labels: Record<Step, string> = { idle: "", preparing: "Preparando tu depósito…", signing: "Aprueba en tu billetera…", confirming: "Aprobado. Confirmando tu depósito…", done: "", error: "" };
 
 /** Selected real deposit with fresh simulation and owner signature. */
-export function PilotDeposit({ vaultId, amount, position, migrate, usdc, autoStart = false, onBusyChange, onClose, onDoneChange }: { autoStart?: boolean; usdc?: bigint | undefined; vaultId: string; amount: string; position?: string | undefined; migrate?: boolean; onBusyChange: (busy: boolean) => void; onClose?: () => void; onDoneChange?: (done: boolean) => void }) {
+export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, usdc, autoStart = false, onBusyChange, onClose, onDoneChange }: { autoStart?: boolean; usdc?: bigint | undefined; vaultId: string; amount: string; position?: string | undefined; migrate?: boolean; onBusyChange: (busy: boolean) => void; onClose?: () => void; onDoneChange?: (done: boolean) => void }) {
   const t = useT();
   const { walletAddress, signAndSend } = useBovedaSession();
   const prepare = useServerFn(preparePilotDeposit);
@@ -29,6 +29,11 @@ export function PilotDeposit({ vaultId, amount, position, migrate, usdc, autoSta
   const readStatus = useServerFn(pilotDepositStatus);
   const queryClient = useQueryClient();
   const [needsReserve, setNeedsReserve] = useState(false);
+  // After the activation is paid from the same dollars, the deposit shrinks to what is left.
+  const [fitted, setFitted] = useState<string | null>(null);
+  useEffect(() => { setFitted(null); }, [typedAmount]);
+  const amount = fitted ?? typedAmount;
+  const runRef = useRef<(auto?: boolean) => Promise<void>>(async () => {});
   const [step, setStep] = useState<Step>("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
@@ -37,7 +42,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, usdc, autoSta
   const busy = step === "preparing" || step === "signing" || step === "confirming";
   const depositMicro = decimalToUnits(amount.replace(/,/g, "") || "0", 6) ?? undefined;
   const valid = pilotInput.safeParse({ wallet: walletAddress, vaultId, amount, ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) });
-  useEffect(() => { setMessage(null); }, [amount, walletAddress]);
+  useEffect(() => { setMessage(null); }, [typedAmount, walletAddress]);
   useEffect(() => { onBusyChange(busy); }, [busy, onBusyChange]);
   useEffect(() => { onDoneChange?.(step === "done"); }, [step, onDoneChange]);
 
@@ -45,6 +50,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, usdc, autoSta
   const autoRan = useRef(false);
   useEffect(() => { if (autoStart && !autoRan.current && walletAddress && valid.success && step === "idle") { autoRan.current = true; void run(true); } }); // eslint-disable-line react-hooks/exhaustive-deps
 
+  runRef.current = (a?: boolean) => run(a);
   async function run(auto = false) {
     if (!walletAddress || busy || !eligible || !valid.success) return;
     setMessage(null); setSignature(null); setStatus(null); setStep("preparing");
@@ -105,7 +111,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, usdc, autoSta
       {step === "error" && message && <SignalErrorCard message={message} />}
       <Button size="lg" disabled={busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? t(labels[step]) : step === "error" ? t("Intentar de nuevo") : t("Confirmar y depositar")}</Button>
     </>}
-    {walletAddress && <ActivationSheet open={needsReserve} usdc={usdc ?? 0n} {...(depositMicro != null ? { depositMicro } : {})} autoActivate={autoStart} resume={{ vaultId, amount, ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) }} onClose={() => setNeedsReserve(false)} onActivated={() => { setNeedsReserve(false); void queryClient.invalidateQueries({ queryKey: ["my-wallet", walletAddress] }); setTimeout(() => void run(autoStart), 1500); }} />}
+    {walletAddress && <ActivationSheet open={needsReserve} usdc={usdc ?? 0n} {...(depositMicro != null ? { depositMicro } : {})} autoActivate={autoStart} resume={{ vaultId, amount, ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) }} onClose={() => setNeedsReserve(false)} onActivated={(adj) => { setNeedsReserve(false); if (adj != null && adj > 0n) setFitted(unitsToDecimal(adj, 6)); void queryClient.invalidateQueries({ queryKey: ["my-wallet", walletAddress] }); setTimeout(() => void runRef.current(true), 1500); }} />}
     {message && step !== "error" && <p role="alert" className="text-muted-foreground">{message}</p>}
     {signature && <a className="text-xs underline" href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("Ver comprobante")}</a>}
   </section>;
