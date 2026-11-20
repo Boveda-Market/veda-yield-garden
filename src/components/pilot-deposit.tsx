@@ -33,6 +33,7 @@ export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, 
   const [fitted, setFitted] = useState<string | null>(null);
   useEffect(() => { setFitted(null); }, [typedAmount]);
   const amount = fitted ?? typedAmount;
+  const [charge, setCharge] = useState<{ feeMicro: bigint; reserveMicro: bigint } | null>(null);
   const runRef = useRef<(auto?: boolean) => Promise<void>>(async () => {});
   const [step, setStep] = useState<Step>("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -102,7 +103,7 @@ export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, 
   if (!eligible) return <p className="border-t border-border pt-4 text-xs text-muted-foreground">{t("Los depósitos no están disponibles para esta bóveda.")}</p>;
   if (step === "done") return <>
     <p role="status" className="sr-only">{t("Depósito confirmado en la red (")}{t(status === "finalized" ? "finalizado" : "confirmado")}).</p>
-    <ActionSuccess title={migrate ? t("¡Cambio de bóveda listo!") : t("¡Depósito exitoso!")} body={migrate ? t("Lo que moviste ya está generando en la nueva bóveda.") : t("Tu posición ya está generando intereses. Puedes cosecharlos cuando quieras desde tu Portafolio.")} amount={{ value: amount, unit: "$" }} details={[{ label: t("Operación"), value: migrate ? t("Cambio de bóveda") : t("Depósito en bóveda") }, { label: t("Destino"), value: t("Bóveda {v}", { v: vaultId.toUpperCase() }) }]} signature={signature} onClose={() => { if (onClose) onClose(); else setStep("idle"); }} />
+    <ActionSuccess title={migrate ? t("¡Cambio de bóveda listo!") : t("¡Depósito exitoso!")} body={migrate ? t("Lo que moviste ya está generando en la nueva bóveda.") : t("Tu posición ya está generando intereses. Puedes cosecharlos cuando quieras desde tu Portafolio.")} amount={{ value: amount, unit: "$" }} details={[{ label: t("Operación"), value: migrate ? t("Cambio de bóveda") : t("Depósito en bóveda") }, { label: t("Destino"), value: t("Bóveda {v}", { v: vaultId.toUpperCase() }) }, ...(charge ? [{ label: t("Cargo por servicio de activación"), value: `$${(Number(charge.feeMicro) / 1e6).toFixed(2)}` }, { label: t("Reserva de operaciones"), value: `$${(Number(charge.reserveMicro) / 1e6).toFixed(2)}` }] : [])]} signature={signature} onClose={() => { if (onClose) onClose(); else setStep("idle"); }} />
   </>;
   return <section aria-labelledby="pilot-title" className="grid gap-3 text-sm">
     <h3 id="pilot-title" className="sr-only">{t("Confirmar depósito")}</h3>
@@ -111,7 +112,7 @@ export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, 
       {step === "error" && message && <SignalErrorCard message={message} />}
       <Button size="lg" disabled={busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? t(labels[step]) : step === "error" ? t("Intentar de nuevo") : t("Confirmar y depositar")}</Button>
     </>}
-    {walletAddress && <ActivationSheet open={needsReserve} usdc={usdc ?? 0n} {...(depositMicro != null ? { depositMicro } : {})} autoActivate={autoStart} resume={{ vaultId, amount, ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) }} onClose={() => setNeedsReserve(false)} onActivated={(adj) => { setNeedsReserve(false); setStep("preparing"); if (adj != null && adj > 0n) { const a = unitsToDecimal(adj, 6); setFitted(a); onAmountFit?.(a); } void queryClient.invalidateQueries({ queryKey: ["my-wallet", walletAddress] }); setTimeout(() => { setStep("idle"); setTimeout(() => void runRef.current(true), 0); }, 1500); }} />}
+    {walletAddress && <ActivationSheet open={needsReserve} usdc={usdc ?? 0n} {...(depositMicro != null ? { depositMicro } : {})} autoActivate resume={{ vaultId, amount, ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) }} onClose={() => setNeedsReserve(false)} onActivated={(adj, ch) => { setNeedsReserve(false); setCharge(ch ?? null); setStep("preparing"); if (adj != null && adj > 0n) { const a = unitsToDecimal(adj, 6); setFitted(a); onAmountFit?.(a); } void queryClient.invalidateQueries({ queryKey: ["my-wallet", walletAddress] }); setTimeout(() => { setStep("idle"); setTimeout(() => void runRef.current(true), 0); }, 1500); }} />}
     {message && step !== "error" && <p role="alert" className="text-muted-foreground">{message}</p>}
     {signature && <a className="text-xs underline" href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("Ver comprobante")}</a>}
   </section>;

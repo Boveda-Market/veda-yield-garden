@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { prepareGasRefill } from "@/lib/gas-refill.functions";
-import { activationShortfallMicro, gasIsLow, type RefillTarget } from "@/lib/gas-refill";
+import { activationShortfallMicro, ACTIVATION_FEE_MICRO, EXTRA_VAULT_FEE_MICRO, gasIsLow, type RefillTarget } from "@/lib/gas-refill";
 import { MIN_USDC_MICRO, decimalToUnits, unitsToDecimal } from "@/lib/onboarding";
 import { getRealWallet } from "@/lib/solana.functions";
 
@@ -95,6 +95,12 @@ function ActivationFlow({ usdc, wallet, prepare, signAndSend, onDone }: { usdc: 
   const view: ActivationStage = stage === "done" ? { kind: "done" } : stage === "working" ? { kind: "working" } : missing > 0n ? { kind: "short", missingMicro: missing } : { kind: "ready", totalMicro: total, ...(error ? { error } : {}) };
   return <>
     <ActivationCardView stage={view} onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={openGta6} />
+    {depositMicro != null && chargeParts && missing === 0n && <dl aria-label={t("Desglose")} className="mt-3 grid gap-1.5 rounded-xl bg-muted p-3 text-xs">
+      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Importe")}</dt><dd className="tabular-nums">{usd(depositMicro)}</dd></div>
+      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{extra ? t("Cargo por servicio de activación") : t("Cargo de activación")}</dt><dd className="tabular-nums">−{usd(chargeParts.feeMicro)}</dd></div>
+      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Reserva de operaciones")}</dt><dd className="tabular-nums">−{usd(chargeParts.reserveMicro)}</dd></div>
+      <div className="flex justify-between gap-3 border-t border-border pt-1.5 font-semibold"><dt>{t("Entra a la bóveda")}</dt><dd className="tabular-nums">{usd(fitted ?? depositMicro)}</dd></div>
+    </dl>}
     {buy > 0 && <BuyUsdc auto={buy} needMicro={missing} className="mt-2" />}
     {gta6 && <Dialog open={sheet} onOpenChange={setSheet}><ActionSheetContent><DialogTitle className="mb-3 text-lg font-bold">{t("Tu primera bóveda")}</DialogTitle>
       <HotVaultCard vault={gta6} owned={null} ownedLink={null} hasPosition={false} depositDisabled={!wallet} onDeposit={() => { setSheet(false); setDeposit(true); }} onDetails={() => setDetails(true)} />
@@ -150,7 +156,7 @@ export function ActivationCardView({ stage, onActivate, onAddFunds, onOpenVault,
 }
 
 /** Popup used by every deposit and Doble o Nada entry when the account still needs activation or more dollars; on success it closes and the original action continues on its own. */
-export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActivate, resume, onClose, onActivated }: { open: boolean; usdc: bigint; needMicro?: bigint; depositMicro?: bigint; autoActivate?: boolean; resume?: Omit<ResumeDeposit, "at">; onClose: () => void; onActivated: (depositMicro?: bigint) => void }) {
+export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActivate, resume, onClose, onActivated }: { open: boolean; usdc: bigint; needMicro?: bigint; depositMicro?: bigint; autoActivate?: boolean; resume?: Omit<ResumeDeposit, "at">; onClose: () => void; onActivated: (depositMicro?: bigint, charge?: { feeMicro: bigint; reserveMicro: bigint }) => void }) {
   const t = useT();
   const session = useBovedaSession();
   const prepare = useServerFn(prepareGasRefill);
@@ -180,6 +186,9 @@ export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActiv
     if (!open || !wallet) return;
     void prepare({ data: { wallet, activation: true, quoteOnly: true } }).then((r) => { if (r.success) { setTotal(BigInt(r.chargeMicro)); setExtra(!!r.extraVault); } }).catch(() => {});
   }, [open, wallet]); // eslint-disable-line react-hooks/exhaustive-deps
+  const feeMicro = extra ? EXTRA_VAULT_FEE_MICRO : ACTIVATION_FEE_MICRO;
+  const chargeParts = total != null && total >= feeMicro ? { feeMicro, reserveMicro: total - feeMicro } : null;
+  const usd = (m: bigint) => `$${(Number(m) / 1e6).toFixed(2)}`;
   const autoDone = useRef(false);
   useEffect(() => { if (!open) autoDone.current = false; }, [open]);
   useEffect(() => { if (open && autoActivate && !checking && missing === 0n && total !== null && stage === "ready" && !error && !autoDone.current) { autoDone.current = true; void activate(); } }); // eslint-disable-line react-hooks/exhaustive-deps
@@ -192,14 +201,14 @@ export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActiv
       if (!r.transaction) throw new Error("No se pudo preparar la activación.");
       await session.signAndSend(Uint8Array.from(atob(r.transaction), (c) => c.charCodeAt(0)));
       setStage("done");
-      setTimeout(() => onActivated(fitted), 1800);
+      setTimeout(() => onActivated(fitted, chargeParts ?? undefined), 1200);
     } catch (e) { setError(e instanceof Error ? t(e.message) : t("No se pudo completar la activación.")); setStage("ready"); }
   }
   const view: ActivationStage = stage === "done" ? { kind: "done" } : stage === "working" || checking ? { kind: "working" } : missing > 0n ? { kind: "short", missingMicro: missing } : { kind: "ready", totalMicro: total, extraVault: extra, ...(error ? { error } : {}) };
   return <Dialog open={open} onOpenChange={(o) => { if (!o && stage !== "working") onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
     <DialogTitle className="sr-only">{t("Activa tu cuenta")}</DialogTitle>
     <DialogDescription className="sr-only">{t("Prepara tu cuenta y seguimos solos.")}</DialogDescription>
-    <ActivationCardView stage={view} continueMode onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={() => onActivated(fitted)} />
+    <ActivationCardView stage={view} continueMode onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={() => onActivated(fitted, chargeParts ?? undefined)} />
     {buy > 0 && <BuyUsdc auto={buy} needMicro={missing} className="mt-2" {...(resume ? { resume } : {})} />}
   </ActionSheetContent></Dialog>;
 }
