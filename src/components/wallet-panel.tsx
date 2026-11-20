@@ -278,8 +278,7 @@ export function WalletPanel() {
     </Link>}
 
 
-    {vaultPositions.length > 0 && <Drawer open={posOpen} onOpenChange={setPosOpen}><DrawerTrigger asChild><button type="button" className="flex w-full items-center justify-between gap-2 rounded-2xl border border-border bg-card p-4 text-left"><span className="font-display text-base font-semibold">{t("Posiciones abiertas")} · {vaultPositions.length}</span><ChevronDown size={18} className="shrink-0 text-muted-foreground" aria-hidden /></button></DrawerTrigger>
-      <DrawerContent><DrawerHeader><DrawerTitle>{t("Posiciones abiertas")}</DrawerTitle></DrawerHeader><div className="max-h-[75vh] overflow-y-auto px-4 pb-6"><WalletPositions wallet={address} bare /></div></DrawerContent></Drawer>}
+    <ReportProblem />
     <WalletOpenPredictions />
 
     <Dialog open={sheet} onOpenChange={(o) => { if (!o && busy) return; setSheet(o); if (!o) { setSent(null); setMessage(null); } }}>
@@ -304,7 +303,8 @@ export function WalletPanel() {
       </ActionSheetContent>
     </Dialog>
 
-    <ReportProblem />
+    {vaultPositions.length > 0 && <Drawer open={posOpen} onOpenChange={setPosOpen}><DrawerTrigger asChild><button type="button" className="flex w-full items-center justify-between gap-2 rounded-2xl border border-border bg-card p-4 text-left"><span className="font-display text-base font-semibold">{t("Posiciones abiertas")} · {vaultPositions.length}</span><ChevronDown size={18} className="shrink-0 text-muted-foreground" aria-hidden /></button></DrawerTrigger>
+      <DrawerContent><DrawerHeader><DrawerTitle>{t("Posiciones abiertas")}</DrawerTitle></DrawerHeader><div className="max-h-[75vh] overflow-y-auto px-4 pb-6"><WalletPositions wallet={address} bare /></div></DrawerContent></Drawer>}
 
     <ActivityView trial={false} wallet={address} rows={[]} heading="Actividad de mi billetera" level={2} collapsed />
 
