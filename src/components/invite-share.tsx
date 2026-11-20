@@ -14,7 +14,7 @@ import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getAffiliateDashboard } from "@/lib/affiliate.functions";
 
-export const shareText = (t: (s: string) => string) => t("Chequea esto, aquí es donde estoy poniendo a rendir mis dólares. Échale un ojo:");
+export const shareText = (t: (s: string) => string) => t("Aquí es donde están las bóvedas:\n💵 Entras desde solo *$20*\n💳 Pagas fácil con *Apple Pay, PayPal, Coinbase* o tarjeta\n🤖 El *piloto automático* se encarga de hacer todo por ti\n🔔 Importante: activa las notificaciones para seguir tus movimientos al instante.\n\nÉchale un ojo aquí:");
 
 /** One-tap share buttons (native sheet, WhatsApp, Telegram) for a referral link. */
 export function ShareButtons({ link, onCopied }: { link: string; onCopied?: () => void }) {

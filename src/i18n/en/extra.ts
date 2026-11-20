@@ -1446,7 +1446,7 @@ export const extra: Record<string, string> = {
   "Entendido, entrar a BÓVEDA": "Got it, enter BÓVEDA",
   "Tu panel": "Your dashboard",
   "Entra con tu cuenta de Google en 1 segundo y recarga con": "Sign in with your Google account in 1 second and top up with",
-  "Chequea esto, aquí es donde estoy poniendo a rendir mis dólares. Échale un ojo:": "Check this out, this is where I'm putting my dollars to work. Take a look:",
+  "Aquí es donde están las bóvedas:\n💵 Entras desde solo *$20*\n💳 Pagas fácil con *Apple Pay, PayPal, Coinbase* o tarjeta\n🤖 El *piloto automático* se encarga de hacer todo por ti\n🔔 Importante: activa las notificaciones para seguir tus movimientos al instante.\n\nÉchale un ojo aquí:": "This is where the vaults are:\n💵 Start from just *$20*\n💳 Pay easily with *Apple Pay, PayPal, Coinbase* or card\n🤖 The *autopilot* does everything for you\n🔔 Important: turn on notifications to follow your moves instantly.\n\nTake a look here:",
   "Copia tu enlace": "Copy your link",
   "Ya está listo. Un toque y es tuyo.": "It's ready. One tap and it's yours.",
   "Compártelo": "Share it",

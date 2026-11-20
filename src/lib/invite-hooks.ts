@@ -4,7 +4,7 @@ import { AFFILIATE_SHARE_BPS, affiliateCommission } from "./affiliate";
 export type InviteHook = "yield" | "gta6" | "duel";
 /** Share messages per hook; gta6 links land on the GTA6 home variant (?v=5). */
 export const HOOK_TEXT: Record<InviteHook, string> = {
-  yield: "Chequea esto, aquí es donde estoy poniendo a rendir mis dólares. Échale un ojo:",
+  yield: "Aquí es donde están las bóvedas:\n💵 Entras desde solo *$20*\n💳 Pagas fácil con *Apple Pay, PayPal, Coinbase* o tarjeta\n🤖 El *piloto automático* se encarga de hacer todo por ti\n🔔 Importante: activa las notificaciones para seguir tus movimientos al instante.\n\nÉchale un ojo aquí:",
   gta6: "Mira esta bóveda de GTA6, está pagando un rendimiento brutal en dólares. Échale un ojo:",
   duel: "Chequea Doble o Nada: rondas de 5 minutos, ¿sube o baja? Pruébalo aquí:",
 };
