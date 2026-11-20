@@ -45,7 +45,6 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
   return <article className={`hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)] ${vaultSkin(vault.id)}`}>
     <div className="relative isolate flex h-full flex-col overflow-hidden rounded-[calc(1rem-2px)] bg-[image:var(--gradient-hot-surface)] text-hot-foreground">
       <HotBanner vault={vault} className="py-3">
-        <span className="hidden rounded-full bg-hot-surface px-2.5 py-0.5 text-[10px] sm:inline font-black uppercase tracking-wide">⚡ {t("Sé la casa")}</span>
         <span className="flex items-center gap-1 rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-live shadow-[0_0_6px_var(--live)] motion-reduce:animate-none" />{t("En vivo")}</span>
       </HotBanner>
       <div className="flex flex-1 flex-col p-2 sm:p-3">
