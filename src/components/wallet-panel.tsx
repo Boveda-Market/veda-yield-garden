@@ -1,3 +1,4 @@
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { ActivityView } from "@/components/activity-view";
 import { AnimatedMoney } from "@/components/ui/animated-money";
 import { earningRatePerMs } from "@/lib/live-earnings";
@@ -59,6 +60,7 @@ export function WalletPanel() {
   const vaultPositions = vaults.data?.success ? vaults.data.data.positions : [];
   const { rows: vaultRows, capital, knownCapital, loading: pricesLoading, totalFees, change24h } = usePositionRows(vaultPositions);
   const [movePeriod, setMovePeriodRaw] = useState<1 | 7 | 30>(1);
+  const [periodOpen, setPeriodOpen] = useState(false);
   useEffect(() => { try { const v = Number(localStorage.getItem("boveda:move-period")); if (v === 7 || v === 30) setMovePeriodRaw(v); } catch { /* ignore */ } }, []);
   const setMovePeriod = (v: 1 | 7 | 30) => { setMovePeriodRaw(v); try { localStorage.setItem("boveda:move-period", String(v)); } catch { /* ignore */ } };
   const dailyQ = useQueries({ queries: vaultRows.map((r) => ({ queryKey: ["pool-daily", r.pool, 30], queryFn: ({ signal }: { signal: AbortSignal }) => fetchDailyCloses(r.pool ?? "", 31, signal), enabled: movePeriod > 1 && Boolean(r.pool), staleTime: 10 * 60_000, retry: 1 })) });
@@ -226,16 +228,15 @@ export function WalletPanel() {
       {(() => {
         if (hidden || balances.data?.usdc === undefined || working === null) return null;
         const total = (Number(balances.data.usdc) / 1e6) + jupUsd + working + totalFees;
-        const solPrice = prices.data?.["SOL"];
         const move = vaultPositions.length > 0 ? changeN : null;
         const base = move !== null ? total - move : 0;
         const pct = move !== null && base > 0 ? (move / base) * 100 : null;
         const up = (move ?? 0) >= 0;
-        if (move === null && !solPrice && vaultPositions.length === 0) return null;
+        if (move === null && vaultPositions.length === 0) return null;
         return <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs tabular-nums">
           {move !== null && <span className={`font-medium ${up ? "text-primary" : "text-destructive"}`}>{up ? "+" : "-"}${fmt(Math.abs(move))}{pct !== null && ` (${up ? "+" : "-"}${Math.abs(pct).toFixed(2)}%)`} </span>}
-          {vaultPositions.length > 0 && <span className="inline-flex rounded-full bg-muted p-0.5" role="group" aria-label={t("Periodo")}>{([1, 7, 30] as const).map((d) => <button key={d} type="button" aria-pressed={movePeriod === d} onClick={() => setMovePeriod(d)} className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${movePeriod === d ? "bg-foreground text-background" : "text-muted-foreground"}`}>{d === 1 ? "24 h" : `${d} d`}</button>)}</span>}
-          {solPrice ? <span className="text-muted-foreground">≈ {fmt(total / solPrice, 3)} SOL</span> : null}
+          {vaultPositions.length > 0 && <Drawer open={periodOpen} onOpenChange={setPeriodOpen}><DrawerTrigger asChild><button type="button" aria-label={t("Periodo")} className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-semibold">{movePeriod === 1 ? "24 h" : `${movePeriod} d`}<ChevronDown size={12} aria-hidden /></button></DrawerTrigger>
+            <DrawerContent><DrawerHeader><DrawerTitle>{t("Periodo")}</DrawerTitle></DrawerHeader><div className="grid gap-2 px-4 pb-6">{([1, 7, 30] as const).map((d) => <button key={d} type="button" aria-pressed={movePeriod === d} onClick={() => { setMovePeriod(d); setPeriodOpen(false); }} className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium ${movePeriod === d ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>{d === 1 ? "24 h" : `${d} d`}{movePeriod === d && <CheckCircle2 size={16} />}</button>)}</div></DrawerContent></Drawer>}
         </div>;
       })()}
       {balances.data && balances.data.usdc === 0n && balances.data.sol === 0n && working === 0 ? <p role="status" className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"><RefreshCw size={12} className="animate-spin" />{t("Comprobando llegada de fondos…")}</p> : null}
