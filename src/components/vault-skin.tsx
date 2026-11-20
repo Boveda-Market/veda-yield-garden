@@ -39,7 +39,7 @@ export function VaultTitle({ vault, className = "h-8 sm:h-9" }: { vault: Pick<Va
   const { lang } = useI18n();
   if (vault.id === "trump") return <span className={`flex items-center gap-1.5 ${className}`}>
     <img src={trumpLogo} alt="" aria-hidden width={160} height={160} className="h-[115%] w-auto shrink-0 rounded-full ring-2 ring-hot-2 drop-shadow-[0_0_10px_var(--hot-2)]" />
-    <span className="-rotate-2 whitespace-nowrap font-display text-[1.35em] font-black italic uppercase leading-none tracking-tight text-hot-foreground [text-shadow:0_2px_0_var(--hot-surface),0_0_8px_var(--hot-surface)]">{lang === "en" ? <><span className="trump-gold">TRUMP</span> Vault</> : <>Bóveda <span className="trump-gold">TRUMP</span></>}</span>
+    <span className="-rotate-2 whitespace-nowrap font-display text-[1.35em] font-black italic uppercase leading-none tracking-tight text-hot-foreground [text-shadow:0_2px_0_var(--hot-surface),0_0_8px_var(--hot-surface)]">{lang === "en" ? <><span className="trump-gold">TRUMP</span> Vault</> : <>Bóveda <span className="trump-gold">TRUMP</span></>}<span className="mt-1 block rotate-0 text-[0.45em] font-bold not-italic tracking-[0.35em] text-[color:var(--trump-gold,#caa75e)] [text-shadow:none]">{lang === "en" ? "OFFICIAL" : "OFICIAL"}</span></span>
     <span className="sr-only">{t(vault.name)}</span>
   </span>;
   if (vault.id === "dcty") return <span className={`flex items-center gap-1.5 ${className}`}>

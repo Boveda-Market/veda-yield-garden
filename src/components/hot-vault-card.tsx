@@ -25,7 +25,7 @@ export function Sunset() {
 export function HotBanner({ vault, children, className = "" }: { vault: Vault; children?: ReactNode; className?: string }) {
   return <div className={`relative flex items-center justify-between gap-3 overflow-hidden bg-[image:var(--gradient-hot)] px-2.5 py-2 text-hot-foreground sm:px-4 sm:py-3 ${vaultSkin(vault.id)} ${className}`}>
     {vault.id === "dcty" ? <DctySkyline /> : vault.id === "trump" ? <TrumpFlag /> : <Sunset />}
-    <h3 className="relative min-w-0"><VaultTitle vault={vault} className="h-6 sm:h-9" /></h3>
+    <h3 className="relative min-w-0"><VaultTitle vault={vault} className={vault.id === "trump" ? "h-9 sm:h-11" : "h-6 sm:h-9"} /></h3>
     {children && <div className="relative flex shrink-0 flex-col items-end gap-1">{children}</div>}
   </div>;
 }
