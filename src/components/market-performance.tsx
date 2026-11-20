@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useT } from "@/lib/i18n";
 import { cumulativeInterest, fetchPoolCandles, type CandleRange } from "@/lib/pool-candles";
@@ -27,7 +27,9 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const t = useT();
   const locale = useLocale();
   const gid = useId().replace(/:/g, "");
-  const [range, setRange] = useState<CandleRange>("24h");
+  const [range, setRangeRaw] = useState<CandleRange>("24h");
+  useEffect(() => { try { const v = localStorage.getItem("boveda:market-range"); if (v === "7d" || v === "30d") setRangeRaw(v); } catch { /* ignore */ } }, []);
+  const setRange = (v: CandleRange) => { setRangeRaw(v); try { localStorage.setItem("boveda:market-range", v); } catch { /* ignore */ } };
   const [hover, setHover] = useState<number | null>(null);
   const candles = useQuery({ queryKey: ["pool-candles", vault.pool, range], queryFn: ({ signal }) => fetchPoolCandles(vault.pool, range, signal), staleTime: (range === "24h" ? 2 : 5) * 60_000, retry: 1 });
   const stats = useQuery({ queryKey: ["dexscreener-pool-stats", vault.pool], queryFn: ({ signal }) => fetchPoolStats(vault.pool, signal), staleTime: 60_000, retry: 1 });

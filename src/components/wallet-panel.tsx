@@ -58,7 +58,9 @@ export function WalletPanel() {
   const refunds = usePredictRefunds(address);
   const vaultPositions = vaults.data?.success ? vaults.data.data.positions : [];
   const { rows: vaultRows, capital, knownCapital, loading: pricesLoading, totalFees, change24h } = usePositionRows(vaultPositions);
-  const [movePeriod, setMovePeriod] = useState<1 | 7 | 30>(1);
+  const [movePeriod, setMovePeriodRaw] = useState<1 | 7 | 30>(1);
+  useEffect(() => { try { const v = Number(localStorage.getItem("boveda:move-period")); if (v === 7 || v === 30) setMovePeriodRaw(v); } catch { /* ignore */ } }, []);
+  const setMovePeriod = (v: 1 | 7 | 30) => { setMovePeriodRaw(v); try { localStorage.setItem("boveda:move-period", String(v)); } catch { /* ignore */ } };
   const dailyQ = useQueries({ queries: vaultRows.map((r) => ({ queryKey: ["pool-daily", r.pool, 30], queryFn: ({ signal }: { signal: AbortSignal }) => fetchDailyCloses(r.pool ?? "", 31, signal), enabled: movePeriod > 1 && Boolean(r.pool), staleTime: 10 * 60_000, retry: 1 })) });
   const changeN = movePeriod === 1 ? change24h : (() => {
     const cutoff = Date.now() - movePeriod * 86_400_000;
