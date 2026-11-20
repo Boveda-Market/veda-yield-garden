@@ -68,15 +68,16 @@ function ActivationFlow({ usdc, wallet, prepare, signAndSend, onDone }: { usdc: 
   const [deposit, setDeposit] = useState(false);
   const [details, setDetails] = useState(false);
   const gta6 = VAULTS.find((v) => v.id === "gta6");
-  const missing = activationShortfallMicro(usdc);
   const [total, setTotal] = useState<bigint | null>(null);
+  // Real need = live market reserve cost + activation fee + $1 first deposit (never a flat $20).
+  const missing = total === null ? 0n : activationShortfallMicro(usdc, total + 1_000_000n);
   const [stage, setStage] = useState<"ready" | "working" | "done">("ready");
   const [error, setError] = useState<string | undefined>();
   const [buy, setBuy] = useState(0);
   useEffect(() => {
-    if (!wallet || missing > 0n) return;
+    if (!wallet) return;
     void prepare({ data: { wallet, activation: true, quoteOnly: true } }).then((r) => { if (r.success) setTotal(BigInt(r.chargeMicro)); }).catch(() => {});
-  }, [wallet, missing > 0n]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [wallet]); // eslint-disable-line react-hooks/exhaustive-deps
   async function activate() {
     if (!wallet) return;
     setError(undefined); setStage("working");
