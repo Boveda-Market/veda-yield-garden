@@ -67,7 +67,7 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
       <div className={tile}>
         <p className={label}><Sprout size={14} />{t("Por cosechar")}</p>
         <p className="mt-2 font-display text-xl font-semibold tabular-nums text-primary">{totalFees > 0 ? <>+${anim(totalFees, liveRate)}</> : money(0)}</p>
-        {(() => { const ready = rows.filter((r) => !r.p.locked && typeof r.fees === "number" && canHarvest(r.fees)); return ready.length > 1 && onHarvestAll ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvestAll(ready.map((r) => r.p))}>{t("Cosechar todo")}</Button> : null; })() ?? (top && canHarvest(top.fees) ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvest(top.p)}>{t("Cosechar ahora")}</Button> : <p className="mt-1 text-xs text-muted-foreground">{t("Se activa desde $0.50.")}</p>)}
+        {(() => { const ready = rows.filter((r) => !r.p.locked && typeof r.fees === "number" && canHarvest(r.fees)); return ready.length > 1 && totalFees > 20 && onHarvestAll ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvestAll(ready.map((r) => r.p))}>{t("Cosechar todo")}</Button> : null; })() ?? (top && canHarvest(top.fees) ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvest(top.p)}>{t("Cosechar ahora")}</Button> : <p className="mt-1 text-xs text-muted-foreground">{t("Se activa desde $0.50.")}</p>)}
       </div>
       <div className={tile}>
         <p className={label}><Sparkles size={14} />{t("Ganancias (PNL)")}</p>
