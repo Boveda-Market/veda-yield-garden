@@ -1671,4 +1671,5 @@ export const extra: Record<string, string> = {
   "recaudando comisiones.": "collecting fees.",
   "Uno de los mayores volúmenes del mercado ahora paga directo a tu billetera. Abre tu posición en segundos.": "One of the market's biggest volumes now pays straight to your wallet. Open your position in seconds.",
   "Explorar Bóveda TRUMP": "Explore TRUMP Vault",
+  "Entrar con otra cuenta": "Sign in with another account",
 };
