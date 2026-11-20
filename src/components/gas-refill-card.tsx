@@ -11,6 +11,7 @@ import type { ResumeDeposit } from "@/lib/resume-deposit";
 import { notify } from "@/lib/notify";
 import { CheckCircle2, Fuel, Loader2, Sparkles } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
+import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
@@ -89,7 +90,8 @@ function ActivationFlow({ usdc, wallet, prepare, signAndSend, onDone }: { usdc: 
       setStage("done"); onDone?.();
     } catch (e) { setError(e instanceof Error ? t(e.message) : t("No se pudo completar la activación.")); setStage("ready"); }
   }
-  function openGta6() { setSheet(true); }
+  const navigate = useNavigate();
+  function openGta6() { void navigate({ to: "/app" }); }
   const view: ActivationStage = stage === "done" ? { kind: "done" } : stage === "working" ? { kind: "working" } : missing > 0n ? { kind: "short", missingMicro: missing } : { kind: "ready", totalMicro: total, ...(error ? { error } : {}) };
   return <>
     <ActivationCardView stage={view} onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={openGta6} />
