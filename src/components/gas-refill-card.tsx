@@ -7,6 +7,7 @@ import { DepositSimulation } from "@/components/deposit-simulation";
 import { PoolDetails } from "@/components/pool-details";
 import { VAULTS } from "@/lib/vaults";
 import { BuyUsdc } from "@/components/buy-usdc";
+import type { ResumeDeposit } from "@/lib/resume-deposit";
 import { notify } from "@/lib/notify";
 import { CheckCircle2, Fuel, Loader2, Sparkles } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
@@ -145,7 +146,7 @@ export function ActivationCardView({ stage, onActivate, onAddFunds, onOpenVault,
 }
 
 /** Popup used by every deposit and Doble o Nada entry when the account still needs activation or more dollars; on success it closes and the original action continues on its own. */
-export function ActivationSheet({ open, usdc, needMicro, onClose, onActivated }: { open: boolean; usdc: bigint; needMicro?: bigint; onClose: () => void; onActivated: () => void }) {
+export function ActivationSheet({ open, usdc, needMicro, resume, onClose, onActivated }: { open: boolean; usdc: bigint; needMicro?: bigint; resume?: Omit<ResumeDeposit, "at">; onClose: () => void; onActivated: () => void }) {
   const t = useT();
   const session = useBovedaSession();
   const prepare = useServerFn(prepareGasRefill);
@@ -178,6 +179,6 @@ export function ActivationSheet({ open, usdc, needMicro, onClose, onActivated }:
     <DialogTitle className="sr-only">{t("Activa tu cuenta")}</DialogTitle>
     <DialogDescription className="sr-only">{t("Prepara tu cuenta y seguimos solos.")}</DialogDescription>
     <ActivationCardView stage={view} continueMode onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={onActivated} />
-    {buy > 0 && <BuyUsdc auto={buy} needMicro={missing} className="mt-2" />}
+    {buy > 0 && <BuyUsdc auto={buy} needMicro={missing} className="mt-2" {...(resume ? { resume } : {})} />}
   </ActionSheetContent></Dialog>;
 }

@@ -103,7 +103,7 @@ export function PilotDeposit({ vaultId, amount, position, migrate, usdc, autoSta
       {step === "error" && message && <SignalErrorCard message={message} />}
       <Button size="lg" disabled={busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? t(labels[step]) : step === "error" ? t("Intentar de nuevo") : t("Confirmar y depositar")}</Button>
     </>}
-    {walletAddress && <ActivationSheet open={needsReserve} usdc={usdc ?? 0n} onClose={() => setNeedsReserve(false)} onActivated={() => { setNeedsReserve(false); void queryClient.invalidateQueries({ queryKey: ["my-wallet", walletAddress] }); setTimeout(() => void run(autoStart), 1500); }} />}
+    {walletAddress && <ActivationSheet open={needsReserve} usdc={usdc ?? 0n} resume={{ vaultId, amount, ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) }} onClose={() => setNeedsReserve(false)} onActivated={() => { setNeedsReserve(false); void queryClient.invalidateQueries({ queryKey: ["my-wallet", walletAddress] }); setTimeout(() => void run(autoStart), 1500); }} />}
     {message && step !== "error" && <p role="alert" className="text-muted-foreground">{message}</p>}
     {signature && <a className="text-xs underline" href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("Ver comprobante")}</a>}
   </section>;
