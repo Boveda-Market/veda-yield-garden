@@ -26,7 +26,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from 
 const COLORS = ["bg-primary", "bg-chart-1", "bg-chart-2", "bg-chart-4", "bg-chart-3", "bg-chart-5"];
 
 /** Visual performance board: capital split by vault/plays, weighted APR, pending, harvested PNL and in/out volume. */
-export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarvest }: { wallet: string | null; positions: ChainPosition[]; positionsComplete: boolean; predictionsMicro: bigint | null; onHarvest: (p: ChainPosition) => void }) {
+export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarvest, onHarvestAll }: { wallet: string | null; positions: ChainPosition[]; positionsComplete: boolean; predictionsMicro: bigint | null; onHarvest: (p: ChainPosition) => void; onHarvestAll?: (ps: ChainPosition[]) => void }) {
   const t = useT();
   const [hidden] = useHideBalances();
   const money = (n: number | null) => n === null ? "—" : hidden ? MASK : formatUsd(n);
@@ -67,7 +67,7 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
       <div className={tile}>
         <p className={label}><Sprout size={14} />{t("Por cosechar")}</p>
         <p className="mt-2 font-display text-xl font-semibold tabular-nums text-primary">{totalFees > 0 ? <>+${anim(totalFees, liveRate)}</> : money(0)}</p>
-        {top && canHarvest(top.fees) ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvest(top.p)}>{t("Cosechar ahora")}</Button> : <p className="mt-1 text-xs text-muted-foreground">{t("Se activa desde $0.50.")}</p>}
+        {(() => { const ready = rows.filter((r) => !r.p.locked && typeof r.fees === "number" && canHarvest(r.fees)); return ready.length > 1 && onHarvestAll ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvestAll(ready.map((r) => r.p))}>{t("Cosechar todo")}</Button> : null; })() ?? (top && canHarvest(top.fees) ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvest(top.p)}>{t("Cosechar ahora")}</Button> : <p className="mt-1 text-xs text-muted-foreground">{t("Se activa desde $0.50.")}</p>)}
       </div>
       <div className={tile}>
         <p className={label}><Sparkles size={14} />{t("Ganancias (PNL)")}</p>
@@ -174,7 +174,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   return <div className="relative mt-3 overflow-hidden rounded-3xl border border-border bg-card p-5">
     <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full blur-3xl" style={{ background: `color-mix(in oklch, ${theme.b} 15%, transparent)` }} />
     <div className="relative flex items-center justify-between gap-2">
-      <p className="text-sm font-semibold">{isPrice ? t("Mercado {s}", { s: sym }) : t("Mercado global")}</p>
+      <p className="text-sm font-semibold">{isPrice ? t("Mercado {s}", { s: sym }) : <>{t("Mercado global")}<span className="block text-xs font-normal text-muted-foreground">{t("Todas las bóvedas abiertas")}</span></>}</p>
       <div className="inline-flex items-center rounded-xl border border-border bg-muted/60 p-1 text-xs font-medium">{tab(1, t("24 h"))}{tab(7, t("7 días"))}{tab(30, t("30 días"))}</div>
     </div>
     {open.length > 2 && (() => { const opts = [{ id: "global", label: t("Global") }, ...open.map((v) => ({ id: v.id, label: `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}` }))]; const curLabel = opts.find((o) => o.id === active)?.label ?? t("Global"); return <Drawer open={pickOpen} onOpenChange={setPickOpen}><DrawerTrigger asChild><button type="button" aria-label={t("Bóvedas")} className="relative mt-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 py-1.5 text-xs font-bold">{curLabel}<ChevronDown size={14} aria-hidden /></button></DrawerTrigger>
