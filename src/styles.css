@@ -396,3 +396,17 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
 .dcty-boat { animation: dcty-drive 9s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .dcty-boat { animation: none; } }
 
+
+/* Themed vault pills (Bóvedas grid): DCTY night skyline, GTA sunset stripes. */
+.vault-dcty.dcty-pill {
+  background-image: linear-gradient(180deg, transparent 55%, oklch(0.16 0.045 275 / 0.9) 55% 62%, transparent 62%), repeating-linear-gradient(90deg, oklch(0.2 0.06 275) 0 10px, oklch(0.26 0.08 290) 10px 16px, oklch(0.18 0.05 275) 16px 24px), linear-gradient(180deg, oklch(0.45 0.22 350 / 0.85), oklch(0.5 0.14 205 / 0.7));
+  background-size: 100% 100%, 100% 45%, 100% 100%;
+  background-position: 0 0, 0 100%, 0 0;
+  background-repeat: no-repeat;
+}
+.gta-pill {
+  background-image: radial-gradient(60% 120% at 85% 110%, oklch(0.93 0.14 90) 0 35%, transparent 36%), repeating-linear-gradient(180deg, transparent 0 7px, oklch(0.17 0.035 315 / 0.35) 7px 9px), linear-gradient(180deg, oklch(0.5 0.2 300), var(--hot) 60%, var(--hot-2));
+}
+.pill-active { box-shadow: 0 0 0 1px var(--primary), 0 0 22px 2px color-mix(in oklab, var(--primary) 55%, transparent), var(--shadow-hot); animation: pill-glow 2.6s ease-in-out infinite; }
+@keyframes pill-glow { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.15) saturate(1.15); } }
+@media (prefers-reduced-motion: reduce) { .pill-active { animation: none; } }
