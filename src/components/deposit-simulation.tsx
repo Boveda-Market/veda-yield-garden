@@ -1,5 +1,5 @@
 import { useT } from "@/lib/i18n";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { simulationDisplay } from "@/lib/deposit-simulation";
 import type { Vault } from "@/lib/vaults";
 import { PilotDeposit } from "@/components/pilot-deposit";
+import { clearResumeDeposit } from "@/lib/resume-deposit";
 import { BuyUsdc } from "@/components/buy-usdc";
 import { RangeAlertsGate } from "@/components/range-alerts-gate";
 import { getRealWallet } from "@/lib/solana.functions";
@@ -28,6 +29,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   const [amount, setAmount] = useState(initialAmount);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  useEffect(() => { if (done) clearResumeDeposit(); }, [done]);
   const readWallet = useServerFn(getRealWallet);
   const balances = useQuery({ queryKey: ["my-wallet", wallet], enabled: !!wallet, queryFn: async () => {
     const r = await readWallet({ data: { wallet: wallet! } });
@@ -67,7 +69,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
       <div className="grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={p.toString()} type="button" size="sm" variant="secondary" disabled={busy || !usdc} onClick={() => pick(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
       <p className="text-xs text-muted-foreground">{migrate ? t("Traslado entre bóvedas: el detalle aparece antes de confirmar.") : t("Entre $1 y $5,000.")}</p>
       {overBalance && <p role="alert" className="text-xs text-muted-foreground">{t("No tienes suficientes dólares para esta cantidad.")}</p>}
-      {(overBalance || usdc === 0n) && <div className={hot ? "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-hot/40 bg-hot/10 p-3 text-xs" : "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs"}><span>{hot ? t("Estás a un paso de comenzar. Deposita dólares para entrar a la {v}.", { v: t(vault.name) }) : t("Estás a un paso de comenzar. Añade dólares y sigue aquí mismo.")}</span><BuyUsdc className="w-full" hot={hot} needMicro={overBalance && typed != null && usdc != null ? typed - usdc : undefined} /></div>}
+      {(overBalance || usdc === 0n) && <div className={hot ? "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-hot/40 bg-hot/10 p-3 text-xs" : "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs"}><span>{hot ? t("Estás a un paso de comenzar. Deposita dólares para entrar a la {v}.", { v: t(vault.name) }) : t("Estás a un paso de comenzar. Añade dólares y sigue aquí mismo.")}</span><BuyUsdc className="w-full" hot={hot} resume={{ vaultId: vault.id, amount: typed != null ? amount : "", ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) }} needMicro={overBalance && typed != null && usdc != null ? typed - usdc : undefined} /></div>}
     </div>
     {breakdown && <dl className="grid gap-2 rounded-xl bg-muted p-4 text-sm">
       <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Importe")}</dt><dd>${breakdown.gross}</dd></div>
