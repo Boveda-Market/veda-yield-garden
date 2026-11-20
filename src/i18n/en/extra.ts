@@ -1666,7 +1666,6 @@ export const extra: Record<string, string> = {
   "Mientras todos especulan, tú estás del lado de la casa: tus dólares recogen intereses en piloto automático.": "While everyone speculates, you're on the house's side: your dollars collect interest on autopilot.",
   "Bóvedas de alto riesgo: el valor de tu depósito sube y baja con el mercado.": "High-risk vaults: your deposit's value rises and falls with the market.",
   "Ver bóvedas de alto octanaje": "See high-octane vaults",
-  "Impacto presidencial": "Presidential impact",
   "La moneda del presidente ya está": "The president's coin is already",
   "recaudando comisiones.": "collecting fees.",
   "Uno de los mayores volúmenes del mercado ahora paga directo a tu billetera. Abre tu posición en segundos.": "One of the market's biggest volumes now pays straight to your wallet. Open your position in seconds.",

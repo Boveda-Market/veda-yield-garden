@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { VAULTS } from "@/lib/vaults";
 import { Dialog, DialogDescription, DialogTitle } from "./ui/dialog";
@@ -18,7 +18,6 @@ export function WeeklyAdView({ onGo, onClose }: { onGo: () => void; onClose: () 
     <div className={`${vaultSkin("trump")} relative overflow-hidden rounded-2xl border-2 border-hot-2/70 bg-[image:var(--gradient-hot-surface)] p-5 text-hot-foreground`}>
       <TrumpFlag />
       <div className="relative">
-        <p className="inline-flex items-center gap-1 rounded-full hot-cta px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-hot-surface"><Zap className="h-3 w-3" />{t("Impacto presidencial")}</p>
         {TRUMP && <div className="mt-3"><VaultTitle vault={TRUMP} className="h-10" /></div>}
         <DialogTitle className="mt-4 font-display text-3xl font-black italic leading-[1.05]">{t("La moneda del presidente ya está")} <span className="trump-gold">{t("recaudando comisiones.")}</span></DialogTitle>
         <DialogDescription className="mt-3 text-sm font-semibold text-hot-muted">{t("Uno de los mayores volúmenes del mercado ahora paga directo a tu billetera. Abre tu posición en segundos.")}</DialogDescription>
