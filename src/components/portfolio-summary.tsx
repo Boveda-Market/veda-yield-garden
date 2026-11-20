@@ -149,8 +149,10 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   // Young tokens: stretch the line edge to edge from their first candle instead of leaving the left side empty.
   const w0 = live ? Math.max(wBase, mSeries[0]!.t) : wBase, wSpan = Math.max(now - w0, 1), young = n !== 1 && live && w0 - wBase > 86_400_000;
   const ms = live ? mSeries.map((p) => p.v) : mk;
-  const cmin = Math.min(...ms), cmax = Math.max(...ms), cr = Math.max(cmax - cmin, Math.abs(cmax) * 1e-6, 1e-9);
-  const my = (v: number) => CB - ((v - cmin) / cr) * (CB - CT - 8);
+  // Log scale: equal % moves take equal height, so the trend reads true even after big spikes.
+  const lg = (v: number) => Math.log10(Math.max(v, 1e-9));
+  const cmin = Math.min(...ms), cmax = Math.max(...ms), lmin = lg(cmin), lr = Math.max(lg(cmax) - lmin, 1e-9);
+  const my = (v: number) => CB - ((lg(v) - lmin) / lr) * (CB - CT - 8);
   const cPts = live ? mSeries.map((p) => ({ x: Math.min(R, L + ((p.t - w0) / wSpan) * (R - L)), y: my(p.v) })) : mk.map((v, i) => ({ x: x(i), y: my(v) }));
   const cLine = angular(cPts), cEnd = cPts[cPts.length - 1]!;
   const eLine = smooth(ePts);
