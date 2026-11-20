@@ -10,7 +10,7 @@ import { Dialog, DialogDescription, DialogTitle } from "./ui/dialog";
 import { ActionSheetContent } from "./ui/action-sheet";
 import { DepositSimulation } from "./deposit-simulation";
 import { WithdrawalSimulation } from "./withdrawal-simulation";
-import { DctySkyline, VaultTitle, vaultSkin } from "./vault-skin";
+import { DctySkyline, TrumpFlag, VaultTitle, vaultSkin } from "./vault-skin";
 import { Sunset } from "./hot-vault-card";
 import { gta6Candidate } from "./gta6-promo";
 import { RANK_ACKED } from "@/lib/rank-ack";
@@ -82,7 +82,7 @@ export function HotRankCard({ onEnter, onLater, positions = [], usdc = 0, onMove
     <div className="mt-3 space-y-2.5">
       {rows.map(({ vault, apr }, i) => { const owned = positions.some((p) => p.vaultId === vault.id); const src = !owned && onMove ? moveSource(positions, vault.id) : null; const moveFirst = !!src && usdc < MOVE_SUGGEST_USD; return <div key={vault.id}><button type="button" onClick={() => (moveFirst && src ? onMove?.(src, vault) : onEnter(vault))} className={`hot-ring block w-full rounded-2xl p-[2px] text-left shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98] ${vaultSkin(vault.id)}`}>
         <span className="relative isolate block overflow-hidden rounded-[calc(1rem-2px)] bg-[image:var(--gradient-hot)] px-3 py-2.5 text-hot-foreground">
-          {vault.id === "dcty" ? <DctySkyline /> : <Sunset />}
+          {vault.id === "dcty" ? <DctySkyline /> : vault.id === "trump" ? <TrumpFlag /> : <Sunset />}
           <span className="relative flex items-center justify-between gap-2">
             <VaultTitle vault={vault} className="h-6" />
             <span className="flex items-center gap-1">{owned && <span className="rounded-full bg-hot-surface px-2 py-0.5 text-[10px] font-bold">{t("Tu bóveda activa")}</span>}{i === 0 && <span className="flex items-center gap-1 rounded-full bg-hot-surface px-2 py-0.5 text-[10px] font-black uppercase"><Crown size={11} aria-hidden />#1</span>}</span>
