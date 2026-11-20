@@ -153,6 +153,7 @@ export const realOps: Record<string, string> = {
   "Depositar USDC": "Deposit USDC",
   "Depositar más": "Deposit more",
   "Tus posiciones abiertas": "Your open positions",
+  "Posiciones abiertas": "Open positions",
   "Ver en portafolio": "View in portfolio",
   "Volver a mis posiciones": "Back to my positions",
   "Todo": "All",

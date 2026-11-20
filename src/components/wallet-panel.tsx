@@ -60,6 +60,7 @@ export function WalletPanel() {
   const vaultPositions = vaults.data?.success ? vaults.data.data.positions : [];
   const { rows: vaultRows, capital, knownCapital, loading: pricesLoading, totalFees, change24h } = usePositionRows(vaultPositions);
   const [movePeriod, setMovePeriodRaw] = useState<1 | 7 | 30>(1);
+  const [posOpen, setPosOpen] = useState(false);
   const [periodOpen, setPeriodOpen] = useState(false);
   useEffect(() => { try { const v = Number(localStorage.getItem("boveda:move-period")); if (v === 7 || v === 30) setMovePeriodRaw(v); } catch { /* ignore */ } }, []);
   const setMovePeriod = (v: 1 | 7 | 30) => { setMovePeriodRaw(v); try { localStorage.setItem("boveda:move-period", String(v)); } catch { /* ignore */ } };
@@ -277,7 +278,8 @@ export function WalletPanel() {
     </Link>}
 
 
-    <WalletPositions wallet={address} />
+    {vaultPositions.length > 0 && <Drawer open={posOpen} onOpenChange={setPosOpen}><DrawerTrigger asChild><button type="button" className="flex w-full items-center justify-between gap-2 rounded-2xl border border-border bg-card p-4 text-left"><span className="font-display text-base font-semibold">{t("Posiciones abiertas")} · {vaultPositions.length}</span><ChevronDown size={18} className="shrink-0 text-muted-foreground" aria-hidden /></button></DrawerTrigger>
+      <DrawerContent><DrawerHeader><DrawerTitle>{t("Posiciones abiertas")}</DrawerTitle></DrawerHeader><div className="max-h-[75vh] overflow-y-auto px-4 pb-6"><WalletPositions wallet={address} bare /></div></DrawerContent></Drawer>}
     <WalletOpenPredictions />
 
     <Dialog open={sheet} onOpenChange={(o) => { if (!o && busy) return; setSheet(o); if (!o) { setSent(null); setMessage(null); } }}>
