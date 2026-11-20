@@ -22,6 +22,7 @@ import { RebalanceButton } from "@/components/rebalance-button";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useRealWallet } from "@/hooks/use-real-wallet";
 import { canHarvest } from "@/lib/harvest";
+import { vaultSkin, DctySkyline, TrumpFlag, VaultTitle } from "@/components/vault-skin";
 
 type Supported = OperableVault;
 const supported = isOperableVault;
@@ -75,8 +76,9 @@ export function WalletPositions({ wallet, only, bare }: { wallet: string; only?:
       const apr = yields[i]?.data?.apr ?? null;
       const v = VAULTS.find((x) => x.id === p.vaultId);
       const ok = supported(p.vaultId);
-      return <li key={p.address} className="rounded-xl border border-border bg-background/40 p-3">
-        <div className="flex items-center gap-2">{hasTokenLogo(p.symbol) && <TokenIcon symbol={p.symbol} size={28} />}<div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{v ? t(v.name) : `${p.symbol}/USDC`}</p>{p.locked && <p className="text-xs text-muted-foreground">{t("Con liquidez bloqueada")}</p>}<PoweredBy brand="meteora" className="mt-0.5 !justify-start" /></div></div>
+      const hot = Boolean(v?.badge);
+      return <li key={p.address} className={hot ? `hot-ring rounded-xl p-[2px] shadow-[var(--shadow-hot)] ${vaultSkin(p.vaultId)}` : "rounded-xl border border-border bg-background/40 p-3"}><div className={hot ? "relative overflow-hidden rounded-[calc(0.75rem-2px)] bg-card p-3" : ""}>{hot && <div className="pointer-events-none absolute inset-0 opacity-40" aria-hidden>{p.vaultId === "dcty" ? <DctySkyline /> : p.vaultId === "trump" ? <TrumpFlag /> : null}</div>}<div className="relative">
+        <div className="flex items-center gap-2">{hasTokenLogo(p.symbol) && <TokenIcon symbol={p.symbol} size={28} />}<div className="min-w-0 flex-1">{hot && v ? <VaultTitle vault={v} className="h-6" /> : <p className="truncate text-sm font-semibold">{v ? t(v.name) : `${p.symbol}/USDC`}</p>}{p.locked && <p className="text-xs text-muted-foreground">{t("Con liquidez bloqueada")}</p>}<PoweredBy brand="meteora" className="mt-0.5 !justify-start" /></div></div>
         <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
           <div className="rounded-lg bg-muted/50 p-2"><dt className="text-muted-foreground">{t("Valor")}</dt><dd className="mt-0.5 font-display text-sm font-semibold tabular-nums">{value === null ? "—" : `≈ ${formatUsd(value)}`}</dd></div>
           <div className="rounded-lg bg-muted/50 p-2"><dt className="text-muted-foreground">{t("Rendimiento")}</dt><dd className="mt-0.5 font-display text-sm font-semibold tabular-nums text-primary">{apr === null ? "—" : `${apr.toFixed(1)}% APR`}</dd></div>
@@ -90,7 +92,7 @@ export function WalletPositions({ wallet, only, bare }: { wallet: string; only?:
             <Button size="sm" variant="outline" disabled={p.locked} onClick={() => setExit({ position: p.address, vaultId: p.vaultId as Supported })}><ArrowDownToLine size={14} />{t("Cerrar")}</Button>
           </div></> : <p className="mt-2 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
 
-      </li>;
+      </div></div></li>;
     })}</ul>
     {!bare && <p className="mt-3 text-[11px] leading-4 text-muted-foreground">{t("PNL = ganancias por cosechar, estimadas al precio actual. APR estimado con las últimas 24h.")}</p>}
     {harvest && <HarvestDialog wallet={wallet} position={harvest.position} vaultId={harvest.vaultId} compound={harvest.compound} onClose={() => { setHarvest(null); void query.refetch(); }} />}
