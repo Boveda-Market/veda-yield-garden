@@ -234,7 +234,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     <div className="relative mt-1">
       <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Market cap {s}", { s: sym }) : t("Market cap global")}</p><p className="flex items-center gap-2"><span className={`font-display text-xl font-extrabold tabular-nums sm:text-2xl ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !liveCap ? "…" : mText}</span>{(ms[0] ?? 0) > 0 && <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${pct >= 0 ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{pct >= 0 ? "+" : ""}{pct.toFixed(1)}%</span>}</p></div>
     </div>
-    <div className="relative mt-2 touch-none overflow-hidden" onPointerDown={pDown} onPointerMove={pMove} onPointerUp={pUp} onPointerCancel={pUp} onPointerLeave={pUp}>
+    <div className="relative mt-2 touch-pan-y overflow-hidden" onPointerDown={pDown} onPointerMove={pMove} onPointerUp={pUp} onPointerCancel={pUp} onPointerLeave={pUp}>
     <div style={{ transform: `translateX(${pan}px) scaleX(${zoom})`, transformOrigin: `${origin * 100}% 50%` }}>
     <svg viewBox={`0 0 ${W} ${H}`} className="relative h-40 w-full overflow-visible sm:h-52" role="img" aria-label={t("Mercado global frente a ganancias cosechadas")}>
       <defs>
