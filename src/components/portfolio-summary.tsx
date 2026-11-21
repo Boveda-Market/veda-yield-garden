@@ -44,7 +44,7 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
   const vaultTotal = byVault.reduce((s, x) => s + x.value, 0);
   const aprWeighted = vaultTotal > 0 && byVault.every((x) => x.apr !== null) ? byVault.reduce((s, x) => s + x.value * (x.apr ?? 0), 0) / vaultTotal : null;
   const liveRate = rows.reduce((s, r) => s + (r.p.locked || r.p.outOfRange ? 0 : earningRatePerMs(r.value, r.apr)), 0);
-  const anim = (n: number, rate = 0) => hidden ? MASK : <AnimatedMoney value={n} ratePerMs={rate} prefix="" format={rate > 0 ? undefined : formatUsd} />;
+  const anim = (n: number, rate = 0) => hidden ? MASK : <AnimatedMoney value={n} ratePerMs={rate} prefix={rate > 0 ? "$" : ""} format={rate > 0 ? undefined : formatUsd} />;
   const pnl = history.pnl ? Number(history.pnl.replace(/,/g, "")) : null;
   const tile = "rounded-2xl border border-border bg-card p-4";
   const label = "flex items-center gap-1.5 text-xs text-muted-foreground";
@@ -68,8 +68,8 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
     <div className="mt-3 grid grid-cols-2 gap-3">
       <div className={tile}>
         <p className={label}><Sprout size={14} />{t("Por cosechar")}</p>
-        <p className="mt-2 font-display text-xl font-semibold tabular-nums text-primary">{totalFees > 0 ? <>+${anim(totalFees, liveRate)}</> : money(0)}</p>
-        {(() => { const ready = rows.filter((r) => !r.p.locked && typeof r.fees === "number" && canHarvest(r.fees)); return ready.length > 1 && totalFees > 20 && onHarvestAll ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvestAll(ready.map((r) => r.p))}>{t("Cosechar todo")}</Button> : null; })() ?? (top && canHarvest(top.fees) ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvest(top.p)}>{t("Cosechar ahora")}</Button> : <p className="mt-1 text-xs text-muted-foreground">{t("Se activa desde $0.50.")}</p>)}
+        <p className="mt-2 font-display text-xl font-semibold tabular-nums text-primary">{totalFees > 0 ? <>+{anim(totalFees, liveRate)}</> : money(0)}</p>
+        {(() => { const ready = rows.filter((r) => !r.p.locked && typeof r.fees === "number" && canHarvest(r.fees)); return ready.length > 1 && totalFees > 20 && onHarvestAll ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvestAll(ready.map((r) => r.p))}>{t("Cosechar todo")}</Button> : null; })() ?? (top && canHarvest(top.fees) ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvest(top.p)}>{t("Cosechar ahora")}</Button> : <p className="mt-1 text-xs text-muted-foreground">{t("Se activa desde $20.")}</p>)}
       </div>
       <div className={tile}>
         <p className={label}><Sparkles size={14} />{t("Ganancias (PNL)")}</p>
