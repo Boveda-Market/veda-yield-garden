@@ -144,7 +144,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const smooth = (pts: { x: number; y: number }[]) => { let d = `M${pts[0]!.x},${pts[0]!.y}`; for (let i = 1; i < pts.length; i++) { const p = pts[i - 1]!, c = pts[i]!, mx = (p.x + c.x) / 2; d += ` C${mx},${p.y} ${mx},${c.y} ${c.x},${c.y}`; } return d; };
   const ePts = earn.map((v, i) => ({ x: x(i), y: EB - (v / emax) * (EB - ET) }));
   const angular = (pts: { x: number; y: number }[]) => pts.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-  // Market line: 1-minute (1 h), 5-minute (24 h), 15-minute (7 d) or 1-hour (30 d) closes placed by time with straight segments, so every real spike and drop shows; Global sums each vault moved by its own price.
+  // Market line: 1-minute (1 h), 5-minute (24 h), 1-hour (7 d) or 4-hour (30 d) closes placed by time with straight segments, so every real spike and drop shows; Global sums each vault moved by its own price.
   const now = Date.now(), wBase = n === 0 ? now - 3_600_000 : n === 1 ? now - 86_400_000 : days[0]!.start;
   const inWin = (i: number) => (introQ[i]?.data ?? []).filter((c) => c.t >= wBase);
   const mSeries = isPrice ? inWin(curIdx).map((c) => ({ t: c.t, v: c.c * (supply(curIdx) ?? 1) })) : intradayGlobal(open.map((v, i) => ({ value: capW[i]!, candles: inWin(i) })));

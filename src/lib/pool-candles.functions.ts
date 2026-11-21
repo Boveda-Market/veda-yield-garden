@@ -5,8 +5,8 @@ import { geckoCandles, POOL_RE, type RawCandle } from "./gecko-candles";
 const SPEC = {
   "1h": { tf: "minute", agg: 1, count: 60, ttl: 30_000 },
   "24h": { tf: "minute", agg: 5, count: 288, ttl: 60_000 },
-  "7d": { tf: "minute", agg: 15, count: 672, ttl: 5 * 60_000 },
-  "30d": { tf: "hour", agg: 1, count: 720, ttl: 10 * 60_000 },
+  "7d": { tf: "hour", agg: 1, count: 168, ttl: 5 * 60_000 },
+  "30d": { tf: "hour", agg: 4, count: 180, ttl: 10 * 60_000 },
   day: { tf: "day", agg: 1, count: 31, ttl: 10 * 60_000 },
 } as const;
 
@@ -63,11 +63,11 @@ export const getPoolCandles = createServerFn({ method: "GET" })
       const fresh = await p;
       if (fresh.length) cache.set(key, { at: Date.now(), data: fresh });
       if (cache.size > 200) cache.delete(cache.keys().next().value!);
-      return fresh.length ? fresh : hit?.data ?? borrowed(data.pool, data.range) ?? (data.range === "day" ? [] : await dexFallback(data.pool));
+      return fresh.length ? fresh : hit?.data ?? borrowed(data.pool, data.range) ?? (data.range === "1h" || data.range === "24h" ? await dexFallback(data.pool) : []);
     } catch {
       if (hit) return hit.data;
       const b = borrowed(data.pool, data.range); if (b) return b;
-      if (data.range !== "day") { const fb = await dexFallback(data.pool); if (fb.length) return fb; }
+      if (data.range === "1h" || data.range === "24h") { const fb = await dexFallback(data.pool); if (fb.length) return fb; }
       throw new Error("Gráfica no disponible por ahora");
     }
   });

@@ -3,12 +3,12 @@ import { getPoolCandles } from "./pool-candles.functions";
 export type PoolCandle = { t: number; c: number; v: number };
 export type CandleRange = "1h" | "24h" | "7d" | "30d";
 
-/** Chart resolutions: 1-minute for 1 h, 5-minute for 24 h (one fast request each), 15-minute for 7 d, 1-hour for 30 d. */
+/** Chart resolutions: 1-minute for 1 h, 5-minute for 24 h (one fast request each), 1-hour for 7 d, 4-hour for 30 d (trading 1H/4H candles). */
 export const RANGE_RES = {
   "1h": { tf: "minute", agg: 1, count: 60, ms: 3_600_000 },
   "24h": { tf: "minute", agg: 5, count: 288, ms: 86_400_000 },
-  "7d": { tf: "minute", agg: 15, count: 672, ms: 7 * 86_400_000 },
-  "30d": { tf: "hour", agg: 1, count: 720, ms: 30 * 86_400_000 },
+  "7d": { tf: "hour", agg: 1, count: 168, ms: 7 * 86_400_000 },
+  "30d": { tf: "hour", agg: 4, count: 180, ms: 30 * 86_400_000 },
 } as const;
 export type ChartRange = keyof typeof RANGE_RES;
 
@@ -43,16 +43,19 @@ function saveCachedCandles(pool: string, range: ChartRange, list: PoolCandle[]) 
   try { localStorage.setItem(CACHE_KEY(pool, range), JSON.stringify(list)); } catch { /* storage full */ }
 }
 
-/** Candles for «Rendimiento y Mercado»: 5-minute for 24 h (one fast request), 15-minute for 7 d. */
+/** Candles for «Rendimiento y Mercado»: 5-minute for 24 h (one fast request), 1-hour for 7 d. */
 export function fetchPoolCandles(pool: string, range: CandleRange, signal?: AbortSignal): Promise<PoolCandle[]> {
   return fetchRangeCandles(pool, range, signal);
 }
 
 /** Global market line over time: each vault's value moved by its own price (carried forward), summed on the densest vault's timestamps. */
 export function intradayGlobal(vaults: { value: number; candles: PoolCandle[] }[]): { t: number; v: number }[] {
-  const live = vaults.filter((v) => v.candles.length);
+  // Sparse series (busy-source checkpoints) would carry one value across the window and fake a flat-then-dive line, so they count as flat value.
+  const best = Math.max(0, ...vaults.map((v) => v.candles.length));
+  const ok = (v: { candles: PoolCandle[] }) => v.candles.length >= Math.min(10, best);
+  const live = vaults.filter((v) => v.candles.length && ok(v));
   if (!live.length) return [];
-  const flat = vaults.filter((v) => !v.candles.length).reduce((s, v) => s + v.value, 0);
+  const flat = vaults.filter((v) => !live.includes(v)).reduce((s, v) => s + v.value, 0);
   const grid = live.reduce((a, v) => (v.candles.length > a.length ? v.candles : a), live[0]!.candles);
   const idx = live.map(() => 0), last = live.map((v) => v.candles[0]!.c), now = live.map((v) => v.candles[v.candles.length - 1]?.c ?? 1);
   return grid.map(({ t }) => ({ t, v: flat + live.reduce((s, v, k) => {
