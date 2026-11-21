@@ -93,7 +93,7 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
     if (phase === "ready" && sell && units && !short && balance != null && autoSign.current === sell.id) { autoSign.current = null; void send(); }
   }, [phase, sell, balance]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (phase === "done" && sig) return <div role="status" className="grid gap-2 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm"><p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} />{t("¡Listo! El dinero llegará a tu saldo de Coinbase.")}</p><a className="text-xs underline" href={`https://orbmarkets.io/tx/${sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}</a></div>;
+  if (phase === "done" && sig) return <div role="status" className="grid gap-2 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm"><p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} />{t("¡Listo! El dinero llegará a tu saldo de Coinbase.")}</p><a className="text-xs underline" href={`https://solscan.io/tx/${sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}</a></div>;
 
   if ((phase === "ready" || phase === "sending") && sell && units) return <div className="grid gap-3">
     <div className="grid gap-1 rounded-lg border p-3 text-xs">

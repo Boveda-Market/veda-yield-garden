@@ -81,7 +81,7 @@ export function CashAppBtc({ wallet }: { wallet: string }) {
     return <div role="status" className="grid gap-2 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm">
       <p className="flex items-center gap-2 font-semibold">{status === "settled" ? <CheckCircle2 size={16} /> : <LoaderCircle size={16} className="animate-spin" />}{label}</p>
       <p className="text-xs">{t("Recibirás")} ≈ {done.btc} BTC</p>
-      <a className="text-xs underline" href={`https://orbmarkets.io/tx/${done.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}</a>
+      <a className="text-xs underline" href={`https://solscan.io/tx/${done.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}</a>
       <Button size="sm" variant="outline" onClick={() => { setDone(null); setAmount(""); setChecked(false); }}>{t("Hacer otro retiro")}</Button>
     </div>;
   }

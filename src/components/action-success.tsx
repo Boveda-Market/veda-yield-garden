@@ -40,7 +40,7 @@ export function ActionSuccess({ title, body, signature, onClose, destination = "
     <Button className="w-full active:scale-[0.98]" size="lg" onClick={done}>{doneLabel ?? t(destination === "/wallet" ? "Listo · ver billetera" : destination ? "Listo · ver mi posición" : "Listo")}</Button>
     <DetailsToggle><dl className="grid w-full gap-2 rounded-xl border border-border bg-background/60 p-4 text-left">
       {rows.map((r) => <div key={r.label} className="flex justify-between gap-3"><dt className="text-muted-foreground">{r.label}</dt><dd className="text-right font-medium">{r.value}</dd></div>)}
-      {signature && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comprobante")}</dt><dd><a href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noopener noreferrer" className="font-mono text-xs underline">{signature.slice(0, 6)}…{signature.slice(-4)}</a></dd></div>}
+      {signature && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comprobante")}</dt><dd><a href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noopener noreferrer" className="font-mono text-xs underline">{signature.slice(0, 6)}…{signature.slice(-4)}</a></dd></div>}
     </dl></DetailsToggle>
   </section></Dismissible>;
 }

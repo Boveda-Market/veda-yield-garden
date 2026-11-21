@@ -124,7 +124,7 @@ export const notifyMyAction = createServerFn({ method: "POST" })
       const { id } = await admin(data.token);
       const tg = await import("./telegram.server");
       const text = data.kind === "exit" ? exitAlertText(data.percent ?? 100, data.amountUsd, data.vault) : data.kind === "deposit" ? depositAlertText(data.amountUsd, data.vault) : data.kind === "harvest" ? harvestAlertText(data.amountUsd, data.vault) : ACTION_TEXT[data.kind];
-      await tg.userAlert(id, text, data.kind, { text: "🧾 Ver comprobante", url: `https://orbmarkets.io/tx/${data.signature}` });
+      await tg.userAlert(id, text, data.kind, { text: "🧾 Ver comprobante", url: `https://solscan.io/tx/${data.signature}` });
       return { success: true };
     } catch { return { success: false }; }
   });

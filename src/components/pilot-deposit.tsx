@@ -115,6 +115,6 @@ export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, 
     </>}
     {walletAddress && <ActivationSheet open={needsReserve} usdc={usdc ?? 0n} {...(depositMicro != null ? { depositMicro } : {})} autoActivate resume={{ vaultId, amount, ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) }} onClose={() => setNeedsReserve(false)} onActivated={(adj, ch) => { setNeedsReserve(false); setCharge(ch ?? null); setStep("preparing"); if (adj != null && adj > 0n) { const a = unitsToDecimal(adj, 6); setFitted(a); onAmountFit?.(a); } void queryClient.invalidateQueries({ queryKey: ["my-wallet", walletAddress] }); setTimeout(() => { setStep("idle"); setTimeout(() => void runRef.current(true), 0); }, 1500); }} />}
     {message && step !== "error" && <p role="alert" className="text-muted-foreground">{message}</p>}
-    {signature && <a className="text-xs underline" href={`https://orbmarkets.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("Ver comprobante")}</a>}
+    {signature && <a className="text-xs underline" href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noreferrer">{t("Ver comprobante")}</a>}
   </section>;
 }
