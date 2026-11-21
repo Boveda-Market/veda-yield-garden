@@ -45,4 +45,4 @@ export function marketPulsePost(p: PulseInput) {
   return [head, ...blocks, `${TG_RULE}\n<blockquote>🛡️ Solo usamos bovedamarket.app. Nunca te escribiremos primero por privado.</blockquote>`].join("\n\n");
 }
 
-export const PULSE_DRAFT_LABEL = "📝 <b>BORRADOR SEMANAL · REVISIÓN PRIVADA</b>\n<i>No se ha publicado. Responde en el chat de BÓVEDA para aprobarlo.</i>";
+export const PULSE_DRAFT_LABEL = "📝 <b>BORRADOR SEMANAL · REVISIÓN PRIVADA</b>\n<i>No se ha publicado. Toca «✅ Publicar en el canal» debajo del mensaje para publicarlo tal cual.</i>";

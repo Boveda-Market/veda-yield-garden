@@ -13,8 +13,7 @@ export const Route = createFileRoute("/api/public/jobs/market-pulse")({
         const tg = await import("@/lib/telegram.server");
         const { PULSE_DRAFT_LABEL } = await import("@/lib/weekly-pulse");
         const post = await buildMarketPulse();
-        const chat = process.env["TELEGRAM_ALERT_CHAT_ID"];
-        const ok = chat ? await tg.sendTelegram(chat, `${PULSE_DRAFT_LABEL}\n\n${post}`) : false;
+        const ok = await tg.sendPulseDraft(PULSE_DRAFT_LABEL, post);
         return Response.json({ ok });
       },
     },

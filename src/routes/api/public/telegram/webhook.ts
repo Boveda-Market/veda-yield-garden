@@ -13,6 +13,8 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         if (!key) return new Response("Unavailable", { status: 503 });
         if (!same(request.headers.get("X-Telegram-Bot-Api-Secret-Token") ?? "", secretFor(key))) return new Response("Unauthorized", { status: 401 });
         const update = (await request.json().catch(() => null)) as { message?: { chat?: { id?: number; type?: string }; from?: { username?: string }; text?: string }; my_chat_member?: { chat?: { id?: number; type?: string }; new_chat_member?: { status?: string } } } | null;
+        const cbq = (update as { callback_query?: Parameters<typeof import("@/lib/telegram.server").handlePulseCallback>[0] } | null)?.callback_query;
+        if (cbq) { const tg = await import("@/lib/telegram.server"); await tg.handlePulseCallback(cbq); return Response.json({ ok: true }); }
         // User blocked or deleted the bot: release the link so the app shows "Conectar Telegram" again.
         const member = update?.my_chat_member;
         if (member?.chat?.type === "private" && typeof member.chat.id === "number" && (member.new_chat_member?.status === "kicked" || member.new_chat_member?.status === "left")) {
