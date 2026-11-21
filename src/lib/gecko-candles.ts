@@ -16,7 +16,7 @@ export async function geckoCandles(pool: string, tf: "minute" | "hour" | "day", 
     const url = `${BASE}/${pool}/ohlcv/${tf}?aggregate=${agg}&limit=${limit}&currency=usd${before ? `&before_timestamp=${before}` : ""}`;
     let res = await fetch(url, { headers: { accept: "application/json" } });
     // Busy public source: one short retry before giving up, so the chart rarely falls back to a sparse line.
-    if (res.status === 429) { await new Promise((r) => setTimeout(r, 1200)); res = await fetch(url, { headers: { accept: "application/json" } }); }
+    for (const wait of [1500, 3000, 5000]) { if (res.status !== 429) break; await new Promise((r) => setTimeout(r, wait)); res = await fetch(url, { headers: { accept: "application/json" } }); }
     if (!res.ok) { if (rows.length) break; throw new Error("candles"); }
     const parsed = schema.safeParse(await res.json());
     const list = parsed.success ? parsed.data.data.attributes.ohlcv_list : [];

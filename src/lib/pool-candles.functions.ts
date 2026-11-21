@@ -3,6 +3,7 @@ import { z } from "zod";
 import { geckoCandles, POOL_RE, type RawCandle } from "./gecko-candles";
 
 const SPEC = {
+  "1m": { tf: "minute", agg: 1, count: 300, ttl: 30_000 },
   "1h": { tf: "hour", agg: 1, count: 168, ttl: 60_000 },
   "4h": { tf: "hour", agg: 4, count: 180, ttl: 5 * 60_000 },
   "1d": { tf: "day", agg: 1, count: 90, ttl: 10 * 60_000 },
@@ -45,7 +46,7 @@ function borrowed(pool: string, range: keyof typeof SPEC): RawCandle[] | null {
 
 /** Pool candles fetched server-side and shared by every visitor (cached per pool+range), so phones never hit the public rate limit and a failed refresh keeps the last good series. */
 export const getPoolCandles = createServerFn({ method: "GET" })
-  .inputValidator((d: unknown) => z.object({ pool: z.string().regex(POOL_RE), range: z.enum(["1h", "4h", "1d", "day"]) }).parse(d))
+  .inputValidator((d: unknown) => z.object({ pool: z.string().regex(POOL_RE), range: z.enum(["1m", "1h", "4h", "1d", "day"]) }).parse(d))
   .handler(async ({ data }) => {
     const spec = SPEC[data.range];
     const key = `${data.pool}:${data.range}`;
@@ -60,11 +61,11 @@ export const getPoolCandles = createServerFn({ method: "GET" })
       const fresh = await p;
       if (fresh.length) cache.set(key, { at: Date.now(), data: fresh });
       if (cache.size > 200) cache.delete(cache.keys().next().value!);
-      return fresh.length ? fresh : hit?.data ?? borrowed(data.pool, data.range) ?? (data.range === "1h" ? await dexFallback(data.pool) : []);
+      return fresh.length ? fresh : hit?.data ?? borrowed(data.pool, data.range) ?? (data.range === "1h" || data.range === "1m" ? await dexFallback(data.pool) : []);
     } catch {
       if (hit) return hit.data;
       const b = borrowed(data.pool, data.range); if (b) return b;
-      if (data.range === "1h") { const fb = await dexFallback(data.pool); if (fb.length) return fb; }
+      if (data.range === "1h" || data.range === "1m") { const fb = await dexFallback(data.pool); if (fb.length) return fb; }
       throw new Error("Gráfica no disponible por ahora");
     }
   });

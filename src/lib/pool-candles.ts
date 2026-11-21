@@ -1,10 +1,11 @@
 import { getPoolCandles } from "./pool-candles.functions";
 
 export type PoolCandle = { t: number; c: number; v: number };
-export type CandleRange = "1h" | "4h" | "1d";
+export type CandleRange = "1m" | "1h" | "4h" | "1d";
 
 /** Chart resolutions: 1-minute for 1 h, 5-minute for 24 h (one fast request each), 1-hour for 7 d, 4-hour for 30 d (trading 1H/4H candles). */
 export const RANGE_RES = {
+  "1m": { tf: "minute", agg: 1, count: 300, ms: 5 * 3_600_000 },
   "1h": { tf: "hour", agg: 1, count: 168, ms: 7 * 86_400_000 },
   "4h": { tf: "hour", agg: 4, count: 180, ms: 30 * 86_400_000 },
   "1d": { tf: "day", agg: 1, count: 90, ms: 90 * 86_400_000 },
