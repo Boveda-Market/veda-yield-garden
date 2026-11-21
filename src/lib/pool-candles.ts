@@ -1,14 +1,13 @@
 import { getPoolCandles } from "./pool-candles.functions";
 
 export type PoolCandle = { t: number; c: number; v: number };
-export type CandleRange = "1h" | "24h" | "7d" | "30d";
+export type CandleRange = "1h" | "4h" | "1d";
 
 /** Chart resolutions: 1-minute for 1 h, 5-minute for 24 h (one fast request each), 1-hour for 7 d, 4-hour for 30 d (trading 1H/4H candles). */
 export const RANGE_RES = {
-  "1h": { tf: "minute", agg: 1, count: 60, ms: 3_600_000 },
-  "24h": { tf: "minute", agg: 5, count: 288, ms: 86_400_000 },
-  "7d": { tf: "hour", agg: 1, count: 168, ms: 7 * 86_400_000 },
-  "30d": { tf: "hour", agg: 4, count: 180, ms: 30 * 86_400_000 },
+  "1h": { tf: "hour", agg: 1, count: 168, ms: 7 * 86_400_000 },
+  "4h": { tf: "hour", agg: 4, count: 180, ms: 30 * 86_400_000 },
+  "1d": { tf: "day", agg: 1, count: 90, ms: 90 * 86_400_000 },
 } as const;
 export type ChartRange = keyof typeof RANGE_RES;
 
@@ -76,7 +75,7 @@ export function cumulativeInterest(candles: PoolCandle[], feeRatio: number): num
 export async function fetchDailyCloses(pool: string, n: number, _signal?: AbortSignal): Promise<PoolCandle[]> {
   if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(pool)) return [];
   const list = await getPoolCandles({ data: { pool, range: "day" } });
-  return list.slice(-Math.min(Math.max(n, 2), 31));
+  return list.slice(-Math.min(Math.max(n, 2), 90));
 }
 
 /** Close price for each day start (carries the previous close forward when a day has no candle). */
