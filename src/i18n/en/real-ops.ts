@@ -304,6 +304,7 @@ export const realOps: Record<string, string> = {
   "Capitalización agregada en posiciones activas": "Aggregated market cap of active positions",
   "Representa la capitalización de mercado (Market Cap) combinada de los tokens subyacentes con liquidez activa en mis bóvedas.": "Represents the combined market cap of the underlying tokens with active liquidity in my vaults.",
   "Refleja la valoración total en tiempo real de los activos en los que se encuentra desplegado el capital.": "Reflects the real-time total valuation of the assets where capital is deployed.",
+  "En resumen: una gráfica del rendimiento de todas mis bóvedas abiertas a la misma vez.": "In short: a performance chart of all my open vaults at the same time.",
   "Cosechar todo": "Harvest all",
   "Cobrar": "Claim",
   "Asegurando reserva de operaciones…": "Securing operations reserve…",
