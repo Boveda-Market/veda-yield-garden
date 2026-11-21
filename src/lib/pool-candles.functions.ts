@@ -3,7 +3,7 @@ import { z } from "zod";
 import { geckoCandles, POOL_RE, type RawCandle } from "./gecko-candles";
 
 const SPEC = {
-  "24h": { tf: "minute", agg: 5, count: 288, ttl: 5 * 60_000 },
+  "24h": { tf: "minute", agg: 3, count: 480, ttl: 30_000 },
   "7d": { tf: "minute", agg: 15, count: 672, ttl: 5 * 60_000 },
   "30d": { tf: "hour", agg: 1, count: 720, ttl: 10 * 60_000 },
   day: { tf: "day", agg: 1, count: 31, ttl: 10 * 60_000 },

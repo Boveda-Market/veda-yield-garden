@@ -34,7 +34,7 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const setRange = (v: CandleRange) => { setRangeRaw(v); try { localStorage.setItem("boveda:market-range", v); } catch { /* ignore */ } };
   const hydrated = useHydrated();
   const [hover, setHover] = useState<number | null>(null);
-  const candles = useQuery({ queryKey: ["pool-candles", vault.pool, range], queryFn: ({ signal }) => fetchPoolCandles(vault.pool, range, signal), ...(hydrated && readCachedCandles(vault.pool, range) ? { placeholderData: readCachedCandles(vault.pool, range)! } : {}), staleTime: 5 * 60_000, refetchInterval: 5 * 60_000, retry: 1 });
+  const candles = useQuery({ queryKey: ["pool-candles", vault.pool, range], queryFn: ({ signal }) => fetchPoolCandles(vault.pool, range, signal), ...(hydrated && readCachedCandles(vault.pool, range) ? { placeholderData: readCachedCandles(vault.pool, range)! } : {}), staleTime: 30_000, refetchInterval: 30_000, retry: 1 });
   const stats = useQuery({ queryKey: ["dexscreener-pool-stats", vault.pool], queryFn: ({ signal }) => fetchPoolStats(vault.pool, signal), staleTime: 60_000, retry: 1 });
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
   const symbol = stats.data?.baseSymbol ?? vault.pair.split("/")[0];
