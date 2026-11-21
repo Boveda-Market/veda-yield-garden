@@ -1,3 +1,4 @@
+import { useHydrated } from "@tanstack/react-router";
 import { AnimatedMoney } from "@/components/ui/animated-money";
 import { earningRatePerMs } from "@/lib/live-earnings";
 import { Layers, PieChart, Sparkles, Sprout, TrendingUp } from "lucide-react";
@@ -5,7 +6,7 @@ import { useT } from "@/lib/i18n";
 import type { ChainPosition } from "@/lib/solana-data";
 import { useQueries } from "@tanstack/react-query";
 import { fetchPoolStats } from "@/lib/pool-stats";
-import { closesForDays, fetchDailyCloses, fetchRangeCandles, globalMarket, intradayGlobal, type ChartRange } from "@/lib/pool-candles";
+import { closesForDays, fetchDailyCloses, fetchRangeCandles, globalMarket, intradayGlobal, readCachedCandles, type ChartRange } from "@/lib/pool-candles";
 import { useMeteoraHistory } from "@/hooks/use-meteora-history";
 import { usePositionRows } from "@/hooks/use-position-rows";
 import { MASK, useHideBalances } from "@/lib/preferences";
@@ -91,6 +92,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const t = useT();
   const locale = useLocale();
   const gid = useId().replace(/:/g, "");
+  const hydrated = useHydrated();
   const [sel, setSel] = useState<number | null>(null);
   const [n, setN] = useState<1 | 7 | 30>(7);
   const dn = n === 1 ? 2 : n;
@@ -100,7 +102,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const open = vaults.map((v) => ({ ...v, pool: VAULTS.find((x) => x.id === v.id)?.pool ?? "" })).filter((v) => v.pool);
   const active = open.find((v) => v.id === tabId) ? tabId : "global";
   const candleQ = useQueries({ queries: open.map((v) => ({ queryKey: ["pool-daily", v.pool, 30], queryFn: ({ signal }: { signal: AbortSignal }) => fetchDailyCloses(v.pool, 31, signal), staleTime: 10 * 60_000, retry: 1 })) });
-  const introQ = useQueries({ queries: open.map((v) => ({ queryKey: ["pool-range", v.pool, range], queryFn: ({ signal }: { signal: AbortSignal }) => fetchRangeCandles(v.pool, range, signal), staleTime: (range === "24h" ? 5 : 10) * 60_000, refetchInterval: 5 * 60_000, retry: 1 })) });
+  const introQ = useQueries({ queries: open.map((v) => ({ queryKey: ["pool-range", v.pool, range], queryFn: ({ signal }: { signal: AbortSignal }) => fetchRangeCandles(v.pool, range, signal), ...(hydrated && readCachedCandles(v.pool, range) ? { placeholderData: readCachedCandles(v.pool, range)! } : {}), staleTime: (range === "24h" ? 5 : 10) * 60_000, refetchInterval: 5 * 60_000, retry: 1 })) });
   const statsQ = useQueries({ queries: open.map((v) => ({ queryKey: ["dexscreener-pool-stats", v.pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(v.pool, signal), staleTime: 60_000, retry: 1 })) });
   const tokenValue = (r: { tokenRaw?: string; pool?: string }) => {
     const cfg = CHAIN_POOLS.find((c) => c.pool === r.pool), price = r.pool ? poolPrices[r.pool] : null;

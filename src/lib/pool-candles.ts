@@ -14,7 +14,27 @@ export type ChartRange = keyof typeof RANGE_RES;
 /** Candles for an exact pool (oldest first) at the range's resolution, served through the shared server cache. */
 export async function fetchRangeCandles(pool: string, range: ChartRange, _signal?: AbortSignal): Promise<PoolCandle[]> {
   if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(pool)) return [];
-  return getPoolCandles({ data: { pool, range } });
+  const fresh = await getPoolCandles({ data: { pool, range } });
+  if (fresh.length) saveCachedCandles(pool, range, fresh);
+  else { const old = readCachedCandles(pool, range); if (old) return old; }
+  return fresh;
+}
+
+const CACHE_KEY = (pool: string, range: string) => `boveda:candles:${range}:${pool}`;
+
+/** Last good series kept on the device so a refresh draws the full line instantly (client only; null on the server). */
+export function readCachedCandles(pool: string, range: ChartRange): PoolCandle[] | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    const raw = localStorage.getItem(CACHE_KEY(pool, range));
+    const list = raw ? (JSON.parse(raw) as PoolCandle[]) : null;
+    return Array.isArray(list) && list.length >= 2 ? list : undefined;
+  } catch { return undefined; }
+}
+
+function saveCachedCandles(pool: string, range: ChartRange, list: PoolCandle[]) {
+  if (typeof window === "undefined") return;
+  try { localStorage.setItem(CACHE_KEY(pool, range), JSON.stringify(list)); } catch { /* storage full */ }
 }
 
 /** Candles for «Rendimiento y Mercado»: 5-minute for 24 h, 15-minute for 7 d. */
