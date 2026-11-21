@@ -15,7 +15,8 @@ export type ChartRange = keyof typeof RANGE_RES;
 export async function fetchRangeCandles(pool: string, range: ChartRange, _signal?: AbortSignal): Promise<PoolCandle[]> {
   if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(pool)) return [];
   const fresh = await getPoolCandles({ data: { pool, range } });
-  if (fresh.length) saveCachedCandles(pool, range, fresh);
+  // Full series are kept on the device; a short busy-source fallback never replaces a good saved line.
+  if (fresh.length > 10) saveCachedCandles(pool, range, fresh);
   else { const old = readCachedCandles(pool, range); if (old) return old; }
   return fresh;
 }

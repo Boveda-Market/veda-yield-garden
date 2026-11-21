@@ -12,6 +12,24 @@ const SPEC = {
 type Entry = { at: number; data: RawCandle[] };
 const cache = new Map<string, Entry>();
 const inflight = new Map<string, Promise<RawCandle[]>>();
+// One upstream call at a time with a small gap, so several vaults opening together never trip the public rate limit.
+let queue: Promise<unknown> = Promise.resolve();
+const queued = <T>(fn: () => Promise<T>) => { const run = queue.then(fn, fn); queue = run.then(() => new Promise((r) => setTimeout(r, 250)), () => new Promise((r) => setTimeout(r, 250))); return run; };
+
+/** Instant fallback from DexScreener's official price-change checkpoints (24 h, 6 h, 1 h, 5 min, now) when the candle source is busy. */
+async function dexFallback(pool: string): Promise<RawCandle[]> {
+  try {
+    const res = await fetch(`https://api.dexscreener.com/latest/dex/pairs/solana/${pool}`, { headers: { accept: "application/json" } });
+    if (!res.ok) return [];
+    const j = await res.json() as { pair?: { priceUsd?: string; priceChange?: Record<string, number>; volume?: Record<string, number> }; pairs?: { priceUsd?: string; priceChange?: Record<string, number>; volume?: Record<string, number> }[] };
+    const p = j.pair ?? j.pairs?.[0];
+    const now = Number(p?.priceUsd);
+    if (!p || !(now > 0)) return [];
+    const ch = p.priceChange ?? {}, vol = (p.volume?.["h24"] ?? 0) / 4, t = Date.now();
+    const at = (h: number, k: string) => ({ t: t - h * 3_600_000, c: now / (1 + (ch[k] ?? 0) / 100), v: vol });
+    return [at(24, "h24"), at(6, "h6"), at(1, "h1"), at(5 / 60, "m5"), { t, c: now, v: vol }].filter((x) => x.c > 0 && Number.isFinite(x.c));
+  } catch { return []; }
+}
 
 /** Pool candles fetched server-side and shared by every visitor (cached per pool+range), so phones never hit the public rate limit and a failed refresh keeps the last good series. */
 export const getPoolCandles = createServerFn({ method: "GET" })
@@ -23,16 +41,17 @@ export const getPoolCandles = createServerFn({ method: "GET" })
     if (hit && Date.now() - hit.at < spec.ttl) return hit.data;
     let p = inflight.get(key);
     if (!p) {
-      p = geckoCandles(data.pool, spec.tf, spec.agg, spec.count).finally(() => inflight.delete(key));
+      p = queued(() => geckoCandles(data.pool, spec.tf, spec.agg, spec.count)).finally(() => inflight.delete(key));
       inflight.set(key, p);
     }
     try {
       const fresh = await p;
       if (fresh.length) cache.set(key, { at: Date.now(), data: fresh });
       if (cache.size > 200) cache.delete(cache.keys().next().value!);
-      return fresh.length ? fresh : hit?.data ?? [];
+      return fresh.length ? fresh : hit?.data ?? (data.range === "day" ? [] : await dexFallback(data.pool));
     } catch {
       if (hit) return hit.data;
+      if (data.range !== "day") { const fb = await dexFallback(data.pool); if (fb.length) return fb; }
       throw new Error("Gráfica no disponible por ahora");
     }
   });

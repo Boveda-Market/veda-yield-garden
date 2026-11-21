@@ -148,7 +148,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const now = Date.now(), wBase = n === 1 ? now - 86_400_000 : days[0]!.start;
   const inWin = (i: number) => (introQ[i]?.data ?? []).filter((c) => c.t >= wBase);
   const mSeries = isPrice ? inWin(curIdx).map((c) => ({ t: c.t, v: c.c * (supply(curIdx) ?? 1) })) : intradayGlobal(open.map((v, i) => ({ value: capW[i]!, candles: inWin(i) })));
-  const live = mSeries.length >= 4;
+  const live = mSeries.length >= 2;
   const drawing = !live && introQ.some((q) => q.isPending || q.isFetching);
   // Young tokens: stretch the line edge to edge from their first candle instead of leaving the left side empty.
   const w0 = live ? Math.max(wBase, mSeries[0]!.t) : wBase, wSpan = Math.max(now - w0, 1), young = n !== 1 && live && w0 - wBase > 86_400_000;
@@ -201,7 +201,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
       </defs>
       {cmax > cmin && <><text x={R} y={CT - 4} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{cap(cmax)}</text><text x={R} y={CB + 12} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{cap(cmin)}</text></>}
-      {!drawing && <><path d={cLine} fill="none" stroke={`url(#h${gid})`} strokeWidth="2" strokeLinejoin="miter" strokeLinecap="butt" style={{ filter: `drop-shadow(0 0 4px ${theme.b})` }} />
+      {!drawing && cPts.length >= 2 && <><path d={cLine} fill="none" stroke={`url(#h${gid})`} strokeWidth="2" strokeLinejoin="miter" strokeLinecap="butt" style={{ filter: `drop-shadow(0 0 4px ${theme.b})` }} />
       <circle cx={cEnd.x} cy={cEnd.y} r="5.5" fill="var(--background)" stroke={theme.b} strokeWidth="3" /></>}
     </svg>
     {drawing && <div role="status" className="pointer-events-none absolute inset-x-0 flex flex-col items-center justify-center gap-2 text-xs text-muted-foreground" style={{ marginTop: "-8.5rem" }}><Loader2 className="size-7 animate-spin text-primary" aria-hidden />{t("Cargando gráfica…")}</div>}
