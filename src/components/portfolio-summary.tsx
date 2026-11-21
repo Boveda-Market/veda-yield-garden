@@ -15,7 +15,7 @@ import { formatUsd } from "@/lib/position-value";
 import { canHarvest } from "@/lib/harvest";
 import { VAULTS } from "@/lib/vaults";
 import { Button } from "./ui/button";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { CHAIN_POOLS } from "@/lib/solana-data";
 import { capitalSeries } from "@/lib/weekly-interest";
 import { useLocale } from "@/lib/i18n";
@@ -98,8 +98,45 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const [n0, setN] = useState<0 | 1 | 7 | 30 | 90>(0); // only the 1M (1-minute candles, last 5 h) timeframe is offered
   const [tabId, setTab] = useState<string>("global");
   const [pickOpen, setPickOpen] = useState(false);
+  // Pinch zoom: two fingers spread the time axis (1–6×), one finger pans while zoomed.
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState(0);
+  const [origin, setOrigin] = useState(0.5);
+  const pinch = useRef<{ ptrs: Map<number, { x: number; y: number }>; d0: number; z0: number; px0: number; pan0: number }>({ ptrs: new Map(), d0: 0, z0: 1, px0: 0, pan0: 0 });
+  const clampPan = (z: number, p: number, w: number, ox: number) => Math.min((z - 1) * w * ox, Math.max(-(z - 1) * w * (1 - ox), p));
+  const pDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const p = pinch.current;
+    p.ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (p.ptrs.size === 2) {
+      const [a, b] = [...p.ptrs.values()] as [{ x: number; y: number }, { x: number; y: number }];
+      p.d0 = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+      p.z0 = zoom;
+      const r = e.currentTarget.getBoundingClientRect();
+      setOrigin(Math.min(1, Math.max(0, ((a.x + b.x) / 2 - r.left) / r.width)));
+    } else if (p.ptrs.size === 1) {
+      p.px0 = e.clientX;
+      p.pan0 = pan;
+    }
+  };
+  const pMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const p = pinch.current;
+    if (!p.ptrs.has(e.pointerId)) return;
+    p.ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const w = e.currentTarget.getBoundingClientRect().width || 1;
+    if (p.ptrs.size >= 2) {
+      const [a, b] = [...p.ptrs.values()] as [{ x: number; y: number }, { x: number; y: number }];
+      const d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+      const z = Math.min(6, Math.max(1, (p.z0 * d) / p.d0));
+      setZoom(z);
+      setPan((pp) => clampPan(z, pp, w, origin));
+    } else if (zoom > 1) {
+      setPan(clampPan(zoom, p.pan0 + (e.clientX - p.px0), w, origin));
+    }
+  };
+  const pUp = (e: React.PointerEvent<HTMLDivElement>) => { pinch.current.ptrs.delete(e.pointerId); };
   const open = vaults.map((v) => ({ ...v, pool: VAULTS.find((x) => x.id === v.id)?.pool ?? "" })).filter((v) => v.pool);
   const active = open.find((v) => v.id === tabId) ? tabId : "global";
+  useEffect(() => { setZoom(1); setPan(0); }, [active, n0]);
   // Thinly traded vaults (chartRangeFor) show 7 days of 1-hour candles on their own tab.
   const week = active !== "global" && chartRangeFor(active) === "1h";
   const n = week ? 7 : n0;
@@ -197,7 +234,9 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     <div className="relative mt-1">
       <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Market cap {s}", { s: sym }) : t("Market cap global")}</p><p className="flex items-center gap-2"><span className={`font-display text-xl font-extrabold tabular-nums sm:text-2xl ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !liveCap ? "…" : mText}</span>{(ms[0] ?? 0) > 0 && <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${pct >= 0 ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{pct >= 0 ? "+" : ""}{pct.toFixed(1)}%</span>}</p></div>
     </div>
-    <svg viewBox={`0 0 ${W} ${H}`} className="relative mt-2 h-40 w-full overflow-visible sm:h-52" role="img" aria-label={t("Mercado global frente a ganancias cosechadas")}>
+    <div className="relative mt-2 touch-none overflow-hidden" onPointerDown={pDown} onPointerMove={pMove} onPointerUp={pUp} onPointerCancel={pUp} onPointerLeave={pUp}>
+    <div style={{ transform: `translateX(${pan}px) scaleX(${zoom})`, transformOrigin: `${origin * 100}% 50%` }}>
+    <svg viewBox={`0 0 ${W} ${H}`} className="relative h-40 w-full overflow-visible sm:h-52" role="img" aria-label={t("Mercado global frente a ganancias cosechadas")}>
       <defs>
         <linearGradient id={`h${gid}`} x1="0" x2="1"><stop offset="0%" stopColor={theme.a} /><stop offset="100%" stopColor={theme.b} /></linearGradient>
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
@@ -206,7 +245,6 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
       {!drawing && (live || n > 1) && cPts.length >= 2 && (() => {
         // GMGN look: green above the window's opening level, red below, soft area fill, dashed current-level line with badge.
         const refY = cPts[0]!.y, off = Math.min(1, Math.max(0, (refY - CT) / Math.max(CB - CT, 1))), up = cEnd.y <= refY, endC = up ? "#10B981" : "#EF4444";
-        const label = cap(ms[ms.length - 1] ?? 0), bw = label.length * 6 + 10;
         return <>
           <defs>
             <linearGradient id={`s${gid}`} gradientUnits="userSpaceOnUse" x1="0" y1={CT} x2="0" y2={CB}><stop offset={off} stopColor="#10B981" /><stop offset={off} stopColor="#EF4444" /></linearGradient>
@@ -217,10 +255,11 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
           <line x1={L} y1={cEnd.y} x2={R} y2={cEnd.y} stroke={endC} strokeOpacity="0.7" strokeDasharray="2 3" />
           <path d={cLine} fill="none" stroke={`url(#s${gid})`} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
           <circle cx={cEnd.x} cy={cEnd.y} r="7" fill={endC} opacity="0.25" /><circle cx={cEnd.x} cy={cEnd.y} r="3.5" fill={endC} />
-          <rect x={R - bw} y={cEnd.y - 9} width={bw} height="18" rx="4" fill={endC} /><text x={R - bw / 2} y={cEnd.y + 4} textAnchor="middle" fontSize="10" fontWeight="700" fill="#fff">{label}</text>
         </>;
       })()}
     </svg>
+    </div>
+    </div>
     {drawing && <div role="status" className="pointer-events-none absolute inset-x-0 -mt-[6.5rem] flex flex-col sm:-mt-[8.5rem] items-center justify-center gap-2 text-xs text-muted-foreground"><Loader2 className="size-7 animate-spin text-primary" aria-hidden />{t("Cargando gráfica…")}</div>}
     {!drawing && !live && n <= 1 && <div className="pointer-events-none absolute inset-x-0 -mt-[5.5rem] flex justify-center text-xs text-muted-foreground sm:-mt-28">{t("Gráfica no disponible por ahora")}</div>}
     <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{n === 0 ? t("Hace 5 h") : n === 1 ? t("Hace 24 h") : young ? t("Desde lanzamiento") : new Date(days[0]!.start).toLocaleDateString(locale, { day: "numeric", month: "short" })}</span><span>{n <= 1 ? t("Ahora") : t("Hoy")}</span></div>
