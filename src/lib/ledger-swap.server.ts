@@ -1,6 +1,7 @@
 import { Buffer } from "buffer";
 import { z } from "zod";
 import { PublicKey, TransactionInstruction, type AddressLookupTableAccount, type Connection } from "@solana/web3.js";
+import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, createCloseAccountInstruction } from "@solana/spl-token";
 import { USDC_MINT, solanaAddressSchema } from "@/lib/solana-data";
 
 const ixSchema = z.object({ programId: solanaAddressSchema, accounts: z.array(z.object({ pubkey: solanaAddressSchema, isSigner: z.boolean(), isWritable: z.boolean() })), data: z.string().max(20_000) });
@@ -18,7 +19,19 @@ async function request(path: string, body?: unknown) {
   }
 }
 
-export type LedgerSwap = { ok: true; setup: TransactionInstruction[]; ledger: TransactionInstruction; route: TransactionInstruction; minimumSwap: bigint; tables: AddressLookupTableAccount[] } | { ok: false; message: string };
+/** Token account a multi-hop route creates for an intermediate token (e.g. wrapped SOL). */
+export type Intermediate = { ata: PublicKey; program: PublicKey };
+export type LedgerSwap = { ok: true; setup: TransactionInstruction[]; ledger: TransactionInstruction; route: TransactionInstruction; minimumSwap: bigint; tables: AddressLookupTableAccount[]; intermediates: Intermediate[] } | { ok: false; message: string };
+
+/** Intermediates that do not exist yet: the route would create them and leave their rent behind. */
+export async function freshIntermediates(connection: Connection, list: Intermediate[]): Promise<Intermediate[]> {
+  if (list.length === 0) return [];
+  const infos = await connection.getMultipleAccountsInfo(list.map((e) => e.ata));
+  return list.filter((_, i) => !infos[i]);
+}
+
+/** Close newly created, emptied intermediates in the same transaction so their rent returns to the owner. */
+export const closeIntermediates = (fresh: Intermediate[], owner: PublicKey) => fresh.map((e) => createCloseAccountInstruction(e.ata, owner, owner, [], e.program));
 
 /**
  * Delta-only conversion of a token released earlier in the same transaction into USDC.
@@ -26,15 +39,12 @@ export type LedgerSwap = { ok: true; setup: TransactionInstruction[]; ledger: Tr
  * the route enforces the exact quoted minimum with zero further slippage. `pool` is the vault's own
  * pool: routes through it are rejected unless `allowPool` (the liquidity removal precedes the swap).
  */
-export async function ledgerSwapToUsdc(connection: Connection, args: { owner: PublicKey; inputMint: string; inputAta: PublicKey; usdcAta: PublicKey; minimumIn: bigint; pool: string; allowPool?: boolean }): Promise<LedgerSwap> {
+async function buildLedgerSwap(connection: Connection, args: { owner: PublicKey; inputMint: string; inputAta: PublicKey; usdcAta: PublicKey; minimumIn: bigint; pool: string; allowPool?: boolean }, path: { direct: boolean; maxAccounts: number }): Promise<LedgerSwap> {
   const { owner, inputMint, inputAta, usdcAta, minimumIn, pool } = args;
   const usdc = new PublicKey(USDC_MINT);
   if (minimumIn <= 0n) return { ok: false, message: "El retiro no permite proteger un mínimo positivo para la conversión." };
-  const params = new URLSearchParams({ inputMint, outputMint: USDC_MINT, amount: minimumIn.toString(), slippageBps: "50", maxAccounts: "24", onlyDirectRoutes: "true", ...(args.allowPool ? {} : { excludeDexes: "Meteora,Meteora DLMM,Meteora DAMM v2" }) });
-  // Tokens like DCTY have no direct USDC route; fall back to a multi-hop route (still simulated and minimum-enforced).
-  let raw: unknown;
-  try { raw = await request(`quote?${params}`); } catch { params.delete("onlyDirectRoutes"); params.set("maxAccounts", "40"); raw = await request(`quote?${params}`); }
-  const jQuote = quoteSchema.parse(raw);
+  const params = new URLSearchParams({ inputMint, outputMint: USDC_MINT, amount: minimumIn.toString(), slippageBps: "50", maxAccounts: String(path.maxAccounts), ...(path.direct ? { onlyDirectRoutes: "true" } : {}), ...(args.allowPool ? {} : { excludeDexes: "Meteora,Meteora DLMM,Meteora DAMM v2" }) });
+  const jQuote = quoteSchema.parse(await request(`quote?${params}`));
   if (jQuote.inputMint !== inputMint || jQuote.outputMint !== USDC_MINT || jQuote.inAmount !== minimumIn.toString() || (!args.allowPool && jQuote.routePlan.some((r) => r.swapInfo.ammKey === pool))) return { ok: false, message: "La conversión no coincide con los fondos retirados." };
   const minimumSwap = BigInt(jQuote.otherAmountThreshold);
   const swap = swapSchema.parse(await request("swap-instructions", { quoteResponse: jQuote, userPublicKey: owner.toBase58(), wrapAndUnwrapSol: false, dynamicComputeUnitLimit: false, useTokenLedger: true, useSharedAccounts: false }));
@@ -52,11 +62,36 @@ export async function ledgerSwapToUsdc(connection: Connection, args: { owner: Pu
   if ((swap.otherInstructions ?? []).length > 0) return { ok: false, message: "La ruta incluye instrucciones adicionales no verificadas." };
   const setup = swap.setupInstructions.map(decode);
   if (setup.some((ix) => !ix.programId.equals(ATA_PROGRAM) || ix.data.length !== 1 || ix.data[0] !== 1 || !ix.keys[0]?.pubkey.equals(owner))) return { ok: false, message: "La preparación Jupiter contiene movimientos adicionales no autorizados." };
+  const intermediates: Intermediate[] = [];
+  for (const ix of setup) {
+    const ata = ix.keys[1]?.pubkey, program = ix.keys[5]?.pubkey;
+    if (!ata || !program || (!program.equals(TOKEN_PROGRAM_ID) && !program.equals(TOKEN_2022_PROGRAM_ID))) return { ok: false, message: "La preparación Jupiter contiene cuentas no validadas." };
+    if (!ata.equals(inputAta) && !ata.equals(usdcAta) && !intermediates.some((e) => e.ata.equals(ata))) intermediates.push({ ata, program });
+  }
   const tables: AddressLookupTableAccount[] = [];
   const loaded = await Promise.all(swap.addressLookupTableAddresses.map((address) => connection.getAddressLookupTable(new PublicKey(address))));
   for (const table of loaded) {
     if (!table.value) return { ok: false, message: "Tabla de direcciones no disponible." };
     tables.push(table.value);
   }
-  return { ok: true, setup, ledger, route, minimumSwap, tables };
+  return { ok: true, setup, ledger, route, minimumSwap, tables, intermediates };
+}
+
+type LedgerSwapOk = Extract<LedgerSwap, { ok: true }>;
+/**
+ * Direct routes first; tokens like GTA6/DCTY only have multi-hop routes. Multi-hop routes are tried
+ * from wider to tighter account caps until `fits` confirms the complete transaction stays within one
+ * signature-sized message. Every candidate is still simulated and minimum-enforced by the caller.
+ */
+export async function ledgerSwapToUsdc(connection: Connection, args: { owner: PublicKey; inputMint: string; inputAta: PublicKey; usdcAta: PublicKey; minimumIn: bigint; pool: string; allowPool?: boolean ; fits?: (swap: LedgerSwapOk) => Promise<boolean> }): Promise<LedgerSwap> {
+  const paths = [{ direct: true, maxAccounts: 24 }, { direct: false, maxAccounts: 40 }, { direct: false, maxAccounts: 32 }, { direct: false, maxAccounts: 28 }];
+  let fallback: LedgerSwap | undefined;
+  for (const path of paths) {
+    let swap: LedgerSwap;
+    try { swap = await buildLedgerSwap(connection, args, path); } catch { continue; }
+    if (!swap.ok) { fallback ??= swap; continue; }
+    if (!args.fits || await args.fits(swap).catch(() => false)) return swap;
+    fallback = swap;
+  }
+  return fallback ?? { ok: false, message: "No se encontró una ruta de conversión a dólares para este retiro." };
 }

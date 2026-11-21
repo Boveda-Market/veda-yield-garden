@@ -11,7 +11,7 @@ import { simulationAmounts, simulationDisplay, type SimulationInput, type Simula
 import type { PreparedPilot } from "@/lib/pilot-deposit";
 import { harvestAmounts, type HarvestResult } from "@/lib/harvest";
 import { withdrawalAmounts, exitFeeMode, type WithdrawalInput, type WithdrawalResult } from "@/lib/withdrawal";
-import { ledgerSwapToUsdc } from "@/lib/ledger-swap.server";
+import { ledgerSwapToUsdc, freshIntermediates, closeIntermediates } from "@/lib/ledger-swap.server";
 import { rebalanceGainsUsd } from "@/lib/autopilot";
 import { compoundSpendValid, type CompoundInput, type CompoundResult } from "@/lib/compound";
 import type { RebalanceResult } from "@/lib/dlmm";
@@ -328,6 +328,8 @@ export async function simulateDlmmWithdrawal(connection: Connection, input: With
     if (recipient.equals(source)) return fail("La wallet de recaudo no puede usarse para esta comprobación de comisión.");
     const addresses = [source, tokenX, recipient, position, owner];
     const before = await connection.getMultipleAccountsInfo(addresses);
+    // Idempotent creation of token accounts that already exist is a no-op; omit it to keep one signature.
+    const existing = new Set([0, 1, 2].filter((i) => before[i]).map((i) => addresses[i]!.toBase58()));
     const usdcBefore = tokenBalance(asSim(before[0]), usdc, owner), xBefore = tokenBalance(asSim(before[1]), mintX, owner, xProgram(config)), feeBefore = tokenBalance(asSim(before[2]), usdc, feeOwner);
     stage = "Preparación del cierre";
     const { lowerBinId, upperBinId } = owned.lb.positionData;
@@ -337,7 +339,7 @@ export async function simulateDlmmWithdrawal(connection: Connection, input: With
     const block = await connection.getLatestBlockhash();
     const tables: AddressLookupTableAccount[] = [];
     const simulate = async (instructions: TransactionInstruction[], units = MAX_COMPUTE_UNITS) => {
-      const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...stripBudget(instructions)]) }).compileToV0Message(tables));
+      const tx = new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(units), ...dropExistingAtaCreates(stripBudget(instructions), existing)]) }).compileToV0Message(tables));
       const bytes = tx.serialize().length;
       if (bytes > 1232) throw new Error("Tamaño excedido");
       const fee = { value: await networkFeeOf(connection, tx.message, units) };
@@ -354,17 +356,36 @@ export async function simulateDlmmWithdrawal(connection: Connection, input: With
     const minimumX = xReceived * BigInt(DLMM_EXIT_MIN_PCT) / 100n, minimumY = yReceived * BigInt(DLMM_EXIT_MIN_PCT) / 100n;
     const instructions = [...removalIxs];
     let minimumSwap = 0n;
+    let closes: TransactionInstruction[] = [];
+    // If closing an intermediate fails (dust) or does not fit, keep it open and count its rent instead.
+    const withCloseFallback = async (units?: number) => {
+      try { return await simulate(instructions, units); } catch (error) {
+        if (closes.length === 0) throw error;
+        for (const ix of closes) instructions.splice(instructions.indexOf(ix), 1);
+        closes = [];
+        return simulate(instructions, units);
+      }
+    };
     if (xReceived > 0n) {
       stage = "Cotización de conversión";
-      const swap = await ledgerSwapToUsdc(connection, { owner, inputMint: config.mint, inputAta: tokenX, usdcAta: source, minimumIn: minimumX, pool: config.pool, allowPool: true });
+      const swap = await ledgerSwapToUsdc(connection, { owner, inputMint: config.mint, inputAta: tokenX, usdcAta: source, minimumIn: minimumX, pool: config.pool, allowPool: true, fits: async (s) => {
+        // Size the complete message (removal, route, intermediate close, fee transfer) before simulating.
+        const fresh = await freshIntermediates(connection, s.intermediates);
+        const ixs = [...s.setup, s.ledger, ...removalIxs, s.route, ...closeIntermediates(fresh, owner), ...(before[2] ? [] : [createAssociatedTokenAccountIdempotentInstruction(owner, recipient, feeOwner, usdc)]), createTransferCheckedInstruction(source, usdc, recipient, owner, 1n, 6)];
+        return new VersionedTransaction(new TransactionMessage({ payerKey: owner, recentBlockhash: block.blockhash, instructions: compactDepositInstructions([...computeBudgetIxs(MAX_COMPUTE_UNITS), ...dropExistingAtaCreates(stripBudget(ixs), existing)]) }).compileToV0Message([...tables, ...s.tables])).serialize().length <= 1232;
+      } });
       if (!swap.ok) return fail(swap.message);
       minimumSwap = swap.minimumSwap;
       instructions.unshift(...swap.setup, swap.ledger);
-      instructions.push(swap.route);
+      // Multi-hop routes may create an intermediate token account; track it and close it afterwards.
+      const fresh = await freshIntermediates(connection, swap.intermediates);
+      addresses.push(...fresh.map((e) => e.ata));
+      closes = closeIntermediates(fresh, owner);
+      instructions.push(swap.route, ...closes);
       tables.push(...swap.tables);
     }
     stage = "Simulación de conversión a USDC";
-    const converted = await simulate(instructions);
+    const converted = await withCloseFallback();
     const gross = tokenBalance(converted.accounts[0], usdc, owner) - usdcBefore;
     if (gross <= 0n) return fail("No hay devolución positiva de USDC.");
     const minimumGross = minimumY + minimumSwap;
@@ -376,7 +397,7 @@ export async function simulateDlmmWithdrawal(connection: Connection, input: With
       instructions.push(createTransferCheckedInstruction(source, usdc, recipient, owner, breakdown.fee, 6));
     }
     stage = "Simulación de comisión y renta";
-    const sized = await simulate(instructions);
+    const sized = await withCloseFallback();
     const final = await simulate(instructions, computeLimit(sized.units));
     const feeDelta = tokenBalance(final.accounts[2], usdc, feeOwner) - feeBefore;
     const netDelta = tokenBalance(final.accounts[0], usdc, owner) - usdcBefore;
@@ -385,7 +406,7 @@ export async function simulateDlmmWithdrawal(connection: Connection, input: With
     const remainingToken = tokenBalance(final.accounts[1], mintX, owner, xProgram(config)) - xBefore;
     const closed = full ? !final.accounts[3] || final.accounts[3]?.lamports === 0 : (final.accounts[3]?.lamports ?? 0) > 0;
     const rentLamports = full ? BigInt(before[3]?.lamports ?? 0) : 0n;
-    const newAccountRent = [0, 1, 2].reduce((sum, i) => sum + BigInt(before[i] ? 0 : final.accounts[i]?.lamports ?? 0), 0n);
+    const newAccountRent = [0, 1, 2].reduce((sum, i) => sum + BigInt(before[i] ? 0 : final.accounts[i]?.lamports ?? 0), 0n) + final.accounts.slice(5).reduce((sum, a) => sum + BigInt(a?.lamports ?? 0), 0n);
     const solDelta = BigInt(final.accounts[4]?.lamports ?? 0) - BigInt(before[4]?.lamports ?? 0);
     const checks = { closed, usdc: remainingToken === 0n && netDelta >= breakdown.net && realizedGross >= minimumGross, fee: feeDelta === breakdown.fee, rent: closed && (full ? rentLamports > 0n : true) && solDelta + newAccountRent + final.networkFee === rentLamports };
     const success = Object.values(checks).every(Boolean);
