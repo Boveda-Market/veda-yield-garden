@@ -1,24 +1,29 @@
 import { getPoolCandles } from "./pool-candles.functions";
 
 export type PoolCandle = { t: number; c: number; v: number };
-export type CandleRange = "24h" | "7d" | "30d";
+export type CandleRange = "1h" | "24h" | "7d" | "30d";
 
-/** Chart resolutions (reference trend, not live): 5-minute for 24 h (one fast request), 15-minute for 7 d, 1-hour for 30 d. */
+/** Chart resolutions: 1-minute for 1 h, 5-minute for 24 h (one fast request each), 15-minute for 7 d, 1-hour for 30 d. */
 export const RANGE_RES = {
+  "1h": { tf: "minute", agg: 1, count: 60, ms: 3_600_000 },
   "24h": { tf: "minute", agg: 5, count: 288, ms: 86_400_000 },
   "7d": { tf: "minute", agg: 15, count: 672, ms: 7 * 86_400_000 },
   "30d": { tf: "hour", agg: 1, count: 720, ms: 30 * 86_400_000 },
 } as const;
 export type ChartRange = keyof typeof RANGE_RES;
 
+/** Fewer real points than this draws an artificial-looking line, so the chart keeps loading and retries instead. */
+export const MIN_DENSE = 10;
+
 /** Candles for an exact pool (oldest first) at the range's resolution, served through the shared server cache. */
 export async function fetchRangeCandles(pool: string, range: ChartRange, _signal?: AbortSignal): Promise<PoolCandle[]> {
   if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(pool)) return [];
   const fresh = await getPoolCandles({ data: { pool, range } });
   // Full series are kept on the device; a short busy-source fallback never replaces a good saved line.
-  if (fresh.length > 10) saveCachedCandles(pool, range, fresh);
-  else { const old = readCachedCandles(pool, range); if (old) return old; }
-  return fresh;
+  if (fresh.length > MIN_DENSE) { saveCachedCandles(pool, range, fresh); return fresh; }
+  const old = readCachedCandles(pool, range); if (old) return old;
+  // Sparse busy-source answer: fail so the query retries shortly instead of drawing a few straight segments.
+  throw new Error("sparse");
 }
 
 const CACHE_KEY = (pool: string, range: string) => `boveda:candles:${range}:${pool}`;
@@ -29,7 +34,7 @@ export function readCachedCandles(pool: string, range: ChartRange): PoolCandle[]
   try {
     const raw = localStorage.getItem(CACHE_KEY(pool, range));
     const list = raw ? (JSON.parse(raw) as PoolCandle[]) : null;
-    return Array.isArray(list) && list.length >= 2 ? list : undefined;
+    return Array.isArray(list) && list.length > MIN_DENSE ? list : undefined;
   } catch { return undefined; }
 }
 

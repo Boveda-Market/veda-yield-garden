@@ -3,11 +3,19 @@ import { z } from "zod";
 import { geckoCandles, POOL_RE, type RawCandle } from "./gecko-candles";
 
 const SPEC = {
+  "1h": { tf: "minute", agg: 1, count: 60, ttl: 30_000 },
   "24h": { tf: "minute", agg: 5, count: 288, ttl: 60_000 },
   "7d": { tf: "minute", agg: 15, count: 672, ttl: 5 * 60_000 },
   "30d": { tf: "hour", agg: 1, count: 720, ttl: 10 * 60_000 },
   day: { tf: "day", agg: 1, count: 31, ttl: 10 * 60_000 },
 } as const;
+
+/** A denser shared series that can stand in for a busy range: its own real candles, trimmed to the window (never invented points). */
+const WIDER: Partial<Record<keyof typeof SPEC, { from: keyof typeof SPEC; ms: number }>> = {
+  "1h": { from: "24h", ms: 3_600_000 },
+  "24h": { from: "7d", ms: 86_400_000 },
+  "7d": { from: "30d", ms: 7 * 86_400_000 },
+};
 
 type Entry = { at: number; data: RawCandle[] };
 const cache = new Map<string, Entry>();
@@ -31,9 +39,16 @@ async function dexFallback(pool: string): Promise<RawCandle[]> {
   } catch { return []; }
 }
 
+function borrowed(pool: string, range: keyof typeof SPEC): RawCandle[] | null {
+  const w = WIDER[range]; if (!w) return null;
+  const src = cache.get(`${pool}:${w.from}`)?.data; if (!src) return null;
+  const cut = Date.now() - w.ms, list = src.filter((c) => c.t >= cut);
+  return list.length > 10 ? list : null;
+}
+
 /** Pool candles fetched server-side and shared by every visitor (cached per pool+range), so phones never hit the public rate limit and a failed refresh keeps the last good series. */
 export const getPoolCandles = createServerFn({ method: "GET" })
-  .inputValidator((d: unknown) => z.object({ pool: z.string().regex(POOL_RE), range: z.enum(["24h", "7d", "30d", "day"]) }).parse(d))
+  .inputValidator((d: unknown) => z.object({ pool: z.string().regex(POOL_RE), range: z.enum(["1h", "24h", "7d", "30d", "day"]) }).parse(d))
   .handler(async ({ data }) => {
     const spec = SPEC[data.range];
     const key = `${data.pool}:${data.range}`;
@@ -48,9 +63,10 @@ export const getPoolCandles = createServerFn({ method: "GET" })
       const fresh = await p;
       if (fresh.length) cache.set(key, { at: Date.now(), data: fresh });
       if (cache.size > 200) cache.delete(cache.keys().next().value!);
-      return fresh.length ? fresh : hit?.data ?? (data.range === "day" ? [] : await dexFallback(data.pool));
+      return fresh.length ? fresh : hit?.data ?? borrowed(data.pool, data.range) ?? (data.range === "day" ? [] : await dexFallback(data.pool));
     } catch {
       if (hit) return hit.data;
+      const b = borrowed(data.pool, data.range); if (b) return b;
       if (data.range !== "day") { const fb = await dexFallback(data.pool); if (fb.length) return fb; }
       throw new Error("Gráfica no disponible por ahora");
     }

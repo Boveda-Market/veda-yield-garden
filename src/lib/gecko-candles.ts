@@ -13,7 +13,10 @@ export async function geckoCandles(pool: string, tf: "minute" | "hour" | "day", 
   let before: number | null = null;
   for (let page = 0; page < 2 && rows.length < count; page++) {
     const limit = Math.min(1000, count - rows.length);
-    const res = await fetch(`${BASE}/${pool}/ohlcv/${tf}?aggregate=${agg}&limit=${limit}&currency=usd${before ? `&before_timestamp=${before}` : ""}`, { headers: { accept: "application/json" } });
+    const url = `${BASE}/${pool}/ohlcv/${tf}?aggregate=${agg}&limit=${limit}&currency=usd${before ? `&before_timestamp=${before}` : ""}`;
+    let res = await fetch(url, { headers: { accept: "application/json" } });
+    // Busy public source: one short retry before giving up, so the chart rarely falls back to a sparse line.
+    if (res.status === 429) { await new Promise((r) => setTimeout(r, 1200)); res = await fetch(url, { headers: { accept: "application/json" } }); }
     if (!res.ok) { if (rows.length) break; throw new Error("candles"); }
     const parsed = schema.safeParse(await res.json());
     const list = parsed.success ? parsed.data.data.attributes.ohlcv_list : [];

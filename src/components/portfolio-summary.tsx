@@ -95,15 +95,15 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const gid = useId().replace(/:/g, "");
   const hydrated = useHydrated();
   const [sel, setSel] = useState<number | null>(null);
-  const [n, setN] = useState<1 | 7 | 30>(7);
-  const dn = n === 1 ? 2 : n;
-  const range: ChartRange = n === 1 ? "24h" : n === 7 ? "7d" : "30d";
+  const [n, setN] = useState<0 | 1 | 7 | 30>(7); // 0 = last hour
+  const dn = n <= 1 ? 2 : n;
+  const range: ChartRange = n === 0 ? "1h" : n === 1 ? "24h" : n === 7 ? "7d" : "30d";
   const [tabId, setTab] = useState<string>("global");
   const [pickOpen, setPickOpen] = useState(false);
   const open = vaults.map((v) => ({ ...v, pool: VAULTS.find((x) => x.id === v.id)?.pool ?? "" })).filter((v) => v.pool);
   const active = open.find((v) => v.id === tabId) ? tabId : "global";
   const candleQ = useQueries({ queries: open.map((v) => ({ queryKey: ["pool-daily", v.pool, 30], queryFn: ({ signal }: { signal: AbortSignal }) => fetchDailyCloses(v.pool, 31, signal), staleTime: 10 * 60_000, retry: 1 })) });
-  const introQ = useQueries({ queries: open.map((v) => ({ queryKey: ["pool-range", v.pool, range], queryFn: ({ signal }: { signal: AbortSignal }) => fetchRangeCandles(v.pool, range, signal), ...(hydrated && readCachedCandles(v.pool, range) ? { placeholderData: readCachedCandles(v.pool, range)! } : {}), staleTime: range === "24h" ? 30_000 : 5 * 60_000, refetchInterval: range === "24h" ? 30_000 : 5 * 60_000, retry: 1 })) });
+  const introQ = useQueries({ queries: open.map((v) => ({ queryKey: ["pool-range", v.pool, range], queryFn: ({ signal }: { signal: AbortSignal }) => fetchRangeCandles(v.pool, range, signal), ...(hydrated && readCachedCandles(v.pool, range) ? { placeholderData: readCachedCandles(v.pool, range)! } : {}), staleTime: n <= 1 ? 30_000 : 5 * 60_000, refetchInterval: n <= 1 ? 30_000 : 5 * 60_000, retry: 4, retryDelay: (k: number) => Math.min(1500 * (k + 1), 6000) })) });
   const statsQ = useQueries({ queries: open.map((v) => ({ queryKey: ["dexscreener-pool-stats", v.pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(v.pool, signal), staleTime: 60_000, retry: 1 })) });
   const tokenValue = (r: { tokenRaw?: string; pool?: string }) => {
     const cfg = CHAIN_POOLS.find((c) => c.pool === r.pool), price = r.pool ? poolPrices[r.pool] : null;
@@ -144,14 +144,14 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const smooth = (pts: { x: number; y: number }[]) => { let d = `M${pts[0]!.x},${pts[0]!.y}`; for (let i = 1; i < pts.length; i++) { const p = pts[i - 1]!, c = pts[i]!, mx = (p.x + c.x) / 2; d += ` C${mx},${p.y} ${mx},${c.y} ${c.x},${c.y}`; } return d; };
   const ePts = earn.map((v, i) => ({ x: x(i), y: EB - (v / emax) * (EB - ET) }));
   const angular = (pts: { x: number; y: number }[]) => pts.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-  // Market line: 3-minute (24 h), 15-minute (7 d) or 1-hour (30 d) closes placed by time with straight segments, so every real spike and drop shows; Global sums each vault moved by its own price.
-  const now = Date.now(), wBase = n === 1 ? now - 86_400_000 : days[0]!.start;
+  // Market line: 1-minute (1 h), 5-minute (24 h), 15-minute (7 d) or 1-hour (30 d) closes placed by time with straight segments, so every real spike and drop shows; Global sums each vault moved by its own price.
+  const now = Date.now(), wBase = n === 0 ? now - 3_600_000 : n === 1 ? now - 86_400_000 : days[0]!.start;
   const inWin = (i: number) => (introQ[i]?.data ?? []).filter((c) => c.t >= wBase);
   const mSeries = isPrice ? inWin(curIdx).map((c) => ({ t: c.t, v: c.c * (supply(curIdx) ?? 1) })) : intradayGlobal(open.map((v, i) => ({ value: capW[i]!, candles: inWin(i) })));
   const live = mSeries.length >= 2;
   const drawing = !live && introQ.some((q) => q.isPending || q.isFetching);
   // Young tokens: stretch the line edge to edge from their first candle instead of leaving the left side empty.
-  const w0 = live ? Math.max(wBase, mSeries[0]!.t) : wBase, wSpan = Math.max(now - w0, 1), young = n !== 1 && live && w0 - wBase > 86_400_000;
+  const w0 = live ? Math.max(wBase, mSeries[0]!.t) : wBase, wSpan = Math.max(now - w0, 1), young = n > 1 && live && w0 - wBase > 86_400_000;
   const ms = live ? mSeries.map((p) => p.v) : mk;
   // Linear scale fitted to the window's own min/max: every spike and drop fills the height (choppy trading look).
   const cmin = Math.min(...ms), cmax = Math.max(...ms), cr = Math.max(cmax - cmin, Math.abs(cmax) * 1e-6, 1e-9);
@@ -164,7 +164,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const tPts = totArr.map((v, i) => ({ x: x(i), y: ty(v) }));
   const bPts = capArr.map((v, i) => ({ x: x(i), y: ty(v) }));
   const tLine = smooth(tPts), bLine = bPts.map((p, i) => `${i ? "L" : "M"}${p.x},${p.y}`).join(" ");
-  const tab = (v: 1 | 7 | 30, label: string) => <button type="button" onClick={() => { setN(v); setSel(null); }} aria-pressed={n === v} className={`rounded-lg px-3 py-1 transition ${n === v ? "bg-primary font-bold text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>{label}</button>;
+  const tab = (v: 0 | 1 | 7 | 30, label: string) => <button type="button" onClick={() => { setN(v); setSel(null); }} aria-pressed={n === v} className={`rounded-lg px-3 py-1 transition ${n === v ? "bg-primary font-bold text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>{label}</button>;
   const vtab = (id: string, label: string) => { const th = vaultTheme(id === "global" ? "global" : id); const on = active === id; return <button key={id} type="button" role="tab" aria-selected={on} onClick={() => { setTab(id); setSel(null); }} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition ${on ? (id === "global" ? "border-primary bg-primary text-primary-foreground" : `border-transparent ${th.on}`) : "border-border bg-muted/60 text-muted-foreground hover:text-foreground"}`}>{label}</button>; };
   const day = new Date(days[shown]!.start).toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" });
   const loading = candleQ.some((q) => q.isPending) || statsQ.some((q) => q?.isPending);
@@ -180,7 +180,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full blur-3xl" style={{ background: `color-mix(in oklch, ${theme.b} 15%, transparent)` }} />
     <div className="relative flex items-center justify-between gap-2">
       <p className="text-sm font-semibold">{isPrice ? t("Mercado {s}", { s: sym }) : <>{t("Mercado global")}<span className="block text-xs font-normal text-muted-foreground">{t("Todas las bóvedas abiertas")}</span></>}</p>
-      <div className="inline-flex items-center rounded-xl border border-border bg-muted/60 p-1 text-xs font-medium">{tab(1, t("24 h"))}{tab(7, t("7 días"))}{tab(30, t("30 días"))}</div>
+      <div className="inline-flex items-center rounded-xl border border-border bg-muted/60 p-1 text-xs font-medium">{tab(0, t("1 h"))}{tab(1, t("24 h"))}{tab(7, t("7 días"))}{tab(30, t("30 días"))}</div>
     </div>
     {open.length > 2 && (() => { const opts = [{ id: "global", label: t("Global") }, ...open.map((v) => ({ id: v.id, label: `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}` }))]; const curLabel = opts.find((o) => o.id === active)?.label ?? t("Global"); return <Drawer open={pickOpen} onOpenChange={setPickOpen}><DrawerTrigger asChild><button type="button" aria-label={t("Bóvedas")} className="relative mt-3 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-background/80 py-1 pl-3 pr-1 text-xs font-bold shadow-sm transition-colors hover:border-primary active:scale-95">{curLabel}<span className="flex size-6 items-center justify-center rounded-full bg-primary/20 text-primary"><ChevronDown size={15} strokeWidth={2.75} aria-hidden /></span></button></DrawerTrigger>
       <DrawerContent><DrawerHeader><DrawerTitle>{t("Bóvedas")}</DrawerTitle></DrawerHeader><div className="grid gap-2 px-4 pb-6">{opts.map((o) => <button key={o.id} type="button" aria-pressed={active === o.id} onClick={() => { setTab(o.id); setSel(null); setPickOpen(false); }} className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium ${active === o.id ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>{o.label}{active === o.id && <CheckCircle2 size={16} />}</button>)}</div></DrawerContent></Drawer>; })()}
@@ -200,10 +200,11 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
       </defs>
       {cmax > cmin && <><text x={R} y={CT - 4} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{cap(cmax)}</text><text x={R} y={CB + 12} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{cap(cmin)}</text></>}
-      {!drawing && cPts.length >= 2 && <><path d={cLine} fill="none" stroke={`url(#h${gid})`} strokeWidth="2" strokeLinejoin="miter" strokeLinecap="butt" style={{ filter: `drop-shadow(0 0 4px ${theme.b})` }} />
+      {!drawing && (live || n > 1) && cPts.length >= 2 && <><path d={cLine} fill="none" stroke={`url(#h${gid})`} strokeWidth="2" strokeLinejoin="miter" strokeLinecap="butt" style={{ filter: `drop-shadow(0 0 4px ${theme.b})` }} />
       <circle cx={cEnd.x} cy={cEnd.y} r="5.5" fill="var(--background)" stroke={theme.b} strokeWidth="3" /></>}
     </svg>
     {drawing && <div role="status" className="pointer-events-none absolute inset-x-0 flex flex-col items-center justify-center gap-2 text-xs text-muted-foreground" style={{ marginTop: "-8.5rem" }}><Loader2 className="size-7 animate-spin text-primary" aria-hidden />{t("Cargando gráfica…")}</div>}
-    <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{n === 1 ? t("Hace 24 h") : young ? t("Desde lanzamiento") : new Date(days[0]!.start).toLocaleDateString(locale, { day: "numeric", month: "short" })}</span><span>{n === 1 ? t("Ahora") : t("Hoy")}</span></div>
+    {!drawing && !live && n <= 1 && <div className="pointer-events-none absolute inset-x-0 flex justify-center text-xs text-muted-foreground" style={{ marginTop: "-7rem" }}>{t("Gráfica no disponible por ahora")}</div>}
+    <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{n === 0 ? t("Hace 1 h") : n === 1 ? t("Hace 24 h") : young ? t("Desde lanzamiento") : new Date(days[0]!.start).toLocaleDateString(locale, { day: "numeric", month: "short" })}</span><span>{n <= 1 ? t("Ahora") : t("Hoy")}</span></div>
       </div>;
 }

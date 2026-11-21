@@ -31,11 +31,11 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const locale = useLocale();
   const gid = useId().replace(/:/g, "");
   const [range, setRangeRaw] = useState<CandleRange>("24h");
-  useEffect(() => { try { const v = localStorage.getItem("boveda:market-range"); if (v === "7d" || v === "30d") setRangeRaw(v); } catch { /* ignore */ } }, []);
+  useEffect(() => { try { const v = localStorage.getItem("boveda:market-range"); if (v === "1h" || v === "7d" || v === "30d") setRangeRaw(v); } catch { /* ignore */ } }, []);
   const setRange = (v: CandleRange) => { setRangeRaw(v); try { localStorage.setItem("boveda:market-range", v); } catch { /* ignore */ } };
   const hydrated = useHydrated();
   const [hover, setHover] = useState<number | null>(null);
-  const candles = useQuery({ queryKey: ["pool-candles", vault.pool, range], queryFn: ({ signal }) => fetchPoolCandles(vault.pool, range, signal), ...(hydrated && readCachedCandles(vault.pool, range) ? { placeholderData: readCachedCandles(vault.pool, range)! } : {}), staleTime: 30_000, refetchInterval: 30_000, retry: 1 });
+  const candles = useQuery({ queryKey: ["pool-candles", vault.pool, range], queryFn: ({ signal }) => fetchPoolCandles(vault.pool, range, signal), ...(hydrated && readCachedCandles(vault.pool, range) ? { placeholderData: readCachedCandles(vault.pool, range)! } : {}), staleTime: 30_000, refetchInterval: 30_000, retry: 4, retryDelay: (n) => Math.min(1500 * (n + 1), 6000) });
   const stats = useQuery({ queryKey: ["dexscreener-pool-stats", vault.pool], queryFn: ({ signal }) => fetchPoolStats(vault.pool, signal), staleTime: 60_000, retry: 1 });
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
   const symbol = stats.data?.baseSymbol ?? vault.pair.split("/")[0];
@@ -43,6 +43,7 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const ratio = fees24h != null && vol24h ? fees24h / vol24h : null;
   const list = candles.data ?? [];
   const earn = ratio != null ? cumulativeInterest(list, ratio) : [];
+  const rl = range === "1h" ? "1 h" : range === "24h" ? "24 h" : range === "7d" ? "7 d" : "30 d";
   const volume = list.reduce((s, c) => s + c.v, 0);
   const pill = (a: boolean) => `rounded-full px-3 py-1 text-xs font-semibold transition ${a ? "bg-foreground text-background" : "text-muted-foreground"}`;
 
@@ -77,13 +78,13 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   return <div className="space-y-3">
     <div className="grid grid-cols-3 gap-2">
       {[[`${t("Precio")} ${symbol}`, stats.data?.price != null ? price(stats.data.price) : "—", stats.data?.change24h != null ? `${stats.data.change24h > 0 ? "+" : ""}${stats.data.change24h.toFixed(1)}% · 24 h` : ""],
-        [t("Volumen operado"), usd(list.length ? volume : vol24h), range === "24h" ? "24 h" : range === "7d" ? "7 d" : "30 d"],
-        [t("Intereses generados"), earn.length ? `+${usd(earn[earn.length - 1], 0)}` : "—", range === "24h" ? "24 h" : range === "7d" ? "7 d" : "30 d"]].map(([k, v, s], i) =>
+        [t("Volumen operado"), usd(list.length ? volume : vol24h), rl],
+        [t("Intereses generados"), earn.length ? `+${usd(earn[earn.length - 1], 0)}` : "—", rl]].map(([k, v, s], i) =>
         <div key={k} className={`min-w-0 rounded-xl p-2.5 ${i === 2 ? "bg-primary/10" : "bg-muted"}`}><p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{k}</p><p className={`truncate font-display text-base font-bold tabular-nums ${i === 2 ? "text-primary" : ""}`}>{v}</p><p className="truncate text-[10px] text-muted-foreground">{s}</p></div>)}
     </div>
     <div className="rounded-2xl border border-border bg-card p-3">
-      <div className="flex rounded-full bg-secondary p-0.5 w-fit" role="tablist" aria-label={t("Periodo")}>{(["24h", "7d", "30d"] as const).map((r) => <button key={r} type="button" role="tab" aria-selected={range === r} onClick={() => { setRange(r); setHover(null); }} className={pill(range === r)}>{r === "24h" ? "24 h" : r === "7d" ? "7 d" : "30 d"}</button>)}</div>
-      {chart ?? <div className="grid h-80 place-items-center text-sm text-muted-foreground">{candles.isPending ? <span className="h-2 w-40 animate-pulse rounded-full bg-muted" /> : t("Gráfica no disponible por ahora")}</div>}
+      <div className="flex rounded-full bg-secondary p-0.5 w-fit" role="tablist" aria-label={t("Periodo")}>{(["1h", "24h", "7d", "30d"] as const).map((r) => <button key={r} type="button" role="tab" aria-selected={range === r} onClick={() => { setRange(r); setHover(null); }} className={pill(range === r)}>{r === "1h" ? "1 h" : r === "24h" ? "24 h" : r === "7d" ? "7 d" : "30 d"}</button>)}</div>
+      {chart ?? <div className="grid h-80 place-items-center text-sm text-muted-foreground">{candles.isPending || candles.isFetching ? <span className="h-2 w-40 animate-pulse rounded-full bg-muted" /> : t("Gráfica no disponible por ahora")}</div>}
     </div>
     <p className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs leading-5">💡 {t("El precio de {s} sube y baja con la oferta y la demanda, pero cada intercambio genera intereses en dólares para la bóveda. La volatilidad es el motor que produce tus ganancias.", { s: symbol ?? "" })}</p>
     <p className="text-[10px] leading-4 text-muted-foreground">{t("Intereses del pool completo, estimados con su volumen. Tu parte depende de tu depósito.")}</p>
