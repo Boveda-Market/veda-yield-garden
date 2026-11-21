@@ -116,7 +116,7 @@ function SellReview({ review, flow, onCancel, onConfirm }: { review: { p: Predic
   const cost = review ? BigInt(review.p.costMicro || "0") : 0n;
   return <Dialog open={!!review || !!flow} onOpenChange={(o) => { if (!o) onCancel(); }}>
     <ActionSheetContent closeLabel={t("Cerrar")} className="sm:max-w-sm">
-      {flow?.receipt ? <ActionSuccess destination="/wallet" title={t("¡Posición cerrada!")} amount={{ value: flow.receipt.amount, unit: "$", label: "≈" }}
+      {flow?.receipt ? <ActionSuccess destination="/portfolio" title={t("¡Posición cerrada!")} amount={{ value: flow.receipt.amount, unit: "$", label: "≈" }}
         body={flow.receipt.partial ? t("Ya vendiste, pero falta pasarlo a dólares. Hazlo en Mi Billetera → Cambiar.") : t("Ya está en tus dólares disponibles.")}
         details={[{ label: t("Operación"), value: t("Cierre antes de tiempo") }, { label: t("Comisión"), value: "$0.00" }]} signature={flow.receipt.sig} onClose={onCancel} />
       : flow ? <>
