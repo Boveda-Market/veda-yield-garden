@@ -302,6 +302,7 @@ export const realOps: Record<string, string> = {
   "Mi rendimiento": "My performance",
   "Índice de bóvedas activas": "Active vaults index",
   "Cosechar todo": "Harvest all",
+  "Cobrar botín": "Claim the loot",
   "Asegurando reserva de operaciones…": "Securing operations reserve…",
   "Recarga de reserva de operaciones": "Operations reserve refill",
   "No se pudo recargar la reserva de operaciones. No se movió dinero.": "Could not refill the operations reserve. No money moved.",

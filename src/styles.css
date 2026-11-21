@@ -410,3 +410,11 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
 .pill-active { box-shadow: 0 0 0 1px var(--primary), 0 0 22px 2px color-mix(in oklab, var(--primary) 55%, transparent), var(--shadow-hot); animation: pill-glow 2.6s ease-in-out infinite; }
 @keyframes pill-glow { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.15) saturate(1.15); } }
 @media (prefers-reduced-motion: reduce) { .pill-active { animation: none; } }
+
+/* «Cobrar botín»: reward-style harvest-all button (gold → green, shimmer, pop-in) */
+.loot-btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:2.25rem;padding:.4rem .75rem;border-radius:.75rem;font-weight:700;font-size:.85rem;color:var(--primary-foreground);background:linear-gradient(120deg,var(--chart-4),var(--primary));box-shadow:0 0 0 1px color-mix(in oklab,var(--chart-4) 60%,transparent),0 8px 22px -8px color-mix(in oklab,var(--chart-4) 70%,transparent);animation:loot-pop .5s cubic-bezier(.2,1.4,.4,1) both}
+.loot-btn::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,color-mix(in oklab,var(--background) 65%,transparent) 50%,transparent 65%);transform:translateX(-120%);animation:loot-shine 2.8s ease-in-out 0.6s infinite}
+.loot-btn:active{transform:scale(.97)}
+@keyframes loot-pop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+@keyframes loot-shine{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+@media (prefers-reduced-motion:reduce){.loot-btn,.loot-btn::after{animation:none}}
