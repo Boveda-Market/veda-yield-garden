@@ -95,7 +95,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const gid = useId().replace(/:/g, "");
   const hydrated = useHydrated();
   const [sel, setSel] = useState<number | null>(null);
-  const [n0, setN] = useState<0 | 1 | 7 | 30 | 90>(0); // only the 1M (1-minute candles, last 5 h) timeframe is offered
+  const [n0, setN] = useState<0 | 1 | 7 | 30 | 90>(7); // only the 7-day view (1-hour candles) is offered
   const [tabId, setTab] = useState<string>("global");
   const [pickOpen, setPickOpen] = useState(false);
   // Pinch zoom: two fingers spread the time axis (1–6×), one finger pans while zoomed.
@@ -191,7 +191,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const live = mSeries.length >= 2;
   const drawing = !live && introQ.some((q) => q.isPending || q.isFetching);
   // Young tokens: stretch the line edge to edge from their first candle instead of leaving the left side empty.
-  const w0 = live ? Math.max(wBase, mSeries[0]!.t) : wBase, wSpan = Math.max(now - w0, 1), young = n > 1 && live && w0 - wBase > 86_400_000;
+  const w0 = live ? Math.max(wBase, mSeries[0]!.t) : wBase, wSpan = Math.max(now - w0, 1);
   const ms = live ? mSeries.map((p) => p.v) : mk;
   // Linear scale fitted to the window's own min/max: every spike and drop fills the height (choppy trading look).
   const cmin = Math.min(...ms), cmax = Math.max(...ms), cr = Math.max(cmax - cmin, Math.abs(cmax) * 1e-6, 1e-9);
@@ -259,6 +259,6 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     </div>
     {drawing && <div role="status" className="pointer-events-none absolute inset-x-0 -mt-[6.5rem] flex flex-col sm:-mt-[8.5rem] items-center justify-center gap-2 text-xs text-muted-foreground"><Loader2 className="size-7 animate-spin text-primary" aria-hidden />{t("Cargando gráfica…")}</div>}
     {!drawing && !live && n <= 1 && <div className="pointer-events-none absolute inset-x-0 -mt-[5.5rem] flex justify-center text-xs text-muted-foreground sm:-mt-28">{t("Gráfica no disponible por ahora")}</div>}
-    <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{n === 0 ? t("Hace 5 h") : n === 1 ? t("Hace 24 h") : young ? t("Desde lanzamiento") : new Date(days[0]!.start).toLocaleDateString(locale, { day: "numeric", month: "short" })}</span><span>{n <= 1 ? t("Ahora") : t("Hoy")}</span></div>
+    {n > 1 ? <div className="relative mt-1 flex justify-between text-[10px] capitalize text-muted-foreground">{[0, 1, 2, 3, 4].map((k) => { const d = new Date((live ? w0 : wBase) + k * ((now - (live ? w0 : wBase)) / 4)); return <span key={k} className="text-center leading-tight">{k === 4 ? t("Hoy") : d.toLocaleDateString(locale, { weekday: "short" })}<br />{d.toLocaleDateString(locale, { day: "numeric", month: "short" })}</span>; })}</div> : <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{n === 0 ? t("Hace 5 h") : t("Hace 24 h")}</span><span>{t("Ahora")}</span></div>}
       </div>;
 }
