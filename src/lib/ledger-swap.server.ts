@@ -31,7 +31,10 @@ export async function ledgerSwapToUsdc(connection: Connection, args: { owner: Pu
   const usdc = new PublicKey(USDC_MINT);
   if (minimumIn <= 0n) return { ok: false, message: "El retiro no permite proteger un mínimo positivo para la conversión." };
   const params = new URLSearchParams({ inputMint, outputMint: USDC_MINT, amount: minimumIn.toString(), slippageBps: "50", maxAccounts: "24", onlyDirectRoutes: "true", ...(args.allowPool ? {} : { excludeDexes: "Meteora,Meteora DLMM,Meteora DAMM v2" }) });
-  const jQuote = quoteSchema.parse(await request(`quote?${params}`));
+  // Tokens like DCTY have no direct USDC route; fall back to a multi-hop route (still simulated and minimum-enforced).
+  let raw: unknown;
+  try { raw = await request(`quote?${params}`); } catch { params.delete("onlyDirectRoutes"); raw = await request(`quote?${params}`); }
+  const jQuote = quoteSchema.parse(raw);
   if (jQuote.inputMint !== inputMint || jQuote.outputMint !== USDC_MINT || jQuote.inAmount !== minimumIn.toString() || (!args.allowPool && jQuote.routePlan.some((r) => r.swapInfo.ammKey === pool))) return { ok: false, message: "La conversión no coincide con los fondos retirados." };
   const minimumSwap = BigInt(jQuote.otherAmountThreshold);
   const swap = swapSchema.parse(await request("swap-instructions", { quoteResponse: jQuote, userPublicKey: owner.toBase58(), wrapAndUnwrapSol: false, dynamicComputeUnitLimit: false, useTokenLedger: true, useSharedAccounts: false }));
