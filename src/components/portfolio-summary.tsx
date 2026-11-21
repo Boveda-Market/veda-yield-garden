@@ -95,7 +95,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const gid = useId().replace(/:/g, "");
   const hydrated = useHydrated();
   const [sel, setSel] = useState<number | null>(null);
-  const [n, setN] = useState<0 | 1 | 7 | 30 | 90>(7); // trading timeframes: 7 = 1H candles, 30 = 4H, 90 = 1D
+  const [n, setN] = useState<0 | 1 | 7 | 30 | 90>(0); // only the 1M (1-minute candles, last 5 h) timeframe is offered
   const dn = n <= 1 ? 2 : n;
   const range: ChartRange = n === 90 ? "1d" : n === 30 ? "4h" : n === 0 ? "1m" : "1h";
   const [tabId, setTab] = useState<string>("global");
@@ -180,7 +180,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full blur-3xl" style={{ background: `color-mix(in oklch, ${theme.b} 15%, transparent)` }} />
     <div className="relative flex items-center justify-between gap-2">
       <p className="text-sm font-semibold">{isPrice ? t("Mercado {s}", { s: sym }) : <>{t("Mercado global")}<span className="block text-xs font-normal text-muted-foreground">{t("Todas las bóvedas abiertas")}</span></>}</p>
-      <div className="inline-flex items-center rounded-xl border border-border bg-muted/60 p-1 text-xs font-medium">{tab(0, "1M")}{tab(7, "1H")}{tab(30, "4H")}{tab(90, "1D")}</div>
+      <div className="inline-flex items-center rounded-xl border border-border bg-muted/60 p-1 text-xs font-medium">{tab(0, "1M")}</div>
     </div>
     {open.length > 2 && (() => { const opts = [{ id: "global", label: t("Global") }, ...open.map((v) => ({ id: v.id, label: `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}` }))]; const curLabel = opts.find((o) => o.id === active)?.label ?? t("Global"); return <Drawer open={pickOpen} onOpenChange={setPickOpen}><DrawerTrigger asChild><button type="button" aria-label={t("Bóvedas")} className="relative mt-3 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-background/80 py-1 pl-3 pr-1 text-xs font-bold shadow-sm transition-colors hover:border-primary active:scale-95">{curLabel}<span className="flex size-6 items-center justify-center rounded-full bg-primary/20 text-primary"><ChevronDown size={15} strokeWidth={2.75} aria-hidden /></span></button></DrawerTrigger>
       <DrawerContent><DrawerHeader><DrawerTitle>{t("Bóvedas")}</DrawerTitle></DrawerHeader><div className="grid gap-2 px-4 pb-6">{opts.map((o) => <button key={o.id} type="button" aria-pressed={active === o.id} onClick={() => { setTab(o.id); setSel(null); setPickOpen(false); }} className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium ${active === o.id ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>{o.label}{active === o.id && <CheckCircle2 size={16} />}</button>)}</div></DrawerContent></Drawer>; })()}
