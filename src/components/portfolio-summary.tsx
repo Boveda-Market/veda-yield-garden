@@ -178,7 +178,11 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const totArr = capArr.map((c, i) => c + earn[i]!);
   const hasTotal = capArr.some((c) => c > 0);
   const baseCap = capArr[shown] ?? 0;
-  const W = 380, L = 12, R = 368, CT = 16, CB = 180, ET = 150, EB = 250, TT = 290, TB = 370, H = 200;
+  // Desktop: widen the drawing area to the card's real aspect so the line fills edge to edge without stretching text or dots.
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [vbW, setVbW] = useState(380);
+  useEffect(() => { const el = svgRef.current; if (!el || typeof ResizeObserver === "undefined") return; const ro = new ResizeObserver(([e]) => { const r = e?.contentRect; if (r && r.width > 0 && r.height > 0) setVbW(Math.max(380, Math.round((r.width / r.height) * 200))); }); ro.observe(el); return () => ro.disconnect(); }, []);
+  const W = vbW, L = 12, R = W - 12, CT = 16, CB = 180, ET = 150, EB = 250, TT = 290, TB = 370, H = 200;
   const x = (i: number) => L + (i * (R - L)) / (dn - 1);
   const emax = Math.max(total, 0.000001);
   const smooth = (pts: { x: number; y: number }[]) => { let d = `M${pts[0]!.x},${pts[0]!.y}`; for (let i = 1; i < pts.length; i++) { const p = pts[i - 1]!, c = pts[i]!, mx = (p.x + c.x) / 2; d += ` C${mx},${p.y} ${mx},${c.y} ${c.x},${c.y}`; } return d; };
@@ -243,7 +247,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     </div>
     <div className="relative mt-2 touch-pan-y overflow-hidden" onPointerDown={pDown} onPointerMove={pMove} onPointerUp={pUp} onPointerCancel={pUp} onPointerLeave={pUp}>
     <div style={{ transform: `translateX(${pan}px) scaleX(${zoom})`, transformOrigin: `${origin * 100}% 50%` }}>
-    <svg viewBox={`0 0 ${W} ${H}`} className="relative h-40 w-full overflow-visible sm:h-52" role="img" aria-label={t("Mercado global frente a ganancias cosechadas")}>
+    <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="relative h-40 w-full overflow-visible sm:h-52 lg:h-64" role="img" aria-label={t("Mercado global frente a ganancias cosechadas")}>
       <defs>
         <linearGradient id={`h${gid}`} x1="0" x2="1"><stop offset="0%" stopColor={theme.a} /><stop offset="100%" stopColor={theme.b} /></linearGradient>
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
