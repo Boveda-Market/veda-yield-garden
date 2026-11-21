@@ -69,7 +69,7 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
       <div className={tile}>
         <p className={label}><Sprout size={14} />{t("Por cosechar")}</p>
         <p className="mt-2 font-display text-xl font-semibold tabular-nums text-primary">{totalFees > 0 ? <>+{anim(totalFees, liveRate)}</> : money(0)}</p>
-        {(() => { const pend = rows.filter((r) => !r.p.locked && typeof r.fees === "number" && r.fees > 0); const ready = pend.filter((r) => canHarvest(r.fees as number)); return ready.length > 1 && ready.length === pend.length && totalFees >= 20 && onHarvestAll ? <button type="button" className="loot-btn mt-2 w-full" onClick={() => onHarvestAll(ready.map((r) => r.p))}><Trophy size={15} aria-hidden="true" /><span>{t("Cobrar botín")}</span></button> : null; })() ?? (top && canHarvest(top.fees) ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvest(top.p)}>{t("Cosechar ahora")}</Button> : null)}
+        {(() => { const pend = rows.filter((r) => !r.p.locked && typeof r.fees === "number" && r.fees > 0); const ready = pend.filter((r) => canHarvest(r.fees as number)); return ready.length > 1 && ready.length === pend.length && totalFees >= 20 && onHarvestAll ? <button type="button" className="loot-btn mt-2 w-full" onClick={() => onHarvestAll(ready.map((r) => r.p))}><Trophy size={15} aria-hidden="true" /><span>{t("Cobrar")}</span></button> : null; })() ?? (top && canHarvest(top.fees) ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvest(top.p)}>{t("Cosechar ahora")}</Button> : null)}
       </div>
       <div className={tile}>
         <p className={label}><Sparkles size={14} />{t("Ganancias (PNL)")}</p>
