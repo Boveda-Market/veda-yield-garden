@@ -10,3 +10,6 @@
 - [ ] Probar el piloto automático con una cuenta real en bovedamarket.app (necesita que el usuario lo active)
 - [x] Bóveda DCTY (DacityCoin) copia de GTA6 con 3 banners
 - [x] Área de bóvedas: fichas con solo el nombre (sin APR, sin tags, sin icono)
+
+- [x] Portafolio: revisar orden de tarjetas de arriba
+- [x] Deslizado «al revés» en tarjetas de arriba del portafolio
