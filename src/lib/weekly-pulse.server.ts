@@ -1,6 +1,6 @@
 import { VAULTS } from "./vaults";
 import { fetchPoolYield } from "./pool-yield";
-import { marketPulsePost, type PulseCoin, type PulseVault } from "./market-pulse";
+import { marketPulsePost, type PulseCoin, type PulseVault } from "./weekly-pulse";
 
 const j = async (url: string) => { const r = await fetch(url, { headers: { accept: "application/json" } }); if (!r.ok) throw new Error(String(r.status)); return r.json() as Promise<any>; };
 

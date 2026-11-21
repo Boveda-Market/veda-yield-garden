@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { marketPulsePost, VAULT_NARRATIVE } from "@/lib/market-pulse";
+import { marketPulsePost, VAULT_NARRATIVE } from "@/lib/weekly-pulse";
 
 describe("weekly market pulse", () => {
   const base = { date: "24 nov", fng: { value: 12, label: "Extreme Fear" }, majors: [], vaults: [

@@ -9,9 +9,9 @@ export const Route = createFileRoute("/api/public/jobs/market-pulse")({
       POST: async ({ request }) => {
         const fail = await authenticateCronRequest(request);
         if (fail) return fail;
-        const { buildMarketPulse } = await import("@/lib/market-pulse.server");
+        const { buildMarketPulse } = await import("@/lib/weekly-pulse.server");
         const tg = await import("@/lib/telegram.server");
-        const { PULSE_DRAFT_LABEL } = await import("@/lib/market-pulse");
+        const { PULSE_DRAFT_LABEL } = await import("@/lib/weekly-pulse");
         const post = await buildMarketPulse();
         const chat = process.env["TELEGRAM_ALERT_CHAT_ID"];
         const ok = chat ? await tg.sendTelegram(chat, `${PULSE_DRAFT_LABEL}\n\n${post}`) : false;
