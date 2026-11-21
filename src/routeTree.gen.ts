@@ -46,6 +46,7 @@ import { Route as EnGuidesPredictionMarketsRouteImport } from './routes/en/guide
 import { Route as EnGuidesWhatIsUsdcRouteImport } from './routes/en/guides/what-is-usdc'
 import { Route as EnGuidesWithdrawToCashAppBitcoinRouteImport } from './routes/en/guides/withdraw-to-cash-app-bitcoin'
 import { Route as ApiPublicJobsCheckSystemStatusRouteImport } from './routes/api/public/jobs/check-system-status'
+import { Route as ApiPublicJobsMarketPulseRouteImport } from './routes/api/public/jobs/market-pulse'
 import { Route as ApiPublicJobsWeeklySummaryRouteImport } from './routes/api/public/jobs/weekly-summary'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -246,6 +247,12 @@ const ApiPublicJobsCheckSystemStatusRoute =
     path: '/api/public/jobs/check-system-status',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsMarketPulseRoute =
+  ApiPublicJobsMarketPulseRouteImport.update({
+    id: '/api/public/jobs/market-pulse',
+    path: '/api/public/jobs/market-pulse',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsWeeklySummaryRoute =
   ApiPublicJobsWeeklySummaryRouteImport.update({
     id: '/api/public/jobs/weekly-summary',
@@ -313,6 +320,7 @@ export interface FileRoutesByFullPath {
   '/en/guides/withdraw-to-cash-app-bitcoin': typeof EnGuidesWithdrawToCashAppBitcoinRoute
   '/en/guides/': typeof EnGuidesIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
+  '/api/public/jobs/market-pulse': typeof ApiPublicJobsMarketPulseRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -357,6 +365,7 @@ export interface FileRoutesByTo {
   '/en/guides/withdraw-to-cash-app-bitcoin': typeof EnGuidesWithdrawToCashAppBitcoinRoute
   '/en/guides': typeof EnGuidesIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
+  '/api/public/jobs/market-pulse': typeof ApiPublicJobsMarketPulseRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -402,6 +411,7 @@ export interface FileRoutesById {
   '/en/guides/withdraw-to-cash-app-bitcoin': typeof EnGuidesWithdrawToCashAppBitcoinRoute
   '/en/guides/': typeof EnGuidesIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
+  '/api/public/jobs/market-pulse': typeof ApiPublicJobsMarketPulseRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -448,6 +458,7 @@ export interface FileRouteTypes {
     | '/en/guides/withdraw-to-cash-app-bitcoin'
     | '/en/guides/'
     | '/api/public/jobs/check-system-status'
+    | '/api/public/jobs/market-pulse'
     | '/api/public/jobs/weekly-summary'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
@@ -492,6 +503,7 @@ export interface FileRouteTypes {
     | '/en/guides/withdraw-to-cash-app-bitcoin'
     | '/en/guides'
     | '/api/public/jobs/check-system-status'
+    | '/api/public/jobs/market-pulse'
     | '/api/public/jobs/weekly-summary'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
@@ -536,6 +548,7 @@ export interface FileRouteTypes {
     | '/en/guides/withdraw-to-cash-app-bitcoin'
     | '/en/guides/'
     | '/api/public/jobs/check-system-status'
+    | '/api/public/jobs/market-pulse'
     | '/api/public/jobs/weekly-summary'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
@@ -581,6 +594,7 @@ export interface RootRouteChildren {
   EnGuidesWithdrawToCashAppBitcoinRoute: typeof EnGuidesWithdrawToCashAppBitcoinRoute
   EnGuidesIndexRoute: typeof EnGuidesIndexRoute
   ApiPublicJobsCheckSystemStatusRoute: typeof ApiPublicJobsCheckSystemStatusRoute
+  ApiPublicJobsMarketPulseRoute: typeof ApiPublicJobsMarketPulseRoute
   ApiPublicJobsWeeklySummaryRoute: typeof ApiPublicJobsWeeklySummaryRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -849,6 +863,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsCheckSystemStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/market-pulse': {
+      id: '/api/public/jobs/market-pulse'
+      path: '/api/public/jobs/market-pulse'
+      fullPath: '/api/public/jobs/market-pulse'
+      preLoaderRoute: typeof ApiPublicJobsMarketPulseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/weekly-summary': {
       id: '/api/public/jobs/weekly-summary'
       path: '/api/public/jobs/weekly-summary'
@@ -925,6 +946,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnGuidesWithdrawToCashAppBitcoinRoute: EnGuidesWithdrawToCashAppBitcoinRoute,
   EnGuidesIndexRoute: EnGuidesIndexRoute,
   ApiPublicJobsCheckSystemStatusRoute: ApiPublicJobsCheckSystemStatusRoute,
+  ApiPublicJobsMarketPulseRoute: ApiPublicJobsMarketPulseRoute,
   ApiPublicJobsWeeklySummaryRoute: ApiPublicJobsWeeklySummaryRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
