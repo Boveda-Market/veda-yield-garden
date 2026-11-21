@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { useHydrated } from "@tanstack/react-router";
 import { readCachedCandles } from "@/lib/pool-candles";
 import { useEffect, useId, useState } from "react";
@@ -72,6 +73,7 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
     </>;
   }
 
+  if (!chart && (candles.isPending || candles.isFetching)) chart = <div role="status" className="flex h-80 flex-col items-center justify-center gap-2 text-xs text-muted-foreground"><Loader2 className="size-7 animate-spin text-primary" aria-hidden />{t("Cargando gráfica…")}</div>;
   return <div className="space-y-3">
     <div className="grid grid-cols-3 gap-2">
       {[[`${t("Precio")} ${symbol}`, stats.data?.price != null ? price(stats.data.price) : "—", stats.data?.change24h != null ? `${stats.data.change24h > 0 ? "+" : ""}${stats.data.change24h.toFixed(1)}% · 24 h` : ""],
