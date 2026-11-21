@@ -33,7 +33,7 @@ export async function ledgerSwapToUsdc(connection: Connection, args: { owner: Pu
   const params = new URLSearchParams({ inputMint, outputMint: USDC_MINT, amount: minimumIn.toString(), slippageBps: "50", maxAccounts: "24", onlyDirectRoutes: "true", ...(args.allowPool ? {} : { excludeDexes: "Meteora,Meteora DLMM,Meteora DAMM v2" }) });
   // Tokens like DCTY have no direct USDC route; fall back to a multi-hop route (still simulated and minimum-enforced).
   let raw: unknown;
-  try { raw = await request(`quote?${params}`); } catch { params.delete("onlyDirectRoutes"); raw = await request(`quote?${params}`); }
+  try { raw = await request(`quote?${params}`); } catch { params.delete("onlyDirectRoutes"); params.set("maxAccounts", "40"); raw = await request(`quote?${params}`); }
   const jQuote = quoteSchema.parse(raw);
   if (jQuote.inputMint !== inputMint || jQuote.outputMint !== USDC_MINT || jQuote.inAmount !== minimumIn.toString() || (!args.allowPool && jQuote.routePlan.some((r) => r.swapInfo.ammKey === pool))) return { ok: false, message: "La conversión no coincide con los fondos retirados." };
   const minimumSwap = BigInt(jQuote.otherAmountThreshold);
