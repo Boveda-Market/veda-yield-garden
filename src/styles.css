@@ -82,6 +82,8 @@
   --color-hot-surface: var(--hot-surface);
   --color-hot-foreground: var(--hot-foreground);
   --color-hot-muted: var(--hot-muted);
+  --color-hot-buy: var(--hot-buy);
+  --color-hot-sell: var(--hot-sell);
   --color-invite: var(--invite);
   --color-whatsapp: var(--whatsapp);
   --color-telegram: var(--telegram);
@@ -120,6 +122,8 @@
   --hot-surface: oklch(0.17 0.035 315);
   --hot-foreground: oklch(0.98 0.01 330);
   --hot-muted: oklch(0.8 0.04 330);
+  --hot-buy: oklch(0.82 0.2 150);
+  --hot-sell: oklch(0.7 0.25 350);
   --gradient-hot: linear-gradient(100deg, var(--hot-2), var(--hot) 55%, oklch(0.66 0.2 300));
   --gradient-hot-surface: radial-gradient(110% 90% at 100% 0%, oklch(0.42 0.2 355 / 0.55), transparent 55%), radial-gradient(90% 80% at 0% 100%, oklch(0.45 0.15 55 / 0.35), transparent 60%), linear-gradient(var(--hot-surface), var(--hot-surface));
   /* Invita y Gana: emerald + gold on deep ink, identical in both themes so it reads as a reward. */
@@ -364,6 +368,8 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
   --hot-surface: oklch(0.16 0.045 275);
   --hot-foreground: oklch(0.98 0.01 260);
   --hot-muted: oklch(0.8 0.05 260);
+  --hot-buy: oklch(0.85 0.15 200);
+  --hot-sell: oklch(0.72 0.26 340);
   --gradient-hot: linear-gradient(100deg, var(--hot-2), var(--hot-3) 45%, var(--hot));
   --gradient-hot-surface: radial-gradient(110% 90% at 100% 0%, oklch(0.45 0.22 350 / 0.5), transparent 55%), radial-gradient(90% 80% at 0% 100%, oklch(0.5 0.14 205 / 0.4), transparent 60%), linear-gradient(var(--hot-surface), var(--hot-surface));
   --shadow-hot: 0 18px 50px -18px oklch(0.7 0.27 350 / 0.7);
@@ -379,6 +385,8 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
   --hot-surface: #0a2255;
   --hot-foreground: oklch(0.98 0.01 90);
   --hot-muted: oklch(0.82 0.04 260);
+  --hot-buy: oklch(0.85 0.15 85);
+  --hot-sell: oklch(0.62 0.23 25);
   --gradient-hot: linear-gradient(100deg, var(--trump-red), oklch(0.97 0.01 90) 30%, oklch(0.35 0.12 262) 60%, var(--hot));
   --gradient-hot-surface: radial-gradient(110% 90% at 100% 0%, oklch(0.75 0.15 85 / 0.45), transparent 55%), radial-gradient(90% 80% at 0% 100%, oklch(0.55 0.23 27 / 0.45), transparent 60%), linear-gradient(var(--hot-surface), var(--hot-surface));
   --shadow-hot: 0 18px 50px -18px oklch(0.8 0.15 82 / 0.65), 0 6px 22px -12px oklch(0.55 0.23 27 / 0.7);

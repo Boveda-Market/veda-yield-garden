@@ -11,7 +11,6 @@ import { isDlmmVault } from "@/lib/solana-data";
 import { PoolYield } from "@/components/pool-yield";
 import { MarketPerformance } from "@/components/market-performance";
 import { vaultSkin } from "@/components/vault-skin";
-import { TokenLinks } from "@/components/hot-vault-card";
 
 const number = (value: number | null | undefined, digits = 2) => value == null ? "—" : value.toLocaleString("es-MX", { maximumFractionDigits: digits });
 const usd = (value: number | null | undefined, digits = 2) => value == null ? "—" : `$${value.toLocaleString("es-MX", { minimumFractionDigits: Math.min(2, digits), maximumFractionDigits: digits })}`;
@@ -58,7 +57,6 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
           </Button>
         </div>
 
-        {vault.links && <div className={`rounded-xl bg-[image:var(--gradient-hot-surface)] p-2 text-hot-foreground ${vaultSkin(vault.id)}`}><TokenLinks vault={vault} /></div>}
         <div className="grid grid-cols-2 rounded-full bg-secondary p-1" role="tablist">{([["perf", t("Rendimiento y Mercado")], ["stats", t("Estadísticas del Pool")]] as const).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={`rounded-full px-2 py-2 text-xs font-bold transition ${tab === k ? "bg-foreground text-background" : "text-muted-foreground"}`}>{l}</button>)}</div>
         {tab === "perf" ? <MarketPerformance vault={vault} /> : <>
         <PoolYield address={vault.pool} />

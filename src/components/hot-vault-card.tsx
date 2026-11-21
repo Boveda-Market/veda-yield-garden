@@ -5,6 +5,7 @@ import { useT } from "@/lib/i18n";
 import { DctySkyline, TrumpFlag, VaultTitle, vaultSkin } from "@/components/vault-skin";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { fetchPoolStats } from "@/lib/pool-stats";
+import { marketPulse, type Pulse } from "@/lib/market-pulse";
 import type { Vault } from "@/lib/vaults";
 
 const num = (v: number | null | undefined) => v == null ? "—" : v.toLocaleString("es-MX", { maximumFractionDigits: 0 });
@@ -41,6 +42,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
   const apr = y.data?.apr;
   const buys = s.data?.buys24h ?? null, sells = s.data?.sells24h ?? null;
   const total = buys != null && sells != null ? buys + sells : null;
+  const pulse = marketPulse(s.data);
   const steps = [["💵", "Depositas"], ["⚡", "Piloto automático"], ["📈", "Ganancias automáticas"]] as const;
   return <article className={`hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)] ${vaultSkin(vault.id)}`}>
     <div className="relative isolate flex h-full flex-col overflow-hidden rounded-[calc(1rem-2px)] bg-[image:var(--gradient-hot-surface)] text-hot-foreground">
@@ -48,7 +50,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
         <span className="flex items-center gap-1 rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-live shadow-[0_0_6px_var(--live)] motion-reduce:animate-none" />{t("En vivo")}</span>
       </HotBanner>
       <div className="flex flex-1 flex-col p-2 sm:p-3">
-        <p className="flex items-center gap-1.5 text-[11px] font-semibold text-hot-muted"><span className="rounded-full border border-hot-foreground/15 bg-hot-surface/50 px-1.5 py-px text-[10px] font-normal">{t("Alto riesgo")}</span></p>
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold text-hot-muted"><PulseChip pulse={pulse} /></p>
         <div className="flex flex-wrap items-baseline gap-x-2">
           <p key={apr ?? "x"} className="animate-count-pop bg-[image:var(--gradient-hot)] bg-clip-text font-display text-4xl font-black leading-tight text-transparent tabular-nums">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 0 })}%`}</p>
           <p className="text-[10px] font-medium leading-tight text-hot-muted sm:text-[11px]">{y.isPending ? t("Consultando el pool…") : t("APR estimado · intereses 24 h")}</p>
@@ -59,6 +61,11 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
             <dd className="font-display text-sm font-bold tabular-nums">{v}</dd>
           </div>)}
         </dl>
+        {buys != null && sells != null && total! > 0 && <div className="mt-2 rounded-lg border border-hot-foreground/15 bg-hot-surface/60 px-2 py-1.5">
+          <p className="text-[9px] font-semibold uppercase tracking-wide text-hot-muted">{t("Pulso de mercado · 24 h")}</p>
+          <div className="mt-0.5 flex justify-between text-[11px] font-bold tabular-nums"><span className="text-hot-buy">{t("Compras")} {Math.round(buys / total! * 100)}%</span><span className="text-hot-sell">{Math.round(sells / total! * 100)}% {t("Ventas")}</span></div>
+          <div className="mt-1 flex h-1.5 overflow-hidden rounded-full bg-hot-foreground/10"><div className="bg-hot-buy transition-all" style={{ width: `${buys / total! * 100}%` }} /><div className="flex-1 bg-hot-sell" /></div>
+        </div>}
         <TokenLinks vault={vault} />
         <p className="mt-1.5 text-[10px] leading-snug text-hot-muted">{t("El valor de tu posición cambia con las compras y ventas rápidas del mercado.")}</p>
         {!hasPosition && <ol className="mt-3 hidden flex-wrap gap-1.5">{steps.map(([icon, label]) => <li key={label} className="flex items-center gap-1 rounded-full bg-hot-surface/60 px-2.5 py-1 text-[11px] font-bold">{icon} {t(label)}</li>)}</ol>}
@@ -73,15 +80,21 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
   </article>;
 }
 
+function PulseChip({ pulse }: { pulse: Pulse | null }) {
+  const t = useT();
+  const [label, cls] = pulse === "bull" ? ["🚀 Bull Run", "border-hot-buy/60 bg-hot-buy/15 text-hot-buy"] : pulse === "moderate" ? ["⚖️ Moderado", "border-hot-foreground/25 bg-hot-surface/60"] : pulse === "volatile" ? ["⚠️ Alta volatilidad", "border-hot-sell/60 bg-hot-sell/15 text-hot-sell"] : ["Alto riesgo", "border-hot-foreground/15 bg-hot-surface/50"];
+  return <span className={`rounded-full border px-1.5 py-px text-[10px] font-bold ${cls}`}>{t(label)}</span>;
+}
+
 /** Web · X · GMGN pills for the vault token; opens in a new tab. */
 export function TokenLinks({ vault }: { vault: Vault }) {
   const t = useT();
   const l = vault.links;
   if (!l) return null;
   const pill = "flex h-7 items-center justify-center gap-1 rounded-full border border-hot-foreground/15 bg-hot-surface/65 px-2 text-[11px] font-bold transition hover:bg-hot-surface active:scale-95";
-  return <div className="mt-2 grid grid-cols-3 gap-1.5">
+  return <div className="mt-2 grid grid-cols-[auto_auto_1fr] gap-1.5">
     <a href={l.web} target="_blank" rel="noopener noreferrer" className={pill}>🌐 Web</a>
     <a href={l.x} target="_blank" rel="noopener noreferrer" className={pill} aria-label="X">𝕏</a>
-    <a href={l.gmgn} target="_blank" rel="noopener noreferrer" className={pill}><img src="/gmgn-logo.png" alt="" width={16} height={16} className="h-4 w-4 rounded-sm" />{t("Ver gráfica")}</a>
+    <a href={l.gmgn} target="_blank" rel="noopener noreferrer" className={pill}><img src="/gmgn-logo.png" alt="" width={16} height={16} className="h-4 w-4 rounded-sm" /><span className="truncate">{t("Copiar Smart Money")}</span></a>
   </div>;
 }
