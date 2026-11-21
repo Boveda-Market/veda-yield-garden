@@ -22,7 +22,7 @@ import { useLocale } from "@/lib/i18n";
 import { TokenIcon } from "@/components/token-icon";
 import dctyLogo from "@/assets/dcty-logo.png";
 import trumpLogo from "@/assets/trump-logo.png";
-import { Check, CheckCircle2, ChevronDown, Copy } from "lucide-react";
+import { Check, CheckCircle2, ChevronDown, Copy, ExternalLink } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 
 const COLORS = ["bg-primary", "bg-chart-1", "bg-chart-2", "bg-chart-4", "bg-chart-3", "bg-chart-5"];
@@ -215,12 +215,19 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const [copied, setCopied] = useState(false);
   const chain = cur ? CHAIN_POOLS.find((c) => c.id === cur.id) : undefined;
   const copyMint = () => { if (!chain) return; void navigator.clipboard?.writeText(chain.mint).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }); };
+  // GMGN detailed chart with BÓVEDA referral tracking: selected vault's token, or the largest open vault on Global.
+  const gmgnId = cur?.id ?? [...open].sort((a, b) => b.value - a.value)[0]?.id;
+  const gmgnMint = CHAIN_POOLS.find((c) => c.id === gmgnId)?.mint;
+  const gmgnUrl = gmgnId && gmgnId !== "sol" && gmgnMint ? (VAULTS.find((v) => v.id === gmgnId)?.links?.gmgn ?? `https://gmgn.ai/sol/token/bvdapp_${gmgnMint}`) : null;
   const sym = cur ? (VAULTS.find((v) => v.id === cur.id)?.pair.split("/")[0] ?? "") : "";
   return <div className="relative mt-2 overflow-hidden rounded-3xl border border-border bg-card p-4 sm:p-5">
     <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full blur-3xl" style={{ background: `color-mix(in oklch, ${theme.b} 15%, transparent)` }} />
     <div className="relative flex items-center justify-between gap-2">
       <p className="text-sm font-semibold">{isPrice ? t("Mercado {s}", { s: sym }) : t("Mercado global")}</p>
-      {!week && <span className="px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">7D</span>}
+      <div className="flex items-center gap-1.5">
+        {gmgnUrl && <a href={gmgnUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full border border-border/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground"><img src="/gmgn-logo.png" alt="" width={12} height={12} className="h-3 w-3 rounded-sm opacity-80" />{t("Ver gráfica")}<ExternalLink size={10} aria-hidden /></a>}
+        {!week && <span className="px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">7D</span>}
+      </div>
     </div>
     {open.length > 2 && (() => { const opts = [{ id: "global", label: t("Global") }, ...open.map((v) => ({ id: v.id, label: `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}` }))]; const curLabel = opts.find((o) => o.id === active)?.label ?? t("Global"); return <Drawer open={pickOpen} onOpenChange={setPickOpen}><DrawerTrigger asChild><button type="button" aria-label={t("Bóvedas")} className="relative mt-2 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-background/80 py-1 pl-3 pr-1 text-xs font-bold shadow-sm transition-colors hover:border-primary active:scale-95">{curLabel}<span className="flex size-6 items-center justify-center rounded-full bg-primary/20 text-primary"><ChevronDown size={15} strokeWidth={2.75} aria-hidden /></span></button></DrawerTrigger>
       <DrawerContent><DrawerHeader><DrawerTitle>{t("Bóvedas")}</DrawerTitle></DrawerHeader><div className="grid gap-2 px-4 pb-6">{opts.map((o) => <button key={o.id} type="button" aria-pressed={active === o.id} onClick={() => { setTab(o.id); setSel(null); setPickOpen(false); }} className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium ${active === o.id ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>{o.label}{active === o.id && <CheckCircle2 size={16} />}</button>)}</div></DrawerContent></Drawer>; })()}

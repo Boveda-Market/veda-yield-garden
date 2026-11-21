@@ -498,6 +498,7 @@ export const extra: Record<string, string> = {
   "Velas": "Candles",
   "Pro": "Pro",
   "Cargando gráfica…": "Loading chart…",
+  "Ver gráfica": "View chart",
   "Sincronizando con la red…": "Syncing with the network…",
   "Sincronizando ganancias…": "Syncing earnings…",
   "Calculando en vivo…": "Calculating live…",
