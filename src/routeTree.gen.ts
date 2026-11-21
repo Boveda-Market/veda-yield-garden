@@ -47,6 +47,7 @@ import { Route as EnGuidesWhatIsUsdcRouteImport } from './routes/en/guides/what-
 import { Route as EnGuidesWithdrawToCashAppBitcoinRouteImport } from './routes/en/guides/withdraw-to-cash-app-bitcoin'
 import { Route as ApiPublicJobsCheckSystemStatusRouteImport } from './routes/api/public/jobs/check-system-status'
 import { Route as ApiPublicJobsMarketPulseRouteImport } from './routes/api/public/jobs/market-pulse'
+import { Route as ApiPublicJobsPromoPostRouteImport } from './routes/api/public/jobs/promo-post'
 import { Route as ApiPublicJobsWeeklySummaryRouteImport } from './routes/api/public/jobs/weekly-summary'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -253,6 +254,11 @@ const ApiPublicJobsMarketPulseRoute =
     path: '/api/public/jobs/market-pulse',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsPromoPostRoute = ApiPublicJobsPromoPostRouteImport.update({
+  id: '/api/public/jobs/promo-post',
+  path: '/api/public/jobs/promo-post',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicJobsWeeklySummaryRoute =
   ApiPublicJobsWeeklySummaryRouteImport.update({
     id: '/api/public/jobs/weekly-summary',
@@ -321,6 +327,7 @@ export interface FileRoutesByFullPath {
   '/en/guides/': typeof EnGuidesIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/jobs/market-pulse': typeof ApiPublicJobsMarketPulseRoute
+  '/api/public/jobs/promo-post': typeof ApiPublicJobsPromoPostRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -366,6 +373,7 @@ export interface FileRoutesByTo {
   '/en/guides': typeof EnGuidesIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/jobs/market-pulse': typeof ApiPublicJobsMarketPulseRoute
+  '/api/public/jobs/promo-post': typeof ApiPublicJobsPromoPostRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -412,6 +420,7 @@ export interface FileRoutesById {
   '/en/guides/': typeof EnGuidesIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/jobs/market-pulse': typeof ApiPublicJobsMarketPulseRoute
+  '/api/public/jobs/promo-post': typeof ApiPublicJobsPromoPostRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -459,6 +468,7 @@ export interface FileRouteTypes {
     | '/en/guides/'
     | '/api/public/jobs/check-system-status'
     | '/api/public/jobs/market-pulse'
+    | '/api/public/jobs/promo-post'
     | '/api/public/jobs/weekly-summary'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
@@ -504,6 +514,7 @@ export interface FileRouteTypes {
     | '/en/guides'
     | '/api/public/jobs/check-system-status'
     | '/api/public/jobs/market-pulse'
+    | '/api/public/jobs/promo-post'
     | '/api/public/jobs/weekly-summary'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
@@ -549,6 +560,7 @@ export interface FileRouteTypes {
     | '/en/guides/'
     | '/api/public/jobs/check-system-status'
     | '/api/public/jobs/market-pulse'
+    | '/api/public/jobs/promo-post'
     | '/api/public/jobs/weekly-summary'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
@@ -595,6 +607,7 @@ export interface RootRouteChildren {
   EnGuidesIndexRoute: typeof EnGuidesIndexRoute
   ApiPublicJobsCheckSystemStatusRoute: typeof ApiPublicJobsCheckSystemStatusRoute
   ApiPublicJobsMarketPulseRoute: typeof ApiPublicJobsMarketPulseRoute
+  ApiPublicJobsPromoPostRoute: typeof ApiPublicJobsPromoPostRoute
   ApiPublicJobsWeeklySummaryRoute: typeof ApiPublicJobsWeeklySummaryRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -870,6 +883,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsMarketPulseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/promo-post': {
+      id: '/api/public/jobs/promo-post'
+      path: '/api/public/jobs/promo-post'
+      fullPath: '/api/public/jobs/promo-post'
+      preLoaderRoute: typeof ApiPublicJobsPromoPostRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/weekly-summary': {
       id: '/api/public/jobs/weekly-summary'
       path: '/api/public/jobs/weekly-summary'
@@ -947,6 +967,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnGuidesIndexRoute: EnGuidesIndexRoute,
   ApiPublicJobsCheckSystemStatusRoute: ApiPublicJobsCheckSystemStatusRoute,
   ApiPublicJobsMarketPulseRoute: ApiPublicJobsMarketPulseRoute,
+  ApiPublicJobsPromoPostRoute: ApiPublicJobsPromoPostRoute,
   ApiPublicJobsWeeklySummaryRoute: ApiPublicJobsWeeklySummaryRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
