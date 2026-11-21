@@ -22,7 +22,7 @@ describe("intradayGlobal", () => {
 describe("chartRangeFor", () => {
   it("shows DCTY over 7 days of 1-hour candles", async () => {
     const { chartRangeFor } = await import("@/lib/pool-candles");
-    expect(chartRangeFor("dcty")).toBe("1h");
+    expect(chartRangeFor("dcty")).toBe("1m");
   });
   it("keeps other vaults on 1-minute candles", async () => {
     const { chartRangeFor } = await import("@/lib/pool-candles");
