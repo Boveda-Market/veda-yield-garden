@@ -200,8 +200,23 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
       </defs>
       {cmax > cmin && <><text x={R} y={CT - 4} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{cap(cmax)}</text><text x={R} y={CB + 12} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{cap(cmin)}</text></>}
-      {!drawing && (live || n > 1) && cPts.length >= 2 && <><path d={cLine} fill="none" stroke={`url(#h${gid})`} strokeWidth="2" strokeLinejoin="miter" strokeLinecap="butt" style={{ filter: `drop-shadow(0 0 4px ${theme.b})` }} />
-      <circle cx={cEnd.x} cy={cEnd.y} r="5.5" fill="var(--background)" stroke={theme.b} strokeWidth="3" /></>}
+      {!drawing && (live || n > 1) && cPts.length >= 2 && (() => {
+        // GMGN look: green above the window's opening level, red below, soft area fill, dashed current-level line with badge.
+        const refY = cPts[0]!.y, off = Math.min(1, Math.max(0, (refY - CT) / Math.max(CB - CT, 1))), up = cEnd.y <= refY, endC = up ? "#10B981" : "#EF4444";
+        const label = cap(ms[ms.length - 1] ?? 0), bw = label.length * 6 + 10;
+        return <>
+          <defs>
+            <linearGradient id={`s${gid}`} gradientUnits="userSpaceOnUse" x1="0" y1={CT} x2="0" y2={CB}><stop offset={off} stopColor="#10B981" /><stop offset={off} stopColor="#EF4444" /></linearGradient>
+            <linearGradient id={`f${gid}`} gradientUnits="userSpaceOnUse" x1="0" y1={CT} x2="0" y2={CB}><stop offset="0" stopColor="#10B981" stopOpacity="0.22" /><stop offset={off} stopColor="#10B981" stopOpacity="0.03" /><stop offset={off} stopColor="#EF4444" stopOpacity="0.03" /><stop offset="1" stopColor="#EF4444" stopOpacity="0.22" /></linearGradient>
+          </defs>
+          <path d={`${cLine} L${cEnd.x.toFixed(1)},${refY.toFixed(1)} L${cPts[0]!.x.toFixed(1)},${refY.toFixed(1)} Z`} fill={`url(#f${gid})`} />
+          <line x1={L} y1={refY} x2={R} y2={refY} stroke="var(--muted-foreground)" strokeOpacity="0.35" strokeDasharray="2 4" />
+          <line x1={L} y1={cEnd.y} x2={R} y2={cEnd.y} stroke={endC} strokeOpacity="0.7" strokeDasharray="2 3" />
+          <path d={cLine} fill="none" stroke={`url(#s${gid})`} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+          <circle cx={cEnd.x} cy={cEnd.y} r="7" fill={endC} opacity="0.25" /><circle cx={cEnd.x} cy={cEnd.y} r="3.5" fill={endC} />
+          <rect x={R - bw} y={cEnd.y - 9} width={bw} height="18" rx="4" fill={endC} /><text x={R - bw / 2} y={cEnd.y + 4} textAnchor="middle" fontSize="10" fontWeight="700" fill="#fff">{label}</text>
+        </>;
+      })()}
     </svg>
     {drawing && <div role="status" className="pointer-events-none absolute inset-x-0 flex flex-col items-center justify-center gap-2 text-xs text-muted-foreground" style={{ marginTop: "-8.5rem" }}><Loader2 className="size-7 animate-spin text-primary" aria-hidden />{t("Cargando gráfica…")}</div>}
     {!drawing && !live && n <= 1 && <div className="pointer-events-none absolute inset-x-0 flex justify-center text-xs text-muted-foreground" style={{ marginTop: "-7rem" }}>{t("Gráfica no disponible por ahora")}</div>}
