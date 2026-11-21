@@ -2,6 +2,9 @@ import { getPoolCandles } from "./pool-candles.functions";
 
 export type PoolCandle = { t: number; c: number; v: number };
 export type CandleRange = "1m" | "1h" | "4h" | "1d";
+/** Thinly traded (newer) vaults look flat over 5 h of 1-minute candles, so their charts show 7 days of 1-hour candles instead. */
+const WEEK_CHART_VAULTS = new Set(["dcty"]);
+export const chartRangeFor = (vaultId: string | undefined): "1m" | "1h" => vaultId && WEEK_CHART_VAULTS.has(vaultId) ? "1h" : "1m";
 
 /** Chart resolutions: 1-minute for 1 h, 5-minute for 24 h (one fast request each), 1-hour for 7 d, 4-hour for 30 d (trading 1H/4H candles). */
 export const RANGE_RES = {

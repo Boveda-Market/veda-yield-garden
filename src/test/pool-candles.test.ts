@@ -18,3 +18,15 @@ describe("intradayGlobal", () => {
     expect(out).toEqual([{ t: 1, v: 100 }, { t: 2, v: 150 }]);
   });
 });
+
+describe("chartRangeFor", () => {
+  it("shows DCTY over 7 days of 1-hour candles", async () => {
+    const { chartRangeFor } = await import("@/lib/pool-candles");
+    expect(chartRangeFor("dcty")).toBe("1h");
+  });
+  it("keeps other vaults on 1-minute candles", async () => {
+    const { chartRangeFor } = await import("@/lib/pool-candles");
+    expect(chartRangeFor("gta6")).toBe("1m");
+    expect(chartRangeFor("trump")).toBe("1m");
+  });
+});
