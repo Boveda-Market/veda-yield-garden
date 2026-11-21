@@ -22,8 +22,8 @@ export async function fetchRangeCandles(pool: string, range: ChartRange, _signal
   // Full series are kept on the device; a short busy-source fallback never replaces a good saved line.
   if (fresh.length > MIN_DENSE) { saveCachedCandles(pool, range, fresh); return fresh; }
   const old = readCachedCandles(pool, range); if (old) return old;
-  // Sparse busy-source answer: fail so the query retries shortly instead of drawing a few straight segments.
-  throw new Error("sparse");
+  // Busy source: draw the few real checkpoints now instead of hanging on «Cargando»; the next refresh brings the full series.
+  return fresh;
 }
 
 const CACHE_KEY = (pool: string, range: string) => `boveda:candles:${range}:${pool}`;

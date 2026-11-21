@@ -22,7 +22,7 @@ const cache = new Map<string, Entry>();
 const inflight = new Map<string, Promise<RawCandle[]>>();
 // One upstream call at a time with a small gap, so several vaults opening together never trip the public rate limit.
 let queue: Promise<unknown> = Promise.resolve();
-const queued = <T>(fn: () => Promise<T>) => { const run = queue.then(fn, fn); queue = run.then(() => new Promise((r) => setTimeout(r, 250)), () => new Promise((r) => setTimeout(r, 250))); return run; };
+const queued = <T>(fn: () => Promise<T>) => { const run = queue.then(fn, fn); queue = run.then(() => new Promise((r) => setTimeout(r, 1100)), () => new Promise((r) => setTimeout(r, 1100))); return run; };
 
 /** Instant fallback from DexScreener's official price-change checkpoints (24 h, 6 h, 1 h, 5 min, now) when the candle source is busy. */
 async function dexFallback(pool: string): Promise<RawCandle[]> {
