@@ -95,7 +95,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const gid = useId().replace(/:/g, "");
   const hydrated = useHydrated();
   const [sel, setSel] = useState<number | null>(null);
-  const n0: 0 | 1 | 7 | 30 | 365 | 9999 = 7; // period hidden for now: fixed 7D (1-h candles); 30D (4-h), 1Y and Todo (1-day) stay available in code
+  const n0: number = 7; // period hidden for now: fixed 7D (1-h candles); 30D (4-h), 1Y and Todo (1-day) stay available in code
   const [tabId, setTab] = useState<string>("global");
   const [pickOpen, setPickOpen] = useState(false);
   // Pinch zoom: two fingers spread the time axis (1–6×), one finger pans while zoomed.
