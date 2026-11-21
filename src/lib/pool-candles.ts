@@ -3,9 +3,9 @@ import { getPoolCandles } from "./pool-candles.functions";
 export type PoolCandle = { t: number; c: number; v: number };
 export type CandleRange = "24h" | "7d" | "30d";
 
-/** Chart resolutions (reference trend, not live): 3-minute for 24 h (one fast request), 15-minute for 7 d, 1-hour for 30 d. */
+/** Chart resolutions (reference trend, not live): 5-minute for 24 h (one fast request), 15-minute for 7 d, 1-hour for 30 d. */
 export const RANGE_RES = {
-  "24h": { tf: "minute", agg: 3, count: 480, ms: 86_400_000 },
+  "24h": { tf: "minute", agg: 5, count: 288, ms: 86_400_000 },
   "7d": { tf: "minute", agg: 15, count: 672, ms: 7 * 86_400_000 },
   "30d": { tf: "hour", agg: 1, count: 720, ms: 30 * 86_400_000 },
 } as const;
@@ -37,7 +37,7 @@ function saveCachedCandles(pool: string, range: ChartRange, list: PoolCandle[]) 
   try { localStorage.setItem(CACHE_KEY(pool, range), JSON.stringify(list)); } catch { /* storage full */ }
 }
 
-/** Candles for «Rendimiento y Mercado»: 3-minute for 24 h (one fast request), 15-minute for 7 d. */
+/** Candles for «Rendimiento y Mercado»: 5-minute for 24 h (one fast request), 15-minute for 7 d. */
 export function fetchPoolCandles(pool: string, range: CandleRange, signal?: AbortSignal): Promise<PoolCandle[]> {
   return fetchRangeCandles(pool, range, signal);
 }
