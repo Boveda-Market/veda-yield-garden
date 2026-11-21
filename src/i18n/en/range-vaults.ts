@@ -94,6 +94,7 @@ export const rangeVaults: Record<string, string> = {
   "Market cap {s}": "{s} market cap",
   "El market cap de {s} puede subir o bajar; tus ganancias cosechadas solo suman.": "{s}'s market cap can go up or down; your harvested earnings only add up.",
   "El precio de {s} puede subir o bajar; tus ganancias cosechadas solo suman.": "The {s} price can go up or down; your harvested earnings only add up.",
+  "Semanal": "Weekly", "Mensual": "Monthly", "Anual": "Yearly", "Histórico completo": "Full history", "Período": "Period",
   "Mercado global": "Global market",
   "Market cap global": "Global market cap",
   "Mercado global frente a ganancias cosechadas": "Global market vs. harvested earnings",

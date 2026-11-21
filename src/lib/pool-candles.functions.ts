@@ -6,7 +6,7 @@ const SPEC = {
   "1m": { tf: "minute", agg: 1, count: 300, ttl: 30_000, be: "1m", secs: 300 * 60 },
   "1h": { tf: "hour", agg: 1, count: 168, ttl: 60_000, be: "1H", secs: 168 * 3600 },
   "4h": { tf: "hour", agg: 4, count: 180, ttl: 5 * 60_000, be: "4H", secs: 180 * 4 * 3600 },
-  "1d": { tf: "day", agg: 1, count: 90, ttl: 10 * 60_000, be: "1D", secs: 90 * 86400 },
+  "1d": { tf: "day", agg: 1, count: 1000, ttl: 10 * 60_000, be: "1D", secs: 1000 * 86400 },
   day: { tf: "day", agg: 1, count: 90, ttl: 10 * 60_000, be: "1D", secs: 90 * 86400 },
 } as const;
 

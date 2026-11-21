@@ -11,7 +11,7 @@ export const RANGE_RES = {
   "1m": { tf: "minute", agg: 1, count: 300, ms: 5 * 3_600_000 },
   "1h": { tf: "hour", agg: 1, count: 168, ms: 7 * 86_400_000 },
   "4h": { tf: "hour", agg: 4, count: 180, ms: 30 * 86_400_000 },
-  "1d": { tf: "day", agg: 1, count: 90, ms: 90 * 86_400_000 },
+  "1d": { tf: "day", agg: 1, count: 1000, ms: 1000 * 86_400_000 },
 } as const;
 export type ChartRange = keyof typeof RANGE_RES;
 

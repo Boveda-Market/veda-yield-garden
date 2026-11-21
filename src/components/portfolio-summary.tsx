@@ -95,7 +95,8 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const gid = useId().replace(/:/g, "");
   const hydrated = useHydrated();
   const [sel, setSel] = useState<number | null>(null);
-  const [n0, setN] = useState<0 | 1 | 7 | 30 | 90>(7); // only the 7-day view (1-hour candles) is offered
+  const [n0, setN] = useState<0 | 1 | 7 | 30 | 365 | 9999>(7); // period picker: 7D (1-h), 30D (4-h), 1Y and Todo (1-day; 9999 = full history)
+  const [perOpen, setPerOpen] = useState(false);
   const [tabId, setTab] = useState<string>("global");
   const [pickOpen, setPickOpen] = useState(false);
   // Pinch zoom: two fingers spread the time axis (1–6×), one finger pans while zoomed.
@@ -140,8 +141,8 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   // Thinly traded vaults (chartRangeFor) show 7 days of 1-hour candles on their own tab.
   const week = active !== "global" && chartRangeFor(active) === "1h";
   const n = week ? 7 : n0;
-  const dn = n <= 1 ? 2 : n;
-  const range: ChartRange = n === 90 ? "1d" : n === 30 ? "4h" : n === 0 ? "1m" : "1h";
+  const dn = n <= 1 ? 2 : Math.min(n, 365);
+  const range: ChartRange = n >= 365 ? "1d" : n === 30 ? "4h" : n === 0 ? "1m" : "1h";
   const candleQ = useQueries({ queries: open.map((v) => ({ queryKey: ["pool-daily", v.pool, 90], queryFn: ({ signal }: { signal: AbortSignal }) => fetchDailyCloses(v.pool, 91, signal), staleTime: 10 * 60_000, retry: 1 })) });
   const introQ = useQueries({ queries: open.map((v) => ({ queryKey: ["pool-range", v.pool, range], queryFn: ({ signal }: { signal: AbortSignal }) => fetchRangeCandles(v.pool, range, signal), ...(hydrated && readCachedCandles(v.pool, range) ? { placeholderData: readCachedCandles(v.pool, range)! } : {}), staleTime: n <= 1 ? 30_000 : 5 * 60_000, refetchInterval: n <= 1 ? 30_000 : 5 * 60_000, retry: 1, retryDelay: 1500 })) });
   const statsQ = useQueries({ queries: open.map((v) => ({ queryKey: ["dexscreener-pool-stats", v.pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(v.pool, signal), staleTime: 60_000, retry: 1 })) });
@@ -185,7 +186,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const ePts = earn.map((v, i) => ({ x: x(i), y: EB - (v / emax) * (EB - ET) }));
   const angular = (pts: { x: number; y: number }[]) => pts.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
   // Market line: 1-minute (1 h), 5-minute (24 h), 1-hour (7 d) or 4-hour (30 d) closes placed by time with straight segments, so every real spike and drop shows; Global sums each vault moved by its own price.
-  const now = Date.now(), wBase = n === 0 ? now - 5 * 3_600_000 : n === 1 ? now - 86_400_000 : days[0]!.start;
+  const now = Date.now(), wBase = n === 0 ? now - 5 * 3_600_000 : n === 1 ? now - 86_400_000 : n === 9999 ? 0 : days[0]!.start;
   const inWin = (i: number) => (introQ[i]?.data ?? []).filter((c) => c.t >= wBase);
   const mSeries = isPrice ? inWin(curIdx).map((c) => ({ t: c.t, v: c.c * (supply(curIdx) ?? 1) })) : intradayGlobal(open.map((v, i) => ({ value: capW[i]!, candles: inWin(i) })));
   const live = mSeries.length >= 2;
@@ -218,6 +219,8 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full blur-3xl" style={{ background: `color-mix(in oklch, ${theme.b} 15%, transparent)` }} />
     <div className="relative flex items-center justify-between gap-2">
       <p className="text-sm font-semibold">{isPrice ? t("Mercado {s}", { s: sym }) : t("Mercado global")}</p>
+      {!week && (() => { const per = [{ v: 7, l: "7D", d: t("Semanal") }, { v: 30, l: "30D", d: t("Mensual") }, { v: 365, l: "1A", d: t("Anual") }, { v: 9999, l: t("Todo"), d: t("Histórico completo") }] as const; const curP = per.find((o) => o.v === n0) ?? per[0]; return <Drawer open={perOpen} onOpenChange={setPerOpen}><DrawerTrigger asChild><button type="button" aria-label={t("Período")} className="inline-flex items-center gap-1 rounded-xl border border-border bg-muted/60 px-2.5 py-1 text-xs font-bold transition active:scale-95">{curP.l}<ChevronDown size={14} strokeWidth={2.75} aria-hidden /></button></DrawerTrigger>
+        <DrawerContent><DrawerHeader><DrawerTitle>{t("Período")}</DrawerTitle></DrawerHeader><div className="grid gap-2 px-4 pb-6">{per.map((o) => <button key={o.v} type="button" aria-pressed={n0 === o.v} onClick={() => { setN(o.v); setSel(null); setPerOpen(false); }} className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium ${n0 === o.v ? "border-primary bg-primary/10 text-primary" : "border-border"}`}><span><b>{o.l}</b> · {o.d}</span>{n0 === o.v && <CheckCircle2 size={16} />}</button>)}</div></DrawerContent></Drawer>; })()}
     </div>
     {open.length > 2 && (() => { const opts = [{ id: "global", label: t("Global") }, ...open.map((v) => ({ id: v.id, label: `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}` }))]; const curLabel = opts.find((o) => o.id === active)?.label ?? t("Global"); return <Drawer open={pickOpen} onOpenChange={setPickOpen}><DrawerTrigger asChild><button type="button" aria-label={t("Bóvedas")} className="relative mt-2 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-background/80 py-1 pl-3 pr-1 text-xs font-bold shadow-sm transition-colors hover:border-primary active:scale-95">{curLabel}<span className="flex size-6 items-center justify-center rounded-full bg-primary/20 text-primary"><ChevronDown size={15} strokeWidth={2.75} aria-hidden /></span></button></DrawerTrigger>
       <DrawerContent><DrawerHeader><DrawerTitle>{t("Bóvedas")}</DrawerTitle></DrawerHeader><div className="grid gap-2 px-4 pb-6">{opts.map((o) => <button key={o.id} type="button" aria-pressed={active === o.id} onClick={() => { setTab(o.id); setSel(null); setPickOpen(false); }} className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium ${active === o.id ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>{o.label}{active === o.id && <CheckCircle2 size={16} />}</button>)}</div></DrawerContent></Drawer>; })()}
@@ -259,6 +262,6 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     </div>
     {drawing && <div role="status" className="pointer-events-none absolute inset-x-0 -mt-[6.5rem] flex flex-col sm:-mt-[8.5rem] items-center justify-center gap-2 text-xs text-muted-foreground"><Loader2 className="size-7 animate-spin text-primary" aria-hidden />{t("Cargando gráfica…")}</div>}
     {!drawing && !live && n <= 1 && <div className="pointer-events-none absolute inset-x-0 -mt-[5.5rem] flex justify-center text-xs text-muted-foreground sm:-mt-28">{t("Gráfica no disponible por ahora")}</div>}
-    {n > 1 ? <div className="relative mt-1 flex justify-between text-[10px] capitalize text-muted-foreground">{[0, 1, 2, 3, 4].map((k) => { const d = new Date((live ? w0 : wBase) + k * ((now - (live ? w0 : wBase)) / 4)); return <span key={k} className="text-center leading-tight">{k === 4 ? t("Hoy") : d.toLocaleDateString(locale, { weekday: "short" })}<br />{d.toLocaleDateString(locale, { day: "numeric", month: "short" })}</span>; })}</div> : <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{n === 0 ? t("Hace 5 h") : t("Hace 24 h")}</span><span>{t("Ahora")}</span></div>}
+    {n > 1 ? <div className="relative mt-1 flex justify-between text-[10px] capitalize text-muted-foreground">{[0, 1, 2, 3, 4].map((k) => { const b = live ? w0 : wBase, d = new Date(b + k * ((now - b) / 4)), span = now - b; const lbl = k === 4 ? t("Hoy") : span <= 40 * 86_400_000 ? d.toLocaleDateString(locale, { day: "numeric", month: "short" }) : span > 730 * 86_400_000 ? String(d.getFullYear()) : k === 0 ? d.toLocaleDateString(locale, { month: "short", year: "2-digit" }) : d.toLocaleDateString(locale, { month: "short" }); return <span key={k} className="text-center leading-tight">{lbl}</span>; })}</div> : <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{n === 0 ? t("Hace 5 h") : t("Hace 24 h")}</span><span>{t("Ahora")}</span></div>}
       </div>;
 }
