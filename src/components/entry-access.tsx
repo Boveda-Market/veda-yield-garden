@@ -12,11 +12,22 @@ import { CoinbaseNote } from "./coinbase-note";
 import { GoogleButton } from "./google-button";
 import { BootSplash } from "./boot-splash";
 import { deviceHasPasskey, rememberPasskey } from "@/lib/passkey-device";
+import { useServerFn } from "@tanstack/react-start";
+import { getRealWallet } from "@/lib/solana.functions";
+import { readCache } from "@/lib/cached-query";
+import type { RealWalletResult } from "@/lib/solana-data";
+
+/** After sign-in: people with open vaults land on Mi Portafolio, everyone else on Billetera. */
+export function landingFor(r: RealWalletResult | undefined | null): "/wallet" | "/portfolio" {
+  return r?.success && r.data.positions.length > 0 ? "/portfolio" : "/wallet";
+}
+const userChoseHome = () => { try { return localStorage.getItem("boveda:home") !== null; } catch { return false; } };
 
 function EntryButtons() {
   const t = useT();
   const [home] = useHomePath();
   const session = useBovedaSession();
+  const readWallet = useServerFn(getRealWallet);
   const [signup, setSignup] = useState(false);
   const [bio, setBio] = useState(false);
   useEffect(() => { if (deviceHasPasskey()) setBio(true); }, []);
@@ -38,14 +49,31 @@ function EntryButtons() {
     if (isHeroReview()) return;
     // Signed in: go straight to the screen they wanted (or their home), no extra "continue" tap.
     let target: string = home;
-    try { const saved = sessionStorage.getItem("boveda:after-login"); if (saved && saved.startsWith("/") && !saved.startsWith("//")) target = saved; sessionStorage.removeItem("boveda:after-login"); } catch { /* ignore */ }
+    let cancelled = false;
+    let id: ReturnType<typeof setTimeout> | undefined;
+    let explicit = userChoseHome();
+    try { const saved = sessionStorage.getItem("boveda:after-login"); if (saved && saved.startsWith("/") && !saved.startsWith("//")) { target = saved; explicit = true; } sessionStorage.removeItem("boveda:after-login"); } catch { /* ignore */ }
     // Never land back on the home page (that left the loading screen waiting forever after switching accounts).
-    if (target === "/" || target.startsWith("/#") || target.startsWith("/?")) target = home;
+    if (target === "/" || target.startsWith("/#") || target.startsWith("/?")) { target = home; explicit = userChoseHome(); }
     try { sessionStorage.setItem("boveda:auth-pending", String(Date.now())); } catch { /* ignore */ }
-    void navigate({ to: target, replace: true });
-    // Safety net: if the screen hasn't changed shortly after, do a clean full load of the target (what "Reintentar" did).
-    const id = setTimeout(() => { if (window.location.pathname === "/") window.location.replace(target); }, 2500);
-    return () => clearTimeout(id);
+    const go = (to: string) => {
+      if (cancelled) return;
+      void navigate({ to, replace: true });
+      // Safety net: if the screen hasn't changed shortly after, do a clean full load of the target (what "Reintentar" did).
+      id = setTimeout(() => { if (window.location.pathname === "/") window.location.replace(to); }, 2500);
+    };
+    const wallet = session.walletAddress;
+    if (explicit || !wallet) { go(explicit ? target : "/wallet"); }
+    else {
+      const cached = readCache<RealWalletResult>(`vaults:${wallet}`);
+      if (cached?.success) go(landingFor(cached));
+      else {
+        const timeout = new Promise<null>((r) => setTimeout(() => r(null), 1500));
+        void Promise.race([readWallet({ data: { wallet } }).catch(() => null), timeout]).then((r) => go(landingFor(r)));
+      }
+    }
+    return () => { cancelled = true; if (id) clearTimeout(id); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.ready, session.authenticated, home, navigate]);
   // Returning visitors: cover the whole startup (secure access → redirect to their home) with one loading screen.
   if (wasReturning.current && (!(session.sessionKnown || session.ready) || session.authenticated)) return <BootSplash />;
