@@ -50,8 +50,8 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
   const label = "flex items-center gap-1.5 text-xs text-muted-foreground";
   const loading = history.query.isFetching ? t("Calculando…") : "—";
 
-  return <section id="rendimiento" aria-label={t("Rendimiento de tu portafolio")} className="scroll-mt-20 py-8">
-    <h2 className="flex items-center gap-2 font-display text-lg font-semibold"><TrendingUp size={18} className="text-primary" />{t("Mi rendimiento")}</h2>
+  return <section id="rendimiento" aria-label={t("Rendimiento de tu portafolio")} className="scroll-mt-20 pb-8 pt-3">
+    <h2 className="flex items-center gap-2 font-display text-base font-semibold sm:text-lg"><TrendingUp size={18} className="text-primary" />{t("Mi rendimiento")}</h2>
     <WeeklyChart records={history.records} poolPrices={history.poolPrices} money={money} vaults={byVault} />
 
     <div className={`${tile} mt-4`}>
@@ -176,25 +176,25 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const vinfo = cur ? VAULTS.find((v) => v.id === cur.id) : undefined;
   const copyMint = () => { if (!chain) return; void navigator.clipboard?.writeText(chain.mint).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }); };
   const sym = cur ? (VAULTS.find((v) => v.id === cur.id)?.pair.split("/")[0] ?? "") : "";
-  return <div className="relative mt-3 overflow-hidden rounded-3xl border border-border bg-card p-5">
+  return <div className="relative mt-2 overflow-hidden rounded-3xl border border-border bg-card p-4 sm:p-5">
     <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full blur-3xl" style={{ background: `color-mix(in oklch, ${theme.b} 15%, transparent)` }} />
     <div className="relative flex items-center justify-between gap-2">
       <p className="text-sm font-semibold">{isPrice ? t("Mercado {s}", { s: sym }) : <>{t("Mercado global")}<span className="block text-xs font-normal text-muted-foreground">{t("Todas las bóvedas abiertas")}</span></>}</p>
       <div className="inline-flex items-center rounded-xl border border-border bg-muted/60 p-1 text-xs font-medium">{tab(0, "1M")}</div>
     </div>
-    {open.length > 2 && (() => { const opts = [{ id: "global", label: t("Global") }, ...open.map((v) => ({ id: v.id, label: `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}` }))]; const curLabel = opts.find((o) => o.id === active)?.label ?? t("Global"); return <Drawer open={pickOpen} onOpenChange={setPickOpen}><DrawerTrigger asChild><button type="button" aria-label={t("Bóvedas")} className="relative mt-3 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-background/80 py-1 pl-3 pr-1 text-xs font-bold shadow-sm transition-colors hover:border-primary active:scale-95">{curLabel}<span className="flex size-6 items-center justify-center rounded-full bg-primary/20 text-primary"><ChevronDown size={15} strokeWidth={2.75} aria-hidden /></span></button></DrawerTrigger>
+    {open.length > 2 && (() => { const opts = [{ id: "global", label: t("Global") }, ...open.map((v) => ({ id: v.id, label: `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}` }))]; const curLabel = opts.find((o) => o.id === active)?.label ?? t("Global"); return <Drawer open={pickOpen} onOpenChange={setPickOpen}><DrawerTrigger asChild><button type="button" aria-label={t("Bóvedas")} className="relative mt-2 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-background/80 py-1 pl-3 pr-1 text-xs font-bold shadow-sm transition-colors hover:border-primary active:scale-95">{curLabel}<span className="flex size-6 items-center justify-center rounded-full bg-primary/20 text-primary"><ChevronDown size={15} strokeWidth={2.75} aria-hidden /></span></button></DrawerTrigger>
       <DrawerContent><DrawerHeader><DrawerTitle>{t("Bóvedas")}</DrawerTitle></DrawerHeader><div className="grid gap-2 px-4 pb-6">{opts.map((o) => <button key={o.id} type="button" aria-pressed={active === o.id} onClick={() => { setTab(o.id); setSel(null); setPickOpen(false); }} className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium ${active === o.id ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>{o.label}{active === o.id && <CheckCircle2 size={16} />}</button>)}</div></DrawerContent></Drawer>; })()}
-    {open.length > 0 && open.length <= 2 && <div role="tablist" aria-label={t("Bóvedas")} className="relative mt-3 flex gap-2 overflow-x-auto pb-1">{vtab("global", t("Global"))}{open.map((v) => vtab(v.id, `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}`))}</div>}
-    {cur && chain && <div className="relative mt-3 flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-muted/40 p-2.5">
-      {cur.id === "trump" ? <img src={trumpLogo} alt="TRUMP" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" /> : cur.id === "dcty" ? <img src={dctyLogo} alt="DCTY" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" /> : <TokenIcon symbol={chain.symbol} size={36} />}
+    {open.length > 0 && open.length <= 2 && <div role="tablist" aria-label={t("Bóvedas")} className="relative mt-2 flex gap-2 overflow-x-auto pb-1">{vtab("global", t("Global"))}{open.map((v) => vtab(v.id, `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}`))}</div>}
+    {cur && chain && <div className="relative mt-2 flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-muted/40 p-2">
+      {cur.id === "trump" ? <img src={trumpLogo} alt="TRUMP" width={32} height={32} className="h-8 w-8 shrink-0 rounded-full object-cover" /> : cur.id === "dcty" ? <img src={dctyLogo} alt="DCTY" width={32} height={32} className="h-8 w-8 shrink-0 rounded-full object-cover" /> : <TokenIcon symbol={chain.symbol} size={32} />}
       <div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-bold">{chain.symbol} <span className="font-normal text-muted-foreground">/ USDC</span></p>
         <button type="button" onClick={copyMint} aria-label={t("Copiar contrato")} className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-background/70 px-2 py-0.5 font-mono text-[11px] text-muted-foreground hover:text-foreground">{copied ? <><Check size={11} className="text-primary" />{t("Copiado")}</> : <><Copy size={11} />{chain.mint.slice(0, 4)}…{chain.mint.slice(-4)}</>}</button></div>
       {vinfo?.links && <a href={vinfo.links.gmgn} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-bold"><img src="/gmgn-logo.png" alt="" width={16} height={16} className="h-4 w-4 rounded-sm" />{t("Ver gráfica")}</a>}
     </div>}
     <div className="relative mt-1">
-      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Market cap {s}", { s: sym }) : t("Market cap global")}</p><p className={`font-display text-2xl font-extrabold tabular-nums ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !liveCap ? "…" : mText}</p>{(ms[0] ?? 0) > 0 && <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${pct >= 0 ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{pct >= 0 ? "+" : ""}{pct.toFixed(1)}%</span>}</div>
+      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Market cap {s}", { s: sym }) : t("Market cap global")}</p><p className="flex items-center gap-2"><span className={`font-display text-xl font-extrabold tabular-nums sm:text-2xl ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !liveCap ? "…" : mText}</span>{(ms[0] ?? 0) > 0 && <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${pct >= 0 ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{pct >= 0 ? "+" : ""}{pct.toFixed(1)}%</span>}</p></div>
     </div>
-    <svg viewBox={`0 0 ${W} ${H}`} className={`relative mt-3 w-full overflow-visible h-52`} role="img" aria-label={t("Mercado global frente a ganancias cosechadas")}>
+    <svg viewBox={`0 0 ${W} ${H}`} className="relative mt-2 h-40 w-full overflow-visible sm:h-52" role="img" aria-label={t("Mercado global frente a ganancias cosechadas")}>
       <defs>
         <linearGradient id={`h${gid}`} x1="0" x2="1"><stop offset="0%" stopColor={theme.a} /><stop offset="100%" stopColor={theme.b} /></linearGradient>
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
@@ -218,8 +218,8 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
         </>;
       })()}
     </svg>
-    {drawing && <div role="status" className="pointer-events-none absolute inset-x-0 flex flex-col items-center justify-center gap-2 text-xs text-muted-foreground" style={{ marginTop: "-8.5rem" }}><Loader2 className="size-7 animate-spin text-primary" aria-hidden />{t("Cargando gráfica…")}</div>}
-    {!drawing && !live && n <= 1 && <div className="pointer-events-none absolute inset-x-0 flex justify-center text-xs text-muted-foreground" style={{ marginTop: "-7rem" }}>{t("Gráfica no disponible por ahora")}</div>}
+    {drawing && <div role="status" className="pointer-events-none absolute inset-x-0 -mt-[6.5rem] flex flex-col sm:-mt-[8.5rem] items-center justify-center gap-2 text-xs text-muted-foreground"><Loader2 className="size-7 animate-spin text-primary" aria-hidden />{t("Cargando gráfica…")}</div>}
+    {!drawing && !live && n <= 1 && <div className="pointer-events-none absolute inset-x-0 -mt-[5.5rem] flex justify-center text-xs text-muted-foreground sm:-mt-28">{t("Gráfica no disponible por ahora")}</div>}
     <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{n === 0 ? t("Hace 5 h") : n === 1 ? t("Hace 24 h") : young ? t("Desde lanzamiento") : new Date(days[0]!.start).toLocaleDateString(locale, { day: "numeric", month: "short" })}</span><span>{n <= 1 ? t("Ahora") : t("Hoy")}</span></div>
       </div>;
 }

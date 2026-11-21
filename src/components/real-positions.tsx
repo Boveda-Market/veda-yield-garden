@@ -90,14 +90,14 @@ export function VaultMiniCards({ positions, onOpen }: { positions: ChainPosition
   const { rows } = usePositionRows(positions);
   if (rows.length === 0) return null;
   const go = (address: string) => { const el = document.getElementById(`pos-${address}`); if (!el) return; el.scrollIntoView({ behavior: "smooth", block: "start" }); el.classList.add("ring-4", "ring-primary"); window.setTimeout(() => el.classList.remove("ring-4", "ring-primary"), 1400); };
-  return <div aria-label={t("Tus bóvedas abiertas")} className="mt-4 grid grid-cols-2 gap-2.5 md:grid-cols-3 lg:grid-cols-4">{rows.map(({ p, value, fees }) => {
+  // Mobile: one compact swipeable row so the chart below stays in the first fold; wider screens keep the grid.
+  return <div aria-label={t("Tus bóvedas abiertas")} className="-mx-5 mt-2 flex snap-x snap-mandatory gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">{rows.map(({ p, value, fees }) => {
     const vault = VAULTS.find((v) => v.id === p.vaultId);
     const hot = Boolean(vault?.badge);
-    return <button key={p.address} type="button" onClick={() => (onOpen ? onOpen(p.address) : go(p.address))} className={`flex min-w-0 flex-col rounded-xl border bg-card p-3 text-left transition hover:bg-secondary ${hot ? `border-hot/60 shadow-[var(--shadow-hot)] ${vaultSkin(p.vaultId)}` : "border-border"}`}>
+    return <button key={p.address} type="button" onClick={() => (onOpen ? onOpen(p.address) : go(p.address))} className={`flex w-[44%] min-w-[9.5rem] shrink-0 snap-start flex-col rounded-xl border bg-card px-3 py-2 text-left transition hover:bg-secondary md:w-auto md:min-w-0 ${hot ? `border-hot/60 shadow-[var(--shadow-hot)] ${vaultSkin(p.vaultId)}` : "border-border"}`}>
       <span className="flex items-center justify-between gap-1.5"><span className="truncate text-sm font-bold">{vault ? t(vault.name) : `${p.symbol}/USDC`}</span><span className="flex shrink-0 items-center gap-1 rounded-full bg-background/80 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-foreground"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-live shadow-[0_0_6px_var(--live)] motion-reduce:animate-none" />Live</span></span>
-      <span className="mt-1.5 font-display text-lg font-semibold tabular-nums">{value === null ? "—" : `≈ ${formatUsd(value)}`}</span>
-      <span className="text-[12px] font-semibold tabular-nums text-primary">{fees === null ? t("Consultando…") : `+${formatUsd(fees)} ${t("por cosechar")}`}</span>
-      <span className="mt-2 text-xs font-semibold text-muted-foreground">{t("Ver más")} {onOpen ? "→" : "↓"}</span>
+      <span className="mt-1 flex items-baseline justify-between gap-1"><span className="font-display text-base font-semibold tabular-nums">{value === null ? "—" : `≈ ${formatUsd(value)}`}</span><span className="shrink-0 text-[11px] font-semibold text-muted-foreground">{t("Ver más")} {onOpen ? "→" : "↓"}</span></span>
+      <span className="truncate text-[11px] font-semibold tabular-nums text-primary">{fees === null ? t("Consultando…") : `+${formatUsd(fees)} ${t("por cosechar")}`}</span>
     </button>;
   })}</div>;
 }

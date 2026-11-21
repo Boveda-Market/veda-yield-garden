@@ -89,17 +89,18 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       {query.isError && <p role="alert" className="mt-3 text-sm text-destructive">{t("No se pudo consultar la red. Inténtalo de nuevo.")}</p>}
       {data && !data.positionsComplete && <p role="status" className="mt-3 text-sm text-muted-foreground">{t("La consulta de posiciones está incompleta. No se puede concluir que no tengas posiciones.")}</p>}</>;
   return <>
-    {portfolioOnly ? <section aria-label={t("Resumen del portafolio")} className="border-y border-border py-8">
-      <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Mi Portafolio")}</h1>{refresh}</div>
+    {portfolioOnly ? <section aria-label={t("Resumen del portafolio")} className="pb-1 pt-1">
+      <div className="flex items-center justify-between gap-3"><h1 className="font-display text-xl font-semibold sm:text-2xl">{t("Mi Portafolio")}</h1>{refresh}</div>
       {!walletAddress && <p className="mt-3 text-sm text-muted-foreground">{t("Conecta tu wallet para ver tu portafolio.")}</p>}
       {errors}
-      {data && <VaultMiniCards positions={data.positions} onOpen={setPortPick} />}{data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
+      {data && <VaultMiniCards positions={data.positions} onOpen={setPortPick} />}
     </section> : <section aria-label={t("Bóvedas de rendimiento")} className="pb-1 pt-1">
       <div className="flex items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">{t("Bóvedas de rendimiento")}</h1>{refresh}</div>
       <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">{t("Pon tus dólares a generar intereses diarios. Retiras o cosechas cuando quieras.")}</p>
       {errors}
     </section>}
     {portfolioOnly && walletAddress && <Suspense fallback={<div className="mt-6 space-y-4"><Skeleton className="h-64" /><Skeleton className="h-28" /></div>}><PortfolioSummary wallet={walletAddress} positions={data?.positions ?? []} positionsComplete={Boolean(data?.positionsComplete)} predictionsMicro={predictionsMicro} onHarvest={(p) => openPositionAction(p, "harvest")} onHarvestAll={(ps) => setHarvestAll(ps.filter((p) => isOperableVault(p.vaultId)).map((p) => ({ position: p.address, vaultId: p.vaultId as OperableVault })))} /></Suspense>}
+    {portfolioOnly && data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
     {portfolioOnly && tab !== "vaults" && predictions.items.length > 0 && <section aria-label={t("Predicciones abiertas")} className="border-b border-border py-8"><OpenPredictions state={predictions} /></section>}
     {portfolioOnly && tab !== "predict" && walletAddress && !data && query.isFetching && <div className="mt-6 space-y-4"><Skeleton className="h-48" /><Skeleton className="h-48" /></div>}
     {portfolioOnly && data && (() => { const pp = data.positions.filter((p) => p.address === portPick); return <Dialog open={pp.length > 0} onOpenChange={(o) => { if (!o) setPortPick(null); }}><ActionSheetContent><DialogTitle className="sr-only">{t("Tu bóveda")}</DialogTitle><DialogDescription className="sr-only">{t("Detalles de tu bóveda")}</DialogDescription>{pp.length > 0 && <RealPositions showHarvestBanner={false} positions={pp} onAction={(p, k) => { setPortPick(null); openPositionAction(p, k); }} onMigrate={(p, v) => { setPortPick(null); migrate(p, v); }} onRotate={(p, v) => { setPortPick(null); migrate(p, v, true); }} onDeposit={(p) => { setPortPick(null); const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) { setAddTo(p.address); setSimulationVault(v); } }} />}</ActionSheetContent></Dialog>; })()}
