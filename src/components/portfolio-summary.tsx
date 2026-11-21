@@ -196,8 +196,8 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   // Linear scale fitted to the window's own min/max: every spike and drop fills the height (choppy trading look).
   // Hybrid scale: the latest value anchors the vertical middle; the widest swing either way plus 20% headroom sets the span, so the end dot stays centered and peaks never touch the edges.
   const cmin = Math.min(...ms), cmax = Math.max(...ms), cLast = ms[ms.length - 1] ?? 0;
-  const cDev = Math.max(cmax - cLast, cLast - cmin, Math.abs(cLast) * 1e-4, 1e-9) * 1.2, cMid = (CT + CB) / 2, cHalf = (CB - CT) / 2;
-  const my = (v: number) => cMid - ((v - cLast) / cDev) * cHalf;
+  const cSpan = Math.max(cmax - cmin, Math.abs(cLast) * 1e-3, 1e-9), cTop = cmax + cSpan * 0.08, cBot = cmin - cSpan * 0.08;
+  const my = (v: number) => CB - ((v - cBot) / (cTop - cBot)) * (CB - CT);
   const cPts = live ? mSeries.map((p) => ({ x: Math.min(R, L + ((p.t - w0) / wSpan) * (R - L)), y: my(p.v) })) : mk.map((v, i) => ({ x: x(i), y: my(v) }));
   const cLine = angular(cPts), cEnd = cPts[cPts.length - 1]!;
   const eLine = smooth(ePts);
@@ -241,7 +241,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
         <linearGradient id={`h${gid}`} x1="0" x2="1"><stop offset="0%" stopColor={theme.a} /><stop offset="100%" stopColor={theme.b} /></linearGradient>
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
       </defs>
-      {cmax > cmin && <><text x={R} y={my(cmax) - 4} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{cap(cmax)}</text><text x={R} y={my(cmin) + 12} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{cap(cmin)}</text></>}
+      {cmax > cmin && <><line x1={L} x2={R} y1={my(cmax)} y2={my(cmax)} stroke="var(--muted-foreground)" strokeOpacity="0.25" strokeDasharray="2 4" /><line x1={L} x2={R} y1={my(cmin)} y2={my(cmin)} stroke="var(--muted-foreground)" strokeOpacity="0.25" strokeDasharray="2 4" /><text x={R} y={my(cmax) - 4} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{cap(cmax)}</text><text x={R} y={my(cmin) + 12} textAnchor="end" fontSize="10" fill="var(--muted-foreground)">{cap(cmin)}</text></>}
       {!drawing && (live || n > 1) && cPts.length >= 2 && (() => {
         // GMGN look: green above the window's opening level, red below, soft area fill, dashed current-level line with badge.
         const refY = cPts[0]!.y, off = Math.min(1, Math.max(0, (refY - CT) / Math.max(CB - CT, 1))), up = cEnd.y <= refY, endC = up ? "#10B981" : "#EF4444";
