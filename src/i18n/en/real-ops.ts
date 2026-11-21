@@ -300,7 +300,7 @@ export const realOps: Record<string, string> = {
   "Rendimiento de tu portafolio": "Your portfolio performance",
   "Tu rendimiento": "Your performance",
   "Mi rendimiento": "My performance",
-  "Todas las bóvedas abiertas": "All open vaults",
+  "Suma de bóvedas activas": "Sum of active vaults",
   "Cosechar todo": "Harvest all",
   "Asegurando reserva de operaciones…": "Securing operations reserve…",
   "Recarga de reserva de operaciones": "Operations reserve refill",
