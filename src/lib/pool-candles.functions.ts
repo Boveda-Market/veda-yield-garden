@@ -3,11 +3,11 @@ import { z } from "zod";
 import { geckoCandles, POOL_RE, type RawCandle } from "./gecko-candles";
 
 const SPEC = {
-  "1m": { tf: "minute", agg: 1, count: 300, ttl: 30_000 },
-  "1h": { tf: "hour", agg: 1, count: 168, ttl: 60_000 },
-  "4h": { tf: "hour", agg: 4, count: 180, ttl: 5 * 60_000 },
-  "1d": { tf: "day", agg: 1, count: 90, ttl: 10 * 60_000 },
-  day: { tf: "day", agg: 1, count: 90, ttl: 10 * 60_000 },
+  "1m": { tf: "minute", agg: 1, count: 300, ttl: 30_000, be: "1m", secs: 300 * 60 },
+  "1h": { tf: "hour", agg: 1, count: 168, ttl: 60_000, be: "1H", secs: 168 * 3600 },
+  "4h": { tf: "hour", agg: 4, count: 180, ttl: 5 * 60_000, be: "4H", secs: 180 * 4 * 3600 },
+  "1d": { tf: "day", agg: 1, count: 90, ttl: 10 * 60_000, be: "1D", secs: 90 * 86400 },
+  day: { tf: "day", agg: 1, count: 90, ttl: 10 * 60_000, be: "1D", secs: 90 * 86400 },
 } as const;
 
 /** A denser shared series that can stand in for a busy range: its own real candles, trimmed to the window (never invented points). */
@@ -54,7 +54,13 @@ export const getPoolCandles = createServerFn({ method: "GET" })
     if (hit && Date.now() - hit.at < spec.ttl) return hit.data;
     let p = inflight.get(key);
     if (!p) {
-      p = queued(() => geckoCandles(data.pool, spec.tf, spec.agg, spec.count)).finally(() => inflight.delete(key));
+      // Birdeye first (dedicated key, dense candles); GeckoTerminal only when it is missing or fails.
+      p = queued(async () => {
+        const { birdeyeCandles } = await import("./birdeye-candles.server");
+        const be = await birdeyeCandles(data.pool, spec.be, spec.secs);
+        if (be && be.length > 1) return be;
+        return geckoCandles(data.pool, spec.tf, spec.agg, spec.count);
+      }).finally(() => inflight.delete(key));
       inflight.set(key, p);
     }
     try {
