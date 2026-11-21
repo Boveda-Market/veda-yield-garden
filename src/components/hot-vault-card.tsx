@@ -62,7 +62,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
           </div>)}
         </dl>
         {buys != null && sells != null && total! > 0 && <div className="mt-2 rounded-lg border border-hot-foreground/15 bg-hot-surface/60 px-2 py-1.5">
-          <p className="text-[9px] font-semibold uppercase tracking-wide text-hot-muted">{t("Pulso de mercado · 24 h")}</p>
+          <p className="animate-pulse text-[10px] font-black uppercase tracking-wide text-hot-foreground motion-reduce:animate-none">{t("Pulso del mercado")}</p>
           <div className="mt-0.5 flex justify-between text-[11px] font-bold tabular-nums"><span className="text-hot-buy">{t("Compras")} {Math.round(buys / total! * 100)}%</span><span className="text-hot-sell">{Math.round(sells / total! * 100)}% {t("Ventas")}</span></div>
           <div className="mt-1 flex h-1.5 overflow-hidden rounded-full bg-hot-foreground/10"><div className="bg-hot-buy transition-all" style={{ width: `${buys / total! * 100}%` }} /><div className="flex-1 bg-hot-sell" /></div>
         </div>}
