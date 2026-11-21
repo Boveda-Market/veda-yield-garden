@@ -72,6 +72,22 @@ export function feesToUsdcSwapPlan(x: bigint, y: bigint, baseX: bigint, baseY: b
   return { swapForY: false, amountIn: inY > y ? y : inY };
 }
 
+/**
+ * Price rose above the range: the base capital still re-centres 50/50, but every harvested gain ends as the vault token
+ * (USDC side sized to half the base value, the rest buys token in-pool). One swap, net direction.
+ */
+export function feesToTokenSwapPlan(x: bigint, y: bigint, baseX: bigint, baseY: bigint, price: number): { swapForY: boolean; amountIn: bigint } {
+  if (!(price > 0) || !Number.isFinite(price)) return { swapForY: true, amountIn: 0n };
+  const targetY = (Number(baseX) * price + Number(baseY)) / 2, yValue = Number(y), total = Number(x) * price + yValue;
+  if (total <= 0 || Math.abs(yValue - targetY) < total / 100) return { swapForY: true, amountIn: 0n };
+  if (yValue > targetY) {
+    const inY = BigInt(Math.floor(yValue - targetY));
+    return { swapForY: false, amountIn: inY > y ? y : inY };
+  }
+  const inX = BigInt(Math.floor((targetY - yValue) / price));
+  return { swapForY: true, amountIn: inX > x ? x : inX };
+}
+
 /** Personal alert text when a range position has been out of range for 10 minutes. */
 export function rangeAlertText(vaultName: string, above: boolean) {
   return tgCard("🚨", `Tu ${vaultName} dejó de generar ganancias`, [

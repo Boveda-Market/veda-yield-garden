@@ -15,7 +15,7 @@ import { ledgerSwapToUsdc, freshIntermediates, closeIntermediates } from "@/lib/
 import { rebalanceGainsUsd } from "@/lib/autopilot";
 import { compoundSpendValid, type CompoundInput, type CompoundResult } from "@/lib/compound";
 import type { RebalanceResult } from "@/lib/dlmm";
-import { dlmmRange, dlmmSlippagePct, binsMoved, rebalanceSwapPlan, feesToUsdcSwapPlan, DLMM_MIN_SOL_LAMPORTS, DLMM_MAX_SWAP_IMPACT_PCT, DLMM_EXIT_MIN_PCT } from "@/lib/dlmm";
+import { dlmmRange, dlmmSlippagePct, binsMoved, rebalanceSwapPlan, feesToUsdcSwapPlan, feesToTokenSwapPlan, DLMM_MIN_SOL_LAMPORTS, DLMM_MAX_SWAP_IMPACT_PCT, DLMM_EXIT_MIN_PCT } from "@/lib/dlmm";
 
 type Sdk = Awaited<ReturnType<typeof loadDlmmSdk>>;
 type Pool = Awaited<ReturnType<Sdk["DLMM"]["create"]>>;
@@ -521,7 +521,8 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     // Withdrawn amounts are SDK estimates; keep a small margin so the swap never touches prior wallet balances.
     // Base capital re-centres 50/50; harvested fees and absorbed leftovers all go in as dollars (single-side).
     const baseX = rawFloor(data.totalXAmount), baseY = rawFloor(data.totalYAmount);
-    const plan = feesToUsdcSwapPlan(x * 995n / 1000n, y * 995n / 1000n, baseX * 995n / 1000n, baseY * 995n / 1000n, price);
+    // Price rose above the range: gains go in as the vault token (single-side token); otherwise as dollars.
+    const plan = (active > data.upperBinId ? feesToTokenSwapPlan : feesToUsdcSwapPlan)(x * 995n / 1000n, y * 995n / 1000n, baseX * 995n / 1000n, baseY * 995n / 1000n, price);
     let swapIxs: TransactionInstruction[] = [], outMin = 0n;
     if (plan.amountIn > 0n) {
       stage = "Cotización del intercambio";

@@ -57,3 +57,15 @@ describe("autopilot fees go in as dollars", () => {
     expect(feesToUsdcSwapPlan(0n, 210n, 0n, 200n, 1)).toEqual({ swapForY: false, amountIn: 100n });
   });
 });
+
+import { feesToTokenSwapPlan } from "./dlmm";
+describe("autopilot fees go in as token when price rose", () => {
+  it("buys token with fee dollars beyond half the base", () => {
+    // base all USDC 200; fees 10 Y → keep 100 USDC, buy token with 110
+    expect(feesToTokenSwapPlan(0n, 210n, 0n, 200n, 1)).toEqual({ swapForY: false, amountIn: 110n });
+  });
+  it("keeps token fees as token", () => {
+    // base 100 X + 100 Y; fees 20 X → USDC already at target, no swap
+    expect(feesToTokenSwapPlan(120n, 100n, 100n, 100n, 1).amountIn).toBe(0n);
+  });
+});
