@@ -44,7 +44,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
   return <section aria-label={t("Posiciones reales")} className={bare ? "" : "border-b border-border py-8"}>
     {showHarvestBanner && top && totalFees >= 0.5 && <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-primary/40 bg-primary/10 p-5"><div><p className="text-sm text-muted-foreground">{t("Ganancias listas para cosechar")}</p><p className="mt-1 font-display text-2xl font-semibold text-primary">≈ {formatUsd(totalFees)}</p><p className="mt-1 text-xs text-muted-foreground">{t("Envíalas a tu wallet sin tocar tu depósito.")}</p></div><Button onClick={() => onAction(top.p, "harvest")}><Sprout size={16} />{t("Cosechar ahora")}</Button></div>}
     {!bare && <h2 className="font-display text-lg font-semibold">{t("Mis posiciones")}</h2>}
-    <div className={bare ? "grid gap-4" : `mt-4 grid gap-4 ${rows.length > 1 ? "md:grid-cols-2" : ""}`}>{rows.map(({ p, value, fees, apr }) => {
+    <div className={bare ? "grid gap-4" : `mt-4 grid gap-4 ${rows.length > 1 ? "md:grid-cols-2" : ""}`}>{[...rows].sort((a, b) => (b.value ?? -1) - (a.value ?? -1)).map(({ p, value, fees, apr }) => {
       const vault = VAULTS.find((v) => v.id === p.vaultId);
       const hot = Boolean(vault?.badge);
       const body = <>
@@ -87,7 +87,8 @@ export function PortfolioEmpty() {
 /** Compact grid of open vaults (capital + earnings); «Ver más» scrolls to that vault's full card. Renders nothing when there are none. */
 export function VaultMiniCards({ positions, onOpen }: { positions: ChainPosition[]; onOpen?: (address: string) => void }) {
   const t = useT();
-  const { rows } = usePositionRows(positions);
+  // Biggest vault first so the most money is always the first card.
+  const rows = [...usePositionRows(positions).rows].sort((a, b) => (b.value ?? -1) - (a.value ?? -1));
   if (rows.length === 0) return null;
   const go = (address: string) => { const el = document.getElementById(`pos-${address}`); if (!el) return; el.scrollIntoView({ behavior: "smooth", block: "start" }); el.classList.add("ring-4", "ring-primary"); window.setTimeout(() => el.classList.remove("ring-4", "ring-primary"), 1400); };
   // Mobile: one compact swipeable row so the chart below stays in the first fold; wider screens keep the grid.
