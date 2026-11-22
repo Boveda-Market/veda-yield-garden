@@ -359,6 +359,7 @@ export const extra: Record<string, string> = {
   "Entra a tu cuenta o prueba gratis con 1,000 créditos ficticios. Mira intereses estimados, cómo funciona y las ganancias antes de empezar.": "Log in or try free with 1,000 fictitious credits. See estimated earnings, how it works and the earnings before you start.",
   "Prueba sin registro, revisa intereses estimados y entra en segundos con email o Google.": "Try without signing up, check estimated interest and log in within seconds with email or Google.",
   "¿Qué es USDC?": "What is USDC?",
+  "¿Qué es el dinero digital?": "What is digital money?",
   "USDC es una moneda digital diseñada para mantener el mismo valor que el dólar estadounidense: 1 USDC busca valer 1 USD. En Bóveda Market tus saldos, depósitos y intereses se muestran en USDC. No es un depósito bancario ni está asegurado.": "USDC is a digital currency designed to keep the same value as the US dollar: 1 USDC aims to be worth 1 USD. In Bóveda Market your balances, deposits and interest are shown in USDC. It is not a bank deposit and is not insured.",
   "¿Puedo explorar sin depositar monedas digitales?": "Can I explore without depositing digital currencies?",
   "No para empezar. Toca «Probar como invitado» y recibe 1,000 créditos ficticios para explorar sin registro ni wallet. Los créditos no se pueden retirar ni convertir en dinero.": "Not to start. Tap “Try as guest” and get 1,000 fictitious credits to explore with no sign-up or wallet. Credits can't be withdrawn or converted to money.",

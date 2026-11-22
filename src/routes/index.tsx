@@ -42,7 +42,7 @@ export const Route = createFileRoute("/")({ staticData: { sitemap: true },
 });
 
 const FAQS = [
-  { q: "¿Qué es USDC?", a: "USDC es una moneda digital diseñada para mantener el mismo valor que el dólar estadounidense: 1 USDC busca valer 1 USD. En Bóveda Market los saldos, depósitos e intereses se muestran en USDC. No es un depósito bancario ni está asegurado." },
+  { q: "¿Qué es el dinero digital?", a: "USDC es una moneda digital diseñada para mantener el mismo valor que el dólar estadounidense: 1 USDC busca valer 1 USD. En Bóveda Market los saldos, depósitos e intereses se muestran en USDC. No es un depósito bancario ni está asegurado." },
   { q: "¿Puedo explorar sin depositar monedas digitales?", a: "No para mirar. Puedes ver las bóvedas y Doble o Nada en vivo sin registrarte. Para participar o depositar basta con entrar con Google o email y añadir dólares con tarjeta. Se puede empezar con montos pequeños." },
   { q: "¿Cómo se generan las ganancias?", a: "Cada depósito se suma a una bóveda que genera intereses cada vez que alguien intercambia monedas digitales en ella. Esos intereses se reparten entre quienes aportan. Las tasas son estimaciones, cambian y existe riesgo de pérdida." },
   { q: "¿Cuándo puedo retirar?", a: "Las ganancias se cosechan y las posiciones se cierran en cualquier momento, sin plazos de permanencia. Cada operación se revisa antes de firmar con la wallet." },
