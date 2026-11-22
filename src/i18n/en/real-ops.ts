@@ -163,7 +163,6 @@ export const realOps: Record<string, string> = {
   "Total depositado": "Total deposited",
   "Cambio": "Change",
   "Ya recuperaste todo lo que depositaste. El cambio incluye lo que tienes hoy en bóvedas y lo que ya cosechaste.": "You've already got back everything you deposited. The change includes what you have in vaults today and what you've harvested.",
-  "Lo que tienes hoy en bóvedas, más lo por cosechar y lo ya cosechado, frente a tu dinero depositado. Las comisiones no cuentan como depósito y el cambio incluye la subida o bajada del precio.": "What you have in vaults today, plus what's to harvest and already harvested, compared with the money you deposited. Fees don't count as deposits and the change includes price moves.",
   "Revisando todos tus movimientos…": "Reviewing all your activity…",
   "No disponible por ahora: aún no podemos leer todo tu historial de movimientos.": "Not available yet: we can't read your full activity history right now.",
   "{a} cosechado · {b} por cosechar": "{a} harvested · {b} to harvest",

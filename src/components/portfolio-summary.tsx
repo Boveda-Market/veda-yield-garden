@@ -113,9 +113,9 @@ function SinceDepositTile({ since, loading, money, hidden }: { since: ReturnType
         <p className="flex items-baseline justify-end gap-2"><span className={`font-display text-2xl font-bold tabular-nums ${tone}`}>{hidden ? money(change) : `${up ? "+" : "−"}${money(Math.abs(change))}`}</span>
           {since.percent !== null && !hidden && <span className={`rounded-full px-2 py-0.5 text-xs font-bold tabular-nums ${up ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{up ? "+" : "−"}{Math.abs(since.percent).toFixed(1)}%</span>}</p></div>}
     </div>
-    <p className="mt-2 text-xs leading-5 text-muted-foreground">{since
-      ? (deposited ?? 0) <= 0 ? t("Ya recuperaste todo lo que depositaste. El cambio incluye lo que tienes hoy en bóvedas y lo que ya cosechaste.") : t("Lo que tienes hoy en bóvedas, más lo por cosechar y lo ya cosechado, frente a tu dinero depositado. Las comisiones no cuentan como depósito y el cambio incluye la subida o bajada del precio.")
-      : loading ? t("Revisando todos tus movimientos…") : t("No disponible por ahora: aún no podemos leer todo tu historial de movimientos.")}</p>
+    {(!since || (deposited ?? 0) <= 0) && <p className="mt-2 text-xs leading-5 text-muted-foreground">{since
+      ? (deposited ?? 0) <= 0 ? t("Ya recuperaste todo lo que depositaste. El cambio incluye lo que tienes hoy en bóvedas y lo que ya cosechaste.") : null
+      : loading ? t("Revisando todos tus movimientos…") : t("No disponible por ahora: aún no podemos leer todo tu historial de movimientos.")}</p>}
   </div>;
 }
 
