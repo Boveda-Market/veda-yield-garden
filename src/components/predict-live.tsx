@@ -69,7 +69,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   const cancelQuote = () => { clearResumePlay(); clearPendingPlay(); setSide(null); setReview(null); setKept(false); };
   // Cancelling at «Todo listo» (after a top-up) first says where the dollars are.
   // Visitors: remember the exact play (coin, duration, side, amount) so it reopens with a live quote right after signing in.
-  const askFor = (s: PredictSide) => { if (round) savePendingPlay({ market: round.asset, window: round.window, side: s, amount }); setAskLogin(true); };
+  const askFor = (s: PredictSide) => { if (round) savePendingPlay({ market: round.asset, window: round.window, side: s, amount, roundId: round.marketId }); setAskLogin(true); };
   const cancelOrKeep = () => { if (review && wasShort.current && !kept) setKept(true); else cancelQuote(); };
   const refresh = useCallback(async () => {
     if (!wallet) return;
@@ -112,6 +112,14 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   if (short) wasShort.current = true;
   // Back from Coinbase: reopen the same play (side + amount) on the round open right now; the live quote refreshes on its own.
   const resumedPlay = useRef(false);
+  // Round the open ticket was picked on: if it closes (during a top-up, sign-in or on screen) the person chooses what to do.
+  const pickedRound = useRef<string | null>(null);
+  const [expired, setExpired] = useState(false);
+  useEffect(() => {
+    if (!side) { pickedRound.current = null; setExpired(false); return; }
+    if (pickedRound.current === null && round) pickedRound.current = round.marketId;
+    else if (pickedRound.current !== (round?.marketId ?? null)) { setExpired(true); setReview(null); }
+  }, [side, round?.marketId]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (resumedPlay.current || !wallet || !round || side) return;
     const back = peekResumePlay();
@@ -119,6 +127,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
     if (!p || p.market !== round.asset || p.window !== round.window) return;
     // Taken once: the open ticket now holds it, so Billetera never sends the person here again for the same play.
     resumedPlay.current = true; if (back) { wasShort.current = true; clearResumePlay(); } else clearPendingPlay();
+    pickedRound.current = p.roundId ?? round.marketId;
     setAmount(p.amount); setSide(p.side);
   }, [wallet, round?.asset, round?.window]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -160,7 +169,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wallet, valid, round?.marketId, side, unitsKey, retryQuote]);
   const confirm = async () => {
-    if (!review || !wallet) return;
+    if (!review || !wallet || expired) return;
     setBusy("sign");
     try {
       const sig = await sign(review.tx, review.context);
@@ -266,7 +275,13 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
       <LoginSheet open={askLogin} onOpenChange={setAskLogin} title={t("Entra para confirmar tu jugada")} body={t("Al entrar te traemos de vuelta a esta jugada, lista para confirmar.")} />
       <Dialog open={!!side} onOpenChange={(o) => { if (!o && busy !== "sign") cancelOrKeep(); }}>
         <ActionSheetContent closeLabel={t("Cerrar")} onOpenAutoFocus={(e) => e.preventDefault()}>
-          {kept ? <FundsKeptCard amountMicro={balance} onDone={() => { wasShort.current = false; cancelQuote(); }} /> : <>
+          {expired && !kept ? <div role="alertdialog" className="space-y-3 text-center">
+            <DialogTitle className="font-display text-xl">⏱️ {t("La ronda que elegiste ya cerró")}</DialogTitle>
+            <DialogDescription className="text-sm">{t("Elegiste {s} con ${a}, pero esa ronda terminó. No se movió dinero: tus dólares siguen en tu Billetera.", { s: t(side === "down" ? "Baja" : "Sube"), a: amount })}</DialogDescription>
+            <Button size="lg" className="h-12 w-full rounded-xl text-base font-bold" disabled={!round} onClick={() => { pickedRound.current = round?.marketId ?? null; setExpired(false); setReview(null); }}>{round ? t("Jugar en la nueva ronda") : <><Loader2 className="animate-spin" /> {t("Esperando la nueva ronda…")}</>}</Button>
+            <Button type="button" variant="secondary" className="w-full" onClick={() => { wasShort.current = false; cancelQuote(); }}>{t("Elegir otra jugada")}</Button>
+            <Button type="button" variant="ghost" className="w-full" onClick={() => { setExpired(false); cancelOrKeep(); }}>{t("Cancelar")}</Button>
+          </div> : kept ? <FundsKeptCard amountMicro={balance} onDone={() => { wasShort.current = false; cancelQuote(); }} /> : <>
           <DialogTitle className={`flex items-center gap-2 pr-10 font-display text-xl ${side === "down" ? "text-destructive" : "text-primary"}`}>{side === "down" ? <ArrowDownRight size={22} /> : <ArrowUpRight size={22} />}{t(side === "down" ? "Predecir Baja" : "Predecir Sube")}{selPrice ? <span className="ml-auto text-sm font-semibold tabular-nums">{t("Paga {x}×", { x: (1 / selPrice).toFixed(2) })}</span> : null}</DialogTitle>
           <DialogDescription className="text-xs">{t(side === "down" ? "Ganas si el precio baja" : "Ganas si el precio sube")}</DialogDescription>
       <section aria-label={t("Tu orden")}>
@@ -289,7 +304,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
             <p className="text-[11px] leading-4 text-muted-foreground">{t("Estimado con el precio actual de la red. La activación se cobra solo la primera vez.")}</p>
           </dl>}
           {short && <SolConvertShortcut className="mt-3" />}
-          {short && side && <BuyUsdc className="mt-3" needMicro={(play?.total ?? units ?? 0n) - (balance ?? 0n)} {...(round ? { resumePlay: { market: round.asset, window: round.window, side, amount } } : {})} />}
+          {short && side && <BuyUsdc className="mt-3" needMicro={(play?.total ?? units ?? 0n) - (balance ?? 0n)} {...(round ? { resumePlay: { market: round.asset, window: round.window, side, amount, roundId: pickedRound.current ?? round.marketId } } : {})} />}
           {!side && <p className="mt-3 text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
           {!wallet ? <p className="mt-3 rounded-xl bg-secondary p-3 text-center text-sm font-semibold">{t("Entra con tu cuenta para predecir en vivo con los dólares de tu wallet.")}</p>
             : !review && !short && <Button disabled className="mt-3 h-12 w-full rounded-xl text-base font-bold">{quoting ? <><Loader2 className="animate-spin" /> {t("Cotizando en la red…")}</> : side ? t(side === "up" ? "Predecir Sube" : "Predecir Baja") : t("Elige Sube o Baja")}</Button>}

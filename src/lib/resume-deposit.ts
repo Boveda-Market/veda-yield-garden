@@ -8,7 +8,8 @@ export const RESUME_MAX_MS = 30 * 60_000;
 export const RESUME_MAX_MICRO = 5_000_000_000n;
 /** `baseline`: dollars (micro-USDC, as text) the wallet had before the purchase, so the flow waits for the NEW dollars. */
 export type ResumeDeposit = { vaultId: string; amount: string; position?: string; migrate?: boolean; baseline?: string; at: number };
-export type ResumePlay = { market: string; window: string; side: "up" | "down"; amount: string; baseline?: string; at: number };
+/** `roundId`: the round the play was picked on, so a closed round is flagged instead of silently moved. */
+export type ResumePlay = { market: string; window: string; side: "up" | "down"; amount: string; roundId?: string; baseline?: string; at: number };
 
 type Store = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 const ls = (): Store => localStorage;

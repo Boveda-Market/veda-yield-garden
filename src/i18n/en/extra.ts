@@ -1816,4 +1816,9 @@ export const extra: Record<string, string> = {
   "Instala Bóveda Market y mira crecer tus intereses en 1 toque.": "Install Bóveda Market and watch your interest grow in 1 tap.",
   "Entra para confirmar tu jugada": "Sign in to confirm your play",
   "Al entrar te traemos de vuelta a esta jugada, lista para confirmar.": "Once you sign in we bring you back to this play, ready to confirm.",
+  "La ronda que elegiste ya cerró": "The round you picked has closed",
+  "Elegiste {s} con ${a}, pero esa ronda terminó. No se movió dinero: tus dólares siguen en tu Billetera.": "You picked {s} with ${a}, but that round ended. No money moved: your dollars are still in your Wallet.",
+  "Jugar en la nueva ronda": "Play in the new round",
+  "Esperando la nueva ronda…": "Waiting for the new round…",
+  "Elegir otra jugada": "Pick another play",
 };
