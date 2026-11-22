@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react";
+import { MAX_HISTORY_PAGES } from "@/lib/meteora-history";
 import { useHydrated } from "@tanstack/react-router";
 import { AnimatedMoney } from "@/components/ui/animated-money";
 import { earningRatePerMs } from "@/lib/live-earnings";
@@ -53,7 +54,7 @@ export function PortfolioSummary({ wallet, positions, positionsComplete, predict
   const valued = rows.every((r) => r.value != null);
   const since = history.complete && positionsComplete && valued && history.flows.length > 0 ? sinceDeposit(history.flows, history.records, history.poolPrices, BigInt(Math.round((vaultTotal + totalFees) * 1e6))) : null;
   const showSince = vaultTotal > 0 || history.flows.length > 0;
-  const sinceLoading = !history.complete && (history.query.isFetching || history.query.hasNextPage) && history.pages.length < 8 && !history.query.isError;
+  const sinceLoading = !history.complete && (history.query.isFetching || history.query.hasNextPage) && history.pages.length < MAX_HISTORY_PAGES && !history.query.isError;
   const tile = "rounded-2xl border border-border bg-card p-4";
   const label = "flex items-center gap-1.5 text-xs text-muted-foreground";
   const loading = history.query.isFetching ? t("Calculando…") : "—";

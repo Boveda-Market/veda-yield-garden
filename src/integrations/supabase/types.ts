@@ -425,6 +425,33 @@ export type Database = {
         }
         Relationships: []
       }
+      vault_tx_cache: {
+        Row: {
+          created_at: string
+          decoder: number
+          flow: Json | null
+          records: Json
+          signature: string
+          wallet: string
+        }
+        Insert: {
+          created_at?: string
+          decoder: number
+          flow?: Json | null
+          records: Json
+          signature: string
+          wallet: string
+        }
+        Update: {
+          created_at?: string
+          decoder?: number
+          flow?: Json | null
+          records?: Json
+          signature?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
       verified_wallets: {
         Row: {
           privy_user_id: string

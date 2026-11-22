@@ -105,26 +105,63 @@ export function decodeVaultFlow(tx: ParsedTransactionWithMeta, wallet: string, s
     hasWithdraw: remove || records.some((r) => r.kind === "withdraw" || r.kind === "close") };
 }
 
-export async function readMeteoraHistory(key: string, wallet: string, before?: string): Promise<MeteoraHistoryPage> {
+/** Bump when decoding changes so cached results are re-read. */
+export const DECODER_VERSION = 1;
+type Decoded = { records: MeteoraRecord[]; flow: VaultFlow | null };
+export type HistoryCache = { get: (wallet: string, signatures: string[]) => Promise<Map<string, Decoded>>; put: (wallet: string, rows: { signature: string; decoded: Decoded }[]) => Promise<void> };
+
+/** Finalized transactions never change, so decoded results are kept server-side (service-role-only table) and each one is read from the network once. */
+async function cloudCache(): Promise<HistoryCache | null> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    return {
+      get: async (wallet, signatures) => {
+        const map = new Map<string, Decoded>();
+        if (!signatures.length) return map;
+        const { data } = await supabaseAdmin.from("vault_tx_cache").select("signature, records, flow").eq("wallet", wallet).eq("decoder", DECODER_VERSION).in("signature", signatures);
+        for (const row of data ?? []) map.set(row.signature, { records: row.records as unknown as MeteoraRecord[], flow: (row.flow ?? null) as unknown as VaultFlow | null });
+        return map;
+      },
+      put: async (wallet, rows) => {
+        if (!rows.length) return;
+        await supabaseAdmin.from("vault_tx_cache").upsert(rows.map((r) => ({ wallet, signature: r.signature, decoder: DECODER_VERSION, records: r.decoded.records as never, flow: r.decoded.flow as never })), { onConflict: "wallet,signature" });
+      },
+    };
+  } catch { return null; }
+}
+
+const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export async function readMeteoraHistory(key: string, wallet: string, before?: string, cacheArg?: HistoryCache | null): Promise<MeteoraHistoryPage> {
   const connection = heliusConnection(key);
   const owner = new PublicKey(wallet);
-  const signatures = await connection.getSignaturesForAddress(owner, { limit: 25, ...(before ? { before } : {}) }, "finalized");
+  const signatures = await connection.getSignaturesForAddress(owner, { limit: 50, ...(before ? { before } : {}) }, "finalized");
+  const cache = cacheArg === undefined ? await cloudCache() : cacheArg;
+  const ok = signatures.filter((row) => row.err === null).map((row) => row.signature);
+  const cached = cache ? await cache.get(wallet, ok).catch(() => new Map<string, Decoded>()) : new Map<string, Decoded>();
   const records: MeteoraRecord[] = [];
   const flows: VaultFlow[] = [];
+  const fresh: { signature: string; decoded: Decoded }[] = [];
   let missing = 0;
-  // Bounded concurrency and pagination; no unbounded wallet backfill on entry.
-  for (let start = 0; start < signatures.length; start += 4) {
-    await Promise.all(signatures.slice(start, start + 4).map(async (row) => {
-      if (row.err !== null) return;
+  const keep = (decoded: Decoded) => { records.push(...decoded.records); if (decoded.flow) flows.push(decoded.flow); };
+  for (const sig of ok) { const hit = cached.get(sig); if (hit) keep(hit); }
+  const todo = ok.filter((sig) => !cached.has(sig));
+  // Bounded concurrency; a busy reply is retried twice with backoff so one rate limit never hides the history.
+  for (let start = 0; start < todo.length; start += 4) {
+    await Promise.all(todo.slice(start, start + 4).map(async (signature) => {
+      let tx: ParsedTransactionWithMeta | null = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try { tx = await connection.getParsedTransaction(signature, { commitment: "finalized", maxSupportedTransactionVersion: MAX_TX_VERSION }); break; }
+        catch { if (attempt < 2) await pause(400 * 3 ** attempt); }
+      }
+      if (!tx) { missing++; return; }
       try {
-        const tx = await connection.getParsedTransaction(row.signature, { commitment: "finalized", maxSupportedTransactionVersion: MAX_TX_VERSION });
-        if (!tx) { missing++; return; }
-        const found = decodeMeteoraRecords(tx, wallet, row.signature);
-        records.push(...found);
-        const flow = decodeVaultFlow(tx, wallet, row.signature, found);
-        if (flow) flows.push(flow);
+        const found = decodeMeteoraRecords(tx, wallet, signature);
+        const decoded = { records: found, flow: decodeVaultFlow(tx, wallet, signature, found) };
+        keep(decoded); fresh.push({ signature, decoded });
       } catch { missing++; }
     }));
   }
-  return { records: records.sort((a, b) => b.slot - a.slot), flows, scanned: signatures.length, next: signatures.length === 25 ? signatures.at(-1)?.signature ?? null : null, missing };
+  if (cache) await cache.put(wallet, fresh).catch(() => undefined);
+  return { records: records.sort((a, b) => b.slot - a.slot), flows, scanned: signatures.length, next: signatures.length === 50 ? signatures.at(-1)?.signature ?? null : null, missing };
 }

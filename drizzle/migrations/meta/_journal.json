@@ -155,6 +155,13 @@
       "when": 1795385027197,
       "tag": "0021_create_app_presence",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1795388967269,
+      "tag": "0022_vault_tx_cache",
+      "breakpoints": true
     }
   ]
 }
