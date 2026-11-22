@@ -29,37 +29,37 @@ function ReturningCover() {
 
 export const Route = createFileRoute("/")({ staticData: { sitemap: true },
   head: () => ({ meta: [
-    { title: "BÓVEDA — Billetera en dólares digitales (USDC) que genera intereses" },
-    { name: "description", content: "Guarda dólares digitales (USDC), genera intereses y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Depositar es gratis." },
-    { property: "og:title", content: "BÓVEDA — Billetera en dólares digitales (USDC) que genera intereses" },
-    { property: "og:description", content: "Guarda dólares digitales (USDC), genera intereses y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Depositar es gratis." },
+    { title: "BÓVEDA — Plataforma de autocustodia y rendimiento en dólares digitales" },
+    { name: "description", content: "Plataforma de autocustodia en dólares digitales (USDC): bóvedas de rendimiento, Piloto Automático, mercados de predicción y retiros a banco, Coinbase o Cash App. Depositar es gratis." },
+    { property: "og:title", content: "BÓVEDA — Plataforma de autocustodia y rendimiento en dólares digitales" },
+    { property: "og:description", content: "Plataforma de autocustodia en dólares digitales (USDC): bóvedas de rendimiento, Piloto Automático, mercados de predicción y retiros a banco, Coinbase o Cash App. Depositar es gratis." },
     { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
-    { property: "og:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:image:width", content: "1200" }, { property: "og:image:height", content: "630" }, { property: "og:image:alt", content: "Bóveda GTA6 — Mientras todos esperan el juego, tú cobras como la casa." }, { name: "twitter:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:video", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:secure_url", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:type", content: "video/mp4" }, { property: "og:video:width", content: "1200" }, { property: "og:video:height", content: "630" },
+    { property: "og:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:image:width", content: "1200" }, { property: "og:image:height", content: "630" }, { property: "og:image:alt", content: "Bóveda GTA6 — Comisiones generadas por el volumen del mercado." }, { name: "twitter:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:video", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:secure_url", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:type", content: "video/mp4" }, { property: "og:video:width", content: "1200" }, { property: "og:video:height", content: "630" },
     { property: "og:url", content: "https://bovedamarket.app/" },
   ], links: langLinks("es", "/", "/en"),
-  scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"BÓVEDA","url":"https://bovedamarket.app/","logo":"https://bovedamarket.app/favicon.png","email":"admin@bovedamarket.app"},{"@type":"WebApplication","name":"BÓVEDA","url":"https://bovedamarket.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"es","description":"Guarda dólares digitales (USDC), genera intereses y retira a tu banco o Cash App. Solo tú apruebas cada movimiento con tu huella o Face ID. Depositar es gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}]}) }] }), component: Landing,
+  scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"BÓVEDA","url":"https://bovedamarket.app/","logo":"https://bovedamarket.app/favicon.png","email":"admin@bovedamarket.app"},{"@type":"WebApplication","name":"BÓVEDA","url":"https://bovedamarket.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"es","description":"Plataforma de autocustodia en dólares digitales (USDC): bóvedas de rendimiento, Piloto Automático, mercados de predicción y retiros a banco, Coinbase o Cash App. Depositar es gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}]}) }] }), component: Landing,
 });
 
 const FAQS = [
-  { q: "¿Qué es USDC?", a: "USDC es una moneda digital diseñada para mantener el mismo valor que el dólar estadounidense: 1 USDC busca valer 1 USD. En BÓVEDA tus saldos, depósitos y intereses se muestran en USDC. No es un depósito bancario ni está asegurado." },
-  { q: "¿Necesito dinero para usar BÓVEDA?", a: "No para mirar. Puedes ver las bóvedas y Doble o Nada en vivo sin registrarte. Para jugar o depositar, entras con Google o email y añades dólares con tu tarjeta. Puedes empezar con poco." },
-  { q: "¿Cómo se generan las ganancias?", a: "Tu depósito se suma a una bóveda que cobra intereses cada vez que otras personas cambian monedas en ella. Esos intereses se reparten entre quienes aportan. Las tasas son estimaciones, cambian y puedes perder dinero." },
-  { q: "¿Cuándo puedo retirar?", a: "Puedes cosechar tus ganancias o cerrar tu posición cuando quieras, sin plazos de permanencia. Cada operación se revisa antes de firmar con tu wallet." },
-  { q: "¿Cuánto cuesta usar BÓVEDA?", a: "Depositar, enviar, cambiar monedas y entrar a Sube/Baja es gratis. Cosechar, cerrar, retirar y reclamar premios tienen un pequeño cargo de servicio que siempre ves antes de firmar. El detalle está en Términos y condiciones." },
+  { q: "¿Qué es USDC?", a: "USDC es una moneda digital diseñada para mantener el mismo valor que el dólar estadounidense: 1 USDC busca valer 1 USD. En BÓVEDA los saldos, depósitos e intereses se muestran en USDC. No es un depósito bancario ni está asegurado." },
+  { q: "¿Necesito dinero para usar BÓVEDA?", a: "No para mirar. Puedes ver las bóvedas y Doble o Nada en vivo sin registrarte. Para participar o depositar basta con entrar con Google o email y añadir dólares con tarjeta. Se puede empezar con montos pequeños." },
+  { q: "¿Cómo se generan las ganancias?", a: "Cada depósito se suma a una bóveda que cobra comisiones cada vez que alguien intercambia monedas en ella. Esas comisiones se reparten entre quienes aportan. Las tasas son estimaciones, cambian y existe riesgo de pérdida." },
+  { q: "¿Cuándo puedo retirar?", a: "Las ganancias se cosechan y las posiciones se cierran en cualquier momento, sin plazos de permanencia. Cada operación se revisa antes de firmar con la wallet." },
+  { q: "¿Cuánto cuesta usar BÓVEDA?", a: "Depositar, enviar, cambiar monedas y entrar a Sube/Baja es gratis. Cosechar, cerrar, retirar y reclamar premios tienen un pequeño cargo de servicio, siempre visible antes de firmar. El detalle está en Términos y condiciones." },
 ];
 
 const GUARANTEES = [
-  { icon: ShieldCheck, title: "Control y firma propia", body: "Cada operación requiere tu autorización. BÓVEDA nunca mueve tus fondos sin tu firma." },
-  { icon: Landmark, title: "Sin dinero congelado", body: "Sin plazos de permanencia. Sales de tus predicciones o bóvedas cuando tú decidas." },
-  { icon: Lock, title: "Seguridad moderna", body: "Entra con huella, Face ID o email cifrado, sin frases secretas escritas en papel." },
+  { icon: ShieldCheck, title: "Control y firma propia", body: "Cada operación requiere autorización del titular. BÓVEDA nunca mueve fondos sin firma del titular." },
+  { icon: Landmark, title: "Sin dinero congelado", body: "Sin plazos de permanencia. Salida libre de predicciones y bóvedas en cualquier momento." },
+  { icon: Lock, title: "Seguridad moderna", body: "Acceso con huella, Face ID o email cifrado, sin frases secretas escritas en papel." },
 ];
 
 
 const ANTI_SCAM: [string, string][] = [
-  ["Nadie custodia tu dinero", "En una estafa entregas tus fondos a alguien. En BÓVEDA tu saldo vive en tu propia wallet: nosotros no podemos tocarlo."],
-  ["Sin «tarifas para descongelar»", "Nunca te pediremos pagar para poder retirar. Retiras a Coinbase, tu banco o Cash App cuando tú decidas."],
-  ["Sin contraseñas que te puedan robar", "Entra con Google (recomendado) o tu huella: tu acceso queda protegido por la verificación en 2 pasos y tu dispositivo. Nunca te pediremos contraseñas ni frases secretas."],
-  ["Cero firmas a ciegas", "Cada operación se simula antes de firmar: ves qué sale, qué entra y el cargo exacto. Así te proteges de hackers."],
+  ["Sin custodia de terceros", "En una estafa los fondos se entregan a un tercero. En BÓVEDA el saldo vive en la wallet del titular: el equipo no puede tocarlo."],
+  ["Sin «tarifas para descongelar»", "Nunca se cobra para poder retirar. Los retiros van a Coinbase, banco o Cash App en cualquier momento."],
+  ["Sin contraseñas expuestas", "Acceso con Google (recomendado) o huella, protegido por verificación en 2 pasos y el propio dispositivo. BÓVEDA nunca pide contraseñas ni frases secretas."],
+  ["Cero firmas a ciegas", "Cada operación se simula antes de firmar: se muestra qué sale, qué entra y el cargo exacto, como protección contra ataques."],
 ];
 
 const REVIEWS = [
@@ -85,9 +85,9 @@ function TrustTicker() {
 }
 
 const TRUST = [
-  { icon: Fingerprint, title: "Tus fondos, tu control", body: "Wallet de autocustodia con Face ID o huella, protegida por Privy. Nadie mueve tu dinero sin tu aprobación digital." },
-  { icon: Landmark, title: "1 USDC = $1 siempre", body: "Nada de monedas locas que hoy suben y mañana se desploman. Tu saldo se mantiene estable mientras genera intereses reales." },
-  { icon: Search, title: "Revisas antes de aprobar", body: "Cada operación se simula primero: ves exactamente qué entra, qué sale y el cargo." },
+  { icon: Fingerprint, title: "Autocustodia real", body: "Wallet de autocustodia con Face ID o huella, protegida por Privy. Ningún movimiento ocurre sin aprobación digital del titular." },
+  { icon: Landmark, title: "1 USDC = $1 siempre", body: "Nada de monedas locas que hoy suben y mañana se desploman. El saldo en dólares digitales se mantiene estable mientras genera rendimiento." },
+  { icon: Search, title: "Revisión antes de aprobar", body: "Cada operación se simula primero: entradas, salidas y cargo exactos a la vista." },
   { icon: ShieldCheck, title: "Sin cargos ocultos", body: "Recargas y retiros con Coinbase. Cargos de servicio reducidos y progresivos." },
 ];
 
@@ -111,7 +111,7 @@ export function Landing() {
   if (decided && compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 pb-10 pt-20 text-foreground sm:py-10">
     <BrandLogo size="lg" />
     <h1 className="mt-4 text-center font-display text-3xl font-bold">{t("Bienvenido de nuevo")}</h1>
-    <p className="mt-2 text-center text-sm text-muted-foreground">{t("Entra para ver tu wallet y tus ganancias.")}</p>
+    <p className="mt-2 text-center text-sm text-muted-foreground">{t("Inicia sesión para ver la wallet y las ganancias.")}</p>
     <div className="mt-2 flex w-full max-w-sm flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0"><EntryAccess /></div>
     <button type="button" onClick={() => setCompact(false)} className="mt-6 text-sm text-primary underline underline-offset-4">{t("Ver portada completa")}</button>
   </div>;
@@ -127,9 +127,9 @@ export function Landing() {
           {plainHero && <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(hero.title)}</h1>}
           {plainHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p><div className="hidden md:block"><TrustTicker /></div></>}
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground md:justify-start"><span className="flex items-center gap-1.5"><span>Powered by</span><img src="/brands/coinbase.svg" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-medium text-foreground">Coinbase</span></span><span className="flex items-center gap-1.5"><span>Network:</span><span className="flex items-center gap-1 font-semibold text-primary"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_var(--color-primary)]" /></span>{t("Online")}</span></span></div>
-          <p className="mt-5 text-base leading-7 text-muted-foreground">{t("Tu dinero, tus reglas. BÓVEDA blinda tu capital con seguridad criptográfica: nadie puede congelar tus fondos y cada centavo se mueve únicamente con tu huella o Face ID.")}</p>
+          <p className="mt-5 text-base leading-7 text-muted-foreground">{t("BÓVEDA es una plataforma de autocustodia: los fondos permanecen en la wallet del titular, nadie puede congelarlos y cada movimiento se aprueba con huella o Face ID.")}</p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs md:justify-start">
-            {["$0 por depositar", "Sin plazos forzosos", "Retiras cuando quieras", "Mira en vivo sin registrarte"].map((b) => <li key={b} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"><ShieldCheck size={13} className="text-primary" />{t(b)}</li>)}
+            {["$0 por depositar", "Sin plazos forzosos", "Retiro en cualquier momento", "Mercados en vivo sin registro"].map((b) => <li key={b} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"><ShieldCheck size={13} className="text-primary" />{t(b)}</li>)}
           </ul>
         </div>
         <div id="acceso" className="order-2 min-w-0 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
@@ -140,7 +140,7 @@ export function Landing() {
       </section>
 
       <section aria-label={t("Doble o Nada")} className="mb-4 grid items-center gap-6 py-8 md:grid-cols-2">
-        <div className="text-center md:text-left"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} loading="lazy" className="mx-auto h-16 w-auto md:mx-0 sm:h-20" /><p className="mt-1 text-xs font-bold uppercase tracking-widest text-primary">{t("Rondas relámpago")}</p><h2 className="mt-2 font-display text-3xl font-bold">{t("Haz dinero en minutos prediciendo el mercado.")}</h2><p className="mt-3 text-muted-foreground">{t("Bitcoin, Ethereum y Solana en rondas relámpago, sin comprar la moneda: juegas en dólares. Si aciertas el movimiento, cobras el premio al instante.")}</p><Link to={guideHref("/guias/mercados-de-prediccion", lang)} className="mt-3 inline-block text-sm font-semibold text-primary underline underline-offset-4">{t("¿Cómo funciona? Lee la guía")} →</Link></div>
+        <div className="text-center md:text-left"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} loading="lazy" className="mx-auto h-16 w-auto md:mx-0 sm:h-20" /><p className="mt-1 text-xs font-bold uppercase tracking-widest text-primary">{t("Rondas relámpago")}</p><h2 className="mt-2 font-display text-3xl font-bold">{t("Mercados de predicción en tiempo real.")}</h2><p className="mt-3 text-muted-foreground">{t("Rondas de 5 min, 15 min y 4 h sobre Bitcoin, Ethereum y Solana. Se participa en dólares, sin comprar la moneda, y cada ronda se resuelve automáticamente.")}</p><Link to={guideHref("/guias/mercados-de-prediccion", lang)} className="mt-3 inline-block text-sm font-semibold text-primary underline underline-offset-4">{t("¿Cómo funciona? Lee la guía")} →</Link></div>
         <PredictPromo />
       </section>
       <section id="opiniones" className="scroll-mt-4 py-12">
@@ -153,8 +153,8 @@ export function Landing() {
           <p className="mt-2 font-display font-semibold leading-snug">{t(title)}</p>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">“{t(text)}”</p></li>)}</ul>
         <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div><p className="flex items-center gap-2 font-display font-semibold"><MessageSquare size={16} className="text-primary" />{t("¿Qué te gusta y qué no? Cuéntanos")}</p>
-            <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">{t("Envía sugerencias, críticas o tu reseña. Leemos cada mensaje para mejorar BÓVEDA.")}</p></div>
+          <div><p className="flex items-center gap-2 font-display font-semibold"><MessageSquare size={16} className="text-primary" />{t("Sugerencias y reseñas")}</p>
+            <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">{t("El equipo lee cada sugerencia, crítica o reseña para mejorar BÓVEDA.")}</p></div>
           <Button asChild variant="outline" className="shrink-0"><a href="#acceso" onClick={() => { try { sessionStorage.setItem("boveda:open-ideas", "1"); } catch { /* ignore */ } }}>{t("Entrar y opinar")}</a></Button>
         </div>
       </section>
@@ -164,8 +164,8 @@ export function Landing() {
       </section>
 
       <section aria-label={t("Por qué BÓVEDA es diferente")} className="mb-12 rounded-3xl border border-border bg-card p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t("¿Te estafaron antes?")}</p>
-        <h2 className="mt-2 font-display text-2xl font-bold">{t("Aquí no le entregas tu dinero a nadie")}</h2>
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t("Diferencia clave")}</p>
+        <h2 className="mt-2 font-display text-2xl font-bold">{t("Los fondos nunca se entregan a terceros")}</h2>
         <ul className="mt-5 grid gap-4 sm:grid-cols-2">{ANTI_SCAM.map(([h, d]) => <li key={h} className="rounded-2xl border border-border bg-background p-4"><p className="font-display text-sm font-semibold">{t(h)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ul>
       </section>
 
@@ -173,14 +173,14 @@ export function Landing() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Send size={14} />{t("Canal oficial de Telegram")}</p>
             <h2 className="mt-2 font-display text-2xl font-bold">{t("Transparencia total, en vivo")}</h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t("Únete a @bovedamarket: recibe alertas automáticas del estado de la red y de la app, avisos de seguridad y cada mejora en cuanto sale.")}</p>
-            <p className="mt-4 flex max-w-xl items-start gap-2 rounded-xl border border-border bg-background/60 p-3 text-xs leading-5 text-muted-foreground"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-primary" /><span>{t("Nadie de BÓVEDA te escribirá primero por privado. Nunca te pediremos claves, frases de recuperación, códigos ni dinero para retirar. Si alguien lo hace, es una estafa.")}</span></p></div>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t("El canal @bovedamarket publica alertas automáticas del estado de la red y de la app, avisos de seguridad y cada mejora en cuanto sale.")}</p>
+            <p className="mt-4 flex max-w-xl items-start gap-2 rounded-xl border border-border bg-background/60 p-3 text-xs leading-5 text-muted-foreground"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-primary" /><span>{t("El equipo de BÓVEDA nunca escribe primero por privado ni pide claves, frases de recuperación, códigos o dinero para retirar. Cualquier mensaje así es una estafa.")}</span></p></div>
           <div className="flex shrink-0 flex-col gap-2"><Button asChild className="h-12"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer">{t("Unirme a @bovedamarket")}<ArrowRight size={16} /></a></Button><Link to="/status" search={{ from: "transparencia" }} className="flex items-center justify-center gap-1.5 text-sm text-primary underline"><Activity size={14} />{t("Ver estado del sistema")}</Link></div>
         </div>
       </section>
 
       <section className="border-t border-border py-12">
-        <h2 className="font-display text-2xl font-bold">{t("Tu tranquilidad en BÓVEDA")}</h2>
+        <h2 className="font-display text-2xl font-bold">{t("Garantías de BÓVEDA")}</h2>
         <ul className="mt-6 grid gap-4 sm:grid-cols-3">{GUARANTEES.map(({ icon: Icon, title, body }) => <li key={title} className="rounded-2xl border border-border bg-card p-5">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={18} /></span>
           <p className="mt-4 font-display font-semibold">{t(title)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(body)}</p></li>)}</ul>
@@ -189,11 +189,11 @@ export function Landing() {
       <section className="py-12">
         <div className="rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card p-6 sm:p-8">
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground"><Gift size={20} /></span>
-          <h2 className="mt-4 font-display text-2xl font-bold">{t("Invita y gana: genera más compartiendo BÓVEDA")}</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Cualquier usuario puede ser socio. Comparte tu enlace y recibe en USDC una parte de las ganancias de cada operación de tus invitados, sin costo extra para ellos.")}</p>
+          <h2 className="mt-4 font-display text-2xl font-bold">{t("Programa de socios")}</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Cualquier usuario puede ser socio. Cada socio recibe en USDC una parte de los cargos de las operaciones de sus invitados, sin costo extra para ellos.")}</p>
           <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">50%</p><p className="text-sm text-muted-foreground">{t("de las ganancias de tus invitados directos")}</p></li>
-            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">10%</p><p className="text-sm text-muted-foreground">{t("de los invitados de tus invitados")}</p></li>
+            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">50%</p><p className="text-sm text-muted-foreground">{t("de los cargos de invitados directos")}</p></li>
+            <li className="rounded-2xl border border-border bg-card p-4"><p className="font-display text-2xl font-bold text-primary">10%</p><p className="text-sm text-muted-foreground">{t("de los cargos del segundo nivel")}</p></li>
           </ul>
           <Button asChild className="mt-5"><Link to="/invita">{t("Obtener mi enlace")}<ArrowRight size={16} /></Link></Button>
         </div>

@@ -27,7 +27,7 @@ export function Gta6Hero({ title, sub }: { title: string; sub: string }) {
   const t = useT();
   const { lang } = useI18n();
   const apr = useGta6AprLabel();
-  const steps = [["💵", "Depositas"], ["📲", "Te avisamos"], ["🎯", "Rebalanceas"]] as const;
+  const steps = [["💵", "Depósito"], ["📲", "Alertas"], ["🤖", "Piloto Automático"]] as const;
   return <div className="hot-ring rounded-3xl p-[2px] shadow-[var(--shadow-hot)]">
     <div className="relative isolate overflow-hidden rounded-[calc(1.5rem-2px)] bg-[image:var(--gradient-hot-surface)] text-hot-foreground">
       <div className="relative bg-[image:var(--gradient-hot)] px-5 pb-4 pt-5 sm:px-8">
@@ -165,7 +165,7 @@ export function DobleHero({ title, sub }: { title: string; sub: string }) {
   const t = useT();
   const left = useRoundCountdown();
   const clock = left == null ? "5:00" : `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
-  const steps = [["🎯", "Eliges Sube o Baja"], ["⏱️", "Esperas 5 min"], ["💵", "Cobras en dólares"]] as const;
+  const steps = [["🎯", "Sube o Baja"], ["⏱️", "Ronda de 5 min"], ["💵", "Pago en dólares"]] as const;
   return <div className="duel-ring rounded-3xl p-[2px] shadow-[var(--shadow-duel)]">
     <div className="relative isolate overflow-hidden rounded-[calc(1.5rem-2px)] bg-[image:var(--gradient-duel-surface)] text-hot-foreground">
       <div className="relative isolate h-36 overflow-hidden px-5 pt-4 sm:h-44 sm:px-8">
