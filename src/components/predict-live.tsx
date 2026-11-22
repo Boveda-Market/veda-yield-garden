@@ -257,8 +257,8 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
           </div>
         </ActionSheetContent>
       </Dialog>
-      <Dialog open={!!side} onOpenChange={(o) => { if (!o && busy !== "sign") cancelQuote(); }}>
-        <ActionSheetContent closeLabel={t("Cerrar")} onOpenAutoFocus={(e) => e.preventDefault()}>
+      <Dialog open={!!side} onOpenChange={(o) => { if (!o && busy !== "sign" && !(review && wasShort.current)) cancelQuote(); }}>
+        <ActionSheetContent locked={!!review && wasShort.current} closeLabel={t("Cerrar")} onOpenAutoFocus={(e) => e.preventDefault()}>
           <DialogTitle className={`flex items-center gap-2 pr-10 font-display text-xl ${side === "down" ? "text-destructive" : "text-primary"}`}>{side === "down" ? <ArrowDownRight size={22} /> : <ArrowUpRight size={22} />}{t(side === "down" ? "Predecir Baja" : "Predecir Sube")}{selPrice ? <span className="ml-auto text-sm font-semibold tabular-nums">{t("Paga {x}×", { x: (1 / selPrice).toFixed(2) })}</span> : null}</DialogTitle>
           <DialogDescription className="text-xs">{t(side === "down" ? "Ganas si el precio baja" : "Ganas si el precio sube")}</DialogDescription>
       <section aria-label={t("Tu orden")}>
@@ -306,7 +306,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
             </div>
             <p className="text-xs text-muted-foreground">{t("Precio real del momento; se actualiza cada 15 s.")} {t("Al expirar el tiempo la posición se cierra sola: si ganas, aparece tu premio para reclamar; si pierdes, desaparece. También puedes vender antes del cierre al precio del momento.")}</p>
           </DetailsToggle>
-          <Button type="button" variant="ghost" className="w-full" disabled={busy === "sign"} onClick={cancelQuote}>{t("Cancelar cotización")}</Button>
+          {!wasShort.current && <Button type="button" variant="ghost" className="w-full" disabled={busy === "sign"} onClick={cancelQuote}>{t("Cancelar cotización")}</Button>}
         </section>}
         </ActionSheetContent>
       </Dialog>

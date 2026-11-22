@@ -11,8 +11,8 @@ import { BackToClose } from "@/lib/back-close";
  */
 export const ActionSheetContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { closeLabel?: string }
->(({ className, children, closeLabel = "Cerrar", style, onOpenAutoFocus, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { closeLabel?: string; locked?: boolean }
+>(({ className, children, closeLabel = "Cerrar", locked = false, style, onOpenAutoFocus, onEscapeKeyDown, onPointerDownOutside, onInteractOutside, ...props }, ref) => {
   const closeRef = React.useRef<HTMLButtonElement>(null);
   const start = React.useRef<number | null>(null);
   const [drag, setDrag] = React.useState(0);
@@ -33,18 +33,21 @@ export const ActionSheetContent = React.forwardRef<
       )}
       // Never focus a field on open: the phone keyboard would cover the quote and confirm button.
       onOpenAutoFocus={(e) => { e.preventDefault(); onOpenAutoFocus?.(e); }}
+      onEscapeKeyDown={(e) => { if (locked) e.preventDefault(); onEscapeKeyDown?.(e); }}
+      onPointerDownOutside={(e) => { if (locked) e.preventDefault(); onPointerDownOutside?.(e); }}
+      onInteractOutside={(e) => { if (locked) e.preventDefault(); onInteractOutside?.(e); }}
       {...props}
     >
-      <div data-sheet-handle aria-hidden onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
+      <div data-sheet-handle aria-hidden onPointerDown={locked ? undefined : onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
         className="-mx-5 -mt-2 flex h-7 cursor-grab touch-none items-center justify-center active:cursor-grabbing sm:hidden">
         <span className="h-1.5 w-10 rounded-full bg-muted-foreground/30" />
       </div>
       {children}
-      <BackToClose closeRef={closeRef} />
-      <DialogPrimitive.Close ref={closeRef} className="absolute right-3 top-3 z-20 grid size-9 place-items-center rounded-full border border-border bg-muted text-foreground shadow-sm transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring sm:right-4 sm:top-4">
+      {!locked && <BackToClose closeRef={closeRef} />}
+      {!locked && <DialogPrimitive.Close ref={closeRef} className="absolute right-3 top-3 z-20 grid size-9 place-items-center rounded-full border border-border bg-muted text-foreground shadow-sm transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring sm:right-4 sm:top-4">
         <X className="size-[18px]" />
         <span className="sr-only">{closeLabel}</span>
-      </DialogPrimitive.Close>
+      </DialogPrimitive.Close>}
     </DialogPrimitive.Content>
   </DialogPrimitive.Portal>;
 });
