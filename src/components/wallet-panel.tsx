@@ -34,6 +34,7 @@ import { solanaAddressSchema } from "@/lib/solana-data";
 import { decimalToUnits, PAYOUT_MOVE_MIN_USD } from "@/lib/onboarding";
 import { StartGuide } from "@/components/start-guide";
 import { ExploreCards } from "@/components/explore-cards";
+import { isExploringAccount } from "@/lib/explore-state";
 import { DobleShortcut, WalletHeroShortcuts } from "@/components/wallet-hero-shortcuts";
 
 import { BuyUsdc } from "@/components/buy-usdc";
@@ -95,6 +96,7 @@ export function WalletPanel() {
     if (!r.success) throw new Error(r.error);
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   } });
+  const exploring = isExploringAccount(balances.data?.usdc, vaultPositions.length, vaults.isLoading);
   const extraTokens = SWAP_TOKENS.filter((x) => x.symbol !== "SOL" && x.symbol !== "USDC");
   const extra = useQuery({ queryKey: ["my-wallet-tokens", address], enabled: !!address && extraTokens.length > 0, queryFn: async () =>
     Object.fromEntries(await Promise.all(extraTokens.map(async (x) => [x.symbol, await readTokenBalance(address!, x.mint).catch(() => undefined)] as const))) as Record<string, bigint | undefined> });
@@ -216,15 +218,17 @@ export function WalletPanel() {
       <h1 className="font-display text-3xl font-semibold">{t("Billetera")}</h1>
       <ReportProblem trigger={(open) => <button type="button" onClick={open} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"><LifeBuoy size={14} className="text-primary" />{t("Reportar")}</button>} />
     </div>
+    {/* New accounts at $0 explore first: the cards lead, the install reminder is skipped (they just saw the install step) and Face ID / first-deposit steps follow. */}
+    {exploring && <ExploreCards />}
     <WalletHeroShortcuts wallet={address} />
-    <InstallAppBanner />
+    {!exploring && <InstallAppBanner />}
     <GasRefillCard sol={balances.data?.sol} usdc={balances.data?.usdc} onDone={() => void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] })} />
-    <PasskeyInvite />
+    {!exploring && <PasskeyInvite />}
     <PendingClaims />
     <WalletRangeBanner wallet={address} />
 
     <StartGuide />
-    {balances.data && balances.data.usdc === 0n && vaultPositions.length === 0 && !vaults.isLoading ? <ExploreCards /> : null}
+    {exploring && <PasskeyInvite />}
     <section className="rounded-3xl border border-border bg-card p-6">
       <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{vaultPositions.length > 0 || jupUsd > 0 ? t("Balance total") : t("Balance en USDC")}</p><Button variant="ghost" size="sm" onClick={() => { void balances.refetch(); void extra.refetch(); void prices.refetch(); void queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); void queryClient.invalidateQueries({ queryKey: ["predict-positions", address] }); }} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
       <div className="mt-1 flex items-center gap-2">{balances.data?.usdc !== undefined && (hidden || working !== null) ? <p className="font-display text-4xl">{hidden ? MASK : <AnimatedMoney value={(Number(balances.data.usdc) / 1e6) + jupUsd + (working ?? 0) + totalFees} ratePerMs={liveRate} />}</p> : <BalanceLoading />}<button type="button" onClick={() => setHidden(!hidden)} aria-label={hidden ? t("Mostrar saldos") : t("Ocultar saldos")} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{hidden ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
