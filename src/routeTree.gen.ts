@@ -26,7 +26,6 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as WalletRouteImport } from './routes/wallet'
-import { Route as ZzStep3PreviewRouteImport } from './routes/zz-step3-preview'
 import { Route as EnIndexRouteImport } from './routes/en/index'
 import { Route as EnFaqRouteImport } from './routes/en/faq'
 import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
@@ -138,11 +137,6 @@ const TerminosRoute = TerminosRouteImport.update({
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ZzStep3PreviewRoute = ZzStep3PreviewRouteImport.update({
-  id: '/zz-step3-preview',
-  path: '/zz-step3-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnIndexRoute = EnIndexRouteImport.update({
@@ -312,7 +306,6 @@ export interface FileRoutesByFullPath {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
-  '/zz-step3-preview': typeof ZzStep3PreviewRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/status': typeof EnStatusRoute
@@ -359,7 +352,6 @@ export interface FileRoutesByTo {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
-  '/zz-step3-preview': typeof ZzStep3PreviewRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/status': typeof EnStatusRoute
@@ -407,7 +399,6 @@ export interface FileRoutesById {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
-  '/zz-step3-preview': typeof ZzStep3PreviewRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/status': typeof EnStatusRoute
@@ -456,7 +447,6 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
-    | '/zz-step3-preview'
     | '/en/faq'
     | '/en/privacy'
     | '/en/status'
@@ -503,7 +493,6 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
-    | '/zz-step3-preview'
     | '/en/faq'
     | '/en/privacy'
     | '/en/status'
@@ -550,7 +539,6 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
-    | '/zz-step3-preview'
     | '/en/faq'
     | '/en/privacy'
     | '/en/status'
@@ -598,7 +586,6 @@ export interface RootRouteChildren {
   StatusRoute: typeof StatusRoute
   TerminosRoute: typeof TerminosRoute
   WalletRoute: typeof WalletRoute
-  ZzStep3PreviewRoute: typeof ZzStep3PreviewRoute
   EnFaqRoute: typeof EnFaqRoute
   EnPrivacyRoute: typeof EnPrivacyRoute
   EnStatusRoute: typeof EnStatusRoute
@@ -747,13 +734,6 @@ declare module '@tanstack/react-router' {
       path: '/wallet'
       fullPath: '/wallet'
       preLoaderRoute: typeof WalletRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/zz-step3-preview': {
-      id: '/zz-step3-preview'
-      path: '/zz-step3-preview'
-      fullPath: '/zz-step3-preview'
-      preLoaderRoute: typeof ZzStep3PreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/': {
@@ -966,7 +946,6 @@ const rootRouteChildren: RootRouteChildren = {
   StatusRoute: StatusRoute,
   TerminosRoute: TerminosRoute,
   WalletRoute: WalletRoute,
-  ZzStep3PreviewRoute: ZzStep3PreviewRoute,
   EnFaqRoute: EnFaqRoute,
   EnPrivacyRoute: EnPrivacyRoute,
   EnStatusRoute: EnStatusRoute,
