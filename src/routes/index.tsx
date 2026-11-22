@@ -136,7 +136,6 @@ export function Landing() {
         <div className="order-3 min-w-0 text-center md:order-1 md:text-left">
           {plainHero && <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(hero.title)}</h1>}
           {plainHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p><div className="hidden md:block">{showReviews && <TrustTicker />}</div></>}
-          <p className="mt-5 text-base leading-7 text-muted-foreground">{t("Bóveda Market es una plataforma de autocustodia: los fondos permanecen en la wallet del titular, nadie puede congelarlos y cada movimiento se aprueba con huella o Face ID.")}</p>
         </div>
         <div id="acceso" className="order-2 min-w-0 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
           <HomeCtas vaultsFirst={gtaHero || hero.theme === "trump"} trump={hero.theme === "trump"} />
