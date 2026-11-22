@@ -89,7 +89,6 @@ export function PortfolioSummary({ wallet, positions, positionsComplete, predict
         {(() => { const pend = rows.filter((r) => !r.p.locked && typeof r.fees === "number" && r.fees > 0); const ready = pend.filter((r) => canHarvest(r.fees as number)); return ready.length > 1 && ready.length === pend.length && totalFees >= 20 && onHarvestAll ? <button type="button" className="loot-btn mt-2 w-full" onClick={() => onHarvestAll(ready.map((r) => r.p))}><Trophy size={15} aria-hidden="true" /><span>{t("Cobrar")}</span></button> : null; })() ?? (top && canHarvest(top.fees) ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvest(top.p)}>{t("Cosechar ahora")}</Button> : null)}
       </div>
     </div>
-    </div>
     <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground"><Layers size={12} className="mt-0.5 shrink-0" />{t("Total ganado = lo ya cosechado (al precio de hoy) + lo que tienes por cosechar. No incluye subidas o bajadas del precio de tu capital.")}</p>
   </section>;
 }
