@@ -30,6 +30,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
   const stats = query.data;
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
   const holders = yieldQ.data?.holders ?? null, fees24h = yieldQ.data?.fees24h ?? null;
+  const sym = vault.id === "trump" ? "$TRUMP" : stats?.baseSymbol ?? vault.pair.split("/")[0];
   const buys = stats?.buys24h ?? null, sells = stats?.sells24h ?? null;
   const url = `https://app.meteora.ag/${isDlmmVault(vault.id) ? "dlmm" : "dammv2"}/${vault.pool}`;
   const copy = async () => {
@@ -69,11 +70,11 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
         </div>}
         <div className="grid grid-cols-3 gap-2">{([["1 h", stats?.change1h], ["6 h", stats?.change6h], ["24 h", stats?.change24h]] as const).map(([k, v]) => <div key={k} className={`rounded-lg p-2 text-center ${v == null ? "bg-muted" : v >= 0 ? "bg-primary/10" : "bg-destructive/10"}`}><p className="text-[11px] text-muted-foreground">{k}</p><p className={`flex items-center justify-center gap-1 font-display font-bold tabular-nums ${v == null ? "" : v >= 0 ? "text-primary" : "text-destructive"}`}>{v == null ? "—" : <>{v >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}{v > 0 ? "+" : ""}{number(v)}%</>}</p></div>)}</div>
         <dl className="grid grid-cols-2 gap-x-5 gap-y-6 py-2">
-          <Metric label={`Precio ${stats?.baseSymbol ?? vault.pair.split("/")[0]} · USD`} value={usd(stats?.price, 6)} />
+          <Metric label={`Precio ${sym} · USD`} value={usd(stats?.price, 6)} />
           <Metric label={t("Volumen · 24 h · USD")} value={usd(stats?.volume24h)} />
           <Metric label={t("Liquidez en el pool · USD")} value={usd(stats?.liquidityUsd)} />
           <Metric label={t("Valor de mercado · USD")} value={usd(stats?.marketCap, 0)} />
-          <Metric label={`${stats?.baseSymbol ?? vault.pair.split("/")[0]} en el pool`} value={number(stats?.baseLocked, 4)} />
+          <Metric label={`${sym} en el pool`} value={number(stats?.baseLocked, 4)} />
           <Metric label={`${stats?.quoteSymbol ?? "USDC"} en el pool`} value={number(stats?.quoteLocked, 4)} />
           <Metric label={t("Operaciones · 24 h")} value={number(stats?.transactions24h, 0)} />
           <Metric label={t("Riesgo de la bóveda")} value={vault.badge ? t(vault.badge) : t(vault.risk)} />

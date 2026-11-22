@@ -1,4 +1,5 @@
-import { Loader2 } from "lucide-react";
+import { Check, Copy, Loader2 } from "lucide-react";
+import { CHAIN_POOLS } from "@/lib/solana-data";
 import { useHydrated } from "@tanstack/react-router";
 import { readCachedCandles } from "@/lib/pool-candles";
 import { useEffect, useId, useState } from "react";
@@ -37,7 +38,11 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const candles = useQuery({ queryKey: ["pool-candles", vault.pool, range], queryFn: ({ signal }) => fetchPoolCandles(vault.pool, range, signal), ...(hydrated && readCachedCandles(vault.pool, range) ? { placeholderData: readCachedCandles(vault.pool, range)! } : {}), staleTime: 30_000, refetchInterval: 30_000, retry: 1, retryDelay: 1500 });
   const stats = useQuery({ queryKey: ["dexscreener-pool-stats", vault.pool], queryFn: ({ signal }) => fetchPoolStats(vault.pool, signal), staleTime: 60_000, retry: 1 });
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
-  const symbol = stats.data?.baseSymbol ?? vault.pair.split("/")[0];
+  const rawSym = stats.data?.baseSymbol ?? vault.pair.split("/")[0];
+  const symbol = vault.id === "trump" ? "$TRUMP" : rawSym;
+  const mint = CHAIN_POOLS.find((p) => p.id === vault.id)?.mint;
+  const [copied, setCopied] = useState(false);
+  const ch = stats.data?.change24h ?? null;
   const fees24h = yieldQ.data?.fees24h ?? null, vol24h = stats.data?.volume24h ?? null;
   const ratio = fees24h != null && vol24h ? fees24h / vol24h : null;
   const list = candles.data ?? [];
@@ -79,8 +84,12 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
       {[[`${t("Precio")} ${symbol}`, stats.data?.price != null ? price(stats.data.price) : "—", stats.data?.change24h != null ? `${stats.data.change24h > 0 ? "+" : ""}${stats.data.change24h.toFixed(1)}% · 24 h` : ""],
         [t("Volumen operado"), usd(list.length ? volume : vol24h), rl],
         [t("Intereses generados"), earn.length ? `+${usd(earn[earn.length - 1], 0)}` : "—", rl]].map(([k, v, s], i) =>
-        <div key={k} className={`min-w-0 rounded-xl p-2.5 ${i === 2 ? "bg-primary/10" : "bg-muted"}`}><p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{k}</p><p className={`truncate font-display text-base font-bold tabular-nums ${i === 2 ? "text-primary" : ""}`}>{v}</p><p className="truncate text-[10px] text-muted-foreground">{s}</p></div>)}
+        <div key={k} className={`min-w-0 rounded-xl p-2.5 ${i === 2 ? "bg-primary/10" : "bg-muted"}`}><p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{k}</p><p className={`truncate font-display text-base font-bold tabular-nums ${i === 2 ? "text-primary" : ""}`}>{v}</p><p className={`truncate text-[10px] ${i === 0 && ch != null ? (ch >= 0 ? "font-bold text-primary" : "font-bold text-destructive") : "text-muted-foreground"}`}>{i === 0 && ch != null ? (ch >= 0 ? "▲ " : "▼ ") : ""}{s}</p></div>)}
     </div>
+    {mint && <button type="button" onClick={() => { void navigator.clipboard.writeText(mint).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {}); }} aria-label={t("Copiar contrato")} className="flex w-full items-center gap-2 rounded-xl border border-border bg-muted/50 px-3 py-2 text-left">
+      <div className="min-w-0 flex-1"><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("Contrato oficial:")} {symbol}</p><p className="break-all font-mono text-[11px] leading-4">{mint}</p></div>
+      {copied ? <Check size={16} className="shrink-0 text-primary" /> : <Copy size={16} className="shrink-0 text-muted-foreground" />}
+    </button>}
     <div className="rounded-2xl border border-border bg-card p-3">
       <div className="flex rounded-full bg-secondary p-0.5 w-fit" role="tablist" aria-label={t("Periodo")}>{([chartRangeFor(vault.id)] as const).map((r) => <button key={r} type="button" role="tab" aria-selected={range === r} onClick={() => { setRange(r); setHover(null); }} className={pill(range === r)}>{r === "1h" ? "7D" : r.toUpperCase()}</button>)}</div>
       {chart ?? <div className="grid h-80 place-items-center text-sm text-muted-foreground">{candles.isPending || candles.isFetching ? <span className="h-2 w-40 animate-pulse rounded-full bg-muted" /> : t("Gráfica no disponible por ahora")}</div>}
