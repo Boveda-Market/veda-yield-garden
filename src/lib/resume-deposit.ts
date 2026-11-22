@@ -49,6 +49,15 @@ export function peekResumePlay(store: Pick<Storage, "getItem" | "removeItem"> = 
   return peek<ResumePlay>(RESUME_PLAY_KEY, (r) => typeof r.market === "string" && typeof r.window === "string" && (r.side === "up" || r.side === "down") && typeof r.amount === "string" && okBaseline(r.baseline), store, now);
 }
 
+/** Play a visitor picked before signing in (this tab only, like the pending vault deposit): reopened as soon as the wallet is ready. */
+export const PENDING_PLAY_KEY = "boveda:pending-play";
+const ss = (): Store => sessionStorage;
+export function savePendingPlay(r: Omit<ResumePlay, "at" | "baseline">, store: Pick<Storage, "setItem"> = ss(), now = Date.now()) { save(PENDING_PLAY_KEY, r, store, now); }
+export function clearPendingPlay(store: Pick<Storage, "removeItem"> = ss()) { clear(PENDING_PLAY_KEY, store); }
+export function peekPendingPlay(store: Pick<Storage, "getItem" | "removeItem"> = ss(), now = Date.now()): ResumePlay | null {
+  return peek<ResumePlay>(PENDING_PLAY_KEY, (r) => typeof r.market === "string" && typeof r.window === "string" && (r.side === "up" || r.side === "down") && typeof r.amount === "string", store, now);
+}
+
 /** True once dollars beyond what the wallet held before the purchase have landed (no baseline recorded → any dollars). */
 export function newFundsArrived(usdcMicro: bigint | undefined | null, baseline?: string): boolean {
   if (usdcMicro == null) return false;

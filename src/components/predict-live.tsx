@@ -7,8 +7,6 @@ import { ArrowDownRight, ArrowUpRight, ExternalLink, Loader2 } from "lucide-reac
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { CoinbaseNote } from "@/components/coinbase-note";
-import { GoogleButton } from "@/components/google-button";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { PredictPositionCard } from "@/components/predict-position-card";
 import { SolConvertShortcut } from "@/components/sol-convert-shortcut";
@@ -31,7 +29,8 @@ import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { ActionSuccess } from "@/components/action-success";
 import { FlowSteps, WorkingLine } from "@/components/move-steps";
 import { FundsKeptCard } from "@/components/funds-kept-card";
-import { clearResumePlay, peekResumePlay } from "@/lib/resume-deposit";
+import { clearPendingPlay, clearResumePlay, peekPendingPlay, peekResumePlay, savePendingPlay } from "@/lib/resume-deposit";
+import { LoginSheet } from "@/components/login-nudge";
 import { DetailsToggle } from "@/components/ui/details-toggle";
 
 const usdc = (micro: string | bigint | null) => micro === null ? "—" : (Number(micro) / 1e6).toFixed(2);
@@ -67,8 +66,10 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   useEffect(() => { setReview(null); }, [round?.marketId]);
   // The quote lives in a pop-up so choosing a side never scrolls the page.
   const [kept, setKept] = useState(false);
-  const cancelQuote = () => { clearResumePlay(); setSide(null); setReview(null); setKept(false); };
+  const cancelQuote = () => { clearResumePlay(); clearPendingPlay(); setSide(null); setReview(null); setKept(false); };
   // Cancelling at «Todo listo» (after a top-up) first says where the dollars are.
+  // Visitors: remember the exact play (coin, duration, side, amount) so it reopens with a live quote right after signing in.
+  const askFor = (s: PredictSide) => { if (round) savePendingPlay({ market: round.asset, window: round.window, side: s, amount }); setAskLogin(true); };
   const cancelOrKeep = () => { if (review && wasShort.current && !kept) setKept(true); else cancelQuote(); };
   const refresh = useCallback(async () => {
     if (!wallet) return;
@@ -113,10 +114,11 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   const resumedPlay = useRef(false);
   useEffect(() => {
     if (resumedPlay.current || !wallet || !round || side) return;
-    const p = peekResumePlay();
+    const back = peekResumePlay();
+    const p = back ?? peekPendingPlay();
     if (!p || p.market !== round.asset || p.window !== round.window) return;
     // Taken once: the open ticket now holds it, so Billetera never sends the person here again for the same play.
-    resumedPlay.current = true; wasShort.current = true; clearResumePlay();
+    resumedPlay.current = true; if (back) { wasShort.current = true; clearResumePlay(); } else clearPendingPlay();
     setAmount(p.amount); setSide(p.side);
   }, [wallet, round?.asset, round?.window]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -239,7 +241,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
         <div className="grid flex-1 grid-cols-4 gap-1.5">{QUICK.map((v) => { const on = Number(amount) === v; return <button key={v} type="button" aria-pressed={on} onClick={() => { setAmount(String(v)); setReview(null); }} className={`rounded-full border py-1.5 text-sm font-bold tabular-nums transition active:scale-95 ${on ? "border-foreground bg-foreground text-background" : "border-border bg-card text-foreground"}`}>${v}</button>; })}</div>
       </div>
       {/* One-tap "go with the crowd": picks the side the live market odds favor and opens the same confirm sheet. */}
-      {(() => { const ou = round?.upPrice, od = round?.downPrice; if (!ou || !od) return null; const fav: PredictSide = ou >= od ? "up" : "down"; const fp = fav === "up" ? ou : od; const pct = Math.round((fp / (ou + od)) * 100); if (pct < 55) return <p className="rounded-2xl border border-border bg-muted px-3 py-2 text-center text-xs font-semibold text-muted-foreground">{t("⚖️ Ronda pareja: el mercado está dividido. Elige tú.")}</p>; const upFav = fav === "up"; return <button type="button" onClick={() => { if (!session.authenticated) { setAskLogin(true); return; } setSide(fav); setReview(null); }}
+      {(() => { const ou = round?.upPrice, od = round?.downPrice; if (!ou || !od) return null; const fav: PredictSide = ou >= od ? "up" : "down"; const fp = fav === "up" ? ou : od; const pct = Math.round((fp / (ou + od)) * 100); if (pct < 55) return <p className="rounded-2xl border border-border bg-muted px-3 py-2 text-center text-xs font-semibold text-muted-foreground">{t("⚖️ Ronda pareja: el mercado está dividido. Elige tú.")}</p>; const upFav = fav === "up"; return <button type="button" onClick={() => { if (!session.authenticated) { askFor(fav); return; } setSide(fav); setReview(null); }}
         className={`cta-attn relative w-full overflow-hidden rounded-2xl border-2 px-4 py-3 text-left transition active:scale-[0.98] ${upFav ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "border-destructive bg-destructive text-destructive-foreground shadow-lg shadow-destructive/30"}`}>
         <span className="flex items-center justify-between gap-2"><span className="font-display text-lg font-extrabold">🔥 {t("Ir con la mayoría")}</span><span className="font-display text-lg font-bold tabular-nums">{upFav ? "▲" : "▼"} {t(upFav ? "Sube" : "Baja")} {pct}%</span></span>
         {amt > 0 && <span className="mt-0.5 block text-xs font-semibold tabular-nums opacity-90">{t("Pones ${a} → recibes ≈${b} si acierta la mayoría", { a: amt % 1 ? amt.toFixed(2) : String(amt), b: (amt / fp).toFixed(2) })}</span>}
@@ -248,7 +250,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
         {(["up", "down"] as const).map((s) => {
           const p = priceOf(s), on = side === s, up = s === "up";
           const Icon = up ? ArrowUpRight : ArrowDownRight;
-          return <button key={s} type="button" disabled={!p} aria-pressed={on} onClick={() => { if (!session.authenticated) { setAskLogin(true); return; } if (on) { cancelQuote(); return; } setSide(s); setReview(null); }}
+          return <button key={s} type="button" disabled={!p} aria-pressed={on} onClick={() => { if (!session.authenticated) { askFor(s); return; } if (on) { cancelQuote(); return; } setSide(s); setReview(null); }}
             className={`relative overflow-hidden rounded-2xl border-2 p-3 text-left transition active:scale-[0.97] disabled:opacity-40 ${on ? (up ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "border-destructive bg-destructive text-destructive-foreground shadow-lg shadow-destructive/30") : up ? "border-primary/40 bg-primary/5 text-primary" : "border-destructive/40 bg-destructive/5 text-destructive"}`}>
             <span className="flex items-center justify-between"><span className="font-display text-xl font-bold">{t(up ? "Sube" : "Baja")}</span><Icon size={22} /></span>
             <span className="mt-1 block font-display text-3xl font-bold tabular-nums">{p ? `${Math.round(p * 100)}%` : "—"}</span>
@@ -261,17 +263,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
 
       {chart}
       {!side && <p className="text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
-      <Dialog open={askLogin} onOpenChange={setAskLogin}>
-        <ActionSheetContent>
-          <DialogTitle className="pr-10 font-display text-xl">{t("Inicia sesión para confirmar tu jugada")}</DialogTitle>
-          <DialogDescription asChild><div><CoinbaseNote /></div></DialogDescription>
-          <div className="mt-4 grid gap-2">
-            <GoogleButton className="h-12 w-full" onClick={() => { setAskLogin(false); session.login("google"); }}>{t("Continuar con Google")}</GoogleButton>
-            <Button variant="secondary" className="h-11 w-full" onClick={() => { setAskLogin(false); session.login("email"); }}>{t("Entrar con email")}</Button>
-            <Button variant="ghost" className="w-full" onClick={() => setAskLogin(false)}>{t("Seguir mirando")}</Button>
-          </div>
-        </ActionSheetContent>
-      </Dialog>
+      <LoginSheet open={askLogin} onOpenChange={setAskLogin} title={t("Entra para confirmar tu jugada")} body={t("Al entrar te traemos de vuelta a esta jugada, lista para confirmar.")} />
       <Dialog open={!!side} onOpenChange={(o) => { if (!o && busy !== "sign") cancelOrKeep(); }}>
         <ActionSheetContent closeLabel={t("Cerrar")} onOpenAutoFocus={(e) => e.preventDefault()}>
           {kept ? <FundsKeptCard amountMicro={balance} onDone={() => { wasShort.current = false; cancelQuote(); }} /> : <>

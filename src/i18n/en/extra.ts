@@ -1814,4 +1814,6 @@ export const extra: Record<string, string> = {
   "Esperando tus dólares para {v}. Cuando lleguen, seguimos donde ibas.": "Waiting for your dollars for {v}. When they arrive, we'll pick up where you left off.",
   "tu jugada": "your play",
   "Instala Bóveda Market y mira crecer tus intereses en 1 toque.": "Install Bóveda Market and watch your interest grow in 1 tap.",
+  "Entra para confirmar tu jugada": "Sign in to confirm your play",
+  "Al entrar te traemos de vuelta a esta jugada, lista para confirmar.": "Once you sign in we bring you back to this play, ready to confirm.",
 };
