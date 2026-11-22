@@ -3,7 +3,7 @@ import { useT } from "@/lib/i18n";
 import { useEffect, useRef, useState } from "react";
 import { HostedSession } from "./session-host";
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
-import { Wallet, ArrowRight, Fingerprint, ChevronDown } from "lucide-react";
+import { ArrowRight, Fingerprint } from "lucide-react";
 import { isReturning, markReturning, useHomePath } from "@/lib/preferences";
 import { isHeroReview } from "@/lib/hero-variants";
 import { Button } from "./ui/button";
@@ -91,16 +91,19 @@ function EntryButtons() {
     {signup && <p className="text-xs leading-5 text-muted-foreground">{t("Tu primer acceso crea tu cuenta con Privy. Después puedes elegir tu nombre y avatar.")}</p>}
     {session.error && <LoginAlert message={session.error} onDismiss={() => session.clearError?.()} />}
     <p className="pt-2 text-xs leading-5 text-muted-foreground">{t("Al continuar, aceptas los")}{" "}<Link className="underline" to="/terminos">{t("términos")}</Link> {t("y conoces la")}{" "}<Link className="underline" to="/privacidad">{t("política de privacidad")}</Link>.</p>
-    <details className="group pt-0 text-center">
-      <summary className="mx-auto flex w-fit cursor-pointer list-none items-center gap-1 text-[11px] text-muted-foreground/80 hover:text-foreground [&::-webkit-details-marker]:hidden">{t("Avanzado")}<ChevronDown size={12} className="transition-transform group-open:rotate-180" /></summary>
-      <div className="mt-2 rounded-xl border border-border p-3">
-        <Button disabled={!session.ready} variant="outline" size="sm" className="w-full" onClick={() => session.login("wallet")}><Wallet size={14} />{t("Conectar wallet externa")}</Button>
-        <p className="mt-2 text-[11px] leading-4 text-muted-foreground">{t("Para quienes ya usan Phantom, Jupiter u otra wallet propia.")}</p>
-      </div>
-    </details>
   </div>;
 }
 export function EntryAccess() {
   const t = useT();
   return <ClientOnly fallback={<p className="mt-8 text-sm text-muted-foreground">{t("Preparando acceso…")}</p>}><HostedSession fallback={<p className="mt-8 text-sm text-muted-foreground">{t("Preparando acceso…")}</p>}><EntryButtons /></HostedSession></ClientOnly>;
+}
+function AdvancedButton() {
+  const t = useT();
+  const session = useBovedaSession();
+  return <button type="button" disabled={!session.ready} onClick={() => session.login("wallet")} className="underline-offset-2 hover:underline disabled:opacity-50">{t("Avanzado")}</button>;
+}
+/** Footer-only external wallet access, kept out of the main sign-in card. */
+export function AdvancedAccess() {
+  const t = useT();
+  return <ClientOnly fallback={<span>{t("Avanzado")}</span>}><HostedSession fallback={<span>{t("Avanzado")}</span>}><AdvancedButton /></HostedSession></ClientOnly>;
 }

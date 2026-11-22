@@ -17,7 +17,7 @@ import { ArrowRight, ShieldCheck, Sparkles, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { isReturning } from "@/lib/preferences";
-import { EntryAccess } from "@/components/entry-access";
+import { AdvancedAccess, EntryAccess } from "@/components/entry-access";
 import { PredictPromo } from "@/components/predict-promo";
 import { DobleHero, Gta6Hero, HomeCtas } from "@/components/home-gta6";
 import { BootSplash } from "@/components/boot-splash";
@@ -218,6 +218,6 @@ export function Landing() {
         </details>)}
       </section>
     </main>
-    <footer className="mx-auto max-w-5xl border-t border-border px-6 py-6 text-xs leading-5 text-muted-foreground"><nav className="flex flex-wrap justify-center gap-5"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to={guidesIndexHref(lang)}>{t("Guías")}</Link><Link to="/status">{t("Estado del sistema")}</Link><Link to="/terminos">{t("Términos")}</Link><Link to="/privacidad">{t("Privacidad")}</Link></nav><p className="mt-4 text-center"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer" className="text-primary underline">{t("Soporte en Telegram")}</a>{" · "}<a href="mailto:admin@bovedamarket.app" className="text-primary underline">admin@bovedamarket.app</a></p><p className="mt-2 text-center">© {new Date().getFullYear()} Boveda Technologies</p></footer>
+    <footer className="mx-auto max-w-5xl border-t border-border px-6 py-6 text-xs leading-5 text-muted-foreground"><nav className="flex flex-wrap justify-center gap-5"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to={guidesIndexHref(lang)}>{t("Guías")}</Link><Link to="/status">{t("Estado del sistema")}</Link><Link to="/terminos">{t("Términos")}</Link><Link to="/privacidad">{t("Privacidad")}</Link><AdvancedAccess /></nav><p className="mt-4 text-center"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer" className="text-primary underline">{t("Soporte en Telegram")}</a>{" · "}<a href="mailto:admin@bovedamarket.app" className="text-primary underline">admin@bovedamarket.app</a></p><p className="mt-2 text-center">© {new Date().getFullYear()} Boveda Technologies</p></footer>
   </div>;
 }
