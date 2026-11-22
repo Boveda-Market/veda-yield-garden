@@ -34,7 +34,7 @@ export const Route = createFileRoute("/")({ staticData: { sitemap: true },
     { property: "og:title", content: "BÓVEDA — Plataforma de autocustodia y rendimiento en dólares digitales" },
     { property: "og:description", content: "Plataforma de autocustodia en dólares digitales (USDC): bóvedas de rendimiento, Piloto Automático, mercados de predicción y retiros a banco, Coinbase o Cash App. Depositar es gratis." },
     { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
-    { property: "og:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:image:width", content: "1200" }, { property: "og:image:height", content: "630" }, { property: "og:image:alt", content: "Bóveda GTA6 — Comisiones generadas por el volumen del mercado." }, { name: "twitter:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:video", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:secure_url", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:type", content: "video/mp4" }, { property: "og:video:width", content: "1200" }, { property: "og:video:height", content: "630" },
+    { property: "og:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:image:width", content: "1200" }, { property: "og:image:height", content: "630" }, { property: "og:image:alt", content: "Bóveda GTA6 — Intereses generados por el volumen del mercado." }, { name: "twitter:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:video", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:secure_url", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:type", content: "video/mp4" }, { property: "og:video:width", content: "1200" }, { property: "og:video:height", content: "630" },
     { property: "og:url", content: "https://bovedamarket.app/" },
   ], links: langLinks("es", "/", "/en"),
   scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"BÓVEDA","url":"https://bovedamarket.app/","logo":"https://bovedamarket.app/favicon.png","email":"admin@bovedamarket.app"},{"@type":"WebApplication","name":"BÓVEDA","url":"https://bovedamarket.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"es","description":"Plataforma de autocustodia en dólares digitales (USDC): bóvedas de rendimiento, Piloto Automático, mercados de predicción y retiros a banco, Coinbase o Cash App. Depositar es gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}]}) }] }), component: Landing,
@@ -42,15 +42,15 @@ export const Route = createFileRoute("/")({ staticData: { sitemap: true },
 
 const FAQS = [
   { q: "¿Qué es USDC?", a: "USDC es una moneda digital diseñada para mantener el mismo valor que el dólar estadounidense: 1 USDC busca valer 1 USD. En BÓVEDA los saldos, depósitos e intereses se muestran en USDC. No es un depósito bancario ni está asegurado." },
-  { q: "¿Necesito dinero para usar BÓVEDA?", a: "No para mirar. Puedes ver las bóvedas y Doble o Nada en vivo sin registrarte. Para participar o depositar basta con entrar con Google o email y añadir dólares con tarjeta. Se puede empezar con montos pequeños." },
-  { q: "¿Cómo se generan las ganancias?", a: "Cada depósito se suma a una bóveda que cobra comisiones cada vez que alguien intercambia monedas en ella. Esas comisiones se reparten entre quienes aportan. Las tasas son estimaciones, cambian y existe riesgo de pérdida." },
+  { q: "¿Puedo explorar sin depositar monedas digitales?", a: "No para mirar. Puedes ver las bóvedas y Doble o Nada en vivo sin registrarte. Para participar o depositar basta con entrar con Google o email y añadir dólares con tarjeta. Se puede empezar con montos pequeños." },
+  { q: "¿Cómo se generan las ganancias?", a: "Cada depósito se suma a una bóveda que genera intereses cada vez que alguien intercambia monedas digitales en ella. Esos intereses se reparten entre quienes aportan. Las tasas son estimaciones, cambian y existe riesgo de pérdida." },
   { q: "¿Cuándo puedo retirar?", a: "Las ganancias se cosechan y las posiciones se cierran en cualquier momento, sin plazos de permanencia. Cada operación se revisa antes de firmar con la wallet." },
   { q: "¿Cuánto cuesta usar BÓVEDA?", a: "Depositar, enviar, cambiar monedas y entrar a Sube/Baja es gratis. Cosechar, cerrar, retirar y reclamar premios tienen un pequeño cargo de servicio, siempre visible antes de firmar. El detalle está en Términos y condiciones." },
 ];
 
 const GUARANTEES = [
   { icon: ShieldCheck, title: "Control y firma propia", body: "Cada operación requiere autorización del titular. BÓVEDA nunca mueve fondos sin firma del titular." },
-  { icon: Landmark, title: "Sin dinero congelado", body: "Sin plazos de permanencia. Salida libre de predicciones y bóvedas en cualquier momento." },
+  { icon: Landmark, title: "Sin monedas digitales retenidas", body: "Sin plazos de permanencia. Salida libre de predicciones y bóvedas en cualquier momento." },
   { icon: Lock, title: "Seguridad moderna", body: "Acceso con huella, Face ID o email cifrado, sin frases secretas escritas en papel." },
 ];
 
@@ -174,7 +174,7 @@ export function Landing() {
           <div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Send size={14} />{t("Canal oficial de Telegram")}</p>
             <h2 className="mt-2 font-display text-2xl font-bold">{t("Transparencia total, en vivo")}</h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t("El canal @bovedamarket publica alertas automáticas del estado de la red y de la app, avisos de seguridad y cada mejora en cuanto sale.")}</p>
-            <p className="mt-4 flex max-w-xl items-start gap-2 rounded-xl border border-border bg-background/60 p-3 text-xs leading-5 text-muted-foreground"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-primary" /><span>{t("El equipo de BÓVEDA nunca escribe primero por privado ni pide claves, frases de recuperación, códigos o dinero para retirar. Cualquier mensaje así es una estafa.")}</span></p></div>
+            <p className="mt-4 flex max-w-xl items-start gap-2 rounded-xl border border-border bg-background/60 p-3 text-xs leading-5 text-muted-foreground"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-primary" /><span>{t("El equipo de BÓVEDA nunca escribe primero por privado ni pide claves, frases de recuperación, códigos ni monedas digitales para habilitar un retiro. Cualquier mensaje así es una estafa.")}</span></p></div>
           <div className="flex shrink-0 flex-col gap-2"><Button asChild className="h-12"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer">{t("Unirme a @bovedamarket")}<ArrowRight size={16} /></a></Button><Link to="/status" search={{ from: "transparencia" }} className="flex items-center justify-center gap-1.5 text-sm text-primary underline"><Activity size={14} />{t("Ver estado del sistema")}</Link></div>
         </div>
       </section>
