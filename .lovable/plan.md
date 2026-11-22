@@ -1,33 +1,42 @@
-# Seguridad nerd, orden del Portafolio, Piloto automático y «Por reclamar»
+# Panel de Control más claro + sección de Usuarios
 
-## 1. Tarjeta «Por qué tus fondos están seguros» (Opción 2)
-Justo después de «BÓVEDA funciona distinto.» se agrega el párrafo:
-> «Opera bajo autocustodia criptográfica pura. Cada transacción requiere una firma matemática generada únicamente por tu llave privada desde tu dispositivo. BÓVEDA no custodia tu capital ni almacena tus claves; tus fondos interactúan de forma directa con contratos inmutables y descentralizados en la cadena de bloques. Nadie, ni siquiera nosotros, tiene la capacidad matemática de tocar o mover un solo centavo sin tu firma.»
-Con traducción al inglés.
+## Qué cambia para ti
 
-## 2. Nuevo orden en Portafolio
-1. Intereses de la semana (gráfica)
-2. Tu rendimiento (capital trabajando, por cosechar, ganancias)
-3. Tus posiciones (bóvedas)
+### 1. Una portada del panel («Resumen») al entrar
+En lugar de caer directo en Finanzas, lo primero que ves son tarjetas con las cifras clave y lo que necesita atención:
+- **Conectados ahora**, **usuarios activos hoy** y **cuentas nuevas en 7 días**
+- **Pagos de socios pendientes** (monto y cantidad)
+- **Reserva de la tesorería** (aviso si está baja)
+- **Mensajes sin leer** en el buzón y sugerencias nuevas
+- **Estado del sistema** (todo bien / algún servicio con fallas)
 
-## 3. Piloto automático con tono nerd y nativo (sugerencia)
-Presentarlo como el «motor» propio de BÓVEDA, no como un bot externo. Título: **«⚙️ Motor BÓVEDA · Piloto automático»**.
-- «🛰️ Nuestro algoritmo detectó que el precio salió de tu zona y recalibró tu posición en un solo bloque.»
-- «🧬 Ganancias recompuestas: +$X.XX se fusionaron con tu capital y ya están generando interés compuesto.»
-- «📊 Tu contador volvió a 0 porque esas ganancias ahora son parte de tu depósito, no porque se perdieran.»
-- «🔐 Ejecutado con tu autorización previa; tus fondos nunca salieron de tu bóveda.»
-Se aplica a Telegram y a la campanita (ES/EN). Sin hablar de comisiones ni pérdidas.
+Cada tarjeta es un atajo: al tocarla te lleva directo a la sección donde se resuelve.
 
-## 4. «Por reclamar» en Mi Billetera sin que parezca que desapareció el dinero
-Problema: cuando el Piloto cosecha, «Por reclamar» baja a $0 sin explicación.
-Solución combinada:
-- **Recordar la última reinversión:** si el contador está en $0 y hubo rebalanceo reciente (7 días), la píldora cambia a «✨ +$17.06 reinvertidos en tu bóveda · hace 2 h» en vez de desaparecer.
-- **Etiqueta más clara:** «Ganancias por cosechar» en lugar de «Por reclamar · se suma al reclamar».
-- **Mini explicación al tocar:** «El Piloto automático cosecha y suma tus ganancias a tu capital. Por eso este número vuelve a 0 y tu saldo en la bóveda sube.»
-- Al tocar la píldora sigue llevando a Portafolio, donde la gráfica ya muestra esas ganancias.
+### 2. Menú ordenado por tareas
+- En computadora: un menú fijo a la izquierda que siempre está a la vista.
+- En celular: una barra de secciones arriba que se desliza, siempre visible al bajar.
+- Cada sección muestra un puntito o número cuando hay algo pendiente.
+- El panel recuerda la última sección abierta y cada sección tiene su propio enlace, así puedes volver directo.
+
+Secciones:
+1. Resumen
+2. Usuarios (nueva)
+3. Finanzas y Afiliados
+4. Comunicaciones
+5. Seguridad y Estado
+6. Vista previa
+
+### 3. Sección nueva: Usuarios
+- **Conectados ahora**: cuántas personas tienen la app abierta en este momento (con sesión y visitantes, por separado).
+- **Lista de cuentas**: nombre o correo, fecha de registro, última vez que entró, si ya depositó, si tiene Telegram conectado y si tiene piloto automático. Con buscador y filtros: «Conectados», «Nuevos», «Sin depósito», «Con bóveda».
+- **Embudo simple**: cuentas creadas → recargaron dólares → hicieron su primer depósito.
+- Tocar un usuario abre su ficha con sus datos de contacto y un enlace para copiar su dirección de cartera.
+
+Solo la cartera de tesorería puede ver esto; nadie más tiene acceso a esa información.
 
 ## Detalles técnicos
-- security-why.tsx: párrafo nuevo + i18n.
-- real-overview.tsx: renderizar PortfolioSummary antes de RealPositions; en portfolio-summary.tsx mover WeeklyChart al inicio de la sección.
-- autopilot.ts: reescribir autopilotDoneText (ambas ramas) y el texto de la campanita; actualizar pruebas existentes de autopilot.
-- wallet-panel.tsx: leer lastRebalanceAt/lastGainsUsd del estado de Piloto ya disponible para la campanita; mostrar píldora de reinversión cuando unclaimed < 0.01.
+- Presencia: la app abierta envía cada 60 s un aviso de actividad a una función del servidor. Con sesión, el servidor verifica el token de Privy (ES256/JWKS) y guarda `last_seen` por identidad de Privy en una tabla privada con RLS cerrada. Los visitantes se cuentan con un identificador anónimo del navegador, sin datos personales. «Conectado» = actividad en los últimos 2 min. Los visitantes anónimos se borran pasadas 24 h.
+- Lista de cuentas: la función de administración, tras verificar que quien llama es la tesorería, combina la API de usuarios de Privy (con el secreto existente) con las tablas `account_profiles`, `coinbase_onramps`, `telegram_links`, `autopilot_enrollments` y `verified_wallets`. Va paginada y nunca devuelve tokens.
+- Contadores del Resumen: un solo servidor agrupa los totales que ya calculan los módulos actuales (pagos, buzón, sugerencias, estado), con caché corta.
+- Navegación: sección guardada en la URL (`/admin?s=usuarios`) y en el almacenamiento local. Los módulos siguen cargándose solo cuando se abren.
+- Se diseña primero para celular y luego para escritorio. Se prueba con capturas en ambos tamaños.
