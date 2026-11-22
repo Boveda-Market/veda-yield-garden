@@ -301,8 +301,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
             <p className="font-display text-3xl font-bold text-primary tabular-nums">${usdc(review.quote.contractsMicro)}</p>
             <p className="text-xs text-muted-foreground tabular-nums">{t("Pones")} ${usdc(review.quote.costMicro)} · {t(review.side === "up" ? "Sube" : "Baja")}</p>
           </div>
-          {wasShort.current && busy !== "sign" && <p role="status" className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-center font-display text-base font-bold">✅ {t("Todo listo, oprime para autorizar y continuar")}</p>}
-          <Button size="lg" className="h-12 w-full rounded-xl text-base font-bold" disabled={busy === "sign"} onClick={confirm}>{busy === "sign" ? <><Loader2 className="animate-spin" /> {t("Aprueba en tu billetera…")}</> : wasShort.current ? t("Autorizar y continuar") : t("Confirmar jugada")}</Button>
+          <Button size="lg" className="h-12 w-full rounded-xl text-base font-bold" disabled={busy === "sign"} onClick={confirm}>{busy === "sign" ? <><Loader2 className="animate-spin" /> {t("Aprueba en tu billetera…")}</> : t("Confirmar jugada")}</Button>
           <DetailsToggle>
             <div className="grid gap-1 rounded-xl border border-border p-3">
               <p className="flex justify-between"><span className="text-muted-foreground">{t("Pagas")}</span><strong className="tabular-nums">${usdc(review.quote.costMicro)}</strong></p>

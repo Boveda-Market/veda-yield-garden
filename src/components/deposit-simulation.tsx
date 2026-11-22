@@ -79,7 +79,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
       {overBalance && <p role="alert" className="text-xs text-muted-foreground">{t("No tienes suficientes dólares para esta cantidad.")}</p>}
       {!busy && (overBalance || usdc === 0n) && <div className={hot ? "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-hot/40 bg-hot/10 p-3 text-xs" : "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs"}><span>{hot ? t("Estás a un paso de comenzar. Deposita dólares para entrar a la {v}.", { v: t(vault.name) }) : t("Estás a un paso de comenzar. Añade dólares y sigue aquí mismo.")}</span><BuyUsdc className="w-full" hot={hot} resume={{ vaultId: vault.id, amount: typed != null ? amount : "", ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) }} needMicro={overBalance && typed != null && usdc != null ? typed - usdc : undefined} label={t("Continuar para depositar")} /></div>}
     </div>
-    {breakdown && quote && !resumed && <dl aria-label={t("Cotización en vivo")} className="grid gap-2 rounded-xl bg-muted p-4 text-sm">
+    {breakdown && quote && <dl aria-label={t("Cotización en vivo")} className="grid gap-2 rounded-xl bg-muted p-4 text-sm">
       <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground"><span className={`h-1.5 w-1.5 rounded-full bg-live ${activationQ.isFetching ? "animate-pulse" : ""}`} />{t("Cotización en vivo")}</p>
       <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Importe")}</dt><dd className="tabular-nums">{usd(quote.amount)}</dd></div>
       {quote.fee > 0n && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Activación de cuenta digital (única vez)")}</dt><dd className="tabular-nums">−{usd(quote.fee)}</dd></div>}
@@ -87,11 +87,10 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
       <div className="flex justify-between gap-3 border-t border-border pt-2"><dt className="font-semibold">{t("Capital neto a la bóveda")}</dt><dd className="font-display text-lg font-bold tabular-nums">~{usd(quote.net)}</dd></div>
       {quote.fee > 0n && <p className="text-[11px] leading-4 text-muted-foreground">{t("Estimado con el precio actual de la red. La activación se cobra solo en tu primer depósito.")}</p>}
     </dl>}
-    {resumed && !done && !busy && usdc != null && usdc > 0n && <p role="status" className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-center font-display text-base font-bold">✅ {t("Todo listo, oprime para autorizar y continuar")}</p>}
     {!position && !migrate && <p role="note" className="rounded-xl border border-border p-3 text-xs leading-5 text-muted-foreground">{t("Tu capital se combina con la otra moneda de la bóveda y su valor fluctuará con el precio de mercado, mientras acumulas intereses en cada operación.")} <a href="/faq#vaults-fluctuation" className="underline">{t("¿Por qué cambia mi balance?")}</a></p>}
     </>}
     {!done && !migrate && isDlmmVault(vault.id) && <RangeAlertsGate />}
-    {wallet ? <PilotDeposit usdc={usdc} autoStart={migrate} vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onAmountFit={setAmount} onClose={onClose} onDoneChange={setDone} {...(resumed ? { confirmLabel: t("Autorizar y continuar") } : {})} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
+    {wallet ? <PilotDeposit usdc={usdc} autoStart={migrate} vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onAmountFit={setAmount} onClose={onClose} onDoneChange={setDone} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
     {step3 && !busy && <Button type="button" variant="ghost" className="w-full" onClick={() => { clearResumeDeposit(); setKept(true); }}>{t("Cancelar")}</Button>}
     </>}
   </ActionSheetContent></Dialog>;
