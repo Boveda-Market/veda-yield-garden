@@ -1733,6 +1733,7 @@ export const extra: Record<string, string> = {
   "Sin custodia interna": "No internal custody",
   "En una estafa los fondos se entregan a la empresa. Aquí el saldo vive en la cuenta digital del titular, protegida por Privy: ni el equipo de Bóveda Market ni terceros pueden congelarlo o moverlo.": "In a scam, funds are handed to the company. Here the balance lives in the holder's digital account, protected by Privy: neither the Bóveda Market team nor third parties can freeze or move it.",
   "Seguridad a cargo de Privy": "Security handled by Privy",
+  "Tu seguridad, primero": "Your security comes first",
   "La creación, el cifrado y la protección de cada cuenta digital corren sobre la infraestructura de Privy, con Face ID o huella. Bóveda Market nunca custodia las monedas digitales.": "Every digital account is created, encrypted and protected on Privy's infrastructure, with Face ID or fingerprint. Bóveda Market never holds the digital currencies.",
   "Cómo comenzar en Bóveda Market": "How to get started with Bóveda Market",
   "Crea una cuenta digital con tu email de Google": "Create a digital account with your Google email",

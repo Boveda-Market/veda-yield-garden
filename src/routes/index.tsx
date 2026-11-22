@@ -151,8 +151,11 @@ export function Landing() {
         <div className="text-center md:text-left"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} loading="lazy" className="mx-auto h-16 w-auto md:mx-0 sm:h-20" /><p className="mt-1 text-xs font-bold uppercase tracking-widest text-primary">{t("Rondas relámpago")}</p><h2 className="mt-2 font-display text-3xl font-bold">{t("Mercados de predicción en tiempo real.")}</h2><p className="mt-3 text-muted-foreground">{t("Rondas de 5 min, 15 min y 4 h sobre Bitcoin, Ethereum y Solana. Se participa en dólares, sin comprar la moneda, y cada ronda se resuelve automáticamente.")}</p><Link to={guideHref("/guias/mercados-de-prediccion", lang)} className="mt-3 inline-block text-sm font-semibold text-primary underline underline-offset-4">{t("¿Cómo funciona? Lee la guía")} →</Link></div>
         <PredictPromo />
       </section>
-      <section aria-label={t("Seguridad")} className="mb-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {TRUST.map(({ icon: Icon, title, body }) => <div key={title} className="rounded-2xl border border-border bg-card p-4"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={16} /></span><p className="mt-3 font-display text-sm font-semibold">{t(title)}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{t(body)}</p></div>)}
+      <section aria-label={t("Seguridad")} className="mb-12">
+        <h2 className="flex items-center gap-2 font-display text-2xl font-bold"><ShieldCheck size={24} className="text-primary" aria-hidden="true" />{t("Tu seguridad, primero")}</h2>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {TRUST.map(({ icon: Icon, title, body }) => <div key={title} className="rounded-2xl border border-border bg-card p-4"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={16} /></span><p className="mt-3 font-display text-sm font-semibold">{t(title)}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{t(body)}</p></div>)}
+        </div>
       </section>
 
       <section aria-label={t("Por qué Bóveda Market es diferente")} className="mb-12 rounded-3xl border border-border bg-card p-6 sm:p-8">
