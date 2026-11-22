@@ -70,10 +70,10 @@ const STEPS: [string, string][] = [
 ];
 
 const REVIEWS = [
-  { stars: 5, name: "Carlos M.", photo: reviewCarlos, title: "Retiré a Coinbase en minutos sin pedir permiso", tag: "Acceso con Google · Bóvedas", text: "Perdí dinero en plataformas que prometían 20% mensual y luego bloquearon los retiros. Aquí mi dinero está en mi wallet y retiré a Coinbase en minutos sin pedir permiso." },
-  { stars: 4, name: "Valeria R.", photo: reviewValeria, title: "Paz mental al revisar cada firma", tag: "Acceso con Google · Hace 2 semanas", text: "La revisión antes de firmar me da paz. Le doy 4 porque a veces la red tarda unos segundos más, pero saber que nadie toca mis USDC vale la pena." },
-  { stars: 3, name: "David S.", photo: reviewDavid, title: "Sin humo: empieza con poco", tag: "Acceso con huella · Sube o Baja", text: "Perdí mi primera ronda de Sube o Baja por no entender los tiempos. Me gusta que no venden humo: recomiendo mirar unas rondas en vivo y empezar con poco." },
-  { stars: 5, name: "Marisol T.", photo: reviewMarisol, title: "Un equipo que sí responde", tag: "Canal de Telegram · Mi Billetera", text: "Envié una sugerencia y el equipo me respondió rápido. Las notificaciones me avisan de cada cosecha y del estado del sistema en Telegram: siento que hay personas reales detrás." },
+  { stars: 5, name: "Carlos M.", photo: reviewCarlos, title: "Retiré a Coinbase en minutos sin pedir permiso", tag: "Miembro Platino", text: "Perdí dinero en plataformas que prometían 20% mensual y luego bloquearon los retiros. Aquí mi dinero está en mi cuenta digital y retiré a Coinbase en minutos sin pedir permiso." },
+  { stars: 4, name: "Valeria R.", photo: reviewValeria, title: "Paz mental al revisar cada firma", tag: "Miembro VIP", text: "La revisión antes de firmar me da paz. Le doy 4 porque a veces la red tarda unos segundos más, pero saber que nadie toca mis USDC vale la pena." },
+  { stars: 3, name: "David S.", photo: reviewDavid, title: "Sin humo: empieza con poco", tag: "Miembro Oro", text: "Perdí mi primera ronda de Sube o Baja por no entender los tiempos. Me gusta que no venden humo: recomiendo mirar unas rondas en vivo y empezar con poco." },
+  { stars: 5, name: "Marisol T.", photo: reviewMarisol, title: "Un equipo que sí responde", tag: "Miembro Diamante", text: "Envié una sugerencia y el equipo me respondió rápido. Las notificaciones me avisan de cada cosecha y del estado del sistema en Telegram: siento que hay personas reales detrás." },
 ];
 
 function TrustTicker() {
@@ -163,7 +163,7 @@ export function Landing() {
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{REVIEWS.map(({ stars, name, text, photo, title, tag }) => <li key={name} className={`relative flex flex-col rounded-2xl border bg-card p-5 ${stars === 5 ? "border-primary/40 bg-gradient-to-br from-primary/10 to-card" : "border-border"}`}>
           <Quote aria-hidden="true" size={28} className="absolute right-4 top-4 text-primary/15" />
           <div className="flex items-center gap-3"><img src={photo} alt="" loading="lazy" width={48} height={48} className="h-12 w-12 rounded-full border-2 border-primary/30 object-cover" />
-            <div className="min-w-0"><p className="text-sm font-semibold">{name}</p><p className="truncate text-xs text-muted-foreground">{t(tag)}</p></div></div>
+            <div className="min-w-0"><p className="text-sm font-semibold">{name}</p><span className="mt-1 inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary"><Star size={9} className="fill-current" />{t(tag)}</span></div></div>
           <div className="mt-3 flex gap-0.5 text-primary" aria-label={`${stars}/5`}>{[1,2,3,4,5].map((n) => <Star key={n} size={15} className={n <= stars ? "fill-current" : "text-muted-foreground/40"} />)}</div>
           <p className="mt-2 font-display font-semibold leading-snug">{t(title)}</p>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">“{t(text)}”</p></li>)}</ul></>}
