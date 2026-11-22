@@ -43,7 +43,7 @@ export function Gta6Hero({ title, sub }: { title: string; sub: string }) {
         <h1 className="font-display text-[1.7rem] font-black leading-tight sm:text-4xl">{t(title)}</h1>
         <p className="mt-2 text-sm leading-6 text-hot-muted sm:text-base">{t(sub)}</p>
         <ol className="mt-4 grid grid-cols-3 gap-2 text-[11px] font-bold sm:text-xs">{steps.map(([i, l]) => <li key={l} className="flex flex-col items-center gap-1 rounded-xl bg-hot-surface/70 px-2 py-2"><span aria-hidden className="text-xl">{i}</span>{t(l)}</li>)}</ol>
-        <Link to="/app" className="hot-cta mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-lg font-black text-hot-surface shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98] md:max-w-sm">🎰 {t("Entrar a la Bóveda GTA6")}<ArrowRight size={18} /></Link>
+        <Link to="/app" hash="open-gta6" className="hot-cta mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-lg font-black text-hot-surface shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98] md:max-w-sm">🎰 {t("Entrar a la Bóveda GTA6")}<ArrowRight size={18} /></Link>
         <p className="mt-3 text-[11px] leading-4 text-hot-muted">{t("APR estimado de las últimas 24 h, cambia cada día. Moneda muy volátil, sin vínculo con Rockstar Games.")}</p>
       </div>
     </div>
@@ -62,7 +62,7 @@ export function HomeCtas({ vaultsFirst = false, trump = false }: { vaultsFirst?:
       <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary-foreground opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary-foreground" /></span>{t("En vivo")}</span>
     </span>
   </Link>;
-  const vaults = <Link key="v" to="/app" className={`${trump ? "vault-trump " : ""}hot-ring group relative block min-w-0 rounded-2xl p-[2px] shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98]`}>
+  const vaults = <Link key="v" to="/app" hash={trump ? "open-trump" : "open-gta6"} className={`${trump ? "vault-trump " : ""}hot-ring group relative block min-w-0 rounded-2xl p-[2px] shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98]`}>
     <span className={`relative isolate flex h-[4.5rem] items-center justify-between gap-2 overflow-hidden rounded-[14px] px-3 text-hot-foreground ${trump ? "bg-[image:var(--gradient-hot-surface)]" : "bg-[image:var(--gradient-hot)]"}`}>
       {!trump && <Sunset />}
       <span aria-hidden className="cta-shimmer pointer-events-none absolute inset-y-0 left-0 z-10 w-1/4 bg-gradient-to-r from-transparent via-hot-foreground/30 to-transparent" />

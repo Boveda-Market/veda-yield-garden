@@ -1780,4 +1780,10 @@ export const extra: Record<string, string> = {
   "En 30 días": "In 30 days",
   "Estimado con los intereses de las últimas 24 h, sin interés compuesto. No es una promesa: los intereses cambian cada día y el precio de la moneda puede subir o bajar.": "Estimated from the last 24 h of interest, without compounding. Not a promise: interest changes every day and the coin's price can go up or down.",
   "Los intereses de esta bóveda no están disponibles ahora. Prueba en unos minutos.": "This vault's interest isn't available right now. Try again in a few minutes.",
+  "Entra con Google": "Sign in with Google",
+  "1 toque, sin contraseñas": "1 tap, no passwords",
+  "Recarga dólares": "Add dollars",
+  "Apple Pay, tarjeta o Coinbase": "Apple Pay, card or Coinbase",
+  "Confirma": "Confirm",
+  "Tu elección queda lista, 1 toque": "Your pick is ready, 1 tap",
 };

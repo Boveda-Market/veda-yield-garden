@@ -220,7 +220,7 @@ export function WalletPanel() {
     </div>
     {/* New accounts at $0 explore first: the cards lead, the install reminder is skipped (they just saw the install step) and Face ID / first-deposit steps follow. */}
     {exploring && <ExploreCards />}
-    <WalletHeroShortcuts wallet={address} />
+    {!exploring && <WalletHeroShortcuts wallet={address} />}
     {!exploring && <InstallAppBanner />}
     <GasRefillCard sol={balances.data?.sol} usdc={balances.data?.usdc} onDone={() => void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] })} />
     {!exploring && <PasskeyInvite />}
