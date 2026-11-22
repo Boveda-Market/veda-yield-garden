@@ -1773,4 +1773,11 @@ export const extra: Record<string, string> = {
   "Explora la app": "Explore the app",
   "Explora la app sin depositar": "Explore the app without depositing",
   "Todo está abierto para mirar. Deposita solo cuando quieras.": "Everything is open to look around. Deposit only when you want.",
+  "Simular ganancias": "Simulate earnings",
+  "Calcula cuánto generaría un depósito hoy.": "See what a deposit would generate today.",
+  "Si depositaras": "If you deposited",
+  "Por día": "Per day",
+  "En 30 días": "In 30 days",
+  "Estimado con los intereses de las últimas 24 h, sin interés compuesto. No es una promesa: los intereses cambian cada día y el precio de la moneda puede subir o bajar.": "Estimated from the last 24 h of interest, without compounding. Not a promise: interest changes every day and the coin's price can go up or down.",
+  "Los intereses de esta bóveda no están disponibles ahora. Prueba en unos minutos.": "This vault's interest isn't available right now. Try again in a few minutes.",
 };

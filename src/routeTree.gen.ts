@@ -26,6 +26,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as ZzSimPreviewRouteImport } from './routes/zz-sim-preview'
 import { Route as EnIndexRouteImport } from './routes/en/index'
 import { Route as EnFaqRouteImport } from './routes/en/faq'
 import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
@@ -137,6 +138,11 @@ const TerminosRoute = TerminosRouteImport.update({
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZzSimPreviewRoute = ZzSimPreviewRouteImport.update({
+  id: '/zz-sim-preview',
+  path: '/zz-sim-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnIndexRoute = EnIndexRouteImport.update({
@@ -306,6 +312,7 @@ export interface FileRoutesByFullPath {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/zz-sim-preview': typeof ZzSimPreviewRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/status': typeof EnStatusRoute
@@ -352,6 +359,7 @@ export interface FileRoutesByTo {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/zz-sim-preview': typeof ZzSimPreviewRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/status': typeof EnStatusRoute
@@ -399,6 +407,7 @@ export interface FileRoutesById {
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
   '/wallet': typeof WalletRoute
+  '/zz-sim-preview': typeof ZzSimPreviewRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/status': typeof EnStatusRoute
@@ -447,6 +456,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/zz-sim-preview'
     | '/en/faq'
     | '/en/privacy'
     | '/en/status'
@@ -493,6 +503,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/zz-sim-preview'
     | '/en/faq'
     | '/en/privacy'
     | '/en/status'
@@ -539,6 +550,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/terminos'
     | '/wallet'
+    | '/zz-sim-preview'
     | '/en/faq'
     | '/en/privacy'
     | '/en/status'
@@ -586,6 +598,7 @@ export interface RootRouteChildren {
   StatusRoute: typeof StatusRoute
   TerminosRoute: typeof TerminosRoute
   WalletRoute: typeof WalletRoute
+  ZzSimPreviewRoute: typeof ZzSimPreviewRoute
   EnFaqRoute: typeof EnFaqRoute
   EnPrivacyRoute: typeof EnPrivacyRoute
   EnStatusRoute: typeof EnStatusRoute
@@ -734,6 +747,13 @@ declare module '@tanstack/react-router' {
       path: '/wallet'
       fullPath: '/wallet'
       preLoaderRoute: typeof WalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zz-sim-preview': {
+      id: '/zz-sim-preview'
+      path: '/zz-sim-preview'
+      fullPath: '/zz-sim-preview'
+      preLoaderRoute: typeof ZzSimPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/': {
@@ -946,6 +966,7 @@ const rootRouteChildren: RootRouteChildren = {
   StatusRoute: StatusRoute,
   TerminosRoute: TerminosRoute,
   WalletRoute: WalletRoute,
+  ZzSimPreviewRoute: ZzSimPreviewRoute,
   EnFaqRoute: EnFaqRoute,
   EnPrivacyRoute: EnPrivacyRoute,
   EnStatusRoute: EnStatusRoute,
