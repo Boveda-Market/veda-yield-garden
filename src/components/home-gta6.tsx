@@ -57,7 +57,7 @@ export function HomeCtas({ vaultsFirst = false, trump = false }: { vaultsFirst?:
   const trumpVault = VAULTS.find((v) => v.id === "trump");
   const ty = useQuery({ ...poolYieldOptions(trumpVault?.pool ?? ""), enabled: trump && !!trumpVault });
   const tApr = ty.data?.apr;
-  const apr = trump ? (tApr != null && tApr >= 100 ? `+${Math.round(tApr).toLocaleString("en-US")}% APR` : t("Alto octanaje")) : gtaApr;
+  const apr = trump ? (tApr != null && tApr > 0 ? `+${Math.round(tApr).toLocaleString("en-US")}% APR` : t("Alto octanaje")) : gtaApr;
   const { lang } = useI18n();
   const gtaTitle = lang === "en" ? titleEn : titleEs;
   const predict = <Link key="p" to="/mercados" className="group relative block min-w-0 rounded-2xl bg-primary p-[2px] shadow-[0_0_28px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
