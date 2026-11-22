@@ -30,6 +30,7 @@ import { predictClaimFee } from "@/lib/fees";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { ActionSuccess } from "@/components/action-success";
 import { FlowSteps, WorkingLine } from "@/components/move-steps";
+import { FundsKeptCard } from "@/components/funds-kept-card";
 import { DetailsToggle } from "@/components/ui/details-toggle";
 
 const usdc = (micro: string | bigint | null) => micro === null ? "—" : (Number(micro) / 1e6).toFixed(2);
@@ -64,7 +65,10 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
 
   useEffect(() => { setReview(null); }, [round?.marketId]);
   // The quote lives in a pop-up so choosing a side never scrolls the page.
-  const cancelQuote = () => { setSide(null); setReview(null); };
+  const [kept, setKept] = useState(false);
+  const cancelQuote = () => { setSide(null); setReview(null); setKept(false); };
+  // Cancelling at «Todo listo» (after a top-up) first says where the dollars are.
+  const cancelOrKeep = () => { if (review && wasShort.current && !kept) setKept(true); else cancelQuote(); };
   const refresh = useCallback(async () => {
     if (!wallet) return;
     const r = await getPredictPositions({ data: { wallet } });
@@ -257,8 +261,9 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
           </div>
         </ActionSheetContent>
       </Dialog>
-      <Dialog open={!!side} onOpenChange={(o) => { if (!o && busy !== "sign" && !(review && wasShort.current)) cancelQuote(); }}>
-        <ActionSheetContent locked={!!review && wasShort.current} closeLabel={t("Cerrar")} onOpenAutoFocus={(e) => e.preventDefault()}>
+      <Dialog open={!!side} onOpenChange={(o) => { if (!o && busy !== "sign") cancelOrKeep(); }}>
+        <ActionSheetContent closeLabel={t("Cerrar")} onOpenAutoFocus={(e) => e.preventDefault()}>
+          {kept ? <FundsKeptCard amountMicro={balance} onDone={() => { wasShort.current = false; cancelQuote(); }} /> : <>
           <DialogTitle className={`flex items-center gap-2 pr-10 font-display text-xl ${side === "down" ? "text-destructive" : "text-primary"}`}>{side === "down" ? <ArrowDownRight size={22} /> : <ArrowUpRight size={22} />}{t(side === "down" ? "Predecir Baja" : "Predecir Sube")}{selPrice ? <span className="ml-auto text-sm font-semibold tabular-nums">{t("Paga {x}×", { x: (1 / selPrice).toFixed(2) })}</span> : null}</DialogTitle>
           <DialogDescription className="text-xs">{t(side === "down" ? "Ganas si el precio baja" : "Ganas si el precio sube")}</DialogDescription>
       <section aria-label={t("Tu orden")}>
@@ -306,8 +311,9 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
             </div>
             <p className="text-xs text-muted-foreground">{t("Precio real del momento; se actualiza cada 15 s.")} {t("Al expirar el tiempo la posición se cierra sola: si ganas, aparece tu premio para reclamar; si pierdes, desaparece. También puedes vender antes del cierre al precio del momento.")}</p>
           </DetailsToggle>
-          {!wasShort.current && <Button type="button" variant="ghost" className="w-full" disabled={busy === "sign"} onClick={cancelQuote}>{t("Cancelar cotización")}</Button>}
+          <Button type="button" variant="ghost" className="w-full" disabled={busy === "sign"} onClick={cancelOrKeep}>{t("Cancelar cotización")}</Button>
         </section>}
+          </>}
         </ActionSheetContent>
       </Dialog>
 

@@ -1797,4 +1797,9 @@ export const extra: Record<string, string> = {
   "Tu jugada": "Your play",
   "Total necesario": "Total needed",
   "Estimado con el precio actual de la red. La activación se cobra solo la primera vez.": "Estimated at the current network price. Activation is charged only the first time.",
+  "Cancelado. Tus dólares están seguros": "Cancelled. Your dollars are safe",
+  "Tus {a} siguen en tu Billetera, listos para usar cuando quieras.": "Your {a} are still in your Wallet, ready whenever you want.",
+  "Tus dólares siguen en tu Billetera, listos para usar cuando quieras.": "Your dollars are still in your Wallet, ready whenever you want.",
+  "No se movió dinero y no se cobró nada.": "No money moved and nothing was charged.",
+  "Ver mi Billetera": "View my Wallet",
 };

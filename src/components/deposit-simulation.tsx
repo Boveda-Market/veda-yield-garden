@@ -20,6 +20,7 @@ import { Wallet } from "lucide-react";
 import { HotBanner } from "@/components/hot-vault-card";
 import { vaultSkin } from "@/components/vault-skin";
 import { isDlmmVault } from "@/lib/solana-data";
+import { FundsKeptCard } from "@/components/funds-kept-card";
 import { useActivationQuote } from "@/hooks/use-activation-quote";
 import { depositQuote, QUOTE_PRESETS } from "@/lib/deposit-quote";
 
@@ -31,6 +32,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   const [amount, setAmount] = useState(initialAmount);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [kept, setKept] = useState(false);
   useEffect(() => { if (done) clearResumeDeposit(); }, [done]);
   const readWallet = useServerFn(getRealWallet);
   const balances = useQuery({ queryKey: ["my-wallet", wallet], enabled: !!wallet, queryFn: async () => {
@@ -54,7 +56,8 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   const hot = Boolean(vault.badge) && !migrate;
   const showBanner = hot && !done;
   const step3 = resumed && !done && usdc != null && usdc > 0n;
-  return <Dialog open onOpenChange={(open) => { if (!open && !busy && !step3) onClose(); }}><ActionSheetContent locked={step3} closeLabel={t("Cerrar")} className={hot ? `border-hot/40 shadow-[var(--shadow-hot)] ${vaultSkin(vault.id)}` : undefined}>
+  return <Dialog open onOpenChange={(open) => { if (open || busy) return; if (step3 && !kept) { clearResumeDeposit(); setKept(true); } else onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")} className={hot && !kept ? `border-hot/40 shadow-[var(--shadow-hot)] ${vaultSkin(vault.id)}` : undefined}>
+    {kept ? <FundsKeptCard amountMicro={usdc} onDone={onClose} /> : <>
     {showBanner && <HotBanner vault={vault} className="-mx-5 -mt-2 rounded-t-3xl pr-14 sm:-mx-6 sm:-mt-6">
       <span className="flex items-center gap-1 rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-live shadow-[0_0_6px_var(--live)] motion-reduce:animate-none" />{t("En vivo")}</span>
     </HotBanner>}
@@ -89,5 +92,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
     </>}
     {!done && !migrate && isDlmmVault(vault.id) && <RangeAlertsGate />}
     {wallet ? <PilotDeposit usdc={usdc} autoStart={migrate} vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onAmountFit={setAmount} onClose={onClose} onDoneChange={setDone} {...(resumed ? { confirmLabel: t("Autorizar y continuar") } : {})} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
+    {step3 && !busy && <Button type="button" variant="ghost" className="w-full" onClick={() => { clearResumeDeposit(); setKept(true); }}>{t("Cancelar")}</Button>}
+    </>}
   </ActionSheetContent></Dialog>;
 }
