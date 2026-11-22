@@ -137,9 +137,6 @@ export function Landing() {
           {plainHero && <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(hero.title)}</h1>}
           {plainHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p><div className="hidden md:block">{showReviews && <TrustTicker />}</div></>}
           <p className="mt-5 text-base leading-7 text-muted-foreground">{t("BÓVEDA es una plataforma de autocustodia: los fondos permanecen en la wallet del titular, nadie puede congelarlos y cada movimiento se aprueba con huella o Face ID.")}</p>
-          <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs md:justify-start">
-            {["$0 por depositar", "Sin plazos forzosos", "Retiro en cualquier momento", "Mercados en vivo sin registro"].map((b) => <li key={b} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"><ShieldCheck size={13} className="text-primary" />{t(b)}</li>)}
-          </ul>
         </div>
         <div id="acceso" className="order-2 min-w-0 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
           <HomeCtas vaultsFirst={gtaHero || hero.theme === "trump"} trump={hero.theme === "trump"} />
