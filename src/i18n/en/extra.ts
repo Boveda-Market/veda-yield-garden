@@ -1786,4 +1786,12 @@ export const extra: Record<string, string> = {
   "Apple Pay, tarjeta o Coinbase": "Apple Pay, card or Coinbase",
   "Confirma": "Confirm",
   "Tu elección queda lista, 1 toque": "Your pick is ready, 1 tap",
+  "Cotización en vivo": "Live quote",
+  "Activación de cuenta digital (única vez)": "Digital account activation (one time)",
+  "Capital neto a la bóveda": "Net capital into the vault",
+  "Estimado con el precio actual de la red. La activación se cobra solo en tu primer depósito.": "Estimated at the current network price. Activation is charged only on your first deposit.",
+  "Todo listo, oprime para autorizar y continuar": "All set, tap to authorize and continue",
+  "Autorizar y continuar": "Authorize and continue",
+  "Autoriza": "Authorize",
+  "Todo listo: 1 toque para continuar": "All set: 1 tap to continue",
 };

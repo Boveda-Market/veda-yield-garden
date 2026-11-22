@@ -20,7 +20,7 @@ type Step = "idle" | "preparing" | "signing" | "confirming" | "done" | "error";
 const labels: Record<Step, string> = { idle: "", preparing: "Preparando tu depósito…", signing: "Aprueba en tu billetera…", confirming: "Aprobado. Confirmando tu depósito…", done: "", error: "" };
 
 /** Selected real deposit with fresh simulation and owner signature. */
-export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, usdc, autoStart = false, onBusyChange, onClose, onDoneChange, onAmountFit }: { onAmountFit?: (amount: string) => void; autoStart?: boolean; usdc?: bigint | undefined; vaultId: string; amount: string; position?: string | undefined; migrate?: boolean; onBusyChange: (busy: boolean) => void; onClose?: () => void; onDoneChange?: (done: boolean) => void }) {
+export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, usdc, autoStart = false, onBusyChange, onClose, onDoneChange, onAmountFit, confirmLabel }: { confirmLabel?: string; onAmountFit?: (amount: string) => void; autoStart?: boolean; usdc?: bigint | undefined; vaultId: string; amount: string; position?: string | undefined; migrate?: boolean; onBusyChange: (busy: boolean) => void; onClose?: () => void; onDoneChange?: (done: boolean) => void }) {
   const t = useT();
   const { walletAddress, signAndSend } = useBovedaSession();
   const prepare = useServerFn(preparePilotDeposit);
@@ -111,7 +111,7 @@ export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, 
     {!walletAddress ? <p className="text-xs text-muted-foreground">{t("Inicia sesión con una wallet para firmar.")}</p> : <>
       {busy && <WorkingLine text={t(labels[step])} />}
       {step === "error" && message && <SignalErrorCard message={message} />}
-      <Button size="lg" disabled={busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? t(labels[step]) : step === "error" ? t("Intentar de nuevo") : t("Confirmar y depositar")}</Button>
+      <Button size="lg" disabled={busy || !valid.success} onClick={() => void run()}>{busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{busy ? t(labels[step]) : step === "error" ? t("Intentar de nuevo") : confirmLabel ?? t("Confirmar y depositar")}</Button>
     </>}
     {walletAddress && <ActivationSheet open={needsReserve} usdc={usdc ?? 0n} {...(depositMicro != null ? { depositMicro } : {})} autoActivate resume={{ vaultId, amount, ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) }} onClose={() => setNeedsReserve(false)} onActivated={(adj, ch) => { setNeedsReserve(false); setCharge(ch ?? null); setStep("preparing"); if (adj != null && adj > 0n) { const a = unitsToDecimal(adj, 6); setFitted(a); onAmountFit?.(a); } void queryClient.invalidateQueries({ queryKey: ["my-wallet", walletAddress] }); setTimeout(() => { setStep("idle"); setTimeout(() => void runRef.current(true), 0); }, 1500); }} />}
     {message && step !== "error" && <p role="alert" className="text-muted-foreground">{message}</p>}

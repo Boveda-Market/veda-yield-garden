@@ -20,11 +20,14 @@ import { Wallet } from "lucide-react";
 import { HotBanner } from "@/components/hot-vault-card";
 import { vaultSkin } from "@/components/vault-skin";
 import { isDlmmVault } from "@/lib/solana-data";
+import { prepareGasRefill } from "@/lib/gas-refill.functions";
+import { ACTIVATION_FEE_MICRO, EXTRA_VAULT_FEE_MICRO } from "@/lib/gas-refill";
+import { depositQuote, QUOTE_PRESETS } from "@/lib/deposit-quote";
 
 const MAX_MICRO = 5_000_000_000n;
 const microToText = (v: bigint) => { const w = v / 1_000_000n; const f = (v % 1_000_000n).toString().padStart(6, "0").replace(/0+$/, ""); return f ? `${w}.${f}` : `${w}`; };
 
-export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", position, migrate = false }: { vault: Vault; wallet: string | null; onClose: () => void; initialAmount?: string; position?: string; migrate?: boolean }) {
+export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", position, migrate = false, resumed = false }: { vault: Vault; wallet: string | null; onClose: () => void; initialAmount?: string; position?: string; migrate?: boolean; resumed?: boolean }) {
   const t = useT();
   const [amount, setAmount] = useState(initialAmount);
   const [busy, setBusy] = useState(false);
@@ -36,6 +39,12 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
     if (!r.success) throw new Error(r.error);
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   } });
+  const quoteFn = useServerFn(prepareGasRefill);
+  // Live network quote of the one-time activation (reserve at current price + fee), refreshed every 20 s.
+  const activationQ = useQuery({ queryKey: ["activation-quote", wallet], enabled: !!wallet && !migrate && isDlmmVault(vault.id), staleTime: 15_000, refetchInterval: 20_000, queryFn: async () => {
+    const r = await quoteFn({ data: { wallet: wallet!, activation: true, quoteOnly: true } });
+    return r.success ? { charge: BigInt(r.chargeMicro), fee: r.extraVault ? EXTRA_VAULT_FEE_MICRO : ACTIVATION_FEE_MICRO } : null;
+  } });
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
   const apr = yieldQ.data?.apr;
   let breakdown: ReturnType<typeof simulationDisplay> | null = null;
@@ -46,6 +55,8 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   const pick = (pct: bigint) => { if (usdc == null) return; const cap = usdc < MAX_MICRO ? usdc : MAX_MICRO; setAmount(microToText((cap * pct) / 100n)); };
   const clean = (v: string) => { const s = v.replace(/,/g, ".").replace(/[^\d.]/g, ""); const [w, ...rest] = s.split("."); return rest.length ? `${w}.${rest.join("").slice(0, 6)}` : (w ?? ""); };
 
+  const quote = typed != null && typed > 0n ? depositQuote(typed, activationQ.data?.charge ?? null, activationQ.data?.fee ?? 0n) : null;
+  const usd = (m: bigint) => `$${(Number(m) / 1e6).toFixed(2)}`;
   const hot = Boolean(vault.badge) && !migrate;
   const showBanner = hot && !done;
   return <Dialog open onOpenChange={(open) => { if (!open && !busy) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")} className={hot ? `border-hot/40 shadow-[var(--shadow-hot)] ${vaultSkin(vault.id)}` : undefined}>
@@ -65,18 +76,23 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
       <button type="button" disabled={busy || !usdc} onClick={() => pick(100n)} className="flex items-center justify-between rounded-lg bg-primary/10 px-3 py-2 text-left disabled:cursor-default"><span className="flex items-center gap-2 text-xs font-medium text-muted-foreground"><Wallet size={14} className="text-primary" />{t("Disponible para depositar")}</span><span className="font-display text-lg font-bold tabular-nums text-foreground">{usdc == null ? "…" : microToText(usdc)} <span className="text-xs font-semibold text-muted-foreground">$</span></span></button>
       <span className="text-xs text-muted-foreground">{t("Cantidad ($)")}</span>
       <TapAmount label={t("Cantidad ($)")} prefix="$" value={amount} disabled={busy} onChange={(v) => setAmount(clean(v))} />
-      <div className="grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={p.toString()} type="button" size="sm" variant="secondary" disabled={busy || !usdc} onClick={() => pick(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
+      {usdc === 0n ? <div className="grid grid-cols-4 gap-2">{QUOTE_PRESETS.map((v) => <Button key={v} type="button" size="sm" variant={amount === v ? "default" : "secondary"} disabled={busy} onClick={() => setAmount(v)}>${v}</Button>)}</div> : <div className="grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={p.toString()} type="button" size="sm" variant="secondary" disabled={busy || !usdc} onClick={() => pick(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>}
       <p className="text-xs text-muted-foreground">{migrate ? t("Traslado entre bóvedas: el detalle aparece antes de confirmar.") : t("Entre $1 y $5,000.")}</p>
       {overBalance && <p role="alert" className="text-xs text-muted-foreground">{t("No tienes suficientes dólares para esta cantidad.")}</p>}
       {!busy && (overBalance || usdc === 0n) && <div className={hot ? "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-hot/40 bg-hot/10 p-3 text-xs" : "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs"}><span>{hot ? t("Estás a un paso de comenzar. Deposita dólares para entrar a la {v}.", { v: t(vault.name) }) : t("Estás a un paso de comenzar. Añade dólares y sigue aquí mismo.")}</span><BuyUsdc className="w-full" hot={hot} resume={{ vaultId: vault.id, amount: typed != null ? amount : "", ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) }} needMicro={overBalance && typed != null && usdc != null ? typed - usdc : undefined} label={t("Continuar para depositar")} /></div>}
     </div>
-    {breakdown && <dl className="grid gap-2 rounded-xl bg-muted p-4 text-sm">
-      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Importe")}</dt><dd>${breakdown.gross}</dd></div>
-      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Invertido neto")}</dt><dd className="font-semibold">${breakdown.net}</dd></div>
+    {breakdown && quote && !resumed && <dl aria-label={t("Cotización en vivo")} className="grid gap-2 rounded-xl bg-muted p-4 text-sm">
+      <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground"><span className={`h-1.5 w-1.5 rounded-full bg-live ${activationQ.isFetching ? "animate-pulse" : ""}`} />{t("Cotización en vivo")}</p>
+      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Importe")}</dt><dd className="tabular-nums">{usd(quote.amount)}</dd></div>
+      {quote.fee > 0n && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Activación de cuenta digital (única vez)")}</dt><dd className="tabular-nums">−{usd(quote.fee)}</dd></div>}
+      {quote.reserve > 0n && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Reserva de operaciones")}</dt><dd className="tabular-nums">−{usd(quote.reserve)}</dd></div>}
+      <div className="flex justify-between gap-3 border-t border-border pt-2"><dt className="font-semibold">{t("Capital neto a la bóveda")}</dt><dd className="font-display text-lg font-bold tabular-nums">~{usd(quote.net)}</dd></div>
+      {quote.fee > 0n && <p className="text-[11px] leading-4 text-muted-foreground">{t("Estimado con el precio actual de la red. La activación se cobra solo en tu primer depósito.")}</p>}
     </dl>}
+    {resumed && !done && !busy && usdc != null && usdc > 0n && <p role="status" className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-center font-display text-base font-bold">✅ {t("Todo listo, oprime para autorizar y continuar")}</p>}
     {!position && !migrate && <p role="note" className="rounded-xl border border-border p-3 text-xs leading-5 text-muted-foreground">{t("Tu capital se combina con la otra moneda de la bóveda y su valor fluctuará con el precio de mercado, mientras acumulas intereses en cada operación.")} <a href="/faq#vaults-fluctuation" className="underline">{t("¿Por qué cambia mi balance?")}</a></p>}
     </>}
     {!done && !migrate && isDlmmVault(vault.id) && <RangeAlertsGate />}
-    {wallet ? <PilotDeposit usdc={usdc} autoStart={migrate} vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onAmountFit={setAmount} onClose={onClose} onDoneChange={setDone} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
+    {wallet ? <PilotDeposit usdc={usdc} autoStart={migrate} vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onAmountFit={setAmount} onClose={onClose} onDoneChange={setDone} {...(resumed ? { confirmLabel: t("Autorizar y continuar") } : {})} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
   </ActionSheetContent></Dialog>;
 }
