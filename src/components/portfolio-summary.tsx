@@ -3,7 +3,7 @@ import { MAX_HISTORY_PAGES } from "@/lib/meteora-history";
 import { useHydrated } from "@tanstack/react-router";
 import { AnimatedMoney } from "@/components/ui/animated-money";
 import { earningRatePerMs } from "@/lib/live-earnings";
-import { Layers, PiggyBank, PieChart, Sprout, TrendingUp, Trophy, Wallet } from "lucide-react";
+import { PiggyBank, PieChart, Sprout, TrendingUp, Trophy, Wallet } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { ChainPosition } from "@/lib/solana-data";
 import { useQueries } from "@tanstack/react-query";
@@ -25,6 +25,7 @@ import { useLocale } from "@/lib/i18n";
 import { TokenIcon } from "@/components/token-icon";
 import dctyLogo from "@/assets/dcty-logo.png";
 import trumpLogo from "@/assets/trump-logo.png";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Check, CheckCircle2, ChevronDown, Copy, ExternalLink } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 
@@ -78,7 +79,7 @@ export function PortfolioSummary({ wallet, cashUsd, positions, positionsComplete
     {showSince && <SinceDepositTile balance={cashUsd != null && Number.isFinite(cashUsd) && valued ? cashUsd + total + totalFees : null} since={since} loading={sinceLoading} money={money} hidden={hidden} />}
 
     <div className={`${tile} mt-3`}>
-      <p className={label}><Trophy size={14} />{t("Total ganado")}</p>
+      <p className={label}><Trophy size={14} />{t("Total ganado")}<HelpTip label={t("¿Qué es Total ganado?")}>{t("Total ganado = lo ya cosechado (al precio de hoy) + lo que tienes por cosechar. No incluye subidas o bajadas del precio de tu capital.")}</HelpTip></p>
       <p className="mt-1 flex flex-wrap items-baseline gap-2"><span className="font-display text-3xl font-semibold tabular-nums text-primary">{earned ? <>+{anim(earned.total, liveRate)}</> : loading}</span>{earned?.percent != null && !hidden && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold tabular-nums text-primary">+{earned.percent.toFixed(1)}%</span>}</p>
       {earned && <p className="mt-1 text-xs text-muted-foreground">{t("{a} cosechado · {b} por cosechar", { a: money(pnl), b: money(totalFees) })}{earned.percent != null ? ` · ${t("sobre lo depositado")}` : ""}</p>}
     </div>
@@ -90,7 +91,6 @@ export function PortfolioSummary({ wallet, cashUsd, positions, positionsComplete
         {(() => { const pend = rows.filter((r) => !r.p.locked && typeof r.fees === "number" && r.fees > 0); const ready = pend.filter((r) => canHarvest(r.fees as number)); return ready.length > 1 && ready.length === pend.length && totalFees >= 20 && onHarvestAll ? <button type="button" className="loot-btn mt-2 w-full" onClick={() => onHarvestAll(ready.map((r) => r.p))}><Trophy size={15} aria-hidden="true" /><span>{t("Cobrar")}</span></button> : null; })() ?? (top && canHarvest(top.fees) ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvest(top.p)}>{t("Cosechar ahora")}</Button> : null)}
       </div>
     </div>
-    <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground"><Layers size={12} className="mt-0.5 shrink-0" />{t("Total ganado = lo ya cosechado (al precio de hoy) + lo que tienes por cosechar. No incluye subidas o bajadas del precio de tu capital.")}</p>
   </section>;
 }
 
@@ -106,13 +106,13 @@ function SinceDepositTile({ balance, since, loading, money, hidden }: { balance:
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><PiggyBank size={14} />{t("Total depositado")}</p>
         <p className="mt-1 font-display text-2xl font-semibold tabular-nums">{since ? money(Math.max(deposited ?? 0, 0)) : loading ? t("Calculando…") : "—"}</p></div>
-      {since && change !== null && <div className="text-right"><p className="text-xs text-muted-foreground">{t("Cambio")}</p>
+      {since && change !== null && <div className="text-right"><p className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground">{t("Cambio")}<HelpTip label={t("¿Qué es el cambio?")}>{t("El cambio incluye lo que tienes hoy en bóvedas y lo que ya cosechaste.")}</HelpTip></p>
         <p className="flex items-baseline justify-end gap-2"><span className={`font-display text-2xl font-bold tabular-nums ${tone}`}>{hidden ? money(change) : `${up ? "+" : "−"}${money(Math.abs(change))}`}</span>
           {since.percent !== null && !hidden && <span className={`rounded-full px-2 py-0.5 text-xs font-bold tabular-nums ${up ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{up ? "+" : "−"}{Math.abs(since.percent).toFixed(1)}%</span>}</p></div>}
     </div>
     {(!since || (deposited ?? 0) <= 0) && <p className="mt-2 text-xs leading-5 text-muted-foreground">{since
-      ? (deposited ?? 0) <= 0 ? t("Ya recuperaste todo lo que depositaste. El cambio incluye lo que tienes hoy en bóvedas y lo que ya cosechaste.") : null
-      : loading ? t("Revisando todos tus movimientos…") : t("No disponible por ahora: aún no podemos leer todo tu historial de movimientos.")}</p>}
+      ? (deposited ?? 0) <= 0 ? t("Ya recuperaste todo lo que depositaste.") : null
+      : loading ? t("Revisando todos tus movimientos…") : <span className="inline-flex items-center gap-1.5">{t("No disponible por ahora")}<HelpTip label={t("¿Por qué no está disponible?")}>{t("Aún no podemos leer todo tu historial de movimientos.")}</HelpTip></span>}</p>}
   </div>;
 }
 
@@ -276,9 +276,8 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
       <div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-bold">${chain.symbol} <span className="font-normal text-muted-foreground">/ USDC</span></p>
         <button type="button" onClick={copyMint} aria-label={t("Copiar contrato")} className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-background/70 px-2 py-0.5 font-mono text-[11px] text-muted-foreground hover:text-foreground">{copied ? <><Check size={11} className="text-primary" />{t("Copiado")}</> : <><Copy size={11} />{chain.mint.slice(0, 4)}…{chain.mint.slice(-4)}</>}</button></div>
     </div>}
-    {!isPrice && <details className="relative mt-1 text-xs text-muted-foreground"><summary className="cursor-pointer underline-offset-2 hover:underline"><span aria-hidden className="mr-1 inline-flex size-4 items-center justify-center rounded-full border border-current text-[10px] font-bold">?</span>{t("¿Qué es el Mercado global?")}</summary><div className="mt-1 space-y-1 leading-5"><p className="font-medium text-foreground">{t("Capitalización agregada en posiciones activas")}</p><p>{t("Representa la capitalización de mercado (Market Cap) combinada de los tokens subyacentes con liquidez activa en mis bóvedas.")}</p><p>{t("Refleja la valoración total en tiempo real de los activos en los que se encuentra desplegado el capital.")}</p><p className="font-medium text-foreground">{t("En resumen: una gráfica del rendimiento de todas mis bóvedas abiertas a la misma vez.")}</p></div></details>}
     <div className="relative mt-1">
-      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Market cap {s}", { s: sym }) : t("Market cap global")}</p><p className="flex items-center gap-2"><span className={`font-display text-xl font-extrabold tabular-nums sm:text-2xl ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !liveCap ? "…" : mText}</span>{(ms[0] ?? 0) > 0 && <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${pct >= 0 ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{pct >= 0 ? "▲ +" : "▼ "}{pct.toFixed(1)}%</span>}</p></div>
+      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Market cap {s}", { s: sym }) : t("Market cap global")}{!isPrice && <HelpTip label={t("¿Qué es el Mercado global?")}><p className="font-medium text-foreground">{t("Capitalización agregada en posiciones activas")}</p><p>{t("Representa la capitalización de mercado (Market Cap) combinada de los tokens subyacentes con liquidez activa en mis bóvedas.")}</p><p>{t("Refleja la valoración total en tiempo real de los activos en los que se encuentra desplegado el capital.")}</p><p className="font-medium text-foreground">{t("En resumen: una gráfica del rendimiento de todas mis bóvedas abiertas a la misma vez.")}</p></HelpTip>}</p><p className="flex items-center gap-2"><span className={`font-display text-xl font-extrabold tabular-nums sm:text-2xl ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !liveCap ? "…" : mText}</span>{(ms[0] ?? 0) > 0 && <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${pct >= 0 ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{pct >= 0 ? "▲ +" : "▼ "}{pct.toFixed(1)}%</span>}</p></div>
     </div>
     <div className="relative mt-2 touch-pan-y overflow-hidden" onPointerDown={pDown} onPointerMove={pMove} onPointerUp={pUp} onPointerCancel={pUp} onPointerLeave={pUp}>
     <div style={{ transform: `translateX(${pan}px) scaleX(${zoom})`, transformOrigin: `${origin * 100}% 50%` }}>
@@ -310,4 +309,10 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     {!drawing && !live && n <= 1 && <div className="pointer-events-none absolute inset-x-0 -mt-[5.5rem] flex justify-center text-xs text-muted-foreground sm:-mt-28">{t("Gráfica no disponible por ahora")}</div>}
     {n > 1 ? <div className="relative mt-1 flex justify-between text-[10px] capitalize text-muted-foreground">{[0, 1, 2, 3, 4].map((k) => { const b = live ? w0 : wBase, d = new Date(b + k * ((now - b) / 4)), span = now - b; const lbl = k === 4 ? t("Hoy") : span <= 40 * 86_400_000 ? d.toLocaleDateString(locale, { day: "numeric", month: "short" }) : span > 730 * 86_400_000 ? String(d.getFullYear()) : k === 0 ? d.toLocaleDateString(locale, { month: "short", year: "2-digit" }) : d.toLocaleDateString(locale, { month: "short" }); return <span key={k} className="text-center leading-tight">{lbl}</span>; })}</div> : <div className="relative mt-1 flex justify-between text-[11px] capitalize text-muted-foreground"><span>{n === 0 ? t("Hace 5 h") : t("Hace 24 h")}</span><span>{t("Ahora")}</span></div>}
       </div>;
+}
+
+/** Small «?» that keeps an explanation tucked away until tapped. */
+function HelpTip({ label, children }: { label: string; children: React.ReactNode }) {
+  return <Popover><PopoverTrigger asChild><button type="button" aria-label={label} className="inline-flex size-4 shrink-0 items-center justify-center rounded-full border border-current text-[10px] font-bold text-muted-foreground hover:text-foreground">?</button></PopoverTrigger>
+    <PopoverContent className="w-72 space-y-1 text-xs leading-5 text-muted-foreground">{children}</PopoverContent></Popover>;
 }
