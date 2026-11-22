@@ -49,10 +49,11 @@ export function PortfolioSummary({ wallet, positions, positionsComplete, predict
   const liveRate = rows.reduce((s, r) => s + (r.p.locked || r.p.outOfRange ? 0 : earningRatePerMs(r.value, r.apr)), 0);
   const anim = (n: number, rate = 0) => hidden ? MASK : <AnimatedMoney value={n} ratePerMs={rate} prefix={rate > 0 ? "$" : ""} format={rate > 0 ? undefined : formatUsd} />;
   const pnl = history.pnl ? Number(history.pnl.replace(/,/g, "")) : null;
-  const earned = totalEarned(pnl, totalFees, vaultTotal);
   // «Desde que depositaste»: only with complete history, complete positions and every vault valued; otherwise unavailable.
   const valued = rows.every((r) => r.value != null);
   const since = history.complete && positionsComplete && valued && history.flows.length > 0 ? sinceDeposit(history.flows, history.records, history.poolPrices, BigInt(Math.round((vaultTotal + totalFees) * 1e6))) : null;
+  // «Total ganado» percent is over «Total depositado»; unavailable while that number is unavailable.
+  const earned = totalEarned(pnl, totalFees, since ? Number(since.depositedMicro) / 1e6 : 0);
   const showSince = vaultTotal > 0 || history.flows.length > 0;
   const sinceLoading = !history.complete && (history.query.isFetching || history.query.hasNextPage) && history.pages.length < MAX_HISTORY_PAGES && !history.query.isError;
   const tile = "rounded-2xl border border-border bg-card p-4";
@@ -79,7 +80,7 @@ export function PortfolioSummary({ wallet, positions, positionsComplete, predict
     <div className={`${tile} mt-3`}>
       <p className={label}><Trophy size={14} />{t("Total ganado")}</p>
       <p className="mt-1 flex flex-wrap items-baseline gap-2"><span className="font-display text-3xl font-semibold tabular-nums text-primary">{earned ? <>+{anim(earned.total, liveRate)}</> : loading}</span>{earned?.percent != null && !hidden && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold tabular-nums text-primary">+{earned.percent.toFixed(1)}%</span>}</p>
-      {earned && <p className="mt-1 text-xs text-muted-foreground">{t("{a} cosechado · {b} por cosechar", { a: money(pnl), b: money(totalFees) })}{earned.percent != null ? ` · ${t("sobre tu capital en bóvedas")}` : ""}</p>}
+      {earned && <p className="mt-1 text-xs text-muted-foreground">{t("{a} cosechado · {b} por cosechar", { a: money(pnl), b: money(totalFees) })}{earned.percent != null ? ` · ${t("sobre lo depositado")}` : ""}</p>}
     </div>
 
     <div className="mt-3">

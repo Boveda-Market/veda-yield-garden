@@ -166,7 +166,7 @@ export const realOps: Record<string, string> = {
   "Revisando todos tus movimientos…": "Reviewing all your activity…",
   "No disponible por ahora: aún no podemos leer todo tu historial de movimientos.": "Not available yet: we can't read your full activity history right now.",
   "{a} cosechado · {b} por cosechar": "{a} harvested · {b} to harvest",
-  "sobre tu capital en bóvedas": "on your capital in vaults",
+  "sobre lo depositado": "on what you deposited",
   "Total ganado = lo ya cosechado (al precio de hoy) + lo que tienes por cosechar. No incluye subidas o bajadas del precio de tu capital.": "Total earned = what you've harvested (at today's price) + what's still to harvest. Doesn't include price moves in your capital.",
   "Intereses cobradas": "Fees collected",
   "Ganancia sobre lo depositado": "Gain on amount deposited",
