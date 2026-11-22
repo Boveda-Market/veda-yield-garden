@@ -76,7 +76,13 @@ export function HomeCtas({ vaultsFirst = false, trump = false }: { vaultsFirst?:
             <span className="flex items-center gap-1 font-display text-2xl font-black tabular-nums tracking-tight sm:text-[1.7rem]"><Flame size={18} aria-hidden className="flame-flicker shrink-0" />{apr.replace(" APR", "")}</span>
             <span className="mt-0.5 text-[10px] font-black uppercase tracking-[0.18em]">APR</span>
           </span>
-        : <span className="hot-cta flex w-[4.5rem] shrink-0 flex-col items-center justify-center rounded-xl px-1.5 py-1 text-center font-display text-[10px] font-black uppercase leading-tight tracking-wide text-hot-surface"><Flame size={16} aria-hidden className="flame-flicker" />{apr}</span>}
+        : trump
+          ? <span className="relative flex h-[3.4rem] w-[5.6rem] shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl bg-[color:var(--trump-blue)] text-center leading-none ring-1 ring-[color:var(--trump-gold)] shadow-[0_0_16px_-4px_var(--trump-gold)] sm:w-28">
+              <span aria-hidden className="text-[8px] tracking-[0.3em] text-[color:var(--trump-gold)]">★ ★ ★</span>
+              <span className="trump-gold font-display text-[13px] font-black uppercase italic tracking-wide sm:text-sm">{lang === "en" ? "High" : "Alto"}</span>
+              <span className="font-display text-[9px] font-bold uppercase tracking-[0.25em] text-[color:var(--trump-gold)]">{lang === "en" ? "Octane" : "Octanaje"}</span>
+            </span>
+          : <span className="hot-cta flex w-[4.5rem] shrink-0 flex-col items-center justify-center rounded-xl px-1.5 py-1 text-center font-display text-[10px] font-black uppercase leading-tight tracking-wide text-hot-surface"><Flame size={16} aria-hidden className="flame-flicker" />{apr}</span>}
     </span>
   </Link>;
   return <div className="mb-4 grid w-full min-w-0 grid-cols-1 gap-2.5">{vaultsFirst ? [vaults, predict] : [predict, vaults]}</div>;
