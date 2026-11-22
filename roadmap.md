@@ -13,3 +13,4 @@
 
 - [x] Portafolio: revisar orden de tarjetas de arriba
 - [x] Deslizado «al revés» en tarjetas de arriba del portafolio
+- [x] Portafolio: «Total depositado» y cambio ($ y %) frente a lo que hay hoy (sin comisiones; cosechas cuentan como ganancia)

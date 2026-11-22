@@ -2,7 +2,7 @@ import { Loader2 } from "lucide-react";
 import { useHydrated } from "@tanstack/react-router";
 import { AnimatedMoney } from "@/components/ui/animated-money";
 import { earningRatePerMs } from "@/lib/live-earnings";
-import { Layers, PieChart, Sparkles, Sprout, TrendingUp, Trophy } from "lucide-react";
+import { Layers, PiggyBank, PieChart, Sparkles, Sprout, TrendingUp, Trophy } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { ChainPosition } from "@/lib/solana-data";
 import { useQueries } from "@tanstack/react-query";
@@ -15,6 +15,7 @@ import { formatUsd } from "@/lib/position-value";
 import { canHarvest } from "@/lib/harvest";
 import { VAULTS } from "@/lib/vaults";
 import { totalEarned } from "@/lib/total-earned";
+import { sinceDeposit } from "@/lib/since-deposit";
 import { Button } from "./ui/button";
 import { useEffect, useId, useRef, useState } from "react";
 import { CHAIN_POOLS } from "@/lib/solana-data";
@@ -29,11 +30,11 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from 
 const COLORS = ["bg-primary", "bg-chart-1", "bg-chart-2", "bg-chart-4", "bg-chart-3", "bg-chart-5"];
 
 /** Visual performance board: capital split by vault/plays, weighted APR, pending, harvested PNL and in/out volume. */
-export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarvest, onHarvestAll }: { wallet: string | null; positions: ChainPosition[]; positionsComplete: boolean; predictionsMicro: bigint | null; onHarvest: (p: ChainPosition) => void; onHarvestAll?: (ps: ChainPosition[]) => void }) {
+export function PortfolioSummary({ wallet, positions, positionsComplete, predictionsMicro, onHarvest, onHarvestAll }: { wallet: string | null; positions: ChainPosition[]; positionsComplete: boolean; predictionsMicro: bigint | null; onHarvest: (p: ChainPosition) => void; onHarvestAll?: (ps: ChainPosition[]) => void }) {
   const t = useT();
   const [hidden] = useHideBalances();
   const money = (n: number | null) => n === null ? "—" : hidden ? MASK : formatUsd(n);
-  const history = useMeteoraHistory(wallet);
+  const history = useMeteoraHistory(wallet, true);
   const { rows, totalFees, top } = usePositionRows(positions);
   const plays = predictionsMicro === null ? 0 : Number(predictionsMicro) / 1e6;
   const byVault = VAULTS.map((v) => {
@@ -48,6 +49,11 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
   const anim = (n: number, rate = 0) => hidden ? MASK : <AnimatedMoney value={n} ratePerMs={rate} prefix={rate > 0 ? "$" : ""} format={rate > 0 ? undefined : formatUsd} />;
   const pnl = history.pnl ? Number(history.pnl.replace(/,/g, "")) : null;
   const earned = totalEarned(pnl, totalFees, vaultTotal);
+  // «Desde que depositaste»: only with complete history, complete positions and every vault valued; otherwise unavailable.
+  const valued = rows.every((r) => r.value != null);
+  const since = history.complete && positionsComplete && valued && history.flows.length > 0 ? sinceDeposit(history.flows, history.records, history.poolPrices, BigInt(Math.round((vaultTotal + totalFees) * 1e6))) : null;
+  const showSince = vaultTotal > 0 || history.flows.length > 0;
+  const sinceLoading = !history.complete && (history.query.isFetching || history.query.hasNextPage) && history.pages.length < 8 && !history.query.isError;
   const tile = "rounded-2xl border border-border bg-card p-4";
   const label = "flex items-center gap-1.5 text-xs text-muted-foreground";
   const loading = history.query.isFetching ? t("Calculando…") : "—";
@@ -66,6 +72,8 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
         <ul className="mt-4 grid gap-2 sm:grid-cols-2">{slices.map((s, i) => <li key={s.id} className="flex items-center justify-between gap-2 text-sm"><span className="flex min-w-0 items-center gap-2"><span className={`h-2.5 w-2.5 shrink-0 rounded-full ${COLORS[i % COLORS.length]}`} /><span className="truncate">{s.label}</span></span><span className="shrink-0 tabular-nums"><strong>{((s.value / total) * 100).toFixed(0)}%</strong> <span className="text-muted-foreground">· {money(s.value)}</span>{s.apr !== null && <span className="ml-1 text-xs text-primary">{s.apr.toFixed(0)}% APR</span>}</span></li>)}</ul>
       </> : <p className="mt-3 text-sm text-muted-foreground">{t("Cuando tengas dinero en bóvedas o jugadas verás aquí cómo se reparte.")}</p>}
     </div>
+
+    {showSince && <SinceDepositTile since={since} loading={sinceLoading} money={money} hidden={hidden} />}
 
     <div className={`${tile} mt-3`}>
       <p className={label}><Trophy size={14} />{t("Total ganado")}</p>
@@ -87,6 +95,27 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
     </div>
     <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground"><Layers size={12} className="mt-0.5 shrink-0" />{t("Total ganado = lo ya cosechado (al precio de hoy) + lo que tienes por cosechar. No incluye subidas o bajadas del precio de tu capital.")}</p>
   </section>;
+}
+
+/** Total deposited (own money, fees excluded) vs. value today, with change in dollars and percent. */
+function SinceDepositTile({ since, loading, money, hidden }: { since: ReturnType<typeof sinceDeposit>; loading: boolean; money: (n: number | null) => string; hidden: boolean }) {
+  const t = useT();
+  const deposited = since ? Number(since.depositedMicro) / 1e6 : null;
+  const change = since ? Number(since.changeMicro) / 1e6 : null;
+  const up = (change ?? 0) >= 0;
+  const tone = up ? "text-primary" : "text-destructive";
+  return <div className="mt-3 rounded-2xl border border-border bg-card p-4">
+    <div className="flex flex-wrap items-end justify-between gap-3">
+      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><PiggyBank size={14} />{t("Total depositado")}</p>
+        <p className="mt-1 font-display text-2xl font-semibold tabular-nums">{since ? money(Math.max(deposited ?? 0, 0)) : loading ? t("Calculando…") : "—"}</p></div>
+      {since && change !== null && <div className="text-right"><p className="text-xs text-muted-foreground">{t("Cambio")}</p>
+        <p className="flex items-baseline justify-end gap-2"><span className={`font-display text-2xl font-bold tabular-nums ${tone}`}>{hidden ? money(change) : `${up ? "+" : "−"}${money(Math.abs(change))}`}</span>
+          {since.percent !== null && !hidden && <span className={`rounded-full px-2 py-0.5 text-xs font-bold tabular-nums ${up ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{up ? "+" : "−"}{Math.abs(since.percent).toFixed(1)}%</span>}</p></div>}
+    </div>
+    <p className="mt-2 text-xs leading-5 text-muted-foreground">{since
+      ? (deposited ?? 0) <= 0 ? t("Ya recuperaste todo lo que depositaste. El cambio incluye lo que tienes hoy en bóvedas y lo que ya cosechaste.") : t("Lo que tienes hoy en bóvedas, más lo por cosechar y lo ya cosechado, frente a tu dinero depositado. Las comisiones no cuentan como depósito y el cambio incluye la subida o bajada del precio.")
+      : loading ? t("Revisando todos tus movimientos…") : t("No disponible por ahora: aún no podemos leer todo tu historial de movimientos.")}</p>
+  </div>;
 }
 
 /** Theme per vault (golden rule: each vault tab uses that vault's own look). Badge vaults use the GTA6 neon. */

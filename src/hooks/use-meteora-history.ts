@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMeteoraHistory } from "@/lib/meteora-history.functions";
@@ -5,12 +6,13 @@ import { harvestedUsdValue, meteoraMetrics } from "@/lib/meteora-history";
 import { fetchPoolStats } from "@/lib/pool-stats";
 
 /** Shared, cached vault history + harvested PNL. Summary and history list reuse one query. */
-export function useMeteoraHistory(wallet: string | null) {
+/** `full` keeps loading older pages (bounded by maxPages) so «Desde que depositaste» can check complete coverage. */
+export function useMeteoraHistory(wallet: string | null, full = false) {
   const read = useServerFn(getMeteoraHistory);
   const query = useInfiniteQuery({ queryKey: ["meteora-history", wallet], initialPageParam: undefined as string | undefined,
     queryFn: async ({ pageParam }) => { if (!wallet) throw new Error("wallet"); const result = await read({ data: { wallet, before: pageParam } }); if (!result.success) throw new Error(result.error); return result.page; },
     getNextPageParam: (last) => last.missing === 0 ? last.next ?? undefined : undefined,
-    enabled: Boolean(wallet), staleTime: 60_000, retry: false, maxPages: 8 });
+    enabled: Boolean(wallet), staleTime: 5 * 60_000, retry: false, maxPages: 8 });
   const pages = query.data?.pages ?? [];
   const records = [...new Map(pages.flatMap((page) => page.records).map((row) => [row.id, row])).values()].sort((a, b) => b.slot - a.slot);
   const metrics = meteoraMetrics(records);
@@ -23,5 +25,10 @@ export function useMeteoraHistory(wallet: string | null) {
   const pnl = ready ? harvestedUsdValue(metrics.totals, prices) : null;
   const missing = pages.reduce((sum, page) => sum + page.missing, 0);
   const scanned = pages.reduce((sum, page) => sum + page.scanned, 0);
-  return { query, pages, records, metrics, pnl, poolPrices, ready, missing, scanned };
+  const flows = pages.flatMap((page) => page.flows ?? []);
+  const { hasNextPage, isFetching, fetchNextPage } = query;
+  useEffect(() => { if (full && hasNextPage && !isFetching && pages.length < 8) void fetchNextPage(); }, [full, hasNextPage, isFetching, pages.length, fetchNextPage]);
+  /** Every wallet transaction was read and decoded, so per-transaction dollar flows form a complete basis. */
+  const complete = ready && !hasNextPage && missing === 0 && pages.every((page) => Array.isArray(page.flows));
+  return { query, pages, records, metrics, pnl, poolPrices, ready, missing, scanned, flows, complete };
 }

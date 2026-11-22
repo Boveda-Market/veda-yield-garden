@@ -4,6 +4,9 @@ import { CP_AMM_PROGRAM_ID, cpAmmCoder } from "@meteora-ag/cp-amm-sdk/dist/index
 import { CHAIN_POOLS } from "./solana-data";
 import { heliusConnection } from "./solana-read.server";
 import type { MeteoraHistoryPage, MeteoraRecord } from "./meteora-history";
+import { tokenDelta, type VaultFlow } from "./since-deposit";
+import { FEE_WALLET } from "./fees";
+import { USDC_MINT } from "./solana-data";
 
 // Small base58 decoder avoids browser/module interop differences in bs58 exports.
 function decode58(value: string) {
@@ -20,6 +23,7 @@ const address = (value: unknown) => new PublicKey(String(value)).toBase58();
 
 const DLMM_PROGRAM_ID = "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo";
 const DLMM_CLAIM_FEE = "4b7a9a308c4a7ba3", DLMM_CLAIM_FEE2 = "e8abf2613a4d232d", DLMM_REBALANCING = "006d75b33d5bc7c8";
+const DLMM_ADD_LIQUIDITY = "1f5e7d5ae3343dba", DLMM_REMOVE_LIQUIDITY = "74f461e8671f983a";
 
 /**
  * Concentrated-liquidity (GTA6) harvest events: ClaimFee/ClaimFee2 (manual or autopilot harvest) and the fees
@@ -74,11 +78,39 @@ export function decodeMeteoraRecords(tx: ParsedTransactionWithMeta, wallet: stri
   return records;
 }
 
+/**
+ * Dollar flow of one owner transaction that touched a validated vault (DLMM AddLiquidity/RemoveLiquidity/Rebalancing
+ * by this owner, or any decoded record). Fee-wallet USDC is added back so fees never count as deposited.
+ */
+export function decodeVaultFlow(tx: ParsedTransactionWithMeta, wallet: string, signature: string, records: MeteoraRecord[]): VaultFlow | null {
+  if (!tx.meta || tx.meta.err !== null || tx.transaction.signatures[0] !== signature) return null;
+  let add = false, remove = false, rebalance = false;
+  for (const group of tx.meta.innerInstructions ?? []) for (const ix of group.instructions) {
+    if (ix.programId.toBase58() !== DLMM_PROGRAM_ID || !("data" in ix)) continue;
+    let data: Buffer; try { data = decode58(ix.data); } catch { continue; }
+    if (data.length < 128 || data.subarray(0, 8).toString("hex") !== "e445a52e51cb9a1d") continue;
+    const tag = data.subarray(8, 16).toString("hex"), d = data.subarray(16);
+    const key = (o: number) => new PublicKey(d.subarray(o, o + 32)).toBase58();
+    if (!CHAIN_POOLS.some((c) => c.kind === "dlmm" && c.pool === key(0))) continue;
+    if (tag === DLMM_ADD_LIQUIDITY && key(32) === wallet) add = true;
+    else if (tag === DLMM_REMOVE_LIQUIDITY && key(32) === wallet) remove = true;
+    else if (tag === DLMM_REBALANCING && key(64) === wallet) rebalance = true;
+  }
+  if (!add && !remove && !rebalance && records.length === 0) return null;
+  const { preTokenBalances: pre, postTokenBalances: post } = tx.meta;
+  const cash = tokenDelta(pre, post, wallet, USDC_MINT) + tokenDelta(pre, post, FEE_WALLET, USDC_MINT);
+  const tokens = CHAIN_POOLS.map((p) => ({ pool: p.pool, raw: tokenDelta(pre, post, wallet, p.mint).toString() })).filter((t) => t.raw !== "0");
+  return { signature, slot: tx.slot, at: tx.blockTime ? tx.blockTime * 1000 : null, cashMicro: cash.toString(), tokens,
+    harvestOnly: !add && !remove && !rebalance && records.length > 0 && records.every((r) => r.kind === "harvest"),
+    hasWithdraw: remove || records.some((r) => r.kind === "withdraw" || r.kind === "close") };
+}
+
 export async function readMeteoraHistory(key: string, wallet: string, before?: string): Promise<MeteoraHistoryPage> {
   const connection = heliusConnection(key);
   const owner = new PublicKey(wallet);
   const signatures = await connection.getSignaturesForAddress(owner, { limit: 25, ...(before ? { before } : {}) }, "finalized");
   const records: MeteoraRecord[] = [];
+  const flows: VaultFlow[] = [];
   let missing = 0;
   // Bounded concurrency and pagination; no unbounded wallet backfill on entry.
   for (let start = 0; start < signatures.length; start += 4) {
@@ -87,9 +119,12 @@ export async function readMeteoraHistory(key: string, wallet: string, before?: s
       try {
         const tx = await connection.getParsedTransaction(row.signature, { commitment: "finalized", maxSupportedTransactionVersion: 0 });
         if (!tx) { missing++; return; }
-        records.push(...decodeMeteoraRecords(tx, wallet, row.signature));
+        const found = decodeMeteoraRecords(tx, wallet, row.signature);
+        records.push(...found);
+        const flow = decodeVaultFlow(tx, wallet, row.signature, found);
+        if (flow) flows.push(flow);
       } catch { missing++; }
     }));
   }
-  return { records: records.sort((a, b) => b.slot - a.slot), scanned: signatures.length, next: signatures.length === 25 ? signatures.at(-1)?.signature ?? null : null, missing };
+  return { records: records.sort((a, b) => b.slot - a.slot), flows, scanned: signatures.length, next: signatures.length === 25 ? signatures.at(-1)?.signature ?? null : null, missing };
 }
