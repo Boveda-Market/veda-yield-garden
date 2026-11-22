@@ -79,7 +79,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
   const fmt = (n: number, d = 2) => n.toLocaleString(locale, { minimumFractionDigits: d, maximumFractionDigits: d });
   const session = useBovedaSession();
   const navigate = useNavigate();
-  const signOut = () => void (async () => { try { localStorage.removeItem("boveda.safety.seen"); } catch {} try { sessionStorage.removeItem("boveda:auth-pending"); } catch {} await session.logout(); window.location.replace("/"); })();
+  const signOut = () => void (async () => { try { localStorage.removeItem("boveda.safety.seen"); } catch {} try { sessionStorage.removeItem("boveda:auth-pending"); sessionStorage.removeItem("boveda:passkey-auto"); } catch {} await session.logout(); window.location.replace("/"); })();
   const user = guest ? t("Invitado") : session.authenticated && session.userId ? session.label : null;
   const identity = guest ? "guest" : session.userId;
   const storageKey = guest ? guestDemoKey : identity ? demoSessionKey(identity) : "";

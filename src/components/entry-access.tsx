@@ -3,7 +3,7 @@ import { useT } from "@/lib/i18n";
 import { useEffect, useRef, useState } from "react";
 import { HostedSession } from "./session-host";
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Fingerprint } from "lucide-react";
 import { isReturning, markReturning, useHomePath } from "@/lib/preferences";
 import { isHeroReview } from "@/lib/hero-variants";
 import { Button } from "./ui/button";
@@ -11,7 +11,7 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { CoinbaseNote } from "./coinbase-note";
 import { GoogleButton } from "./google-button";
 import { BootSplash } from "./boot-splash";
-import { rememberPasskey } from "@/lib/passkey-device";
+import { deviceHasPasskey, rememberPasskey } from "@/lib/passkey-device";
 import { useServerFn } from "@tanstack/react-start";
 import { getRealWallet } from "@/lib/solana.functions";
 import { readCache } from "@/lib/cached-query";
@@ -32,6 +32,16 @@ function EntryButtons() {
   const readWallet = useServerFn(getRealWallet);
   const [signup, setSignup] = useState(false);
   useEffect(() => { if ((session.security?.passkeyCount ?? 0) > 0) rememberPasskey(); }, [session.security?.passkeyCount]);
+  const [bio, setBio] = useState(false);
+  useEffect(() => { if (deviceHasPasskey()) setBio(true); }, []);
+  // Ask for the fingerprint once per visit; cancelling stays silent and it won't pop up again, so Google stays free to switch accounts.
+  useEffect(() => {
+    if (!bio || signup || !session.ready || session.authenticated) return;
+    try { if (sessionStorage.getItem("boveda:passkey-auto")) return; sessionStorage.setItem("boveda:passkey-auto", "1"); } catch { return; }
+    const id = setTimeout(() => session.login("passkey"), 400);
+    return () => clearTimeout(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bio, signup, session.ready, session.authenticated]);
   const navigate = useNavigate();
   const [installTo, setInstallTo] = useState<string | null>(null);
   const wasReturning = useRef<boolean | null>(null);
@@ -79,7 +89,8 @@ function EntryButtons() {
       <button role="tab" aria-selected={!signup} onClick={() => setSignup(false)} className={`rounded-lg py-2 ${!signup ? "bg-background shadow-sm" : "text-muted-foreground"}`}>{t("Iniciar sesión")}</button>
       <button role="tab" aria-selected={signup} onClick={() => setSignup(true)} className={`rounded-lg py-2 ${signup ? "bg-background shadow-sm" : "text-muted-foreground"}`}>{t("Crear cuenta")}</button>
     </div>
-    <div className="relative rounded-xl border border-primary/40 bg-primary/5 p-2 pt-4"><span className="absolute -top-2.5 left-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">{t("Recomendado · Mayor seguridad")}</span><GoogleButton disabled={!session.ready} arrow className="h-14 w-full text-base" onClick={() => session.login("google")}>{t("Continuar con Google")}</GoogleButton><p className="mt-1.5 text-center text-[11px] font-medium text-primary">{t("Gratis, sin tarjeta y sin depósito para explorar.")}</p><p className="mt-2 text-center text-[11px] leading-4 text-muted-foreground">{t("Protegido por la verificación en 2 pasos de tu cuenta de Google. Sin contraseñas que puedan robarte.")}</p><CoinbaseNote className="mt-2 text-center text-xs text-muted-foreground" /></div>
+    {bio && !signup && <div className="rounded-xl border border-primary/50 bg-primary/10 p-2"><Button disabled={!session.ready} className="h-14 w-full text-base" onClick={() => session.login("passkey")}><Fingerprint size={22} />{t("Entrar con huella o Face ID")}</Button></div>}
+    <div className="relative rounded-xl border border-primary/40 bg-primary/5 p-2 pt-4"><span className="absolute -top-2.5 left-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">{bio && !signup ? t("¿Otra cuenta?") : t("Recomendado · Mayor seguridad")}</span><GoogleButton disabled={!session.ready} arrow className="h-14 w-full text-base" onClick={() => session.login("google")}>{bio && !signup ? t("Cambiar de cuenta con Google") : t("Continuar con Google")}</GoogleButton><p className="mt-1.5 text-center text-[11px] font-medium text-primary">{t("Gratis, sin tarjeta y sin depósito para explorar.")}</p><p className="mt-2 text-center text-[11px] leading-4 text-muted-foreground">{t("Protegido por la verificación en 2 pasos de tu cuenta de Google. Sin contraseñas que puedan robarte.")}</p><CoinbaseNote className="mt-2 text-center text-xs text-muted-foreground" /></div>
     <Button disabled={!session.ready} variant="secondary" className="h-12 w-full" onClick={() => session.login("email")}>{signup ? t("Registrarme con email") : t("Entrar con email")}</Button>
     {signup && <p className="text-xs leading-5 text-muted-foreground">{t("Tu primer acceso crea tu cuenta con Privy. Después puedes elegir tu nombre y avatar.")}</p>}
     {session.error && <LoginAlert message={session.error} onDismiss={() => session.clearError?.()} />}

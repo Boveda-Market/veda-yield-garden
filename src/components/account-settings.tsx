@@ -150,6 +150,6 @@ export function AccountSettings() {
       <p className="mt-3 text-xs text-muted-foreground">Boveda Technologies</p>
     </div>
 
-    <Button variant="outline" className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => void (async () => { await session.logout(); window.location.assign("/"); })()}><LogOut size={16} />{t("Cerrar sesión")}</Button>
+    <Button variant="outline" className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => void (async () => { try { sessionStorage.removeItem("boveda:passkey-auto"); } catch {} await session.logout(); window.location.assign("/"); })()}><LogOut size={16} />{t("Cerrar sesión")}</Button>
   </section>;
 }
