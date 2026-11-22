@@ -17,7 +17,7 @@ export const CHAIN_POOLS = [
   { id: "trump", kind: "dlmm", pool: "3C5YE97HADPDxZehYq9Cis8AXr9aNyrUsczKzE1nDbW9", mint: "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN", symbol: "TRUMP", decimals: 6, swapDecimals: 6 },
 ] as const;
 export type ChainPoolConfig = (typeof CHAIN_POOLS)[number];
-/** Vaults whose positions BÓVEDA can open, harvest and close. */
+/** Vaults whose positions Bóveda Market can open, harvest and close. */
 export const OPERABLE_VAULTS = ["sol", "met", "gta6", "dcty", "trump"] as const;
 export type OperableVault = (typeof OPERABLE_VAULTS)[number];
 export const isOperableVault = (id: string): id is OperableVault => (OPERABLE_VAULTS as readonly string[]).includes(id);

@@ -4,8 +4,8 @@ import { useT } from "@/lib/i18n";
 import { LegalLayout } from "@/components/legal-layout";
 import { SystemStatusView } from "@/components/system-status";
 
-const TITLE = "System status — BÓVEDA";
-const DESC = "Check live that BÓVEDA services are running, with global liquidity and fees for vaults and predictions.";
+const TITLE = "System status — Bóveda Market";
+const DESC = "Check live that Bóveda Market services are running, with global liquidity and fees for vaults and predictions.";
 export const Route = createFileRoute("/en/status")({ staticData: { sitemap: true },
   head: () => ({ meta: [
     { title: TITLE }, { name: "description", content: DESC },

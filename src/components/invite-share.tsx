@@ -21,7 +21,7 @@ export function ShareButtons({ link, onCopied }: { link: string; onCopied?: () =
   const t = useT();
   const text = shareText(t);
   async function share() {
-    if (navigator.share) { try { await navigator.share({ title: "BÓVEDA", text, url: link }); } catch { /* cancelled */ } return; }
+    if (navigator.share) { try { await navigator.share({ title: "Bóveda Market", text, url: link }); } catch { /* cancelled */ } return; }
     await navigator.clipboard.writeText(`${text} ${link}`); onCopied?.();
   }
   const enc = encodeURIComponent;
@@ -50,7 +50,7 @@ export function InvitePromoCard() {
     <div className="flex items-start gap-3">
       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground"><Gift size={22} aria-hidden /></span>
       <div className="min-w-0 flex-1">
-        <p className="font-display text-lg font-semibold">{t("Gana más compartiendo BÓVEDA")}</p>
+        <p className="font-display text-lg font-semibold">{t("Gana más compartiendo Bóveda Market")}</p>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("Llévate el 50% de las ganancias de tus invitados, en USDC directo a tu wallet. A ellos no les cuesta nada extra.")}</p>
       </div>
     </div>
@@ -81,14 +81,14 @@ export function InviteHero({ link, code, referred, pending, preview, onCopied, r
   const text = shareText(t);
   const flash = () => { setCopied(true); onCopied?.(); setTimeout(() => setCopied(false), 2000); };
   async function copy() { try { await navigator.clipboard.writeText(link); } catch { /* ignore */ } flash(); }
-  async function share(msg: string, url: string) { if (navigator.share) { try { await navigator.share({ title: "BÓVEDA", text: msg, url }); } catch { /* cancelled */ } return; } try { await navigator.clipboard.writeText(`${msg} ${url}`); } catch { /* ignore */ } flash(); }
+  async function share(msg: string, url: string) { if (navigator.share) { try { await navigator.share({ title: "Bóveda Market", text: msg, url }); } catch { /* cancelled */ } return; } try { await navigator.clipboard.writeText(`${msg} ${url}`); } catch { /* ignore */ } flash(); }
   const cleanDraft = normalizeCode(draft);
   async function save() { if (!cleanDraft) { setEditMsg(t("Usa de 4 a 16 letras o números, sin espacios.")); return; } if (!onSaveCode) return; setSaving(true); setEditMsg(null); const err = await onSaveCode(cleanDraft); setSaving(false); if (err) setEditMsg(err); else setEditOpen(false); }
   const steps: [string, string][] = [[t("Copia tu enlace"), t("Ya está listo. Un toque y es tuyo.")], [t("Compártelo"), t("Con amigos y familia, por WhatsApp o Telegram.")], [t("Gana hasta 60%"), t("De las ganancias de cada movimiento, en dólares.")]];
   return <section aria-labelledby="invite-hero" className="invite-ring rounded-3xl p-[2px]">
     <div className="rounded-[22px] bg-[image:var(--gradient-invite-surface)] p-5 text-invite-foreground sm:p-7">
       <span className="invite-cta inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wide text-invite-surface"><Gift size={12} aria-hidden />{t("Invita y Gana")}</span>
-      <h1 id="invite-hero" className="mt-3 font-display text-3xl font-extrabold leading-tight sm:text-4xl">{t("Comparte BÓVEDA y gana")} <span className="bg-[image:linear-gradient(90deg,var(--invite),var(--invite-2))] bg-clip-text text-transparent">{t("hasta 60%")}</span></h1>
+      <h1 id="invite-hero" className="mt-3 font-display text-3xl font-extrabold leading-tight sm:text-4xl">{t("Comparte Bóveda Market y gana")} <span className="bg-[image:linear-gradient(90deg,var(--invite),var(--invite-2))] bg-clip-text text-transparent">{t("hasta 60%")}</span></h1>
       <p className="mt-2 text-sm text-invite-muted">{t("A tus invitados no les cuesta nada extra.")}</p>
       <ol className="mt-5 grid grid-cols-3 gap-2">{steps.map(([h, d], i) => <li key={h} className="rounded-2xl border border-invite/25 bg-invite-foreground/5 p-3">
         <span className="invite-cta grid h-8 w-8 place-items-center rounded-full font-display text-sm font-black text-invite-surface">{i + 1}</span>

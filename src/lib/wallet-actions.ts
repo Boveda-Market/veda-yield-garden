@@ -69,10 +69,10 @@ export async function buildTransfer(input: z.infer<typeof sendInput>): Promise<U
   return new Uint8Array(getTransactionEncoder().encode(compileTransaction(message)));
 }
 
-/** BÓVEDA's existing USDC account for the fee wallet; every swap fee is paid in USDC here. */
+/** Bóveda Market's existing USDC account for the fee wallet; every swap fee is paid in USDC here. */
 export const FEE_USDC_ACCOUNT = "DXbXVtrEEyJ7zuanJNzyyj1D3PQBsUm65hdQ3DHiarQW";
 
-/** Swaps carry no BÓVEDA fee. */
+/** Swaps carry no Bóveda Market fee. */
 export function swapFee(_usdcUnits: bigint) { return 0n; }
 
 /** Swappable tokens: USDC plus every vault token validated with `swapDecimals`; new pools appear automatically. */

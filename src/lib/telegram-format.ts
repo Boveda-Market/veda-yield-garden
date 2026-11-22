@@ -1,7 +1,7 @@
 /** Shared Telegram HTML helpers (pure, browser-safe) so every post and alert follows one clean, scannable layout. */
 export const tgEsc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 export const TG_RULE = "━━━━━━━━━━━━━━";
-export const TG_SAFETY = "<i>🛡️ BÓVEDA nunca te pedirá claves ni frases secretas.</i>";
+export const TG_SAFETY = "<i>🛡️ Bóveda Market nunca te pedirá claves ni frases secretas.</i>";
 
 /** Alert card: emoji + bold title, a thin divider, then short lines (falsy lines are skipped). Lines are trusted HTML. */
 export function tgCard(icon: string, title: string, lines: Array<string | false | null | undefined>): string {

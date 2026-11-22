@@ -99,7 +99,7 @@ export function CashAppBtc({ wallet }: { wallet: string }) {
       <div className="flex justify-between"><span>{t("Llega a Cash App")}</span><b className="flex items-center gap-1"><Bitcoin size={14} />{quote.settleAmount} BTC</b></div>
       <div className="flex justify-between text-xs text-muted-foreground"><span>{t("Valor aproximado")}</span><span>≈ ${cost.value.toFixed(2)}</span></div>
       <div className="flex justify-between text-xs"><span>{t("Costo del cambio y red Bitcoin")}</span><span>≈ ${cost.cost.toFixed(2)} ({cost.pct.toFixed(1)}%)</span></div>
-      <div className="flex justify-between text-xs"><span>{t("Comisión de BÓVEDA ({p}%)", { p: String(tierPercent(grossUnits || 0n, "withdraw")) })}</span><span>${(Number(feeUnits) / 1e6).toFixed(2)}</span></div>
+      <div className="flex justify-between text-xs"><span>{t("Comisión de Bóveda Market ({p}%)", { p: String(tierPercent(grossUnits || 0n, "withdraw")) })}</span><span>${(Number(feeUnits) / 1e6).toFixed(2)}</span></div>
       <p className="pt-1 text-xs text-muted-foreground">{t("El precio queda fijo unos minutos. Tarda de 15 a 30 minutos por las confirmaciones de Bitcoin. Si algo falla, el proveedor devuelve tus USDC a tu wallet.")}</p>
     </div>}
     <label className="grid gap-1 text-sm"><span className="font-medium">{t("Dirección de Bitcoin de tu Cash App")}</span><Input value={addr} onChange={(e) => setAddr(e.target.value.trim())} placeholder="bc1q…" disabled={busy} autoComplete="off" spellCheck={false} /></label>

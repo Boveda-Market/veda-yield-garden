@@ -29,7 +29,7 @@ export function installPrivyApiFallback(): void {
       const custom = data?.custom_api_url;
       if (typeof custom !== "string" || !custom) return res;
       if (await probeHost(custom)) return res;
-      console.warn("[BÓVEDA] custom Privy domain unreachable, using auth.privy.io");
+      console.warn("[Bóveda Market] custom Privy domain unreachable, using auth.privy.io");
       return new Response(JSON.stringify({ ...data, custom_api_url: null }), { status: res.status, statusText: res.statusText, headers: res.headers });
     } catch { return res; }
   };

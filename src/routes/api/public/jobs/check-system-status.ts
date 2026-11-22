@@ -41,7 +41,7 @@ export const Route = createFileRoute("/api/public/jobs/check-system-status")({
           const last = rows.get("apr_gap")?.first_down_at;
           if (best?.up && gapAlertDue(last, now)) {
             const to = VAULTS.find((v) => v.id === best.up!.id);
-            const ok = await tg.sendTelegram(tg.TELEGRAM_CHANNEL, `⚡ <b>Traslado gratis disponible</b>\n\n${to?.name} rinde <b>+${best.up.gain.toFixed(1)}% APR</b> más que ${best.v.name} ahora mismo.\n\nSi tienes capital en ${best.v.name}, entra a tu Portafolio y toca «Migrar gratis»: 0% de comisión de BÓVEDA al salir y al depositar.\n\n🔗 <a href="https://bovedamarket.app/portfolio">Abrir Portafolio</a>`);
+            const ok = await tg.sendTelegram(tg.TELEGRAM_CHANNEL, `⚡ <b>Traslado gratis disponible</b>\n\n${to?.name} rinde <b>+${best.up.gain.toFixed(1)}% APR</b> más que ${best.v.name} ahora mismo.\n\nSi tienes capital en ${best.v.name}, entra a tu Portafolio y toca «Migrar gratis»: 0% de comisión de Bóveda Market al salir y al depositar.\n\n🔗 <a href="https://bovedamarket.app/portfolio">Abrir Portafolio</a>`);
             if (ok) await db.from("system_service_status").upsert({ service: "apr_gap", first_down_at: new Date(now).toISOString(), operator_alerted: false, public_alerted: false, updated_at: new Date(now).toISOString() }, { onConflict: "service" });
           }
         } catch { /* best-effort; never blocks status checks */ }

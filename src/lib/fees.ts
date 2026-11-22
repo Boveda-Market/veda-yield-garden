@@ -42,5 +42,5 @@ export function validDeposit(amount: string, available: number) {
 /** Any vault move (offer or voluntary): progressive "move" tier on the exit only, never shared with affiliates. */
 export function rotateFee(units: bigint) { return tieredFee(units, "move"); }
 
-/** Progressive BÓVEDA fee on bank/Cash App/Coinbase withdrawals, floored micro-USDC, deducted from the gross amount. */
+/** Progressive Bóveda Market fee on bank/Cash App/Coinbase withdrawals, floored micro-USDC, deducted from the gross amount. */
 export function withdrawFee(units: bigint) { return tieredFee(units, "withdraw"); }

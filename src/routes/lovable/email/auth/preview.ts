@@ -18,7 +18,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "BÓVEDA"
+const SITE_NAME = "Bóveda Market"
 const ROOT_DOMAIN = "bovedamarket.app"
 
 // Sample data for preview mode ONLY (not used in actual email sending).

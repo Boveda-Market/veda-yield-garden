@@ -63,7 +63,7 @@ export function AffiliatePayoutsAdmin() {
   }
   const total = (due ?? []).reduce((a, d) => a + BigInt(d.pendingRaw), 0n);
   return <section id="tesoreria" className="mt-10 scroll-mt-20 rounded-2xl border border-primary/40 bg-primary/5 p-5" aria-labelledby="payouts-title">
-    <h2 id="payouts-title" className="flex items-center gap-2 font-display text-xl font-semibold"><ShieldCheck size={18} />{t("Tesorería BÓVEDA (operador)")}</h2>
+    <h2 id="payouts-title" className="flex items-center gap-2 font-display text-xl font-semibold"><ShieldCheck size={18} />{t("Tesorería Bóveda Market (operador)")}</h2>
     <p className="mt-1 text-xs text-muted-foreground">{t("Wallet de tesorería")}: <span className="font-mono">{short(AFFILIATE_PAYOUT_WALLET)}</span></p>
     {!due ? <Button className="mt-4" onClick={() => void open()} disabled={!!busy}>{busy === "load" ? <Loader2 size={14} className="animate-spin" /> : <Wallet size={14} />}{t("Abrir panel de tesorería")}</Button> : <>
       <dl className="mt-4 grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">

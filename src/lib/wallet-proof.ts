@@ -4,7 +4,7 @@ import { z } from "zod";
 export const PROOF_MAX_AGE_MS = 10 * 60 * 1000;
 
 export function walletProofMessage(privyId: string, wallet: string, issuedAt: string) {
-  return `BÓVEDA: confirmo que esta wallet es mía.\nCuenta: ${privyId}\nWallet: ${wallet}\nFecha: ${issuedAt}\nNo mueve fondos ni cuesta nada.`;
+  return `Bóveda Market: confirmo que esta wallet es mía.\nCuenta: ${privyId}\nWallet: ${wallet}\nFecha: ${issuedAt}\nNo mueve fondos ni cuesta nada.`;
 }
 
 const b58 = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]+$/);

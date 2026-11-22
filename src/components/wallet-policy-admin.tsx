@@ -60,7 +60,7 @@ export function WalletPolicyAdmin() {
       <div className="mt-4 flex items-start justify-between gap-4">
         <div>
           <p className="font-medium">{t("Bloquear operaciones con wallets externas")}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{t("Si lo activas, Phantom, Jupiter y otras wallets externas solo podrán ver la app. Las billeteras de BÓVEDA (Google, email o passkey) siguen operando.")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("Si lo activas, Phantom, Jupiter y otras wallets externas solo podrán ver la app. Las billeteras de Bóveda Market (Google, email o passkey) siguen operando.")}</p>
         </div>
         <Switch checked={on} disabled={busy || policy.isLoading} onCheckedChange={toggle} aria-label={t("Bloquear operaciones con wallets externas")} />
       </div>

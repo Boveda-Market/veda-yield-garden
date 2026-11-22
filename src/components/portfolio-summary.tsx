@@ -219,7 +219,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const [copied, setCopied] = useState(false);
   const chain = cur ? CHAIN_POOLS.find((c) => c.id === cur.id) : undefined;
   const copyMint = () => { if (!chain) return; void navigator.clipboard?.writeText(chain.mint).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }); };
-  // GMGN detailed chart with BÓVEDA referral tracking: selected vault's token, or the largest open vault on Global.
+  // GMGN detailed chart with Bóveda Market referral tracking: selected vault's token, or the largest open vault on Global.
   const gmgnId = cur?.id ?? [...open].sort((a, b) => b.value - a.value)[0]?.id;
   const gmgnMint = CHAIN_POOLS.find((c) => c.id === gmgnId)?.mint;
   const gmgnUrl = gmgnId && gmgnId !== "sol" && gmgnMint ? (VAULTS.find((v) => v.id === gmgnId)?.links?.gmgn ?? `https://gmgn.ai/sol/token/bvdapp_${gmgnMint}`) : null;

@@ -88,7 +88,7 @@ export function AccountSettings() {
         <p className="mt-1 break-all text-sm text-muted-foreground">{session.label}</p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"><ShieldCheck size={14} />{t("Cuenta activa")}</span>
-          <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-card px-3 py-1 text-xs font-semibold text-foreground"><Shield size={14} className="text-primary" />{t("Titular BÓVEDA")}</span>
+          <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-card px-3 py-1 text-xs font-semibold text-foreground"><Shield size={14} className="text-primary" />{t("Titular Bóveda Market")}</span>
           {wallet && <button type="button" onClick={copy} className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 font-mono text-xs hover:bg-muted" aria-label={t("Copiar dirección")}>{wallet.slice(0, 4)}…{wallet.slice(-4)}{copied ? <Check size={12} /> : <Copy size={12} />}</button>}
         </div>
       </div>

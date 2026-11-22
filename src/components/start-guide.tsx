@@ -42,7 +42,7 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
         [t("Convertido"), `${num(receipt.solIn, 9, 4)} SOL`],
         [t("Recibes (aprox.)"), `${num(receipt.usdcOut, 6, 2)} USDC`],
         ...(receipt.minimum !== null ? [[t("Mínimo garantizado"), `${num(receipt.minimum, 6, 2)} USDC`]] : []),
-        [t("Servicio BÓVEDA"), "0.00 USDC"],
+        [t("Servicio Bóveda Market"), "0.00 USDC"],
         [t("Reservado para costos de red"), `${num(receipt.kept, 9, 4)} SOL`],
         [t("Comprobante"), `${receipt.signature.slice(0, 6)}…${receipt.signature.slice(-6)}`],
       ].map(([k, v]) => <div key={k} className="flex justify-between gap-3 px-4 py-2.5"><dt className="text-muted-foreground">{k}</dt><dd className="font-semibold">{v}</dd></div>)}
@@ -62,7 +62,7 @@ export function StartGuide({ className }: { className?: string; onSwap?: () => v
     <ol aria-hidden className="mt-2 grid grid-cols-3 gap-1.5">{[1, 2, 3].map((n) => <li key={n} className={`h-1.5 rounded-full ${n === 1 ? "bg-primary" : "bg-primary/20"}`} />)}</ol>
     <h2 className="mt-2 font-display text-xl font-semibold">{t("Añade tus primeros dólares")}</h2>
     <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Elige Coinbase (saldo, banco o tarjeta) o tarjeta y Apple Pay. Luego activas tu cuenta en segundos para empezar a generar.")}</p>
-    <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck size={14} className="text-primary" />{t("Solo tú controlas tus fondos. BÓVEDA no puede moverlos sin tu firma.")}</p>
+    <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck size={14} className="text-primary" />{t("Solo tú controlas tus fondos. Bóveda Market no puede moverlos sin tu firma.")}</p>
     <Button className="mt-4 w-full" onClick={() => setBuyOpen((v) => v + 1)}><CreditCard size={16} />{t("Depositar dólares")}</Button>
     {buyOpen ? <BuyUsdc className="mt-3" auto={buyOpen} /> : null}
     {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}

@@ -1,4 +1,4 @@
-/** Live Up/Down crypto rounds (Polymarket, routed through Jupiter Prediction). BÓVEDA never takes the other side. */
+/** Live Up/Down crypto rounds (Polymarket, routed through Jupiter Prediction). Bóveda Market never takes the other side. */
 export const PREDICT_MIN_USDC = 5;
 export const PREDICT_MAX_USDC = 250;
 export const PREDICT_ASSETS = ["BTC", "ETH", "SOL"] as const;

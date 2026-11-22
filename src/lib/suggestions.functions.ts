@@ -18,7 +18,7 @@ export const submitSuggestion = createServerFn({ method: "POST" })
         const tg = await import("@/lib/telegram.server");
         const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         const w = data.wallet ? `${data.wallet.slice(0, 4)}…${data.wallet.slice(-4)}` : "sin wallet";
-        await tg.treasuryAlert(`${data.category === "error" ? "🚨 <b>REPORTE DE PROBLEMA</b>" : `💡 <b>Nueva sugerencia en BÓVEDA</b> (${data.category})`}\n<b>Usuario:</b> <code>${w}</code>\n<b>Mensaje:</b> <i>${esc(data.message)}</i>`);
+        await tg.treasuryAlert(`${data.category === "error" ? "🚨 <b>REPORTE DE PROBLEMA</b>" : `💡 <b>Nueva sugerencia en Bóveda Market</b> (${data.category})`}\n<b>Usuario:</b> <code>${w}</code>\n<b>Mensaje:</b> <i>${esc(data.message)}</i>`);
       } catch { /* alerts never block */ }
       return { success: true };
     } catch { return { success: false, error: "No se pudo enviar la sugerencia." }; }

@@ -11,7 +11,7 @@ export const simulationInput = z.object({
   vaultId: z.enum(["sol", "met", "gta6", "dcty", "trump"]),
   amount: depositAmountSchema,
   position: solanaAddressSchema.optional(),
-  /** Moving between vaults: no BÓVEDA entry fee. */
+  /** Moving between vaults: no Bóveda Market entry fee. */
   migrate: z.literal(true).optional(),
 }).strict();
 export type SimulationInput = z.infer<typeof simulationInput>;

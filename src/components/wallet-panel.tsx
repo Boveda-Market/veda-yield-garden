@@ -154,14 +154,14 @@ export function WalletPanel() {
     try {
       let bytes: Uint8Array;
       try { bytes = await buildSwap(address, quote); } catch (e) {
-        console.error("[BÓVEDA] swap preparation failed", e);
+        console.error("[Bóveda Market] swap preparation failed", e);
         throw new Error(`${t("No se pudo preparar el cambio")}: ${e instanceof Error ? e.message : String(e)}`);
       }
       await session.signAndSend(bytes); refresh();
     } catch (e) { fail(e); throw e; } finally { setBusy(false); }
   }
 
-  // One tap: every extra coin (prize/refund dollars, vault leftovers) → USDC, no BÓVEDA fee. SOL is the network reserve and is never sold.
+  // One tap: every extra coin (prize/refund dollars, vault leftovers) → USDC, no Bóveda Market fee. SOL is the network reserve and is never sold.
   async function convertPayouts() {
     if (!address || converting) return;
     setConverting(true);
@@ -283,9 +283,9 @@ export function WalletPanel() {
 
     <Dialog open={sheet} onOpenChange={(o) => { if (!o && busy) return; setSheet(o); if (!o) { setSent(null); setMessage(null); } }}>
       <ActionSheetContent closeLabel={t("Cerrar")} onInteractOutside={(e) => { if (busy) e.preventDefault(); }}>
-      <DialogHeader className="pr-10 text-left"><DialogTitle className="font-display text-xl">{tab === "swap" ? t("Cambiar") : t("Enviar")}</DialogTitle><DialogDescription className="hidden sm:block">{tab === "swap" ? t("Cambia entre tus monedas sin comisión de BÓVEDA.") : t("Envía USDC o SOL a otra billetera.")}</DialogDescription></DialogHeader>
+      <DialogHeader className="pr-10 text-left"><DialogTitle className="font-display text-xl">{tab === "swap" ? t("Cambiar") : t("Enviar")}</DialogTitle><DialogDescription className="hidden sm:block">{tab === "swap" ? t("Cambia entre tus monedas sin comisión de Bóveda Market.") : t("Envía USDC o SOL a otra billetera.")}</DialogDescription></DialogHeader>
       {!sent && <div role="tablist" className="grid grid-cols-2 gap-1 rounded-full bg-muted p-1">{([["swap", ArrowLeftRight, t("Cambiar")], ["send", Send, t("Enviar")]] as const).map(([k, Icon, label]) => <button key={k} type="button" role="tab" aria-selected={tab === k} disabled={busy} onClick={() => { setTab(k); setMessage(null); }} className={`flex items-center justify-center gap-1.5 rounded-full py-2 text-sm font-medium transition-colors ${tab === k ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}><Icon size={15} />{label}</button>)}</div>}
-      {sent ? <ActionSuccess destination={null} title={t("Envío realizado")} amount={{ value: sent.amount, unit: sent.asset }} body={t("Tu saldo se actualizará en unos segundos.")} details={[{ label: t("Operación"), value: t("Envío") }, { label: t("Destino"), value: `${sent.to.slice(0, 4)}…${sent.to.slice(-4)}` }, { label: t("Servicio BÓVEDA"), value: "0" }]} signature={sent.sig} onClose={() => { setSent(null); setSheet(false); }} />
+      {sent ? <ActionSuccess destination={null} title={t("Envío realizado")} amount={{ value: sent.amount, unit: sent.asset }} body={t("Tu saldo se actualizará en unos segundos.")} details={[{ label: t("Operación"), value: t("Envío") }, { label: t("Destino"), value: `${sent.to.slice(0, 4)}…${sent.to.slice(-4)}` }, { label: t("Servicio Bóveda Market"), value: "0" }]} signature={sent.sig} onClose={() => { setSent(null); setSheet(false); }} />
       : tab === "swap" ? <WalletSwap key={swapFrom.key} balances={swapBalances} initialFrom={swapFrom.from} initialAmount={swapFrom.amount} busy={busy} onConfirm={swap} sheet /> : <div className="space-y-4">
         <div className="grid grid-cols-2 gap-2">{(["USDC", "SOL"] as const).map((a) => { const b = a === "SOL" ? balances.data?.sol : balances.data?.usdc; return <button key={a} type="button" onClick={() => setAsset(a)} className={`rounded-xl border p-3 text-left ${asset === a ? "border-primary bg-primary/10" : "border-border"}`}><p className="flex items-center gap-2 font-medium"><TokenIcon symbol={a} size={20} />{a}</p><p className="text-xs text-muted-foreground">{t("Disponible")}: {b !== undefined ? fmt(Number(spendable(b, a)) / 10 ** (a === "SOL" ? 9 : 6), 4) : "—"}</p></button>; })}</div>
         <div><label className="text-xs text-muted-foreground">{t("Dirección de destino")}</label><Input className="mt-1" placeholder={t("Pega la dirección aquí")} value={to} onChange={(e) => setTo(e.target.value.trim())} />
@@ -295,8 +295,8 @@ export function WalletPanel() {
         <div><label className="text-xs text-muted-foreground">{t("Monto")}</label><TapAmount className="mt-1" label={t("Monto")} suffix={asset} value={amount} onChange={(v) => setAmount(v.replace(",", ".").replace(/[^\d.]/g, ""))} />
           <div className="mt-2 grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={String(p)} size="sm" variant="outline" onClick={() => setPct(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
           {amountError && <p className="mt-1 text-sm text-destructive">{amountError}</p>}{asset === "SOL" && <p className="mt-1 text-xs text-muted-foreground">{t("Guardamos 0.01 SOL para pagar los costos de red.")}</p>}</div>
-        {units && !amountError && to && !toError && <div className="rounded-xl bg-muted p-3 text-sm"><div className="flex justify-between"><span className="text-muted-foreground">{t("Envías")}</span><span>{amount} {asset}</span></div><div className="flex justify-between"><span className="text-muted-foreground">{t("Servicio BÓVEDA")}</span><span>0</span></div><div className="flex justify-between"><span className="text-muted-foreground">{t("Destino")}</span><code>{to.slice(0, 4)}…{to.slice(-4)}</code></div></div>}
-        <p className="text-xs text-muted-foreground">{t("Revisa bien la dirección: los envíos no se pueden revertir. BÓVEDA no cobra comisión por enviar.")}</p>
+        {units && !amountError && to && !toError && <div className="rounded-xl bg-muted p-3 text-sm"><div className="flex justify-between"><span className="text-muted-foreground">{t("Envías")}</span><span>{amount} {asset}</span></div><div className="flex justify-between"><span className="text-muted-foreground">{t("Servicio Bóveda Market")}</span><span>0</span></div><div className="flex justify-between"><span className="text-muted-foreground">{t("Destino")}</span><code>{to.slice(0, 4)}…{to.slice(-4)}</code></div></div>}
+        <p className="text-xs text-muted-foreground">{t("Revisa bien la dirección: los envíos no se pueden revertir. Bóveda Market no cobra comisión por enviar.")}</p>
         <Button className="w-full" disabled={busy || !units || !!amountError || !to || !!toError} onClick={() => void send()}>{busy ? t("Procesando…") : t("Revisar y firmar envío")}</Button>
       </div>}
       {message && <SignalErrorCard message={message} />}

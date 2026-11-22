@@ -30,36 +30,36 @@ function ReturningCover() {
 
 export const Route = createFileRoute("/")({ staticData: { sitemap: true },
   head: () => ({ meta: [
-    { title: "BÓVEDA — Cuenta digital para generar intereses con monedas digitales" },
+    { title: "Bóveda Market — Cuenta digital para generar intereses con monedas digitales" },
     { name: "description", content: "Crea una cuenta digital con Google, añade saldo y genera intereses con monedas digitales en bóvedas como GTA6 Coin y Trump Coin. Seguridad de Privy y depósitos gratis." },
-    { property: "og:title", content: "BÓVEDA — Cuenta digital para generar intereses con monedas digitales" },
+    { property: "og:title", content: "Bóveda Market — Cuenta digital para generar intereses con monedas digitales" },
     { property: "og:description", content: "Crea una cuenta digital con Google, añade saldo y genera intereses con monedas digitales en bóvedas como GTA6 Coin y Trump Coin. Seguridad de Privy y depósitos gratis." },
     { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
     { property: "og:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:image:width", content: "1200" }, { property: "og:image:height", content: "630" }, { property: "og:image:alt", content: "Bóveda GTA6 — Intereses generados por el volumen del mercado." }, { name: "twitter:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:video", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:secure_url", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:type", content: "video/mp4" }, { property: "og:video:width", content: "1200" }, { property: "og:video:height", content: "630" },
     { property: "og:url", content: "https://bovedamarket.app/" },
   ], links: langLinks("es", "/", "/en"),
-  scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"BÓVEDA","url":"https://bovedamarket.app/","logo":"https://bovedamarket.app/favicon.png","email":"admin@bovedamarket.app"},{"@type":"WebApplication","name":"BÓVEDA","url":"https://bovedamarket.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"es","description":"Crea una cuenta digital con Google, añade saldo y genera intereses con monedas digitales en bóvedas como GTA6 Coin y Trump Coin. Seguridad de Privy y depósitos gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"HowTo","name":"Cómo empezar en BÓVEDA","inLanguage":"es","step":[{"@type":"HowToStep","position":1,"name":"Crea una cuenta digital","text":"Crea una cuenta digital con tu email de Google, protegida por Privy."},{"@type":"HowToStep","position":2,"name":"Añade saldo","text":"Añade saldo a tu cuenta digital en dólares digitales."},{"@type":"HowToStep","position":3,"name":"Genera intereses","text":"Genera intereses en una bóveda o participa en tiempo real."}]}]}) }] }), component: Landing,
+  scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"Bóveda Market","url":"https://bovedamarket.app/","logo":"https://bovedamarket.app/favicon.png","email":"admin@bovedamarket.app"},{"@type":"WebApplication","name":"Bóveda Market","url":"https://bovedamarket.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"es","description":"Crea una cuenta digital con Google, añade saldo y genera intereses con monedas digitales en bóvedas como GTA6 Coin y Trump Coin. Seguridad de Privy y depósitos gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"HowTo","name":"Cómo empezar en Bóveda Market","inLanguage":"es","step":[{"@type":"HowToStep","position":1,"name":"Crea una cuenta digital","text":"Crea una cuenta digital con tu email de Google, protegida por Privy."},{"@type":"HowToStep","position":2,"name":"Añade saldo","text":"Añade saldo a tu cuenta digital en dólares digitales."},{"@type":"HowToStep","position":3,"name":"Genera intereses","text":"Genera intereses en una bóveda o participa en tiempo real."}]}]}) }] }), component: Landing,
 });
 
 const FAQS = [
-  { q: "¿Qué es USDC?", a: "USDC es una moneda digital diseñada para mantener el mismo valor que el dólar estadounidense: 1 USDC busca valer 1 USD. En BÓVEDA los saldos, depósitos e intereses se muestran en USDC. No es un depósito bancario ni está asegurado." },
+  { q: "¿Qué es USDC?", a: "USDC es una moneda digital diseñada para mantener el mismo valor que el dólar estadounidense: 1 USDC busca valer 1 USD. En Bóveda Market los saldos, depósitos e intereses se muestran en USDC. No es un depósito bancario ni está asegurado." },
   { q: "¿Puedo explorar sin depositar monedas digitales?", a: "No para mirar. Puedes ver las bóvedas y Doble o Nada en vivo sin registrarte. Para participar o depositar basta con entrar con Google o email y añadir dólares con tarjeta. Se puede empezar con montos pequeños." },
   { q: "¿Cómo se generan las ganancias?", a: "Cada depósito se suma a una bóveda que genera intereses cada vez que alguien intercambia monedas digitales en ella. Esos intereses se reparten entre quienes aportan. Las tasas son estimaciones, cambian y existe riesgo de pérdida." },
   { q: "¿Cuándo puedo retirar?", a: "Las ganancias se cosechan y las posiciones se cierran en cualquier momento, sin plazos de permanencia. Cada operación se revisa antes de firmar con la wallet." },
-  { q: "¿Cuánto cuesta usar BÓVEDA?", a: "Depositar, enviar, cambiar monedas y entrar a Sube/Baja es gratis. Cosechar, cerrar, retirar y reclamar premios tienen un pequeño cargo de servicio, siempre visible antes de firmar. El detalle está en Términos y condiciones." },
+  { q: "¿Cuánto cuesta usar Bóveda Market?", a: "Depositar, enviar, cambiar monedas y entrar a Sube/Baja es gratis. Cosechar, cerrar, retirar y reclamar premios tienen un pequeño cargo de servicio, siempre visible antes de firmar. El detalle está en Términos y condiciones." },
 ];
 
 const GUARANTEES = [
-  { icon: ShieldCheck, title: "Control y firma propia", body: "Cada operación requiere autorización del titular. BÓVEDA nunca mueve fondos sin firma del titular." },
+  { icon: ShieldCheck, title: "Control y firma propia", body: "Cada operación requiere autorización del titular. Bóveda Market nunca mueve fondos sin firma del titular." },
   { icon: Landmark, title: "Sin monedas digitales retenidas", body: "Sin plazos de permanencia. Salida libre de predicciones y bóvedas en cualquier momento." },
   { icon: Lock, title: "Seguridad moderna", body: "Acceso con huella, Face ID o email cifrado, sin frases secretas escritas en papel." },
 ];
 
 
 const ANTI_SCAM: [string, string][] = [
-  ["Sin custodia interna", "En una estafa los fondos se entregan a la empresa. Aquí el saldo vive en la cuenta digital del titular, protegida por Privy: ni el equipo de BÓVEDA ni terceros pueden congelarlo o moverlo."],
+  ["Sin custodia interna", "En una estafa los fondos se entregan a la empresa. Aquí el saldo vive en la cuenta digital del titular, protegida por Privy: ni el equipo de Bóveda Market ni terceros pueden congelarlo o moverlo."],
   ["Sin «tarifas para descongelar»", "Nunca se cobra para poder retirar. Los retiros van a Coinbase, banco o Cash App en cualquier momento."],
-  ["Sin contraseñas expuestas", "Acceso con Google (recomendado) o huella, protegido por verificación en 2 pasos y el propio dispositivo. BÓVEDA nunca pide contraseñas ni frases secretas."],
+  ["Sin contraseñas expuestas", "Acceso con Google (recomendado) o huella, protegido por verificación en 2 pasos y el propio dispositivo. Bóveda Market nunca pide contraseñas ni frases secretas."],
   ["Cero firmas a ciegas", "Cada operación se simula antes de firmar: se muestra qué sale, qué entra y el cargo exacto, como protección contra ataques."],
 ];
 
@@ -92,7 +92,7 @@ function TrustTicker() {
 }
 
 const TRUST = [
-  { icon: Fingerprint, title: "Seguridad a cargo de Privy", body: "La creación, el cifrado y la protección de cada cuenta digital corren sobre la infraestructura de Privy, con Face ID o huella. BÓVEDA nunca custodia las monedas digitales." },
+  { icon: Fingerprint, title: "Seguridad a cargo de Privy", body: "La creación, el cifrado y la protección de cada cuenta digital corren sobre la infraestructura de Privy, con Face ID o huella. Bóveda Market nunca custodia las monedas digitales." },
   { icon: Landmark, title: "1 USDC = $1 siempre", body: "Nada de monedas locas que hoy suben y mañana se desploman. El saldo en dólares digitales se mantiene estable mientras genera rendimiento." },
   { icon: Search, title: "Revisión antes de aprobar", body: "Cada operación se simula primero: entradas, salidas y cargo exactos a la vista." },
   { icon: ShieldCheck, title: "Sin cargos ocultos", body: "Recargas y retiros con Coinbase. Cargos de servicio reducidos y progresivos." },
@@ -136,7 +136,7 @@ export function Landing() {
         <div className="order-3 min-w-0 text-center md:order-1 md:text-left">
           {plainHero && <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(hero.title)}</h1>}
           {plainHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p><div className="hidden md:block">{showReviews && <TrustTicker />}</div></>}
-          <p className="mt-5 text-base leading-7 text-muted-foreground">{t("BÓVEDA es una plataforma de autocustodia: los fondos permanecen en la wallet del titular, nadie puede congelarlos y cada movimiento se aprueba con huella o Face ID.")}</p>
+          <p className="mt-5 text-base leading-7 text-muted-foreground">{t("Bóveda Market es una plataforma de autocustodia: los fondos permanecen en la wallet del titular, nadie puede congelarlos y cada movimiento se aprueba con huella o Face ID.")}</p>
         </div>
         <div id="acceso" className="order-2 min-w-0 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
           <HomeCtas vaultsFirst={gtaHero || hero.theme === "trump"} trump={hero.theme === "trump"} />
@@ -145,8 +145,8 @@ export function Landing() {
         </div>
       </section>
 
-      <section aria-label={t("Cómo comenzar en BÓVEDA")} className="mb-4 py-8">
-        <h2 className="font-display text-2xl font-bold">{t("Cómo comenzar en BÓVEDA")}</h2>
+      <section aria-label={t("Cómo comenzar en Bóveda Market")} className="mb-4 py-8">
+        <h2 className="font-display text-2xl font-bold">{t("Cómo comenzar en Bóveda Market")}</h2>
         <ol className="mt-6 grid gap-4 sm:grid-cols-3">{STEPS.map(([h, d], i) => <li key={h} className="rounded-2xl border border-border bg-card p-5"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-display font-bold text-primary-foreground">{i + 1}</span><p className="mt-4 font-display font-semibold">{t(h)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ol>
       </section>
 
@@ -169,7 +169,7 @@ export function Landing() {
         {TRUST.map(({ icon: Icon, title, body }) => <div key={title} className="rounded-2xl border border-border bg-card p-4"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={16} /></span><p className="mt-3 font-display text-sm font-semibold">{t(title)}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{t(body)}</p></div>)}
       </section>
 
-      <section aria-label={t("Por qué BÓVEDA es diferente")} className="mb-12 rounded-3xl border border-border bg-card p-6 sm:p-8">
+      <section aria-label={t("Por qué Bóveda Market es diferente")} className="mb-12 rounded-3xl border border-border bg-card p-6 sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t("Diferencia clave")}</p>
         <h2 className="mt-2 font-display text-2xl font-bold">{t("Los fondos nunca se entregan a terceros")}</h2>
         <ul className="mt-5 grid gap-4 sm:grid-cols-2">{ANTI_SCAM.map(([h, d]) => <li key={h} className="rounded-2xl border border-border bg-background p-4"><p className="font-display text-sm font-semibold">{t(h)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ul>
@@ -180,13 +180,13 @@ export function Landing() {
           <div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary"><Send size={14} />{t("Canal oficial de Telegram")}</p>
             <h2 className="mt-2 font-display text-2xl font-bold">{t("Transparencia total, en vivo")}</h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{t("El canal @bovedamarket publica alertas automáticas del estado de la red y de la app, avisos de seguridad y cada mejora en cuanto sale.")}</p>
-            <p className="mt-4 flex max-w-xl items-start gap-2 rounded-xl border border-border bg-background/60 p-3 text-xs leading-5 text-muted-foreground"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-primary" /><span>{t("El equipo de BÓVEDA nunca escribe primero por privado ni pide claves, frases de recuperación, códigos ni monedas digitales para habilitar un retiro. Cualquier mensaje así es una estafa.")}</span></p></div>
+            <p className="mt-4 flex max-w-xl items-start gap-2 rounded-xl border border-border bg-background/60 p-3 text-xs leading-5 text-muted-foreground"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-primary" /><span>{t("El equipo de Bóveda Market nunca escribe primero por privado ni pide claves, frases de recuperación, códigos ni monedas digitales para habilitar un retiro. Cualquier mensaje así es una estafa.")}</span></p></div>
           <div className="flex shrink-0 flex-col gap-2"><Button asChild className="h-12"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer">{t("Unirme a @bovedamarket")}<ArrowRight size={16} /></a></Button><Link to="/status" search={{ from: "transparencia" }} className="flex items-center justify-center gap-1.5 text-sm text-primary underline"><Activity size={14} />{t("Ver estado del sistema")}</Link></div>
         </div>
       </section>
 
       <section className="border-t border-border py-12">
-        <h2 className="font-display text-2xl font-bold">{t("Garantías de BÓVEDA")}</h2>
+        <h2 className="font-display text-2xl font-bold">{t("Garantías de Bóveda Market")}</h2>
         <ul className="mt-6 grid gap-4 sm:grid-cols-3">{GUARANTEES.map(({ icon: Icon, title, body }) => <li key={title} className="rounded-2xl border border-border bg-card p-5">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={18} /></span>
           <p className="mt-4 font-display font-semibold">{t(title)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(body)}</p></li>)}</ul>

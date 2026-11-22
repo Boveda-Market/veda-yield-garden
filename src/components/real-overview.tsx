@@ -126,7 +126,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <DialogContent>
         <DialogTitle>{unavailableAction === "harvest" ? t("Cosechar Ganancias") : t("Cerrar y Liquidar")}</DialogTitle>
         <DialogDescription>{t("Esta operación todavía no está habilitada para esta posición.")}</DialogDescription>
-        <p className="text-sm leading-6 text-muted-foreground">{t("Puedes operar las posiciones de las bóvedas de BÓVEDA con su wallet propietaria. La liquidez bloqueada no se puede liquidar y no se reinvierte mientras el precio esté fuera de rango. No se ha solicitado ninguna firma ni se ha movido dinero.")}</p>
+        <p className="text-sm leading-6 text-muted-foreground">{t("Puedes operar las posiciones de las bóvedas de Bóveda Market con su wallet propietaria. La liquidez bloqueada no se puede liquidar y no se reinvierte mientras el precio esté fuera de rango. No se ha solicitado ninguna firma ni se ha movido dinero.")}</p>
         <Button variant="outline" onClick={() => setUnavailableAction(null)}>{t("Volver a mis posiciones")}</Button>
       </DialogContent>
     </Dialog>

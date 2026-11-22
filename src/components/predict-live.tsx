@@ -36,7 +36,7 @@ const dismissedLost = (wallet: string) => { try { const v = JSON.parse(localStor
 const QUICK = [5, 10, 25, 50];
 const toB64 = (b: Uint8Array) => btoa(Array.from(b, (x) => String.fromCharCode(x)).join(""));
 
-/** Order ticket for the selected live Up/Down round. Wallet USDC only; BÓVEDA is never the counterparty. */
+/** Order ticket for the selected live Up/Down round. Wallet USDC only; Bóveda Market is never the counterparty. */
 export function PredictLive({ round, chart }: { round: LiveRound | null; chart?: ReactNode }) {
   const t = useT();
   const session = useBovedaSession();

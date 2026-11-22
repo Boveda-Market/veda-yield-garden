@@ -43,7 +43,7 @@ export function unitsToDecimal(v: bigint, decimals: number): string {
   return frac ? `${v / d}.${frac}` : `${v / d}`;
 }
 
-/** Starting SOL card purchase, preset to ~$100 (BÓVEDA card minimum $50); extra converts to USDC. */
+/** Starting SOL card purchase, preset to ~$100 (Bóveda Market card minimum $50); extra converts to USDC. */
 export const GAS_TOP_UP_SOL = "0.75";
 /** Minimum and default card (MoonPay) purchase, in US dollars. */
 export const CARD_MIN_USD = "50";

@@ -97,7 +97,7 @@ export function BuyUsdc({ className, auto, hot, needMicro, resume, label }: { la
     {receipt && <div role="status" className="mt-3 rounded-xl border border-primary/40 bg-primary/10 p-4 text-sm">
       <p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} className="text-primary" />{t("¡Fondos añadidos!")}</p>
       <dl className="mt-2 divide-y divide-border">
-        {[[t("Añadido"), `+${usdc(receipt.added)} USDC`], [t("Servicio BÓVEDA"), "0.00 USDC"], [t("Nuevo saldo"), `${usdc(receipt.total)} USDC`]].map(([k, v]) => <div key={k} className="flex justify-between py-1.5"><dt className="text-muted-foreground">{k}</dt><dd className="font-semibold">{v}</dd></div>)}
+        {[[t("Añadido"), `+${usdc(receipt.added)} USDC`], [t("Servicio Bóveda Market"), "0.00 USDC"], [t("Nuevo saldo"), `${usdc(receipt.total)} USDC`]].map(([k, v]) => <div key={k} className="flex justify-between py-1.5"><dt className="text-muted-foreground">{k}</dt><dd className="font-semibold">{v}</dd></div>)}
       </dl>
       <p className="mt-1 text-xs text-muted-foreground">{t("La pasarela de pago puede cobrar su propio cargo, que ves antes de pagar.")}</p>
       <Button size="sm" variant="ghost" className="mt-1" onClick={() => setReceipt(null)}>{t("Listo")}</Button>

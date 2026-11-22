@@ -1,6 +1,6 @@
 import { FEE_TIERS } from "./fees";
 
-/** Account level from total BÓVEDA balance in USD (vault capital + wallet USDC), using the same thresholds as fee tiers. */
+/** Account level from total Bóveda Market balance in USD (vault capital + wallet USDC), using the same thresholds as fee tiers. */
 export function accountTier(usd: number) {
   const units = BigInt(Math.max(0, Math.floor(usd * 1_000_000)));
   let i = 0;

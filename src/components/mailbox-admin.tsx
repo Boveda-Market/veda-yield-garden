@@ -48,7 +48,7 @@ export function MailboxAdmin() {
   const field = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm";
   return <section className="mt-6 rounded-2xl border border-border bg-card p-5" aria-labelledby="mailbox-title">
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <h2 id="mailbox-title" className="flex items-center gap-2 font-display text-lg font-semibold"><Inbox size={18} className="text-primary" />{t("Correo de BÓVEDA")}</h2>
+      <h2 id="mailbox-title" className="flex items-center gap-2 font-display text-lg font-semibold"><Inbox size={18} className="text-primary" />{t("Correo de Bóveda Market")}</h2>
       <div className="flex gap-2">{items && <Button size="sm" onClick={() => compose()}><Send size={14} />{t("Redactar")}</Button>}<Button size="sm" variant="secondary" disabled={busy} onClick={() => void load()}>{busy ? t("Cargando…") : items ? t("Actualizar") : t("Abrir correo")}</Button></div>
     </div>
     <p className="mt-1 text-xs text-muted-foreground">{t("Los correos a admin@, dev@ y demás llegan a tu Gmail y los lees aquí.")}</p>

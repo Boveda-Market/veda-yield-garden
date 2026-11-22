@@ -8,7 +8,7 @@ const ROWS: [string, string][] = [
   ["Guardan tu dinero en sus propias cuentas.", "Tu dinero está siempre en tu propia wallet. Solo tú tienes la llave."],
   ["Necesitas su aprobación para retirar y pueden congelar retiros.", "Retiras cuando quieras, sin pedir permiso a nadie."],
   ["Prometen intereses fijos que no explican.", "Las ganancias vienen de intereses reales y verificables; nunca garantizadas."],
-  ["Si la empresa cae, tu dinero cae con ella.", "BÓVEDA nunca toca tu dinero: no puede perderlo ni bloquearlo."],
+  ["Si la empresa cae, tu dinero cae con ella.", "Bóveda Market nunca toca tu dinero: no puede perderlo ni bloquearlo."],
 ];
 
 export function SecurityGuarantees() {
@@ -35,8 +35,8 @@ export function SecurityWhyDialog({ trigger }: { trigger: (open: () => void) => 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogTitle className="flex items-center gap-2 font-display"><ShieldCheck size={20} className="text-primary" />{t("¿Por qué tus fondos están seguros?")}</DialogTitle>
-          <DialogDescription>{t("Otras apps han fallado por guardar el dinero de sus usuarios. BÓVEDA funciona distinto.")}</DialogDescription>
-          <p className="rounded-xl border border-primary/20 bg-primary/5 p-3 font-mono text-xs leading-5 text-muted-foreground">{t("Bajo el capó: tu wallet usa criptografía de clave pública. Tu llave privada vive solo en tu dispositivo y firma cada operación; BÓVEDA nunca la ve. Cada movimiento es una transacción atómica: se ejecuta completa o no se ejecuta, sin estados a medias. Todo queda registrado en una red pública verificable por cualquiera, sin servidores centrales que custodien tu dinero y sin puertas traseras.")}</p>
+          <DialogDescription>{t("Otras apps han fallado por guardar el dinero de sus usuarios. Bóveda Market funciona distinto.")}</DialogDescription>
+          <p className="rounded-xl border border-primary/20 bg-primary/5 p-3 font-mono text-xs leading-5 text-muted-foreground">{t("Bajo el capó: tu wallet usa criptografía de clave pública. Tu llave privada vive solo en tu dispositivo y firma cada operación; Bóveda Market nunca la ve. Cada movimiento es una transacción atómica: se ejecuta completa o no se ejecuta, sin estados a medias. Todo queda registrado en una red pública verificable por cualquiera, sin servidores centrales que custodien tu dinero y sin puertas traseras.")}</p>
           <SafetyNotice />
           <h3 className="mt-2 font-display font-semibold">{t("Comparativa rápida")}</h3>
           <SecurityGuarantees />

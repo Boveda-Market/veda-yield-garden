@@ -62,6 +62,6 @@ export const BovedaSessionContext = import.meta.env.DEV
 
 export function useBovedaSession() {
   const session = useContext(BovedaSessionContext);
-  if (!session) throw new Error("BÓVEDA session provider is missing");
+  if (!session) throw new Error("Bóveda Market session provider is missing");
   return session;
 }

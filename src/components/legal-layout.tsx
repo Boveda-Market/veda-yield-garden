@@ -8,7 +8,7 @@ export function LegalLayout({ title, children, legal = true, backHash, footer = 
   const t = useT();
   return <main className="mx-auto min-h-screen max-w-3xl px-5 py-8 text-foreground">
     <BackButton fallback="/" homeHash={backHash} />
-    <Link to="/" aria-label={t("BÓVEDA · Ir al inicio")} className="mt-10 flex items-center gap-3 font-display text-lg font-bold"><BrandLogo /></Link>
+    <Link to="/" aria-label={t("Bóveda Market · Ir al inicio")} className="mt-10 flex items-center gap-3 font-display text-lg font-bold"><BrandLogo /></Link>
     <p className="mt-2 text-xs text-muted-foreground">Boveda Technologies</p>
     <h1 className="mt-3 font-display text-3xl font-bold">{title}</h1>
     {legal && <p className="mt-3 text-sm text-muted-foreground">{t("Vigente desde el")} {t("8 de noviembre de 2026")}</p>}

@@ -1,7 +1,7 @@
 import { FEE_WALLET } from "@/lib/fees";
 import { z } from "zod";
 
-/** Share of every BÓVEDA fee (entry, harvest, exit) paid to the referring affiliate, in basis points of that fee. */
+/** Share of every Bóveda Market fee (entry, harvest, exit) paid to the referring affiliate, in basis points of that fee. */
 export const AFFILIATE_SHARE_BPS = 5000;
 /** Second-tier share: the direct affiliate's own referrer earns this from their sub-affiliates' referrals. */
 export const SUB_AFFILIATE_SHARE_BPS = 1000;

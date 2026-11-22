@@ -112,7 +112,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
       try {
         ({ signedTransaction: signed } = await signTransaction({ transaction, wallet, chain: "solana:mainnet", options: { uiOptions: { showWalletUIs: false } } }));
       } catch (e) {
-        console.error("[BÓVEDA] wallet signing failed", e);
+        console.error("[Bóveda Market] wallet signing failed", e);
         if (e instanceof Error && /reject|cancel|exited/i.test(e.message)) throw new Error(t("Cancelaste la firma."));
         throw new Error(`${t("La wallet no pudo firmar")}: ${e instanceof Error ? e.message : String(e)}`);
       }
@@ -133,13 +133,13 @@ function SessionBridge({ children }: { children: ReactNode }) {
         })();
         return String(sig);
       } catch (e) {
-        console.error("[BÓVEDA] broadcast failed", e);
+        console.error("[Bóveda Market] broadcast failed", e);
         throw new Error(`${t("La red rechazó la operación")}: ${e instanceof Error ? e.message : String(e)}`);
       }
   };
   const guard = () => {
-    if (tradeBlock === "treasury") throw new Error(t("Modo operador: la wallet de tesorería no puede operar en BÓVEDA."));
-    if (tradeBlock === "external") throw new Error(t("Modo solo consulta: para operar, entra con Google, email o passkey y usa tu billetera protegida de BÓVEDA."));
+    if (tradeBlock === "treasury") throw new Error(t("Modo operador: la wallet de tesorería no puede operar en Bóveda Market."));
+    if (tradeBlock === "external") throw new Error(t("Modo solo consulta: para operar, entra con Google, email o passkey y usa tu billetera protegida de Bóveda Market."));
   };
   const doLogout = useCallback(async () => { try { await queryClient.cancelQueries(); queryClient.clear(); await logout(); setError(null); } catch { setError(t("No se pudo cerrar sesión. Inténtalo de nuevo.")); } }, [queryClient, logout]);
   const value: BovedaSession = {
@@ -157,7 +157,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
       message: securityMessage,
       linkEmail: () => { setSecurityMessage(null); linkEmail(); },
       updateEmail: () => { setSecurityMessage(null); update(); },
-      linkPasskey: () => { if (user?.linkedAccounts.some(a => a.type === "passkey")) return; setSecurityMessage(null); linkPasskey({ name: "BÓVEDA" }); },
+      linkPasskey: () => { if (user?.linkedAccounts.some(a => a.type === "passkey")) return; setSecurityMessage(null); linkPasskey({ name: "Bóveda Market" }); },
       unlinkPasskeys: user && user.linkedAccounts.some(a => a.type === "passkey") && user.linkedAccounts.some(a => a.type === "email" || a.type === "google_oauth") ? async () => {
         setSecurityMessage(null);
         for (const a of user.linkedAccounts) if (a.type === "passkey") await unlinkPasskey(a.credentialId);
@@ -207,7 +207,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
       // Dedicated MoonPay route: unified addFunds also quotes Stripe, which rejects native SOL.
       await fundWallet({ address: walletAddress, options: { chain: "solana:mainnet", asset: "native-currency", amount: solAmount ?? GAS_TOP_UP_SOL, defaultFundingMethod: "card", card: { preferredProvider: "moonpay" } } });
     },
-    // Autopilot: one Privy permission lets BÓVEDA's signer sign only range rebalances (Privy policy), revocable at any time.
+    // Autopilot: one Privy permission lets Bóveda Market's signer sign only range rebalances (Privy policy), revocable at any time.
     autopilot: embedded && tradeBlock === null ? {
       grant: async () => { await addSigners({ address: walletAddress!, signers: [{ signerId: AUTOPILOT_SIGNER_ID, policyIds: [AUTOPILOT_POLICY_ID] }] }); },
       revoke: async () => { await removeSigners({ address: walletAddress! }); },
@@ -223,7 +223,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
 export default function PrivyAccess({ children }: { children: ReactNode }) {
   return <PrivyProvider appId="cmw6ftcf900ge0hl0jyw3rc75" config={{
     loginMethods: ["email", "google", "wallet", "passkey"],
-    appearance: { theme: "#0d1117", accentColor: "#22c55e", walletChainType: "solana-only", walletList: ["phantom", "jupiter", "detected_solana_wallets", "solflare", "backpack", "okx_wallet", "coinbase_wallet", "wallet_connect"], logo: "/icon-512.png", landingHeader: "Acceso seguro a BÓVEDA" },
+    appearance: { theme: "#0d1117", accentColor: "#22c55e", walletChainType: "solana-only", walletList: ["phantom", "jupiter", "detected_solana_wallets", "solflare", "backpack", "okx_wallet", "coinbase_wallet", "wallet_connect"], logo: "/icon-512.png", landingHeader: "Acceso seguro a Bóveda Market" },
     externalWallets: { solana: { connectors: solanaConnectors } },
     embeddedWallets: { showWalletUIs: false, solana: { createOnLogin: "users-without-wallets" }, ethereum: { createOnLogin: "off" } },
     solana: { rpcs: solanaRpcs },

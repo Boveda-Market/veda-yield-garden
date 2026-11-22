@@ -78,7 +78,7 @@ export function OpenPredictions({ state }: { state: ReturnType<typeof useOpenPre
       if (!x.success) throw new Error(x.error);
       annotateRecord(wallet, p.pubkey, { soldMicro: estimateMicro ?? p.valueMicro ?? "0", sellSig: x.signature });
       setFlow({ phase: 2, text: t("Posición cerrada. Preparando el paso a dólares…") });
-      // Closing early is free: convert only the JupUSD received from this sale to USDC (no BÓVEDA fee).
+      // Closing early is free: convert only the JupUSD received from this sale to USDC (no Bóveda Market fee).
       try {
         let got = 0n;
         for (let i = 0; i < 4 && got <= 0n; i++) { await new Promise((res) => setTimeout(res, 2000)); got = (await readTokenBalance(wallet, JUPUSD_MINT)) - before; }

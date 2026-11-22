@@ -3,7 +3,7 @@ import { amountAllowed, isBtcAddress, providerCost, BOVEDA_BTC_FEE_PCT } from ".
 
 describe("btc offramp", () => {
   it("minimum withdrawal is 25 USDC", () => { expect(amountAllowed(24.99)).toBe(false); expect(amountAllowed(25)).toBe(true); });
-  it("BÓVEDA charges 1% on Bitcoin withdrawals", () => expect(BOVEDA_BTC_FEE_PCT).toBe(1));
+  it("Bóveda Market charges 1% on Bitcoin withdrawals", () => expect(BOVEDA_BTC_FEE_PCT).toBe(1));
   it("accepts Bitcoin addresses and rejects Solana ones", () => {
     expect(isBtcAddress("bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq")).toBe(true);
     expect(isBtcAddress("1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2")).toBe(true);

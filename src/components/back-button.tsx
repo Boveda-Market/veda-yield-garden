@@ -6,7 +6,7 @@ export const OPEN_MENU_EVENT = "boveda:open-menu";
 export const OPEN_MENU_FLAG = "boveda:open-menu";
 export const IN_APP_FLAG = "boveda:in-app";
 
-/** True when this tab already visited another BÓVEDA screen, so going back stays inside the app. */
+/** True when this tab already visited another Bóveda Market screen, so going back stays inside the app. */
 export function canGoBackInApp(state: unknown): boolean {
   const idx = state && typeof state === "object" ? (state as Record<string, unknown>)["__TSR_index"] : undefined;
   return typeof idx === "number" && idx > 0;

@@ -63,7 +63,7 @@ export const joinAffiliate = createServerFn({ method: "POST" })
       const { id, db } = await admin(data.token);
       const { data: owner } = await db.from("affiliates").select("privy_user_id").eq("code", data.code).maybeSingle();
       if (!owner) {
-        // Not a friend's code: try a partner upgrade code assigned by BÓVEDA.
+        // Not a friend's code: try a partner upgrade code assigned by Bóveda Market.
         await getAffiliateRow(db, id);
         const { data: bps } = await db.rpc("redeem_affiliate_upgrade", { _code: data.code, _privy_user_id: id });
         if (typeof bps === "number") return { success: true, upgradedBps: bps };
@@ -131,7 +131,7 @@ export const verifyWalletOwnership = createServerFn({ method: "POST" })
     } catch { return { success: false }; }
   });
 
-/** Credits the referrer only from a confirmed on-chain fee paid to BÓVEDA by the referred user's wallet. */
+/** Credits the referrer only from a confirmed on-chain fee paid to Bóveda Market by the referred user's wallet. */
 export const recordAffiliateFee = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => recordRequest.parse(input))
   .handler(async ({ data }): Promise<{ success: boolean }> => {
@@ -166,7 +166,7 @@ export const recordAffiliateFee = createServerFn({ method: "POST" })
           fee_raw: Number(transfer.feeRaw), share_bps: subBps, commission_raw: Number(affiliateCommission(transfer.feeRaw, subBps)) });
       }
       const { error } = await db.from("affiliate_earnings").insert(rows);
-      if (!error) { const tg = await import("./telegram.server"); await tg.treasuryAlert(`💰 <b>Comisión recibida</b> (${data.kind})\nTesorería: +${tg.usdcText(transfer.feeRaw)} USDC\nAfiliados: ${rows.map((r) => `N${r.level} ${tg.usdcText(r.commission_raw)}`).join(" · ")} USDC`); for (const r of rows) await tg.userAlert(r.affiliate_privy_id, `💰 <b>¡Ganaste una comisión!</b>\nUn invitado${r.level === 2 ? " de tu red" : ""} usó BÓVEDA: +${tg.usdcText(r.commission_raw)} USDC para ti.\nCóbrala en Invita y gana.`, "commission"); }
+      if (!error) { const tg = await import("./telegram.server"); await tg.treasuryAlert(`💰 <b>Comisión recibida</b> (${data.kind})\nTesorería: +${tg.usdcText(transfer.feeRaw)} USDC\nAfiliados: ${rows.map((r) => `N${r.level} ${tg.usdcText(r.commission_raw)}`).join(" · ")} USDC`); for (const r of rows) await tg.userAlert(r.affiliate_privy_id, `💰 <b>¡Ganaste una comisión!</b>\nUn invitado${r.level === 2 ? " de tu red" : ""} usó Bóveda Market: +${tg.usdcText(r.commission_raw)} USDC para ti.\nCóbrala en Invita y gana.`, "commission"); }
       return { success: !error };
     } catch { return { success: false }; }
   });

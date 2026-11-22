@@ -21,7 +21,7 @@ describe("wallet actions", () => {
 
 import { swapFee } from "@/lib/wallet-actions";
 describe("swap fee", () => {
-  it("swaps carry no BÓVEDA fee", () => {
+  it("swaps carry no Bóveda Market fee", () => {
     expect(swapFee(100_000_000n)).toBe(0n);
   });
 });

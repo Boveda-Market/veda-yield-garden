@@ -5,7 +5,7 @@ import { TG_RULE, TG_SAFETY, tgEsc } from "./telegram-format";
 const GATEWAY = "https://connector-gateway.lovable.dev/telegram";
 export const TELEGRAM_CHANNEL = "@bovedamarket";
 const SITE = "https://bovedamarket.app";
-const HEAD: Record<Announcement["kind"], string> = { vault: "🏦 NUEVA BÓVEDA", market: "⚡ NUEVO MERCADO", policy: "📜 AVISO IMPORTANTE", update: "🚀 NOVEDADES" };
+const HEAD: Record<Announcement["kind"], string> = { vault: "🏦 NUEVA Bóveda Market", market: "⚡ NUEVO MERCADO", policy: "📜 AVISO IMPORTANTE", update: "🚀 NOVEDADES" };
 
 /** Channel post: header + date, bold title, short lead, then one spaced block per highlight; the CTA travels as a button. */
 export function announcementPost(a: Announcement) {
@@ -16,7 +16,7 @@ export function announcementPost(a: Announcement) {
 }
 /** Tappable button under the channel post (official domain only). */
 export function announcementButton(a: Announcement): TelegramButton | undefined {
-  return a.href ? { text: `👉 ${a.cta ?? "Abrir BÓVEDA"}`, url: `${SITE}${a.href === "/" ? "" : a.href}` } : undefined;
+  return a.href ? { text: `👉 ${a.cta ?? "Abrir Bóveda Market"}`, url: `${SITE}${a.href === "/" ? "" : a.href}` } : undefined;
 }
 
 export type TelegramButton = { text: string; url: string };
@@ -51,7 +51,7 @@ export async function userAlert(privyUserId: string, html: string, kind?: AlertK
 }
 
 const PULSE_PUB = "pulse:pub";
-const SITE_BUTTON: TelegramButton = { text: "👉 Abrir BÓVEDA", url: SITE };
+const SITE_BUTTON: TelegramButton = { text: "👉 Abrir Bóveda Market", url: SITE };
 async function tgCall(method: string, body: Record<string, unknown>) {
   const lk = process.env["LOVABLE_API_KEY"], tk = process.env["TELEGRAM_API_KEY"];
   if (!lk || !tk) return null;

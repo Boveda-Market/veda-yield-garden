@@ -9,7 +9,7 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 // Configuration
-const SITE_NAME = "BÓVEDA"
+const SITE_NAME = "Bóveda Market"
 const SENDER_DOMAIN = "bovedamarket.app"
 const ROOT_DOMAIN = "bovedamarket.app"
 const FROM_DOMAIN = "bovedamarket.app"

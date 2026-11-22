@@ -17,7 +17,7 @@ export function StayUpdated({ dismissible = false }: { dismissible?: boolean }) 
     <div className="flex items-start gap-3 pr-6">
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary"><BellRing size={18} /></span>
       <div>
-        <p className="font-semibold">{t("Mantente al día con BÓVEDA")}</p>
+        <p className="font-semibold">{t("Mantente al día con Bóveda Market")}</p>
         <p className="mt-1 text-sm text-muted-foreground">{t("Recibe avisos oficiales de nuevas bóvedas, mercados, cambios de intereses y alertas de seguridad.")}</p>
       </div>
     </div>

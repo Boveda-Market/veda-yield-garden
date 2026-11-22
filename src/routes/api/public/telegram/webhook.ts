@@ -27,12 +27,12 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         if (!chatId || msg?.chat?.type !== "private" || typeof msg.text !== "string") return Response.json({ ok: true });
         const tg = await import("@/lib/telegram.server");
         const m = /^\/start(?:\s+([a-f0-9]{36}))?\s*$/.exec(msg.text.trim());
-        if (!m) { if (msg.text.startsWith("/")) await tg.sendTelegram(String(chatId), "Para activar tus avisos abre BÓVEDA → Mi cuenta → «Conectar Telegram»."); return Response.json({ ok: true }); }
+        if (!m) { if (msg.text.startsWith("/")) await tg.sendTelegram(String(chatId), "Para activar tus avisos abre Bóveda Market → Mi cuenta → «Conectar Telegram»."); return Response.json({ ok: true }); }
         if (!m[1]) { await tg.sendTelegram(String(chatId), "👋 Hola. Para recibir avisos de tu cuenta, abre bovedamarket.app → Mi cuenta → «Conectar Telegram»."); return Response.json({ ok: true }); }
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: row } = await supabaseAdmin.from("telegram_links").select("privy_user_id, code_expires_at").eq("link_code", m[1]).maybeSingle();
         if (!row || !row.code_expires_at || new Date(row.code_expires_at).getTime() < Date.now()) {
-          await tg.sendTelegram(String(chatId), "⚠️ Este enlace expiró. Genera uno nuevo desde BÓVEDA → Mi cuenta.");
+          await tg.sendTelegram(String(chatId), "⚠️ Este enlace expiró. Genera uno nuevo desde Bóveda Market → Mi cuenta.");
           return Response.json({ ok: true });
         }
         // One chat per account: release this chat from any other account first.

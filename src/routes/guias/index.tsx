@@ -7,8 +7,8 @@ import { langLinks } from "@/lib/seo-lang";
 const D = "Guías claras sobre dólares digitales (USDC): cómo comprarlos con tarjeta, retirarlos a Cash App o Bitcoin y protegerte de estafas.";
 export const Route = createFileRoute("/guias/")({ staticData: { sitemap: true },
   head: () => ({ meta: [
-    { title: "Guías de dólares digitales (USDC) | BÓVEDA" }, { name: "description", content: D },
-    { property: "og:title", content: "Guías de dólares digitales | BÓVEDA" }, { property: "og:description", content: D },
+    { title: "Guías de dólares digitales (USDC) | Bóveda Market" }, { name: "description", content: D },
+    { property: "og:title", content: "Guías de dólares digitales | Bóveda Market" }, { property: "og:description", content: D },
     { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { property: "og:url", content: "https://bovedamarket.app/guias" },
   ], links: langLinks("es", "/guias", "/en/guides") }),

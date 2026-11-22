@@ -85,7 +85,7 @@ export async function readDlmmPositions(connection: Connection, wallet: PublicKe
         address: p.publicKey.toBase58(), vaultId: config.id, symbol: config.symbol,
         tokenAmount: tokenAmount(rawFloor(d.totalXAmount).toString(), config.decimals), usdcAmount: tokenAmount(rawFloor(d.totalYAmount).toString(), 6),
         feeTokenAmount: tokenAmount(d.feeX.toString(), config.decimals), feeUsdcAmount: tokenAmount(d.feeY.toString(), 6),
-        locked: false, // BÓVEDA never locks these; every operation re-checks the live lock point.
+        locked: false, // Bóveda Market never locks these; every operation re-checks the live lock point.
         outOfRange: activeBin.binId < d.lowerBinId || activeBin.binId > d.upperBinId,
         ...(activeBin.binId > d.upperBinId ? { priceAbove: true } : {}),
         bins: { lower: d.lowerBinId, upper: d.upperBinId, active: activeBin.binId },

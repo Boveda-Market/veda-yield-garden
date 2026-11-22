@@ -15,7 +15,7 @@ import { useT } from "@/lib/i18n";
 import { notify } from "@/lib/notify";
 import { autopilotStatus, disableAutopilot, enableAutopilot, type AutopilotStatus } from "@/lib/autopilot.functions";
 
-/** Shared cached Autopilot state for the signed-in wallet (only for the protected BÓVEDA wallet). */
+/** Shared cached Autopilot state for the signed-in wallet (only for the protected Bóveda Market wallet). */
 export function useAutopilot() {
   const session = useBovedaSession();
   const wallet = session.walletAddress ?? "";
@@ -26,7 +26,7 @@ export function useAutopilot() {
 }
 
 /**
- * Range vaults run on Autopilot by default: once a signed-in BÓVEDA wallet holds a range position and never recorded a
+ * Range vaults run on Autopilot by default: once a signed-in Bóveda Market wallet holds a range position and never recorded a
  * choice, attach the rebalance-only permission and enable it (one try per session). Telegram and the bell then inform.
  */
 export function AutopilotDefault() {
@@ -57,7 +57,7 @@ function ago(iso: string, t: ReturnType<typeof useT>) {
   return m < 60 ? t("hace {n} min", { n: m }) : m < 1440 ? t("hace {n} h", { n: Math.round(m / 60) }) : t("hace {n} d", { n: Math.round(m / 1440) });
 }
 
-/** One-switch Autopilot for range vaults: one Privy permission, then BÓVEDA re-centres out-of-range positions without asking for signatures. */
+/** One-switch Autopilot for range vaults: one Privy permission, then Bóveda Market re-centres out-of-range positions without asking for signatures. */
 export function AutopilotToggle({ className }: { className?: string }) {
   const t = useT();
   const queryClient = useQueryClient();

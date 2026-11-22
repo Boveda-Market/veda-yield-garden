@@ -1,7 +1,7 @@
 import { FEE_WALLET } from "@/lib/fees";
 import { USDC_MINT } from "@/lib/solana-data";
 
-/** Reads a confirmed transaction and returns its fee payer and the USDC credited to BÓVEDA's fee wallet. */
+/** Reads a confirmed transaction and returns its fee payer and the USDC credited to Bóveda Market's fee wallet. */
 export async function confirmedFeeTransfer(apiKey: string, signature: string) {
   const { heliusConnection } = await import("@/lib/solana-read.server");
   const tx = await heliusConnection(apiKey).getParsedTransaction(signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });

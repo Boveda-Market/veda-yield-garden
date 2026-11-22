@@ -15,7 +15,7 @@ export const getAccountProfile = createServerFn({ method: "POST" })
       const result = await supabaseAdmin.from("account_profiles").select("display_name, avatar, photo").eq("privy_user_id", id).single();
       if (result.error) throw result.error;
       return { success: true, profile: result.data ? profileSchema.parse({ displayName: result.data.display_name, avatar: result.data.avatar, photo: result.data.photo ?? "" }) : defaultProfile };
-    } catch { return { success: false, error: "No se pudo cargar tu personalización. Puedes seguir usando BÓVEDA." }; }
+    } catch { return { success: false, error: "No se pudo cargar tu personalización. Puedes seguir usando Bóveda Market." }; }
   });
 
 export const saveAccountProfile = createServerFn({ method: "POST" })

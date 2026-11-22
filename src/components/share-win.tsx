@@ -19,9 +19,9 @@ export function ShareWin({ headline }: { headline: string }) {
       const token = session.authenticated ? await session.getAccessToken?.() : null;
       if (token) { const r = await load({ data: { token } }); if (r.success) url = `${url}/?ref=${r.dashboard.code}`; }
     } catch { /* plain link */ }
-    const text = `${headline} — ${t("Predice el mercado conmigo en BÓVEDA")}`;
+    const text = `${headline} — ${t("Predice el mercado conmigo en Bóveda Market")}`;
     try {
-      if (navigator.share) { await navigator.share({ title: "BÓVEDA", text, url }); return; }
+      if (navigator.share) { await navigator.share({ title: "Bóveda Market", text, url }); return; }
     } catch { return; }
     try { await navigator.clipboard.writeText(`${text} ${url}`); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { /* ignore */ }
   };

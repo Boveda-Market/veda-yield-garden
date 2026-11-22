@@ -16,7 +16,7 @@ export function worthSweeping(outMicro: bigint) { return outMicro >= SWEEP_MIN_M
 
 /**
  * Converts every leftover JupUSD / vault token in the wallet to USDC, one wallet-signed swap each,
- * with no BÓVEDA fee (swaps are free). Returns the USDC quoted and any symbols that could not be converted.
+ * with no Bóveda Market fee (swaps are free). Returns the USDC quoted and any symbols that could not be converted.
  */
 export async function sweepLeftovers(wallet: string, signAndSend: (tx: Uint8Array) => Promise<string>, onStep?: (symbol: string, index: number, total: number) => void, only?: readonly string[]) {
   const { quoteSwap, buildSwap, readTokenBalance } = await import("@/lib/wallet-actions");

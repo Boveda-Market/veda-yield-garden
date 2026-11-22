@@ -31,7 +31,7 @@ export const enableAutopilot = createServerFn({ method: "POST" })
     if (!secret || !process.env["PRIVY_AUTOPILOT_KEY_SEED"]) throw new Error("El piloto automático no está disponible ahora mismo.");
     const { embeddedWalletId, hasAutopilotSigner } = await import("@/lib/autopilot.server");
     const walletId = await embeddedWalletId(context.privyUserId, data.wallet, secret);
-    if (!walletId) throw new Error("El piloto automático solo funciona con tu billetera protegida de BÓVEDA.");
+    if (!walletId) throw new Error("El piloto automático solo funciona con tu billetera protegida de Bóveda Market.");
     if (!(await hasAutopilotSigner(walletId, secret))) throw new Error("No se completó el permiso. Inténtalo de nuevo.");
     const db = await adminDb();
     const now = new Date().toISOString();

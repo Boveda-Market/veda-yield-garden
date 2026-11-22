@@ -42,7 +42,7 @@ export function PredictHow() {
           <p className="font-semibold">{t("Ejemplo con $5")}</p>
           <p className="text-muted-foreground">{t("Crees que Bitcoin sube en 5 minutos. «Sube» cuesta 0.50, así que $5 compran 10 contratos. Si al final el precio está más alto, cobras $10.00. Si está más bajo, pierdes los $5.")}</p>
         </div>
-        <p className="text-xs text-muted-foreground">{t("Los precios cambian según lo que opinan otros participantes. BÓVEDA nunca juega en tu contra.")}</p>
+        <p className="text-xs text-muted-foreground">{t("Los precios cambian según lo que opinan otros participantes. Bóveda Market nunca juega en tu contra.")}</p>
       </DialogContent>
     </Dialog>
   );

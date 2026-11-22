@@ -2,7 +2,7 @@
 export const guides: Record<string, string> = {
   "Migas de pan": "Breadcrumb",
   "Página de inicio": "Home",
-  "Lectura de {n} min · Guía de BÓVEDA": "{n} min read · BÓVEDA guide",
+  "Lectura de {n} min · Guía de Bóveda Market": "{n} min read · Bóveda Market guide",
   "Empieza a tu ritmo": "Start at your own pace",
   "Abre tu billetera en dólares en un minuto con Google y empieza con poco. Retiras cuando quieras.": "Open your dollar wallet in a minute with Google and start small. Withdraw whenever you want.",
   "Abrir mi billetera": "Open my wallet",

@@ -33,7 +33,7 @@ const MAIN = [
 export function BottomNav({ active, guest, onSelect }: { active: AppView; guest: boolean; onSelect: (v: AppView) => void }) {
   const t = useT();
   const items = guest ? MAIN.filter((i) => i.key !== "wallet") : MAIN;
-  return <nav aria-label={t("Secciones de BÓVEDA")} className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
+  return <nav aria-label={t("Secciones de Bóveda Market")} className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
     <ul className="mx-auto flex max-w-lg">
       {items.map(({ key, label, icon: Icon, to }) => {
         const on = active === key;

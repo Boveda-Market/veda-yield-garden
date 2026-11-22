@@ -29,7 +29,7 @@ const usd = (m: bigint) => `$${(Number(m) / 1e6).toFixed(2)}`;
 
 /** Weekly Telegram summary (Spanish, HTML). Never mentions fees; informational, so it says no action is needed. */
 export function weeklySummaryText(o: { weekMicro: bigint; harvests: number; from: string; to: string }) {
-  return tgCard("📊", "Tu resumen semanal en BÓVEDA", [
+  return tgCard("📊", "Tu resumen semanal en Bóveda Market", [
     `<i>Semana del ${o.from} al ${o.to}</i>`,
     "",
     tgRow("💰", "Intereses cosechados", `+${usd(o.weekMicro)}`),

@@ -51,7 +51,7 @@ export const setTelegramAlerts = createServerFn({ method: "POST" })
       const { error } = await q;
       if (!error && data.action === "unlink" && row?.chat_id) {
         const tg = await import("./telegram.server");
-        await tg.sendTelegram(String(row.chat_id), tgCard("🔕", "Cuenta desconectada", ["Ya no recibirás avisos de BÓVEDA aquí.", "Vuelve a conectarla cuando quieras desde Mi cuenta."]));
+        await tg.sendTelegram(String(row.chat_id), tgCard("🔕", "Cuenta desconectada", ["Ya no recibirás avisos de Bóveda Market aquí.", "Vuelve a conectarla cuando quieras desde Mi cuenta."]));
       }
       return { success: !error };
     } catch { return { success: false }; }
@@ -80,7 +80,7 @@ export const sendTelegramTest = createServerFn({ method: "POST" })
       const { data: row } = await db.from("telegram_links").select("chat_id").eq("privy_user_id", id).maybeSingle();
       if (!row?.chat_id) return { success: false };
       const tg = await import("./telegram.server");
-      const ok = await tg.sendTelegram(String(row.chat_id), `${tgCard("✅", "Aviso de prueba", ["Tus alertas de BÓVEDA funcionan.", "", "🌾 Cosechas  ·  🏧 Retiros", "⚡ Doble o Nada  ·  🎯 Rebalanceos"])}\n\n${TG_SAFETY}`);
+      const ok = await tg.sendTelegram(String(row.chat_id), `${tgCard("✅", "Aviso de prueba", ["Tus alertas de Bóveda Market funcionan.", "", "🌾 Cosechas  ·  🏧 Retiros", "⚡ Doble o Nada  ·  🎯 Rebalanceos"])}\n\n${TG_SAFETY}`);
       return { success: ok };
     } catch { return { success: false }; }
   });

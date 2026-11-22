@@ -28,18 +28,18 @@ export function htmlEmail(body: string) {
   return `<!doctype html><html><body style="margin:0;padding:0;background:#f4f6f3;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#0f1a14">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f3;padding:24px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e3e8e1">
-<tr><td style="background:#0c140f;padding:20px 24px"><img src="${LOGO}" width="40" height="40" alt="BÓVEDA" style="vertical-align:middle;border-radius:10px"><span style="vertical-align:middle;margin-left:12px;color:#c6f24a;font-size:20px;font-weight:700;letter-spacing:1px">BÓVEDA</span></td></tr>
+<tr><td style="background:#0c140f;padding:20px 24px"><img src="${LOGO}" width="40" height="40" alt="Bóveda Market" style="vertical-align:middle;border-radius:10px"><span style="vertical-align:middle;margin-left:12px;color:#c6f24a;font-size:20px;font-weight:700;letter-spacing:1px">Bóveda Market</span></td></tr>
 <tr><td style="padding:28px 24px;font-size:15px;line-height:1.6">${text}</td></tr>
 <tr><td style="padding:20px 24px;border-top:1px solid #e3e8e1;font-size:12px;line-height:1.5;color:#5b6b60">
 <img src="${LOGO}" width="24" height="24" alt="" style="vertical-align:middle;border-radius:6px"> <a href="https://bovedamarket.app" style="color:#0f1a14;font-weight:600;text-decoration:none;vertical-align:middle">bovedamarket.app</a> · <a href="https://t.me/bovedamarket" style="color:#0f1a14;text-decoration:none;vertical-align:middle">Telegram</a><br><br>
-BÓVEDA jamás te pedirá claves privadas, frases de recuperación ni transferencias por correo.</td></tr>
+Bóveda Market jamás te pedirá claves privadas, frases de recuperación ni transferencias por correo.</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
 /** RFC 2822 multipart/alternative message (plain + branded HTML), base64url. Header values are stripped of line breaks so no header can be injected. */
 export function rawEmail(m: { from: string; to: string; subject: string; body: string; inReplyTo?: string | undefined }) {
   const boundary = `boveda_${Math.random().toString(36).slice(2)}`;
-  const lines = [`From: ${header("BÓVEDA")} <${clean(m.from)}>`, `To: ${clean(m.to)}`, `Subject: ${header(clean(m.subject))}`];
+  const lines = [`From: ${header("Bóveda Market")} <${clean(m.from)}>`, `To: ${clean(m.to)}`, `Subject: ${header(clean(m.subject))}`];
   if (m.inReplyTo) lines.push(`In-Reply-To: ${clean(m.inReplyTo)}`, `References: ${clean(m.inReplyTo)}`);
   lines.push("MIME-Version: 1.0", `Content-Type: multipart/alternative; boundary="${boundary}"`, "",
     `--${boundary}`, 'Content-Type: text/plain; charset="UTF-8"', "Content-Transfer-Encoding: base64", "", b64(m.body),
