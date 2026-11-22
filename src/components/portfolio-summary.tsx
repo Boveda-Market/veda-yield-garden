@@ -3,7 +3,7 @@ import { MAX_HISTORY_PAGES } from "@/lib/meteora-history";
 import { useHydrated } from "@tanstack/react-router";
 import { AnimatedMoney } from "@/components/ui/animated-money";
 import { earningRatePerMs } from "@/lib/live-earnings";
-import { Layers, PiggyBank, PieChart, Sparkles, Sprout, TrendingUp, Trophy } from "lucide-react";
+import { Layers, PiggyBank, PieChart, Sprout, TrendingUp, Trophy } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { ChainPosition } from "@/lib/solana-data";
 import { useQueries } from "@tanstack/react-query";
@@ -82,17 +82,13 @@ export function PortfolioSummary({ wallet, positions, positionsComplete, predict
       {earned && <p className="mt-1 text-xs text-muted-foreground">{t("{a} cosechado · {b} por cosechar", { a: money(pnl), b: money(totalFees) })}{earned.percent != null ? ` · ${t("sobre tu capital en bóvedas")}` : ""}</p>}
     </div>
 
-    <div className="mt-3 grid grid-cols-2 gap-3">
+    <div className="mt-3">
       <div className={tile}>
         <p className={label}><Sprout size={14} />{t("Por cosechar")}</p>
         <p className="mt-2 font-display text-xl font-semibold tabular-nums text-primary">{totalFees > 0 ? <>+{anim(totalFees, liveRate)}</> : money(0)}</p>
         {(() => { const pend = rows.filter((r) => !r.p.locked && typeof r.fees === "number" && r.fees > 0); const ready = pend.filter((r) => canHarvest(r.fees as number)); return ready.length > 1 && ready.length === pend.length && totalFees >= 20 && onHarvestAll ? <button type="button" className="loot-btn mt-2 w-full" onClick={() => onHarvestAll(ready.map((r) => r.p))}><Trophy size={15} aria-hidden="true" /><span>{t("Cobrar")}</span></button> : null; })() ?? (top && canHarvest(top.fees) ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvest(top.p)}>{t("Cosechar ahora")}</Button> : null)}
       </div>
-      <div className={tile}>
-        <p className={label}><Sparkles size={14} />{t("Ya cosechado")}</p>
-        <p className="mt-2 font-display text-xl font-semibold tabular-nums text-primary">{pnl !== null ? <>+{anim(pnl)}</> : loading}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{t("Lo que ya cosechaste.")}</p>
-      </div>
+    </div>
     </div>
     <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground"><Layers size={12} className="mt-0.5 shrink-0" />{t("Total ganado = lo ya cosechado (al precio de hoy) + lo que tienes por cosechar. No incluye subidas o bajadas del precio de tu capital.")}</p>
   </section>;
