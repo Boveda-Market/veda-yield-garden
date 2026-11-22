@@ -94,7 +94,6 @@ const TRUST = [
   { icon: Fingerprint, title: "Seguridad a cargo de Privy", body: "La creación, el cifrado y la protección de cada cuenta digital corren sobre la infraestructura de Privy, con Face ID o huella. Bóveda Market nunca custodia las monedas digitales." },
   { icon: Landmark, title: "1 USDC = $1 siempre", body: "Nada de monedas locas que hoy suben y mañana se desploman. El saldo en dólares digitales se mantiene estable mientras genera rendimiento." },
   { icon: Search, title: "Revisión antes de aprobar", body: "Cada operación se simula primero: entradas, salidas y cargo exactos a la vista." },
-  { icon: ShieldCheck, title: "Sin cargos ocultos", body: "Recargas y retiros con Coinbase. Cargos de servicio reducidos y progresivos." },
 ];
 
 export function Landing() {
