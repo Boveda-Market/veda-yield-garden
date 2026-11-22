@@ -60,7 +60,6 @@ const ANTI_SCAM: [string, string][] = [
   ["Sin custodia interna", "En una estafa los fondos se entregan a la empresa. Aquí el saldo vive en la cuenta digital del titular, protegida por Privy: ni el equipo de Bóveda Market ni terceros pueden congelarlo o moverlo."],
   ["Sin «tarifas para descongelar»", "Nunca se cobra para poder retirar. Los retiros van a Coinbase, banco o Cash App en cualquier momento."],
   ["Sin contraseñas expuestas", "Acceso con Google (recomendado) o huella, protegido por verificación en 2 pasos y el propio dispositivo. Bóveda Market nunca pide contraseñas ni frases secretas."],
-  ["Cero firmas a ciegas", "Cada operación se simula antes de firmar: se muestra qué sale, qué entra y el cargo exacto, como protección contra ataques."],
 ];
 
 const STEPS: [string, string][] = [
