@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { mailboxListRequest, mailboxReadRequest, mailboxSendRequest, rawEmail, decodePart, type MailRow } from "./mailbox";
 
+// Only show mail sent to or from the app domain.
+const DOMAIN_Q = "{to:bovedamarket.app from:bovedamarket.app cc:bovedamarket.app deliveredto:bovedamarket.app}";
 type Fail = { success: false; error: string };
 const GW = "https://connector-gateway.lovable.dev/google_mail/gmail/v1/users/me";
 
@@ -20,7 +22,7 @@ export const listMailbox = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<{ success: true; items: MailRow[]; next: string | null; aliases: string[] } | Fail> => {
     try {
       await guard(data.token);
-      const qs = new URLSearchParams({ maxResults: "20", q: data.q || "in:inbox" });
+      const qs = new URLSearchParams({ maxResults: "20", q: `${data.q || "in:inbox"} ${DOMAIN_Q}` });
       if (data.pageToken) qs.set("pageToken", data.pageToken);
       const [list, sendAs] = await Promise.all([gmail(`/messages?${qs}`), gmail("/settings/sendAs").catch(() => ({ sendAs: [] }))]);
       const ids: string[] = (list.messages ?? []).map((m: any) => m.id);
