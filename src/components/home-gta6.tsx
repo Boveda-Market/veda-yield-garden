@@ -11,6 +11,7 @@ import { Sunset } from "./hot-vault-card";
 import titleEs from "@/assets/gta6-vault-title.png";
 import titleEn from "@/assets/gta6-vault-title-en.png";
 import dobleLogo from "@/assets/doble-o-nada-logo.png";
+import { VaultTitle } from "./vault-skin";
 
 const gta6 = VAULTS.find((v) => v.id === "gta6");
 
@@ -50,9 +51,13 @@ export function Gta6Hero({ title, sub }: { title: string; sub: string }) {
 }
 
 /** The two main home buttons, styled to pop in every hero variant. Vaults goes first in the GTA6 variant. */
-export function HomeCtas({ vaultsFirst = false }: { vaultsFirst?: boolean }) {
+export function HomeCtas({ vaultsFirst = false, trump = false }: { vaultsFirst?: boolean; trump?: boolean }) {
   const t = useT();
-  const apr = useGta6AprLabel();
+  const gtaApr = useGta6AprLabel();
+  const trumpVault = VAULTS.find((v) => v.id === "trump");
+  const ty = useQuery({ ...poolYieldOptions(trumpVault?.pool ?? ""), enabled: trump && !!trumpVault });
+  const tApr = ty.data?.apr;
+  const apr = trump ? (tApr != null && tApr >= 100 ? `+${Math.round(tApr).toLocaleString("en-US")}% APR` : t("Alto octanaje")) : gtaApr;
   const { lang } = useI18n();
   const gtaTitle = lang === "en" ? titleEn : titleEs;
   const predict = <Link key="p" to="/mercados" className="group relative block min-w-0 rounded-2xl bg-primary p-[2px] shadow-[0_0_28px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
@@ -62,10 +67,10 @@ export function HomeCtas({ vaultsFirst = false }: { vaultsFirst?: boolean }) {
       <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary-foreground opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary-foreground" /></span>{t("En vivo")}</span>
     </span>
   </Link>;
-  const vaults = <Link key="v" to="/app" className="hot-ring group relative block min-w-0 rounded-2xl p-[2px] shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98]">
+  const vaults = <Link key="v" to="/app" className={`${trump ? "vault-trump " : ""}hot-ring group relative block min-w-0 rounded-2xl p-[2px] shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98]`}>
     <span className="relative isolate flex h-[4.5rem] items-center justify-between gap-2 overflow-hidden rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
       <span aria-hidden className="cta-shimmer pointer-events-none absolute inset-y-0 left-0 z-10 w-1/4 bg-gradient-to-r from-transparent via-hot-foreground/30 to-transparent" />
-      <span className="flex min-w-0 items-center gap-2 whitespace-nowrap font-display text-[15px] font-black sm:text-base"><img src={gtaTitle} alt="GTA6" className="h-7 w-auto shrink-0 -rotate-2 sm:h-9" /><span className="sr-only">{t("Explorar Bóvedas")}</span><ArrowRight size={16} className="hidden transition-transform group-hover:translate-x-0.5 min-[380px]:block" /></span>
+      <span className="flex min-w-0 items-center gap-2 whitespace-nowrap font-display text-[15px] font-black sm:text-base">{trump ? <VaultTitle vault={trumpVault ?? { id: "trump", name: "Bóveda TRUMP" }} className="h-7 text-[13px] sm:h-8 sm:text-sm" /> : <img src={gtaTitle} alt="GTA6" className="h-7 w-auto shrink-0 -rotate-2 sm:h-9" />}<span className="sr-only">{t("Explorar Bóvedas")}</span><ArrowRight size={16} className="hidden transition-transform group-hover:translate-x-0.5 min-[380px]:block" /></span>
       {apr.endsWith(" APR")
         ? <span className="hot-cta flex shrink-0 flex-col items-center justify-center rounded-xl px-3 py-1 leading-none text-hot-surface shadow-[0_0_18px_-2px_var(--hot)]">
             <span className="flex items-center gap-1 font-display text-2xl font-black tabular-nums tracking-tight sm:text-[1.7rem]"><Flame size={18} aria-hidden className="flame-flicker shrink-0" />{apr.replace(" APR", "")}</span>

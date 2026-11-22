@@ -1,8 +1,8 @@
 /** Rotating home headlines. Index 0 is the original; ?v=N forces one (for campaigns). The gta6 variant restyles the whole hero. */
-export const HERO_VARIANTS: readonly { title: string; sub: string; theme?: "gta6" | "doble" }[] = [
+export const HERO_VARIANTS: readonly { title: string; sub: string; theme?: "gta6" | "doble" | "trump" }[] = [
   { title: "Dólares digitales en autocustodia que generan rendimiento.", sub: "BÓVEDA conecta depósitos en USDC con bóvedas de liquidez y mercados en vivo. $0 por depositar, retiros a banco, Coinbase o Cash App y cada movimiento aprobado con huella o Face ID." },
   { title: "Bóveda GTA6: comisiones generadas por el volumen del mercado.", sub: "Cada compra y venta de la moneda GTA6 reparte comisiones entre quienes aportan liquidez. El Piloto Automático mantiene la posición en rango y las alertas llegan por Telegram.", theme: "gta6" },
-  { title: "Bóveda TRUMP: liquidez en uno de los mercados más activos.", sub: "La moneda oficial TRUMP mueve volumen las 24 horas. La bóveda convierte esa actividad en comisiones estimadas en dólares, con retiro disponible en cualquier momento." },
+  { title: "Bóveda TRUMP: liquidez en uno de los mercados más activos.", sub: "La moneda oficial TRUMP mueve volumen las 24 horas. La bóveda convierte esa actividad en comisiones estimadas en dólares, con retiro disponible en cualquier momento.", theme: "trump" },
   { title: "Doble o Nada: mercados de predicción en tiempo real.", sub: "Rondas de 5 minutos, 15 minutos y 4 horas sobre Bitcoin, Ethereum y Solana. Se participa en dólares, sin comprar la moneda, y cada ronda se resuelve de forma automática y transparente.", theme: "doble" },
 ];
 
