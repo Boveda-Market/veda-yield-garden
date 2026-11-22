@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { FundsKeptCard } from "@/components/funds-kept-card";
 import { SignalErrorCard } from "@/components/signal-error";
 import { notify } from "@/lib/notify";
 import { useQueryClient } from "@tanstack/react-query";
@@ -114,16 +115,20 @@ function SellReview({ review, flow, onCancel, onConfirm }: { review: { p: Predic
   const t = useT();
   const est = review?.estimateMicro ? BigInt(review.estimateMicro) : null;
   const cost = review ? BigInt(review.p.costMicro || "0") : 0n;
-  return <Dialog open={!!review || !!flow} onOpenChange={(o) => { if (!o) onCancel(); }}>
+  const [kept, setKept] = useState(false);
+  useEffect(() => { if (!review && !flow) setKept(false); }, [review, flow]);
+  // Cancelling the sale (or a failed approval) first says the prediction is still active.
+  const keep = () => { if (!kept && !flow?.receipt && (review || flow?.error)) setKept(true); else onCancel(); };
+  return <Dialog open={!!review || !!flow || kept} onOpenChange={(o) => { if (o) return; if (flow && !flow.error && !flow.receipt && !kept) onCancel(); else keep(); }}>
     <ActionSheetContent closeLabel={t("Cerrar")} className="sm:max-w-sm">
-      {flow?.receipt ? <ActionSuccess destination="/portfolio" title={t("¡Posición cerrada!")} amount={{ value: flow.receipt.amount, unit: "$", label: "≈" }}
+      {kept ? <FundsKeptCard where="prediction" onDone={() => { setKept(false); onCancel(); }} /> : flow?.receipt ? <ActionSuccess destination="/portfolio" title={t("¡Posición cerrada!")} amount={{ value: flow.receipt.amount, unit: "$", label: "≈" }}
         body={flow.receipt.partial ? t("Ya vendiste, pero falta pasarlo a dólares. Hazlo en Mi Billetera → Cambiar.") : t("Ya está en tus dólares disponibles.")}
         details={[{ label: t("Operación"), value: t("Cierre antes de tiempo") }, { label: t("Comisión"), value: "$0.00" }]} signature={flow.receipt.sig} onClose={onCancel} />
       : flow ? <>
         <DialogTitle className="pr-10 font-display text-xl">{t("Cerrar antes de tiempo")}</DialogTitle>
         <DialogDescription>{est !== null ? t("Recibes aprox. ${v}", { v: usdcText(est) }) : t("Vendes al precio que el mercado paga en este momento.")}</DialogDescription>
         <ProgressSteps steps={[t("Cerrar posición"), t("Pasar a dólares")]} current={flow.phase} />
-        {flow.error ? <><SignalErrorCard message={flow.error} />{review && <Button size="lg" onClick={onConfirm}>{t("Intentar de nuevo")}</Button>}<Button variant="ghost" onClick={onCancel}>{t("Cerrar")}</Button></> : <WorkingLine text={flow.text} />}
+        {flow.error ? <><SignalErrorCard message={flow.error} />{review && <Button size="lg" onClick={onConfirm}>{t("Intentar de nuevo")}</Button>}<Button variant="ghost" onClick={keep}>{t("Cerrar")}</Button></> : <WorkingLine text={flow.text} />}
       </> : <>
       <DialogHeader className="pr-10 text-left">
         <DialogTitle className="font-display text-xl">{t("Cerrar antes de tiempo")}</DialogTitle>
@@ -138,7 +143,7 @@ function SellReview({ review, flow, onCancel, onConfirm }: { review: { p: Predic
         ? <p className="text-sm text-destructive">{t("Ahora mismo no hay suficientes compradores: podrías recibir mucho menos. Si esperas al final de la ronda y aciertas, cobras el premio completo.")}</p>
         : est < cost ? <p className="text-sm text-muted-foreground">{t("Recibirías menos de lo que invertiste. Si esperas al final de la ronda y aciertas, cobras el premio completo.")}</p> : null}
       <div className="grid grid-cols-2 gap-2">
-        <Button variant="outline" onClick={onCancel}>{t("Mejor espero")}</Button>
+        <Button variant="outline" onClick={keep}>{t("Mejor espero")}</Button>
         <Button onClick={onConfirm}>{t("Confirmar venta")}</Button>
       </div>
       </>}

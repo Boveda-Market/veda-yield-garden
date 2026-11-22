@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FundsKeptCard } from "@/components/funds-kept-card";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -34,6 +35,7 @@ export function HarvestAllDialog({ wallet, targets, onClose }: { wallet: string;
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ total: number; sigs: string[]; failed: string[]; refillMicro: bigint } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [kept, setKept] = useState(false);
   useEffect(() => {
     void Promise.all(targets.map(async (x) => ({ ...x, r: await simulate({ data: { wallet, ...x } }).catch(() => ({ success: false, sent: false, message: "" }) as HarvestResult) }))).then(setQuotes);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -79,7 +81,8 @@ export function HarvestAllDialog({ wallet, targets, onClose }: { wallet: string;
     else setError(t("No se pudo completar la cosecha. No se movió dinero."));
     setBusy(false); setStep("");
   }
-  return <Dialog open onOpenChange={(o) => { if (!o && !busy) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
+  return <Dialog open onOpenChange={(o) => { if (o || busy) return; if (ok.length > 0 && !done && !kept) setKept(true); else onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
+    {kept ? <FundsKeptCard where="earnings" onDone={onClose} /> : <>
     <DialogTitle className={done ? "sr-only" : undefined}>{t("Cosechar todo")}</DialogTitle>
     <DialogDescription className={done ? "sr-only" : undefined}>{t("Cobra las ganancias de todas las bóvedas abiertas a la vez. Los depósitos siguen generando.")}</DialogDescription>
     {done ? <><ActionSuccess title={t("¡Ganancias cosechadas!")} amount={{ value: done.total.toFixed(2), unit: "$", label: "≈" }} details={[{ label: t("Operación"), value: t("Cosecha de todas las bóvedas") }, { label: t("Bóvedas"), value: String(done.sigs.length) }, { label: t("Destino"), value: t("Billetera") }, ...(done.refillMicro > 0n ? [{ label: t("Recarga de reserva de operaciones"), value: `$${(Number(done.refillMicro) / 1e6).toFixed(2)}` }] : [])]} body={t("Las ganancias ya están en la billetera y los depósitos siguen generando.")} signature={done.sigs[done.sigs.length - 1] ?? null} onClose={onClose} />{done.failed.length > 0 && <p role="status" className="text-sm text-muted-foreground">{t("No se pudo cosechar: {v}. Sus ganancias siguen en la bóveda.", { v: done.failed.join(", ") })}</p>}</> : <>
@@ -92,6 +95,7 @@ export function HarvestAllDialog({ wallet, targets, onClose }: { wallet: string;
       {quotes && ok.length > 0 && canSign && <Button size="lg" disabled={busy} onClick={() => void run()}>{busy ? step : t("Confirmar cosecha de todo")}</Button>}
       {quotes && ok.length === 0 && <p className="text-sm text-muted-foreground">{t("No hay ganancias listas para cosechar.")}</p>}
       {error && <SignalErrorCard message={error} />}
+    </>}
     </>}
   </ActionSheetContent></Dialog>;
 }

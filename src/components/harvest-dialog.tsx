@@ -5,6 +5,7 @@ import { vaultSymbol, type OperableVault } from "@/lib/solana-data";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
 import { useEffect, useState } from "react";
+import { FundsKeptCard } from "@/components/funds-kept-card";
 import { useServerFn } from "@tanstack/react-start";
 import { LoaderCircle, PenLine } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -87,8 +88,11 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
   }
   const coin = vaultSymbol(vaultId);
   const [compoundDone, setCompoundDone] = useState(false);
+  const [kept, setKept] = useState(false);
+  const ready = !!result?.success && !signature && !finished;
   const steps = [t("Cobrar ganancias"), t("Sumar a tu bóveda")];
-  return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
+  return <Dialog open onOpenChange={(open) => { if (open || pending) return; if (ready && !kept) setKept(true); else onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
+    {kept ? <FundsKeptCard where="earnings" onDone={onClose} /> : <>
     <DialogTitle className={finished && (!compound || compoundDone) ? "sr-only" : undefined}>{compound ? t("Reinvertir ganancias ·") : t("Cosechar Ganancias ·")}{" "}{coin}</DialogTitle>
     <DialogDescription className={finished && (!compound || compoundDone) ? "sr-only" : undefined}>{compound ? t("Cobras tus ganancias y las sumamos a esta misma bóveda.") : t("Recibe las ganancias acumuladas. Tu depósito sigue en la bóveda generando más.")}</DialogDescription>
     {compound && signature && !compoundDone && <ProgressSteps steps={steps} current={finished ? 2 : 1} />}
@@ -111,6 +115,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
     {canSign && result?.success && !signature && <><Button size="lg" disabled={pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <PenLine className="mr-2 h-4 w-4" />}{pending ? step : compound ? t("Confirmar reinversión") : t("Confirmar cosecha")}</Button></>}
     {!canSign && <p role="note" className="text-xs leading-5 text-muted-foreground">{t("Conecta la wallet propietaria para firmar esta cosecha. No hay movimientos hasta que firmes.")}</p>}
     {message && <SignalErrorCard message={message} />}
+    </>}
     </>}
   </ActionSheetContent></Dialog>;
 }

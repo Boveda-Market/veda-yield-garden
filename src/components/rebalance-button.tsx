@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FundsKeptCard } from "@/components/funds-kept-card";
 import { SignalErrorCard } from "@/components/signal-error";
 import { DetailsToggle } from "@/components/ui/details-toggle";
 import { useServerFn } from "@tanstack/react-start";
@@ -72,6 +73,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
   const [signature, setSignature] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [step, setStep] = useState("");
+  const [kept, setKept] = useState(false);
 
   async function review() {
     setPending(true); setMessage(null);
@@ -115,7 +117,8 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
   }
 
   const symbol = quote?.tokenSymbol ?? position.symbol;
-  return <Dialog open onOpenChange={(o) => { if (!o && !pending) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
+  return <Dialog open onOpenChange={(o) => { if (o || pending) return; if (quote?.success && !signature && !done && !kept) setKept(true); else onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
+    {kept ? <FundsKeptCard where="vault" onDone={onClose} /> : <>
     {done ? <ActionSuccess title={t("¡Posición rebalanceada!")} body={t("Tus ganancias se sumaron y tu posición quedó centrada en el precio actual. Ya vuelve a generar.")} signature={signature} onClose={onClose}
       amount={quote?.valueUsd ? { value: `$${quote.valueUsd}`, unit: "" } : undefined}
       details={[]} /> : <>
@@ -136,6 +139,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
       {message && <SignalErrorCard message={message} />}
       {message && !pending && !quote?.success && <Button onClick={() => void review()}>{t("Intentar de nuevo")}</Button>}
       {message && !pending && <Button variant="outline" onClick={onClose}>{t("Cerrar")}</Button>}
+    </>}
     </>}
   </ActionSheetContent></Dialog>;
 }

@@ -21,7 +21,7 @@ type Sell = { id: string; toAddress: string; amount: string; fiat: string | null
 const fmt = (v: bigint) => (Number(v) / 1e6).toFixed(2);
 
 /** Coinbase-hosted sell: user picks bank/card at Coinbase, then signs one USDC transfer (+tiered fee) to Coinbase's deposit address. */
-export function CoinbaseSell({ wallet }: { wallet: string }) {
+export function CoinbaseSell({ wallet, onReadyChange }: { wallet: string; onReadyChange?: (ready: boolean) => void }) {
   const t = useT();
   const { signAndSend } = useBovedaSession();
   const reportAffiliate = useAffiliateReport();
@@ -32,6 +32,7 @@ export function CoinbaseSell({ wallet }: { wallet: string }) {
   const [sig, setSig] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
+  useEffect(() => { onReadyChange?.(phase === "ready"); }, [phase, onReadyChange]);
   const timer = useRef<number | null>(null);
   const release = useRef<(() => void) | null>(null);
   const hold = () => { release.current?.(); release.current = holdSessionForExternalFlow(); };

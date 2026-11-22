@@ -1,3 +1,4 @@
+import { FundsKeptCard } from "@/components/funds-kept-card";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { ActivityView } from "@/components/activity-view";
 import { AnimatedMoney } from "@/components/ui/animated-money";
@@ -115,6 +116,8 @@ export function WalletPanel() {
   const [sheet, setSheet] = useState(false);
   const [converting, setConverting] = useState(false);
   const [sent, setSent] = useState<{ amount: string; asset: WalletAsset; to: string; sig: string } | null>(null);
+  const [swapReady, setSwapReady] = useState(false);
+  const [kept, setKept] = useState(false);
   const [hidden, setHidden] = useHideBalances();
   const [contacts] = useContacts();
   const prices = useQuery({ queryKey: ["wallet-prices"], staleTime: 60_000, queryFn: async () => {
@@ -287,12 +290,13 @@ export function WalletPanel() {
     <ReportProblem />
     <WalletOpenPredictions />
 
-    <Dialog open={sheet} onOpenChange={(o) => { if (!o && busy) return; setSheet(o); if (!o) { setSent(null); setMessage(null); } }}>
+    <Dialog open={sheet} onOpenChange={(o) => { if (!o && busy) return; if (!o && !kept && !sent && (tab === "swap" ? swapReady : Boolean(units && !amountError && to && !toError))) { setKept(true); return; } setSheet(o); if (!o) { setSent(null); setMessage(null); setKept(false); } }}>
       <ActionSheetContent closeLabel={t("Cerrar")} onInteractOutside={(e) => { if (busy) e.preventDefault(); }}>
+      {kept ? <FundsKeptCard where="wallet" onDone={() => { setKept(false); setSheet(false); setSent(null); setMessage(null); }} /> : <>
       <DialogHeader className="pr-10 text-left"><DialogTitle className="font-display text-xl">{tab === "swap" ? t("Cambiar") : t("Enviar")}</DialogTitle><DialogDescription className="hidden sm:block">{tab === "swap" ? t("Cambia entre tus monedas sin comisión de Bóveda Market.") : t("Envía USDC o SOL a otra billetera.")}</DialogDescription></DialogHeader>
       {!sent && <div role="tablist" className="grid grid-cols-2 gap-1 rounded-full bg-muted p-1">{([["swap", ArrowLeftRight, t("Cambiar")], ["send", Send, t("Enviar")]] as const).map(([k, Icon, label]) => <button key={k} type="button" role="tab" aria-selected={tab === k} disabled={busy} onClick={() => { setTab(k); setMessage(null); }} className={`flex items-center justify-center gap-1.5 rounded-full py-2 text-sm font-medium transition-colors ${tab === k ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}><Icon size={15} />{label}</button>)}</div>}
       {sent ? <ActionSuccess destination={null} title={t("Envío realizado")} amount={{ value: sent.amount, unit: sent.asset }} body={t("Tu saldo se actualizará en unos segundos.")} details={[{ label: t("Operación"), value: t("Envío") }, { label: t("Destino"), value: `${sent.to.slice(0, 4)}…${sent.to.slice(-4)}` }, { label: t("Servicio Bóveda Market"), value: "0" }]} signature={sent.sig} onClose={() => { setSent(null); setSheet(false); }} />
-      : tab === "swap" ? <WalletSwap key={swapFrom.key} balances={swapBalances} initialFrom={swapFrom.from} initialAmount={swapFrom.amount} busy={busy} onConfirm={swap} sheet /> : <div className="space-y-4">
+      : tab === "swap" ? <WalletSwap key={swapFrom.key} balances={swapBalances} initialFrom={swapFrom.from} initialAmount={swapFrom.amount} busy={busy} onConfirm={swap} sheet onReadyChange={setSwapReady} /> : <div className="space-y-4">
         <div className="grid grid-cols-2 gap-2">{(["USDC", "SOL"] as const).map((a) => { const b = a === "SOL" ? balances.data?.sol : balances.data?.usdc; return <button key={a} type="button" onClick={() => setAsset(a)} className={`rounded-xl border p-3 text-left ${asset === a ? "border-primary bg-primary/10" : "border-border"}`}><p className="flex items-center gap-2 font-medium"><TokenIcon symbol={a} size={20} />{a}</p><p className="text-xs text-muted-foreground">{t("Disponible")}: {b !== undefined ? fmt(Number(spendable(b, a)) / 10 ** (a === "SOL" ? 9 : 6), 4) : "—"}</p></button>; })}</div>
         <div><label className="text-xs text-muted-foreground">{t("Dirección de destino")}</label><Input className="mt-1" placeholder={t("Pega la dirección aquí")} value={to} onChange={(e) => setTo(e.target.value.trim())} />
           {contacts.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{contacts.map((c) => <button key={c.address} type="button" onClick={() => setTo(c.address)} className={`rounded-full border px-3 py-1 text-xs ${to === c.address ? "border-primary bg-primary/10" : "border-border"}`}>{c.name} · {c.address.slice(0, 4)}…{c.address.slice(-4)}</button>)}</div>}
@@ -306,6 +310,7 @@ export function WalletPanel() {
         <Button className="w-full" disabled={busy || !units || !!amountError || !to || !!toError} onClick={() => void send()}>{busy ? t("Procesando…") : t("Revisar y firmar envío")}</Button>
       </div>}
       {message && <SignalErrorCard message={message} />}
+      </>}
       </ActionSheetContent>
     </Dialog>
 

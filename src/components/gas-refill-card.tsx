@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { FundsKeptCard } from "@/components/funds-kept-card";
 import { SignalErrorCard } from "@/components/signal-error";
 import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
@@ -75,7 +76,7 @@ function ActivationFlow({ usdc, wallet, prepare, signAndSend, onDone }: { usdc: 
   const [stage, setStage] = useState<"ready" | "working" | "done">("ready");
   const [error, setError] = useState<string | undefined>();
   const [buy, setBuy] = useState(0);
-  useEffect(() => {
+    useEffect(() => {
     if (!wallet) return;
     void prepare({ data: { wallet, activation: true, quoteOnly: true } }).then((r) => { if (r.success) setTotal(BigInt(r.chargeMicro)); }).catch(() => {});
   }, [wallet]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -175,6 +176,7 @@ export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActiv
   const [error, setError] = useState<string | undefined>();
   const [extra, setExtra] = useState(false);
   const [buy, setBuy] = useState(0);
+  const [kept, setKept] = useState(false);
   useEffect(() => { if (open) { setStage("ready"); setError(undefined); } }, [open]);
   useEffect(() => {
     if (!open || !wallet) return;
@@ -198,10 +200,12 @@ export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActiv
     } catch (e) { setError(e instanceof Error ? t(e.message) : t("No se pudo completar la activación.")); setStage("ready"); }
   }
   const view: ActivationStage = stage === "done" ? { kind: "done" } : stage === "working" || checking ? { kind: "working" } : missing > 0n ? { kind: "short", missingMicro: missing } : { kind: "ready", totalMicro: total, extraVault: extra, ...(error ? { error } : {}) };
-  return <Dialog open={open} onOpenChange={(o) => { if (!o && stage !== "working") onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
+  return <Dialog open={open} onOpenChange={(o) => { if (o || stage === "working") return; if (view.kind === "ready" && !kept) setKept(true); else { setKept(false); onClose(); } }}><ActionSheetContent closeLabel={t("Cerrar")}>
+    {kept ? <FundsKeptCard where="wallet" amountMicro={usdc} onDone={() => { setKept(false); onClose(); }} /> : <>
     <DialogTitle className="sr-only">{t("Activa tu cuenta")}</DialogTitle>
     <DialogDescription className="sr-only">{t("Prepara tu cuenta y seguimos solos.")}</DialogDescription>
     <ActivationCardView stage={view} continueMode onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={() => onActivated(fitted, chargeParts ?? undefined)} />
     {buy > 0 && <BuyUsdc auto={buy} needMicro={missing} className="mt-2" {...(resume ? { resume } : {})} />}
+    </>}
   </ActionSheetContent></Dialog>;
 }

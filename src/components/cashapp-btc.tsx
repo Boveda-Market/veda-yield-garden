@@ -16,7 +16,7 @@ import { USDC_MINT, buildTransfer, readTokenBalance, toBaseUnits } from "@/lib/w
 type Quote = Awaited<ReturnType<typeof quoteBtcWithdraw>>;
 
 /** Cash App: swap USDC to native Bitcoin via provider and deliver to the user's Cash App BTC address. One wallet signature. */
-export function CashAppBtc({ wallet }: { wallet: string }) {
+export function CashAppBtc({ wallet, onReadyChange }: { wallet: string; onReadyChange?: (ready: boolean) => void }) {
   const t = useT();
   const { signAndSend } = useBovedaSession();
   const reportAffiliate = useAffiliateReport();
@@ -33,6 +33,7 @@ export function CashAppBtc({ wallet }: { wallet: string }) {
   const [done, setDone] = useState<{ sig: string; shiftId: string; btc: string } | null>(null);
   const [status, setStatus] = useState<string>("waiting");
   const [balance, setBalance] = useState<number | null>(null);
+  useEffect(() => { onReadyChange?.(!!quote && !done && !busy); }, [quote, done, busy, onReadyChange]);
   useEffect(() => { readTokenBalance(wallet, USDC_MINT).then((b) => setBalance(Number(b) / 1e6)).catch(() => setBalance(null)); }, [wallet, done]);
   const pick = (f: number) => { if (balance == null) return; setAmount((Math.floor(balance * f * 100) / 100).toFixed(2)); };
 

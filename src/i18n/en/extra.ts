@@ -1802,4 +1802,10 @@ export const extra: Record<string, string> = {
   "Tus dólares siguen en tu Billetera, listos para usar cuando quieras.": "Your dollars are still in your Wallet, ready whenever you want.",
   "No se movió dinero y no se cobró nada.": "No money moved and nothing was charged.",
   "Ver mi Billetera": "View my Wallet",
+  "Cancelado. Todo sigue igual": "Cancelled. Nothing changed",
+  "Tu dinero sigue trabajando en tu bóveda. Lo ves en Mi Portafolio.": "Your money is still working in your vault. You can see it in My Portfolio.",
+  "Tus ganancias siguen acumulándose en tu bóveda. Puedes cosecharlas cuando quieras desde Mi Portafolio.": "Your earnings keep building up in your vault. Harvest them anytime from My Portfolio.",
+  "Tu predicción sigue activa. La ves en Mi Portafolio.": "Your prediction is still active. You can see it in My Portfolio.",
+  "Tu premio sigue esperando. Lo cobras cuando quieras desde tu Billetera.": "Your prize is still waiting. Claim it anytime from your Wallet.",
+  "Ver Mi Portafolio": "View My Portfolio",
 };

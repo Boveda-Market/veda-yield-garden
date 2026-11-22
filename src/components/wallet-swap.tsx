@@ -19,10 +19,12 @@ type Props = {
   compact?: boolean;
   /** Rendered inside an action sheet: the sheet already shows the title. */
   sheet?: boolean;
+  /** Tells the sheet when a live quote is ready to confirm, so closing it can explain where the money stays. */
+  onReadyChange?: (ready: boolean) => void;
 };
 
 /** Quote-only requests never sign; only the reviewed, current input can be confirmed. Any pair; fee always in USDC. */
-export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "", busy, onConfirm, compact = false, sheet = false }: Props) {
+export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "", busy, onConfirm, compact = false, sheet = false, onReadyChange }: Props) {
   const t = useT();
   const [from, setFrom] = useState(initialFrom);
   const [to, setTo] = useState(initialFrom === "USDC" ? "SOL" : "USDC");
@@ -58,6 +60,7 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
     refetchOnWindowFocus: false,
   });
   const current = amount === debounced && quote.data?.from === from && quote.data.to === to && quote.data.amount === units ? quote.data : undefined;
+  useEffect(() => { onReadyChange?.(!!current && !done); }, [current, done, onReadyChange]);
   useEffect(() => {
     if (!current) return;
     setNow(Date.now());

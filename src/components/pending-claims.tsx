@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { FundsKeptCard } from "@/components/funds-kept-card";
 import { SignalErrorCard } from "@/components/signal-error";
 import { notify } from "@/lib/notify";
 import { useQueryClient } from "@tanstack/react-query";
@@ -36,6 +37,8 @@ export function PendingClaims() {
   const [claimed, setClaimed] = useState<string[]>([]);
   const items = (q.data ?? []).filter((p) => !claimed.includes(p.pubkey) && p.status !== "open" && positionWon(p) === true && BigInt(p.payoutMicro || "0") > 0n);
   const [flow, setFlow] = useState<Flow | null>(null);
+  const [kept, setKept] = useState(false);
+  const closeFlow = () => { if (flow?.error && !flow.receipt && !kept) setKept(true); else { setKept(false); setFlow(null); } };
   const busy = !!flow && !flow.receipt && !flow.error;
   const refresh = useCallback(async () => { await qc.invalidateQueries({ queryKey: ["predict-positions", wallet] }); }, [qc, wallet]);
 
@@ -71,15 +74,15 @@ export function PendingClaims() {
     } catch (e) { setFlow({ p, phase: 1, text: "", error: e instanceof Error ? e.message : String(e) }); }
   };
 
-  const sheet = <Dialog open={!!flow} onOpenChange={(o) => { if (!o && !busy) setFlow(null); }}>
+  const sheet = <Dialog open={!!flow} onOpenChange={(o) => { if (!o && !busy) closeFlow(); }}>
     <ActionSheetContent closeLabel={t("Cerrar")} className="sm:max-w-sm">
-      {flow?.receipt ? <ActionSuccess destination="/portfolio" title={flow.receipt.partial ? t("¡Premio cobrado!") : t("¡Premio en tu billetera!")} amount={{ value: flow.receipt.net, unit: "$" }}
+      {kept ? <FundsKeptCard where="prize" onDone={() => { setKept(false); setFlow(null); }} /> : flow?.receipt ? <ActionSuccess destination="/portfolio" title={flow.receipt.partial ? t("¡Premio cobrado!") : t("¡Premio en tu billetera!")} amount={{ value: flow.receipt.net, unit: "$" }}
         body={flow.receipt.partial ? t("Tu premio ya es tuyo, pero falta pasarlo a dólares. Hazlo en Mi Billetera → Cambiar.") : t("Ya está en tus dólares disponibles.")}
         details={[{ label: t("Operación"), value: t("Premio de Doble o Nada") }, { label: t("Comisión"), value: flow.receipt.fee === "0.00" ? "$0.00" : `−$${flow.receipt.fee}` }]} signature={flow.receipt.sig} onClose={() => setFlow(null)} /> : flow && <>
         <DialogTitle className="pr-10 font-display text-xl">{t("Cobrar premio")}</DialogTitle>
         <DialogDescription>{t("Premio de ${v}", { v: usdc(flow.p.payoutMicro || "0") })}</DialogDescription>
         <ProgressSteps steps={[t("Cobrar premio"), t("Pasar a dólares")]} current={flow.phase} />
-        {flow.error ? <><SignalErrorCard message={flow.error} /><Button size="lg" onClick={() => void claim(flow.p)}>{t("Intentar de nuevo")}</Button><Button variant="ghost" onClick={() => setFlow(null)}>{t("Cerrar")}</Button></> : <WorkingLine text={flow.text} />}
+        {flow.error ? <><SignalErrorCard message={flow.error} /><Button size="lg" onClick={() => void claim(flow.p)}>{t("Intentar de nuevo")}</Button><Button variant="ghost" onClick={closeFlow}>{t("Cerrar")}</Button></> : <WorkingLine text={flow.text} />}
       </>}
     </ActionSheetContent>
   </Dialog>;

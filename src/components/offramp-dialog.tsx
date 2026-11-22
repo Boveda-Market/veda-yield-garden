@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { FundsKeptCard } from "@/components/funds-kept-card";
 import { Banknote, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,6 +15,9 @@ export function OfframpButton({ wallet, trial, trigger }: { wallet: string | nul
   const t = useT();
   const [open, setOpen] = useState(false);
   const [provider, setProvider] = useState<Provider>("bank");
+  const [ready, setReady] = useState(false);
+  const [kept, setKept] = useState(false);
+  const onOpenChange = (o: boolean) => { if (o) { setOpen(true); return; } if (ready && !kept) { setKept(true); return; } setKept(false); setReady(false); setOpen(false); };
   // Coming back from Coinbase: reopen the withdraw dialog so the signature request appears on its own.
   useEffect(() => {
     if (trial || !wallet) return;
@@ -31,15 +35,17 @@ export function OfframpButton({ wallet, trial, trigger }: { wallet: string | nul
 
   return <>
     {trigger ? trigger(() => setOpen(true)) : <Button size="sm" onClick={() => setOpen(true)}><Banknote size={16} />{t("Retirar a banco o tarjeta")}</Button>}
-    <Dialog open={open} onOpenChange={setOpen}><ActionSheetContent closeLabel={t("Cerrar")}>
+    <Dialog open={open} onOpenChange={onOpenChange}><ActionSheetContent closeLabel={t("Cerrar")}>
+      {kept ? <FundsKeptCard where="wallet" onDone={() => onOpenChange(false)} /> : <>
       <DialogHeader><DialogTitle>{t("Retirar a banco o tarjeta")}</DialogTitle><DialogDescription>{t("Pasa tus USDC a tu saldo de Coinbase, disponible al instante, o conviértelos a Bitcoin para Cash App. La comisión siempre la ves antes de firmar.")}</DialogDescription></DialogHeader>
       <div className="grid grid-cols-2 gap-2">{(Object.keys(options) as Provider[]).map((p) => <button key={p} type="button" onClick={() => setProvider(p)} aria-pressed={provider === p} className={`flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-colors ${provider === p ? "border-primary bg-primary/10 ring-2 ring-primary" : "border-border hover:border-primary/50"}`}><img src={options[p].icon} alt="" width={28} height={28} className="h-7 w-7 rounded-md" /><span className="text-sm font-semibold">{options[p].label}</span><span className="text-xs text-muted-foreground">{options[p].perk}</span></button>)}</div>
       {provider === "bank" && <p className="text-xs text-muted-foreground">{t("¿Usas PayPal? Retira primero a Coinbase y desde allí pásalo a PayPal.")}</p>}
       {provider === "cashapp" && <p className="flex gap-2 rounded-lg border border-border/80 bg-secondary/60 p-3 text-xs"><TriangleAlert size={14} className="mt-0.5 shrink-0 text-primary" />{t("Cash App solo recibe Bitcoin. Convertimos tus USDC por ti; nunca envíes USDC directo a Cash App.")}</p>}
       {trial ? <p role="status" className="text-sm">{t("En Prueba los créditos son ficticios y no se pueden retirar. Cambia a Real para usar esta opción.")}</p>
         : !wallet ? <p role="status" className="text-sm">{t("Conecta tu wallet para retirar.")}</p>
-        : provider === "cashapp" ? <CashAppBtc wallet={wallet} />
-        : <CoinbaseSell wallet={wallet} />}
+        : provider === "cashapp" ? <CashAppBtc wallet={wallet} onReadyChange={setReady} />
+        : <CoinbaseSell wallet={wallet} onReadyChange={setReady} />}
+      </>}
     </ActionSheetContent></Dialog>
   </>;
 }

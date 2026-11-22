@@ -7,6 +7,7 @@ import { vaultSymbol, type OperableVault } from "@/lib/solana-data";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
 import { useEffect, useState, useRef } from "react";
+import { FundsKeptCard } from "@/components/funds-kept-card";
 import { useServerFn } from "@tanstack/react-start";
 import { ReceiptText, LoaderCircle, PenLine } from "lucide-react";
 import { TapAmount } from "@/components/ui/tap-amount";
@@ -53,6 +54,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
   const [signature, setSignature] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [finished, setFinished] = useState(false);
+  const [kept, setKept] = useState(false);
   // Migration: chain step 2 automatically as soon as the exit is confirmed.
   useEffect(() => { if (finished && (vaultId === "trump" || dest?.id === "trump")) markTrumpTouched(); if (finished && dest) ackRankLineup(); if (finished && dest && onMigrated) onMigrated(result?.minimumNet ?? "", dest); }, [finished]); // eslint-disable-line react-hooks/exhaustive-deps
   const [sweepNote, setSweepNote] = useState<string | null>(null);
@@ -111,11 +113,13 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
     finally { setPending(false); setStep(""); }
   }
   const prefilled = Boolean(wallet && position);
+  const ready = !!result?.success && !signature && !finished;
   const inputs = <>
     <label className="grid gap-2 text-sm">{t("Wallet propietaria")}<Input aria-label={t("Wallet propietaria")} value={address} disabled={pending || Boolean(wallet) || Boolean(signature)} maxLength={44} onChange={(e) => { setAddress(e.target.value.trim()); setResult(null); setAccepted(false); }} /></label>
     <label className="grid gap-2 text-sm">{t("Dirección de la posición")}<Input aria-label={t("Dirección de la posición")} value={positionAddress} disabled={pending || Boolean(position) || Boolean(signature)} maxLength={44} onChange={(e) => { setPositionAddress(e.target.value.trim()); setResult(null); setAccepted(false); }} /></label>
   </>;
-  return <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
+  return <Dialog open onOpenChange={(open) => { if (open || pending) return; if (ready && !kept) setKept(true); else onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
+    {kept ? <FundsKeptCard where="vault" onDone={onClose} /> : <>
     <DialogTitle>{migrateTo ? t("Cambiar a {v}", { v: t((dest ?? migrateTo).name) }) : <>{t("Retirar ·")}{" "}{vaultSymbol(vaultId)}</>}</DialogTitle>
     <DialogDescription>{migrateTo ? (rotate || percent === 100 ? t("Movemos todo tu dinero y ganancias.") : t("Mueves el {p}% y el resto sigue en tu bóveda actual.", { p: String(percent) })) : t("Elige cuánto retirar a tus dólares disponibles.")}</DialogDescription>
     {!migrateTo && !finished && !signature && <div role="radiogroup" aria-label={t("Cuánto retirar")} className="grid grid-cols-4 gap-2">{EXIT_PERCENTS.map((p) => <Button key={p} type="button" role="radio" aria-checked={percent === p} variant={percent === p ? "default" : "outline"} disabled={Boolean(step)} onClick={() => { setPercent(p); setPctText(String(p)); setResult(null); setAccepted(false); setMessage(null); }}>{p === 100 ? t("Todo") : `${p}%`}</Button>)}</div>}
@@ -144,6 +148,7 @@ export function WithdrawalSimulation({ wallet, position, vaultId, onClose, migra
     {signature && pending && step && <WorkingLine text={step} />}
     {message && <SignalErrorCard message={message} />}
     {signature && !pending && <Link to="/wallet" onClick={onClose} className="text-xs underline">{t("Ver en tu billetera")}</Link>}
+    </>}
     </>}
   </ActionSheetContent></Dialog>;
 }
