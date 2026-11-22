@@ -53,13 +53,8 @@ export function Gta6Hero({ title, sub }: { title: string; sub: string }) {
 /** The two main home buttons, styled to pop in every hero variant. Vaults goes first in the GTA6 variant. */
 export function HomeCtas({ vaultsFirst = false, trump = false }: { vaultsFirst?: boolean; trump?: boolean }) {
   const t = useT();
-  const gtaApr = useGta6AprLabel();
-  const trumpVault = VAULTS.find((v) => v.id === "trump");
-  const ty = useQuery({ ...poolYieldOptions(trumpVault?.pool ?? ""), enabled: trump && !!trumpVault });
-  const tApr = ty.data?.apr;
-  const apr = trump ? (tApr != null && tApr > 0 ? `+${Math.round(tApr).toLocaleString("en-US")}% APR` : t("Alto octanaje")) : gtaApr;
   const { lang } = useI18n();
-  const gtaTitle = lang === "en" ? titleEn : titleEs;
+  const V = lang === "en" ? "Vault" : "Bóveda";
   const predict = <Link key="p" to="/mercados" className="group relative block min-w-0 rounded-2xl bg-primary p-[2px] shadow-[0_0_28px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
     <span className="relative isolate flex h-16 items-center justify-between gap-2 overflow-hidden rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
       <DuelLines />
@@ -68,21 +63,16 @@ export function HomeCtas({ vaultsFirst = false, trump = false }: { vaultsFirst?:
     </span>
   </Link>;
   const vaults = <Link key="v" to="/app" className={`${trump ? "vault-trump " : ""}hot-ring group relative block min-w-0 rounded-2xl p-[2px] shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98]`}>
-    <span className="relative isolate flex h-[4.5rem] items-center justify-between gap-2 overflow-hidden rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
+    <span className={`relative isolate flex h-[4.5rem] items-center justify-between gap-2 overflow-hidden rounded-[14px] px-3 text-hot-foreground ${trump ? "bg-[image:var(--gradient-hot-surface)]" : "bg-[image:var(--gradient-hot)]"}`}>
+      {!trump && <Sunset />}
       <span aria-hidden className="cta-shimmer pointer-events-none absolute inset-y-0 left-0 z-10 w-1/4 bg-gradient-to-r from-transparent via-hot-foreground/30 to-transparent" />
-      <span className="flex min-w-0 items-center gap-2 whitespace-nowrap font-display text-[15px] font-black sm:text-base">{trump ? <span className="flex items-center gap-2"><img src={trumpLogo} alt="" aria-hidden width={160} height={160} className="h-9 w-9 shrink-0 rounded-full ring-2 sm:h-10 sm:w-10 ring-hot-2 drop-shadow-[0_0_10px_var(--hot-2)]" /><span className="flex flex-col items-start leading-none"><span className="flex items-center gap-1.5"><span className="text-[10px] font-bold uppercase tracking-[0.25em] text-hot-muted">{lang === "en" ? "Vault" : "Bóveda"}</span><span className="rounded-sm bg-[color:var(--trump-blue)] px-1 py-px text-[8px] font-bold tracking-[0.2em] text-[color:var(--trump-gold)] ring-1 ring-[color:var(--trump-gold)]/60">{lang === "en" ? "OFFICIAL" : "OFICIAL"}</span></span><span className="trump-gold -rotate-2 font-display text-[1.05rem] font-black italic uppercase tracking-tight whitespace-nowrap min-[380px]:text-[1.2rem] sm:text-2xl">TRUMP COIN</span></span></span> : <img src={gtaTitle} alt="GTA6" className="h-7 w-auto shrink-0 -rotate-2 sm:h-9" />}<span className="sr-only">{t("Explorar Bóvedas")}</span><ArrowRight size={16} className="hidden transition-transform group-hover:translate-x-0.5 min-[380px]:block" /></span>
-      {apr.endsWith(" APR")
-        ? <span className="hot-cta flex shrink-0 flex-col items-center justify-center rounded-xl px-3 py-1 leading-none text-hot-surface shadow-[0_0_18px_-2px_var(--hot)]">
-            <span className="flex items-center gap-1 font-display text-2xl font-black tabular-nums tracking-tight sm:text-[1.7rem]"><Flame size={18} aria-hidden className="flame-flicker shrink-0" />{apr.replace(" APR", "")}</span>
-            <span className="mt-0.5 text-[10px] font-black uppercase tracking-[0.18em]">APR</span>
-          </span>
-        : trump
-          ? <span className="relative flex h-[3.4rem] w-[5.6rem] shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl bg-[color:var(--trump-blue)] text-center leading-none ring-1 ring-[color:var(--trump-gold)] shadow-[0_0_16px_-4px_var(--trump-gold)] sm:w-28">
-              <span aria-hidden className="text-[8px] tracking-[0.3em] text-[color:var(--trump-gold)]">★ ★ ★</span>
-              <span className="trump-gold font-display text-[13px] font-black uppercase italic tracking-wide sm:text-sm">{lang === "en" ? "High" : "Alto"}</span>
-              <span className="font-display text-[9px] font-bold uppercase tracking-[0.25em] text-[color:var(--trump-gold)]">{lang === "en" ? "Octane" : "Octanaje"}</span>
-            </span>
-          : <span className="hot-cta flex w-[4.5rem] shrink-0 flex-col items-center justify-center rounded-xl px-1.5 py-1 text-center font-display text-[10px] font-black uppercase leading-tight tracking-wide text-hot-surface"><Flame size={16} aria-hidden className="flame-flicker" />{apr}</span>}
+      {trump
+        ? <span className="relative flex min-w-0 items-center gap-2 whitespace-nowrap"><img src={trumpLogo} alt="" aria-hidden width={160} height={160} className="h-8 w-8 shrink-0 rounded-full ring-2 ring-hot-2 drop-shadow-[0_0_10px_var(--hot-2)] min-[380px]:h-9 min-[380px]:w-9 sm:h-10 sm:w-10" /><span className="flex flex-col items-start leading-none"><span className="flex items-center gap-1.5"><span className="text-[10px] font-bold uppercase tracking-[0.25em] text-hot-muted">{V}</span><span className="rounded-sm bg-[color:var(--trump-blue)] px-1 py-px text-[8px] font-bold tracking-[0.2em] text-[color:var(--trump-gold)] ring-1 ring-[color:var(--trump-gold)]/60">{lang === "en" ? "OFFICIAL" : "OFICIAL"}</span></span><span className="trump-gold -rotate-2 font-display text-[0.95rem] min-[380px]:text-[1.05rem] min-[420px]:text-[1.2rem] font-black italic uppercase tracking-tight sm:text-2xl">TRUMP COIN</span></span></span>
+        : <span className="relative flex min-w-0 flex-col items-start whitespace-nowrap leading-none"><span className="flex items-center gap-1.5"><span className="text-[10px] font-bold uppercase tracking-[0.25em] text-hot-foreground/80">{V}</span><span className="rounded-sm bg-hot-surface px-1 py-px text-[8px] font-bold tracking-[0.2em] text-hot-foreground ring-1 ring-hot-foreground/40">VICE CITY</span></span><span className="-rotate-2 font-display text-[1.15rem] font-black italic uppercase tracking-tight text-hot-foreground min-[380px]:text-[1.4rem] [text-shadow:0_2px_0_var(--hot-surface),0_0_14px_var(--hot)] sm:text-[1.8rem]">GTA6 <span className="text-hot-surface [text-shadow:0_0_10px_var(--hot-foreground)]">COIN</span></span></span>}
+      <span className="sr-only">{t("Explorar Bóvedas")}</span>
+      {trump
+        ? <span className="relative flex shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl bg-[color:var(--trump-blue)] px-2 py-1.5 min-[380px]:px-3 leading-none ring-1 ring-[color:var(--trump-gold)] shadow-[0_0_16px_-4px_var(--trump-gold)]"><span aria-hidden className="text-[8px] tracking-[0.3em] text-[color:var(--trump-gold)]">★ ★ ★</span><span className="trump-gold flex items-center gap-1 font-display text-xs min-[380px]:text-sm font-black uppercase">{t("Entrar")}<ArrowRight size={14} className="text-[color:var(--trump-gold)] transition-transform group-hover:translate-x-0.5" /></span></span>
+        : <span className="hot-cta relative flex shrink-0 items-center gap-1 rounded-xl px-2 py-2 font-display text-xs font-black uppercase text-hot-surface min-[380px]:px-3 min-[380px]:text-sm shadow-[0_0_18px_-2px_var(--hot)]"><Flame size={14} aria-hidden className="flame-flicker" />{t("Entrar")}<ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" /></span>}
     </span>
   </Link>;
   return <div className="mb-4 grid w-full min-w-0 grid-cols-1 gap-2.5">{vaultsFirst ? [vaults, predict] : [predict, vaults]}</div>;
