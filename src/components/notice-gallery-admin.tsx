@@ -11,13 +11,15 @@ import { LoginAlert } from "@/components/login-alert";
 import { SafetyNotice } from "@/components/safety-notice";
 import { VaultSteps } from "@/components/vault-steps";
 import { StartGuide } from "@/components/start-guide";
-import { DevNote } from "@/components/dev-note";
+import { FundsKeptCard } from "@/components/funds-kept-card";
+import { ExploreCards } from "@/components/explore-cards";
+import { FirstDepositSteps } from "@/components/login-nudge";
+import { Dialog } from "@/components/ui/dialog";
 import { PredictPositionCard } from "@/components/predict-position-card";
 import { ActionSuccess } from "@/components/action-success";
 import { RealPositions } from "@/components/real-positions";
 import { WorkingLine } from "@/components/move-steps";
 import { Crosshair, Send } from "lucide-react";
-import { RangeUrgentBanner } from "@/components/rebalance-button";
 import { sendRangeTestAlert } from "@/lib/range-test.functions";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import type { PredictPosition } from "@/lib/predict";
@@ -33,7 +35,6 @@ export function NoticeGalleryAdmin() {
   const t = useT();
   const items: { id: string; title: string; node: ReactNode }[] = [
     { id: "bell", title: t("Campanita: premios, pérdidas, reembolsos y rango"), node: <NewsList predict={[{ id: "w", outcome: "won", p: { ...SAMPLE_ROUND, status: "closed", result: "yes", closeTime: Math.floor(NOW / 1000) - 60 } }, { id: "l", outcome: "lost", p: { ...SAMPLE_ROUND, pubkey: "Sample3333333333333333333333333333333333333", status: "closed", result: "no", closeTime: Math.floor(NOW / 1000) - 600 } }]} refunds={[{ id: "r", r: { order: "Sample4444444444444444444444444444444444444", marketId: "sample", title: SAMPLE_ROUND.title, amountMicro: "5000000", at: NOW - 120_000 } }]} ranges={[{ id: "g", p: SAMPLE_VAULT, since: NOW - 15 * 60_000 }]} /> },
-    { id: "range-banner", title: t("Aviso urgente en Mi Billetera"), node: <RangeUrgentBanner positions={[SAMPLE_VAULT]} /> },
     { id: "range-card", title: t("Bóveda fuera de rango (simulada)"), node: <RealPositions positions={[SAMPLE_VAULT]} onAction={() => undefined} showHarvestBanner={false} /> },
     { id: "rb-quote", title: t("Rebalanceo · cotización"), node: <div className="grid gap-3"><p className="font-display text-lg font-semibold">{t("Rebalancear posición")} · GTA6</p><p className="text-sm text-muted-foreground">{t("Tu posición salió del rango y no está generando. Cosechamos tus ganancias, dejamos mitad y mitad al precio actual y la volvemos a centrar.")}</p><dl className="grid gap-2 rounded-xl border border-border p-4 text-sm"><div className="flex justify-between"><dt className="text-muted-foreground">{t("Se recoloca")}</dt><dd className="font-semibold">≈ $12.40</dd></div><div className="flex justify-between"><dt className="text-muted-foreground">{t("Ganancias que se suman")}</dt><dd>$0.42 + 3 GTA6</dd></div><div className="flex justify-between"><dt className="text-muted-foreground">{t("Nuevo reparto")}</dt><dd>{t("Mitad {s} · mitad dólares", { s: "GTA6" })}</dd></div></dl><Button size="lg"><Crosshair className="mr-2 h-4 w-4" />{t("Rebalancear ahora")}</Button></div> },
     { id: "rb-working", title: t("Rebalanceo · en curso"), node: <WorkingLine text={t("Centrando tu posición…")} /> },
@@ -51,9 +52,12 @@ export function NoticeGalleryAdmin() {
     { id: "safety", title: t("Aviso anti-suplantación"), node: <SafetyNotice /> },
     { id: "steps", title: t("Pasos de bóvedas"), node: <VaultSteps /> },
     { id: "guide", title: t("Guía de inicio"), node: <StartGuide /> },
-    { id: "dev", title: t("Nota del desarrollador"), node: <DevNote /> },
-    { id: "deposit", title: t("Comprobante de depósito"), node: <ActionSuccess title={t("¡Depósito exitoso!")} body={t("Tu posición ya está generando intereses. Puedes cosecharlos cuando quieras desde tu Portafolio.")} amount={{ value: "10.00", unit: "$" }} details={[{ label: t("Operación"), value: t("Depósito en bóveda") }]} signature={null} destination={null} onClose={() => undefined} /> },
-    { id: "withdraw", title: t("Comprobante de retiro"), node: <ActionSuccess title={t("¡Retiro completado!")} body={t("Tus USDC ya están en tu wallet. También recuperaste el SOL de apertura de la posición.")} amount={{ value: "9.85", unit: "$", label: "≈" }} details={[{ label: t("Operación"), value: t("Retiro total de bóveda") }]} signature={null} destination={null} onClose={() => undefined} /> },
+    { id: "first-steps", title: t("Pasos del primer depósito (al entrar)"), node: <FirstDepositSteps /> },
+    { id: "explore", title: t("Cuenta nueva en $0 · accesos"), node: <ExploreCards /> },
+    { id: "kept-wallet", title: t("Cancelado · dinero en Billetera"), node: <Dialog><FundsKeptCard where="wallet" amountMicro={20_000_000n} onDone={() => undefined} /></Dialog> },
+    { id: "kept-vault", title: t("Cancelado · dinero en bóveda"), node: <Dialog><FundsKeptCard where="vault" onDone={() => undefined} /></Dialog> },
+    { id: "deposit", title: t("Comprobante de depósito"), node: <ActionSuccess title={t("¡Depósito exitoso!")} body={t("Tu posición ya está generando intereses. Puedes cosecharlos cuando quieras desde tu Portafolio.")} amount={{ value: "10.00", unit: "$" }} details={[{ label: t("Operación"), value: t("Depósito en bóveda") }, { label: t("Destino"), value: t("Bóveda {v}", { v: "GTA6" }) }, { label: t("Cargo por servicio de activación"), value: "$5.00" }, { label: t("Reserva de operaciones"), value: "$1.40" }]} signature={null} destination={null} onClose={() => undefined} /> },
+    { id: "withdraw", title: t("Comprobante de retiro"), node: <ActionSuccess title={t("¡Retiro completado!")} body={t("Tus dólares ya están en tu billetera. También recuperaste la garantía de apertura.")} amount={{ value: "9.85", unit: "$", label: "≈" }} details={[{ label: t("Operación"), value: t("Retiro total de bóveda") }, { label: t("Origen"), value: t("Bóveda {v}", { v: "GTA6" }) }, { label: t("Destino"), value: t("Tu billetera") }, { label: t("Garantía de apertura"), value: t("Devuelta") }]} signature={null} destination={null} onClose={() => undefined} /> },
   ];
   const session = useBovedaSession();
   const [testMsg, setTestMsg] = useState<string | null>(null);

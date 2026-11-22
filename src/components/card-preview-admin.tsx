@@ -60,7 +60,7 @@ export function CardPreviewAdmin() {
           <Button size="lg"><LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" />{t("Esperando tu firma en la wallet…")}</Button>
         </Frame>
         <Frame title={t("4 · Comprobante")}>
-          <ActionSuccess title={t("¡Cambio de bóveda listo!")} body={t("Todo tu dinero ya está generando en la nueva bóveda. Comisión: $0.00.")} amount={{ value: "12.23", unit: "$" }} details={[{ label: t("Operación"), value: t("Cambio de bóveda") }, { label: t("Destino"), value: t("Bóveda {v}", { v: "MET" }) }]} signature={null} destination={null} onClose={noop} />
+          <ActionSuccess title={t("¡Cambio de bóveda listo!")} body={t("Lo que moviste ya está generando en la nueva bóveda.")} amount={{ value: "12.23", unit: "$" }} details={[{ label: t("Operación"), value: t("Cambio de bóveda") }, { label: t("Destino"), value: t("Bóveda {v}", { v: "MET" }) }]} signature={null} destination={null} onClose={noop} />
         </Frame>
       </div>
     </div>

@@ -62,4 +62,8 @@ export const admin: Record<string, string> = {
   "Conectados": "Online",
   "Nuevos (7 días)": "New (7 days)",
   "Sin depósito": "No deposit",
+  "Pasos del primer depósito (al entrar)": "First deposit steps (on sign-in)",
+  "Cuenta nueva en $0 · accesos": "New $0 account · shortcuts",
+  "Cancelado · dinero en Billetera": "Cancelled · money in Wallet",
+  "Cancelado · dinero en bóveda": "Cancelled · money in vault",
 };
