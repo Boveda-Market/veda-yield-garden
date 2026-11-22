@@ -186,7 +186,7 @@ export const extra: Record<string, string> = {
   "Valores en dólares estimados al precio actual; pueden cambiar antes de firmar.": "Dollar values estimated at the current price; they may change before signing.",
   "El contador en vivo estima cómo crecen tus ganancias con los intereses recientes de la bóveda; el monto exacto se confirma al cosechar.": "The live counter estimates how your earnings grow based on the vault's recent interest; the exact amount is confirmed when you harvest.",
   "Tu dinero puede empezar a generar intereses": "Your money can start earning",
-  "Aún no tienes bóvedas abiertas. Elige una, deposita USDC y mira aquí cómo crecen tus ganancias.": "You don't have any open vaults yet. Pick one, deposit USDC and watch your earnings grow here.",
+  "Aún no tienes bóvedas abiertas. Elige una, deposita y mira aquí cómo crecen tus ganancias.": "You don't have any open vaults yet. Pick one, deposit and watch your earnings grow here.",
   "Hacer mi primer depósito": "Make my first deposit",
   "Depositar en bóveda": "Deposit in a vault",
   "Bóveda Market": "Bóveda Market",
