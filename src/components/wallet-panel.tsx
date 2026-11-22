@@ -33,6 +33,7 @@ import { WalletSwap } from "@/components/wallet-swap";
 import { solanaAddressSchema } from "@/lib/solana-data";
 import { decimalToUnits, PAYOUT_MOVE_MIN_USD } from "@/lib/onboarding";
 import { StartGuide } from "@/components/start-guide";
+import { ExploreCards } from "@/components/explore-cards";
 import { DobleShortcut, WalletHeroShortcuts } from "@/components/wallet-hero-shortcuts";
 
 import { BuyUsdc } from "@/components/buy-usdc";
@@ -223,6 +224,7 @@ export function WalletPanel() {
     <WalletRangeBanner wallet={address} />
 
     <StartGuide />
+    {balances.data && balances.data.usdc === 0n && vaultPositions.length === 0 && !vaults.isLoading ? <ExploreCards /> : null}
     <section className="rounded-3xl border border-border bg-card p-6">
       <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{vaultPositions.length > 0 || jupUsd > 0 ? t("Balance total") : t("Balance en USDC")}</p><Button variant="ghost" size="sm" onClick={() => { void balances.refetch(); void extra.refetch(); void prices.refetch(); void queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); void queryClient.invalidateQueries({ queryKey: ["predict-positions", address] }); }} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
       <div className="mt-1 flex items-center gap-2">{balances.data?.usdc !== undefined && (hidden || working !== null) ? <p className="font-display text-4xl">{hidden ? MASK : <AnimatedMoney value={(Number(balances.data.usdc) / 1e6) + jupUsd + (working ?? 0) + totalFees} ratePerMs={liveRate} />}</p> : <BalanceLoading />}<button type="button" onClick={() => setHidden(!hidden)} aria-label={hidden ? t("Mostrar saldos") : t("Ocultar saldos")} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{hidden ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
