@@ -39,7 +39,7 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const stats = useQuery({ queryKey: ["dexscreener-pool-stats", vault.pool], queryFn: ({ signal }) => fetchPoolStats(vault.pool, signal), staleTime: 60_000, retry: 1 });
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
   const rawSym = stats.data?.baseSymbol ?? vault.pair.split("/")[0];
-  const symbol = vault.id === "trump" ? "$TRUMP" : rawSym;
+  const symbol = rawSym ? `$${rawSym.replace(/^\$/, "")}` : rawSym;
   const mint = CHAIN_POOLS.find((p) => p.id === vault.id)?.mint;
   const [copied, setCopied] = useState(false);
   const ch = stats.data?.change24h ?? null;

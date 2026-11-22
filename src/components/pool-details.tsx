@@ -17,7 +17,7 @@ const usd = (value: number | null | undefined, digits = 2) => value == null ? "â
 
 export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => void }) {
   const t = useT();
-  const [tab, setTab] = useState<"perf" | "stats">(vault.badge ? "perf" : "stats");
+  const [tab, setTab] = useState<"perf" | "stats">("perf");
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
   const query = useQuery({
@@ -30,7 +30,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
   const stats = query.data;
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
   const holders = yieldQ.data?.holders ?? null, fees24h = yieldQ.data?.fees24h ?? null;
-  const sym = vault.id === "trump" ? "$TRUMP" : stats?.baseSymbol ?? vault.pair.split("/")[0];
+  const sym = `$${(stats?.baseSymbol ?? vault.pair.split("/")[0] ?? "").replace(/^\$/, "")}`;
   const buys = stats?.buys24h ?? null, sells = stats?.sells24h ?? null;
   const url = `https://app.meteora.ag/${isDlmmVault(vault.id) ? "dlmm" : "dammv2"}/${vault.pool}`;
   const copy = async () => {
