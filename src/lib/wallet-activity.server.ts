@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { heliusConnection } from "./solana-read.server";
+import { heliusConnection, MAX_TX_VERSION } from "./solana-read.server";
 import { classifyActivity, type WalletActivity } from "./wallet-activity";
 
 export async function readWalletActivity(key: string, wallet: string): Promise<WalletActivity[]> {
@@ -8,7 +8,7 @@ export async function readWalletActivity(key: string, wallet: string): Promise<W
   // One request per signature (small batches) so a single slow or oversized reply cannot blank every label.
   const txs: Array<{ meta: { logMessages?: string[] | null } | null } | null> = [];
   for (let i = 0; i < rows.length; i += 5) {
-    const part = await Promise.all(rows.slice(i, i + 5).map((r) => connection.getTransaction(r.signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 }).catch(() => null)));
+    const part = await Promise.all(rows.slice(i, i + 5).map((r) => connection.getTransaction(r.signature, { commitment: "confirmed", maxSupportedTransactionVersion: MAX_TX_VERSION }).catch(() => null)));
     txs.push(...part);
   }
   // Rebalances sent before the on-chain tag existed: the last Autopilot signature is kept server-side.

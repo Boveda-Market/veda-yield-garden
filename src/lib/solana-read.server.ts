@@ -66,3 +66,5 @@ export async function readRealWallet(apiKey: string, address: string): Promise<R
   try { const { readDlmmPositions } = await import("@/lib/dlmm.server"); positions.push(...await readDlmmPositions(connection, wallet)); } catch { positionsComplete = false; }
   return { wallet: address, sol: tokenAmount(String(sol), 9), usdc: tokenAmount(usdc.toString(), 6), positions, positionsComplete, checkedAt: new Date().toISOString() };
 }
+/** Highest transaction format the history readers accept; the network now also produces version-1 transactions, which version 0 rejects as unreadable. */
+export const MAX_TX_VERSION = 1 as unknown as 0;

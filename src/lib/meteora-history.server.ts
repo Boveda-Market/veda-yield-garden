@@ -2,7 +2,7 @@ import { Buffer } from "buffer";
 import { PublicKey, type ParsedTransactionWithMeta } from "@solana/web3.js";
 import { CP_AMM_PROGRAM_ID, cpAmmCoder } from "@meteora-ag/cp-amm-sdk/dist/index.js";
 import { CHAIN_POOLS } from "./solana-data";
-import { heliusConnection } from "./solana-read.server";
+import { heliusConnection, MAX_TX_VERSION } from "./solana-read.server";
 import type { MeteoraHistoryPage, MeteoraRecord } from "./meteora-history";
 import { tokenDelta, type VaultFlow } from "./since-deposit";
 import { FEE_WALLET } from "./fees";
@@ -117,7 +117,7 @@ export async function readMeteoraHistory(key: string, wallet: string, before?: s
     await Promise.all(signatures.slice(start, start + 4).map(async (row) => {
       if (row.err !== null) return;
       try {
-        const tx = await connection.getParsedTransaction(row.signature, { commitment: "finalized", maxSupportedTransactionVersion: 0 });
+        const tx = await connection.getParsedTransaction(row.signature, { commitment: "finalized", maxSupportedTransactionVersion: MAX_TX_VERSION });
         if (!tx) { missing++; return; }
         const found = decodeMeteoraRecords(tx, wallet, row.signature);
         records.push(...found);

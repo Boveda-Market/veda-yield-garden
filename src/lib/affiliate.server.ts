@@ -3,8 +3,8 @@ import { USDC_MINT } from "@/lib/solana-data";
 
 /** Reads a confirmed transaction and returns its fee payer and the USDC credited to Bóveda Market's fee wallet. */
 export async function confirmedFeeTransfer(apiKey: string, signature: string) {
-  const { heliusConnection } = await import("@/lib/solana-read.server");
-  const tx = await heliusConnection(apiKey).getParsedTransaction(signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
+  const { heliusConnection, MAX_TX_VERSION } = await import("@/lib/solana-read.server");
+  const tx = await heliusConnection(apiKey).getParsedTransaction(signature, { commitment: "confirmed", maxSupportedTransactionVersion: MAX_TX_VERSION });
   if (!tx?.meta || tx.meta.err) return null;
   const payer = tx.transaction.message.accountKeys[0]?.pubkey.toBase58();
   if (!payer) return null;
@@ -18,8 +18,8 @@ export async function confirmedFeeTransfer(apiKey: string, signature: string) {
 
 /** Confirmed USDC moved from the payout wallet (which must have signed) to `recipient` in this transaction (micro-USDC), or null. */
 export async function confirmedPayoutTransfer(apiKey: string, signature: string, payoutWallet: string, recipient: string) {
-  const { heliusConnection } = await import("@/lib/solana-read.server");
-  const tx = await heliusConnection(apiKey).getParsedTransaction(signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
+  const { heliusConnection, MAX_TX_VERSION } = await import("@/lib/solana-read.server");
+  const tx = await heliusConnection(apiKey).getParsedTransaction(signature, { commitment: "confirmed", maxSupportedTransactionVersion: MAX_TX_VERSION });
   if (!tx?.meta || tx.meta.err) return null;
   if (!tx.transaction.message.accountKeys.some((k) => k.signer && k.pubkey.toBase58() === payoutWallet)) return null;
   const mint = USDC_MINT.toString();
