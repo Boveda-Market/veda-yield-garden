@@ -1794,4 +1794,7 @@ export const extra: Record<string, string> = {
   "Autorizar y continuar": "Authorize and continue",
   "Autoriza": "Authorize",
   "Todo listo: 1 toque para continuar": "All set: 1 tap to continue",
+  "Tu jugada": "Your play",
+  "Total necesario": "Total needed",
+  "Estimado con el precio actual de la red. La activación se cobra solo la primera vez.": "Estimated at the current network price. Activation is charged only the first time.",
 };

@@ -20,8 +20,7 @@ import { Wallet } from "lucide-react";
 import { HotBanner } from "@/components/hot-vault-card";
 import { vaultSkin } from "@/components/vault-skin";
 import { isDlmmVault } from "@/lib/solana-data";
-import { prepareGasRefill } from "@/lib/gas-refill.functions";
-import { ACTIVATION_FEE_MICRO, EXTRA_VAULT_FEE_MICRO } from "@/lib/gas-refill";
+import { useActivationQuote } from "@/hooks/use-activation-quote";
 import { depositQuote, QUOTE_PRESETS } from "@/lib/deposit-quote";
 
 const MAX_MICRO = 5_000_000_000n;
@@ -39,12 +38,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
     if (!r.success) throw new Error(r.error);
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   } });
-  const quoteFn = useServerFn(prepareGasRefill);
-  // Live network quote of the one-time activation (reserve at current price + fee), refreshed every 20 s.
-  const activationQ = useQuery({ queryKey: ["activation-quote", wallet], enabled: !!wallet && !migrate && isDlmmVault(vault.id), staleTime: 15_000, refetchInterval: 20_000, queryFn: async () => {
-    const r = await quoteFn({ data: { wallet: wallet!, activation: true, quoteOnly: true } });
-    return r.success ? { charge: BigInt(r.chargeMicro), fee: r.extraVault ? EXTRA_VAULT_FEE_MICRO : ACTIVATION_FEE_MICRO } : null;
-  } });
+  const activationQ = useActivationQuote(wallet, !migrate && isDlmmVault(vault.id));
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
   const apr = yieldQ.data?.apr;
   let breakdown: ReturnType<typeof simulationDisplay> | null = null;

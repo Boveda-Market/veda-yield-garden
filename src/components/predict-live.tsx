@@ -17,6 +17,8 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { ActivationSheet } from "@/components/gas-refill-card";
 import { BuyUsdc } from "@/components/buy-usdc";
 import { playActivationNeedMicro } from "@/lib/gas-refill";
+import { useActivationQuote } from "@/hooks/use-activation-quote";
+import { playQuote } from "@/lib/deposit-quote";
 import { useT } from "@/lib/i18n";
 import { PREDICT_MAX_USDC, PREDICT_MIN_USDC, assetOfTitle, positionWon, potentialProfit, type LiveRound, type PredictPosition, type PredictQuote, type PredictSide } from "@/lib/predict";
 import { executePredict, getPredictOrderStatus, getPredictPositions, preparePredictBuy, preparePredictClaim, preparePredictSell } from "@/lib/predict.functions";
@@ -96,6 +98,12 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   const valid = inRange && !short && !!round && !!side && !!selPrice;
   const maxMicro = balance === null ? null : (balance < BigInt(PREDICT_MAX_USDC * 1e6) ? balance : BigInt(PREDICT_MAX_USDC * 1e6));
   const amt = units ? Number(units) / 1e6 : 0;
+  // Live activation quote (first play only), refreshed with the network price while the ticket is open.
+  const activationQ = useActivationQuote(wallet, !!side);
+  const play = units && units > 0n && activationQ.data ? playQuote(units, activationQ.data.charge, activationQ.data.fee) : null;
+  // Someone who was short and has just topped up gets a clear pause before the one-tap authorization.
+  const wasShort = useRef(false);
+  if (short) wasShort.current = true;
 
   // Fast follow-up refreshes after a signed order so balances and cards update in about a second.
   const sync = () => { for (const ms of [600, 1500, 4000]) setTimeout(() => { void refresh(); void loadBalance(); for (const k of ["predict-positions", "my-wallet", "my-wallet-tokens"]) void qc.invalidateQueries({ queryKey: [k, wallet] }); }, ms); };
@@ -140,7 +148,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
     try {
       const sig = await sign(review.tx, review.context);
       // Order placed: clear the side so the 15s quote loop stops and the screen returns to normal.
-      seq.current++; setSide(null); setReview(null); setQuoteErr(null);
+      seq.current++; wasShort.current = false; setSide(null); setReview(null); setQuoteErr(null);
       const spent = toBaseUnits(amount, "USDC") ?? 0n;
       setBalance((b) => b === null ? b : b > spent ? b - spent : 0n);
       sync();
@@ -264,8 +272,16 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
             <p className="font-display text-2xl font-bold text-primary tabular-nums">${(amt / selPrice).toFixed(2)}</p>
             {short && <p className="pt-1 text-[11px] text-muted-foreground">{t("Cotización con el precio actual del mercado. Fondea tu wallet para firmarla.")}</p>}
           </div>}
+          {play && inRange && !review && <dl aria-label={t("Cotización en vivo")} className="mt-3 grid gap-1.5 rounded-xl bg-muted p-3 text-sm">
+            <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground"><span className={`h-1.5 w-1.5 rounded-full bg-live ${activationQ.isFetching ? "animate-pulse" : ""}`} />{t("Cotización en vivo")}</p>
+            <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Tu jugada")}</dt><dd className="tabular-nums">${usdc(play.stake)}</dd></div>
+            {play.fee > 0n && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Activación de cuenta digital (única vez)")}</dt><dd className="tabular-nums">+${usdc(play.fee)}</dd></div>}
+            {play.reserve > 0n && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Reserva de operaciones")}</dt><dd className="tabular-nums">+${usdc(play.reserve)}</dd></div>}
+            <div className="flex justify-between gap-3 border-t border-border pt-1.5"><dt className="font-semibold">{t("Total necesario")}</dt><dd className="font-display text-lg font-bold tabular-nums">~${usdc(play.total)}</dd></div>
+            <p className="text-[11px] leading-4 text-muted-foreground">{t("Estimado con el precio actual de la red. La activación se cobra solo la primera vez.")}</p>
+          </dl>}
           {short && <SolConvertShortcut className="mt-3" />}
-          {short && side && <BuyUsdc className="mt-3" needMicro={(units ?? 0n) - (balance ?? 0n)} />}
+          {short && side && <BuyUsdc className="mt-3" needMicro={(play?.total ?? units ?? 0n) - (balance ?? 0n)} />}
           {!side && <p className="mt-3 text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
           {!wallet ? <p className="mt-3 rounded-xl bg-secondary p-3 text-center text-sm font-semibold">{t("Entra con tu cuenta para predecir en vivo con los dólares de tu wallet.")}</p>
             : !review && !short && <Button disabled className="mt-3 h-12 w-full rounded-xl text-base font-bold">{quoting ? <><Loader2 className="animate-spin" /> {t("Cotizando en la red…")}</> : side ? t(side === "up" ? "Predecir Sube" : "Predecir Baja") : t("Elige Sube o Baja")}</Button>}
@@ -280,7 +296,8 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
             <p className="font-display text-3xl font-bold text-primary tabular-nums">${usdc(review.quote.contractsMicro)}</p>
             <p className="text-xs text-muted-foreground tabular-nums">{t("Pones")} ${usdc(review.quote.costMicro)} · {t(review.side === "up" ? "Sube" : "Baja")}</p>
           </div>
-          <Button size="lg" className="h-12 w-full rounded-xl text-base font-bold" disabled={busy === "sign"} onClick={confirm}>{busy === "sign" ? <><Loader2 className="animate-spin" /> {t("Aprueba en tu billetera…")}</> : t("Confirmar jugada")}</Button>
+          {wasShort.current && busy !== "sign" && <p role="status" className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-center font-display text-base font-bold">✅ {t("Todo listo, oprime para autorizar y continuar")}</p>}
+          <Button size="lg" className="h-12 w-full rounded-xl text-base font-bold" disabled={busy === "sign"} onClick={confirm}>{busy === "sign" ? <><Loader2 className="animate-spin" /> {t("Aprueba en tu billetera…")}</> : wasShort.current ? t("Autorizar y continuar") : t("Confirmar jugada")}</Button>
           <DetailsToggle>
             <div className="grid gap-1 rounded-xl border border-border p-3">
               <p className="flex justify-between"><span className="text-muted-foreground">{t("Pagas")}</span><strong className="tabular-nums">${usdc(review.quote.costMicro)}</strong></p>
