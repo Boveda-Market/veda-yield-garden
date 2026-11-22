@@ -14,6 +14,7 @@ import { MASK, useHideBalances } from "@/lib/preferences";
 import { formatUsd } from "@/lib/position-value";
 import { canHarvest } from "@/lib/harvest";
 import { VAULTS } from "@/lib/vaults";
+import { totalEarned } from "@/lib/total-earned";
 import { Button } from "./ui/button";
 import { useEffect, useId, useRef, useState } from "react";
 import { CHAIN_POOLS } from "@/lib/solana-data";
@@ -46,6 +47,7 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
   const liveRate = rows.reduce((s, r) => s + (r.p.locked || r.p.outOfRange ? 0 : earningRatePerMs(r.value, r.apr)), 0);
   const anim = (n: number, rate = 0) => hidden ? MASK : <AnimatedMoney value={n} ratePerMs={rate} prefix={rate > 0 ? "$" : ""} format={rate > 0 ? undefined : formatUsd} />;
   const pnl = history.pnl ? Number(history.pnl.replace(/,/g, "")) : null;
+  const earned = totalEarned(pnl, totalFees, vaultTotal);
   const tile = "rounded-2xl border border-border bg-card p-4";
   const label = "flex items-center gap-1.5 text-xs text-muted-foreground";
   const loading = history.query.isFetching ? t("Calculando…") : "—";
@@ -65,6 +67,12 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
       </> : <p className="mt-3 text-sm text-muted-foreground">{t("Cuando tengas dinero en bóvedas o jugadas verás aquí cómo se reparte.")}</p>}
     </div>
 
+    <div className={`${tile} mt-3`}>
+      <p className={label}><Trophy size={14} />{t("Total ganado")}</p>
+      <p className="mt-1 flex flex-wrap items-baseline gap-2"><span className="font-display text-3xl font-semibold tabular-nums text-primary">{earned ? <>+{anim(earned.total, liveRate)}</> : loading}</span>{earned?.percent != null && !hidden && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold tabular-nums text-primary">+{earned.percent.toFixed(1)}%</span>}</p>
+      {earned && <p className="mt-1 text-xs text-muted-foreground">{t("{a} cosechado · {b} por cosechar", { a: money(pnl), b: money(totalFees) })}{earned.percent != null ? ` · ${t("sobre tu capital en bóvedas")}` : ""}</p>}
+    </div>
+
     <div className="mt-3 grid grid-cols-2 gap-3">
       <div className={tile}>
         <p className={label}><Sprout size={14} />{t("Por cosechar")}</p>
@@ -72,12 +80,12 @@ export function PortfolioSummary({ wallet, positions, predictionsMicro, onHarves
         {(() => { const pend = rows.filter((r) => !r.p.locked && typeof r.fees === "number" && r.fees > 0); const ready = pend.filter((r) => canHarvest(r.fees as number)); return ready.length > 1 && ready.length === pend.length && totalFees >= 20 && onHarvestAll ? <button type="button" className="loot-btn mt-2 w-full" onClick={() => onHarvestAll(ready.map((r) => r.p))}><Trophy size={15} aria-hidden="true" /><span>{t("Cobrar")}</span></button> : null; })() ?? (top && canHarvest(top.fees) ? <Button size="sm" className="mt-2 w-full" onClick={() => onHarvest(top.p)}>{t("Cosechar ahora")}</Button> : null)}
       </div>
       <div className={tile}>
-        <p className={label}><Sparkles size={14} />{t("Ganancias (PNL)")}</p>
+        <p className={label}><Sparkles size={14} />{t("Ya cosechado")}</p>
         <p className="mt-2 font-display text-xl font-semibold tabular-nums text-primary">{pnl !== null ? <>+{anim(pnl)}</> : loading}</p>
         <p className="mt-1 text-xs text-muted-foreground">{t("Lo que ya cosechaste.")}</p>
       </div>
     </div>
-    <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground"><Layers size={12} className="mt-0.5 shrink-0" />{t("Ganancias = lo que ya cosechaste, al precio de hoy. No incluye subidas o bajadas del precio de tu capital.")}</p>
+    <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground"><Layers size={12} className="mt-0.5 shrink-0" />{t("Total ganado = lo ya cosechado (al precio de hoy) + lo que tienes por cosechar. No incluye subidas o bajadas del precio de tu capital.")}</p>
   </section>;
 }
 
