@@ -5,13 +5,18 @@ import shareVideo from "@/assets/share/og-preview-gta6.mp4.asset.json";
 import dobleLogo from "@/assets/doble-o-nada-logo.png";
 import { HERO_VARIANTS, HERO_KEY, pickHeroVariant, isHeroReview } from "@/lib/hero-variants";
 import { Fingerprint, Landmark } from "lucide-react";
-import { Lock, Gift, Search, MessageSquare, Send, Activity } from "lucide-react";
+import reviewCarlos from "@/assets/review-carlos.jpg";
+import reviewValeria from "@/assets/review-valeria.jpg";
+import reviewDavid from "@/assets/review-david.jpg";
+import reviewMarisol from "@/assets/review-marisol.jpg";
+import { Lock, Gift, Search, Star, Quote, MessageSquare, Send, Activity } from "lucide-react";
 import { useI18n, useT } from "@/lib/i18n";
 import { guideHref, guidesIndexHref } from "@/components/guide-layout";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ShieldCheck, Sparkles, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { pickReviewsArm, REVIEWS_AB_KEY } from "@/lib/reviews-ab";
 import { isReturning } from "@/lib/preferences";
 import { AdvancedAccess, EntryAccess } from "@/components/entry-access";
 import { PredictPromo } from "@/components/predict-promo";
@@ -64,6 +69,28 @@ const STEPS: [string, string][] = [
   ["Genera intereses o participa en tiempo real", "Activa una bóveda para acumular intereses las 24 horas o participa en las rondas relámpago de Doble o Nada. Retira al banco o a Coinbase desde la cuenta digital cuando quieras."],
 ];
 
+const REVIEWS = [
+  { stars: 5, name: "Carlos M.", photo: reviewCarlos, title: "Retiré a Coinbase en minutos sin pedir permiso", tag: "Acceso con Google · Bóvedas", text: "Perdí dinero en plataformas que prometían 20% mensual y luego bloquearon los retiros. Aquí mi dinero está en mi wallet y retiré a Coinbase en minutos sin pedir permiso." },
+  { stars: 4, name: "Valeria R.", photo: reviewValeria, title: "Paz mental al revisar cada firma", tag: "Acceso con Google · Hace 2 semanas", text: "La revisión antes de firmar me da paz. Le doy 4 porque a veces la red tarda unos segundos más, pero saber que nadie toca mis USDC vale la pena." },
+  { stars: 3, name: "David S.", photo: reviewDavid, title: "Sin humo: empieza con poco", tag: "Acceso con huella · Sube o Baja", text: "Perdí mi primera ronda de Sube o Baja por no entender los tiempos. Me gusta que no venden humo: recomiendo mirar unas rondas en vivo y empezar con poco." },
+  { stars: 5, name: "Marisol T.", photo: reviewMarisol, title: "Un equipo que sí responde", tag: "Canal de Telegram · Mi Billetera", text: "Envié una sugerencia y el equipo me respondió rápido. Las notificaciones me avisan de cada cosecha y del estado del sistema en Telegram: siento que hay personas reales detrás." },
+];
+
+function TrustTicker() {
+  const t = useT();
+  const [i, setI] = useState(0);
+  const [paused, setPaused] = useState(false);
+  useEffect(() => { if (paused) return; const id = setInterval(() => setI((n) => (n + 1) % REVIEWS.length), 4500); return () => clearInterval(id); }, [paused]);
+  const r = REVIEWS[i] ?? REVIEWS[0]!;
+  return <a href="#opiniones" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} className="mx-auto mt-4 flex w-full min-w-0 max-w-full sm:max-w-md items-center gap-3 rounded-full border border-primary/30 bg-primary/5 py-1.5 pl-1.5 pr-4 text-left md:mx-0" aria-label={t("Lo que dice la comunidad")}>
+    <span className="flex shrink-0 -space-x-2">{REVIEWS.map((x, n) => <img key={x.name} src={x.photo} alt="" width={28} height={28} className={`h-7 w-7 rounded-full border-2 object-cover transition-transform duration-500 ${n === i ? "z-10 scale-110 border-primary" : "border-background"}`} />)}</span>
+    <span className="min-w-0 flex-1">
+      <span className="flex items-center gap-1 text-[11px] font-semibold text-foreground"><span className="flex text-primary">{[1,2,3,4,5].map((n) => <Star key={n} size={10} className="fill-current" />)}</span>4.8 / 5</span>
+      <span key={i} className="block truncate text-xs text-muted-foreground animate-in fade-in slide-in-from-bottom-1 duration-500">{`«${t(r.title)}» — ${r.name}`}</span>
+    </span>
+  </a>;
+}
+
 const TRUST = [
   { icon: Fingerprint, title: "Seguridad a cargo de Privy", body: "La creación, el cifrado y la protección de cada cuenta digital corren sobre la infraestructura de Privy, con Face ID o huella. BÓVEDA nunca custodia las monedas digitales." },
   { icon: Landmark, title: "1 USDC = $1 siempre", body: "Nada de monedas locas que hoy suben y mañana se desploman. El saldo en dólares digitales se mantiene estable mientras genera rendimiento." },
@@ -76,6 +103,9 @@ export function Landing() {
   const [compact, setCompact] = useState(false);
   const [decided, setDecided] = useState(false);
   useEffect(() => { setCompact(isReturning() && !isHeroReview()); setDecided(true); void import("@/components/privy-access").catch(() => {}); }, []);
+  const [showReviews, setShowReviews] = useState(true);
+  useEffect(() => { setShowReviews(pickReviewsArm(new URLSearchParams(window.location.search).get("reviews"), (() => { try { return localStorage.getItem(REVIEWS_AB_KEY); } catch { return null; } })(), Math.random())); }, []);
+  useEffect(() => { try { localStorage.setItem(REVIEWS_AB_KEY, showReviews ? "1" : "0"); } catch { /* ignore */ } }, [showReviews]);
   const [heroIdx, setHeroIdx] = useState(0);
   useEffect(() => {
     let saved: string | null = null;
@@ -102,10 +132,10 @@ export function Landing() {
       <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">
         {gtaHero && <div className="order-1 min-w-0 md:col-span-2"><Gta6Hero title={hero.title} sub={hero.sub} /></div>}
         {dobleHero && <div className="order-1 min-w-0 md:col-span-2"><DobleHero title={hero.title} sub={hero.sub} /></div>}
-        {plainHero && <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(hero.title)}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t(hero.sub)}</p></div>}
+        {plainHero && <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(hero.title)}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t(hero.sub)}</p>{showReviews && <TrustTicker />}</div>}
         <div className="order-3 min-w-0 text-center md:order-1 md:text-left">
           {plainHero && <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(hero.title)}</h1>}
-          {plainHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p><div className="hidden md:block"></div></>}
+          {plainHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p><div className="hidden md:block">{showReviews && <TrustTicker />}</div></>}
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground md:justify-start"><span className="flex items-center gap-1.5"><span>Powered by</span><img src="/brands/coinbase.svg" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-medium text-foreground">Coinbase</span></span><span className="flex items-center gap-1.5"><span>Network:</span><span className="flex items-center gap-1 font-semibold text-primary"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_var(--color-primary)]" /></span>{t("Online")}</span></span></div>
           <p className="mt-5 text-base leading-7 text-muted-foreground">{t("BÓVEDA es una plataforma de autocustodia: los fondos permanecen en la wallet del titular, nadie puede congelarlos y cada movimiento se aprueba con huella o Face ID.")}</p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs md:justify-start">
@@ -128,8 +158,16 @@ export function Landing() {
         <div className="text-center md:text-left"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} loading="lazy" className="mx-auto h-16 w-auto md:mx-0 sm:h-20" /><p className="mt-1 text-xs font-bold uppercase tracking-widest text-primary">{t("Rondas relámpago")}</p><h2 className="mt-2 font-display text-3xl font-bold">{t("Mercados de predicción en tiempo real.")}</h2><p className="mt-3 text-muted-foreground">{t("Rondas de 5 min, 15 min y 4 h sobre Bitcoin, Ethereum y Solana. Se participa en dólares, sin comprar la moneda, y cada ronda se resuelve automáticamente.")}</p><Link to={guideHref("/guias/mercados-de-prediccion", lang)} className="mt-3 inline-block text-sm font-semibold text-primary underline underline-offset-4">{t("¿Cómo funciona? Lee la guía")} →</Link></div>
         <PredictPromo />
       </section>
-      <section id="opiniones" className="scroll-mt-4 py-8">
-        <div className="flex flex-col gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <section id="opiniones" className="scroll-mt-4 py-12">
+        {showReviews && <><h2 className="font-display text-2xl font-bold">{t("Lo que dice la comunidad")}</h2>
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{REVIEWS.map(({ stars, name, text, photo, title, tag }) => <li key={name} className={`relative flex flex-col rounded-2xl border bg-card p-5 ${stars === 5 ? "border-primary/40 bg-gradient-to-br from-primary/10 to-card" : "border-border"}`}>
+          <Quote aria-hidden="true" size={28} className="absolute right-4 top-4 text-primary/15" />
+          <div className="flex items-center gap-3"><img src={photo} alt="" loading="lazy" width={48} height={48} className="h-12 w-12 rounded-full border-2 border-primary/30 object-cover" />
+            <div className="min-w-0"><p className="text-sm font-semibold">{name}</p><p className="truncate text-xs text-muted-foreground">{t(tag)}</p></div></div>
+          <div className="mt-3 flex gap-0.5 text-primary" aria-label={`${stars}/5`}>{[1,2,3,4,5].map((n) => <Star key={n} size={15} className={n <= stars ? "fill-current" : "text-muted-foreground/40"} />)}</div>
+          <p className="mt-2 font-display font-semibold leading-snug">{t(title)}</p>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">“{t(text)}”</p></li>)}</ul></>}
+        <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div><p className="flex items-center gap-2 font-display font-semibold"><MessageSquare size={16} className="text-primary" />{t("Sugerencias y reseñas")}</p>
             <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">{t("El equipo lee cada sugerencia, crítica o reseña para mejorar BÓVEDA.")}</p></div>
           <Button asChild variant="outline" className="shrink-0"><a href="#acceso" onClick={() => { try { sessionStorage.setItem("boveda:open-ideas", "1"); } catch { /* ignore */ } }}>{t("Entrar y opinar")}</a></Button>
