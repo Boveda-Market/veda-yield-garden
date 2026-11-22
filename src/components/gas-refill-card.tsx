@@ -182,7 +182,6 @@ export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActiv
   }, [open, wallet]); // eslint-disable-line react-hooks/exhaustive-deps
   const feeMicro = extra ? EXTRA_VAULT_FEE_MICRO : ACTIVATION_FEE_MICRO;
   const chargeParts = total != null && total >= feeMicro ? { feeMicro, reserveMicro: total - feeMicro } : null;
-  const usd = (m: bigint) => `$${(Number(m) / 1e6).toFixed(2)}`;
   const autoDone = useRef(false);
   useEffect(() => { if (!open) autoDone.current = false; }, [open]);
   useEffect(() => { if (open && autoActivate && !checking && missing === 0n && total !== null && stage === "ready" && !error && !autoDone.current) { autoDone.current = true; void activate(); } }); // eslint-disable-line react-hooks/exhaustive-deps
@@ -203,12 +202,6 @@ export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActiv
     <DialogTitle className="sr-only">{t("Activa tu cuenta")}</DialogTitle>
     <DialogDescription className="sr-only">{t("Prepara tu cuenta y seguimos solos.")}</DialogDescription>
     <ActivationCardView stage={view} continueMode onActivate={() => void activate()} onAddFunds={() => setBuy((n) => n + 1)} onOpenVault={() => onActivated(fitted, chargeParts ?? undefined)} />
-    {depositMicro != null && chargeParts && missing === 0n && <dl aria-label={t("Desglose")} className="mt-3 grid gap-1.5 rounded-xl bg-muted p-3 text-xs">
-      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Importe")}</dt><dd className="tabular-nums">{usd(depositMicro)}</dd></div>
-      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{extra ? t("Cargo por servicio de activación") : t("Cargo de activación")}</dt><dd className="tabular-nums">−{usd(chargeParts.feeMicro)}</dd></div>
-      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Reserva de operaciones")}</dt><dd className="tabular-nums">−{usd(chargeParts.reserveMicro)}</dd></div>
-      <div className="flex justify-between gap-3 border-t border-border pt-1.5 font-semibold"><dt>{t("Entra a la bóveda")}</dt><dd className="tabular-nums">{usd(fitted ?? depositMicro)}</dd></div>
-    </dl>}
     {buy > 0 && <BuyUsdc auto={buy} needMicro={missing} className="mt-2" {...(resume ? { resume } : {})} />}
   </ActionSheetContent></Dialog>;
 }

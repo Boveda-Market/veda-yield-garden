@@ -71,6 +71,6 @@ export function LoginSheet({ open, onOpenChange, title, body }: { open: boolean;
 /** The 3 simple steps to a first deposit; after sign-in the chosen vault/round reopens on its own so the last step is one tap. */
 export function FirstDepositSteps() {
   const t = useT();
-  const steps = [["1", "Entra con Google", "1 toque, sin contraseñas"], ["2", "Recarga dólares", "Apple Pay, tarjeta o Coinbase"], ["3", "Confirma", "Tu elección queda lista, 1 toque"]] as const;
+  const steps = [["1", "Entra con Google", "1 toque, sin contraseñas"], ["2", "Recarga dólares", "Apple Pay, tarjeta o Coinbase"], ["3", "Autoriza", "Todo listo: 1 toque para continuar"]] as const;
   return <ol className="mb-3 grid grid-cols-3 gap-1.5">{steps.map(([n, a, b], i) => <li key={n} className={`rounded-xl border px-2 py-2 ${i === 0 ? "border-primary bg-primary/10" : "border-border bg-card"}`}><span className={`mb-1 flex size-5 items-center justify-center rounded-full text-[11px] font-black ${i === 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{n}</span><span className="block text-xs font-extrabold leading-tight text-foreground">{t(a)}</span><span className="mt-0.5 block text-[10px] leading-tight text-muted-foreground">{t(b)}</span></li>)}</ol>;
 }
