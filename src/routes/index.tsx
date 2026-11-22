@@ -64,8 +64,8 @@ const ANTI_SCAM: [string, string][] = [
 ];
 
 const STEPS: [string, string][] = [
-  ["Crea una cuenta digital con tu email de Google", "La cuenta digital y sus llaves de seguridad se crean al instante con la infraestructura de Privy. BÓVEDA no custodia las monedas ni tiene acceso a las claves: Privy asegura que solo el titular autorice movimientos con huella o Face ID, sin contraseñas ni frases en papel."],
-  ["Añade saldo a tu cuenta digital", "Recarga dólares digitales con tarjeta mediante Coinbase o transfiere monedas digitales directamente, con paridad 1:1 frente al dólar."],
+  ["Crea una cuenta digital con tu email de Google", "La cuenta digital y sus llaves de seguridad se crean al instante."],
+  ["Añade saldo a tu cuenta digital", "Recarga dólares digitales con Apple Pay, Tarjeta de Crédito o Coinbase."],
   ["Genera intereses o participa en tiempo real", "Activa una bóveda para acumular intereses las 24 horas o participa en las rondas relámpago de Doble o Nada. Retira al banco o a Coinbase desde la cuenta digital cuando quieras."],
 ];
 
@@ -136,7 +136,6 @@ export function Landing() {
         <div className="order-3 min-w-0 text-center md:order-1 md:text-left">
           {plainHero && <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(hero.title)}</h1>}
           {plainHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p><div className="hidden md:block">{showReviews && <TrustTicker />}</div></>}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground md:justify-start"><span className="flex items-center gap-1.5"><span>Powered by</span><img src="/brands/coinbase.svg" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-medium text-foreground">Coinbase</span></span><span className="flex items-center gap-1.5"><span>Network:</span><span className="flex items-center gap-1 font-semibold text-primary"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_var(--color-primary)]" /></span>{t("Online")}</span></span></div>
           <p className="mt-5 text-base leading-7 text-muted-foreground">{t("BÓVEDA es una plataforma de autocustodia: los fondos permanecen en la wallet del titular, nadie puede congelarlos y cada movimiento se aprueba con huella o Face ID.")}</p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2 text-xs md:justify-start">
             {["$0 por depositar", "Sin plazos forzosos", "Retiro en cualquier momento", "Mercados en vivo sin registro"].map((b) => <li key={b} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"><ShieldCheck size={13} className="text-primary" />{t(b)}</li>)}
