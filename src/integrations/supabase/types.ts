@@ -185,6 +185,30 @@ export type Database = {
         }
         Relationships: []
       }
+      app_presence: {
+        Row: {
+          first_seen: string
+          id: string
+          last_seen: string
+          privy_user_id: string | null
+          screen: string
+        }
+        Insert: {
+          first_seen?: string
+          id: string
+          last_seen?: string
+          privy_user_id?: string | null
+          screen?: string
+        }
+        Update: {
+          first_seen?: string
+          id?: string
+          last_seen?: string
+          privy_user_id?: string | null
+          screen?: string
+        }
+        Relationships: []
+      }
       autopilot_enrollments: {
         Row: {
           created_at: string

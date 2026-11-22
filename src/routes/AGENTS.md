@@ -1,4 +1,4 @@
 - Every route sets staticData.sitemap (router-derived /sitemap.xml via src/lib/sitemap.ts): true only for public marketing/legal/trial pages, false for signed-in app views, so private screens never reach search.
-- Operator tools live only in the /admin Control Panel (admin-dashboard.tsx, tabbed, FEE_WALLET-gated client-side; each tool still re-verifies payoutAdmin server-side); /invita stays user-only with a link for the operator.
+- Operator tools live only in the /admin Control Panel (admin-dashboard.tsx: «Resumen» first, left menu on desktop / sticky chips on phones, section in ?s= and localStorage, FEE_WALLET-gated client-side; each tool still re-verifies payoutAdmin server-side); /invita stays user-only with a link for the operator.
 - /admin "Vista previa" tab (card-preview-admin.tsx, notice-gallery-admin.tsx) renders real cards for any wallet and every notice with sample data inside `inert` wrappers, so the operator can inspect UI without signing or moving money.
 - English twins of public pages live in en/ reusing the Spanish component; langLinks (seo-lang.ts) sets self-canonical + hreflang, and /en paths force English so Google indexes each language.

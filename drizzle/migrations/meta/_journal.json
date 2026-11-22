@@ -148,6 +148,13 @@
       "when": 1794858809457,
       "tag": "0020_autopilot_last_gains",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1795385027197,
+      "tag": "0021_create_app_presence",
+      "breakpoints": true
     }
   ]
 }
