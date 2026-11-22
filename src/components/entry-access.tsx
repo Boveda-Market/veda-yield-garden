@@ -16,6 +16,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { getRealWallet } from "@/lib/solana.functions";
 import { readCache } from "@/lib/cached-query";
 import type { RealWalletResult } from "@/lib/solana-data";
+import { InstallStep } from "./install-app";
+import { installOfferSeen, isStandalone, markInstallOfferSeen, shouldOfferInstall } from "@/lib/install-offer";
 
 /** After sign-in: people with open vaults land on Mi Portafolio, everyone else on Billetera. */
 export function landingFor(r: RealWalletResult | undefined | null): "/wallet" | "/portfolio" {
@@ -41,6 +43,7 @@ function EntryButtons() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bio, signup, session.ready, session.authenticated]);
   const navigate = useNavigate();
+  const [installTo, setInstallTo] = useState<string | null>(null);
   const wasReturning = useRef<boolean | null>(null);
   if (wasReturning.current === null && typeof window !== "undefined") wasReturning.current = isReturning() && !isHeroReview();
   useEffect(() => {
@@ -58,6 +61,7 @@ function EntryButtons() {
     try { sessionStorage.setItem("boveda:auth-pending", String(Date.now())); } catch { /* ignore */ }
     const go = (to: string) => {
       if (cancelled) return;
+      if (shouldOfferInstall({ standalone: isStandalone(), seen: installOfferSeen(), returning: !!wasReturning.current })) { setInstallTo(to); return; }
       void navigate({ to, replace: true });
       // Safety net: if the screen hasn't changed shortly after, do a clean full load of the target (what "Reintentar" did).
       id = setTimeout(() => { if (window.location.pathname === "/") window.location.replace(to); }, 2500);
@@ -75,6 +79,7 @@ function EntryButtons() {
     return () => { cancelled = true; if (id) clearTimeout(id); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.ready, session.authenticated, home, navigate]);
+  if (installTo) return <InstallStep onDone={() => { markInstallOfferSeen(); const to = installTo; setInstallTo(null); void navigate({ to, replace: true }); setTimeout(() => { if (window.location.pathname === "/") window.location.replace(to); }, 2500); }} />;
   // Returning visitors: cover the whole startup (secure access → redirect to their home) with one loading screen.
   if (wasReturning.current && (!(session.sessionKnown || session.ready) || session.authenticated)) return <BootSplash />;
   if (session.ready && session.authenticated && isHeroReview()) return <div className="mt-8 w-full max-w-sm"><Button asChild className="h-12 w-full"><Link to={home}>{t("Continuar al app")}<ArrowRight size={16} /></Link></Button></div>;

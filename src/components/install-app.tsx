@@ -83,3 +83,21 @@ export function InstallAppBanner() {
     <InstallHelp help={help} setHelp={setHelp} />
   </>;
 }
+
+/** Post-login step for new visitors in the browser: install the app or keep going in the browser. */
+export function InstallStep({ onDone }: { onDone: () => void }) {
+  const t = useT();
+  const { installed, help, setHelp, install } = useInstall();
+  useEffect(() => { if (installed && typeof window !== "undefined" && window.matchMedia("(display-mode: standalone)").matches) onDone(); }, [installed, onDone]);
+  const perks = ["Abre en 1 toque desde tu pantalla de inicio", "Pantalla completa, sin barras del navegador", "Avisos y acceso más rápidos"];
+  return <div className="mt-2 w-full max-w-sm text-left" data-testid="install-step">
+    <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-md"><Download size={26} /></span>
+    <p className="mt-4 text-center text-xs font-semibold uppercase tracking-wide text-primary">{t("Cuenta digital lista")}</p>
+    <h2 className="mt-1 text-center font-display text-2xl font-bold">{t("Instala BÓVEDA en tu dispositivo")}</h2>
+    <ul className="mt-4 space-y-2 text-sm">{perks.map((p) => <li key={p} className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2"><span className="size-1.5 shrink-0 rounded-full bg-primary" />{t(p)}</li>)}</ul>
+    <button type="button" onClick={async () => { await install(); }} className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-base font-semibold text-primary-foreground shadow-md active:scale-[0.98]"><Download size={20} />{t("Instalar app")}</button>
+    <button type="button" onClick={onDone} className="mt-3 w-full py-2 text-center text-sm text-muted-foreground underline underline-offset-4">{t("Continuar en el navegador")}</button>
+    <p className="mt-2 text-center text-[11px] text-muted-foreground">{t("Sin tiendas de apps. Ocupa casi nada de espacio.")}</p>
+    <InstallHelp help={help} setHelp={(v) => { setHelp(v); onDone(); }} />
+  </div>;
+}

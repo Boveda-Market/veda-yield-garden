@@ -16,3 +16,4 @@
 - Per-vault skins (vault-skin.tsx): high-octane vaults share the --hot tokens; a skin class (e.g. .vault-dcty) re-declares them and their derived gradients/shadow, and VaultTitle/DctySkyline swap title and art, so every hot card, banner and deposit sheet stays one component. Mi Billetera's top rotation cycles GTA6 → Doble o Nada → DCTY → TRUMP (step % 4).
 - No automatic popups on the public home: the weekly TRUMP ad (weekly-ad.tsx) is unmounted and stays only as an /admin preview; external-wallet sign-in lives only in the home footer («Avanzado», AdvancedAccess).
 - Floating notify pills: one at a time (fixed id, 3 s); flows ending on ActionSuccess fire no pills so the sheet alone tells progress.
+- New visitors who sign in from a browser see InstallStep (install-app.tsx) once per device before landing (lib/install-offer.ts decides: skipped inside the installed app and for returning visitors); «Continuar en el navegador» always proceeds.

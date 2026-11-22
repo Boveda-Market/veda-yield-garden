@@ -1,5 +1,12 @@
 /** English strings for the homepage, wallet, portfolio, operation dialogs, affiliates and account redesigns. */
 export const extra: Record<string, string> = {
+  "Cuenta digital lista": "Digital account ready",
+  "Instala BÓVEDA en tu dispositivo": "Install BÓVEDA on your device",
+  "Abre en 1 toque desde tu pantalla de inicio": "Opens in 1 tap from your home screen",
+  "Pantalla completa, sin barras del navegador": "Full screen, no browser bars",
+  "Avisos y acceso más rápidos": "Faster alerts and access",
+  "Continuar en el navegador": "Continue in the browser",
+  "Sin tiendas de apps. Ocupa casi nada de espacio.": "No app stores. Takes almost no space.",
   "Oficial": "Official",
   "Marcas de terceros": "Third-party trademarks",
   "Tus fondos siempre bajo tu control. $0 para entrar\xa0 y retira todo en cualquier momento. Garantizado.": "Your funds always under your control. $0 to get in and withdraw everything anytime. Guaranteed.",
