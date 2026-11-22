@@ -1719,4 +1719,7 @@ export const extra: Record<string, string> = {
   "Recarga dólares digitales con tarjeta mediante Coinbase o transfiere monedas digitales directamente, con paridad 1:1 frente al dólar.": "Top up digital dollars by card through Coinbase or transfer digital currencies directly, pegged 1:1 to the dollar.",
   "Genera intereses o participa en tiempo real": "Earn interest or play in real time",
   "Activa una bóveda para acumular intereses las 24 horas o participa en las rondas relámpago de Doble o Nada. Retira al banco o a Coinbase desde la cuenta digital cuando quieras.": "Open a vault to earn interest around the clock or join Double or Nothing lightning rounds. Withdraw to your bank or Coinbase from the digital account anytime.",
+  "Acceso avanzado": "Advanced access",
+  "Conectar wallet externa": "Connect external wallet",
+  "Para quienes ya usan Phantom, Jupiter u otra wallet propia.": "For people who already use Phantom, Jupiter or their own wallet.",
 };
