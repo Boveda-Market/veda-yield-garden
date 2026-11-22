@@ -38,10 +38,10 @@ export const ActionSheetContent = React.forwardRef<
       onInteractOutside={(e) => { if (locked) e.preventDefault(); onInteractOutside?.(e); }}
       {...props}
     >
-      <div data-sheet-handle aria-hidden onPointerDown={locked ? undefined : onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
+      {locked ? <div aria-hidden className="h-2 sm:hidden" /> : <div data-sheet-handle aria-hidden onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
         className="-mx-5 -mt-2 flex h-7 cursor-grab touch-none items-center justify-center active:cursor-grabbing sm:hidden">
         <span className="h-1.5 w-10 rounded-full bg-muted-foreground/30" />
-      </div>
+      </div>}
       {children}
       {!locked && <BackToClose closeRef={closeRef} />}
       {!locked && <DialogPrimitive.Close ref={closeRef} className="absolute right-3 top-3 z-20 grid size-9 place-items-center rounded-full border border-border bg-muted text-foreground shadow-sm transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring sm:right-4 sm:top-4">
