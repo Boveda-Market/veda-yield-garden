@@ -56,6 +56,7 @@ export const app: Record<string, string> = {
   "Ver gráfica": "View chart",
   "Copiar trades": "Copy trades",
   "Copiar contrato": "Copy contract",
+  "Contrato oficial:": "Official contract:",
   "Tienes capital aquí": "You have capital here",
   "Mercado {s}": "{s} market",
   "Ver más": "See more",
