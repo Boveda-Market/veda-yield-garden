@@ -1793,7 +1793,6 @@ export const extra: Record<string, string> = {
   "Estimado con el precio actual de la red. La activación se cobra solo en tu primer depósito.": "Estimated at the current network price. Activation is charged only on your first deposit.",
   "Todo listo, oprime para autorizar y continuar": "All set, tap to authorize and continue",
   "Autorizar y continuar": "Authorize and continue",
-  "Confirma": "Confirm",
   "Revisa la cotización y deposita": "Review the quote and deposit",
   "Tu jugada": "Your play",
   "Total necesario": "Total needed",
