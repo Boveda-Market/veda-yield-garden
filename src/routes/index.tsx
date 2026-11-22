@@ -56,10 +56,16 @@ const GUARANTEES = [
 
 
 const ANTI_SCAM: [string, string][] = [
-  ["Sin custodia de terceros", "En una estafa los fondos se entregan a un tercero. En BÓVEDA el saldo vive en la wallet del titular: el equipo no puede tocarlo."],
+  ["Sin custodia interna", "En una estafa los fondos se entregan a la empresa. Aquí el saldo vive en la cuenta digital del titular, protegida por Privy: ni el equipo de BÓVEDA ni terceros pueden congelarlo o moverlo."],
   ["Sin «tarifas para descongelar»", "Nunca se cobra para poder retirar. Los retiros van a Coinbase, banco o Cash App en cualquier momento."],
   ["Sin contraseñas expuestas", "Acceso con Google (recomendado) o huella, protegido por verificación en 2 pasos y el propio dispositivo. BÓVEDA nunca pide contraseñas ni frases secretas."],
   ["Cero firmas a ciegas", "Cada operación se simula antes de firmar: se muestra qué sale, qué entra y el cargo exacto, como protección contra ataques."],
+];
+
+const STEPS: [string, string][] = [
+  ["Crea una cuenta digital con tu email de Google", "La cuenta digital y sus llaves de seguridad se crean al instante con la infraestructura de Privy. BÓVEDA no custodia las monedas ni tiene acceso a las claves: Privy asegura que solo el titular autorice movimientos con huella o Face ID, sin contraseñas ni frases en papel."],
+  ["Añade saldo a tu cuenta digital", "Recarga dólares digitales con tarjeta mediante Coinbase o transfiere monedas digitales directamente, con paridad 1:1 frente al dólar."],
+  ["Genera intereses o participa en tiempo real", "Activa una bóveda para acumular intereses las 24 horas o participa en las rondas relámpago de Doble o Nada. Retira al banco o a Coinbase desde la cuenta digital cuando quieras."],
 ];
 
 const REVIEWS = [
@@ -85,7 +91,7 @@ function TrustTicker() {
 }
 
 const TRUST = [
-  { icon: Fingerprint, title: "Autocustodia real", body: "Wallet de autocustodia con Face ID o huella, protegida por Privy. Ningún movimiento ocurre sin aprobación digital del titular." },
+  { icon: Fingerprint, title: "Seguridad a cargo de Privy", body: "La creación, el cifrado y la protección de cada cuenta digital corren sobre la infraestructura de Privy, con Face ID o huella. BÓVEDA nunca custodia las monedas digitales." },
   { icon: Landmark, title: "1 USDC = $1 siempre", body: "Nada de monedas locas que hoy suben y mañana se desploman. El saldo en dólares digitales se mantiene estable mientras genera rendimiento." },
   { icon: Search, title: "Revisión antes de aprobar", body: "Cada operación se simula primero: entradas, salidas y cargo exactos a la vista." },
   { icon: ShieldCheck, title: "Sin cargos ocultos", body: "Recargas y retiros con Coinbase. Cargos de servicio reducidos y progresivos." },
@@ -111,7 +117,7 @@ export function Landing() {
   if (decided && compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 pb-10 pt-20 text-foreground sm:py-10">
     <BrandLogo size="lg" />
     <h1 className="mt-4 text-center font-display text-3xl font-bold">{t("Bienvenido de nuevo")}</h1>
-    <p className="mt-2 text-center text-sm text-muted-foreground">{t("Inicia sesión para ver la wallet y las ganancias.")}</p>
+    <p className="mt-2 text-center text-sm text-muted-foreground">{t("Inicia sesión para ver la cuenta digital y las ganancias.")}</p>
     <div className="mt-2 flex w-full max-w-sm flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0"><EntryAccess /></div>
     <button type="button" onClick={() => setCompact(false)} className="mt-6 text-sm text-primary underline underline-offset-4">{t("Ver portada completa")}</button>
   </div>;
@@ -137,6 +143,11 @@ export function Landing() {
           <EntryAccess />
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span><span aria-hidden="true">·</span><a href="https://www.privy.io/security" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground underline-offset-2 hover:text-primary hover:underline">{t("Conoce más")} ↗</a></p>
         </div>
+      </section>
+
+      <section aria-label={t("Cómo comenzar en BÓVEDA")} className="mb-4 py-8">
+        <h2 className="font-display text-2xl font-bold">{t("Cómo comenzar en BÓVEDA")}</h2>
+        <ol className="mt-6 grid gap-4 sm:grid-cols-3">{STEPS.map(([h, d], i) => <li key={h} className="rounded-2xl border border-border bg-card p-5"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-display font-bold text-primary-foreground">{i + 1}</span><p className="mt-4 font-display font-semibold">{t(h)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ol>
       </section>
 
       <section aria-label={t("Doble o Nada")} className="mb-4 grid items-center gap-6 py-8 md:grid-cols-2">
