@@ -69,7 +69,7 @@ function SessionPage({ guest = false, view }: { guest?: boolean; view: "vaults" 
   const [modeReady, setModeReady] = useState(false);
   useEffect(() => { try { sessionStorage.removeItem("boveda-mode"); } catch {} setMode("real"); setModeReady(true); }, []);
   if (!guest && (!(session.sessionKnown || session.ready) || !modeReady)) return <AccessLoading />;
-  if (!guest && !session.authenticated && view !== "markets" && view !== "vaults") return <ToSignIn />;
+  if (!guest && !session.authenticated && !["markets", "vaults", "wallet", "portfolio"].includes(view)) return <ToSignIn />;
   return <Dashboard key={`${session.userId ?? "guest"}:${guest ? "trial" : mode}`} mode={guest ? "trial" : mode} guest={guest} view={view} onModeChange={(value) => { if (guest) return; setMode(value); try { sessionStorage.setItem("boveda-mode", value); } catch {} }} />;
 }
 

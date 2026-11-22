@@ -83,7 +83,10 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   const query = useRealWallet(walletAddress);
   const data = query.data?.success ? query.data.data : null;
   // New account with nothing in it (no dollars, no reserve, no vaults, no open predictions): explore first instead of an empty $0 chart.
-  const exploring = !!data && data.positionsComplete && isEmptyPortfolio(data.usdc, data.sol, data.positions.length) && predictions.items.length === 0;
+  const exploring = !!data && data.positionsComplete && isEmptyPortfolio(data.usdc, data.sol, data.positions.length) && predictions.items.length === 0
+  // Visitors without an account explore Mi Portafolio the same way: welcome + explore cards, no empty chart or history.
+  const visitor = !walletAddress && session.ready && !session.authenticated;
+  const showExplore = exploring || visitor;
   const { rows: feeRows } = usePositionRows(data?.positions ?? []);
   const feesOf = (address: string) => feeRows.find((r) => r.p.address === address)?.fees ?? null;
   const unavailable = query.isFetching ? t("Consultando…") : t("No disponible");
@@ -95,7 +98,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   return <>
     {portfolioOnly ? <section aria-label={t("Resumen del portafolio")} className="pb-1 pt-1">
       <div className="flex items-center justify-between gap-3"><h1 className="font-display text-xl font-semibold sm:text-2xl">{t("Mi Portafolio")}</h1>{refresh}</div>
-      {!walletAddress && <p className="mt-3 text-sm text-muted-foreground">{t("Conecta tu wallet para ver tu portafolio.")}</p>}
+      {!walletAddress && !visitor && <p className="mt-3 text-sm text-muted-foreground">{t("Conecta tu wallet para ver tu portafolio.")}</p>}
       {errors}
       {data && <VaultMiniCards positions={data.positions} onOpen={setPortPick} />}
     </section> : <section aria-label={t("Bóvedas de rendimiento")} className="pb-1 pt-1">
@@ -103,13 +106,13 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">{t("Pon tus dólares a generar intereses diarios. Retiras o cosechas cuando quieras.")}</p>
       {errors}
     </section>}
-    {portfolioOnly && exploring && <><PortfolioEmpty /><ExploreCards onPortfolio /></>}
+    {portfolioOnly && showExplore && <><PortfolioEmpty /><ExploreCards onPortfolio /></>}
     {portfolioOnly && walletAddress && !exploring && <Suspense fallback={<div className="mt-6 space-y-4"><Skeleton className="h-64" /><Skeleton className="h-28" /></div>}><PortfolioSummary wallet={walletAddress} positions={data?.positions ?? []} positionsComplete={Boolean(data?.positionsComplete)} predictionsMicro={predictionsMicro} onHarvest={(p) => openPositionAction(p, "harvest")} onHarvestAll={(ps) => setHarvestAll(ps.filter((p) => isOperableVault(p.vaultId)).map((p) => ({ position: p.address, vaultId: p.vaultId as OperableVault })))} /></Suspense>}
     {portfolioOnly && data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
     {portfolioOnly && tab !== "vaults" && predictions.items.length > 0 && <section aria-label={t("Predicciones abiertas")} className="border-b border-border py-8"><OpenPredictions state={predictions} /></section>}
     {portfolioOnly && tab !== "predict" && walletAddress && !data && query.isFetching && <div className="mt-6 space-y-4"><Skeleton className="h-48" /><Skeleton className="h-48" /></div>}
     {portfolioOnly && data && (() => { const pp = data.positions.filter((p) => p.address === portPick); return <Dialog open={pp.length > 0} onOpenChange={(o) => { if (!o) setPortPick(null); }}><ActionSheetContent><DialogTitle className="sr-only">{t("Tu bóveda")}</DialogTitle><DialogDescription className="sr-only">{t("Detalles de tu bóveda")}</DialogDescription>{pp.length > 0 && <RealPositions showHarvestBanner={false} positions={pp} onAction={(p, k) => { setPortPick(null); openPositionAction(p, k); }} onMigrate={(p, v) => { setPortPick(null); migrate(p, v); }} onRotate={(p, v) => { setPortPick(null); migrate(p, v, true); }} onDeposit={(p) => { setPortPick(null); const v = VAULTS.find((x) => x.id === p.vaultId); if (v && walletAddress) { setAddTo(p.address); setSimulationVault(v); } }} />}</ActionSheetContent></Dialog>; })()}
-    {portfolioOnly && !exploring && <Suspense fallback={<NeonLoader minHeight="min-h-40" />}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
+    {portfolioOnly && !showExplore && <Suspense fallback={<NeonLoader minHeight="min-h-40" />}><RealPortfolioPanel data={data} wallet={walletAddress} /></Suspense>}
     {data?.positionsComplete && data.positions.length === 0 && portfolioOnly && !exploring && tab !== "predict" && <PortfolioEmpty />}
     {!portfolioOnly && <><div className="mb-1 mt-1 flex justify-end"><PoweredBy brand="meteora" /></div>
     {(() => { const sorted = [...VAULTS].sort((a, b) => { const has = (v: Vault) => data?.positions.some((p) => p.vaultId === v.id) ?? false; if (has(a) !== has(b)) return has(a) ? -1 : 1; return has(a) ? (aprs[b.id] ?? -1) - (aprs[a.id] ?? -1) : Number(Boolean(b.badge)) - Number(Boolean(a.badge)); }); const card = (vault: Vault) => { const own = data?.positions.find((p) => p.vaultId === vault.id); const ownCount = data?.positions.filter((p) => p.vaultId === vault.id).length ?? 0; const ownedLink = ownCount > 0 ? <Link to="/portfolio" hash={`vault-${vault.id}`} className="cta-attn mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border-2 border-primary bg-primary px-3 py-2 text-center text-xs font-extrabold leading-tight text-primary-foreground shadow-md ring-2 ring-primary/30 transition active:scale-95 sm:text-sm">💼 {t("Tienes capital aquí · Ver en Portafolio")} →</Link> : null; const owned = null; const openDeposit = () => { setHotPick(null); if (!walletAddress && !session.authenticated) { try { sessionStorage.setItem(PENDING_DEPOSIT, vault.id); } catch { /* storage blocked */ } setLoginFor(vault); return; } const o = data?.positions.find((p) => p.vaultId === vault.id && !p.locked); setAddTo(o?.address ?? null); setSimulationVault(vault); }; const canAdd = data?.positions.some((p) => p.vaultId === vault.id && !p.locked) ?? false; const blocked = !isOperableVault(vault.id) || (!walletAddress && session.authenticated); if (vault.badge) return <HotVaultCard key={vault.id} vault={vault} owned={owned} ownedLink={ownedLink} hasPosition={canAdd} depositDisabled={blocked} onDeposit={openDeposit} onDetails={() => { setHotPick(null); onDetails(vault); }} />; return <article key={vault.id} className="flex flex-col rounded-lg border border-border bg-card p-4">

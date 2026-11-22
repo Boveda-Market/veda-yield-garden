@@ -66,7 +66,7 @@ export function InstallAppButton({ className }: { className: string }) {
 const DISMISS_KEY = "boveda-install-banner-dismissed";
 
 /** Dismissible card; hidden while running as the installed app, so it returns after uninstall. Dismissal lasts for the browser session. */
-export function InstallAppBanner() {
+export function InstallAppBanner({ text }: { text?: string } = {}) {
   const t = useT();
   const { installed, help, setHelp, install } = useInstall();
   const [dismissed, setDismissed] = useState(true);
@@ -76,7 +76,7 @@ export function InstallAppBanner() {
   return <>
     <div className="flex items-center gap-3 rounded-2xl border border-primary/30 bg-primary/10 p-3">
       <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground"><Download size={18} /></span>
-      <p className="flex-1 text-sm">{t("Instala Bóveda Market en tu pantalla de inicio para abrirla al instante.")}</p>
+      <p className="flex-1 text-sm">{text ?? t("Instala Bóveda Market en tu pantalla de inicio para abrirla al instante.")}</p>
       <button type="button" onClick={install} className="rounded-full bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground">{t("Instalar")}</button>
       <button type="button" onClick={close} aria-label={t("Cerrar")} className="rounded-full p-1 text-muted-foreground hover:text-foreground"><X size={16} /></button>
     </div>

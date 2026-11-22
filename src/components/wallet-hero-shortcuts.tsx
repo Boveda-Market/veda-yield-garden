@@ -18,7 +18,6 @@ import type { Vault } from "@/lib/vaults";
 import { ChevronRight, Zap } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { VAULTS } from "@/lib/vaults";
-import { takeResumeDeposit } from "@/lib/resume-deposit";
 import { DuelLines, Gta6RotatingBanner } from "@/components/home-gta6";
 
 const STEPS = 12;
@@ -60,8 +59,6 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
   const [harvest, setHarvest] = useState<{ position: string; vaultId: OperableVault; compound?: boolean } | null>(null);
   const [withdrawal, setWithdrawal] = useState<{ position: string; vaultId: OperableVault; migrateTo?: Vault; rotate?: boolean } | null>(null);
   const [deposit, setDeposit] = useState<{ vault: Vault; position?: string; amount?: string; migrate?: boolean } | null>(null);
-  // Back from Coinbase: reopen the deposit the person left halfway, amount ready.
-  useEffect(() => { if (!wallet) return; const r = takeResumeDeposit(); const v = r && VAULTS.find((x) => x.id === r.vaultId); if (r && v && isOperableVault(v.id)) setDeposit({ vault: v, amount: r.amount, ...(r.position ? { position: r.position } : {}), ...(r.migrate ? { migrate: true } : {}) }); }, [wallet]);
   const mineAll = all.filter((p) => p.vaultId === openId);
   // Every action closes the popup first so only one sheet is ever on screen.
   const act = (p: ChainPosition, a: "harvest" | "exit" | "compound") => { if (!isOperableVault(p.vaultId)) return; setOpen(false); if (a === "exit") setWithdrawal({ position: p.address, vaultId: p.vaultId }); else setHarvest({ position: p.address, vaultId: p.vaultId, compound: a === "compound" }); };
@@ -101,7 +98,7 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
     </Dialog>
     {wallet && harvest && <HarvestDialog wallet={wallet} position={harvest.position} vaultId={harvest.vaultId} compound={harvest.compound} onClose={() => { setHarvest(null); refetch(); }} />}
     {wallet && withdrawal && <WithdrawalSimulation wallet={wallet} {...withdrawal} onClose={() => { setWithdrawal(null); refetch(); }} onMigrated={(usdc, target) => { setWithdrawal(null); if (target) setDeposit({ vault: target, amount: usdc, migrate: true }); }} />}
-    {wallet && deposit && <DepositSimulation key={`${deposit.vault.id}-${deposit.position ?? "new"}`} vault={deposit.vault} wallet={wallet} {...(deposit.position ? { position: deposit.position } : {})} initialAmount={deposit.amount ?? ""} migrate={Boolean(deposit.migrate)} resumed onClose={() => { setDeposit(null); refetch(); }} />}
+    {wallet && deposit && <DepositSimulation key={`${deposit.vault.id}-${deposit.position ?? "new"}`} vault={deposit.vault} wallet={wallet} {...(deposit.position ? { position: deposit.position } : {})} initialAmount={deposit.amount ?? ""} migrate={Boolean(deposit.migrate)} onClose={() => { setDeposit(null); refetch(); }} />}
   </section>;
 }
 

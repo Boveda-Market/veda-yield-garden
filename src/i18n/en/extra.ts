@@ -1808,4 +1808,9 @@ export const extra: Record<string, string> = {
   "Tu predicción sigue activa. La ves en Mi Portafolio.": "Your prediction is still active. You can see it in My Portfolio.",
   "Tu premio sigue esperando. Lo cobras cuando quieras desde tu Billetera.": "Your prize is still waiting. Claim it anytime from your Wallet.",
   "Ver Mi Portafolio": "View My Portfolio",
+  "Balance en dólares": "Balance in dollars",
+  "Así se ve tu cuenta digital. Entra con Google para activarla y ver tu saldo real.": "This is what your digital account looks like. Continue with Google to activate it and see your real balance.",
+  "Entra para usar tu Billetera": "Sign in to use your Wallet",
+  "Esperando tus dólares para {v}. Cuando lleguen, te mostramos «Todo listo».": "Waiting for your dollars for {v}. When they arrive, we'll show you “All set”.",
+  "Instala Bóveda Market y mira crecer tus intereses en 1 toque.": "Install Bóveda Market and watch your interest grow in 1 tap.",
 };

@@ -36,6 +36,8 @@ import { decimalToUnits, PAYOUT_MOVE_MIN_USD } from "@/lib/onboarding";
 import { StartGuide } from "@/components/start-guide";
 import { ExploreCards } from "@/components/explore-cards";
 import { isExploringAccount } from "@/lib/explore-state";
+import { VisitorWallet } from "@/components/visitor-views";
+import { ResumeDepositHost } from "@/components/resume-deposit-host";
 import { DobleShortcut, WalletHeroShortcuts } from "@/components/wallet-hero-shortcuts";
 
 import { BuyUsdc } from "@/components/buy-usdc";
@@ -133,7 +135,25 @@ export function WalletPanel() {
   useEffect(() => { const c = new URLSearchParams(window.location.search).get("convert"); if (c && /^\d+(\.\d+)?$/.test(c)) { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from: "SOL", amount: c })); window.history.replaceState(null, "", "/wallet"); setSheet(true); } }, []);
   useEffect(() => { if (!receiveOpen || !address || qr) return; void import("qrcode").then((m) => m.toDataURL(address, { width: 448, margin: 1 })).then(setQr).catch(() => setQr(null)); }, [receiveOpen, address, qr]);
 
-  if (!session.authenticated) return <p className="text-muted-foreground">{t("Inicia sesión para ver tu wallet.")}</p>;
+  // Hooks stay above the early returns. Sube/Baja prizes and refunds land as JupUSD: convert them silently to available dollars so the next round can use them.
+  const autoJup = useRef(false);
+  useEffect(() => {
+    const bal = extra.data?.["JupUSD"];
+    if (!address || autoJup.current || converting) return;
+    const key = `boveda:auto-jupusd:${address}`;
+    void import("@/lib/sweep-leftovers").then(async ({ autoJupUsdDue, sweepLeftovers }) => {
+      let last: number | null = null; try { const v = Number(sessionStorage.getItem(key)); last = v > 0 ? v : null; } catch { /* ignore */ }
+      if (autoJup.current || !autoJupUsdDue(bal, last, Date.now())) return;
+      autoJup.current = true;
+      try { sessionStorage.setItem(key, String(Date.now())); } catch { /* ignore */ }
+      try { const r = await sweepLeftovers(address, session.signAndSend, undefined, ["JupUSD"]); if (r.converted > 0) { void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] }); void extra.refetch(); } }
+      catch { /* silent: the balance still counts in the total and is retried later */ }
+      finally { autoJup.current = false; }
+    });
+  }, [address, extra.data, converting]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Visitors without an account see the same Billetera at $0; money buttons open the 3-step sign-in.
+  if (!session.authenticated) return <VisitorWallet />;
   if (!address) return <p className="text-muted-foreground">{t("Todavía no hay una wallet conectada a tu cuenta.")}</p>;
 
   const balance = asset === "SOL" ? balances.data?.sol : balances.data?.usdc;
@@ -182,22 +202,6 @@ export function WalletPanel() {
     finally { setConverting(false); }
   }
 
-  // Sube/Baja prizes and refunds land as JupUSD: convert them silently to available dollars so the next round can use them.
-  const autoJup = useRef(false);
-  useEffect(() => {
-    const bal = extra.data?.["JupUSD"];
-    if (!address || autoJup.current || converting) return;
-    const key = `boveda:auto-jupusd:${address}`;
-    void import("@/lib/sweep-leftovers").then(async ({ autoJupUsdDue, sweepLeftovers }) => {
-      let last: number | null = null; try { const v = Number(sessionStorage.getItem(key)); last = v > 0 ? v : null; } catch { /* ignore */ }
-      if (autoJup.current || !autoJupUsdDue(bal, last, Date.now())) return;
-      autoJup.current = true;
-      try { sessionStorage.setItem(key, String(Date.now())); } catch { /* ignore */ }
-      try { const r = await sweepLeftovers(address, session.signAndSend, undefined, ["JupUSD"]); if (r.converted > 0) { refresh(); void extra.refetch(); } }
-      catch { /* silent: the balance still counts in the total and is retried later */ }
-      finally { autoJup.current = false; }
-    });
-  }, [address, extra.data, converting]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // JupUSD (prediction payouts and refunds of unfilled orders) is a 1:1 dollar: count it so the total never looks short.
   // A recent refunded Sube/Baja order is named as such so the user knows their money came back.
@@ -221,6 +225,7 @@ export function WalletPanel() {
       <h1 className="font-display text-3xl font-semibold">{t("Billetera")}</h1>
       <ReportProblem trigger={(open) => <button type="button" onClick={open} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"><LifeBuoy size={14} className="text-primary" />{t("Reportar")}</button>} />
     </div>
+    <ResumeDepositHost wallet={address} usdc={balances.data?.usdc} checkedAt={balances.dataUpdatedAt} onClose={() => void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] })} />
     {/* New accounts at $0 explore first: the cards lead, the install reminder is skipped (they just saw the install step) and Face ID / first-deposit steps follow. */}
     {exploring && <ExploreCards />}
     {!exploring && <WalletHeroShortcuts wallet={address} />}
