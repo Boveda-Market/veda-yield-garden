@@ -70,10 +70,10 @@ const STEPS: [string, string][] = [
 ];
 
 const REVIEWS = [
-  { stars: 5, name: "Carlos M.", photo: reviewCarlos, title: "Retiré a Coinbase en minutos sin pedir permiso", tag: "Miembro Platino", text: "Perdí dinero en plataformas que prometían 20% mensual y luego bloquearon los retiros. Aquí mi dinero está en mi cuenta digital y retiré a Coinbase en minutos sin pedir permiso." },
-  { stars: 4, name: "Valeria R.", photo: reviewValeria, title: "Paz mental al revisar cada firma", tag: "Miembro VIP", text: "La revisión antes de firmar me da paz. Le doy 4 porque a veces la red tarda unos segundos más, pero saber que nadie toca mis USDC vale la pena." },
-  { stars: 3, name: "David S.", photo: reviewDavid, title: "Sin humo: empieza con poco", tag: "Miembro Oro", text: "Perdí mi primera ronda de Sube o Baja por no entender los tiempos. Me gusta que no venden humo: recomiendo mirar unas rondas en vivo y empezar con poco." },
-  { stars: 5, name: "Marisol T.", photo: reviewMarisol, title: "Un equipo que sí responde", tag: "Miembro Diamante", text: "Envié una sugerencia y el equipo me respondió rápido. Las notificaciones me avisan de cada cosecha y del estado del sistema en Telegram: siento que hay personas reales detrás." },
+  { stars: 5, name: "Carlos M.", photo: reviewCarlos, title: "Mi dinero digital está seguro y lo saco cuando quiero", tag: "Miembro Platino", text: "En otros sitios me engañaron y no me dejaban sacar mi plata. Aquí todo es diferente. Mi dinero digital está en mi propia cuenta digital. Cuando quiero pasarlo a mi banco, llega en minutos y nadie me pone trabas." },
+  { stars: 4, name: "Valeria R.", photo: reviewValeria, title: "Veo todo clarito antes de mover un solo dólar", tag: "Miembro VIP", text: "La pantalla me muestra todo lo que va a pasar antes de tocar cualquier botón. Nadie puede tocar mi dinero digital si yo no doy permiso. Es muy fácil de usar y me da mucha tranquilidad." },
+  { stars: 3, name: "David S.", photo: reviewDavid, title: "Empecé con poco dinero digital para probar", tag: "Miembro Oro", text: "No sabía cómo funcionaba esto, así que puse poquito dinero digital para aprender. En mi cuenta digital veo cómo el saldo crece día a día. Todo es transparente y no te inventan cosas raras." },
+  { stars: 5, name: "Marisol T.", photo: reviewMarisol, title: "Gano intereses todos los días en mi cuenta digital", tag: "Miembro Diamante", text: "Puse unos ahorros en mi cuenta digital y todos los días veo cómo sube con intereses. Si tengo alguna duda, el equipo me contesta rápido por mensaje. Es como una alcancía moderna que sí da ganancias." },
 ];
 
 function TrustTicker() {
