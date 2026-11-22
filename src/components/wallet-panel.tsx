@@ -10,7 +10,7 @@ import { SyncPill } from "@/components/ui/sync-bar";
 import { ShieldCheck, Eye, EyeOff, LifeBuoy, Gift } from "lucide-react";
 import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
 import { TokenIcon } from "@/components/token-icon";
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { Dialog, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { ActionSuccess } from "@/components/action-success";
@@ -152,6 +152,7 @@ export function WalletPanel() {
     });
   }, [address, extra.data, converting]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const pollWallet = useCallback(() => { void balances.refetch(); }, [balances.refetch]); // eslint-disable-line react-hooks/exhaustive-deps
   // Visitors without an account see the same Billetera at $0; money buttons open the 3-step sign-in.
   if (!session.authenticated) return <VisitorWallet />;
   if (!address) return <p className="text-muted-foreground">{t("Todavía no hay una wallet conectada a tu cuenta.")}</p>;
@@ -225,7 +226,7 @@ export function WalletPanel() {
       <h1 className="font-display text-3xl font-semibold">{t("Billetera")}</h1>
       <ReportProblem trigger={(open) => <button type="button" onClick={open} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"><LifeBuoy size={14} className="text-primary" />{t("Reportar")}</button>} />
     </div>
-    <ResumeDepositHost wallet={address} usdc={balances.data?.usdc} checkedAt={balances.dataUpdatedAt} onClose={() => void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] })} />
+    <ResumeDepositHost wallet={address} usdc={balances.data?.usdc} checkedAt={balances.dataUpdatedAt} onClose={() => void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] })} onPoll={pollWallet} />
     {/* New accounts at $0 explore first: the cards lead, the install reminder is skipped (they just saw the install step) and Face ID / first-deposit steps follow. */}
     {exploring && <ExploreCards />}
     {!exploring && <WalletHeroShortcuts wallet={address} />}

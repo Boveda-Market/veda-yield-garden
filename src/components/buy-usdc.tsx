@@ -10,7 +10,7 @@ import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
 import { decimalToUnits } from "@/lib/onboarding";
-import { saveResumeDeposit, type ResumeDeposit } from "@/lib/resume-deposit";
+import { saveResumeDeposit, saveResumePlay, type ResumeDeposit, type ResumePlay } from "@/lib/resume-deposit";
 import { holdSessionForExternalFlow } from "@/components/idle-logout";
 import { coinbaseOnrampStatus, recordCoinbaseOnramp, startCoinbaseBuy } from "@/lib/coinbase-offramp.functions";
 
@@ -18,7 +18,7 @@ type Receipt = { added: bigint; total: bigint };
 const usdc = (v: bigint) => (Number(v) / 1e6).toFixed(2);
 
 /** One "Add funds" button: users with network reserve buy USDC directly; others get the starter card purchase (auto-activated by StartGuide). */
-export function BuyUsdc({ className, auto, hot, needMicro, resume, label }: { label?: string; resume?: Omit<ResumeDeposit, "at">; className?: string; only?: "SOL" | "USDC"; auto?: number; hot?: boolean; needMicro?: bigint | undefined }) {
+export function BuyUsdc({ className, auto, hot, needMicro, resume, resumePlay, label }: { label?: string; resume?: Omit<ResumeDeposit, "at" | "baseline">; resumePlay?: Omit<ResumePlay, "at" | "baseline">; className?: string; only?: "SOL" | "USDC"; auto?: number; hot?: boolean; needMicro?: bigint | undefined }) {
   const t = useT();
   const session = useBovedaSession();
   const read = useServerFn(getRealWallet);
@@ -51,7 +51,9 @@ export function BuyUsdc({ className, auto, hot, needMicro, resume, label }: { la
     try {
       const before = await balances();
       if (provider === "coinbase") {
-        if (resume) saveResumeDeposit(resume);
+        // Remember what the person was doing plus the dollars held right now, so the return waits for the NEW dollars.
+        if (resume) saveResumeDeposit({ ...resume, baseline: before.usdc.toString() });
+        if (resumePlay) saveResumePlay({ ...resumePlay, baseline: before.usdc.toString() });
         // Always USDC in US dollars (never SOL); the network reserve refills from USDC.
         const r = await cbBuy({ data: { wallet: address!, asset: "USDC", origin: window.location.origin, ...(needMicro && needMicro > 0n ? { amountUsd: Number(needMicro) / 1e6 } : {}) } });
         if (!r.success) { tab?.close(); throw new Error(r.error); }

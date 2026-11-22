@@ -1,38 +1,79 @@
 import { decimalToUnits, unitsToDecimal } from "@/lib/onboarding";
 
-/** Remembers an unfinished vault deposit while the person buys dollars at Coinbase, so it reopens on return. */
+/** Remembers an unfinished vault deposit or Doble o Nada play while the person buys dollars at Coinbase, so it reopens on return. */
 export const RESUME_KEY = "boveda:resume-deposit";
+export const RESUME_PLAY_KEY = "boveda:resume-play";
 export const RESUME_MAX_MS = 30 * 60_000;
 /** Same cap as the deposit form ($5,000). */
 export const RESUME_MAX_MICRO = 5_000_000_000n;
-export type ResumeDeposit = { vaultId: string; amount: string; position?: string; migrate?: boolean; at: number };
+/** `baseline`: dollars (micro-USDC, as text) the wallet had before the purchase, so the flow waits for the NEW dollars. */
+export type ResumeDeposit = { vaultId: string; amount: string; position?: string; migrate?: boolean; baseline?: string; at: number };
+export type ResumePlay = { market: string; window: string; side: "up" | "down"; amount: string; baseline?: string; at: number };
 
-export function saveResumeDeposit(r: Omit<ResumeDeposit, "at">, store: Pick<Storage, "setItem"> = localStorage, now = Date.now()) {
-  try { store.setItem(RESUME_KEY, JSON.stringify({ ...r, at: now })); } catch { /* storage blocked */ }
+type Store = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+const ls = (): Store => localStorage;
+
+function save(key: string, v: object, store: Pick<Storage, "setItem">, now: number) {
+  try { store.setItem(key, JSON.stringify({ ...v, at: now })); } catch { /* storage blocked */ }
 }
-export function clearResumeDeposit(store: Pick<Storage, "removeItem"> = localStorage) {
-  try { store.removeItem(RESUME_KEY); } catch { /* ignore */ }
+function clear(key: string, store: Pick<Storage, "removeItem">) {
+  try { store.removeItem(key); } catch { /* ignore */ }
 }
-/** Reads the pending deposit without clearing it; stale (>30 min) or malformed entries read as none. */
-export function peekResumeDeposit(store: Pick<Storage, "getItem"> = localStorage, now = Date.now()): ResumeDeposit | null {
+function peek<T extends { at: number }>(key: string, ok: (r: T) => boolean, store: Pick<Storage, "getItem" | "removeItem">, now: number): T | null {
   try {
-    const raw = store.getItem(RESUME_KEY);
+    const raw = store.getItem(key);
     if (!raw) return null;
-    const r = JSON.parse(raw) as ResumeDeposit;
-    if (typeof r?.vaultId !== "string" || typeof r.amount !== "string" || typeof r.at !== "number" || now - r.at > RESUME_MAX_MS) return null;
+    const r = JSON.parse(raw) as T;
+    if (!r || typeof r.at !== "number" || !ok(r) || now - r.at > RESUME_MAX_MS) { clear(key, store); return null; }
     return r;
-  } catch { return null; }
+  } catch { clear(key, store); return null; }
+}
+const okBaseline = (b: unknown) => b === undefined || (typeof b === "string" && /^\d+$/.test(b));
+
+export function saveResumeDeposit(r: Omit<ResumeDeposit, "at">, store: Pick<Storage, "setItem"> = ls(), now = Date.now()) { save(RESUME_KEY, r, store, now); }
+export function clearResumeDeposit(store: Pick<Storage, "removeItem"> = ls()) { clear(RESUME_KEY, store); }
+/** Reads the pending deposit without consuming it; stale (>30 min) or malformed entries are removed and read as none. */
+export function peekResumeDeposit(store: Pick<Storage, "getItem" | "removeItem"> = ls(), now = Date.now()): ResumeDeposit | null {
+  return peek<ResumeDeposit>(RESUME_KEY, (r) => typeof r.vaultId === "string" && typeof r.amount === "string" && okBaseline(r.baseline), store, now);
 }
 /** Reads and clears the pending deposit. */
-export function takeResumeDeposit(store: Pick<Storage, "getItem" | "removeItem"> = localStorage, now = Date.now()): ResumeDeposit | null {
+export function takeResumeDeposit(store: Pick<Storage, "getItem" | "removeItem"> = ls(), now = Date.now()): ResumeDeposit | null {
   const r = peekResumeDeposit(store, now);
   clearResumeDeposit(store);
   return r;
 }
-/** Step 3 amount: what the person chose, never more than the dollars that actually arrived (nor $5,000); no amount chosen → all arrived dollars. */
+
+export function saveResumePlay(r: Omit<ResumePlay, "at">, store: Pick<Storage, "setItem"> = ls(), now = Date.now()) { save(RESUME_PLAY_KEY, r, store, now); }
+export function clearResumePlay(store: Pick<Storage, "removeItem"> = ls()) { clear(RESUME_PLAY_KEY, store); }
+export function peekResumePlay(store: Pick<Storage, "getItem" | "removeItem"> = ls(), now = Date.now()): ResumePlay | null {
+  return peek<ResumePlay>(RESUME_PLAY_KEY, (r) => typeof r.market === "string" && typeof r.window === "string" && (r.side === "up" || r.side === "down") && typeof r.amount === "string" && okBaseline(r.baseline), store, now);
+}
+
+/** True once dollars beyond what the wallet held before the purchase have landed (no baseline recorded → any dollars). */
+export function newFundsArrived(usdcMicro: bigint | undefined | null, baseline?: string): boolean {
+  if (usdcMicro == null) return false;
+  const before = baseline ? BigInt(baseline) : 0n;
+  return usdcMicro > before;
+}
+
+/** Deposit amount on return: what the person chose, never more than the dollars available (nor $5,000); no amount chosen → all available dollars. */
 export function fitResumeAmount(amount: string, usdcMicro: bigint): string {
   const cap = usdcMicro < RESUME_MAX_MICRO ? usdcMicro : RESUME_MAX_MICRO;
   const chosen = decimalToUnits(amount.replace(/,/g, "") || "0", 6);
   const micro = chosen != null && chosen > 0n && chosen < cap ? chosen : cap;
   return unitsToDecimal(micro, 6);
+}
+
+export type ResumeStep =
+  | { kind: "none" }
+  | { kind: "wait"; for: "play" | "deposit"; vaultId?: string }
+  | { kind: "play" }
+  | { kind: "deposit"; vaultId: string; amount: string; position?: string; migrate?: boolean };
+
+/** What Billetera does on return from Coinbase: a pending play wins over a deposit; both wait until the new dollars land. */
+export function resumeStep(play: ResumePlay | null, deposit: ResumeDeposit | null, usdcMicro: bigint | undefined): ResumeStep {
+  if (play) return newFundsArrived(usdcMicro, play.baseline) ? { kind: "play" } : { kind: "wait", for: "play" };
+  if (!deposit) return { kind: "none" };
+  if (!newFundsArrived(usdcMicro, deposit.baseline)) return { kind: "wait", for: "deposit", vaultId: deposit.vaultId };
+  return { kind: "deposit", vaultId: deposit.vaultId, amount: fitResumeAmount(deposit.amount, usdcMicro!), ...(deposit.position ? { position: deposit.position } : {}), ...(deposit.migrate ? { migrate: true } : {}) };
 }

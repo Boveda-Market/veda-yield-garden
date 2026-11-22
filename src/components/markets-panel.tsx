@@ -21,6 +21,7 @@ import { RollingNumber } from "@/components/rolling-number";
 import { TradePulse } from "@/components/trade-pulse";
 import { RoundTimeline } from "@/components/round-timeline";
 import { roundSlug } from "@/lib/price-to-beat";
+import { peekResumePlay } from "@/lib/resume-deposit";
 
 const num = (n: number, d = 2) => n.toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const digits = (p: number) => (p >= 1000 ? 2 : 3);
@@ -40,6 +41,14 @@ export function MarketsPanel(_: { identity: string }) {
   // Live odds history per round (asset:window:openTime), so the duel follows the same numbers as the buttons.
   const [oddsHist, setOddsHist] = useState<Record<string, OddsPoint[]>>({});
 
+  // Back from Coinbase with a pending play: reopen the same coin and duration (PredictLive restores side and amount).
+  useEffect(() => {
+    const p = peekResumePlay();
+    if (!p) return;
+    const m = MARKETS.find((x) => x.id === p.market);
+    if (m) setMarket(m.id);
+    if ((PREDICT_WINDOWS as readonly string[]).includes(p.window)) setWin(p.window as PredictWindow);
+  }, []);
   useEffect(() => { setNow(Date.now()); const id = setInterval(() => setNow(Date.now()), 250); return () => clearInterval(id); }, []);
   useEffect(() => {
     let alive = true;

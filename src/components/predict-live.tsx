@@ -31,6 +31,7 @@ import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { ActionSuccess } from "@/components/action-success";
 import { FlowSteps, WorkingLine } from "@/components/move-steps";
 import { FundsKeptCard } from "@/components/funds-kept-card";
+import { clearResumePlay, peekResumePlay } from "@/lib/resume-deposit";
 import { DetailsToggle } from "@/components/ui/details-toggle";
 
 const usdc = (micro: string | bigint | null) => micro === null ? "—" : (Number(micro) / 1e6).toFixed(2);
@@ -66,7 +67,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   useEffect(() => { setReview(null); }, [round?.marketId]);
   // The quote lives in a pop-up so choosing a side never scrolls the page.
   const [kept, setKept] = useState(false);
-  const cancelQuote = () => { setSide(null); setReview(null); setKept(false); };
+  const cancelQuote = () => { clearResumePlay(); setSide(null); setReview(null); setKept(false); };
   // Cancelling at «Todo listo» (after a top-up) first says where the dollars are.
   const cancelOrKeep = () => { if (review && wasShort.current && !kept) setKept(true); else cancelQuote(); };
   const refresh = useCallback(async () => {
@@ -108,6 +109,16 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   // Someone who was short and has just topped up gets a clear pause before the one-tap authorization.
   const wasShort = useRef(false);
   if (short) wasShort.current = true;
+  // Back from Coinbase: reopen the same play (side + amount) on the round open right now; the live quote refreshes on its own.
+  const resumedPlay = useRef(false);
+  useEffect(() => {
+    if (resumedPlay.current || !wallet || !round || side) return;
+    const p = peekResumePlay();
+    if (!p || p.market !== round.asset || p.window !== round.window) return;
+    // Taken once: the open ticket now holds it, so Billetera never sends the person here again for the same play.
+    resumedPlay.current = true; wasShort.current = true; clearResumePlay();
+    setAmount(p.amount); setSide(p.side);
+  }, [wallet, round?.asset, round?.window]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fast follow-up refreshes after a signed order so balances and cards update in about a second.
   const sync = () => { for (const ms of [600, 1500, 4000]) setTimeout(() => { void refresh(); void loadBalance(); for (const k of ["predict-positions", "my-wallet", "my-wallet-tokens"]) void qc.invalidateQueries({ queryKey: [k, wallet] }); }, ms); };
@@ -152,7 +163,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
     try {
       const sig = await sign(review.tx, review.context);
       // Order placed: clear the side so the 15s quote loop stops and the screen returns to normal.
-      seq.current++; wasShort.current = false; setSide(null); setReview(null); setQuoteErr(null);
+      clearResumePlay(); seq.current++; wasShort.current = false; setSide(null); setReview(null); setQuoteErr(null);
       const spent = toBaseUnits(amount, "USDC") ?? 0n;
       setBalance((b) => b === null ? b : b > spent ? b - spent : 0n);
       sync();
@@ -286,7 +297,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
             <p className="text-[11px] leading-4 text-muted-foreground">{t("Estimado con el precio actual de la red. La activación se cobra solo la primera vez.")}</p>
           </dl>}
           {short && <SolConvertShortcut className="mt-3" />}
-          {short && side && <BuyUsdc className="mt-3" needMicro={(play?.total ?? units ?? 0n) - (balance ?? 0n)} />}
+          {short && side && <BuyUsdc className="mt-3" needMicro={(play?.total ?? units ?? 0n) - (balance ?? 0n)} {...(round ? { resumePlay: { market: round.asset, window: round.window, side, amount } } : {})} />}
           {!side && <p className="mt-3 text-center text-xs text-muted-foreground">{t("Elige Sube o Baja para ver tu pago.")}</p>}
           {!wallet ? <p className="mt-3 rounded-xl bg-secondary p-3 text-center text-sm font-semibold">{t("Entra con tu cuenta para predecir en vivo con los dólares de tu wallet.")}</p>
             : !review && !short && <Button disabled className="mt-3 h-12 w-full rounded-xl text-base font-bold">{quoting ? <><Loader2 className="animate-spin" /> {t("Cotizando en la red…")}</> : side ? t(side === "up" ? "Predecir Sube" : "Predecir Baja") : t("Elige Sube o Baja")}</Button>}
