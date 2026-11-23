@@ -21,3 +21,11 @@ export function markTrumpTouched() { try { localStorage.setItem(TRUMP_AD_DONE, "
 export function trumpTouched(): boolean { try { return localStorage.getItem(TRUMP_AD_DONE) === "1"; } catch { return false; } }
 /** Positions read from the wallet include the TRUMP vault. */
 export const holdsTrump = (positions: { vaultId: string }[] | undefined) => Boolean(positions?.some((p) => p.vaultId === "trump"));
+
+/** Which weekly ad showed last on this device; the rotation alternates TRUMP and Bitcoin. */
+export const WEEKLY_AD_LAST = "boveda:weekly-ad-last";
+/** Alternate TRUMP ↔ Bitcoin each time; once TRUMP was touched only Bitcoin is shown. */
+export function pickWeeklyAd(last: string | null, trumpDone: boolean): "trump" | "btc" {
+  if (trumpDone) return "btc";
+  return last === "trump" ? "btc" : "trump";
+}

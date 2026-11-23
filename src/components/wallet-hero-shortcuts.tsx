@@ -70,7 +70,7 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
   const [step, pickSlide] = useBannerStep();
   const rail = useRef<HTMLDivElement>(null);
   const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const layer = "h-32 w-full shrink-0 snap-center overflow-hidden";
+  const layer = "h-36 w-full shrink-0 snap-center overflow-hidden";
   // Auto-rotation slides the rail across all slides; a finger swipe picks the slide it settles on.
   useEffect(() => { const el = rail.current; if (!el) return; const left = step * el.clientWidth; if (Math.abs(el.scrollLeft - left) > 4) el.scrollTo({ left, behavior: "smooth" }); }, [step]);
   const onRailScroll = () => { if (scrollTimer.current) clearTimeout(scrollTimer.current); scrollTimer.current = setTimeout(() => { const el = rail.current; if (!el || !el.clientWidth) return; const idx = Math.round(el.scrollLeft / el.clientWidth); if (idx !== step && idx >= 0 && idx < STEPS) pickSlide(idx); }, 120); };
@@ -86,7 +86,7 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
     </div>;
   };
   return <section aria-label={t("Bóvedas destacadas")}>
-    <div ref={rail} onScroll={onRailScroll} className="flex h-32 snap-x snap-mandatory items-stretch gap-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div ref={rail} onScroll={onRailScroll} className="flex h-36 snap-x snap-mandatory items-stretch gap-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {Array.from({ length: STEPS }, (_, k) => slide(k))}
     </div>
     <div aria-hidden className="mt-2 flex justify-center gap-1">{Array.from({ length: STEPS }, (_, k) => <span key={k} className={`h-1.5 rounded-full transition-all ${k === step ? "w-4" : "w-1.5 opacity-40"} ${KINDS[k % KINDS.length] === "doble" ? "bg-bolt-neon" : KINDS[k % KINDS.length] === "trump" ? "bg-[#c8102e]" : "bg-[#f7931a]"}`} />)}</div>

@@ -414,6 +414,8 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
 .trump-gold {
   background: linear-gradient(180deg, #ddbf7d, #caa75e 50%, #a8853f 56%, #d7bd82);
   -webkit-background-clip: text; background-clip: text; color: transparent;
+  /* inherited text-shadow would paint over the clipped gradient and darken it */
+  text-shadow: none;
   filter: drop-shadow(0 2px 0 oklch(0.2 0.07 262)) drop-shadow(0 0 6px oklch(0.8 0.15 82 / 0.7));
   padding-right: 0.08em;
 }
