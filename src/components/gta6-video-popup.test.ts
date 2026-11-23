@@ -7,6 +7,8 @@ describe("GTA6 video popup", () => {
   it("shows on every visit when the user has no dollars", () => expect([1, 2, 3, 4].every((v) => gta6VideoDue(false, v))).toBe(true));
   it("shows once every 3 visits when the user has dollars but no vaults", () => expect([1, 2, 3, 4, 5, 6, 7].map((v) => gta6VideoDue(true, v))).toEqual([true, false, false, true, false, false, true]));
   const D = 24 * 3600_000, L = LAUNCH["dcty"] ?? 0;
+  /** Every high-octane vault with a launch campaign (now also TRUMP), so the "acked all" case stays correct as the lineup grows. */
+  const HOT_IDS = ["gta6", ...Object.keys(LAUNCH)];
   it("new vault campaign: every 2 days in week 1, every 4 in week 2, once in week 3, then off", () => {
     expect(campaignGap(L, L + D)).toBe(2 * D);
     expect(campaignGap(L, L + 8 * D)).toBe(4 * D);
@@ -20,7 +22,7 @@ describe("GTA6 video popup", () => {
     expect(holderRankDue([pos("gta6")], null, L + 22 * D)).toBe(false);
   });
   it("after moving vaults it stays silent until a new vault is added", () => {
-    expect(holderRankDue([pos("gta6")], null, L + D, ["gta6", "dcty"])).toBe(false);
+    expect(holderRankDue([pos("gta6")], null, L + D, HOT_IDS)).toBe(false);
     expect(holderRankDue([pos("gta6")], null, L + D, ["gta6"])).toBe(true);
   });
   it("holders with every high-octane vault never see it", () => expect(holderRankDue([pos("gta6"), pos("dcty")], null, 0)).toBe(false));

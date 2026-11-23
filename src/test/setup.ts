@@ -20,3 +20,6 @@ Object.defineProperty(window, "matchMedia", {
   }),
 });
 }
+
+// jsdom lacks element scrolling; components call it to keep chips in view.
+if (typeof Element !== "undefined" && !Element.prototype.scrollTo) Element.prototype.scrollTo = function scrollTo() {};
