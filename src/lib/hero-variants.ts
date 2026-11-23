@@ -1,8 +1,8 @@
 /** Rotating home headlines. Index 0 is the original; ?v=N forces one (for campaigns). The gta6 variant restyles the whole hero. */
 export const HERO_VARIANTS: readonly { title: string; sub: string; theme?: "gta6" | "doble" | "trump" }[] = [
-  { title: "Monedas digitales en autocustodia que generan intereses.", sub: "Bóveda Market conecta depósitos en USDC con bóvedas de liquidez y mercados en vivo. $0 por depositar, retiros a banco, Coinbase o Cash App y cada movimiento aprobado con huella o Face ID." },
-  { title: "Bóveda GTA6 Coin: intereses generados por el volumen del mercado.", sub: "Cada compra y venta de la moneda GTA6 Coin reparte intereses entre quienes aportan liquidez. El Piloto Automático mantiene la posición en rango y las alertas llegan por Telegram.", theme: "gta6" },
-  { title: "Bóveda Trump Coin: liquidez en uno de los mercados más activos.", sub: "La moneda oficial Trump Coin mueve volumen las 24 horas. La bóveda convierte esa actividad en intereses estimados en dólares, con retiro disponible en cualquier momento.", theme: "trump" },
+  { title: "Gana en las subidas y en las bajadas, sin la ansiedad de holdear.", sub: "Deposita dólares en una bóveda y cobra intereses de cada compra y venta del mercado. Sin comprar monedas una por una ni vigilar gráficas: el Piloto Automático se encarga. $0 por depositar y retiras cuando quieras." },
+  { title: "Bóveda GTA6 Coin: intereses generados por el volumen del mercado.", sub: "Suba o baje GTA6 Coin, cada compra y venta te deja intereses. Sin holdear con ansiedad: el Piloto Automático ajusta tu bóveda y te avisa por Telegram.", theme: "gta6" },
+  { title: "Bóveda Trump Coin: liquidez en uno de los mercados más activos.", sub: "Trump Coin mueve volumen las 24 horas. Suba o baje, la bóveda convierte esa actividad en intereses estimados en dólares, con retiro en cualquier momento.", theme: "trump" },
   { title: "Doble o Nada: mercados de predicción en tiempo real.", sub: "Rondas de 5 minutos, 15 minutos y 4 horas sobre Bitcoin, Ethereum y Solana. Se participa en dólares, sin comprar la moneda, y cada ronda se resuelve de forma automática y transparente.", theme: "doble" },
 ];
 

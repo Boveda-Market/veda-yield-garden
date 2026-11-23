@@ -36,7 +36,7 @@ export function DctyBannerSlide({ index, cta }: { index: number; cta: React.Reac
     <span aria-hidden className="cta-shimmer pointer-events-none absolute inset-y-0 left-0 z-10 w-1/4 bg-gradient-to-r from-transparent via-hot-foreground/25 to-transparent" />
     <span className="relative flex items-center gap-3">
       <img src={dctyLogo} alt="" aria-hidden width={160} height={160} className="h-10 w-10 shrink-0 rounded-full drop-shadow-[0_0_16px_var(--hot)]" />
-      <span className="flex min-w-0 flex-col gap-1"><span className="text-[10px] font-black uppercase tracking-wide text-hot-2">DacityCoin · DCTY</span><span className="font-display text-base font-black leading-tight">{t("La cripto que viste en GTA 6, ahora cobrando para ti.")}</span></span>
+      <span className="flex min-w-0 flex-col gap-1"><span className="text-[10px] font-black uppercase tracking-wide text-hot-2">DacityCoin · DCTY</span><span className="font-display text-base font-black leading-tight">{t("Suba o baje DCTY, cada intercambio te deja intereses.")}</span></span>
     </span>
     <span className="relative mt-1.5 flex items-center justify-between gap-2"><span className="text-[11px] font-bold text-hot-muted">{t("Intereses de cada intercambio")}</span>{aprChip}</span>
     <span className={bar}>{cta}</span>

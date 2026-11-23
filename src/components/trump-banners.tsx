@@ -40,7 +40,7 @@ export function TrumpBannerSlide({ index, cta }: { index: number; cta: React.Rea
     <span aria-hidden className="cta-shimmer pointer-events-none absolute inset-y-0 left-0 z-10 w-1/4 bg-gradient-to-r from-transparent via-hot-foreground/25 to-transparent" />
     <span className="relative flex items-center gap-3">
       <img src={trumpLogo} alt="" aria-hidden width={160} height={160} className="h-10 w-10 shrink-0 rounded-full ring-2 ring-hot drop-shadow-[0_0_16px_var(--hot)]" />
-      <span className="flex min-w-0 flex-col gap-1"><span className="trump-gold w-fit text-[10px] font-black uppercase tracking-wide">Official Trump · TRUMP</span><span className="font-display text-base font-black leading-tight">{t("Cada compra y venta de TRUMP te deja intereses.")}</span></span>
+      <span className="flex min-w-0 flex-col gap-1"><span className="trump-gold w-fit text-[10px] font-black uppercase tracking-wide">Official Trump · TRUMP</span><span className="font-display text-base font-black leading-tight">{t("Suba o baje TRUMP, cada intercambio te deja intereses.")}</span></span>
     </span>
     <span className="relative mt-1.5 flex items-center justify-between gap-2"><span className="text-[11px] font-bold text-hot-muted">{t("Intereses de cada intercambio")}</span>{aprChip}</span>
     <span className={bar}>{cta}</span>

@@ -1820,4 +1820,10 @@ export const extra: Record<string, string> = {
   "Jugar en la nueva ronda": "Play in the new round",
   "Esperando la nueva ronda…": "Waiting for the new round…",
   "Elegir otra jugada": "Pick another play",
+  "Gana en las subidas y en las bajadas, sin la ansiedad de holdear.": "Earn when markets go up and down, without the anxiety of holding.",
+  "Deposita dólares en una bóveda y cobra intereses de cada compra y venta del mercado. Sin comprar monedas una por una ni vigilar gráficas: el Piloto Automático se encarga. $0 por depositar y retiras cuando quieras.": "Deposit dollars into a vault and earn interest from every market buy and sell. No buying coins one by one or watching charts: Autopilot handles it. $0 to deposit and withdraw anytime.",
+  "Suba o baje GTA6 Coin, cada compra y venta te deja intereses. Sin holdear con ansiedad: el Piloto Automático ajusta tu bóveda y te avisa por Telegram.": "Whether GTA6 Coin goes up or down, every buy and sell earns you interest. No anxious holding: Autopilot adjusts your vault and alerts you on Telegram.",
+  "Trump Coin mueve volumen las 24 horas. Suba o baje, la bóveda convierte esa actividad en intereses estimados en dólares, con retiro en cualquier momento.": "Trump Coin trades 24/7. Up or down, the vault turns that activity into estimated dollar interest, with withdrawals anytime.",
+  "Suba o baje DCTY, cada intercambio te deja intereses.": "Up or down, every DCTY trade earns you interest.",
+  "Suba o baje TRUMP, cada intercambio te deja intereses.": "Up or down, every TRUMP trade earns you interest.",
 };
