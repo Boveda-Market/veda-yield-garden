@@ -263,7 +263,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     <div className="relative flex items-center justify-between gap-2">
       <p className="text-sm font-semibold">{isPrice ? t("Mercado {s}", { s: sym }) : t("Mercado global")}</p>
       <div className="flex items-center gap-1.5">
-        {gmgnUrl && <a href={gmgnUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full border border-border/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground"><img src="/gmgn-logo.png" alt="" width={12} height={12} className="h-3 w-3 rounded-sm opacity-80" />{t("Ver gráfica completa en GMGN")}<ExternalLink size={10} aria-hidden /></a>}
+        {gmgnUrl && <a href={gmgnUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/5 px-2 py-0.5 text-[11px] font-semibold text-primary transition-colors hover:bg-primary/10"><img src="/gmgn-logo.png" alt="" width={12} height={12} className="h-3 w-3 rounded-sm opacity-80" />{t("Ver gráfica completa en GMGN")}<ExternalLink size={10} aria-hidden /></a>}
         {!week && <span className="px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">7D</span>}
       </div>
     </div>
