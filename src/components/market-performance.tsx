@@ -1,6 +1,5 @@
-import { Check, Copy, HelpCircle } from "lucide-react";
-import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { ActionSheetContent } from "@/components/ui/action-sheet";
+import { Check, Copy } from "lucide-react";
+import { MetricHelpGrid } from "@/components/metric-help";
 import { CHAIN_POOLS } from "@/lib/solana-data";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -62,7 +61,6 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const symbol = coin ? `$${coin}` : rawSym;
   const mint = CHAIN_POOLS.find((p) => p.id === vault.id)?.mint;
   const [copied, setCopied] = useState(false);
-  const [help, setHelp] = useState<{ key: string; value: string; sub?: string | undefined } | null>(null);
   const ch = stats.data?.change24h ?? null;
   const vol24h = m?.volume24h ?? stats.data?.volume24h ?? null;
   const share = tvlSharePct(m?.tvl, protocol.data);
@@ -108,23 +106,9 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("Métricas del pool")}</p>
       {pool.isPending ? <div role="status" className="mt-3 grid grid-cols-2 gap-2">{Array.from({ length: 8 }, (_, i) => <span key={i} className="h-14 animate-pulse rounded-xl bg-muted" />)}</div>
         : !m ? <p role="status" className="mt-3 text-sm text-muted-foreground">{t("Métricas no disponibles por ahora")}</p>
-        : <div className="mt-3 grid grid-cols-2 gap-2">{rows.map(([k, v, s, h], i) =>
-          <button type="button" key={`${k}-${i}`} onClick={() => setHelp({ key: h, value: v, sub: s })} aria-label={`${k}: ${v}. ${t("¿Qué significa?")}`} className={`relative min-w-0 rounded-xl p-2.5 pr-6 text-left transition-colors active:scale-[0.98] ${i === 0 || i === 4 ? "bg-primary/10 hover:bg-primary/15" : "bg-muted hover:bg-muted/70"}`}>
-            <HelpCircle aria-hidden size={14} className="absolute right-2 top-2 text-muted-foreground/70" />
-            <span className="block text-[11px] leading-tight text-muted-foreground">{k}</span>
-            <span className={`block truncate font-display text-lg font-bold tabular-nums ${i === 0 || i === 4 ? "text-primary" : ""}`}>{v}</span>
-            {s && <span className="block text-[10px] leading-tight text-muted-foreground">{s}</span>}
-          </button>)}</div>}
+        : <div className="mt-3"><MetricHelpGrid tiles={rows.map(([label, value, sub, help], i) => ({ label, value, sub, help: METRIC_HELP[help], accent: i === 0 || i === 4 }))} /></div>}
     </section>
     {m && <p className="-mt-1 text-center text-[10px] text-muted-foreground">{t("Toca una métrica para ver qué significa.")}</p>}
-    <Dialog open={help != null} onOpenChange={(o) => { if (!o) setHelp(null); }}><ActionSheetContent closeLabel={t("Cerrar")}>
-      {help && <>
-        <DialogTitle className="pr-10 font-display text-lg">{t(help.key)}</DialogTitle>
-        <div className="rounded-xl bg-muted p-3"><p className="font-display text-2xl font-bold tabular-nums">{help.value}</p>{help.sub && <p className="text-xs text-muted-foreground">{help.sub}</p>}</div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("¿Qué significa?")}</p>
-        <DialogDescription className="text-base leading-7 text-foreground">{t(METRIC_HELP[help.key] ?? "")}</DialogDescription>
-      </>}
-    </ActionSheetContent></Dialog>
     <p className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs leading-5">💡 {t("El precio de {s} sube y baja con la oferta y la demanda, pero cada intercambio genera intereses en dólares para la bóveda. La volatilidad es el motor que produce tus ganancias.", { s: symbol ?? "" })}</p>
     <p className="text-[10px] leading-4 text-muted-foreground">{t("Cifras del pool completo con datos públicos. El interés anual es una estimación simple (intereses de 24 h ÷ dinero en el pool × 365), no una ganancia garantizada. Tu parte depende de tu depósito.")}</p>
   </div>;

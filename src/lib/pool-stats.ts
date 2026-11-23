@@ -7,11 +7,14 @@ const poolSchema = z.object({
   baseToken: z.object({ symbol: z.string(), address: z.string().nullish() }),
   quoteToken: z.object({ symbol: z.string() }),
   priceUsd: z.string().nullish(),
-  volume: z.object({ h24: z.number().nonnegative().nullish() }).nullish(),
+  volume: z.object({ h24: z.number().nonnegative().nullish(), h1: z.number().nonnegative().nullish().catch(null) }).nullish(),
   liquidity: z.object({ usd: z.number().nonnegative().nullish(), base: z.number().nonnegative().nullish(), quote: z.number().nonnegative().nullish() }).nullish(),
-  priceChange: z.object({ h1: z.number().nullish(), h6: z.number().nullish(), h24: z.number().nullish() }).nullish(),
+  priceChange: z.object({ m5: z.number().nullish().catch(null), h1: z.number().nullish(), h6: z.number().nullish(), h24: z.number().nullish() }).nullish(),
   marketCap: z.number().nonnegative().nullish(),
-  txns: z.object({ h24: z.object({ buys: z.number().nonnegative(), sells: z.number().nonnegative() }).nullish() }).nullish(),
+  txns: z.object({
+    h24: z.object({ buys: z.number().nonnegative(), sells: z.number().nonnegative() }).nullish(),
+    h1: z.object({ buys: z.number().nonnegative(), sells: z.number().nonnegative() }).nullish().catch(null),
+  }).nullish(),
 });
 
 export function parsePoolStats(data: unknown, address: string) {
@@ -34,6 +37,10 @@ export function parsePoolStats(data: unknown, address: string) {
       change24h: p.priceChange?.h24 ?? null,
       change1h: p.priceChange?.h1 ?? null,
       change6h: p.priceChange?.h6 ?? null,
+      change5m: p.priceChange?.m5 ?? null,
+      volume1h: p.volume?.h1 ?? null,
+      buys1h: p.txns?.h1?.buys ?? null,
+      sells1h: p.txns?.h1?.sells ?? null,
       marketCap: p.marketCap ?? null,
       buys24h: p.txns?.h24?.buys ?? null,
       sells24h: p.txns?.h24?.sells ?? null,

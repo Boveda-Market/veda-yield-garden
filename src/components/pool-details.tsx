@@ -2,19 +2,21 @@ import { useT } from "@/lib/i18n";
 import { formatCoinPrice } from "@/lib/format-price";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Check, Copy, RefreshCw, TrendingDown, TrendingUp, Users } from "lucide-react";
+import { Check, Copy, RefreshCw, TrendingDown, TrendingUp } from "lucide-react";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { fetchPoolStats, coinLabel } from "@/lib/pool-stats";
 import type { Vault } from "@/lib/vaults";
 import { isDlmmVault } from "@/lib/solana-data";
-import { PoolYield } from "@/components/pool-yield";
+import { MetricHelpGrid, type MetricTile } from "@/components/metric-help";
 import { MarketPerformance } from "@/components/market-performance";
 import { vaultSkin } from "@/components/vault-skin";
 
 const number = (value: number | null | undefined, digits = 2) => value == null ? "—" : value.toLocaleString("es-MX", { maximumFractionDigits: digits });
-const usd = (value: number | null | undefined, digits = 2) => value == null ? "—" : `$${value.toLocaleString("es-MX", { minimumFractionDigits: Math.min(2, digits), maximumFractionDigits: digits })}`;
+/** Short amounts for narrow tiles: $1.1M, 987M (no «B»: in Spanish a billón is 10¹²). */
+const compact = (v: number | null | undefined) => v == null ? "—" : v >= 1e6 ? `${(v / 1e6).toLocaleString("en-US", { maximumFractionDigits: v >= 1e8 ? 0 : 1 })}M` : Math.round(v).toLocaleString("en-US");
+const usdShort = (v: number | null | undefined) => v == null ? "—" : `$${compact(v)}`;
 
 export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => void }) {
   const t = useT();
@@ -30,9 +32,27 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
   });
   const stats = query.data;
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
-  const holders = yieldQ.data?.holders ?? null, fees24h = yieldQ.data?.fees24h ?? null;
-  const sym = `$${coinLabel(stats?.baseSymbol, vault.pair.split("/")[0] ?? "")}`;
-  const buys = stats?.buys24h ?? null, sells = stats?.sells24h ?? null;
+  const y = yieldQ.data;
+  const sym = `$${coinLabel(stats?.baseSymbol ?? y?.symbolX, vault.pair.split("/")[0] ?? "")}`;
+  const buys1h = stats?.buys1h ?? null, sells1h = stats?.sells1h ?? null;
+  const trades1h = buys1h != null && sells1h != null ? buys1h + sells1h : null;
+  const freezable = y?.tokenFreezable ?? null;
+  // Coin facts and right-now pool activity; whole-day figures (price, APR, TVL, volume, fees, trades) live in «Rendimiento y Mercado».
+  const coinTiles: MetricTile[] = [
+    { label: t("Personas con {s}", { s: sym }), value: number(y?.holders, 0), sub: t("Billeteras que la tienen"), help: "Cuántas billeteras tienen esta moneda hoy. Muchas personas significa una moneda más conocida, con más gente comprando y vendiendo.", accent: true },
+    { label: t("Valor de mercado"), value: usdShort(y?.tokenMarketCap ?? stats?.marketCap), sub: t("Precio × monedas en circulación"), help: "El precio de la moneda multiplicado por todas las monedas que circulan. Sirve para comparar qué tan grande es una moneda frente a otras." },
+    { label: t("Monedas emitidas"), value: compact(y?.tokenSupply), sub: t("Total que existe"), help: "Cuántas monedas existen en total. Si hay pocas, cada una suele valer más; si hay miles de millones, cada una puede valer centavos." },
+    { label: t("Verificación pública"), value: y?.tokenVerified == null ? "—" : y.tokenVerified ? t("✓ Verificada") : t("Sin verificar"), sub: t("Listas públicas de monedas"), help: "Indica si esta moneda aparece verificada en listas públicas de monedas. Ayuda a evitar copias falsas con el mismo nombre, pero no garantiza que su precio suba." },
+    { label: t("El emisor puede congelarla"), value: freezable == null ? "—" : freezable ? t("Sí") : t("No"), sub: freezable == null ? undefined : freezable ? t("Común en monedas de empresas") : t("Nadie puede congelarla"), help: "Algunas monedas respaldadas por empresas, como los dólares digitales, permiten a su emisor bloquear monedas en casos legales o de fraude. «No» significa que nadie puede congelarlas.", wide: true },
+  ];
+  const poolTiles: MetricTile[] = [
+    { label: t("Volumen · última hora"), value: usdShort(stats?.volume1h ?? y?.volume1h), sub: t("Dinero intercambiado"), help: "Cuánto dinero se intercambió en la última hora. Te muestra si la bóveda está activa en este momento.", accent: true },
+    { label: t("Intercambios · última hora"), value: number(trades1h, 0), sub: trades1h ? t("{p} compras", { p: `${Math.round((buys1h ?? 0) / trades1h * 100)}%` }) : t("Compras y ventas"), help: "Compras y ventas que hicieron otras personas en la última hora. Cada una paga una pequeña comisión que se reparte entre los depósitos." },
+    { label: t("{s} en el pool", { s: sym }), value: number(stats?.baseLocked ?? y?.amountX, 4), sub: t("Cantidad de monedas"), help: "Cuántas monedas hay guardadas en el pool ahora mismo. Cambia todo el tiempo: cuando alguien compra, sale moneda y entran dólares digitales, y al revés." },
+    { label: t("Dólares digitales en el pool"), value: number(stats?.quoteLocked ?? y?.amountY, 2), sub: t("Cantidad de monedas"), help: "Cuántos dólares digitales hay guardados en el pool ahora mismo. Suben cuando la gente vende la moneda y bajan cuando la compra." },
+    { label: t("Para los depósitos"), value: y?.depositorFeeShare == null ? "—" : `${number(y.depositorFeeShare, 1)}%`, sub: t("De cada comisión"), help: "De cada comisión que pagan quienes cambian monedas, esta parte se reparte entre los depósitos como el tuyo. El resto es la tarifa de la plataforma del pool." },
+    { label: t("Riesgo de la bóveda"), value: t(vault.risk), sub: vault.badge ? t(vault.badge) : undefined, help: "Nuestra clasificación sencilla de qué tanto puede subir o bajar el valor de tu depósito. Más riesgo suele venir con más intereses y más altibajos." },
+  ];
   const url = `https://app.meteora.ag/${isDlmmVault(vault.id) ? "dlmm" : "dammv2"}/${vault.pool}`;
   const copy = async () => {
     try {
@@ -61,29 +81,22 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
 
         <div className="grid grid-cols-2 rounded-full bg-secondary p-1" role="tablist">{([["perf", t("Rendimiento y Mercado")], ["stats", t("Estadísticas del Pool")]] as const).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={`rounded-full px-2 py-2 text-xs font-bold transition ${tab === k ? "bg-foreground text-background" : "text-muted-foreground"}`}>{l}</button>)}</div>
         {tab === "perf" ? <MarketPerformance vault={vault} /> : <>
-        <PoolYield address={vault.pool} />
-        {holders != null && <div className="flex items-center gap-3 rounded-xl border border-primary/40 bg-primary/10 p-3"><Users className="h-6 w-6 shrink-0 text-primary" /><div><p className="font-display text-lg font-bold tabular-nums">+{number(holders, 0)} {t("holders")}</p><p className="text-xs text-muted-foreground">{t("Comunidad activa con alto volumen de intercambio.")}</p></div></div>}
-        {fees24h != null && <div className="rounded-xl bg-muted p-3"><p className="text-xs text-muted-foreground">💰 {t("Intereses repartidas · 24 h")}</p><p className="font-display text-2xl font-bold tabular-nums text-primary">+{usd(fees24h)}</p></div>}
-        {buys != null && sells != null && buys + sells > 0 && <div className="grid gap-1.5">
-          <div className="flex justify-between text-xs font-semibold"><span className="text-primary">{t("Compras")} {Math.round(buys / (buys + sells) * 100)}% · {number(buys, 0)}</span><span className="text-destructive">{number(sells, 0)} · {Math.round(sells / (buys + sells) * 100)}% {t("Ventas")}</span></div>
-          <div className="flex h-3 overflow-hidden rounded-full bg-muted" aria-label={t("Presión de mercado · 24 h")}><div className="bg-primary transition-all" style={{ width: `${buys / (buys + sells) * 100}%` }} /><div className="flex-1 bg-destructive" /></div>
-          <p className="text-[11px] text-muted-foreground">{t("Presión de mercado · 24 h")}</p>
-        </div>}
-        <div className="grid grid-cols-3 gap-2">{([["1 h", stats?.change1h], ["6 h", stats?.change6h], ["24 h", stats?.change24h]] as const).map(([k, v]) => <div key={k} className={`rounded-lg p-2 text-center ${v == null ? "bg-muted" : v >= 0 ? "bg-primary/10" : "bg-destructive/10"}`}><p className="text-[11px] text-muted-foreground">{k}</p><p className={`flex items-center justify-center gap-1 font-display font-bold tabular-nums ${v == null ? "" : v >= 0 ? "text-primary" : "text-destructive"}`}>{v == null ? "—" : <>{v >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}{v > 0 ? "+" : ""}{number(v)}%</>}</p></div>)}</div>
-        <dl className="grid grid-cols-2 gap-x-5 gap-y-6 py-2">
-          <Metric label={`Precio ${sym} · USD`} value={formatCoinPrice(stats?.price)} />
-          <Metric label={t("Volumen · 24 h · USD")} value={usd(stats?.volume24h)} />
-          <Metric label={t("Liquidez en el pool · USD")} value={usd(stats?.liquidityUsd)} />
-          <Metric label={t("Valor de mercado · USD")} value={usd(stats?.marketCap, 0)} />
-          <Metric label={`${sym} en el pool`} value={number(stats?.baseLocked, 4)} />
-          <Metric label={`${coinLabel(stats?.quoteSymbol, "USDC")} en el pool`} value={number(stats?.quoteLocked, 4)} />
-          <Metric label={t("Operaciones · 24 h")} value={number(stats?.transactions24h, 0)} />
-          <Metric label={t("Riesgo de la bóveda")} value={vault.badge ? t(vault.badge) : t(vault.risk)} />
-        </dl>
+        <section aria-label={t("La moneda {s}", { s: sym })} className="grid gap-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("La moneda {s}", { s: sym })}</p>
+          <MetricHelpGrid tiles={coinTiles} />
+        </section>
+        <section aria-label={t("Cambio de precio")} className="grid gap-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("Cambio de precio")}</p>
+          <div className="grid grid-cols-3 gap-2">{([["5 min", stats?.change5m], ["1 h", stats?.change1h], ["6 h", stats?.change6h]] as const).map(([k, v]) => <div key={k} className={`rounded-lg p-2 text-center ${v == null ? "bg-muted" : v >= 0 ? "bg-primary/10" : "bg-destructive/10"}`}><p className="text-[11px] text-muted-foreground">{k}</p><p className={`flex items-center justify-center gap-1 font-display font-bold tabular-nums ${v == null ? "" : v >= 0 ? "text-primary" : "text-destructive"}`}>{v == null ? "—" : <>{v >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}{v > 0 ? "+" : ""}{number(v)}%</>}</p></div>)}</div>
+        </section>
+        <section aria-label={t("Ahora mismo en el pool")} className="grid gap-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("Ahora mismo en el pool")}</p>
+          <MetricHelpGrid tiles={poolTiles} />
+        </section>
         {<p className="text-xs leading-relaxed text-foreground">{t(vault.blurb)}{vault.note && <span className="mt-1 block text-muted-foreground">{t(vault.note)}</span>}</p>}
 
         <p className="text-xs leading-relaxed text-muted-foreground" role="status">
-          {query.isError ? t("No se pudo actualizar la información de DexScreener. Inténtalo de nuevo.") : !query.isPending && !stats ? t("Este pool no tiene datos disponibles en DexScreener. No se muestran cifras estimadas.") : t("Fuente: DexScreener. Precio, volumen y liquidez en USD. La liquidez representa los activos del pool, no una garantía de bloqueo ni de rendimiento.")}
+          {query.isError ? t("No se pudo actualizar la información de DexScreener. Inténtalo de nuevo.") : !query.isPending && !stats ? t("Este pool no tiene datos disponibles en DexScreener. No se muestran cifras estimadas.") : t("Fuente: datos públicos del pool y DexScreener. Las cantidades de monedas no son dólares. Nada de esto garantiza ganancias.")}
         </p>
 
         <div className="border-t border-border pt-4">
@@ -104,6 +117,3 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
-  return <div className="min-w-0"><dt className="text-xs text-muted-foreground">{label}</dt><dd className="mt-1 break-words font-display text-xl font-semibold">{value}</dd></div>;
-}

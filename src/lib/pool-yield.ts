@@ -4,6 +4,7 @@ import { CHAIN_POOLS } from "@/lib/solana-data";
 // Optional public metrics: any odd value becomes null so it can never break the verified APR fields.
 const num = z.number().finite().nonnegative().nullish().catch(null);
 const sym = z.string().max(20).nullish().catch(null);
+const flag = z.boolean().nullish().catch(null);
 
 const schema = z.object({
   address: z.string(),
@@ -11,11 +12,14 @@ const schema = z.object({
   fees: z.object({ "24h": z.number().finite().nonnegative().nullish(), "1h": num }).nullish(),
   volume: z.object({ "24h": num, "1h": num }).nullish().catch(null),
   cumulative_metrics: z.object({ volume: num, fees: num }).nullish().catch(null),
-  token_x: z.object({ holders: z.number().int().nonnegative().nullish(), symbol: sym }).nullish(),
+  token_x: z.object({
+    holders: z.number().int().nonnegative().nullish(), symbol: sym,
+    is_verified: flag, freeze_authority_disabled: flag, total_supply: num, market_cap: num,
+  }).nullish(),
   token_y: z.object({ symbol: sym }).nullish().catch(null),
   token_x_amount: num,
   token_y_amount: num,
-  pool_config: z.object({ base_fee_pct: num }).nullish().catch(null),
+  pool_config: z.object({ base_fee_pct: num, protocol_fee_pct: num }).nullish().catch(null),
   created_at: num,
 });
 
@@ -44,6 +48,14 @@ export function parsePoolYield(data: unknown, address: string) {
     /** Base swap fee in percent (0.04 = 0.04%). */
     feePct: d.pool_config?.base_fee_pct ?? null,
     createdAt: d.created_at ?? null,
+    /** Token-level facts about the vault's coin (token X). */
+    tokenVerified: d.token_x?.is_verified ?? null,
+    /** true when the issuer can still freeze holders' coins (freeze authority not disabled). */
+    tokenFreezable: d.token_x?.freeze_authority_disabled == null ? null : !d.token_x.freeze_authority_disabled,
+    tokenSupply: d.token_x?.total_supply ?? null,
+    tokenMarketCap: d.token_x?.market_cap ?? null,
+    /** Percent of every swap fee that goes to deposits (100 − platform share); null when unreported or out of range. */
+    depositorFeeShare: d.pool_config?.protocol_fee_pct != null && d.pool_config.protocol_fee_pct <= 100 ? 100 - d.pool_config.protocol_fee_pct : null,
   };
 }
 

@@ -31,3 +31,12 @@ describe("Pool statistics", () => {
     expect(fetch).toHaveBeenCalledExactlyOnceWith("https://api.dexscreener.com/latest/dex/pairs/solana/pool-a", { signal: null });
   });
 });
+describe("Last-hour pool activity", () => {
+  it("reads 5-minute price change and last-hour volume and trades of the exact pool", () => {
+    const p = { ...pool, priceChange: { m5: 0.04, h1: -0.08, h24: 0.6 }, volume: { h24: 12345, h1: 257 }, txns: { h24: { buys: 10, sells: 20 }, h1: { buys: 143, sells: 186 } } };
+    expect(parsePoolStats({ pairs: [p] }, "pool-a")).toMatchObject({ change5m: 0.04, volume1h: 257, buys1h: 143, sells1h: 186 });
+  });
+  it("keeps last-hour figures unavailable when the source omits them", () => {
+    expect(parsePoolStats({ pairs: [pool] }, "pool-a")).toMatchObject({ change5m: null, volume1h: null, buys1h: null });
+  });
+});

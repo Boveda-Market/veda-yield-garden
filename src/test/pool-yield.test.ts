@@ -43,3 +43,21 @@ describe("Public pool metrics", () => {
     expect(m?.apr).toBeCloseTo(67.525, 3);
   });
 });
+
+describe("Coin facts for the pool statistics tab", () => {
+  const base = { address: "pool-a", tvl: 1, fees: { "24h": 0 } };
+  it("reads the coin's verification, supply and market cap from the exact pool", () => {
+    const m = parsePoolYield({ ...base, token_x: { holders: 5, is_verified: false, total_supply: 987_159_629, market_cap: 1_105_697 } }, "pool-a");
+    expect(m).toMatchObject({ tokenVerified: false, tokenSupply: 987_159_629, tokenMarketCap: 1_105_697 });
+  });
+  it("reports a coin as freezable only when the issuer's freeze power is still on", () => {
+    expect(parsePoolYield({ ...base, token_x: { freeze_authority_disabled: false } }, "pool-a")?.tokenFreezable).toBe(true);
+    expect(parsePoolYield({ ...base, token_x: { freeze_authority_disabled: true } }, "pool-a")?.tokenFreezable).toBe(false);
+    expect(parsePoolYield(base, "pool-a")?.tokenFreezable).toBeNull();
+  });
+  it("gives deposits what the platform does not keep of each fee: 5% platform share leaves 95%", () => {
+    expect(parsePoolYield({ ...base, pool_config: { protocol_fee_pct: 5 } }, "pool-a")?.depositorFeeShare).toBe(95);
+    expect(parsePoolYield({ ...base, pool_config: { protocol_fee_pct: 20 } }, "pool-a")?.depositorFeeShare).toBe(80);
+    expect(parsePoolYield(base, "pool-a")?.depositorFeeShare).toBeNull();
+  });
+});
