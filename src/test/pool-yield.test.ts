@@ -19,3 +19,27 @@ describe("Real pool yield", () => {
     expect(parsePoolYield({ ...pool, tvl: 0 }, "pool-a")?.apr).toBeNull();
   });
 });
+describe("Public pool metrics", () => {
+  const full = {
+    address: "pool-a", tvl: 1_000_000, fees: { "1h": 48, "24h": 1850 }, volume: { "1h": 126_000, "24h": 4_053_869 },
+    cumulative_metrics: { volume: 2_795_047_717, fees: 1_148_346 }, token_x: { holders: 79075, symbol: "cbBTC" }, token_y: { symbol: "USDC" },
+    token_x_amount: 14.54, token_y_amount: 216_802.8, pool_config: { base_fee_pct: 0.04 }, created_at: 1731019054000,
+  };
+  it("reads lifetime fees and volume of the exact pool", () => {
+    const m = parsePoolYield(full, "pool-a");
+    expect(m?.totalFees).toBe(1_148_346);
+    expect(m?.totalVolume).toBe(2_795_047_717);
+    expect(m?.feePct).toBe(0.04);
+  });
+  it("keeps token amounts separate from dollar figures", () => {
+    const m = parsePoolYield(full, "pool-a");
+    expect(m?.amountX).toBe(14.54);
+    expect(m?.tvl).toBe(1_000_000);
+  });
+  it("a malformed optional metric is unavailable but never hides the verified rate", () => {
+    const m = parsePoolYield({ ...full, cumulative_metrics: { fees: "lots" }, pool_config: { base_fee_pct: -1 } }, "pool-a");
+    expect(m?.totalFees).toBeNull();
+    expect(m?.feePct).toBeNull();
+    expect(m?.apr).toBeCloseTo(67.525, 3);
+  });
+});

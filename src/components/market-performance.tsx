@@ -1,101 +1,70 @@
-import { Check, Copy, Loader2 } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { CHAIN_POOLS } from "@/lib/solana-data";
-import { useHydrated } from "@tanstack/react-router";
-import { readCachedCandles } from "@/lib/pool-candles";
-import { useEffect, useId, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useT } from "@/lib/i18n";
-import { chartRangeFor, cumulativeInterest, fetchPoolCandles, type CandleRange } from "@/lib/pool-candles";
 import { fetchPoolStats } from "@/lib/pool-stats";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import type { Vault } from "@/lib/vaults";
 import { formatCoinPrice } from "@/lib/format-price";
 
-const W = 400, H = 300, L = 6, R = 394, TOP = 12, MID = 150, BOT = 290;
-const usd = (v: number | null | undefined, d = 0) => v == null ? "—" : `$${v.toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d })}`;
-const price = formatCoinPrice;
+const usd = (v: number | null | undefined) => v == null ? "—" : `$${v.toLocaleString("en-US", { maximumFractionDigits: v >= 100 ? 0 : 2 })}`;
+/** Short dollars for narrow cards: $4.06M, $2,795M (no «B»: in Spanish a billón is 10¹²). */
+const usdShort = (v: number | null | undefined) => v == null ? "—" : v >= 1e6 ? `$${(v / 1e6).toLocaleString("en-US", { maximumFractionDigits: v >= 1e8 ? 0 : v >= 1e7 ? 1 : 2 })}M` : usd(v);
+const amount = (v: number | null | undefined) => v == null ? "—" : v.toLocaleString("en-US", { maximumFractionDigits: v >= 100 ? 0 : 4 });
 
-function smooth(pts: { x: number; y: number }[]) {
-  if (pts.length < 2) return "";
-  let d = `M${pts[0]!.x},${pts[0]!.y}`;
-  for (let i = 1; i < pts.length; i++) { const p = pts[i - 1]!, c = pts[i]!, mx = (p.x + c.x) / 2; d += ` C${mx},${p.y} ${mx},${c.y} ${c.x},${c.y}`; }
-  return d;
-}
-
-/** Straight point-to-point segments: the price line stays choppy like a trading chart. */
-function angular(pts: { x: number; y: number }[]) {
-  return pts.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-}
-
-/** «Rendimiento y Mercado»: token price (calm, top) vs. interest the pool paid (always rising, bottom). */
+/** «Rendimiento y Mercado»: live price plus the whole pool's public metrics (no chart). */
 export function MarketPerformance({ vault }: { vault: Vault }) {
   const t = useT();
   const locale = useLocale();
-  const gid = useId().replace(/:/g, "");
-  const [range, setRangeRaw] = useState<CandleRange>(() => chartRangeFor(vault.id));
-  const setRange = (v: CandleRange) => { setRangeRaw(v); try { localStorage.setItem("boveda:market-range", v); } catch { /* ignore */ } };
-  const hydrated = useHydrated();
-  const [hover, setHover] = useState<number | null>(null);
-  const candles = useQuery({ queryKey: ["pool-candles", vault.pool, range], queryFn: ({ signal }) => fetchPoolCandles(vault.pool, range, signal), ...(hydrated && readCachedCandles(vault.pool, range) ? { placeholderData: readCachedCandles(vault.pool, range)! } : {}), staleTime: 30_000, refetchInterval: 30_000, retry: 1, retryDelay: 1500 });
   const stats = useQuery({ queryKey: ["dexscreener-pool-stats", vault.pool], queryFn: ({ signal }) => fetchPoolStats(vault.pool, signal), staleTime: 60_000, retry: 1 });
-  const yieldQ = useQuery(poolYieldOptions(vault.pool));
-  const rawSym = stats.data?.baseSymbol ?? vault.pair.split("/")[0];
+  const pool = useQuery(poolYieldOptions(vault.pool));
+  const m = pool.data;
+  const rawSym = stats.data?.baseSymbol ?? m?.symbolX ?? vault.pair.split("/")[0];
   const symbol = rawSym ? `$${rawSym.replace(/^\$/, "")}` : rawSym;
+  const coin = vault.pair.split("/")[0] ?? rawSym ?? "";
   const mint = CHAIN_POOLS.find((p) => p.id === vault.id)?.mint;
   const [copied, setCopied] = useState(false);
   const ch = stats.data?.change24h ?? null;
-  const fees24h = yieldQ.data?.fees24h ?? null, vol24h = stats.data?.volume24h ?? null;
-  const ratio = fees24h != null && vol24h ? fees24h / vol24h : null;
-  const list = candles.data ?? [];
-  const earn = ratio != null ? cumulativeInterest(list, ratio) : [];
-  const rl = range === "1m" ? "5 h" : range === "1h" ? "7 d" : range === "4h" ? "30 d" : "90 d";
-  const volume = list.reduce((s, c) => s + c.v, 0);
-  const pill = (a: boolean) => `rounded-full px-3 py-1 text-xs font-semibold transition ${a ? "bg-foreground text-background" : "text-muted-foreground"}`;
+  const vol24h = m?.volume24h ?? stats.data?.volume24h ?? null;
 
-  let chart = null;
-  if (list.length >= 2) {
-    const ps = list.map((c) => c.c), pmin = Math.min(...ps), pmax = Math.max(...ps), pr = Math.max(pmax - pmin, pmax * 1e-6);
-    const emax = Math.max(earn[earn.length - 1] ?? 0, 1e-9);
-    const x = (i: number) => L + (i / (list.length - 1)) * (R - L);
-    const pPts = list.map((c, i) => ({ x: x(i), y: TOP + (1 - (c.c - pmin) / pr) * (MID - TOP - 16) }));
-    const ePts = earn.map((e, i) => ({ x: x(i), y: BOT - (e / emax) * (BOT - MID - 14) }));
-    const eLine = smooth(ePts);
-    const a = hover ?? list.length - 1;
-    chart = <>
-      <p className="mt-3 text-xs text-muted-foreground">{new Date(list[a]!.t).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}</p>
-      <div className="mt-1 grid grid-cols-2 gap-3">
-        <div><p className="text-xs text-muted-foreground">{t("Precio de mercado")}</p><p className="font-display text-xl font-bold tabular-nums">{price(list[a]!.c)}</p></div>
-        {earn.length > 0 && <div className="text-right"><p className="text-xs text-muted-foreground">{t("Intereses generados")} ↗</p><p className="font-display text-xl font-bold tabular-nums text-primary">+{usd(earn[a], 0)}</p></div>}
-      </div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="mt-2 h-80 w-full" role="img" aria-label={t("Precio de {s} frente a intereses generados", { s: symbol ?? "" })}>
-        <defs><linearGradient id={gid} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.35" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient></defs>
-        <path d={angular(pPts)} fill="none" stroke="var(--muted-foreground)" strokeOpacity="0.9" strokeWidth="1.75" strokeLinejoin="miter" strokeLinecap="butt" />
-        <line x1={L} y1={MID} x2={R} y2={MID} stroke="var(--border)" strokeDasharray="3 6" />
-        {eLine && <><path d={`${eLine} L${R},${BOT} L${L},${BOT} Z`} fill={`url(#${gid})`} />
-          <path d={eLine} fill="none" stroke="var(--primary)" strokeWidth="4" strokeLinecap="round" style={{ filter: "drop-shadow(0 0 4px var(--primary))" }} /></>}
-        <circle cx={pPts[a]!.x} cy={pPts[a]!.y} r="6" fill="var(--muted-foreground)" />
-        {ePts[a] && <circle cx={ePts[a]!.x} cy={ePts[a]!.y} r="7" fill="var(--background)" stroke="var(--primary)" strokeWidth="3" />}
-      </svg>
-    </>;
-  }
+  const rows: [string, string, string?][] = [
+    [t("Interés anual estimado"), m?.apr != null ? `${m.apr.toLocaleString("en-US", { maximumFractionDigits: 1 })}%` : "—", t("Según intereses de 24 h")],
+    [t("Dinero en el pool"), usdShort(m?.tvl), t("Todos los depósitos")],
+    [t("Intereses · última hora"), m?.fees1h != null ? `+${usd(m.fees1h)}` : "—"],
+    [t("Volumen · última hora"), usd(m?.volume1h)],
+    [t("Intereses totales"), m?.totalFees != null ? `+${usdShort(m.totalFees)}` : "—", t("Desde que abrió el pool")],
+    [t("Volumen total"), usdShort(m?.totalVolume), t("Desde que abrió el pool")],
+    [t("{s} en el pool", { s: coin }), amount(m?.amountX), t("Monedas, no dólares")],
+    [t("{s} en el pool", { s: m?.symbolY ?? "USDC" }), amount(m?.amountY), t("Monedas, no dólares")],
+    [t("Comisión por intercambio"), m?.feePct != null ? `${m.feePct.toLocaleString("en-US", { maximumFractionDigits: 3 })}%` : "—", t("Se reparte entre los depósitos")],
+    [t("Personas con {s}", { s: coin }), m?.holders != null ? m.holders.toLocaleString("en-US") : "—"],
+  ];
+  if (m?.createdAt) rows.push([t("Pool activo desde"), new Date(m.createdAt).toLocaleDateString(locale, { month: "short", year: "numeric" })]);
 
-  if (!chart && (candles.isPending || candles.isFetching)) chart = <div role="status" className="flex h-80 flex-col items-center justify-center gap-2 text-xs text-muted-foreground"><Loader2 className="size-7 animate-spin text-primary" aria-hidden />{t("Cargando gráfica…")}</div>;
   return <div className="space-y-3">
     <div className="grid grid-cols-3 gap-2">
-      {[[`${t("Precio")} ${symbol}`, stats.data?.price != null ? price(stats.data.price) : "—", stats.data?.change24h != null ? `${stats.data.change24h > 0 ? "+" : ""}${stats.data.change24h.toFixed(1)}% · 24 h` : ""],
-        [t("Volumen operado"), usd(list.length ? volume : vol24h), rl],
-        [t("Intereses generados"), earn.length ? `+${usd(earn[earn.length - 1], 0)}` : "—", rl]].map(([k, v, s], i) =>
+      {[[`${t("Precio")} ${symbol}`, stats.data?.price != null ? formatCoinPrice(stats.data.price) : "—", ch != null ? `${ch > 0 ? "+" : ""}${ch.toFixed(1)}% · 24 h` : ""],
+        [t("Volumen operado"), usdShort(vol24h), "24 h"],
+        [t("Intereses generados"), m?.fees24h != null ? `+${usd(m.fees24h)}` : "—", "24 h"]].map(([k, v, s], i) =>
         <div key={k} className={`min-w-0 rounded-xl p-2.5 ${i === 2 ? "bg-primary/10" : "bg-muted"}`}><p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{k}</p><p className={`truncate font-display text-base font-bold tabular-nums ${i === 2 ? "text-primary" : ""}`}>{v}</p><p className={`truncate text-[10px] ${i === 0 && ch != null ? (ch >= 0 ? "font-bold text-primary" : "font-bold text-destructive") : "text-muted-foreground"}`}>{i === 0 && ch != null ? (ch >= 0 ? "▲ " : "▼ ") : ""}{s}</p></div>)}
     </div>
     {mint && <button type="button" onClick={() => { void navigator.clipboard.writeText(mint).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {}); }} aria-label={t("Copiar contrato")} className="flex w-full items-center gap-2 rounded-xl border border-border bg-muted/50 px-3 py-2 text-left">
       <div className="min-w-0 flex-1"><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("Contrato oficial:")} {symbol}</p><p className="break-all font-mono text-[11px] leading-4">{mint}</p></div>
       {copied ? <Check size={16} className="shrink-0 text-primary" /> : <Copy size={16} className="shrink-0 text-muted-foreground" />}
     </button>}
-    <div className="rounded-2xl border border-border bg-card p-3">
-      <div className="flex rounded-full bg-secondary p-0.5 w-fit" role="tablist" aria-label={t("Periodo")}>{([chartRangeFor(vault.id)] as const).map((r) => <button key={r} type="button" role="tab" aria-selected={range === r} onClick={() => { setRange(r); setHover(null); }} className={pill(range === r)}>{r === "1h" ? "7D" : r.toUpperCase()}</button>)}</div>
-      {chart ?? <div className="grid h-80 place-items-center text-sm text-muted-foreground">{candles.isPending || candles.isFetching ? <span className="h-2 w-40 animate-pulse rounded-full bg-muted" /> : t("Gráfica no disponible por ahora")}</div>}
-    </div>
+    <section className="rounded-2xl border border-border bg-card p-3" aria-label={t("Métricas del pool")}>
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("Métricas del pool")}</p>
+      {pool.isPending ? <div role="status" className="mt-3 grid grid-cols-2 gap-2">{Array.from({ length: 6 }, (_, i) => <span key={i} className="h-14 animate-pulse rounded-xl bg-muted" />)}</div>
+        : !m ? <p role="status" className="mt-3 text-sm text-muted-foreground">{t("Métricas no disponibles por ahora")}</p>
+        : <dl className="mt-3 grid grid-cols-2 gap-2">{rows.map(([k, v, s], i) =>
+          <div key={`${k}-${i}`} className={`min-w-0 rounded-xl p-2.5 ${i === 0 || i === 4 ? "bg-primary/10" : "bg-muted"}`}>
+            <dt className="text-[11px] leading-tight text-muted-foreground">{k}</dt>
+            <dd className={`truncate font-display text-lg font-bold tabular-nums ${i === 0 || i === 4 ? "text-primary" : ""}`}>{v}</dd>
+            {s && <dd className="text-[10px] leading-tight text-muted-foreground">{s}</dd>}
+          </div>)}</dl>}
+    </section>
     <p className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs leading-5">💡 {t("El precio de {s} sube y baja con la oferta y la demanda, pero cada intercambio genera intereses en dólares para la bóveda. La volatilidad es el motor que produce tus ganancias.", { s: symbol ?? "" })}</p>
-    <p className="text-[10px] leading-4 text-muted-foreground">{t("Intereses del pool completo, estimados con su volumen. Tu parte depende de tu depósito.")}</p>
+    <p className="text-[10px] leading-4 text-muted-foreground">{t("Cifras del pool completo con datos públicos. El interés anual es una estimación simple (intereses de 24 h ÷ dinero en el pool × 365), no una ganancia garantizada. Tu parte depende de tu depósito.")}</p>
   </div>;
 }
