@@ -5,13 +5,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocale, useT } from "@/lib/i18n";
 import { fetchPoolStats, coinLabel } from "@/lib/pool-stats";
 import { poolYieldOptions } from "@/lib/pool-yield";
-import { poolVolatilityOptions, protocolTvlOptions, tvlSharePct, turnoverPct } from "@/lib/pool-metrics";
+import { poolVolatilityOptions, protocolTvlOptions, poolFlowOptions, tvlSharePct, turnoverPct } from "@/lib/pool-metrics";
 import type { Vault } from "@/lib/vaults";
 import { formatCoinPrice } from "@/lib/format-price";
 
 const usd = (v: number | null | undefined) => v == null ? "—" : `$${v.toLocaleString("en-US", { maximumFractionDigits: v >= 100 ? 0 : 2 })}`;
 /** Short dollars for narrow cards: $4.06M, $2,795M (no «B»: in Spanish a billón is 10¹²). */
 const usdShort = (v: number | null | undefined) => v == null ? "—" : v >= 1e6 ? `$${(v / 1e6).toLocaleString("en-US", { maximumFractionDigits: v >= 1e8 ? 0 : v >= 1e7 ? 1 : 2 })}M` : usd(v);
+/** Same short dollars, but always showing whether it came in or went out. */
+const signedUsdShort = (v: number | null | undefined) => v == null ? "—" : `${v >= 0 ? "+" : "-"}${usdShort(Math.abs(v))}`;
 /** Percent with the decimals a small screen can still read: 0.04%, 3.2%, 364%. */
 const pct = (v: number | null | undefined) => v == null ? "—" : `${v.toLocaleString("en-US", { maximumFractionDigits: v < 1 ? 2 : v < 10 ? 1 : 0 })}%`;
 /** Whole number with thousands separators: 6,871. */
@@ -36,6 +38,10 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const pool = useQuery(poolYieldOptions(vault.pool));
   const volatility = useQuery(poolVolatilityOptions(vault.pool));
   const protocol = useQuery(protocolTvlOptions(vault.pool));
+  const flow = useQuery(poolFlowOptions(vault.pool));
+  const f = flow.data;
+  const gross = f != null ? f.totalDeposits + f.totalWithdraws : 0;
+  const inShare = f != null && gross > 0 ? f.totalDeposits / gross * 100 : null;
   const m = pool.data;
   const rawSym = stats.data?.baseSymbol ?? m?.symbolX ?? vault.pair.split("/")[0];
   const coin = coinLabel(rawSym, vault.pair.split("/")[0] ?? "");
@@ -75,6 +81,14 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
       <div className="min-w-0 flex-1"><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("Contrato oficial:")} {symbol}</p><p className="break-all font-mono text-[11px] leading-4">{mint}</p></div>
       {copied ? <Check size={16} className="shrink-0 text-primary" /> : <Copy size={16} className="shrink-0 text-muted-foreground" />}
     </button>}
+    {f && <div className="rounded-2xl border border-border bg-card p-3">
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("Depósitos netos")}</p>
+        <p className={`font-display text-lg font-bold tabular-nums ${f.netDeposits >= 0 ? "text-primary" : "text-destructive"}`}>{signedUsdShort(f.netDeposits)}</p>
+      </div>
+      {inShare != null && <div className="mt-2 flex h-3 overflow-hidden rounded-full bg-muted" aria-label={t("Dinero que entró y salió del pool")}><div className="bg-primary transition-all" style={{ width: `${inShare}%` }} /><div className="flex-1 bg-destructive" /></div>}
+      <p className="mt-1.5 text-[11px] leading-4 text-muted-foreground">{t("Entraron {a} · Salieron {b}", { a: usdShort(f.totalDeposits), b: usdShort(f.totalWithdraws) })}</p>
+    </div>}
     <section className="rounded-2xl border border-border bg-card p-3" aria-label={t("Métricas del pool")}>
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("Métricas del pool")}</p>
       {pool.isPending ? <div role="status" className="mt-3 grid grid-cols-2 gap-2">{Array.from({ length: 8 }, (_, i) => <span key={i} className="h-14 animate-pulse rounded-xl bg-muted" />)}</div>

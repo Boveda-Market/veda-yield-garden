@@ -77,3 +77,45 @@ export const protocolTvlOptions = (address: string) => ({
   staleTime: 10 * 60_000,
   retry: 1,
 });
+
+const flowRow = z.object({
+  pool_address: z.string(),
+  net_deposits: z.number().finite().nullish().catch(null),
+  total_deposits: z.number().finite().nonnegative().nullish().catch(null),
+  total_withdraws: z.number().finite().nonnegative().nullish().catch(null),
+});
+const flowResponse = z.object({ data: z.array(flowRow).nullish().catch(null) });
+
+export type PoolFlow = { netDeposits: number; totalDeposits: number; totalWithdraws: number };
+
+/**
+ * Money that came in and went out of the pool. Only the row whose address matches is used, and the
+ * figure stays unavailable when the source has no deposits/withdrawals for it — never guessed.
+ */
+export function parsePoolFlow(json: unknown, address: string): PoolFlow | null {
+  const parsed = flowResponse.safeParse(json);
+  const row = (parsed.data?.data ?? []).find((r) => r.pool_address === address);
+  if (!row) return null;
+  const deposits = row.total_deposits;
+  const withdraws = row.total_withdraws;
+  if (deposits == null || withdraws == null) return null;
+  const net = row.net_deposits ?? deposits - withdraws;
+  if (!Number.isFinite(net)) return null;
+  return { netDeposits: net, totalDeposits: deposits, totalWithdraws: withdraws };
+}
+
+/** Public discovery API: the pool's own deposits vs. withdrawals row. */
+export async function fetchPoolFlow(address: string, signal?: AbortSignal): Promise<PoolFlow | null> {
+  const url = `https://pool-discovery-api.datapi.meteora.ag/pools?page_size=1&category=all&filter_by=${encodeURIComponent(`pool_address=${address}`)}`;
+  const response = await fetch(url, { signal: signal ?? null });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error("No se pudo consultar la entrada y salida de dinero del pool.");
+  return parsePoolFlow(await response.json(), address);
+}
+
+export const poolFlowOptions = (address: string) => ({
+  queryKey: ["meteora-pool-flow", address],
+  queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolFlow(address, signal),
+  staleTime: 10 * 60_000,
+  retry: 1,
+});

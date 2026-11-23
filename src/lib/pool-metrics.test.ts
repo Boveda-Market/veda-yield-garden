@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dailyVolatility, poolDataHost, tvlSharePct, turnoverPct } from "./pool-metrics";
+import { dailyVolatility, parsePoolFlow, poolDataHost, tvlSharePct, turnoverPct } from "./pool-metrics";
 
 describe("dailyVolatility", () => {
   it("is the spread of day-to-day changes", () => {
@@ -54,5 +54,28 @@ describe("poolDataHost", () => {
   it("reads each pool from its own protocol", () => {
     expect(poolDataHost("7ubS3GccjhQY99AYNKXjNJqnXjaokEdfdV915xnCb96r")).toBe("dlmm.datapi.meteora.ag");
     expect(poolDataHost("8Pm2kZpnxD3hoMmt4bjStX2Pw2Z9abpbHzZxMPqxPmie")).toBe("damm-v2.datapi.meteora.ag");
+  });
+});
+
+describe("parsePoolFlow", () => {
+  const BTC = "7ubS3GccjhQY99AYNKXjNJqnXjaokEdfdV915xnCb96r";
+  const row = { pool_address: BTC, net_deposits: 43078.46, total_deposits: 2387000.9, total_withdraws: 2343922.44 };
+
+  it("keeps only the pool we asked for", () => {
+    expect(parsePoolFlow({ data: [row] }, BTC)).toEqual({ netDeposits: 43078.46, totalDeposits: 2387000.9, totalWithdraws: 2343922.44 });
+    expect(parsePoolFlow({ data: [row] }, "8Pm2kZpnxD3hoMmt4bjStX2Pw2Z9abpbHzZxMPqxPmie")).toBeNull();
+  });
+
+  it("counts the money itself when the source omits the net figure", () => {
+    const noNet = { pool_address: BTC, total_deposits: 8348.75, total_withdraws: 8355.54 };
+    expect(parsePoolFlow({ data: [noNet] }, BTC)?.netDeposits).toBeCloseTo(-6.79, 2);
+  });
+
+  it("stays unavailable instead of guessing", () => {
+    expect(parsePoolFlow({ data: [] }, BTC)).toBeNull();
+    expect(parsePoolFlow({}, BTC)).toBeNull();
+    expect(parsePoolFlow({ data: [{ pool_address: BTC }] }, BTC)).toBeNull();
+    expect(parsePoolFlow({ data: [{ pool_address: BTC, total_deposits: 5 }] }, BTC)).toBeNull();
+    expect(parsePoolFlow({ data: [{ pool_address: BTC, total_deposits: "5", total_withdraws: 1 }] }, BTC)).toBeNull();
   });
 });
