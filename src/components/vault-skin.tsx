@@ -55,7 +55,7 @@ export function VaultTitle({ vault, className = "h-8 sm:h-9" }: { vault: Pick<Va
   </span>;
   if (vault.id === "btc") return <span className={`flex items-center gap-1.5 ${className}`}>
     <img src="/tokens/btc.svg" alt="" aria-hidden width={160} height={160} className="h-[115%] w-auto shrink-0 rounded-full ring-2 ring-hot-2 drop-shadow-[0_0_10px_var(--hot)]" />
-    <span className="-rotate-2 whitespace-nowrap font-display text-[1.35em] font-black italic uppercase leading-none tracking-tight text-hot-foreground [text-shadow:0_2px_0_var(--hot-surface),0_0_8px_var(--hot-surface)]">{lang === "en" ? <><span className="text-hot-surface [text-shadow:0_1px_0_oklch(1_0_0/0.35)]">Bitcoin</span> Vault</> : <>Bóveda <span className="text-hot-surface [text-shadow:0_1px_0_oklch(1_0_0/0.35)]">Bitcoin</span></>}</span>
+    <span className="-rotate-2 whitespace-nowrap font-display text-[1.35em] font-black italic uppercase leading-none tracking-tight text-hot-foreground [text-shadow:0_2px_0_var(--hot-surface),0_0_8px_var(--hot-surface)]">{lang === "en" ? <><span className="text-hot [text-shadow:0_2px_0_var(--hot-surface),0_0_10px_var(--hot-surface)]">Bitcoin</span> Vault</> : <>Bóveda <span className="text-hot [text-shadow:0_2px_0_var(--hot-surface),0_0_10px_var(--hot-surface)]">Bitcoin</span></>}</span>
     <span className="sr-only">{t(vault.name)}</span>
   </span>;
   if (vault.id === "dcty") return <span className={`flex items-center gap-1.5 ${className}`}>
