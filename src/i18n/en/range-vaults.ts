@@ -295,6 +295,7 @@ export const rangeVaults: Record<string, string> = {
   "últimos 7 días": "last 7 days",
   "Precio de Bitcoin en los últimos 7 días": "Bitcoin price over the last 7 days",
   "Mín.": "Min",
+  "Oprime aquí para ver la bóveda": "Tap here to see the vault",
   "Máx.": "Max",
   "Miles de millones de dólares": "Billion dollars",
   "Direcciones con bitcoin": "Addresses holding bitcoin",

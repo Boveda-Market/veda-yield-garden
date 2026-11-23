@@ -54,6 +54,6 @@ export function VisitorBtcChart() {
       {!live && <div role="status" className="absolute inset-0 flex items-center justify-center gap-2 text-xs text-muted-foreground">{candles.isPending || candles.isFetching ? <><Loader2 className="size-5 animate-spin text-primary" aria-hidden />{t("Cargando gráfica…")}</> : t("Gráfica no disponible por ahora")}</div>}
     </div>
     {live && <div className="mt-1 flex justify-between text-[11px] tabular-nums text-muted-foreground"><span>{t("Mín.")} {formatCoinPrice(min)}</span><span>{t("Máx.")} {formatCoinPrice(max)}</span></div>}
-    <Link to="/app" className="mt-3 flex w-full items-center justify-center rounded-xl bg-primary px-3 py-2.5 text-sm font-bold text-primary-foreground transition active:scale-95">👉 {t("Oprime aquí para entrar a la bóveda")}</Link>
+    <Link to="/app" className="mt-3 flex w-full items-center justify-center rounded-xl bg-primary px-3 py-2.5 text-sm font-bold text-primary-foreground transition active:scale-95">👉 {t("Oprime aquí para ver la bóveda")}</Link>
   </section>;
 }
