@@ -70,6 +70,7 @@ it("opens the active portfolio card with pool details when tapping a vault that 
   const card = within(screen.getByRole("dialog"));
   expect(card.getByText("Valor estimado")).toBeInTheDocument();
   expect(card.queryByText(/Cosechar y reinvertir se activan/)).toBeNull();
-  fireEvent.click(card.getByRole("button", { name: "Detalles de la bóveda" }));
+  fireEvent.click(card.getByText("Ver detalles"));
+  fireEvent.click(card.getByRole("button", { name: /Detalles de la bóveda/ }));
   expect(onDetails).toHaveBeenCalledWith(expect.objectContaining({ id: "sol" }));
 });
