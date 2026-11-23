@@ -1852,4 +1852,10 @@ export const extra: Record<string, string> = {
   "Trump Coin mueve volumen las 24 horas. Suba o baje, la bóveda convierte esa actividad en intereses estimados en dólares, con retiro en cualquier momento.": "Trump Coin trades 24/7. Up or down, the vault turns that activity into estimated dollar interest, with withdrawals anytime.",
   "Suba o baje DCTY, cada intercambio te deja intereses.": "Up or down, every DCTY trade earns you interest.",
   "Suba o baje TRUMP, cada intercambio te deja intereses.": "Up or down, every TRUMP trade earns you interest.",
+  "Mira tu bóveda cuando quieras": "Check your vault anytime",
+  "Desde Mi Portafolio ves cuánto depositaste, cuánto tienes hoy y cuánto has ganado. Te avisamos por Telegram y en la campanita cuando el Piloto Automático mueve algo.": "In My Portfolio you see how much you deposited, what you have today and how much you have earned. We alert you on Telegram and in the bell whenever Autopilot moves something.",
+  "Sigue tus ganancias en vivo": "Track your earnings live",
+  "Abre Mi Portafolio para ver tu balance, tus ganancias y lo que tienes por cosechar. Sin hojas de cálculo ni cuentas complicadas.": "Open My Portfolio to see your balance, your earnings and what is ready to harvest. No spreadsheets or complicated math.",
+  "Tu bóveda ya está generando intereses. Síguela cuando quieras en Mi Portafolio: balance, ganancias y lo que tienes por cosechar.": "Your vault is already earning interest. Follow it anytime in My Portfolio: balance, earnings and what is ready to harvest.",
+  "Ver mi bóveda en Mi Portafolio": "See my vault in My Portfolio",
 };

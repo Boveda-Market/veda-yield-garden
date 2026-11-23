@@ -9,7 +9,7 @@ import reviewCarlos from "@/assets/review-carlos.jpg";
 import reviewValeria from "@/assets/review-valeria.jpg";
 import reviewDavid from "@/assets/review-david.jpg";
 import reviewMarisol from "@/assets/review-marisol.jpg";
-import { Target, DollarSign, Bot } from "lucide-react";
+import { Target, DollarSign, Bot, Smartphone } from "lucide-react";
 import { Lock, Gift, Search, Star, Quote, MessageSquare, Send, Activity } from "lucide-react";
 import { useI18n, useT } from "@/lib/i18n";
 import { guideHref, guidesIndexHref } from "@/components/guide-layout";
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/")({ staticData: { sitemap: true },
     { property: "og:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:image:width", content: "1200" }, { property: "og:image:height", content: "630" }, { property: "og:image:alt", content: "Bóveda GTA6 — Intereses generados por el volumen del mercado." }, { name: "twitter:image", content: `https://bovedamarket.app${sharePreview.url}` }, { property: "og:video", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:secure_url", content: `https://bovedamarket.app${shareVideo.url}` }, { property: "og:video:type", content: "video/mp4" }, { property: "og:video:width", content: "1200" }, { property: "og:video:height", content: "630" },
     { property: "og:url", content: "https://bovedamarket.app/" },
   ], links: langLinks("es", "/", "/en"),
-  scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"Bóveda Market","url":"https://bovedamarket.app/","logo":"https://bovedamarket.app/favicon.png","email":"admin@bovedamarket.app"},{"@type":"WebApplication","name":"Bóveda Market","url":"https://bovedamarket.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"es","description":"Crea una cuenta digital con Google, añade saldo y genera intereses con monedas digitales en bóvedas como GTA6 Coin y Trump Coin. Seguridad de Privy y depósitos gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"HowTo","name":"Cómo empezar en Bóveda Market","inLanguage":"es","step":[{"@type":"HowToStep","position":1,"name":"Crea una cuenta digital","text":"Crea una cuenta digital con tu email de Google, protegida por Privy."},{"@type":"HowToStep","position":2,"name":"Añade saldo","text":"Añade saldo a tu cuenta digital en dólares digitales."},{"@type":"HowToStep","position":3,"name":"Abre tu bóveda en un solo toque","text":"Confirmas una vez y el sistema compra las monedas a precio de mercado, arma la bóveda y empieza a generar intereses."}]}]}) }] }), component: Landing,
+  scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"Bóveda Market","url":"https://bovedamarket.app/","logo":"https://bovedamarket.app/favicon.png","email":"admin@bovedamarket.app"},{"@type":"WebApplication","name":"Bóveda Market","url":"https://bovedamarket.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"es","description":"Crea una cuenta digital con Google, añade saldo y genera intereses con monedas digitales en bóvedas como GTA6 Coin y Trump Coin. Seguridad de Privy y depósitos gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"HowTo","name":"Cómo empezar en Bóveda Market","inLanguage":"es","step":[{"@type":"HowToStep","position":1,"name":"Crea una cuenta digital","text":"Crea una cuenta digital con tu email de Google, protegida por Privy."},{"@type":"HowToStep","position":2,"name":"Añade saldo","text":"Añade saldo a tu cuenta digital en dólares digitales."},{"@type":"HowToStep","position":3,"name":"Abre tu bóveda en un solo toque","text":"Confirmas una vez y el sistema compra las monedas a precio de mercado, arma la bóveda y empieza a generar intereses."},{"@type":"HowToStep","position":4,"name":"Sigue tus ganancias en vivo","text":"Desde Mi Portafolio ves tu balance, tus ganancias y lo que tienes por cosechar."}]}]}) }] }), component: Landing,
 });
 
 const FAQS = [
@@ -69,12 +69,14 @@ const CALM_HOLD = [
   { icon: DollarSign, title: "Entras fácil solo con dólares", body: "Sin procesos técnicos ni compras confusas. Recargas con tarjeta, Apple Pay o transferencia y el sistema se encarga de todo el armado automáticamente." },
   { icon: Bot, title: "Piloto Automático: un bot con una sola misión", body: "Vigilar y optimizar 24/7 para que tú no tengas que mirar pantallas. Su única tarea es mantener tu bóveda activa y generando comisiones, tanto en las subidas como en las bajadas del mercado." },
   { icon: ShieldCheck, title: "100% bajo tu autocustodia", body: "Paz mental total con tus fondos. El dinero nunca se entrega a Bóveda ni a terceros; vive en tu propia cuenta digital protegida por Privy y nadie puede moverlo, tocarlo o congelarlo sin tu firma." },
+  { icon: Smartphone, title: "Mira tu bóveda cuando quieras", body: "Desde Mi Portafolio ves cuánto depositaste, cuánto tienes hoy y cuánto has ganado. Te avisamos por Telegram y en la campanita cuando el Piloto Automático mueve algo." },
 ];
 
 const STEPS: [string, string][] = [
   ["Crea una cuenta digital con tu email de Google", "La cuenta digital y sus llaves de seguridad se crean al instante."],
   ["Añade saldo a tu cuenta digital", "Recarga dólares digitales con Apple Pay, Tarjeta de Crédito o Coinbase."],
   ["Abre tu bóveda en un solo toque", "Eliges la bóveda y confirmas una vez: el sistema compra las monedas a precio de mercado, arma tu bóveda y empieza a generar intereses las 24 horas. También puedes jugar las rondas relámpago de Doble o Nada. Retira al banco o a Coinbase cuando quieras."],
+  ["Sigue tus ganancias en vivo", "Abre Mi Portafolio para ver tu balance, tus ganancias y lo que tienes por cosechar. Sin hojas de cálculo ni cuentas complicadas."],
 ];
 
 const REVIEWS = [
@@ -156,13 +158,13 @@ export function Landing() {
 
       <section aria-label={t("Cómo comenzar en Bóveda Market")} className="mb-4 py-8">
         <h2 className="font-display text-2xl font-bold">{t("Cómo comenzar en Bóveda Market")}</h2>
-        <ol className="mt-6 grid gap-4 sm:grid-cols-3">{STEPS.map(([h, d], i) => <li key={h} className="rounded-2xl border border-border bg-card p-5"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-display font-bold text-primary-foreground">{i + 1}</span><p className="mt-4 font-display font-semibold">{t(h)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ol>
+        <ol className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{STEPS.map(([h, d], i) => <li key={h} className="rounded-2xl border border-border bg-card p-5"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-display font-bold text-primary-foreground">{i + 1}</span><p className="mt-4 font-display font-semibold">{t(h)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ol>
       </section>
 
       <section aria-label={t("Abre tu bóveda y olvídate de las gráficas")} className="mb-4 py-8">
         <h2 className="font-display text-2xl font-bold">{t("Abre tu bóveda y olvídate de las gráficas")}</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("En el cripto tradicional comprar y holdear da ansiedad. En Bóveda Market, la volatilidad te paga intereses en cada subida y cada bajada.")}</p>
-        <ul className="mt-5 grid gap-3 sm:grid-cols-2">{CALM_HOLD.map(({ icon: Icon, title, body }) => <li key={title} className="rounded-2xl border border-border bg-card p-4"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={18} aria-hidden="true" /></span><p className="mt-3 font-display font-semibold">{t(title)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(body)}</p></li>)}</ul>
+        <ul className="mt-5 grid gap-3 sm:grid-cols-2">{CALM_HOLD.map(({ icon: Icon, title, body }) => <li key={title} className="rounded-2xl sm:last:odd:col-span-2 border border-border bg-card p-4"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={18} aria-hidden="true" /></span><p className="mt-3 font-display font-semibold">{t(title)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(body)}</p></li>)}</ul>
         <p className="mt-4 rounded-2xl border border-primary/30 bg-primary/5 p-4 text-center font-display text-sm font-semibold leading-6">{t("El hold tradicional es esperar y rezar para que el precio suba. Holdear en Bóveda es cobrar comisiones mientras duermes, pase lo que pase con el precio.")}</p>
       </section>
 
