@@ -391,6 +391,23 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
   --gradient-hot-surface: radial-gradient(110% 90% at 100% 0%, oklch(0.75 0.15 85 / 0.45), transparent 55%), radial-gradient(90% 80% at 0% 100%, oklch(0.55 0.23 27 / 0.45), transparent 60%), linear-gradient(var(--hot-surface), var(--hot-surface));
   --shadow-hot: 0 18px 50px -18px oklch(0.8 0.15 82 / 0.65), 0 6px 22px -12px oklch(0.55 0.23 27 / 0.7);
 }
+/* Bitcoin vault skin: bitcoin.org orange (#F7931A) and gold on a deep charcoal ground. Same in Día and Noche. */
+.vault-btc {
+  --hot: #f7931a;
+  --hot-2: oklch(0.86 0.14 75);
+  --hot-3: oklch(0.6 0.17 45);
+  --hot-surface: oklch(0.17 0.012 60);
+  --hot-foreground: oklch(0.98 0.01 80);
+  --hot-muted: oklch(0.8 0.03 70);
+  --hot-buy: oklch(0.85 0.15 80);
+  --hot-sell: oklch(0.65 0.2 35);
+  --gradient-hot: linear-gradient(100deg, oklch(0.6 0.17 45), #f7931a 50%, oklch(0.86 0.14 75));
+  --gradient-hot-surface: radial-gradient(110% 90% at 100% 0%, oklch(0.72 0.17 60 / 0.42), transparent 55%), radial-gradient(90% 80% at 0% 100%, oklch(0.6 0.17 45 / 0.3), transparent 60%), linear-gradient(var(--hot-surface), var(--hot-surface));
+  --shadow-hot: 0 18px 50px -18px oklch(0.72 0.17 60 / 0.7);
+}
+.vault-btc.btc-pill {
+  background-image: radial-gradient(70% 140% at 100% 50%, oklch(0.72 0.17 60 / 0.55), transparent 60%), repeating-linear-gradient(90deg, transparent 0 18px, oklch(0.98 0.01 80 / 0.07) 18px 20px), linear-gradient(var(--hot-surface), var(--hot-surface));
+}
 .vault-trump.trump-pill {
   background-image: linear-gradient(90deg, var(--trump-blue) 0 58%, transparent 58%), repeating-linear-gradient(180deg, var(--trump-red) 0 6px, var(--trump-white) 6px 12px);
 }

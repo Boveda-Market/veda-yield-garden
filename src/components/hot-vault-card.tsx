@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Check, Copy, Plus } from "lucide-react";
 import { CHAIN_POOLS } from "@/lib/solana-data";
 import { useT } from "@/lib/i18n";
-import { DctySkyline, TrumpFlag, VaultTitle, vaultSkin } from "@/components/vault-skin";
+import { BitcoinBlocks, DctySkyline, TrumpFlag, VaultTitle, vaultSkin } from "@/components/vault-skin";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { fetchPoolStats } from "@/lib/pool-stats";
 import { marketPulse, type Pulse } from "@/lib/market-pulse";
@@ -26,7 +26,7 @@ export function Sunset() {
 /** Sunset banner with the GTA-style title, shared by the vault card and the active portfolio card. */
 export function HotBanner({ vault, children, className = "" }: { vault: Vault; children?: ReactNode; className?: string }) {
   return <div className={`relative flex items-center justify-between gap-3 overflow-hidden bg-[image:var(--gradient-hot)] px-2.5 py-2 text-hot-foreground sm:px-4 sm:py-3 ${vaultSkin(vault.id)} ${className}`}>
-    {vault.id === "dcty" ? <DctySkyline /> : vault.id === "trump" ? <TrumpFlag /> : <Sunset />}
+    {vault.id === "dcty" ? <DctySkyline /> : vault.id === "trump" ? <TrumpFlag /> : vault.id === "btc" ? <BitcoinBlocks /> : <Sunset />}
     <h3 className="relative min-w-0"><VaultTitle vault={vault} className={vault.id === "trump" ? "h-9 sm:h-11" : "h-6 sm:h-9"} /></h3>
     {children && <div className="relative flex shrink-0 flex-col items-end gap-1">{children}</div>}
   </div>;

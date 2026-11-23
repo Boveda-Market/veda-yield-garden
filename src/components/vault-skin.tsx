@@ -7,7 +7,7 @@ import dctyLogo from "@/assets/dcty-logo.png";
 import trumpLogo from "@/assets/trump-logo.png";
 
 /** CSS skin that re-colours the shared high-octane (--hot) tokens per vault; GTA6 keeps the default sunset palette. */
-export const vaultSkin = (id: string | undefined) => (id === "dcty" ? "vault-dcty" : id === "trump" ? "vault-trump" : "");
+export const vaultSkin = (id: string | undefined) => (id === "dcty" ? "vault-dcty" : id === "trump" ? "vault-trump" : id === "btc" ? "vault-btc" : "");
 
 /** DacityCoin night city: neon skyline over the water with a pink speedboat crossing (original art, no game assets). */
 export function DctySkyline() {
@@ -33,6 +33,17 @@ export function TrumpFlag() {
   return <svg aria-hidden="true" viewBox="0 0 400 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full"><rect y="96" width="400" height="4" fill="var(--hot)" /></svg>;
 }
 
+/** Bitcoin: a glowing chain of blocks over a dark ground (original vector art on the bitcoin.org orange). */
+export function BitcoinBlocks() {
+  return <svg aria-hidden="true" viewBox="0 0 400 100" preserveAspectRatio="xMaxYMid slice" className="pointer-events-none absolute inset-0 h-full w-full">
+    <g fill="none" stroke="var(--hot-foreground)" strokeOpacity="0.28" strokeWidth="2">
+      {[0, 1, 2, 3].map((i) => <rect key={i} x={222 + i * 44} y={i % 2 ? 50 : 30} width="30" height="30" rx="5" />)}
+      {[0, 1, 2].map((i) => <path key={i} d={`M${252 + i * 44} ${i % 2 ? 65 : 45} L${266 + i * 44} ${i % 2 ? 45 : 65}`} />)}
+    </g>
+    <text x="360" y="92" textAnchor="middle" fontSize="70" fontWeight="900" fill="var(--hot-foreground)" fillOpacity="0.12" transform="rotate(14 360 70)">₿</text>
+  </svg>;
+}
+
 /** Per-vault title lettering used by banners, cards and the deposit sheet. */
 export function VaultTitle({ vault, className = "h-8 sm:h-9" }: { vault: Pick<Vault, "id" | "name">; className?: string }) {
   const t = useT();
@@ -40,6 +51,11 @@ export function VaultTitle({ vault, className = "h-8 sm:h-9" }: { vault: Pick<Va
   if (vault.id === "trump") return <span className={`flex items-center gap-1.5 ${className}`}>
     <img src={trumpLogo} alt="" aria-hidden width={160} height={160} className="h-[115%] w-auto shrink-0 rounded-full ring-2 ring-hot-2 drop-shadow-[0_0_10px_var(--hot-2)]" />
     <span className="-rotate-2 whitespace-nowrap font-display text-[1.35em] font-black italic uppercase leading-none tracking-tight text-hot-foreground [text-shadow:0_2px_0_var(--hot-surface),0_0_8px_var(--hot-surface)]">{lang === "en" ? <><span className="trump-gold">TRUMP</span> Vault</> : <>Bóveda <span className="trump-gold">TRUMP</span></>}<span className="mt-1 flex w-fit rotate-0 rounded-sm bg-[color:var(--trump-blue,#111c35)] px-1.5 py-px text-[0.45em] font-bold not-italic tracking-[0.35em] text-[color:var(--trump-gold,#caa75e)] [text-shadow:none] ring-1 ring-[color:var(--trump-gold,#caa75e)]/60">{lang === "en" ? "OFFICIAL" : "OFICIAL"}</span></span>
+    <span className="sr-only">{t(vault.name)}</span>
+  </span>;
+  if (vault.id === "btc") return <span className={`flex items-center gap-1.5 ${className}`}>
+    <img src="/tokens/btc.svg" alt="" aria-hidden width={160} height={160} className="h-[115%] w-auto shrink-0 rounded-full ring-2 ring-hot-2 drop-shadow-[0_0_10px_var(--hot)]" />
+    <span className="-rotate-2 whitespace-nowrap font-display text-[1.35em] font-black italic uppercase leading-none tracking-tight text-hot-foreground [text-shadow:0_2px_0_var(--hot-surface),0_0_8px_var(--hot-surface)]">{lang === "en" ? <><span className="text-hot-surface [text-shadow:0_1px_0_oklch(1_0_0/0.35)]">Bitcoin</span> Vault</> : <>Bóveda <span className="text-hot-surface [text-shadow:0_1px_0_oklch(1_0_0/0.35)]">Bitcoin</span></>}</span>
     <span className="sr-only">{t(vault.name)}</span>
   </span>;
   if (vault.id === "dcty") return <span className={`flex items-center gap-1.5 ${className}`}>

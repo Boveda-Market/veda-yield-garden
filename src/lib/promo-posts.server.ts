@@ -2,7 +2,7 @@ import { VAULTS } from "./vaults";
 import { fetchPoolYield } from "./pool-yield";
 import { promoKindFor, promoPost, type PromoVault } from "./promo-posts";
 
-const HOT = ["trump", "dcty", "gta6"];
+const HOT = ["btc", "trump", "dcty", "gta6"];
 
 /** Builds the cycle's promo from live volume/APR of a high-octane vault (rotates by cycle, skips vaults without data). */
 export async function buildPromo(cycle: number) {

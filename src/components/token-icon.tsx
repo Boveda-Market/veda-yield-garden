@@ -1,5 +1,5 @@
 const LOGOS: Record<string, string> = {
-  BTC: "/tokens/btc.svg", ETH: "/tokens/eth.svg", SOL: "/tokens/sol.svg", USDC: "/tokens/usdc.svg", USDT: "/tokens/usdt.svg",
+  BTC: "/tokens/btc.svg", CBBTC: "/tokens/btc.svg", ETH: "/tokens/eth.svg", SOL: "/tokens/sol.svg", USDC: "/tokens/usdc.svg", USDT: "/tokens/usdt.svg",
   JUP: "/tokens/jup.png", JUPUSD: "/tokens/jupusd.png", BONK: "/tokens/bonk.jpg", WIF: "/tokens/wif.jpg", MET: "/tokens/met.svg",
 };
 

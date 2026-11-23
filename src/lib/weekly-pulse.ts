@@ -5,6 +5,7 @@ export const VAULT_NARRATIVE: Record<string, { icon: string; theme: string; stor
   gta6: { icon: "🎮", theme: "Narrativa GTA VI", story: "Cada rumor, tráiler o filtración de Rockstar sobre Vice City dispara compras y ventas." },
   dcty: { icon: "🌆", theme: "Narrativa GTA VI", story: "DacityCoin, la cripto vista en GTA 6, se mueve con cada noticia del juego." },
   trump: { icon: "🏛️", theme: "Narrativa política", story: "Cada titular, discurso o decisión económica de Trump sacude el precio al instante." },
+  btc: { icon: "₿", theme: "Narrativa Bitcoin", story: "Cada dato económico, noticia de los grandes fondos o movimiento de las ballenas mueve el precio de Bitcoin." },
   sol: { icon: "⚡", theme: "Red principal", story: "Termómetro del ánimo general: cuando el mercado se activa, sube el volumen." },
   met: { icon: "🧱", theme: "Infraestructura", story: "Se mueve con la actividad de los intercambios descentralizados." },
 };

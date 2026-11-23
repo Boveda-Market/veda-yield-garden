@@ -19,7 +19,7 @@ describe("GTA6 video popup", () => {
     expect(holderRankDue([pos("gta6")], null, L + D)).toBe(true);
     expect(holderRankDue([pos("gta6")], L, L + 2 * D - 1)).toBe(false);
     expect(holderRankDue([pos("gta6")], L, L + 2 * D)).toBe(true);
-    expect(holderRankDue([pos("gta6")], null, L + 22 * D)).toBe(false);
+    expect(holderRankDue([pos("gta6")], null, Math.max(...Object.values(LAUNCH)) + 22 * D)).toBe(false);
   });
   it("after moving vaults it stays silent until a new vault is added", () => {
     expect(holderRankDue([pos("gta6")], null, L + D, HOT_IDS)).toBe(false);
