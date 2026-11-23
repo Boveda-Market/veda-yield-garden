@@ -1,12 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { pickHeroVariant, HERO_VARIANTS, GTA6_HERO, GTA6_HEROES } from "./hero-variants";
-const CALM = HERO_VARIANTS.findIndex((v) => v.theme === "calm");
+import { pickHeroVariant, HERO_VARIANTS, HERO_WEIGHTS } from "./hero-variants";
+const idx = (t?: string) => HERO_VARIANTS.findIndex((v) => v.theme === t);
+const share = (i: number) => HERO_WEIGHTS[i] ?? 0;
 describe("pickHeroVariant", () => {
-  it("has the original, GTA6, Trump, Doble o Nada and the calm-hold variant", () => expect(HERO_VARIANTS.length).toBe(5));
-  it("the calm-hold variant is reachable with ?v=4", () => { expect(CALM).toBe(4); expect(pickHeroVariant("4", "1", 0)).toBe(4); });
-  it("link ?v=1 forces the GTA6 variant", () => expect(pickHeroVariant("1", "2", 0.9)).toBe(GTA6_HERO));
-  it("keeps the saved variant for returning visitors", () => expect(pickHeroVariant(null, "2", 0.1)).toBe(2));
-  it("40% of new visitors see GTA6", () => { expect(GTA6_HEROES).toEqual([1]); expect(pickHeroVariant(null, null, 0)).toBe(1); expect(pickHeroVariant(null, null, 0.39)).toBe(1); expect(pickHeroVariant(null, null, 0.4)).not.toBe(1); });
-  it("the other 60% split evenly, calm hold included", () => { expect(pickHeroVariant(null, null, 0.4)).toBe(0); expect(pickHeroVariant(null, null, 0.99)).toBe(CALM); });
-  it("ignores invalid values", () => expect(pickHeroVariant("99", "x", 0.99)).toBe(CALM));
+  it("has 5 variants; calm hold is ?v=4", () => { expect(HERO_VARIANTS.length).toBe(5); expect(idx("calm")).toBe(4); });
+  it("shares: GTA6 30%, calm 25%, Trump 25%, original 10%, Doble 10%", () => {
+    expect(share(idx("gta6"))).toBe(0.3); expect(share(idx("calm"))).toBe(0.25); expect(share(idx("trump"))).toBe(0.25);
+    expect(share(0)).toBe(0.1); expect(share(idx("doble"))).toBe(0.1);
+    expect(HERO_WEIGHTS.reduce((a, b) => a + b, 0)).toBeCloseTo(1);
+  });
+  it("forced link wins", () => expect(pickHeroVariant("4", "1", 0)).toBe(4));
+  it("keeps the saved variant", () => expect(pickHeroVariant(null, "2", 0.1)).toBe(2));
+  it("random draw follows the weights", () => { expect(pickHeroVariant(null, null, 0.05)).toBe(0); expect(pickHeroVariant(null, null, 0.15)).toBe(1); expect(pickHeroVariant(null, null, 0.99)).toBe(4); });
+  it("ignores invalid values", () => expect(pickHeroVariant("99", "x", 0.99)).toBe(4));
 });

@@ -10,22 +10,22 @@ export const HERO_VARIANTS: readonly { title: string; sub: string; theme?: "gta6
 /** Index of the GTA6 launch variant and the share of new visitors who see it. */
 export const GTA6_HERO = HERO_VARIANTS.findIndex((v) => v.theme === "gta6");
 export const GTA6_HEROES = HERO_VARIANTS.map((v, i) => (v.theme === "gta6" ? i : -1)).filter((i) => i >= 0);
-export const GTA6_HERO_SHARE = 0.4;
+export const GTA6_HERO_SHARE = 0.3;
 
 export const HERO_KEY = "boveda-hero-v";
 
-/** Pick a variant: forced URL value wins, then the saved one, else random. */
+/** Share of new visitors per variant (same order as HERO_VARIANTS, sums to 1): GTA6 launch, then calm hold and Trump boosted. */
+export const HERO_WEIGHTS: readonly number[] = HERO_VARIANTS.map((v) => ({ gta6: 0.3, calm: 0.25, trump: 0.25, doble: 0.1 } as Record<string, number>)[v.theme ?? ""] ?? 0.1);
+
+/** Pick a variant: forced URL value wins, then the saved one, else weighted random. */
 export function pickHeroVariant(forced: string | null, saved: string | null, rand: number): number {
   const n = HERO_VARIANTS.length;
   const ok = (s: string | null) => s !== null && /^\d+$/.test(s) && Number(s) < n;
   if (ok(forced)) return Number(forced);
   if (ok(saved)) return Number(saved);
-  const g = GTA6_HEROES;
-  if (g.length && rand < GTA6_HERO_SHARE) return g[Math.min(g.length - 1, Math.floor((rand / GTA6_HERO_SHARE) * g.length))]!;
-  // Remaining visitors split evenly among the other variants.
-  const others = HERO_VARIANTS.map((_, i) => i).filter((i) => !g.includes(i));
-  const r = g.length ? (rand - GTA6_HERO_SHARE) / (1 - GTA6_HERO_SHARE) : rand;
-  return others[Math.min(others.length - 1, Math.floor(r * others.length))]!;
+  let acc = 0;
+  for (let i = 0; i < n; i++) { acc += HERO_WEIGHTS[i] ?? 0; if (rand < acc) return i; }
+  return n - 1;
 }
 
 /** Preview host or a forced ?v= link: show the full landing (no returning-user shortcut) so variants can be reviewed. */
