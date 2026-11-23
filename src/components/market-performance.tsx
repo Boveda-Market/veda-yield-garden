@@ -9,10 +9,11 @@ import { chartRangeFor, cumulativeInterest, fetchPoolCandles, type CandleRange }
 import { fetchPoolStats } from "@/lib/pool-stats";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import type { Vault } from "@/lib/vaults";
+import { formatCoinPrice } from "@/lib/format-price";
 
 const W = 400, H = 300, L = 6, R = 394, TOP = 12, MID = 150, BOT = 290;
 const usd = (v: number | null | undefined, d = 0) => v == null ? "—" : `$${v.toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d })}`;
-const price = (v: number) => `$${v.toPrecision(4)}`;
+const price = formatCoinPrice;
 
 function smooth(pts: { x: number; y: number }[]) {
   if (pts.length < 2) return "";

@@ -1,4 +1,5 @@
 import { useT } from "@/lib/i18n";
+import { formatCoinPrice } from "@/lib/format-price";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Check, Copy, RefreshCw, TrendingDown, TrendingUp, Users } from "lucide-react";
@@ -70,7 +71,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
         </div>}
         <div className="grid grid-cols-3 gap-2">{([["1 h", stats?.change1h], ["6 h", stats?.change6h], ["24 h", stats?.change24h]] as const).map(([k, v]) => <div key={k} className={`rounded-lg p-2 text-center ${v == null ? "bg-muted" : v >= 0 ? "bg-primary/10" : "bg-destructive/10"}`}><p className="text-[11px] text-muted-foreground">{k}</p><p className={`flex items-center justify-center gap-1 font-display font-bold tabular-nums ${v == null ? "" : v >= 0 ? "text-primary" : "text-destructive"}`}>{v == null ? "—" : <>{v >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}{v > 0 ? "+" : ""}{number(v)}%</>}</p></div>)}</div>
         <dl className="grid grid-cols-2 gap-x-5 gap-y-6 py-2">
-          <Metric label={`Precio ${sym} · USD`} value={usd(stats?.price, 6)} />
+          <Metric label={`Precio ${sym} · USD`} value={formatCoinPrice(stats?.price)} />
           <Metric label={t("Volumen · 24 h · USD")} value={usd(stats?.volume24h)} />
           <Metric label={t("Liquidez en el pool · USD")} value={usd(stats?.liquidityUsd)} />
           <Metric label={t("Valor de mercado · USD")} value={usd(stats?.marketCap, 0)} />
