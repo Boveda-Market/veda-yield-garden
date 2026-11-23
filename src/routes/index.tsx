@@ -9,6 +9,7 @@ import reviewCarlos from "@/assets/review-carlos.jpg";
 import reviewValeria from "@/assets/review-valeria.jpg";
 import reviewDavid from "@/assets/review-david.jpg";
 import reviewMarisol from "@/assets/review-marisol.jpg";
+import { Target, DollarSign, Bot } from "lucide-react";
 import { Lock, Gift, Search, Star, Quote, MessageSquare, Send, Activity } from "lucide-react";
 import { useI18n, useT } from "@/lib/i18n";
 import { guideHref, guidesIndexHref } from "@/components/guide-layout";
@@ -60,6 +61,13 @@ const ANTI_SCAM: [string, string][] = [
   ["Sin custodia interna", "En una estafa los fondos se entregan a la empresa. Aquí el saldo vive en la cuenta digital del titular, protegida por Privy: ni el equipo de Bóveda Market ni terceros pueden congelarlo o moverlo."],
   ["Sin «tarifas para descongelar»", "Nunca se cobra para poder retirar. Los retiros van a Coinbase, banco o Cash App en cualquier momento."],
   ["Sin contraseñas expuestas", "Acceso con Google (recomendado) o huella, protegido por verificación en 2 pasos y el propio dispositivo. Bóveda Market nunca pide contraseñas ni frases secretas."],
+];
+
+const CALM_HOLD = [
+  { icon: Target, title: "Bóvedas curadas por el equipo", body: "Cero estrés de adivinar. Solo seleccionamos activos con volumen real y alta demanda en el mercado, para que no tengas que investigar cientos de proyectos ni leer noticias financieras." },
+  { icon: DollarSign, title: "Entras fácil solo con dólares", body: "Sin procesos técnicos ni compras confusas. Recargas con tarjeta, Apple Pay o transferencia y el sistema se encarga de todo el armado automáticamente." },
+  { icon: Bot, title: "Piloto Automático: un bot con una sola misión", body: "Vigilar y optimizar 24/7 para que tú no tengas que mirar pantallas. Su única tarea es mantener tu bóveda activa y generando comisiones, tanto en las subidas como en las bajadas del mercado." },
+  { icon: ShieldCheck, title: "100% bajo tu autocustodia", body: "Paz mental total con tus fondos. El dinero nunca se entrega a Bóveda ni a terceros; vive en tu propia cuenta digital protegida por Privy y nadie puede moverlo, tocarlo o congelarlo sin tu firma." },
 ];
 
 const STEPS: [string, string][] = [
@@ -145,6 +153,13 @@ export function Landing() {
       <section aria-label={t("Cómo comenzar en Bóveda Market")} className="mb-4 py-8">
         <h2 className="font-display text-2xl font-bold">{t("Cómo comenzar en Bóveda Market")}</h2>
         <ol className="mt-6 grid gap-4 sm:grid-cols-3">{STEPS.map(([h, d], i) => <li key={h} className="rounded-2xl border border-border bg-card p-5"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-display font-bold text-primary-foreground">{i + 1}</span><p className="mt-4 font-display font-semibold">{t(h)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ol>
+      </section>
+
+      <section aria-label={t("Abre tu bóveda y olvídate de las gráficas")} className="mb-4 py-8">
+        <h2 className="font-display text-2xl font-bold">{t("Abre tu bóveda y olvídate de las gráficas")}</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("En el cripto tradicional comprar y holdear da ansiedad. En Bóveda Market, la volatilidad te paga intereses en cada subida y cada bajada.")}</p>
+        <ul className="mt-5 grid gap-3 sm:grid-cols-2">{CALM_HOLD.map(({ icon: Icon, title, body }) => <li key={title} className="rounded-2xl border border-border bg-card p-4"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={18} aria-hidden="true" /></span><p className="mt-3 font-display font-semibold">{t(title)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(body)}</p></li>)}</ul>
+        <p className="mt-4 rounded-2xl border border-primary/30 bg-primary/5 p-4 text-center font-display text-sm font-semibold leading-6">{t("El hold tradicional es esperar y rezar para que el precio suba. Holdear en Bóveda es cobrar comisiones mientras duermes, pase lo que pase con el precio.")}</p>
       </section>
 
       <section aria-label={t("Doble o Nada")} className="mb-4 grid items-center gap-6 py-8 md:grid-cols-2">
