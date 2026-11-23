@@ -3,7 +3,6 @@ import dobleLogo from "@/assets/doble-o-nada-logo.png";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { DobleBannerSlide } from "@/components/doble-banners";
-import { DctyBannerSlide } from "@/components/dcty-banners";
 import { TrumpBannerSlide } from "@/components/trump-banners";
 import { BtcBannerSlide } from "@/components/btc-banners";
 import { vaultSkin } from "@/components/vault-skin";
@@ -19,12 +18,14 @@ import type { Vault } from "@/lib/vaults";
 import { ChevronRight, Zap } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { VAULTS } from "@/lib/vaults";
-import { DuelLines, Gta6RotatingBanner } from "@/components/home-gta6";
+import { DuelLines } from "@/components/home-gta6";
 
-const STEPS = 15;
+const STEPS = 9;
+/** Rotation order per round; GTA6 and DCTY stay on their vault cards but left the rotation. */
+const KINDS = ["trump", "doble", "btc"] as const;
 const STEP_KEY = "boveda:wallet-banner";
 
-/** Top rotation step: GTA6, Doble o Nada, DCTY, TRUMP and Bitcoin slides take turns every 7 s (step % 5), starting on the next one each visit. */
+/** Top rotation step: TRUMP, Doble o Nada and Bitcoin slides take turns every 7 s (KINDS), starting on the next one each visit. */
 function useBannerStep() {
   const [step, setStep] = useState(0);
   const [tick, setTick] = useState(0);
@@ -52,7 +53,7 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
   const t = useT();
   const vaults = useWalletVaults(wallet ?? "");
   const all = wallet && vaults.data?.success ? vaults.data.data.positions : [];
-  const mine = all.find((p) => p.vaultId === "gta6"), mineDcty = all.find((p) => p.vaultId === "dcty"), mineTrump = all.find((p) => p.vaultId === "trump"), mineBtc = all.find((p) => p.vaultId === "btc");
+  const mineTrump = all.find((p) => p.vaultId === "trump"), mineBtc = all.find((p) => p.vaultId === "btc");
   // Which high-octane vault popup is open (GTA6 or DCTY); null when closed.
   const [openId, setOpenId] = useState<string | null>(null);
   const open = openId !== null, setOpen = (v: boolean) => { if (!v) setOpenId(null); };
@@ -66,31 +67,29 @@ export function WalletHeroShortcuts({ wallet }: { wallet?: string }) {
   const move = (p: ChainPosition, target: Vault, rotate = false) => { if (!isOperableVault(p.vaultId) || !isOperableVault(target.id) || p.locked || (target.id === p.vaultId && !rotate)) return; setOpen(false); setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target, ...(rotate ? { rotate: true } : {}) }); };
   const refetch = () => void vaults.refetch();
   const ctaFor = (m: ChainPosition | undefined) => m ? <><span className="truncate">{m.outOfRange ? <><Zap size={14} aria-hidden className="mr-1 inline" />{t("Piloto activo")}</> : <>👉 {t("Ver ganancias")}</>}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : <><span>👉 {t("Oprime aquí para depositar")}</span><ChevronRight size={16} aria-hidden /></>;
-  const cta = mine ? <><span className="truncate">{mine.outOfRange ? <><Zap size={14} aria-hidden className="mr-1 inline" />{t("Piloto activo")}</> : <>👉 {t("Ver ganancias")}</>}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : <><span>👉 {t("Oprime aquí para depositar")}</span><ChevronRight size={16} aria-hidden /></>;
-  const sub = t("Intereses con el volumen de GTA6");
   const [step, pickSlide] = useBannerStep();
   const rail = useRef<HTMLDivElement>(null);
   const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const layer = "h-32 w-full shrink-0 snap-center overflow-hidden";
-  // Auto-rotation slides the rail across all 15 slides; a finger swipe picks the slide it settles on.
+  // Auto-rotation slides the rail across all slides; a finger swipe picks the slide it settles on.
   useEffect(() => { const el = rail.current; if (!el) return; const left = step * el.clientWidth; if (Math.abs(el.scrollLeft - left) > 4) el.scrollTo({ left, behavior: "smooth" }); }, [step]);
   const onRailScroll = () => { if (scrollTimer.current) clearTimeout(scrollTimer.current); scrollTimer.current = setTimeout(() => { const el = rail.current; if (!el || !el.clientWidth) return; const idx = Math.round(el.scrollLeft / el.clientWidth); if (idx !== step && idx >= 0 && idx < STEPS) pickSlide(idx); }, 120); };
   const slide = (k: number) => {
-    const kd = k % 5, i = Math.floor(k / 5);
-    if (kd === 1) return <div key={k} className={layer}><Link to="/mercados" className="duel-ring block h-full rounded-2xl p-[2px] shadow-[var(--shadow-duel)] transition-transform active:scale-[0.98]"><DobleBannerSlide index={i} /></Link></div>;
-    const id = kd === 0 ? "gta6" : kd === 2 ? "dcty" : kd === 3 ? "trump" : "btc";
-    const m = kd === 0 ? mine : kd === 2 ? mineDcty : kd === 3 ? mineTrump : mineBtc;
-    const body = kd === 4 ? <BtcBannerSlide index={i} cta={ctaFor(mineBtc)} /> : kd === 0 ? <Gta6RotatingBanner cta={cta} sub={sub} index={i} dots={false} /> : kd === 2 ? <DctyBannerSlide index={i} cta={ctaFor(mineDcty)} /> : <TrumpBannerSlide index={i} cta={mineTrump ? <><span className="trump-gold truncate font-display text-xs font-black uppercase">🇺🇸 {t("Moneda del presidente")}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : ctaFor(mineTrump)} />;
-    return <div key={k} className={`${layer} ${kd === 2 ? "vault-dcty" : kd === 3 ? "vault-trump" : kd === 4 ? "vault-btc" : ""}`}>
+    const kind = KINDS[k % KINDS.length]!, i = Math.floor(k / KINDS.length);
+    if (kind === "doble") return <div key={k} className={layer}><Link to="/mercados" className="duel-ring block h-full rounded-2xl p-[2px] shadow-[var(--shadow-duel)] transition-transform active:scale-[0.98]"><DobleBannerSlide index={i} /></Link></div>;
+    const id = kind;
+    const m = kind === "trump" ? mineTrump : mineBtc;
+    const body = kind === "btc" ? <BtcBannerSlide index={i} cta={ctaFor(mineBtc)} /> : <TrumpBannerSlide index={i} cta={mineTrump ? <><span className="trump-gold truncate font-display text-xs font-black uppercase">🇺🇸 {t("Moneda del presidente")}</span><span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">{t("Activa")} →</span></> : ctaFor(mineTrump)} />;
+    return <div key={k} className={`${layer} ${kind === "trump" ? "vault-trump" : "vault-btc"}`}>
       {m ? <button type="button" onClick={() => setOpenId(id)} className="hot-ring cta-glow-hot block h-full w-full rounded-2xl p-[2px] text-left transition-transform active:scale-[0.98]">{body}</button>
       : <Link to="/app" hash={`open-${id}`} className="hot-ring cta-glow-hot block h-full rounded-2xl p-[2px] transition-transform active:scale-[0.98]">{body}</Link>}
     </div>;
   };
-  return <section aria-label={t("Bóveda GTA6")}>
+  return <section aria-label={t("Bóvedas destacadas")}>
     <div ref={rail} onScroll={onRailScroll} className="flex h-32 snap-x snap-mandatory items-stretch gap-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {Array.from({ length: STEPS }, (_, k) => slide(k))}
     </div>
-    <div aria-hidden className="mt-2 flex justify-center gap-1">{Array.from({ length: STEPS }, (_, k) => <span key={k} className={`h-1.5 rounded-full transition-all ${k === step ? "w-4" : "w-1.5 opacity-40"} ${k % 5 === 0 ? "bg-hot" : k % 5 === 1 ? "bg-bolt-neon" : k % 5 === 2 ? "bg-dcty" : k % 5 === 3 ? "bg-[#c8102e]" : "bg-[#f7931a]"}`} />)}</div>
+    <div aria-hidden className="mt-2 flex justify-center gap-1">{Array.from({ length: STEPS }, (_, k) => <span key={k} className={`h-1.5 rounded-full transition-all ${k === step ? "w-4" : "w-1.5 opacity-40"} ${KINDS[k % KINDS.length] === "doble" ? "bg-bolt-neon" : KINDS[k % KINDS.length] === "trump" ? "bg-[#c8102e]" : "bg-[#f7931a]"}`} />)}</div>
     <Dialog open={open} onOpenChange={setOpen}>
       <ActionSheetContent closeLabel={t("Cerrar")} className={vaultSkin(openId ?? undefined)}>
         <DialogHeader className="pr-10 text-left"><DialogTitle className="font-display text-xl">{openId === "trump" ? t("Tu Bóveda TRUMP") : openId === "dcty" ? t("Tu Bóveda DCTY") : openId === "btc" ? t("Tu Bóveda Bitcoin") : t("Tu Bóveda GTA6")}</DialogTitle><DialogDescription className="sr-only">{t("Ver ganancias")}</DialogDescription></DialogHeader>
