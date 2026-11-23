@@ -58,12 +58,6 @@ const GUARANTEES = [
 ];
 
 
-const ANTI_SCAM: [string, string][] = [
-  ["Sin custodia interna", "En una estafa los fondos se entregan a la empresa. Aquí el saldo vive en la cuenta digital del titular, protegida por Privy: ni el equipo de Bóveda Market ni terceros pueden congelarlo o moverlo."],
-  ["Sin «tarifas para descongelar»", "Nunca se cobra para poder retirar. Los retiros van a Coinbase, banco o Cash App en cualquier momento."],
-  ["Sin contraseñas expuestas", "Acceso con Google (recomendado) o huella, protegido por verificación en 2 pasos y el propio dispositivo. Bóveda Market nunca pide contraseñas ni frases secretas."],
-];
-
 const CALM_HOLD = [
   { icon: Target, title: "Bóvedas curadas por el equipo", body: "Cero estrés de adivinar. Solo seleccionamos activos con volumen real y alta demanda en el mercado, para que no tengas que investigar cientos de proyectos ni leer noticias financieras." },
   { icon: DollarSign, title: "Entras fácil solo con dólares", body: "Sin procesos técnicos ni compras confusas. Recargas con tarjeta, Apple Pay o transferencia y el sistema se encarga de todo el armado automáticamente." },
@@ -177,12 +171,6 @@ export function Landing() {
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {TRUST.map(({ icon: Icon, title, body }) => <div key={title} className="rounded-2xl border border-border bg-card p-4"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={16} /></span><p className="mt-3 font-display text-sm font-semibold">{t(title)}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{t(body)}</p></div>)}
         </div>
-      </section>
-
-      <section aria-label={t("Por qué Bóveda Market es diferente")} className="mb-12 rounded-3xl border border-border bg-card p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t("Diferencia clave")}</p>
-        <h2 className="mt-2 font-display text-2xl font-bold">{t("Los fondos nunca se entregan a terceros")}</h2>
-        <ul className="mt-5 grid gap-4 sm:grid-cols-2">{ANTI_SCAM.map(([h, d]) => <li key={h} className="rounded-2xl border border-border bg-background p-4"><p className="font-display text-sm font-semibold">{t(h)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ul>
       </section>
 
       <section id="transparencia" className="mb-12 scroll-mt-6 rounded-3xl border border-primary/30 bg-primary/5 p-6 sm:p-8">
