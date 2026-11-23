@@ -65,7 +65,9 @@ export function PortfolioSummary({ wallet, cashUsd, positions, positionsComplete
     <h2 className="flex items-center gap-2 font-display text-base font-semibold sm:text-lg"><TrendingUp size={18} className="text-primary" />{t("Mi rendimiento")}</h2>
     <WeeklyChart records={history.records} poolPrices={history.poolPrices} money={money} vaults={byVault} />
 
-    <div className={`${tile} mt-4`}>
+    {showSince && <SinceDepositTile balance={cashUsd != null && Number.isFinite(cashUsd) && valued ? cashUsd + total + totalFees : null} since={since} loading={sinceLoading} money={money} hidden={hidden} />}
+
+    <div className={`${tile} mt-3`}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div><p className={label}><PieChart size={14} />{t("Capital trabajando")}</p><p className="mt-1 font-display text-3xl font-semibold tabular-nums">{total > 0 ? anim(total) : "—"}</p></div>
         {aprWeighted !== null && <div className="text-right"><p className="text-xs text-muted-foreground">{t("APR promedio")}</p><p className="font-display text-2xl font-bold tabular-nums text-primary">{aprWeighted.toFixed(1)}%</p></div>}
@@ -75,8 +77,6 @@ export function PortfolioSummary({ wallet, cashUsd, positions, positionsComplete
         <ul className="mt-4 grid gap-2 sm:grid-cols-2">{slices.map((s, i) => <li key={s.id} className="flex items-center justify-between gap-2 text-sm"><span className="flex min-w-0 items-center gap-2"><span className={`h-2.5 w-2.5 shrink-0 rounded-full ${COLORS[i % COLORS.length]}`} /><span className="truncate">{s.label}</span></span><span className="shrink-0 tabular-nums"><strong>{((s.value / total) * 100).toFixed(0)}%</strong> <span className="text-muted-foreground">· {money(s.value)}</span>{s.apr !== null && <span className="ml-1 text-xs text-primary">{s.apr.toFixed(0)}% APR</span>}</span></li>)}</ul>
       </> : <p className="mt-3 text-sm text-muted-foreground">{t("Cuando tengas dinero en bóvedas o jugadas verás aquí cómo se reparte.")}</p>}
     </div>
-
-    {showSince && <SinceDepositTile balance={cashUsd != null && Number.isFinite(cashUsd) && valued ? cashUsd + total + totalFees : null} since={since} loading={sinceLoading} money={money} hidden={hidden} />}
 
     <div className={`${tile} mt-3`}>
       <p className={label}><Trophy size={14} />{t("Total ganado")}<HelpTip label={t("¿Qué es Total ganado?")}>{t("Total ganado = lo ya cosechado (al precio de hoy) + lo que tienes por cosechar. No incluye subidas o bajadas del precio de tu capital.")}</HelpTip></p>
@@ -101,7 +101,7 @@ function SinceDepositTile({ balance, since, loading, money, hidden }: { balance:
   const change = since ? Number(since.changeMicro) / 1e6 : null;
   const up = (change ?? 0) >= 0;
   const tone = up ? "text-primary" : "text-destructive";
-  return <div className="mt-3 rounded-2xl border border-border bg-card p-4">
+  return <div className="mt-4 rounded-2xl border border-border bg-card p-4">
     {balance !== null && <div className="mb-3 flex items-baseline justify-between gap-3 border-b border-border pb-3"><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><Wallet size={14} />{t("Balance total")}</p><p className="font-display text-2xl font-semibold tabular-nums">{money(balance)}</p></div>}
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><PiggyBank size={14} />{t("Total depositado")}</p>
