@@ -47,3 +47,5 @@ export async function fetchPoolStats(address: string, signal?: AbortSignal) {
   if (!response.ok) throw new Error("No se pudieron consultar las estadísticas del pool.");
   return parsePoolStats(await response.json(), address);
 }
+/** Price source matches the vault token (case-insensitive: the market names cbBTC as "CBBTC" or "cbBTC"). */
+export const priceMatchesSymbol = (baseSymbol: string, symbol: string) => baseSymbol.toUpperCase().includes(symbol.toUpperCase());

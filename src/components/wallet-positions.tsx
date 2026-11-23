@@ -5,7 +5,7 @@ import { useQueries } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowDownToLine, Plus, Repeat, Sprout } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { fetchPoolStats } from "@/lib/pool-stats";
+import { fetchPoolStats, priceMatchesSymbol } from "@/lib/pool-stats";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { estimateUsd, formatUsd } from "@/lib/position-value";
 import { earningRatePerMs } from "@/lib/live-earnings";
@@ -70,7 +70,7 @@ export function WalletPositions({ wallet, only, bare }: { wallet: string; only?:
     {!bare && <div className="flex items-center justify-between gap-2"><h3 className="font-display text-base font-semibold">{t("Tus posiciones abiertas")} · {positions.length}</h3><Link to="/portfolio" className="text-xs font-medium text-primary">{t("Ver en portafolio")}</Link></div>}
     <ul className={bare ? "space-y-3" : "mt-3 space-y-3"}>{positions.map((p, i) => {
       const s = stats[i]?.data;
-      const price = s && s.baseSymbol.toUpperCase().includes(p.symbol.toUpperCase()) ? s.price : null;
+      const price = s && priceMatchesSymbol(s.baseSymbol, p.symbol) ? s.price : null;
       const value = estimateUsd(p.tokenAmount, p.usdcAmount, price);
       const fees = estimateUsd(p.feeTokenAmount, p.feeUsdcAmount, price);
       const apr = yields[i]?.data?.apr ?? null;

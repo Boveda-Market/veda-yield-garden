@@ -3,7 +3,7 @@ import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMeteoraHistory } from "@/lib/meteora-history.functions";
 import { harvestedUsdValue, MAX_HISTORY_PAGES, meteoraMetrics } from "@/lib/meteora-history";
-import { fetchPoolStats } from "@/lib/pool-stats";
+import { fetchPoolStats, priceMatchesSymbol } from "@/lib/pool-stats";
 
 /** Shared, cached vault history + harvested PNL. Summary and history list reuse one query. */
 /** `full` keeps loading older pages (bounded by maxPages) so «Desde que depositaste» can check complete coverage. */
@@ -18,7 +18,7 @@ export function useMeteoraHistory(wallet: string | null, full = false) {
   const metrics = meteoraMetrics(records);
   const priced = metrics.totals;
   const priceQueries = useQueries({ queries: priced.map((p) => ({ queryKey: ["dexscreener-pool-stats", p.pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(p.pool, signal), staleTime: 60_000, retry: 1 })) });
-  const prices = Object.fromEntries(priced.map((p, i) => { const s = priceQueries[i]?.data; return [p.id, s && s.baseSymbol.toUpperCase().includes(p.symbol) ? s.price : null]; }));
+  const prices = Object.fromEntries(priced.map((p, i) => { const s = priceQueries[i]?.data; return [p.id, s && priceMatchesSymbol(s.baseSymbol, p.symbol) ? s.price : null]; }));
   /** Today's price per pool address (for valuing harvested vault tokens). */
   const poolPrices: Record<string, number | null> = Object.fromEntries(priced.map((p, i) => [p.pool, prices[p.id] ?? null]));
   const ready = pages.length > 0;

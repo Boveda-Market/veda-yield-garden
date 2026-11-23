@@ -1,5 +1,5 @@
 import { useQueries } from "@tanstack/react-query";
-import { fetchPoolStats } from "@/lib/pool-stats";
+import { fetchPoolStats, priceMatchesSymbol } from "@/lib/pool-stats";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { estimateUsd, change24hUsd } from "@/lib/position-value";
 import { isOperableVault, type ChainPosition } from "@/lib/solana-data";
@@ -17,7 +17,7 @@ export function usePositionRows(positions: ChainPosition[]) {
   const yields = useQueries({ queries: pools.map((pool) => ({ ...poolYieldOptions(pool ?? ""), enabled: Boolean(pool) })) });
   const rows = positions.map((p, i) => {
     const s = stats[i]?.data;
-    const price = s && s.baseSymbol.toUpperCase().includes(p.symbol.toUpperCase()) ? s.price : null;
+    const price = s && priceMatchesSymbol(s.baseSymbol, p.symbol) ? s.price : null;
     return { p, value: estimateUsd(p.tokenAmount, p.usdcAmount, price), fees: estimateUsd(p.feeTokenAmount, p.feeUsdcAmount, price), apr: yields[i]?.data?.apr ?? null, price, pool: pools[i] ?? null, change24h: change24hUsd(p.tokenAmount, price, s?.change24h ?? null) };
   });
   const loading = stats.some((s) => s?.isLoading);
