@@ -47,7 +47,10 @@ export function activationShortfallMicro(usdcMicro: bigint, needMicro: bigint = 
   return usdcMicro >= need ? 0n : need - usdcMicro;
 }
 
-export const gasRefillInput = z.object({ wallet: solanaAddressSchema, target: z.enum(["standard", "vault", "deposit"]).optional(), activation: z.boolean().optional(), quoteOnly: z.boolean().optional() });
+export const gasRefillInput = z.object({ wallet: solanaAddressSchema, target: z.enum(["standard", "vault", "deposit"]).optional(), activation: z.boolean().optional(), quoteOnly: z.boolean().optional(), play: z.boolean().optional() });
+
+/** A Doble o Nada entry only needs the regular operations reserve; above it the account is already active for plays and no activation is quoted. */
+export function playNeedsActivation(sol: bigint) { return sol < SOL_RESERVE_LAMPORTS; }
 
 /** Dollars a Doble o Nada entry needs when the account still has to be activated: the bet plus the activation (~$15). */
 export const ACTIVATION_PLAY_MICRO = 15_000_000n;

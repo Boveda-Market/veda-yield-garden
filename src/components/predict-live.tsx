@@ -105,7 +105,7 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
   const maxMicro = balance === null ? null : (balance < BigInt(PREDICT_MAX_USDC * 1e6) ? balance : BigInt(PREDICT_MAX_USDC * 1e6));
   const amt = units ? Number(units) / 1e6 : 0;
   // Live activation quote (first play only), refreshed with the network price while the ticket is open.
-  const activationQ = useActivationQuote(wallet, !!side);
+  const activationQ = useActivationQuote(wallet, !!side, true);
   const play = units && units > 0n && activationQ.data ? playQuote(units, activationQ.data.charge, activationQ.data.fee) : null;
   // Someone who was short and has just topped up gets a clear pause before the one-tap authorization.
   const wasShort = useRef(false);
@@ -293,7 +293,6 @@ export function PredictLive({ round, chart }: { round: LiveRound | null; chart?:
           {inRange && selPrice && !review && <div className="mt-3 rounded-xl bg-secondary/50 p-3 text-center">
             <p className="text-xs text-muted-foreground">{t("Si aciertas recibes aprox.")}</p>
             <p className="font-display text-2xl font-bold text-primary tabular-nums">${(amt / selPrice).toFixed(2)}</p>
-            {short && <p className="pt-1 text-[11px] text-muted-foreground">{t("Cotización con el precio actual del mercado. Fondea tu wallet para firmarla.")}</p>}
           </div>}
           {play && inRange && !review && <dl aria-label={t("Cotización en vivo")} className="mt-3 grid gap-1.5 rounded-xl bg-muted p-3 text-sm">
             <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground"><span className={`h-1.5 w-1.5 rounded-full bg-live ${activationQ.isFetching ? "animate-pulse" : ""}`} />{t("Cotización en vivo")}</p>

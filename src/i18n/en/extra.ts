@@ -486,7 +486,6 @@ export const extra: Record<string, string> = {
   "Incluye tu enlace de invitación si ya eres afiliado.": "Includes your invite link if you're already an affiliate.",
   "Máx": "Max",
   "Precio por contrato": "Price per contract",
-  "Cotización con el precio actual del mercado. Fondea tu wallet para firmarla.": "Quote at the current market price. Fund your wallet to sign it.",
   "Saldo insuficiente: tienes ${v}.": "Insufficient balance: you have ${v}.",
   "Depositar o cambiar a dólares": "Deposit or swap to dollars",
   "Si aciertas recibes aprox. el doble; verás la cifra exacta antes de firmar.": "If you're right you get roughly double; you'll see the exact amount before signing.",

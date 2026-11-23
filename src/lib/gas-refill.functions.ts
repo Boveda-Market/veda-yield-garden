@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requirePrivyAuth } from "@/lib/privy-auth.middleware";
-import { activationCharge, gasRefillInput, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
+import { activationCharge, gasRefillInput, playNeedsActivation, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
 
 const UNAVAILABLE = "La recarga automática no está disponible en este momento. Ya avisamos al equipo; inténtalo de nuevo más tarde. No se movió dinero.";
 let lastTreasuryAlert = 0;
@@ -20,6 +20,7 @@ export const prepareGasRefill = createServerFn({ method: "POST" })
       const { PublicKey } = await import("@solana/web3.js");
       const { heliusConnection } = await import("@/lib/solana-read.server");
       const sol = BigInt(await heliusConnection(key).getBalance(new PublicKey(data.wallet), "confirmed"));
+      if (data.play && !playNeedsActivation(sol)) return { success: false, error: "Tu reserva para operaciones ya está bien." };
       const lamports = refillLamports(sol, data.activation ? "vault" : (data.target ?? "standard"));
       if (lamports <= 0n) return { success: false, error: "Tu reserva para operaciones ya está bien." };
       const { FEE_WALLET } = await import("@/lib/fees");
