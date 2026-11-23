@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fetchPoolStats, parsePoolStats } from "@/lib/pool-stats";
+import { fetchPoolStats, parsePoolStats, parseTokenLiquidity } from "@/lib/pool-stats";
 
 const pool = { chainId: "solana", pairAddress: "pool-a", baseToken: { symbol: "SOL" }, quoteToken: { symbol: "USDC" }, priceUsd: "150.25", volume: { h24: 12345 }, liquidity: { usd: 50000, base: 100, quote: 35000 }, priceChange: { h24: -2.5 }, txns: { h24: { buys: 10, sells: 20 } } };
 
@@ -38,5 +38,20 @@ describe("Last-hour pool activity", () => {
   });
   it("keeps last-hour figures unavailable when the source omits them", () => {
     expect(parsePoolStats({ pairs: [pool] }, "pool-a")).toMatchObject({ change5m: null, volume1h: null, buys1h: null });
+  });
+});
+
+describe("Total coin liquidity", () => {
+  const mk = (pairAddress: string, base: string, quote: string, usd: number | null, chainId = "solana") => ({ chainId, pairAddress, baseToken: { address: base }, quoteToken: { address: quote }, liquidity: usd == null ? undefined : { usd } });
+  it("adds up every market that trades the exact coin, on either side, once each", () => {
+    const r = parseTokenLiquidity([mk("a", "COIN", "USDC", 1000), mk("b", "SOL", "COIN", 250), mk("a", "COIN", "USDC", 1000)], "COIN");
+    expect(r).toEqual({ totalUsd: 1250, markets: 2 });
+  });
+  it("ignores markets of other coins, other chains and markets without liquidity", () => {
+    const r = parseTokenLiquidity([mk("a", "COIN", "USDC", 500), mk("c", "OTHER", "USDC", 9999), mk("d", "COIN", "USDC", 9999, "ethereum"), mk("e", "COIN", "USDC", null)], "COIN");
+    expect(r).toEqual({ totalUsd: 500, markets: 1 });
+  });
+  it("shows nothing instead of $0 when no market is found", () => {
+    expect(parseTokenLiquidity([], "COIN")).toBeNull();
   });
 });

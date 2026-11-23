@@ -70,3 +70,47 @@ export function vaultTokenPrice(stats: { baseSymbol: string; baseAddress?: strin
   const same = stats.baseAddress ? stats.baseAddress === cfg.mint : stats.baseSymbol.toUpperCase().includes(cfg.symbol.toUpperCase());
   return same ? stats.price : null;
 }
+
+const marketSchema = z.object({
+  chainId: z.string(),
+  pairAddress: z.string(),
+  baseToken: z.object({ address: z.string() }),
+  quoteToken: z.object({ address: z.string() }),
+  liquidity: z.object({ usd: z.number().finite().nonnegative().nullish() }).nullish(),
+});
+
+/**
+ * Total dollar liquidity of every listed market that trades this exact coin (by token address), each market counted once.
+ * The source lists only a coin's main markets, so `markets` says how many were added up.
+ */
+export function parseTokenLiquidity(data: unknown, mint: string) {
+  if (!Array.isArray(data)) return null;
+  const seen = new Set<string>();
+  let totalUsd = 0;
+  for (const candidate of data) {
+    const parsed = marketSchema.safeParse(candidate);
+    if (!parsed.success) continue;
+    const p = parsed.data;
+    if (p.chainId !== "solana" || seen.has(p.pairAddress)) continue;
+    if (p.baseToken.address !== mint && p.quoteToken.address !== mint) continue;
+    const usd = p.liquidity?.usd;
+    if (usd == null) continue;
+    seen.add(p.pairAddress);
+    totalUsd += usd;
+  }
+  return seen.size ? { totalUsd, markets: seen.size } : null;
+}
+
+export async function fetchTokenLiquidity(mint: string, signal?: AbortSignal) {
+  const response = await fetch(`https://api.dexscreener.com/token-pairs/v1/solana/${encodeURIComponent(mint)}`, { signal: signal ?? null });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error("No se pudo consultar la liquidez de la moneda.");
+  return parseTokenLiquidity(await response.json(), mint);
+}
+
+export const tokenLiquidityOptions = (mint: string) => ({
+  queryKey: ["dexscreener-token-liquidity", mint],
+  queryFn: ({ signal }: { signal: AbortSignal }) => fetchTokenLiquidity(mint, signal),
+  staleTime: 60_000,
+  retry: 1,
+});
