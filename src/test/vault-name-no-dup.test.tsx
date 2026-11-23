@@ -61,3 +61,15 @@ it("keeps an open position card free of a repeated token", () => {
   expect(card.queryByText("SOL/USDC")).toBeNull();
   expect(card.getByText("Activa")).toBeInTheDocument();
 });
+
+it("opens the active portfolio card with pool details when tapping a vault that has money", () => {
+  mocks.positions = [POSITION];
+  const onDetails = vi.fn();
+  render(<RealOverview walletAddress={WITHDRAWAL_PILOT.wallet} onDetails={onDetails} />);
+  fireEvent.click(screen.getByRole("button", { name: /SOL/ }));
+  const card = within(screen.getByRole("dialog"));
+  expect(card.getByText("Valor estimado")).toBeInTheDocument();
+  expect(card.queryByText(/Cosechar y reinvertir se activan/)).toBeNull();
+  fireEvent.click(card.getByRole("button", { name: "Detalles de la bóveda" }));
+  expect(onDetails).toHaveBeenCalledWith(expect.objectContaining({ id: "sol" }));
+});

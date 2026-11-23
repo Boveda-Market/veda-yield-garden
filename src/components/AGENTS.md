@@ -29,4 +29,4 @@
 - ScrollHint (scroll-hint.tsx) on phone Portafolio/Billetera: bottom fade while content remains below, bouncing arrow only on the first visits per screen (lib/scroll-hint.ts).
 - «Balance total» (Billetera and Mi Portafolio) = USDC + vaults + unclaimed fees + network reserve and every other held coin at market price, via shared useWalletExtrasUsd/walletExtrasUsd (wallet-holdings.ts), so both screens match external wallet trackers; coins without a known price are left out.
 
-- Tapping any vault pill in Bóvedas opens the same vault card (HotVaultCard or the plain card) whether or not the user has money there; active vaults add only the «Ver en Portafolio» link and «Depositar más», and harvest/withdraw stay in Mi Portafolio.
+- Tapping a vault pill in Bóvedas where the user has money opens the same active card as Mi Portafolio (RealPositions, with «Detalles de la bóveda» at the bottom via onDetails); vaults without money open the catalog card (HotVaultCard or the plain card).
