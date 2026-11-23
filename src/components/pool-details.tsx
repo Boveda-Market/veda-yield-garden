@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Check, Copy, RefreshCw, TrendingDown, TrendingUp } from "lucide-react";
 import { poolYieldOptions } from "@/lib/pool-yield";
+import { bitcoinStatsOptions } from "@/lib/bitcoin-stats";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { fetchPoolStats, coinLabel } from "@/lib/pool-stats";
@@ -37,8 +38,21 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
   const buys1h = stats?.buys1h ?? null, sells1h = stats?.sells1h ?? null;
   const trades1h = buys1h != null && sells1h != null ? buys1h + sells1h : null;
   const freezable = y?.tokenFreezable ?? null;
+  const isBtc = vault.id === "btc";
+  const btcQ = useQuery({ ...bitcoinStatsOptions(), enabled: isBtc });
+  const btc = btcQ.data;
+  const capT = btc?.marketCap != null && btc.marketCap >= 1e12; // billones go in the sub-line so the narrow tile never truncates
+  const btcCap = btc?.marketCap == null ? "—" : capT ? `$${(btc.marketCap / 1e12).toLocaleString("es-MX", { maximumFractionDigits: 2 })}` : usdShort(btc.marketCap);
   // Coin facts and right-now pool activity; whole-day figures (price, APR, TVL, volume, fees, trades) live in «Rendimiento y Mercado».
-  const coinTiles: MetricTile[] = [
+  // Bóveda Bitcoin: coin facts describe Bitcoin itself (network stats), while the freeze tile stays honest about the Coinbase coin the pool holds.
+  const btcTiles: MetricTile[] = [
+    { label: t("Personas con {s}", { s: sym }), value: compact(btc?.holders), sub: t("Direcciones con bitcoin"), help: "Cuántas direcciones de Bitcoin en el mundo tienen saldo hoy. Una persona puede tener varias, así que es una idea aproximada de cuánta gente tiene bitcoin.", accent: true },
+    { label: t("Valor de mercado"), value: btcCap, sub: capT ? t("Billones de dólares") : t("Todo el bitcoin del mundo"), help: "El precio de Bitcoin multiplicado por todos los bitcoins que existen. Es la moneda digital más grande del mundo." },
+    { label: t("Bitcoins en circulación"), value: compact(btc?.circulating), sub: t("De 21M que existirán"), help: "Cuántos bitcoins existen hoy. Nunca habrá más de 21 millones: esa escasez es parte de por qué se le llama oro digital." },
+    { label: t("Respaldo en la bóveda"), value: "1:1", sub: t("Bitcoin de Coinbase"), help: "Esta bóveda usa el Bitcoin de Coinbase (cbBTC): cada moneda está respaldada por un bitcoin real que Coinbase guarda. Por eso su precio sigue al de Bitcoin." },
+    { label: t("Coinbase puede congelarla"), value: freezable == null ? "—" : freezable ? t("Sí") : t("No"), sub: t("El bitcoin original no se puede congelar"), help: "Nadie puede congelar el bitcoin original. La versión de Coinbase que usa esta bóveda sí permite a Coinbase bloquear monedas en casos legales o de fraude.", wide: true },
+  ];
+  const coinTiles: MetricTile[] = isBtc ? btcTiles : [
     { label: t("Personas con {s}", { s: sym }), value: number(y?.holders, 0), sub: t("Billeteras que la tienen"), help: "Cuántas billeteras tienen esta moneda hoy. Muchas personas significa una moneda más conocida, con más gente comprando y vendiendo.", accent: true },
     { label: t("Valor de mercado"), value: usdShort(y?.tokenMarketCap ?? stats?.marketCap), sub: t("Precio × monedas en circulación"), help: "El precio de la moneda multiplicado por todas las monedas que circulan. Sirve para comparar qué tan grande es una moneda frente a otras." },
     { label: t("Monedas emitidas"), value: compact(y?.tokenSupply), sub: t("Total que existe"), help: "Cuántas monedas existen en total. Si hay pocas, cada una suele valer más; si hay miles de millones, cada una puede valer centavos." },

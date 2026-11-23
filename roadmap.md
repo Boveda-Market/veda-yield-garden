@@ -22,3 +22,4 @@
 
 - [x] Métricas del pool: volatilidad, dinero en el pool, volumen/dinero, intercambios, intereses totales, antigüedad y comisión, con sus porcentajes
 - [x] Bóvedas activas abren la misma tarjeta que las demás en Bóvedas
+- [x] Bóveda Bitcoin: «La moneda» usa estadísticas del Bitcoin regular (personas, valor, circulación); «Ahora mismo en el pool» sigue con cbBTC
