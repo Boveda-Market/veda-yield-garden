@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { priceMatchesSymbol } from "./pool-stats";
+import { vaultTokenPrice } from "./pool-stats";
+import { CHAIN_POOLS } from "./solana-data";
 
-describe("priceMatchesSymbol", () => {
-  it("recognizes the Bitcoin vault price whatever the letter case", () => {
-    expect(priceMatchesSymbol("cbBTC", "cbBTC")).toBe(true);
-    expect(priceMatchesSymbol("CBBTC", "cbBTC")).toBe(true);
+describe("vaultTokenPrice", () => {
+  it("prices every vault, current and future, by its own coin address whatever the name's letter case", () => {
+    for (const v of CHAIN_POOLS) {
+      expect(vaultTokenPrice({ baseSymbol: v.symbol.toLowerCase(), baseAddress: v.mint, price: 2 }, v.id)).toBe(2);
+    }
   });
-  it("rejects a different token", () => {
-    expect(priceMatchesSymbol("TRUMP", "cbBTC")).toBe(false);
+  it("recognizes Bitcoin when the market writes cbBTC in capitals and omits the address", () => {
+    expect(vaultTokenPrice({ baseSymbol: "CBBTC", price: 61000 }, "btc")).toBe(61000);
+  });
+  it("rejects a price that belongs to a different coin", () => {
+    const trump = CHAIN_POOLS.find((v) => v.id === "trump")!;
+    expect(vaultTokenPrice({ baseSymbol: "cbBTC", baseAddress: trump.mint, price: 5 }, "btc")).toBeNull();
   });
 });

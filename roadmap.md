@@ -17,3 +17,5 @@
 
 - [x] Activación solo al abrir una bóveda por primera vez ($0 al reabrir, en Doble o Nada y recargas de Billetera)
 - [x] Sin cargo de activación ($2) al trasladar dinero a una bóveda nueva
+
+- [x] Total depositado: precio de cada bóveda reconocido por dirección de moneda (también bóvedas nuevas)

@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { CHAIN_POOLS } from "./solana-data";
 
 const poolSchema = z.object({
   chainId: z.string(),
   pairAddress: z.string(),
-  baseToken: z.object({ symbol: z.string() }),
+  baseToken: z.object({ symbol: z.string(), address: z.string().nullish() }),
   quoteToken: z.object({ symbol: z.string() }),
   priceUsd: z.string().nullish(),
   volume: z.object({ h24: z.number().nonnegative().nullish() }).nullish(),
@@ -23,6 +24,7 @@ export function parsePoolStats(data: unknown, address: string) {
     const price = p.priceUsd == null ? NaN : Number(p.priceUsd);
     return {
       baseSymbol: p.baseToken.symbol,
+      baseAddress: p.baseToken.address ?? null,
       quoteSymbol: p.quoteToken.symbol,
       price: Number.isFinite(price) && price > 0 ? price : null,
       volume24h: p.volume?.h24 ?? null,
@@ -47,5 +49,14 @@ export async function fetchPoolStats(address: string, signal?: AbortSignal) {
   if (!response.ok) throw new Error("No se pudieron consultar las estadísticas del pool.");
   return parsePoolStats(await response.json(), address);
 }
-/** Price source matches the vault token (case-insensitive: the market names cbBTC as "CBBTC" or "cbBTC"). */
-export const priceMatchesSymbol = (baseSymbol: string, symbol: string) => baseSymbol.toUpperCase().includes(symbol.toUpperCase());
+/**
+ * Today's price of a vault's token, only when the market data is for that exact coin: matched by token address
+ * (so new vaults work whatever their name or letter case), falling back to a case-insensitive name only when
+ * the source omits the address. Unknown vaults get no price.
+ */
+export function vaultTokenPrice(stats: { baseSymbol: string; baseAddress?: string | null; price: number | null } | null | undefined, vaultId: string) {
+  const cfg = CHAIN_POOLS.find((c) => c.id === vaultId);
+  if (!stats || !cfg) return null;
+  const same = stats.baseAddress ? stats.baseAddress === cfg.mint : stats.baseSymbol.toUpperCase().includes(cfg.symbol.toUpperCase());
+  return same ? stats.price : null;
+}
