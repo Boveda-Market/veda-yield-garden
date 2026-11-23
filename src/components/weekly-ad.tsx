@@ -24,7 +24,7 @@ export function WeeklyAdView({ onGo, onClose }: { onGo: () => void; onClose: () 
       </div>
     </div>
     <p className="text-center text-[11px] text-muted-foreground">{t("Bóvedas de alto riesgo: el valor de tu depósito sube y baja con el mercado.")}</p>
-    <button type="button" onClick={onGo} className={`${vaultSkin("trump")} hot-cta flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-base font-extrabold text-hot-surface active:scale-95`}>{t("Explorar Bóveda TRUMP")}<ArrowRight className="h-4 w-4" /></button>
+    <button type="button" onClick={onGo} className={`${vaultSkin("trump")} hot-cta flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-base font-extrabold text-hot-surface active:scale-95`}>👉 {t("Oprime aquí para entrar a la bóveda")}<ArrowRight className="h-4 w-4" /></button>
     <button type="button" onClick={onClose} className="text-sm font-semibold text-muted-foreground">{t("Ahora no")}</button>
   </div>;
 }
