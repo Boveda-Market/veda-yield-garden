@@ -34,6 +34,7 @@ import { MarketsPanel } from "./markets-panel";
 import { PendingClaims } from "./pending-claims";
 import { VaultSteps } from "./vault-steps";
 import { BottomNav, ProfileMenu } from "./app-nav";
+import { ScrollHint } from "./scroll-hint";
 import { BackButton } from "./back-button";
 import { HostedSession } from "./session-host";
 import { ActivityView } from "@/components/activity-view";
@@ -197,6 +198,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
 
       </main>
 
+      {(activeView === "portfolio" || activeView === "wallet") && <ScrollHint key={activeView} view={activeView} />}
       <BottomNav active={activeView} guest={guest} onSelect={(v) => setGuestView(v as typeof guestView)} />
       <footer className="border-t border-border pb-20">
         <div className="mx-auto max-w-5xl px-5 py-8 text-xs leading-relaxed text-muted-foreground">
