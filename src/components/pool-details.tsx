@@ -37,26 +37,29 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
   const sym = `$${coinLabel(stats?.baseSymbol ?? y?.symbolX, vault.pair.split("/")[0] ?? "")}`;
   const buys1h = stats?.buys1h ?? null, sells1h = stats?.sells1h ?? null;
   const trades1h = buys1h != null && sells1h != null ? buys1h + sells1h : null;
-  const freezable = y?.tokenFreezable ?? null;
   const isBtc = vault.id === "btc";
   const btcQ = useQuery({ ...bitcoinStatsOptions(), enabled: isBtc });
   const btc = btcQ.data;
-  const capT = btc?.marketCap != null && btc.marketCap >= 1e12; // billones go in the sub-line so the narrow tile never truncates
-  const btcCap = btc?.marketCap == null ? "—" : capT ? `$${(btc.marketCap / 1e12).toLocaleString("es-MX", { maximumFractionDigits: 2 })}` : usdShort(btc.marketCap);
+  // Big market caps keep the number short and put the unit in the sub-line so narrow tiles never truncate.
+  const capParts = (v: number | null | undefined, fallbackSub: string) => v == null ? { value: "—", sub: fallbackSub }
+    : v >= 1e12 ? { value: `$${(v / 1e12).toLocaleString("es-MX", { maximumFractionDigits: 2 })}`, sub: t("Billones de dólares") }
+    : v >= 1e9 ? { value: `$${(v / 1e9).toLocaleString("es-MX", { maximumFractionDigits: 2 })}`, sub: t("Miles de millones de dólares") }
+    : { value: usdShort(v), sub: fallbackSub };
+  const btcCap = capParts(btc?.marketCap, t("Todo el bitcoin del mundo"));
+  const coinCap = capParts(y?.tokenMarketCap ?? stats?.marketCap, t("Precio × monedas en circulación"));
   // Coin facts and right-now pool activity; whole-day figures (price, APR, TVL, volume, fees, trades) live in «Rendimiento y Mercado».
-  // Bóveda Bitcoin: coin facts describe Bitcoin itself (network stats), while the freeze tile stays honest about the Coinbase coin the pool holds.
+  // Bóveda Bitcoin: coin facts describe Bitcoin itself (network stats), issuer freeze powers are disclosed in Términos, not as tiles.
   const btcTiles: MetricTile[] = [
     { label: t("Personas con {s}", { s: sym }), value: compact(btc?.holders), sub: t("Direcciones con bitcoin"), help: "Cuántas direcciones de Bitcoin en el mundo tienen saldo hoy. Una persona puede tener varias, así que es una idea aproximada de cuánta gente tiene bitcoin.", accent: true },
-    { label: t("Valor de mercado"), value: btcCap, sub: capT ? t("Billones de dólares") : t("Todo el bitcoin del mundo"), help: "El precio de Bitcoin multiplicado por todos los bitcoins que existen. Es la moneda digital más grande del mundo." },
+    { label: t("Valor de mercado"), value: btcCap.value, sub: btcCap.sub, help: "El precio de Bitcoin multiplicado por todos los bitcoins que existen. Es la moneda digital más grande del mundo." },
     { label: t("Bitcoins en circulación"), value: compact(btc?.circulating), sub: t("De 21M que existirán"), help: "Cuántos bitcoins existen hoy. Nunca habrá más de 21 millones: esa escasez es parte de por qué se le llama oro digital." },
     { label: t("Respaldo en la bóveda"), value: "1:1", sub: t("Bitcoin de Coinbase"), help: "Esta bóveda usa el Bitcoin de Coinbase (cbBTC): cada moneda está respaldada por un bitcoin real que Coinbase guarda. Por eso su precio sigue al de Bitcoin." },
   ];
   const coinTiles: MetricTile[] = isBtc ? btcTiles : [
     { label: t("Personas con {s}", { s: sym }), value: number(y?.holders, 0), sub: t("Billeteras que la tienen"), help: "Cuántas billeteras tienen esta moneda hoy. Muchas personas significa una moneda más conocida, con más gente comprando y vendiendo.", accent: true },
-    { label: t("Valor de mercado"), value: usdShort(y?.tokenMarketCap ?? stats?.marketCap), sub: t("Precio × monedas en circulación"), help: "El precio de la moneda multiplicado por todas las monedas que circulan. Sirve para comparar qué tan grande es una moneda frente a otras." },
+    { label: t("Valor de mercado"), value: coinCap.value, sub: coinCap.sub, help: "El precio de la moneda multiplicado por todas las monedas que circulan. Sirve para comparar qué tan grande es una moneda frente a otras." },
     { label: t("Monedas emitidas"), value: compact(y?.tokenSupply), sub: t("Total que existe"), help: "Cuántas monedas existen en total. Si hay pocas, cada una suele valer más; si hay miles de millones, cada una puede valer centavos." },
     { label: t("Verificación pública"), value: y?.tokenVerified == null ? "—" : y.tokenVerified ? t("✓ Verificada") : t("Sin verificar"), sub: t("Listas públicas de monedas"), help: "Indica si esta moneda aparece verificada en listas públicas de monedas. Ayuda a evitar copias falsas con el mismo nombre, pero no garantiza que su precio suba." },
-    { label: t("El emisor puede congelarla"), value: freezable == null ? "—" : freezable ? t("Sí") : t("No"), sub: freezable == null ? undefined : freezable ? t("Común en monedas de empresas") : t("Nadie puede congelarla"), help: "Algunas monedas respaldadas por empresas, como los dólares digitales, permiten a su emisor bloquear monedas en casos legales o de fraude. «No» significa que nadie puede congelarlas.", wide: true },
   ];
   const poolTiles: MetricTile[] = [
     { label: t("Volumen · última hora"), value: usdShort(stats?.volume1h ?? y?.volume1h), sub: t("Dinero intercambiado"), help: "Cuánto dinero se intercambió en la última hora. Te muestra si la bóveda está activa en este momento.", accent: true },

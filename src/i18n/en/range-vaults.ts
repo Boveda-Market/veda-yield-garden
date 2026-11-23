@@ -289,6 +289,7 @@ export const rangeVaults: Record<string, string> = {
   "Precio × monedas en circulación": "Price × coins in circulation",
   "Monedas emitidas": "Coins issued",
   "Billones de dólares": "Trillion dollars",
+  "Miles de millones de dólares": "Billion dollars",
   "Direcciones con bitcoin": "Addresses holding bitcoin",
   "Cuántas direcciones de Bitcoin en el mundo tienen saldo hoy. Una persona puede tener varias, así que es una idea aproximada de cuánta gente tiene bitcoin.": "How many Bitcoin addresses worldwide hold a balance today. One person can have several, so it is a rough idea of how many people own bitcoin.",
   "Todo el bitcoin del mundo": "All the bitcoin in the world",
