@@ -1,6 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { geckoCandles, POOL_RE, type RawCandle } from "./gecko-candles";
+import { VAULTS } from "./vaults";
+
+/** Only the app's own vault pools can be charted, so visitors cannot use the server (and its candle API key) to look up arbitrary pools. */
+export const CHART_POOLS: ReadonlySet<string> = new Set(VAULTS.map((v) => v.pool));
+export const isChartPool = (pool: string) => POOL_RE.test(pool) && CHART_POOLS.has(pool);
 
 const SPEC = {
   "1m": { tf: "minute", agg: 1, count: 300, ttl: 30_000, be: "1m", secs: 300 * 60 },
@@ -46,7 +51,7 @@ function borrowed(pool: string, range: keyof typeof SPEC): RawCandle[] | null {
 
 /** Pool candles fetched server-side and shared by every visitor (cached per pool+range), so phones never hit the public rate limit and a failed refresh keeps the last good series. */
 export const getPoolCandles = createServerFn({ method: "GET" })
-  .inputValidator((d: unknown) => z.object({ pool: z.string().regex(POOL_RE), range: z.enum(["1m", "1h", "4h", "1d", "day"]) }).parse(d))
+  .inputValidator((d: unknown) => z.object({ pool: z.string().regex(POOL_RE).refine(isChartPool, "Bóveda no disponible"), range: z.enum(["1m", "1h", "4h", "1d", "day"]) }).parse(d))
   .handler(async ({ data }) => {
     const spec = SPEC[data.range];
     const key = `${data.pool}:${data.range}`;
