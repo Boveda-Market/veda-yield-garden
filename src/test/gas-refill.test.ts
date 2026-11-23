@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activationCharge, activationKind, activationKindFor, activationShortfallMicro, gasIsLow, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
+import { activationCharge, activationKind, activationKindFor, activationShortfallMicro, usedPools, gasIsLow, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
 
 describe("gas refill", () => {
   it("is low below 0.003 SOL", () => { expect(gasIsLow(2_999_999n)).toBe(true); expect(gasIsLow(3_000_000n)).toBe(false); });
@@ -48,4 +48,11 @@ describe("activation when moving between vaults", () => {
   const GTA6 = "99bL7ZdcQxcrkdJDKGoGpAhqZUMYEHzhMvtNadiZJpE8", TRUMP = "3C5YE97HADPDxZehYq9Cis8AXr9aNyrUsczKzE1nDbW9";
   it("moving 100% into a vault never opened before pays no $2 activation", () => expect(activationKindFor(false, [TRUMP], GTA6, true)).toBe("reopen"));
   it("without a move, a new vault still pays $2", () => expect(activationKindFor(false, [TRUMP], GTA6, false)).toBe("extra"));
+});
+
+describe("vault history proves a vault was opened", () => {
+  const G = "99bL7ZdcQxcrkdJDKGoGpAhqZUMYEHzhMvtNadiZJpE8";
+  it("a vault with only harvests in history counts as opened before (no $2)", () => expect(activationKind(false, usedPools([{ kind: "harvest", pool: G }]), G)).toBe("reopen"));
+  it("withdraw and close also count", () => expect(usedPools([{ kind: "withdraw", pool: "a" }, { kind: "close", pool: "b" }]).sort()).toEqual(["a", "b"]));
+  it("records without a pool are ignored", () => expect(usedPools([{ kind: "deposit" }])).toEqual([]));
 });

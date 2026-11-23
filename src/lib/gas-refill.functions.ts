@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requirePrivyAuth } from "@/lib/privy-auth.middleware";
-import { activationCharge, activationFee, activationKindFor, type ActivationKind, gasRefillInput, playNeedsActivation, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
+import { activationCharge, activationFee, usedPools, activationKindFor, type ActivationKind, gasRefillInput, playNeedsActivation, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
 
 const UNAVAILABLE = "La recarga automática no está disponible en este momento. Ya avisamos al equipo; inténtalo de nuevo más tarde. No se movió dinero.";
 let lastTreasuryAlert = 0;
@@ -43,13 +43,16 @@ export const prepareGasRefill = createServerFn({ method: "POST" })
       let kind: ActivationKind = "new";
       if (data.activation) {
         let open = false, past: string[] = [];
-        try { const { readDlmmPositions } = await import("@/lib/dlmm.server"); open = (await readDlmmPositions(heliusConnection(key), new PublicKey(data.wallet))).length > 0; } catch { open = false; }
+        let openVaultIds: string[] = [];
+        try { const { readDlmmPositions } = await import("@/lib/dlmm.server"); openVaultIds = (await readDlmmPositions(heliusConnection(key), new PublicKey(data.wallet))).map((p) => p.vaultId); open = openVaultIds.length > 0; } catch { open = false; }
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const { data: rows } = await supabaseAdmin.from("vault_tx_cache").select("records").eq("wallet", data.wallet).limit(2000);
-          past = [...new Set((rows ?? []).flatMap((r) => Array.isArray(r.records) ? (r.records as { kind?: string; pool?: string }[]) : []).filter((x) => x.kind === "deposit" && typeof x.pool === "string").map((x) => x.pool!))];
+          past = usedPools((rows ?? []).flatMap((r) => Array.isArray(r.records) ? (r.records as { kind?: string; pool?: string }[]) : []));
         } catch { past = []; }
         const { VAULTS } = await import("@/lib/vaults");
+        // A vault open right now is already opened: adding money to it never pays activation.
+        past = [...new Set([...past, ...VAULTS.filter((v) => openVaultIds.includes(v.id)).map((v) => v.pool)])];
         kind = activationKindFor(open, past, data.vault ? VAULTS.find((v) => v.id === data.vault)?.pool : undefined, !!data.migrate);
       }
       const extraVault = kind === "extra";

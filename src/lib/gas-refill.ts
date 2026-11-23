@@ -47,6 +47,10 @@ export function activationKind(hasOpenVault: boolean, pastPools: readonly string
   if (pool && pastPools.includes(pool)) return "reopen";
   return hasOpenVault || pastPools.length > 0 ? "extra" : "new";
 }
+/** Pools this wallet has used, from decoded vault history: any deposit, harvest, withdraw or close proves the vault was opened before (history may hold only harvests when older deposits fell outside it). */
+export function usedPools(records: readonly { kind?: string; pool?: string }[]): string[] {
+  return [...new Set(records.filter((x) => typeof x.pool === "string" && ["deposit", "harvest", "withdraw", "close"].includes(x.kind ?? "")).map((x) => x.pool!))];
+}
 /** Without a vault being opened (a play or a plain reserve refill), an account that already had a vault is never activated again. */
 /** Moving money between vaults never pays activation either; only an account that already had a vault can be moving, so a new account still pays its first activation. */
 export function activationKindFor(hasOpenVault: boolean, pastPools: readonly string[], pool?: string, migrate = false): ActivationKind {
