@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react";
+import { useWalletExtrasUsd } from "@/hooks/use-wallet-extras";
 import { MAX_HISTORY_PAGES } from "@/lib/meteora-history";
 import { useHydrated } from "@tanstack/react-router";
 import { AnimatedMoney } from "@/components/ui/animated-money";
@@ -32,11 +33,13 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from 
 const COLORS = ["bg-primary", "bg-chart-1", "bg-chart-2", "bg-chart-4", "bg-chart-3", "bg-chart-5"];
 
 /** Visual performance board: capital split by vault/plays, weighted APR, pending, harvested PNL and in/out volume. */
-export function PortfolioSummary({ wallet, cashUsd, positions, positionsComplete, predictionsMicro, onHarvest, onHarvestAll }: { wallet: string | null; cashUsd?: number | null; positions: ChainPosition[]; positionsComplete: boolean; predictionsMicro: bigint | null; onHarvest: (p: ChainPosition) => void; onHarvestAll?: (ps: ChainPosition[]) => void }) {
+export function PortfolioSummary({ wallet, cashUsd, solLamports, positions, positionsComplete, predictionsMicro, onHarvest, onHarvestAll }: { wallet: string | null; cashUsd?: number | null; solLamports?: bigint | undefined; positions: ChainPosition[]; positionsComplete: boolean; predictionsMicro: bigint | null; onHarvest: (p: ChainPosition) => void; onHarvestAll?: (ps: ChainPosition[]) => void }) {
   const t = useT();
   const [hidden] = useHideBalances();
   const money = (n: number | null) => n === null ? "—" : hidden ? MASK : formatUsd(n);
   const history = useMeteoraHistory(wallet, true);
+  // Same «Balance total» as Billetera: also counts the network reserve and other held coins.
+  const held = useWalletExtrasUsd(wallet, solLamports);
   const { rows, totalFees, top } = usePositionRows(positions);
   const plays = predictionsMicro === null ? 0 : Number(predictionsMicro) / 1e6;
   const byVault = VAULTS.map((v) => {
@@ -65,7 +68,7 @@ export function PortfolioSummary({ wallet, cashUsd, positions, positionsComplete
     <h2 className="flex items-center gap-2 font-display text-base font-semibold sm:text-lg"><TrendingUp size={18} className="text-primary" />{t("Mi rendimiento")}</h2>
     <WeeklyChart records={history.records} poolPrices={history.poolPrices} money={money} vaults={byVault} />
 
-    {showSince && <SinceDepositTile balance={cashUsd != null && Number.isFinite(cashUsd) && valued ? cashUsd + total + totalFees : null} since={since} loading={sinceLoading} money={money} hidden={hidden} />}
+    {showSince && <SinceDepositTile balance={cashUsd != null && Number.isFinite(cashUsd) && valued ? cashUsd + held.total + total + totalFees : null} since={since} loading={sinceLoading} money={money} hidden={hidden} />}
 
     <div className={`${tile} mt-3`}>
       <div className="flex flex-wrap items-end justify-between gap-3">

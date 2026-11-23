@@ -29,8 +29,10 @@ import { getRealWallet } from "@/lib/solana.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MASK, useContacts, useHideBalances } from "@/lib/preferences";
-import { buildSwap, buildTransfer, readTokenBalance, spendable, STABLE_SYMBOLS, SWAP_TOKENS, toBaseUnits, type SwapQuote, type WalletAsset } from "@/lib/wallet-actions";
+import { buildSwap, buildTransfer, spendable, toBaseUnits, type SwapQuote, type WalletAsset } from "@/lib/wallet-actions";
 import { WalletSwap } from "@/components/wallet-swap";
+import { EXTRA_TOKENS, useWalletPrices, useWalletTokens } from "@/hooks/use-wallet-extras";
+import { walletExtrasUsd } from "@/lib/wallet-holdings";
 import { solanaAddressSchema } from "@/lib/solana-data";
 import { decimalToUnits, PAYOUT_MOVE_MIN_USD } from "@/lib/onboarding";
 import { StartGuide } from "@/components/start-guide";
@@ -100,9 +102,8 @@ export function WalletPanel() {
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   } });
   const exploring = isExploringAccount(balances.data?.usdc, vaultPositions.length, vaults.isLoading);
-  const extraTokens = SWAP_TOKENS.filter((x) => x.symbol !== "SOL" && x.symbol !== "USDC");
-  const extra = useQuery({ queryKey: ["my-wallet-tokens", address], enabled: !!address && extraTokens.length > 0, queryFn: async () =>
-    Object.fromEntries(await Promise.all(extraTokens.map(async (x) => [x.symbol, await readTokenBalance(address!, x.mint).catch(() => undefined)] as const))) as Record<string, bigint | undefined> });
+  const extraTokens = EXTRA_TOKENS;
+  const extra = useWalletTokens(address);
   const swapBalances: Record<string, bigint | undefined> = { SOL: balances.data?.sol, USDC: balances.data?.usdc, ...(extra.data ?? {}) };
   const [swapFrom, setSwapFrom] = useState({ key: 0, from: "USDC", amount: "" });
   const [tab, setTab] = useState<"send" | "swap">("swap");
@@ -122,15 +123,7 @@ export function WalletPanel() {
   const [kept, setKept] = useState(false);
   const [hidden, setHidden] = useHideBalances();
   const [contacts] = useContacts();
-  const prices = useQuery({ queryKey: ["wallet-prices"], staleTime: 60_000, queryFn: async () => {
-    const out: Record<string, number> = Object.fromEntries(STABLE_SYMBOLS.map((s) => [s, 1]));
-    await Promise.all(SWAP_TOKENS.filter((x) => !STABLE_SYMBOLS.includes(x.symbol)).map(async (x) => {
-      try { const r = await fetch(`https://api.dexscreener.com/tokens/v1/solana/${x.mint}`); const j = await r.json() as { priceUsd?: string; liquidity?: { usd?: number } }[];
-        const best = Array.isArray(j) ? [...j].sort((a, b) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0))[0] : undefined;
-        const p = Number(best?.priceUsd); if (Number.isFinite(p) && p > 0) out[x.symbol] = p; } catch { /* price unavailable */ }
-    }));
-    return out;
-  } });
+  const prices = useWalletPrices();
   useEffect(() => { const f = new URLSearchParams(window.location.search).get("swap"); if (f === "SOL" || f === "USDC") { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from: f, amount: "" })); window.history.replaceState(null, "", "/wallet"); setSheet(true); } }, []);
   useEffect(() => { const c = new URLSearchParams(window.location.search).get("convert"); if (c && /^\d+(\.\d+)?$/.test(c)) { setTab("swap"); setSwapFrom((v) => ({ key: v.key + 1, from: "SOL", amount: c })); window.history.replaceState(null, "", "/wallet"); setSheet(true); } }, []);
   useEffect(() => { if (!receiveOpen || !address || qr) return; void import("qrcode").then((m) => m.toDataURL(address, { width: 448, margin: 1 })).then(setQr).catch(() => setQr(null)); }, [receiveOpen, address, qr]);
@@ -207,8 +200,8 @@ export function WalletPanel() {
   // JupUSD (prediction payouts and refunds of unfilled orders) is a 1:1 dollar: count it so the total never looks short.
   // A recent refunded Sube/Baja order is named as such so the user knows their money came back.
   const refundReady = (refunds.data ?? []).length > 0;
-  const jupUsd = extra.data?.["JupUSD"] !== undefined ? Number(extra.data["JupUSD"]) / 1e6 : 0;
-  const extraUsd = jupUsd + extraTokens.filter((x) => x.symbol !== "JupUSD").reduce((sum, x) => { const raw = extra.data?.[x.symbol]; const p = prices.data?.[x.symbol]; return raw && p ? sum + Number(raw) / 10 ** x.decimals * p : sum; }, 0);
+  // «Balance total» counts everything the account owns: dollars, vaults, the network reserve and every other held coin.
+  const held = walletExtrasUsd(balances.data?.sol, extraTokens.map((x) => ({ symbol: x.symbol, decimals: x.decimals, raw: extra.data?.[x.symbol] })), prices.data ?? {});
   const fmt = (v: number, d = 2) => v.toLocaleString("en-US", { useGrouping: false, maximumFractionDigits: d });
   const openSwap = (from: string, amount = "") => { setTab("swap"); setSent(null); setMessage(null); setSwapFrom((v) => ({ key: v.key + 1, from, amount })); setSheet(true); };
   const openSend = (a: WalletAsset) => { setTab("send"); setSent(null); setMessage(null); setAsset(a); setSheet(true); };
@@ -239,11 +232,11 @@ export function WalletPanel() {
     <StartGuide />
     {exploring && <PasskeyInvite />}
     <section className="rounded-3xl border border-border bg-card p-6">
-      <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{vaultPositions.length > 0 || jupUsd > 0 ? t("Balance total") : t("Balance en USDC")}</p><Button variant="ghost" size="sm" onClick={() => { void balances.refetch(); void extra.refetch(); void prices.refetch(); void queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); void queryClient.invalidateQueries({ queryKey: ["predict-positions", address] }); }} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
-      <div className="mt-1 flex items-center gap-2">{balances.data?.usdc !== undefined && (hidden || working !== null) ? <p className="font-display text-4xl">{hidden ? MASK : <AnimatedMoney value={(Number(balances.data.usdc) / 1e6) + jupUsd + (working ?? 0) + totalFees} ratePerMs={liveRate} />}</p> : <BalanceLoading />}<button type="button" onClick={() => setHidden(!hidden)} aria-label={hidden ? t("Mostrar saldos") : t("Ocultar saldos")} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{hidden ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
+      <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{vaultPositions.length > 0 || held.total >= 0.01 ? t("Balance total") : t("Balance en USDC")}</p><Button variant="ghost" size="sm" onClick={() => { void balances.refetch(); void extra.refetch(); void prices.refetch(); void queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); void queryClient.invalidateQueries({ queryKey: ["predict-positions", address] }); }} aria-label={t("Actualizar")}><RefreshCw size={16} /></Button></div>
+      <div className="mt-1 flex items-center gap-2">{balances.data?.usdc !== undefined && (hidden || working !== null) ? <p className="font-display text-4xl">{hidden ? MASK : <AnimatedMoney value={(Number(balances.data.usdc) / 1e6) + held.total + (working ?? 0) + totalFees} ratePerMs={liveRate} />}</p> : <BalanceLoading />}<button type="button" onClick={() => setHidden(!hidden)} aria-label={hidden ? t("Mostrar saldos") : t("Ocultar saldos")} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{hidden ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
       {(() => {
         if (hidden || balances.data?.usdc === undefined || working === null) return null;
-        const total = (Number(balances.data.usdc) / 1e6) + jupUsd + working + totalFees;
+        const total = (Number(balances.data.usdc) / 1e6) + held.total + working + totalFees;
         const move = vaultPositions.length > 0 ? changeN : null;
         const base = move !== null ? total - move : 0;
         const pct = move !== null && base > 0 ? (move / base) * 100 : null;
@@ -256,10 +249,10 @@ export function WalletPanel() {
         </div>;
       })()}
       {balances.data && balances.data.usdc === 0n && balances.data.sol === 0n && working === 0 ? <p role="status" className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"><RefreshCw size={12} className="animate-spin" />{t("Comprobando llegada de fondos…")}</p> : null}
-      {vaultPositions.length > 0 && balances.data?.usdc !== undefined && <div className="mt-2 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{t("Disponible")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(Number(balances.data.usdc) / 1e6)}`}</span></span>{balances.data.usdc >= 20_000_000n && <Link to="/app" className="reinvest-attn relative inline-flex items-center gap-1 overflow-hidden rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-medium text-primary transition-colors hover:bg-primary/15"><ArrowLeft size={14} strokeWidth={2.75} aria-hidden />{t("Reinvertir")}</Link>}<Link to="/portfolio" className="rounded-full bg-primary/10 px-3 py-1 text-primary"><span>{t("Trabajando")}:</span> <span className="font-medium">{hidden ? MASK : working === null ? <BalanceLoading compact /> : `$${fmt(working)}`}</span></Link></div>}
+      {vaultPositions.length > 0 && balances.data?.usdc !== undefined && <div className="mt-2 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{t("Disponible")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(Number(balances.data.usdc) / 1e6)}`}</span></span>{balances.data.usdc >= 20_000_000n && <Link to="/app" className="reinvest-attn relative inline-flex items-center gap-1 overflow-hidden rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-medium text-primary transition-colors hover:bg-primary/15"><ArrowLeft size={14} strokeWidth={2.75} aria-hidden />{t("Reinvertir")}</Link>}{held.total >= 0.01 && <span className="rounded-full bg-muted px-3 py-1"><span className="text-muted-foreground">{t("Reserva y monedas")}:</span> <span className="font-medium">{hidden ? MASK : `$${fmt(held.total)}`}</span></span>}<Link to="/portfolio" className="rounded-full bg-primary/10 px-3 py-1 text-primary"><span>{t("Trabajando")}:</span> <span className="font-medium">{hidden ? MASK : working === null ? <BalanceLoading compact /> : `$${fmt(working)}`}</span></Link></div>}
       {(vaults.isLoading || (vaultPositions.length > 0 && pricesLoading && totalFees === 0)) && <SyncPill />}
       {unclaimedPrizes >= 0.01 && <Link to="/portfolio" className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs text-primary"><Gift size={12} aria-hidden />{t("Por reclamar")}: <span className="font-semibold">{hidden ? MASK : `+$${fmt(unclaimedPrizes)}`}</span></Link>}
-      {vaultPositions.length > 0 && <details className="mt-2 text-xs text-muted-foreground"><summary className="cursor-pointer underline-offset-2 hover:underline">ⓘ {t("¿Por qué cambia el balance total?")}</summary><div className="mt-1 space-y-1 leading-5"><p>{t("Tu cuenta combina dos dinámicas:")}</p><p>• <span className="font-medium text-foreground">{t("Disponible:")}</span> {t("dólares líquidos 1:1 que nunca oscilan.")}</p><p>• <span className="font-medium text-foreground">{t("Trabajando:")}</span> {t("tu capital cotiza en vivo como liquidez de mercado. Su valuación fluctúa con las compras y ventas del activo (la línea de mercado de tu gráfica), pero cada intercambio genera microtarifas algorítmicas en dólares (la línea verde que solo suma).")}</p><p className="italic">{t("El piloto automático cobra y reinvierte esas ganancias en tu capital automáticamente.")}</p><a href="/portfolio#rendimiento" className="inline-block text-primary underline">{t("Ver la gráfica en Portafolio")} →</a></div></details>}
+      {vaultPositions.length > 0 && <details className="mt-2 text-xs text-muted-foreground"><summary className="cursor-pointer underline-offset-2 hover:underline">ⓘ {t("¿Por qué cambia el balance total?")}</summary><div className="mt-1 space-y-1 leading-5"><p>{t("Tu cuenta combina dos dinámicas:")}</p><p>• <span className="font-medium text-foreground">{t("Disponible:")}</span> {t("dólares líquidos 1:1 que nunca oscilan.")}</p><p>• <span className="font-medium text-foreground">{t("Trabajando:")}</span> {t("tu capital cotiza en vivo como liquidez de mercado. Su valuación fluctúa con las compras y ventas del activo (la línea de mercado de tu gráfica), pero cada intercambio genera microtarifas algorítmicas en dólares (la línea verde que solo suma).")}</p><p>• <span className="font-medium text-foreground">{t("Reserva y monedas:")}</span> {t("tu reserva de operaciones y otras monedas que tengas, a precio de mercado.")}</p><p className="italic">{t("El piloto automático cobra y reinvierte esas ganancias en tu capital automáticamente.")}</p><a href="/portfolio#rendimiento" className="inline-block text-primary underline">{t("Ver la gráfica en Portafolio")} →</a></div></details>}
       {vaultPositions.length > 0 && working === null && <p className="mt-1 text-xs text-muted-foreground">{t("Calculando el valor de tus bóvedas…")}</p>}
       {vaultPositions.length > 0 && partialWorking && <p className="mt-1 text-xs text-muted-foreground"><RefreshCw size={12} className="mr-1 inline animate-spin align-[-1px]" />{t("Buscando el precio de algunas bóvedas; el total se actualiza solo.")}</p>}
       <button type="button" onClick={() => setReceiveOpen(true)} className="mt-2 inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground hover:text-foreground"><code>{address.slice(0, 4)}…{address.slice(-4)}</code><Copy size={12} /></button>
