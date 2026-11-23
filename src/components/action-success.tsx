@@ -26,7 +26,7 @@ export function ActionSuccess({ title, body, signature, onClose, destination = "
   const [at] = useState(() => new Date());
   const done = () => { onClose(); if (destination && router) void router.navigate({ to: destination }); };
   const rows: ReceiptRow[] = [...details, { label: t("Fecha y hora"), value: at.toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" }) }];
-  return <Dismissible onDismiss={done} ms={Infinity} className="rounded-2xl bg-card text-primary"><section role="status" className="grid justify-items-center gap-4 p-6 text-center text-sm text-foreground">
+  return <Dismissible onDismiss={done} ms={Infinity} hideClose className="rounded-2xl bg-card text-primary"><section role="status" className="grid justify-items-center gap-4 p-6 text-center text-sm text-foreground">
     <FlowSteps current={3} />
     <span className="relative grid size-16 place-items-center" aria-hidden>
       <span className="absolute inset-0 rounded-full bg-primary/15 motion-safe:animate-ping motion-safe:[animation-iteration-count:1] motion-safe:[animation-duration:900ms]" />
