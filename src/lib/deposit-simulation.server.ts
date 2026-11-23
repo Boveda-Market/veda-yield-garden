@@ -100,6 +100,11 @@ export async function simulateDeposit(apiKey: string, input: SimulationInput, op
     // "Depositar más": add to the same owner-verified position instead of opening a new one.
     let existing: { position: PublicKey; nftMint: PublicKey } | null = null;
     let deposit;
+    if (!input.position) {
+      // One position per vault: never open a duplicate while an owned position exists in this pool.
+      const mine = (await cp.getPositionsByUser(owner)).find((p) => p.positionState.pool.equals(poolAddress));
+      if (mine) return { ...result(false, "Ya tienes esta bóveda abierta; tu dinero se suma a ella."), existingPosition: mine.position.toBase58() };
+    }
     if (input.position) {
       const position = new PublicKey(input.position);
       const owned = (await cp.getPositionsByUser(owner)).find((p) => p.position.equals(position));

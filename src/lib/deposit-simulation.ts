@@ -23,6 +23,8 @@ export type SimulationResult = {
   message: string;
   /** The existing position is out of range: re-centre it first, then deposit. */
   outOfRange?: boolean;
+  /** The wallet already has this vault open: deposit into that position instead of opening a duplicate. */
+  existingPosition?: string;
   gross: string;
   fee: string;
   net: string;
@@ -46,4 +48,8 @@ export function simulationAmounts(amount: string, migrate = false) {
 export function simulationDisplay(amount: string, migrate = false) {
   const values = simulationAmounts(amount, migrate);
   return { gross: tokenAmount(values.gross.toString(), 6), fee: tokenAmount(values.fee.toString(), 6), net: tokenAmount(values.net.toString(), 6) };
+}
+/** One position per vault: the open (unlocked) position a new deposit or move must add to, if any. */
+export function openVaultPosition(positions: readonly { address: string; vaultId: string; locked?: boolean }[], vaultId: string): string | null {
+  return positions.find((p) => p.vaultId === vaultId && !p.locked)?.address ?? null;
 }

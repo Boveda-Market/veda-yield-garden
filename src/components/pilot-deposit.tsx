@@ -21,7 +21,7 @@ type Step = "idle" | "preparing" | "signing" | "confirming" | "done" | "error";
 const labels: Record<Step, string> = { idle: "", preparing: "Preparando tu depósito…", signing: "Aprueba en tu billetera…", confirming: "Aprobado. Confirmando tu depósito…", done: "", error: "" };
 
 /** Selected real deposit with fresh simulation and owner signature. */
-export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, usdc, autoStart = false, onBusyChange, onClose, onDoneChange, onAmountFit, confirmLabel }: { confirmLabel?: string; onAmountFit?: (amount: string) => void; autoStart?: boolean; usdc?: bigint | undefined; vaultId: string; amount: string; position?: string | undefined; migrate?: boolean; onBusyChange: (busy: boolean) => void; onClose?: () => void; onDoneChange?: (done: boolean) => void }) {
+export function PilotDeposit({ vaultId, amount: typedAmount, position: givenPosition, migrate, usdc, autoStart = false, onBusyChange, onClose, onDoneChange, onAmountFit, confirmLabel }: { confirmLabel?: string; onAmountFit?: (amount: string) => void; autoStart?: boolean; usdc?: bigint | undefined; vaultId: string; amount: string; position?: string | undefined; migrate?: boolean; onBusyChange: (busy: boolean) => void; onClose?: () => void; onDoneChange?: (done: boolean) => void }) {
   const t = useT();
   const { walletAddress, signAndSend } = useBovedaSession();
   const prepare = useServerFn(preparePilotDeposit);
@@ -30,6 +30,9 @@ export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, 
   const readStatus = useServerFn(pilotDepositStatus);
   const queryClient = useQueryClient();
   const [needsReserve, setNeedsReserve] = useState(false);
+  // One position per vault: when the server reports this vault is already open, the dollars go into that position.
+  const [foundPosition, setFoundPosition] = useState<string | null>(null);
+  const position = givenPosition ?? foundPosition ?? undefined;
   // After the activation is paid from the same dollars, the deposit shrinks to what is left.
   const [fitted, setFitted] = useState<string | null>(null);
   useEffect(() => { setFitted(null); }, [typedAmount]);
@@ -57,10 +60,17 @@ export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, 
     if (!walletAddress || busy || !eligible || !valid.success) return;
     setMessage(null); setSignature(null); setStatus(null); setStep("preparing");
     try {
-      let prepared = await prepare({ data: valid.data });
+      let data = valid.data;
+      let prepared = await prepare({ data });
+      if (!prepared.success && prepared.existingPosition && !data.position) {
+        setFoundPosition(prepared.existingPosition);
+        data = { ...data, position: prepared.existingPosition };
+        prepared = await prepare({ data });
+      }
+      const target = data.position;
       // Out-of-range position: re-centre it first (one approval), then add the new dollars to the centred position.
-      if (!prepared.success && prepared.outOfRange && position && !migrate) {
-        const rb = await prepareRebalance({ data: { wallet: walletAddress, position, vaultId: vaultId as never, prepare: true } });
+      if (!prepared.success && prepared.outOfRange && target) {
+        const rb = await prepareRebalance({ data: { wallet: walletAddress, position: target, vaultId: vaultId as never, prepare: true } });
         if (!rb.success || !rb.prepared) { setStep("error"); setMessage(`${rb.message} ${t("No se movió dinero.")}`); return; }
         setStep("signing");
         let rbSig: string;
@@ -76,7 +86,7 @@ export function PilotDeposit({ vaultId, amount: typedAmount, position, migrate, 
         if (!ok) { setStep("error"); setMessage(t("La confirmación tarda más de lo habitual. Revisa tu billetera antes de intentarlo otra vez.")); return; }
         for (const k of ["real-solana", "my-wallet"]) void queryClient.invalidateQueries({ queryKey: [k, walletAddress] });
         setStep("preparing");
-        prepared = await prepare({ data: valid.data });
+        prepared = await prepare({ data });
       }
       if (!prepared.success && prepared.stage === "reserve") { setStep("idle"); setNeedsReserve(true); return; }
       if (!prepared.success || !prepared.prepared) { setStep("error"); setMessage(`${prepared.message} ${t("No se movió dinero.")}`); return; }

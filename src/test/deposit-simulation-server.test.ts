@@ -21,6 +21,7 @@ vi.mock("@meteora-ag/cp-amm-sdk/dist/index.js", async (original) => {
     getDepositQuote = () => ({ outputAmount: new BN(10) });
     getLiquidityDelta = () => new BN(1000);
     createPositionAndAddLiquidity = mocks.deposit;
+    getPositionsByUser = async () => [];
   }, cpAmmCoder: { accounts: { decode: mocks.decode } } };
 });
 import { simulateDeposit } from "@/lib/deposit-simulation.server";

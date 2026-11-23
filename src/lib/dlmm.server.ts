@@ -136,6 +136,13 @@ export async function simulateDlmmDeposit(connection: Connection, input: Simulat
       existing = await ownedPosition(connection, sdk, pool, owner, new PublicKey(input.position));
       if (!existing) return result(false, "La posición no pertenece a esta wallet y bóveda.");
       if (existing.locked) return result(false, "Esta posición está bloqueada y no admite más depósitos.");
+    } else {
+      // One position per vault: never open a duplicate while an owned, unlocked one exists in this pool.
+      const { userPositions } = await pool.getPositionsByUserAndLbPair(owner);
+      for (const p of userPositions) {
+        const owned = await ownedPosition(connection, sdk, pool, owner, p.publicKey);
+        if (owned && !owned.locked) return { ...result(false, "Ya tienes esta bóveda abierta; tu dinero se suma a ella."), existingPosition: p.publicKey.toBase58() };
+      }
     }
     stage = "reserve";
     if (await connection.getBalance(owner) < (existing ? 10_000_000 : DLMM_MIN_SOL_LAMPORTS)) return result(false, "Esta bóveda necesita una garantía de apertura en tu reserva de operaciones; casi toda vuelve a ti al cerrarla.");

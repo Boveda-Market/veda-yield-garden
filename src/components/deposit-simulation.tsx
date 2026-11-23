@@ -1,4 +1,5 @@
 import { useT } from "@/lib/i18n";
+import { useRealWallet } from "@/hooks/use-real-wallet";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -7,7 +8,7 @@ import { TapAmount } from "@/components/ui/tap-amount";
 import { MoveSteps } from "@/components/move-steps";
 import { Dialog, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
-import { simulationDisplay } from "@/lib/deposit-simulation";
+import { openVaultPosition, simulationDisplay } from "@/lib/deposit-simulation";
 import type { Vault } from "@/lib/vaults";
 import { PilotDeposit } from "@/components/pilot-deposit";
 import { clearResumeDeposit } from "@/lib/resume-deposit";
@@ -28,9 +29,12 @@ import { depositQuote, QUOTE_PRESETS } from "@/lib/deposit-quote";
 const MAX_MICRO = 5_000_000_000n;
 const microToText = (v: bigint) => { const w = v / 1_000_000n; const f = (v % 1_000_000n).toString().padStart(6, "0").replace(/0+$/, ""); return f ? `${w}.${f}` : `${w}`; };
 
-export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", position, migrate = false, resumed = false }: { vault: Vault; wallet: string | null; onClose: () => void; initialAmount?: string; position?: string; migrate?: boolean; resumed?: boolean }) {
+export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", position: givenPosition, migrate = false, resumed = false }: { vault: Vault; wallet: string | null; onClose: () => void; initialAmount?: string; position?: string; migrate?: boolean; resumed?: boolean }) {
   const t = useT();
   const [amount, setAmount] = useState(initialAmount);
+  // One position per vault: a deposit or move into a vault the person already has open adds to that position.
+  const real = useRealWallet(wallet);
+  const position = givenPosition ?? (real.data?.success ? openVaultPosition(real.data.data.positions, vault.id) : null) ?? undefined;
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [kept, setKept] = useState(false);
