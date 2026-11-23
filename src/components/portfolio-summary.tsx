@@ -53,7 +53,7 @@ export function PortfolioSummary({ wallet, cashUsd, positions, positionsComplete
   // «Desde que depositaste»: only with complete history, complete positions and every vault valued; otherwise unavailable.
   const valued = rows.every((r) => r.value != null);
   const since = history.complete && positionsComplete && valued && history.flows.length > 0 ? sinceDeposit(history.flows, history.records, history.poolPrices, BigInt(Math.round((vaultTotal + totalFees) * 1e6))) : null;
-  // «Total ganado» percent is over «Total depositado»; unavailable while that number is unavailable.
+  // «Intereses pagados» percent is over «Total depositado»; unavailable while that number is unavailable.
   const earned = totalEarned(pnl, totalFees, since ? Number(since.depositedMicro) / 1e6 : 0);
   const showSince = vaultTotal > 0 || history.flows.length > 0;
   const sinceLoading = !history.complete && (history.query.isFetching || history.query.hasNextPage) && history.pages.length < MAX_HISTORY_PAGES && !history.query.isError;
@@ -79,7 +79,7 @@ export function PortfolioSummary({ wallet, cashUsd, positions, positionsComplete
     </div>
 
     <div className={`${tile} mt-3`}>
-      <p className={label}><Trophy size={14} />{t("Total ganado")}<HelpTip label={t("¿Qué es Total ganado?")}>{t("Total ganado = lo ya cosechado (al precio de hoy) + lo que tienes por cosechar. No incluye subidas o bajadas del precio de tu capital.")}</HelpTip></p>
+      <p className={label}><Trophy size={14} />{t("Intereses pagados")}<HelpTip label={t("¿Qué son los intereses pagados?")}>{t("Intereses pagados = lo ya cobrado (al precio de hoy) + lo que tienes por cobrar. No incluye subidas o bajadas del precio de tu capital.")}</HelpTip></p>
       <p className="mt-1 flex flex-wrap items-baseline gap-2"><span className="font-display text-3xl font-semibold tabular-nums text-primary">{earned ? <>+{anim(earned.total, liveRate)}</> : loading}</span>{earned?.percent != null && !hidden && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold tabular-nums text-primary">+{earned.percent.toFixed(1)}%</span>}</p>
     </div>
 
