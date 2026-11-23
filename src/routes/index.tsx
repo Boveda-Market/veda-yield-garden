@@ -147,6 +147,7 @@ export function Landing() {
           {plainHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p><div className="hidden md:block">{showReviews && <TrustTicker />}</div></>}
         </div>
         <div id="acceso" className="order-2 min-w-0 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
+          <p className="mb-3 w-full rounded-xl border border-primary/40 bg-primary/5 px-3 py-2 text-center text-sm leading-5">⚡ <strong>{t("Abre tu bóveda en un solo toque.")}</strong> {t("El sistema te guía, compra las monedas y hace todo por ti.")}</p>
           <HomeCtas vaultsFirst={gtaHero || calmHero || hero.theme === "trump"} trump={hero.theme === "trump"} />
           <EntryAccess />
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span><span aria-hidden="true">·</span><a href="https://www.privy.io/security" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground underline-offset-2 hover:text-primary hover:underline">{t("Conoce más")} ↗</a></p>

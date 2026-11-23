@@ -22,6 +22,7 @@ import { vaultSkin } from "@/components/vault-skin";
 import { isDlmmVault } from "@/lib/solana-data";
 import { FundsKeptCard } from "@/components/funds-kept-card";
 import { useActivationQuote } from "@/hooks/use-activation-quote";
+import { ACTIVATION_FEE_MICRO } from "@/lib/gas-refill";
 import { depositQuote, QUOTE_PRESETS } from "@/lib/deposit-quote";
 
 const MAX_MICRO = 5_000_000_000n;
@@ -90,8 +91,16 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
     {!position && !migrate && <p role="note" className="rounded-xl border border-border p-3 text-xs leading-5 text-muted-foreground">{t("Tu capital se combina con la otra moneda de la bóveda y su valor fluctuará con el precio de mercado, mientras acumulas intereses en cada operación.")} <a href="/faq#vaults-fluctuation" className="underline">{t("¿Por qué cambia mi balance?")}</a></p>}
     </>}
     {!done && !migrate && isDlmmVault(vault.id) && <RangeAlertsGate />}
+    {/* First vault only (first-account activation fee quoted): keep the one-tap promise in view right above the confirm button. */}
+    {!done && !busy && !position && !migrate && activationQ.data?.fee === ACTIVATION_FEE_MICRO && <OneTapNote />}
     {wallet ? <PilotDeposit usdc={usdc} autoStart={migrate} vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onAmountFit={setAmount} onClose={onClose} onDoneChange={setDone} /> : <p role="note" className="text-sm text-muted-foreground">{t("Conecta tu wallet para depositar.")}</p>}
     {step3 && !busy && <Button type="button" variant="ghost" className="w-full" onClick={() => { clearResumeDeposit(); setKept(true); }}>{t("Cancelar")}</Button>}
     </>}
   </ActionSheetContent></Dialog>;
+}
+
+/** One-tap promise shown only on the person's first vault deposit. */
+export function OneTapNote() {
+  const t = useT();
+  return <p role="note" className="rounded-xl border border-primary/40 bg-primary/5 p-3 text-sm leading-5">⚡ <strong>{t("Abre tu bóveda en un solo toque.")}</strong> {t("El sistema te guía, compra las monedas y hace todo por ti.")}</p>;
 }

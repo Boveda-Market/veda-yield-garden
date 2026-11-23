@@ -1764,6 +1764,8 @@ export const extra: Record<string, string> = {
   "Añade saldo a tu cuenta digital": "Add funds to your digital account",
   "Recarga dólares digitales con Apple Pay, Tarjeta de Crédito o Coinbase.": "Top up digital dollars with Apple Pay, Credit Card or Coinbase.",
   "Abre tu bóveda en un solo toque": "Open your vault in one tap",
+  "Abre tu bóveda en un solo toque.": "Open your vault in one tap.",
+  "El sistema te guía, compra las monedas y hace todo por ti.": "The system guides you, buys the coins and does everything for you.",
   "Eliges la bóveda y confirmas una vez: el sistema compra las monedas a precio de mercado, arma tu bóveda y empieza a generar intereses las 24 horas. También puedes jugar las rondas relámpago de Doble o Nada. Retira al banco o a Coinbase cuando quieras.": "Pick a vault and confirm once: the system buys the coins at market price, builds your vault and starts earning interest 24/7. You can also play Double or Nothing lightning rounds. Withdraw to your bank or Coinbase anytime.",
   "Acceso avanzado": "Advanced access",
   "Conectar wallet externa": "Connect external wallet",
