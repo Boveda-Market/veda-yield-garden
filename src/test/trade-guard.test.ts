@@ -16,3 +16,23 @@ describe("trade guard", () => {
     expect(tradeBlockReason(W, T, [])).toBe("not_owner");
   });
 });
+
+describe("wallet read gate", () => {
+  const O = "So11111111111111111111111111111111111111112";
+  it("allows reading a wallet linked to the caller's account", async () => {
+    const { walletReadAllowed } = await import("@/lib/trade-guard");
+    expect(walletReadAllowed(W, [{ type: "wallet", address: W }], [], T)).toBe(true);
+  });
+  it("allows reading a wallet the caller proved by signature", async () => {
+    const { walletReadAllowed } = await import("@/lib/trade-guard");
+    expect(walletReadAllowed(W, [], [W], T)).toBe(true);
+  });
+  it("allows the operator (proved owner of the treasury) to read any wallet", async () => {
+    const { walletReadAllowed } = await import("@/lib/trade-guard");
+    expect(walletReadAllowed(O, [], [T], T)).toBe(true);
+  });
+  it("refuses someone else's wallet", async () => {
+    const { walletReadAllowed } = await import("@/lib/trade-guard");
+    expect(walletReadAllowed(O, [{ type: "wallet", address: W }], [W], T)).toBe(false);
+  });
+});

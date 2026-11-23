@@ -8,3 +8,9 @@ export function tradeBlockReason(wallet: string, treasury: string, linked: Linke
   const embedded = own.chain_type === "solana" && (own.wallet_client_type === "privy" || own.wallet_client_type === "privy-v2" || own.connector_type === "embedded");
   return embedded ? null : "external";
 }
+
+/** Pure read decision shared by tests: a wallet's balances and history are only read for its owner (linked to the account or proved by signature) or the operator. */
+export function walletReadAllowed(wallet: string, linked: LinkedWallet[], verifiedByCaller: string[], operator: string): boolean {
+  if (linked.some((a) => a.type === "wallet" && a.address === wallet)) return true;
+  return verifiedByCaller.includes(wallet) || verifiedByCaller.includes(operator);
+}

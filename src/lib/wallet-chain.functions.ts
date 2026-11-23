@@ -37,7 +37,8 @@ const balanceInput = z.object({ wallet: solanaAddressSchema, mint: z.string().re
 export const getTokenBalance = createServerFn({ method: "POST" })
   .middleware([requirePrivyAuth])
   .inputValidator((input: unknown) => balanceInput.parse(input))
-  .handler(async ({ data }): Promise<{ success: true; amount: string } | { success: false; error: string }> => {
+  .handler(async ({ data, context }): Promise<{ success: true; amount: string } | { success: false; error: string }> => {
+    try { const { assertReadableWallet } = await import("@/lib/trade-guard.server"); await assertReadableWallet(context.privyUserId, data.wallet); } catch (e) { return { success: false, error: e instanceof Error && e.message.startsWith("Solo puedes") ? e.message : "No se pudo verificar tu billetera. Inténtalo de nuevo." }; }
     const key = process.env["HELIUS_API_KEY"];
     if (!key) return { success: false, error: "La conexión todavía no está configurada." };
     try {

@@ -7,7 +7,8 @@ export type { WalletActivity } from "./wallet-activity";
 export const getWalletActivity = createServerFn({ method: "POST" })
   .middleware([requirePrivyAuth])
   .inputValidator((input: unknown) => realWalletInput.parse(input))
-  .handler(async ({ data }): Promise<{ success: true; rows: WalletActivity[] } | { success: false; error: string }> => {
+  .handler(async ({ data, context }): Promise<{ success: true; rows: WalletActivity[] } | { success: false; error: string }> => {
+    try { const { assertReadableWallet } = await import("@/lib/trade-guard.server"); await assertReadableWallet(context.privyUserId, data.wallet); } catch (e) { return { success: false, error: e instanceof Error && e.message.startsWith("Solo puedes") ? e.message : "No se pudo verificar tu billetera. Inténtalo de nuevo." }; }
     const key = process.env["HELIUS_API_KEY"];
     if (!key) return { success: false, error: "La consulta de actividad no está disponible." };
     try {

@@ -31,16 +31,20 @@ export const getPastRounds = createServerFn({ method: "GET" }).handler(async () 
 });
 
 export const getPredictPositions = createServerFn({ method: "POST" })
+  .middleware([requirePrivyAuth])
   .inputValidator((i: unknown) => z.object({ wallet: solanaAddressSchema }).strict().parse(i))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    try { const { assertReadableWallet } = await import("@/lib/trade-guard.server"); await assertReadableWallet(context.privyUserId, data.wallet); } catch { return { success: false as const, positions: [] }; }
     try { const { listPositions } = await import("@/lib/predict.server"); return { success: true as const, positions: await listPositions(data.wallet) }; }
     catch { return { success: false as const, positions: [] }; }
   });
 
-/** Public venue history: recent orders that did not enter their round and were refunded. */
+/** Venue history for the caller's own wallet: recent orders that did not enter their round and were refunded. */
 export const getPredictRefunds = createServerFn({ method: "POST" })
+  .middleware([requirePrivyAuth])
   .inputValidator((i: unknown) => z.object({ wallet: solanaAddressSchema }).strict().parse(i))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    try { const { assertReadableWallet } = await import("@/lib/trade-guard.server"); await assertReadableWallet(context.privyUserId, data.wallet); } catch { return { success: false as const, refunds: [] }; }
     try { const { listRefunds } = await import("@/lib/predict.server"); return { success: true as const, refunds: await listRefunds(data.wallet) }; }
     catch { return { success: false as const, refunds: [] }; }
   });
