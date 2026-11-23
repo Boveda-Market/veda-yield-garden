@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activationCharge, activationKind, activationShortfallMicro, gasIsLow, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
+import { activationCharge, activationKind, activationKindFor, activationShortfallMicro, gasIsLow, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
 
 describe("gas refill", () => {
   it("is low below 0.003 SOL", () => { expect(gasIsLow(2_999_999n)).toBe(true); expect(gasIsLow(3_000_000n)).toBe(false); });
@@ -36,4 +36,10 @@ describe("activation kind", () => {
   it("reopening still free while another vault is open", () => expect(activationKind(true, [GTA6, TRUMP], GTA6)).toBe("reopen"));
   it("a new vault for an account that already had one pays $2", () => expect(activationKind(false, [TRUMP], GTA6)).toBe("extra"));
   it("a new vault while another is open pays $2", () => expect(activationKind(true, [], GTA6)).toBe("extra"));
+});
+
+describe("activation outside opening a vault", () => {
+  const GTA6 = "99bL7ZdcQxcrkdJDKGoGpAhqZUMYEHzhMvtNadiZJpE8";
+  it("a play or Billetera refill by an account that had a vault pays no activation", () => expect(activationKindFor(false, [GTA6])).toBe("reopen"));
+  it("a brand-new account still pays the $5 activation", () => expect(activationKindFor(false, [])).toBe("new"));
 });

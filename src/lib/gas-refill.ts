@@ -47,6 +47,11 @@ export function activationKind(hasOpenVault: boolean, pastPools: readonly string
   if (pool && pastPools.includes(pool)) return "reopen";
   return hasOpenVault || pastPools.length > 0 ? "extra" : "new";
 }
+/** Without a vault being opened (a play or a plain reserve refill), an account that already had a vault is never activated again. */
+export function activationKindFor(hasOpenVault: boolean, pastPools: readonly string[], pool?: string): ActivationKind {
+  const kind = activationKind(hasOpenVault, pastPools, pool);
+  return !pool && kind === "extra" ? "reopen" : kind;
+}
 export function activationFee(kind: ActivationKind) { return kind === "new" ? ACTIVATION_FEE_MICRO : kind === "extra" ? EXTRA_VAULT_FEE_MICRO : 0n; }
 /** Reopening only refills the reserve at the regular refill price; first openings add the fixed activation fee. */
 export function activationCharge(marketMicro: bigint, kind: ActivationKind = "new") { return kind === "reopen" ? refillCharge(marketMicro) : marketMicro + activationFee(kind); }

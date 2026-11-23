@@ -1181,6 +1181,7 @@ export const extra: Record<string, string> = {
   "Casi listo…": "Almost there…",
   "Total estimado": "Estimated total",
   "Continuar": "Continue",
+  "Tu cuenta ya está activada: no pagas activación otra vez. Solo recargamos tu reserva de operaciones.": "Your account is already activated, so there is no activation fee again. We only refill your operations reserve.",
   "Ya abriste esta bóveda antes: no pagas activación otra vez. Solo recargamos tu reserva de operaciones.": "You opened this vault before, so there is no activation fee again. We only refill your operations reserve.",
   "Duelo": "Duel",
   "Cargando precio en vivo…": "Loading live price…",

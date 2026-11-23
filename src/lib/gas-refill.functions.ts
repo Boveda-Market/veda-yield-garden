@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requirePrivyAuth } from "@/lib/privy-auth.middleware";
-import { activationCharge, activationFee, activationKind, gasRefillInput, playNeedsActivation, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
+import { activationCharge, activationFee, activationKindFor, type ActivationKind, gasRefillInput, playNeedsActivation, refillCharge, refillLamports, treasuryCanRefill } from "@/lib/gas-refill";
 
 const UNAVAILABLE = "La recarga automática no está disponible en este momento. Ya avisamos al equipo; inténtalo de nuevo más tarde. No se movió dinero.";
 let lastTreasuryAlert = 0;
@@ -40,7 +40,7 @@ export const prepareGasRefill = createServerFn({ method: "POST" })
       // Activation charges reserve cost + fixed $5; regular refills keep the small cost-recovery margin.
       // Wallets that already hold a vault pay the smaller additional-vault fee (verified on-chain, never trusted from the client).
       // A vault this wallet opened before (finalized history decoded server-side) pays no activation again.
-      let kind: ReturnType<typeof activationKind> = "new";
+      let kind: ActivationKind = "new";
       if (data.activation) {
         let open = false, past: string[] = [];
         try { const { readDlmmPositions } = await import("@/lib/dlmm.server"); open = (await readDlmmPositions(heliusConnection(key), new PublicKey(data.wallet))).length > 0; } catch { open = false; }
@@ -50,7 +50,7 @@ export const prepareGasRefill = createServerFn({ method: "POST" })
           past = [...new Set((rows ?? []).flatMap((r) => Array.isArray(r.records) ? (r.records as { kind?: string; pool?: string }[]) : []).filter((x) => x.kind === "deposit" && typeof x.pool === "string").map((x) => x.pool!))];
         } catch { past = []; }
         const { VAULTS } = await import("@/lib/vaults");
-        kind = activationKind(open, past, data.vault ? VAULTS.find((v) => v.id === data.vault)?.pool : undefined);
+        kind = activationKindFor(open, past, data.vault ? VAULTS.find((v) => v.id === data.vault)?.pool : undefined);
       }
       const extraVault = kind === "extra";
       const charge = data.activation ? activationCharge(market, kind) : refillCharge(market);
