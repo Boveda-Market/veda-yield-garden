@@ -30,6 +30,7 @@ import { PoolYield } from "@/components/pool-yield";
 import { HarvestDialog } from "@/components/harvest-dialog";
 import { RealPositions, PortfolioEmpty, VaultMiniCards } from "@/components/real-positions";
 import { ExploreCards } from "@/components/explore-cards";
+import { VisitorBtcChart } from "@/components/visitor-btc-chart";
 import { isEmptyPortfolio } from "@/lib/explore-state";
 import { StartGuide } from "@/components/start-guide";
 import { VaultSteps } from "@/components/vault-steps";
@@ -107,7 +108,7 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
       <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">{t("Pon tus dólares a generar intereses diarios. Retiras o cosechas cuando quieras.")}</p>
       {errors}
     </section>}
-    {portfolioOnly && showExplore && <><PortfolioEmpty /><ExploreCards onPortfolio /></>}
+    {portfolioOnly && showExplore && <>{visitor && <VisitorBtcChart />}<PortfolioEmpty /><ExploreCards onPortfolio /></>}
     {portfolioOnly && walletAddress && !exploring && <Suspense fallback={<div className="mt-6 space-y-4"><Skeleton className="h-64" /><Skeleton className="h-28" /></div>}><PortfolioSummary wallet={walletAddress} cashUsd={data ? Number(data.usdc) : null} solLamports={data ? decimalToUnits(data.sol, 9) ?? undefined : undefined} positions={data?.positions ?? []} positionsComplete={Boolean(data?.positionsComplete)} predictionsMicro={predictionsMicro} onHarvest={(p) => openPositionAction(p, "harvest")} onHarvestAll={(ps) => setHarvestAll(ps.filter((p) => isOperableVault(p.vaultId)).map((p) => ({ position: p.address, vaultId: p.vaultId as OperableVault })))} /></Suspense>}
     {portfolioOnly && data && <MigrateBanner positions={data.positions} onMigrate={migrate} />}
     {portfolioOnly && tab !== "vaults" && predictions.items.length > 0 && <section aria-label={t("Predicciones abiertas")} className="border-b border-border py-8"><OpenPredictions state={predictions} /></section>}
