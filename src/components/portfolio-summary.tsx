@@ -81,7 +81,6 @@ export function PortfolioSummary({ wallet, cashUsd, positions, positionsComplete
     <div className={`${tile} mt-3`}>
       <p className={label}><Trophy size={14} />{t("Total ganado")}<HelpTip label={t("¿Qué es Total ganado?")}>{t("Total ganado = lo ya cosechado (al precio de hoy) + lo que tienes por cosechar. No incluye subidas o bajadas del precio de tu capital.")}</HelpTip></p>
       <p className="mt-1 flex flex-wrap items-baseline gap-2"><span className="font-display text-3xl font-semibold tabular-nums text-primary">{earned ? <>+{anim(earned.total, liveRate)}</> : loading}</span>{earned?.percent != null && !hidden && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold tabular-nums text-primary">+{earned.percent.toFixed(1)}%</span>}</p>
-      {earned && <p className="mt-1 text-xs text-muted-foreground">{t("{a} cosechado · {b} por cosechar", { a: money(pnl), b: money(totalFees) })}{earned.percent != null ? ` · ${t("sobre lo depositado")}` : ""}</p>}
     </div>
 
     <div className="mt-3">
