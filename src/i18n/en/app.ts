@@ -54,6 +54,7 @@ export const app: Record<string, string> = {
   "Detalles del pool": "Pool details",
   "Detalles de la bóveda": "Vault details",
   "Ver gráfica": "View chart",
+  "Explorar gráfica en GMGN": "Explore chart on GMGN",
   "Copiar trades": "Copy trades",
   "Copiar contrato": "Copy contract",
   "Contrato oficial:": "Official contract:",
