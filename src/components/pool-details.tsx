@@ -6,7 +6,7 @@ import { Check, Copy, RefreshCw, TrendingDown, TrendingUp, Users } from "lucide-
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { fetchPoolStats } from "@/lib/pool-stats";
+import { fetchPoolStats, coinLabel } from "@/lib/pool-stats";
 import type { Vault } from "@/lib/vaults";
 import { isDlmmVault } from "@/lib/solana-data";
 import { PoolYield } from "@/components/pool-yield";
@@ -31,7 +31,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
   const stats = query.data;
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
   const holders = yieldQ.data?.holders ?? null, fees24h = yieldQ.data?.fees24h ?? null;
-  const sym = `$${(stats?.baseSymbol ?? vault.pair.split("/")[0] ?? "").replace(/^\$/, "")}`;
+  const sym = `$${coinLabel(stats?.baseSymbol, vault.pair.split("/")[0] ?? "")}`;
   const buys = stats?.buys24h ?? null, sells = stats?.sells24h ?? null;
   const url = `https://app.meteora.ag/${isDlmmVault(vault.id) ? "dlmm" : "dammv2"}/${vault.pool}`;
   const copy = async () => {
@@ -76,7 +76,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
           <Metric label={t("Liquidez en el pool · USD")} value={usd(stats?.liquidityUsd)} />
           <Metric label={t("Valor de mercado · USD")} value={usd(stats?.marketCap, 0)} />
           <Metric label={`${sym} en el pool`} value={number(stats?.baseLocked, 4)} />
-          <Metric label={`${stats?.quoteSymbol ?? "USDC"} en el pool`} value={number(stats?.quoteLocked, 4)} />
+          <Metric label={`${coinLabel(stats?.quoteSymbol, "USDC")} en el pool`} value={number(stats?.quoteLocked, 4)} />
           <Metric label={t("Operaciones · 24 h")} value={number(stats?.transactions24h, 0)} />
           <Metric label={t("Riesgo de la bóveda")} value={vault.badge ? t(vault.badge) : t(vault.risk)} />
         </dl>

@@ -11,6 +11,7 @@ import type { RangeAlert } from "@/hooks/use-range-alerts";
 import { useAutopilot } from "@/components/autopilot-toggle";
 import { autopilotNotice } from "@/lib/autopilot";
 import { VAULTS } from "@/lib/vaults";
+import { coinLabel } from "@/lib/coin-label";
 import { ANNOUNCEMENTS, DISMISSED_KEY, SEEN_KEY, announcementSections, latestAnnouncementId, shortDate, type Announcement, type AnnouncementKind } from "@/lib/announcements";
 
 const LABEL: Record<AnnouncementKind, string> = { vault: "Nueva bóveda", market: "Nuevo mercado", policy: "Aviso legal", update: "Novedad" };
@@ -98,7 +99,7 @@ export function NewsList({ onNavigate, predict = [], refunds = [], ranges = [], 
       <button type="button" onClick={() => setShowAll(false)} className="text-xs font-medium text-muted-foreground hover:text-foreground">{t("Ocultar historial")}</button>
     </div>}
     <ul className="space-y-3">
-      {ranges.map((a) => <NoticeCard key={a.id} tone="urgent" icon="🚨" label={t("Bóvedas")} title={t("Bóveda {v} sin generar", { v: a.p.symbol })}>
+      {ranges.map((a) => <NoticeCard key={a.id} tone="urgent" icon="🚨" label={t("Bóvedas")} title={t("Bóveda {v} sin generar", { v: coinLabel(a.p.symbol, a.p.symbol) })}>
         <p className="mt-2 text-sm text-muted-foreground">{t("Lleva más de 10 minutos sin generar ganancias. Tu dinero sigue seguro; vuelve a centrarla cuando quieras.")}</p>
         <Link to="/wallet" search={{ rebalance: a.p.address }} onClick={onNavigate} className={ctaClass(true)}>🎯 {t("Rebalancear ahora")}</Link>
       </NoticeCard>)}

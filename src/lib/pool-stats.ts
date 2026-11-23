@@ -43,6 +43,9 @@ export function parsePoolStats(data: unknown, address: string) {
   return null;
 }
 
+/** Short coin name for the screen (see coin-label.ts). */
+export { coinLabel } from "./coin-label";
+
 export async function fetchPoolStats(address: string, signal?: AbortSignal) {
   const response = await fetch(`https://api.dexscreener.com/latest/dex/pairs/solana/${encodeURIComponent(address)}`, { signal: signal ?? null });
   if (response.status === 404) return null;

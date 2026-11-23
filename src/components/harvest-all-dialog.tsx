@@ -13,6 +13,7 @@ import { harvestedToUsdc, type HarvestResult } from "@/lib/harvest";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
 import { prepareGasRefill } from "@/lib/gas-refill.functions";
 import { vaultSymbol, type OperableVault } from "@/lib/solana-data";
+import { coinLabel } from "@/lib/coin-label";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
@@ -62,7 +63,7 @@ export function HarvestAllDialog({ wallet, targets, onClose }: { wallet: string;
       } else if (!r.success && !/ya está bien/.test(r.error)) throw new Error(r.error);
     } catch (e) { setError(e instanceof Error && e.message !== "refill" ? t(e.message) : t("No se pudo recargar la reserva de operaciones. No se movió dinero.")); setBusy(false); setStep(""); return; }
     for (const [i, q] of ok.entries()) {
-      const coin = vaultSymbol(q.vaultId);
+      const coin = coinLabel(vaultSymbol(q.vaultId));
       setStep(t("Cosechando {v} ({i}/{n})…", { v: coin, i: i + 1, n: ok.length }));
       try {
         const next = await prepare({ data: { wallet, position: q.position, vaultId: q.vaultId, maximumFeeRaw: q.r.feeRaw! } });
@@ -89,7 +90,7 @@ export function HarvestAllDialog({ wallet, targets, onClose }: { wallet: string;
       {!quotes && <WorkingLine text={t("Calculando ganancias…")} />}
       {quotes && <>
         <ReceiveCard label={t("Recibes")} amount={net.toFixed(2)} unit="$" sub={t("+ la otra parte, convertida a dólares")} />
-        <dl className="grid gap-2 rounded-xl border border-border p-4 text-sm">{quotes.map((q) => <div key={q.position} className="flex justify-between gap-3"><dt className="text-muted-foreground">{vaultSymbol(q.vaultId)}</dt><dd className="tabular-nums">{q.r.success ? `$${q.r.net}` : t("No disponible")}</dd></div>)}</dl>
+        <dl className="grid gap-2 rounded-xl border border-border p-4 text-sm">{quotes.map((q) => <div key={q.position} className="flex justify-between gap-3"><dt className="text-muted-foreground">{coinLabel(vaultSymbol(q.vaultId))}</dt><dd className="tabular-nums">{q.r.success ? `$${q.r.net}` : t("No disponible")}</dd></div>)}</dl>
       </>}
       {step && <WorkingLine text={step} />}
       {quotes && ok.length > 0 && canSign && <Button size="lg" disabled={busy} onClick={() => void run()}>{busy ? step : t("Confirmar cosecha de todo")}</Button>}

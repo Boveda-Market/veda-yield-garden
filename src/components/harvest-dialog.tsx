@@ -2,6 +2,7 @@ import { ServiceFeeLabel } from "@/components/service-fee-label";
 import { SignalErrorCard } from "@/components/signal-error";
 import { DetailsToggle } from "@/components/ui/details-toggle";
 import { vaultSymbol, type OperableVault } from "@/lib/solana-data";
+import { coinLabel } from "@/lib/coin-label";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
 import { useEffect, useState } from "react";
@@ -86,7 +87,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
     } catch { setMessage(t("No se pudo preparar la cosecha. No se movió dinero.")); }
     finally { setPending(false); setStep(""); }
   }
-  const coin = vaultSymbol(vaultId);
+  const coin = coinLabel(vaultSymbol(vaultId));
   const [compoundDone, setCompoundDone] = useState(false);
   const [kept, setKept] = useState(false);
   const ready = !!result?.success && !signature && !finished;
@@ -106,7 +107,7 @@ export function HarvestDialog({ wallet, position, vaultId, onClose, compound }: 
         <DetailsToggle><dl className="grid gap-2 rounded-xl border border-border p-4">
           <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en dólares")}</dt><dd>${result.gross}</dd></div>
           <div className="flex justify-between gap-3"><dt><ServiceFeeLabel t={t} /></dt><dd>−${result.fee}</dd></div>
-          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en")} {result.tokenSymbol}</dt><dd>{otherUsd !== null ? `≈ $${otherUsd.toFixed(2)}` : result.tokenAmount}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias en")} {coinLabel(result.tokenSymbol, vaultSymbol(vaultId))}</dt><dd>{otherUsd !== null ? `≈ $${otherUsd.toFixed(2)}` : result.tokenAmount}</dd></div>
         </dl></DetailsToggle>
       </>}
     </div>}

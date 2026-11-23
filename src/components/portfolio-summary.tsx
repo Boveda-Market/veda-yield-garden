@@ -9,6 +9,7 @@ import { useT } from "@/lib/i18n";
 import type { ChainPosition } from "@/lib/solana-data";
 import { useQueries } from "@tanstack/react-query";
 import { fetchPoolStats } from "@/lib/pool-stats";
+import { coinLabel } from "@/lib/coin-label";
 import { chartRangeFor, closesForDays, fetchDailyCloses, fetchRangeCandles, globalMarket, intradayGlobal, readCachedCandles, type ChartRange } from "@/lib/pool-candles";
 import { useMeteoraHistory } from "@/hooks/use-meteora-history";
 import { usePositionRows } from "@/hooks/use-position-rows";
@@ -275,7 +276,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
     {open.length > 0 && open.length <= 2 && <div role="tablist" aria-label={t("Bóvedas")} className="relative mt-2 flex gap-2 overflow-x-auto pb-1">{vtab("global", t("Global"))}{open.map((v) => vtab(v.id, `${VAULTS.find((x) => x.id === v.id)?.badge ? "⚡ " : ""}${v.label}`))}</div>}
     {cur && chain && <div className="relative mt-2 flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-muted/40 p-2">
       {cur.id === "btc" ? <TokenIcon symbol="BTC" size={32} /> : cur.id === "trump" ? <img src={trumpLogo} alt="TRUMP" width={32} height={32} className="h-8 w-8 shrink-0 rounded-full object-cover" /> : cur.id === "dcty" ? <img src={dctyLogo} alt="DCTY" width={32} height={32} className="h-8 w-8 shrink-0 rounded-full object-cover" /> : <TokenIcon symbol={chain.symbol} size={32} />}
-      <div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-bold">${chain.symbol} <span className="font-normal text-muted-foreground">/ USDC</span></p>
+      <div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-bold">${coinLabel(chain.symbol, chain.symbol)} <span className="font-normal text-muted-foreground">/ USDC</span></p>
         <button type="button" onClick={copyMint} aria-label={t("Copiar contrato")} className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-background/70 px-2 py-0.5 font-mono text-[11px] text-muted-foreground hover:text-foreground">{copied ? <><Check size={11} className="text-primary" />{t("Copiado")}</> : <><Copy size={11} />{chain.mint.slice(0, 4)}…{chain.mint.slice(-4)}</>}</button></div>
     </div>}
     <div className="relative mt-1">

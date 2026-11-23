@@ -3,7 +3,7 @@ import { CHAIN_POOLS } from "@/lib/solana-data";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useT } from "@/lib/i18n";
-import { fetchPoolStats } from "@/lib/pool-stats";
+import { fetchPoolStats, coinLabel } from "@/lib/pool-stats";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import type { Vault } from "@/lib/vaults";
 import { formatCoinPrice } from "@/lib/format-price";
@@ -21,8 +21,8 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const pool = useQuery(poolYieldOptions(vault.pool));
   const m = pool.data;
   const rawSym = stats.data?.baseSymbol ?? m?.symbolX ?? vault.pair.split("/")[0];
-  const symbol = rawSym ? `$${rawSym.replace(/^\$/, "")}` : rawSym;
-  const coin = vault.pair.split("/")[0] ?? rawSym ?? "";
+  const coin = coinLabel(rawSym, vault.pair.split("/")[0] ?? "");
+  const symbol = coin ? `$${coin}` : rawSym;
   const mint = CHAIN_POOLS.find((p) => p.id === vault.id)?.mint;
   const [copied, setCopied] = useState(false);
   const ch = stats.data?.change24h ?? null;
@@ -36,7 +36,7 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
     [t("Intereses totales"), m?.totalFees != null ? `+${usdShort(m.totalFees)}` : "—", t("Desde que abrió el pool")],
     [t("Volumen total"), usdShort(m?.totalVolume), t("Desde que abrió el pool")],
     [t("{s} en el pool", { s: coin }), amount(m?.amountX), t("Monedas, no dólares")],
-    [t("{s} en el pool", { s: m?.symbolY ?? "USDC" }), amount(m?.amountY), t("Monedas, no dólares")],
+    [t("{s} en el pool", { s: coinLabel(m?.symbolY, "USDC") }), amount(m?.amountY), t("Monedas, no dólares")],
     [t("Comisión por intercambio"), m?.feePct != null ? `${m.feePct.toLocaleString("en-US", { maximumFractionDigits: 3 })}%` : "—", t("Se reparte entre los depósitos")],
     [t("Personas con {s}", { s: coin }), m?.holders != null ? m.holders.toLocaleString("en-US") : "—"],
   ];

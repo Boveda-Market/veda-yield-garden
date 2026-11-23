@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SignalErrorCard } from "@/components/signal-error";
 import { type OperableVault } from "@/lib/solana-data";
+import { coinLabel } from "@/lib/coin-label";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -59,7 +60,7 @@ export function CompoundStep({ wallet, position, vaultId, usdcRaw, tokenRaw, net
 
   if (done) return <ActionSuccess title={t("¡Ganancias reinvertidas!")} body={t("Se sumaron a tu misma bóveda y ya generan más.")} signature={signature} onClose={onClose}
     amount={netUsd ? { value: netUsd, unit: "$" } : undefined}
-    details={[{ label: t("Operación"), value: t("Reinversión de ganancias") }, ...(quote?.tokenUsed && quote.tokenUsed !== "0" ? [{ label: t("También sumado"), value: `${quote.tokenUsed} ${quote.tokenSymbol}` }] : [])]} />;
+    details={[{ label: t("Operación"), value: t("Reinversión de ganancias") }, ...(quote?.tokenUsed && quote.tokenUsed !== "0" ? [{ label: t("También sumado"), value: `${quote.tokenUsed} ${coinLabel(quote.tokenSymbol, "")}` }] : [])]} />;
   return <div className="grid gap-3 text-sm">
     {pending && <WorkingLine text={step} />}
     {message && <><SignalErrorCard message={message} /><Button size="lg" onClick={() => void sign()}>{t("Intentar de nuevo")}</Button><Button variant="ghost" onClick={onClose}>{t("Cerrar")}</Button></>}

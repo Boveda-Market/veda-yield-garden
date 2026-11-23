@@ -12,6 +12,7 @@ import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { ActionSuccess, ReceiveCard } from "@/components/action-success";
 import { useT } from "@/lib/i18n";
 import { notify } from "@/lib/notify";
+import { coinLabel } from "@/lib/coin-label";
 import { isDlmmVault, type ChainPosition, type OperableVault } from "@/lib/solana-data";
 import { prepareRealRebalance } from "@/lib/rebalance.functions";
 import { pilotDepositStatus } from "@/lib/pilot-deposit.functions";
@@ -116,7 +117,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
     finally { setPending(false); setStep(""); }
   }
 
-  const symbol = quote?.tokenSymbol ?? position.symbol;
+  const symbol = coinLabel(quote?.tokenSymbol ?? position.symbol, position.symbol);
   return <Dialog open onOpenChange={(o) => { if (o || pending) return; if (quote?.success && !signature && !done && !kept) setKept(true); else onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
     {kept ? <FundsKeptCard where="vault" onDone={onClose} /> : <>
     {done ? <ActionSuccess title={t("¡Posición rebalanceada!")} body={t("Tus ganancias se sumaron y tu posición quedó centrada en el precio actual. Ya vuelve a generar.")} signature={signature} onClose={onClose}

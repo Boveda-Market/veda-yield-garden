@@ -8,6 +8,7 @@ import { ArrowDownToLine, Plus, Repeat, Copy, ExternalLink, Sprout, Vault as Vau
 import { useT } from "@/lib/i18n";
 import { VAULTS } from "@/lib/vaults";
 import { formatUsd } from "@/lib/position-value";
+import { coinLabel } from "@/lib/coin-label";
 import { usePositionRows } from "@/hooks/use-position-rows";
 import type { ChainPosition } from "@/lib/solana-data";
 import { Button } from "./ui/button";
@@ -49,7 +50,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
       const hot = Boolean(vault?.badge);
       const body = <>
         {hot && vault ? <HotBanner vault={vault} className="-mx-5 -mt-5 mb-2">{p.locked && !p.outOfRange && <span className="rounded-full bg-hot-surface px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide">{t("Con liquidez bloqueada")}</span>}</HotBanner> : null}
-        <div className="flex items-start justify-between gap-3"><div>{!hot && <h3 className="font-display font-semibold">{vault ? t(vault.name) : `${p.symbol}/USDC`}</h3>}{!hot && !p.outOfRange && <p className="mt-1 text-xs text-muted-foreground">{p.locked ? t("Con liquidez bloqueada") : t("Activa")}</p>}<PoweredBy brand="meteora" className="mt-1 !justify-start" /></div></div>
+        <div className="flex items-start justify-between gap-3"><div>{!hot && <h3 className="font-display font-semibold">{vault ? t(vault.name) : `${coinLabel(p.symbol, p.symbol)}/USDC`}</h3>}{!hot && !p.outOfRange && <p className="mt-1 text-xs text-muted-foreground">{p.locked ? t("Con liquidez bloqueada") : t("Activa")}</p>}<PoweredBy brand="meteora" className="mt-1 !justify-start" /></div></div>
         <p className="mt-1 text-xs text-muted-foreground">{t("Valor estimado")}</p>
         <p className={`font-display text-3xl font-semibold ${hot ? "w-fit bg-[image:var(--gradient-hot)] bg-clip-text font-black text-transparent" : ""}`}>{value === null ? t("No disponible") : `≈ ${formatUsd(value)}`}</p>
         {hot && <HotZoneMeter position={p} className="mt-3" />}
