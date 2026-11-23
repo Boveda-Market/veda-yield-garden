@@ -1670,6 +1670,7 @@ export const extra: Record<string, string> = {
   "Dirección de tesorería del protocolo:": "Protocol treasury address:",
 "Oprime aquí para ver ganancias": "Tap here to see earnings",
   "Oprime aquí para depositar": "Tap here to deposit",
+  "Oprime aquí para entrar a la bóveda": "Tap here to enter the vault",
   "Intereses con el volumen de GTA6": "Interest from GTA6 trading volume",
   "Ganando 24/7": "Earning 24/7",
   "Ver mis ganancias": "See my earnings",
