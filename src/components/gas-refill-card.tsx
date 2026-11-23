@@ -192,10 +192,10 @@ export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActiv
   useEffect(() => { if (open) { setStage("ready"); setError(undefined); } }, [open]);
   useEffect(() => {
     if (!open || !wallet) return;
-    void prepare({ data: { wallet, activation: true, quoteOnly: true, ...(resume?.vaultId ? { vault: resume.vaultId } : {}) } }).then((r) => { if (r.success) { setTotal(BigInt(r.chargeMicro)); setExtra(!!r.extraVault); setFee(r.feeMicro != null ? BigInt(r.feeMicro) : null); } }).catch(() => {});
+    void prepare({ data: { wallet, activation: true, quoteOnly: true, ...(resume?.vaultId ? { vault: resume.vaultId } : {}), ...(resume?.migrate ? { migrate: true } : {}) } }).then((r) => { if (r.success) { setTotal(BigInt(r.chargeMicro)); setExtra(!!r.extraVault); setFee(r.feeMicro != null ? BigInt(r.feeMicro) : null); } }).catch(() => {});
   }, [open, wallet]); // eslint-disable-line react-hooks/exhaustive-deps
   const feeMicro = fee ?? (extra ? EXTRA_VAULT_FEE_MICRO : ACTIVATION_FEE_MICRO);
-  const reopen = fee === 0n ? (resume?.vaultId ? "vault" as const : "account" as const) : undefined;
+  const reopen = fee === 0n ? (resume?.vaultId && !resume.migrate ? "vault" as const : "account" as const) : undefined;
   const chargeParts = total != null && total >= feeMicro ? { feeMicro, reserveMicro: total - feeMicro } : null;
   const autoDone = useRef(false);
   useEffect(() => { if (!open) autoDone.current = false; }, [open]);
@@ -204,7 +204,7 @@ export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActiv
     if (!wallet) return;
     setError(undefined); setStage("working");
     try {
-      const r = await prepare({ data: { wallet, activation: true, ...(resume?.vaultId ? { vault: resume.vaultId } : {}) } });
+      const r = await prepare({ data: { wallet, activation: true, ...(resume?.vaultId ? { vault: resume.vaultId } : {}), ...(resume?.migrate ? { migrate: true } : {}) } });
       if (!r.success) throw new Error(r.error);
       if (!r.transaction) throw new Error("No se pudo preparar la activación.");
       await session.signAndSend(Uint8Array.from(atob(r.transaction), (c) => c.charCodeAt(0)));

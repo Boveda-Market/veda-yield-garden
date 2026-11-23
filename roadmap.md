@@ -14,3 +14,6 @@
 - [x] Portafolio: revisar orden de tarjetas de arriba
 - [x] Deslizado «al revés» en tarjetas de arriba del portafolio
 - [x] Portafolio: «Total depositado» y cambio ($ y %) frente a lo que hay hoy (sin comisiones; cosechas cuentan como ganancia)
+
+- [x] Activación solo al abrir una bóveda por primera vez ($0 al reabrir, en Doble o Nada y recargas de Billetera)
+- [x] Sin cargo de activación ($2) al trasladar dinero a una bóveda nueva

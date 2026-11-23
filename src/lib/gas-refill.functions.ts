@@ -50,7 +50,7 @@ export const prepareGasRefill = createServerFn({ method: "POST" })
           past = [...new Set((rows ?? []).flatMap((r) => Array.isArray(r.records) ? (r.records as { kind?: string; pool?: string }[]) : []).filter((x) => x.kind === "deposit" && typeof x.pool === "string").map((x) => x.pool!))];
         } catch { past = []; }
         const { VAULTS } = await import("@/lib/vaults");
-        kind = activationKindFor(open, past, data.vault ? VAULTS.find((v) => v.id === data.vault)?.pool : undefined);
+        kind = activationKindFor(open, past, data.vault ? VAULTS.find((v) => v.id === data.vault)?.pool : undefined, !!data.migrate);
       }
       const extraVault = kind === "extra";
       const charge = data.activation ? activationCharge(market, kind) : refillCharge(market);

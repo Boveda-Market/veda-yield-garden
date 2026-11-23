@@ -43,3 +43,9 @@ describe("activation outside opening a vault", () => {
   it("a play or Billetera refill by an account that had a vault pays no activation", () => expect(activationKindFor(false, [GTA6])).toBe("reopen"));
   it("a brand-new account still pays the $5 activation", () => expect(activationKindFor(false, [])).toBe("new"));
 });
+
+describe("activation when moving between vaults", () => {
+  const GTA6 = "99bL7ZdcQxcrkdJDKGoGpAhqZUMYEHzhMvtNadiZJpE8", TRUMP = "3C5YE97HADPDxZehYq9Cis8AXr9aNyrUsczKzE1nDbW9";
+  it("moving 100% into a vault never opened before pays no $2 activation", () => expect(activationKindFor(false, [TRUMP], GTA6, true)).toBe("reopen"));
+  it("without a move, a new vault still pays $2", () => expect(activationKindFor(false, [TRUMP], GTA6, false)).toBe("extra"));
+});
