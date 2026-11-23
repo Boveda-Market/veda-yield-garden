@@ -1472,7 +1472,7 @@ export const extra: Record<string, string> = {
   "Entendido, entrar a Bóveda Market": "Got it, enter Bóveda Market",
   "Tu panel": "Your dashboard",
   "Entra con tu cuenta de Google en 1 segundo y recarga con": "Sign in with your Google account in 1 second and top up with",
-  "Aquí es donde están las bóvedas:\n💵 Entras desde solo *$20*\n💳 Pagas fácil con *Apple Pay, PayPal, Coinbase* o tarjeta\n🤖 El *piloto automático* se encarga de hacer todo por ti\n🔔 Importante: activa las notificaciones para seguir tus movimientos al instante.\n\nÉchale un ojo aquí:": "This is where the vaults are:\n💵 Start from just *$20*\n💳 Pay easily with *Apple Pay, PayPal, Coinbase* or card\n🤖 The *autopilot* does everything for you\n🔔 Important: turn on notifications to follow your moves instantly.\n\nTake a look here:",
+  "💵 Empieza en Bóveda desde $20.\n💳 Recarga con Apple Pay, PayPal, Coinbase o tarjeta.\n🤖 El piloto automático ajusta tu bóveda por ti.\n🔔 Activa las notificaciones y recibe avisos de tus movimientos.\n\nMira las bóvedas disponibles aquí 👇": "💵 Get started in Bóveda from $20.\n💳 Top up with Apple Pay, PayPal, Coinbase or card.\n🤖 Autopilot adjusts your vault for you.\n🔔 Turn on notifications and receive updates on your movements.\n\nSee the available vaults here 👇",
   "Copia tu enlace": "Copy your link",
   "Ya está listo. Un toque y es tuyo.": "It's ready. One tap and it's yours.",
   "Compártelo": "Share it",
