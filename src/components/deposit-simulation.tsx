@@ -41,7 +41,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
     if (!r.success) throw new Error(r.error);
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   } });
-  const activationQ = useActivationQuote(wallet, !migrate && isDlmmVault(vault.id));
+  const activationQ = useActivationQuote(wallet, !migrate && isDlmmVault(vault.id), false, vault.id);
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
   const apr = yieldQ.data?.apr;
   let breakdown: ReturnType<typeof simulationDisplay> | null = null;

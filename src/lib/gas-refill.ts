@@ -40,14 +40,23 @@ export const ACTIVATION_FEE_MICRO = 5_000_000n;
 export const ACTIVATION_SUGGESTED_USD = 20;
 /** Wallets that already hold a vault pay this smaller fee to activate an additional vault ($2). */
 export const EXTRA_VAULT_FEE_MICRO = 2_000_000n;
-export function activationCharge(marketMicro: bigint, extraVault = false) { return marketMicro + (extraVault ? EXTRA_VAULT_FEE_MICRO : ACTIVATION_FEE_MICRO); }
+/** "new": first vault ever ($5 account activation); "extra": first time in this vault for an account that already had one ($2); "reopen": this vault was opened before, so no activation fee again. */
+export type ActivationKind = "new" | "extra" | "reopen";
+/** Decides the activation from verified facts: a vault open now and the pools this wallet deposited into before. */
+export function activationKind(hasOpenVault: boolean, pastPools: readonly string[], pool?: string): ActivationKind {
+  if (pool && pastPools.includes(pool)) return "reopen";
+  return hasOpenVault || pastPools.length > 0 ? "extra" : "new";
+}
+export function activationFee(kind: ActivationKind) { return kind === "new" ? ACTIVATION_FEE_MICRO : kind === "extra" ? EXTRA_VAULT_FEE_MICRO : 0n; }
+/** Reopening only refills the reserve at the regular refill price; first openings add the fixed activation fee. */
+export function activationCharge(marketMicro: bigint, kind: ActivationKind = "new") { return kind === "reopen" ? refillCharge(marketMicro) : marketMicro + activationFee(kind); }
 /** Dollars still missing to reach the suggested starting balance (0 when enough). */
 export function activationShortfallMicro(usdcMicro: bigint, needMicro: bigint = BigInt(ACTIVATION_SUGGESTED_USD) * 1_000_000n) {
   const need = needMicro;
   return usdcMicro >= need ? 0n : need - usdcMicro;
 }
 
-export const gasRefillInput = z.object({ wallet: solanaAddressSchema, target: z.enum(["standard", "vault", "deposit"]).optional(), activation: z.boolean().optional(), quoteOnly: z.boolean().optional(), play: z.boolean().optional() });
+export const gasRefillInput = z.object({ wallet: solanaAddressSchema, target: z.enum(["standard", "vault", "deposit"]).optional(), activation: z.boolean().optional(), vault: z.string().regex(/^[a-z0-9]{2,12}$/).optional(), quoteOnly: z.boolean().optional(), play: z.boolean().optional() });
 
 /** A Doble o Nada entry only needs the regular operations reserve; above it the account is already active for plays and no activation is quoted. */
 export function playNeedsActivation(sol: bigint) { return sol < SOL_RESERVE_LAMPORTS; }

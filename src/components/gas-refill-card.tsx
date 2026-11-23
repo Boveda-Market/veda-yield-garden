@@ -61,7 +61,7 @@ export function GasRefillCard({ sol, usdc, onDone, force, target }: Props) {
 
 export const PENDING_DEPOSIT_KEY = "boveda:pending-deposit";
 const money = (micro: bigint) => `$${(Number(micro) / 1e6).toFixed(2)}`;
-export type ActivationStage = { kind: "short"; missingMicro: bigint } | { kind: "ready"; totalMicro: bigint | null; error?: string; extraVault?: boolean } | { kind: "working" } | { kind: "done" };
+export type ActivationStage = { kind: "short"; missingMicro: bigint } | { kind: "ready"; totalMicro: bigint | null; error?: string; extraVault?: boolean; reopen?: boolean } | { kind: "working" } | { kind: "done" };
 
 /** First-time activation in one card: clean total → GTA6 wait → "Cuenta lista" that opens the GTA6 deposit. */
 function ActivationFlow({ usdc, wallet, prepare, signAndSend, onDone }: { usdc: bigint; wallet: string | null | undefined; prepare: ReturnType<typeof useServerFn<typeof prepareGasRefill>>; signAndSend: (tx: Uint8Array) => Promise<string>; onDone?: (() => void) | undefined }) {
@@ -131,6 +131,13 @@ export function ActivationCardView({ stage, onActivate, onAddFunds, onOpenVault,
     <Button className="mt-4 w-full" onClick={onAddFunds}><Sparkles size={16} />{t("Depositar lo que falta ({amount})", { amount: money(stage.missingMicro) })}</Button>
   </section>;
   const total = stage.totalMicro === null ? "…" : `~${money(stage.totalMicro)}`;
+  if (stage.reopen) return <section aria-label={t("Reserva de operaciones")} className="rounded-2xl border border-primary/40 bg-primary/10 p-5">
+    <h2 className="font-display text-xl font-semibold">{t("Reserva de operaciones")}</h2>
+    <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Ya abriste esta bóveda antes: no pagas activación otra vez. Solo recargamos tu reserva de operaciones.")}</p>
+    <p className="mt-3 text-sm text-muted-foreground">{t("Total estimado")} <span className="ml-1 font-display text-2xl font-bold text-foreground">{total}</span></p>
+    {stage.error && <SignalErrorCard className="mt-2" message={stage.error} />}
+    <Button className="mt-4 h-12 w-full text-base font-bold" disabled={stage.totalMicro === null} onClick={onActivate}><Sparkles size={16} />{t("Continuar")} ({total})</Button>
+  </section>;
   if (stage.extraVault) return <section aria-label={t("Activación de bóveda")} className="rounded-2xl border border-primary/40 bg-primary/10 p-5">
     <h2 className="font-display text-xl font-semibold">{t("Activación de bóveda")}</h2>
     <p className="mt-1 text-sm leading-6 text-foreground/85">{t("Para comenzar a generar en esta bóveda se requiere un cargo único de activación.")}</p>
@@ -175,14 +182,16 @@ export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActiv
   const [stage, setStage] = useState<"ready" | "working" | "done">("ready");
   const [error, setError] = useState<string | undefined>();
   const [extra, setExtra] = useState(false);
+  const [fee, setFee] = useState<bigint | null>(null);
   const [buy, setBuy] = useState(0);
   const [kept, setKept] = useState(false);
   useEffect(() => { if (open) { setStage("ready"); setError(undefined); } }, [open]);
   useEffect(() => {
     if (!open || !wallet) return;
-    void prepare({ data: { wallet, activation: true, quoteOnly: true } }).then((r) => { if (r.success) { setTotal(BigInt(r.chargeMicro)); setExtra(!!r.extraVault); } }).catch(() => {});
+    void prepare({ data: { wallet, activation: true, quoteOnly: true, ...(resume?.vaultId ? { vault: resume.vaultId } : {}) } }).then((r) => { if (r.success) { setTotal(BigInt(r.chargeMicro)); setExtra(!!r.extraVault); setFee(r.feeMicro != null ? BigInt(r.feeMicro) : null); } }).catch(() => {});
   }, [open, wallet]); // eslint-disable-line react-hooks/exhaustive-deps
-  const feeMicro = extra ? EXTRA_VAULT_FEE_MICRO : ACTIVATION_FEE_MICRO;
+  const feeMicro = fee ?? (extra ? EXTRA_VAULT_FEE_MICRO : ACTIVATION_FEE_MICRO);
+  const reopen = fee === 0n;
   const chargeParts = total != null && total >= feeMicro ? { feeMicro, reserveMicro: total - feeMicro } : null;
   const autoDone = useRef(false);
   useEffect(() => { if (!open) autoDone.current = false; }, [open]);
@@ -191,7 +200,7 @@ export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActiv
     if (!wallet) return;
     setError(undefined); setStage("working");
     try {
-      const r = await prepare({ data: { wallet, activation: true } });
+      const r = await prepare({ data: { wallet, activation: true, ...(resume?.vaultId ? { vault: resume.vaultId } : {}) } });
       if (!r.success) throw new Error(r.error);
       if (!r.transaction) throw new Error("No se pudo preparar la activación.");
       await session.signAndSend(Uint8Array.from(atob(r.transaction), (c) => c.charCodeAt(0)));
@@ -199,7 +208,7 @@ export function ActivationSheet({ open, usdc, needMicro, depositMicro, autoActiv
       setTimeout(() => onActivated(fitted, chargeParts ?? undefined), 1200);
     } catch (e) { setError(e instanceof Error ? t(e.message) : t("No se pudo completar la activación.")); setStage("ready"); }
   }
-  const view: ActivationStage = stage === "done" ? { kind: "done" } : stage === "working" || checking ? { kind: "working" } : missing > 0n ? { kind: "short", missingMicro: missing } : { kind: "ready", totalMicro: total, extraVault: extra, ...(error ? { error } : {}) };
+  const view: ActivationStage = stage === "done" ? { kind: "done" } : stage === "working" || checking ? { kind: "working" } : missing > 0n ? { kind: "short", missingMicro: missing } : { kind: "ready", totalMicro: total, extraVault: extra, reopen, ...(error ? { error } : {}) };
   return <Dialog open={open} onOpenChange={(o) => { if (o || stage === "working") return; if (view.kind === "ready" && !kept) setKept(true); else { setKept(false); onClose(); } }}><ActionSheetContent closeLabel={t("Cerrar")}>
     {kept ? <FundsKeptCard where="wallet" amountMicro={usdc} onDone={() => { setKept(false); onClose(); }} /> : <>
     <DialogTitle className="sr-only">{t("Activa tu cuenta")}</DialogTitle>

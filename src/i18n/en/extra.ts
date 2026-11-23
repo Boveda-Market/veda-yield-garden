@@ -1180,6 +1180,8 @@ export const extra: Record<string, string> = {
   "Revisando tus ganancias…": "Checking your earnings…",
   "Casi listo…": "Almost there…",
   "Total estimado": "Estimated total",
+  "Continuar": "Continue",
+  "Ya abriste esta bóveda antes: no pagas activación otra vez. Solo recargamos tu reserva de operaciones.": "You opened this vault before, so there is no activation fee again. We only refill your operations reserve.",
   "Duelo": "Duel",
   "Cargando precio en vivo…": "Loading live price…",
   "La línea que va arriba es la que va ganando: verde para Sube, roja para Baja. La línea amarilla marca el precio a batir.": "The line on top is winning: green for Up, red for Down. The yellow line marks the price to beat.",
