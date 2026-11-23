@@ -135,6 +135,7 @@ export const notifyPredictResults = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<{ success: boolean }> => {
     try {
       const { id, db } = await admin(data.token);
+      { const { assertReadableWallet } = await import("@/lib/trade-guard.server"); await assertReadableWallet(id, data.wallet); }
       const { listPositions } = await import("./predict.server");
       const { resolvedOutcome, predictAlertText } = await import("./predict-alerts");
       const t = db as unknown as { from: (x: string) => any };
@@ -158,6 +159,7 @@ export const notifyPredictRefunds = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<{ success: boolean }> => {
     try {
       const { id, db } = await admin(data.token);
+      { const { assertReadableWallet } = await import("@/lib/trade-guard.server"); await assertReadableWallet(id, data.wallet); }
       const { listRefunds } = await import("./predict.server");
       const { refundAlertText } = await import("./predict-refunds");
       const t = db as unknown as { from: (x: string) => any };
@@ -177,6 +179,7 @@ export const registerAlertWallet = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<{ success: boolean }> => {
     try {
       const { id, db } = await admin(data.token);
+      { const { assertReadableWallet } = await import("@/lib/trade-guard.server"); await assertReadableWallet(id, data.wallet); }
       const t = db as unknown as { from: (x: string) => any };
       const { error } = await t.from("telegram_links").update({ wallet: data.wallet }).eq("privy_user_id", id);
       return { success: !error };
