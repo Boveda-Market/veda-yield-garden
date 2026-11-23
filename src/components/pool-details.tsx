@@ -50,7 +50,6 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
     { label: t("Valor de mercado"), value: btcCap, sub: capT ? t("Billones de dólares") : t("Todo el bitcoin del mundo"), help: "El precio de Bitcoin multiplicado por todos los bitcoins que existen. Es la moneda digital más grande del mundo." },
     { label: t("Bitcoins en circulación"), value: compact(btc?.circulating), sub: t("De 21M que existirán"), help: "Cuántos bitcoins existen hoy. Nunca habrá más de 21 millones: esa escasez es parte de por qué se le llama oro digital." },
     { label: t("Respaldo en la bóveda"), value: "1:1", sub: t("Bitcoin de Coinbase"), help: "Esta bóveda usa el Bitcoin de Coinbase (cbBTC): cada moneda está respaldada por un bitcoin real que Coinbase guarda. Por eso su precio sigue al de Bitcoin." },
-    { label: t("Coinbase puede congelarla"), value: freezable == null ? "—" : freezable ? t("Sí") : t("No"), sub: t("El bitcoin original no se puede congelar"), help: "Nadie puede congelar el bitcoin original. La versión de Coinbase que usa esta bóveda sí permite a Coinbase bloquear monedas en casos legales o de fraude.", wide: true },
   ];
   const coinTiles: MetricTile[] = isBtc ? btcTiles : [
     { label: t("Personas con {s}", { s: sym }), value: number(y?.holders, 0), sub: t("Billeteras que la tienen"), help: "Cuántas billeteras tienen esta moneda hoy. Muchas personas significa una moneda más conocida, con más gente comprando y vendiendo.", accent: true },
