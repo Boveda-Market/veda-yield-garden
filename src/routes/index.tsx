@@ -23,6 +23,7 @@ import { AdvancedAccess, EntryAccess } from "@/components/entry-access";
 import { PredictPromo } from "@/components/predict-promo";
 import { DobleHero, Gta6Hero, HomeCtas } from "@/components/home-gta6";
 import { BootSplash } from "@/components/boot-splash";
+import { CalmHero } from "@/components/home-calm";
 
 /** Before hydration, returning visitors (flag set by a tiny head script) see the loading screen instead of the full page flashing. */
 function ReturningCover() {
@@ -123,7 +124,8 @@ export function Landing() {
   const hero = HERO_VARIANTS[heroIdx] ?? HERO_VARIANTS[0]!;
   const gtaHero = hero.theme === "gta6";
   const dobleHero = hero.theme === "doble";
-  const plainHero = !gtaHero && !dobleHero;
+  const calmHero = hero.theme === "calm";
+  const plainHero = !gtaHero && !dobleHero && !calmHero;
   if (decided && compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 pb-10 pt-20 text-foreground sm:py-10">
     <BrandLogo size="lg" />
     <h1 className="mt-4 text-center font-display text-3xl font-bold">{t("Bienvenido de nuevo")}</h1>
@@ -138,13 +140,14 @@ export function Landing() {
       <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">
         {gtaHero && <div className="order-1 min-w-0 md:col-span-2"><Gta6Hero title={hero.title} sub={hero.sub} /></div>}
         {dobleHero && <div className="order-1 min-w-0 md:col-span-2"><DobleHero title={hero.title} sub={hero.sub} /></div>}
+        {calmHero && <div className="order-1 min-w-0 md:col-span-2"><CalmHero title={hero.title} sub={hero.sub} /></div>}
         {plainHero && <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(hero.title)}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t(hero.sub)}</p>{showReviews && <TrustTicker />}</div>}
         <div className="order-3 min-w-0 text-center md:order-1 md:text-left">
           {plainHero && <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(hero.title)}</h1>}
           {plainHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p><div className="hidden md:block">{showReviews && <TrustTicker />}</div></>}
         </div>
         <div id="acceso" className="order-2 min-w-0 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
-          <HomeCtas vaultsFirst={gtaHero || hero.theme === "trump"} trump={hero.theme === "trump"} />
+          <HomeCtas vaultsFirst={gtaHero || calmHero || hero.theme === "trump"} trump={hero.theme === "trump"} />
           <EntryAccess />
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span><span aria-hidden="true">·</span><a href="https://www.privy.io/security" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground underline-offset-2 hover:text-primary hover:underline">{t("Conoce más")} ↗</a></p>
         </div>
