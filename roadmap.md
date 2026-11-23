@@ -19,3 +19,5 @@
 - [x] Sin cargo de activación ($2) al trasladar dinero a una bóveda nueva
 
 - [x] Total depositado: precio de cada bóveda reconocido por dirección de moneda (también bóvedas nuevas)
+
+- [x] Métricas del pool: volatilidad, dinero en el pool, volumen/dinero, intercambios, intereses totales, antigüedad y comisión, con sus porcentajes
