@@ -41,6 +41,7 @@ import { isExploringAccount } from "@/lib/explore-state";
 import { VisitorWallet } from "@/components/visitor-views";
 import { ResumeDepositHost } from "@/components/resume-deposit-host";
 import { DobleShortcut, WalletHeroShortcuts } from "@/components/wallet-hero-shortcuts";
+import { WeeklyAd } from "@/components/weekly-ad";
 
 import { BuyUsdc } from "@/components/buy-usdc";
 import { InstallAppBanner } from "@/components/install-app";
@@ -223,6 +224,7 @@ export function WalletPanel() {
     {/* New accounts at $0 explore first: the cards lead, the install reminder is skipped (they just saw the install step) and Face ID / first-deposit steps follow. */}
     {exploring && <ExploreCards />}
     {!exploring && <WalletHeroShortcuts wallet={address} />}
+    {!exploring && <WeeklyAd />}
     {!exploring && <InstallAppBanner />}
     <GasRefillCard sol={balances.data?.sol} usdc={balances.data?.usdc} onDone={() => void queryClient.invalidateQueries({ queryKey: ["my-wallet", address] })} />
     {!exploring && <PasskeyInvite />}

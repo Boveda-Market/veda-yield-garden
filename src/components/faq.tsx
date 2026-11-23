@@ -19,6 +19,7 @@ export const CATEGORIES: { id: Cat | "all"; label: string }[] = [
 ];
 
 export const questions: Q[] = [
+  { id: "vaults-buy-coins", cat: "vaults", question: "¿Tengo que comprar Bitcoin, Trump u otras monedas para entrar?", answer: "No. Solo necesitas dólares en tu cuenta. Abres tu bóveda en un solo toque: el sistema te guía, compra las monedas a precio de mercado y arma todo por ti. Confirmas una vez y tu bóveda empieza a generar intereses." },
   { id: "safety-why", cat: "wallet", question: "¿Dónde está guardado mi dinero y quién lo custodia?", answer: "En tu propia billetera criptográfica de autocustodia. Bóveda Market no funciona como un banco tradicional ni guarda fondos en balances internos. Tu cuenta opera con criptografía de clave pública: la llave privada vive en tu dispositivo y es la única que autoriza movimientos. Ni Bóveda Market, ni Google, ni ningún tercero pueden congelar, retener o mover tu capital." },
   { id: "vaults-earn", cat: "vaults", question: "¿Cuál es el motor algorítmico que genera los intereses?", answer: "Un creador de mercado automatizado de alta frecuencia. Tu capital aporta liquidez a un mercado abierto que procesa miles de cambios continuos. Por cada intercambio que pasa por la bóveda, el algoritmo cobra una microtarifa que se acredita a tu balance como interés compuesto en tiempo real. Las tasas son estimaciones, cambian y no están garantizadas." },
   { id: "vaults-autopilot", cat: "vaults", question: "¿Qué es el Piloto Automático?", answer: "Es lo que hace la magia. Cada bóveda de altos intereses viene con un bot que trabaja 24/7 en tu lugar: vigila el mercado sin descanso y, si el precio se sale de la zona donde tu dinero está produciendo, la vuelve a centrar por ti para que no deje de cobrar intereses. También toma las ganancias que se van acumulando y las vuelve a meter en la bóveda para que crezcan solas. No firmas nada, no avisas a nadie y no tienes que abrir la app: el bot se encarga y te avisa para que lo veas cuando quieras. Ese permiso solo sirve para mantener tu bóveda produciendo —no puede retirar tu dinero ni enviarlo a otra parte— y lo apagas cuando quieras." },
@@ -28,7 +29,7 @@ export const questions: Q[] = [
   { id: "predict-how", cat: "predict", question: "¿Cómo funcionan las rondas de Doble o Nada?", answer: "Son contratos binarios con liquidación atómica basados en oráculos de precio en tiempo real. Pronosticas si Bitcoin, Ethereum u otro activo terminará arriba o abajo en rondas de 5 minutos, 15 minutos o 4 horas. Cada contrato ganador liquida a $1.00 exacto; si no aciertas, pierdes lo que pusiste. Bóveda Market nunca es tu contraparte." },
 ];
 
-const FEATURED = ["safety-why", "vaults-earn", "vaults-partial"];
+const FEATURED = ["vaults-buy-coins", "safety-why", "vaults-earn", "vaults-partial"];
 
 const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
