@@ -63,4 +63,10 @@ export const homeSections: Record<string, string> = {
   "Intereses estimados que cambian cada día. El valor de tu bóveda sube y baja con el precio de Trump Coin.": "Estimated interest that changes daily. Your vault's value rises and falls with the Trump Coin price.",
   "Oprime aquí para ver las bóvedas": "Tap here to see the vaults",
   "Intereses estimados que cambian cada día. El valor de tu bóveda sube y baja con el precio de sus monedas.": "Estimated interest that changes daily. Your vault's value rises and falls with the price of its coins.",
+  "Bitcoin en vivo": "Bitcoin live",
+  "Trump Coin en vivo": "Trump Coin live",
+  "GTA6 Coin en vivo": "GTA6 Coin live",
+  "Datos en vivo": "Live data",
+  "Volumen 24 h": "24 h volume",
+  "Liquidez": "Liquidity",
 };
