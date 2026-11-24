@@ -26,7 +26,7 @@ export function HomeMarketCard({ coin = "btc" }: { coin?: MarketCoin }) {
   const up = (ch ?? 0) >= 0;
   const holders = coin === "btc" ? btc?.holders : y?.holders;
   const tiles: [string, React.ReactNode][] = [
-    [t("Precio"), <>{stats?.price != null ? formatCoinPrice(stats.price) : "—"}{ch != null && <span className={`ml-1.5 align-middle rounded-full px-1.5 py-0.5 text-[10px] font-bold ${up ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{up ? "▲ +" : "▼ "}{ch.toFixed(1)}%</span>}</>],
+    [t("Precio"), <>{stats?.price != null ? formatCoinPrice(stats.price) : "—"}{ch != null && <span className={`mt-1 block w-fit rounded-full px-1.5 py-0.5 text-[10px] font-bold ${up ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{up ? "▲ +" : "▼ "}{ch.toFixed(1)}%</span>}</>],
     [t("Volumen 24 h"), short(stats?.volume24h)],
     [t("Liquidez"), short(stats?.liquidityUsd)],
     ["Holders", count(holders)],
