@@ -49,3 +49,5 @@
 - [x] FAQ del inicio: «¿Puedo retirar en cualquier momento?» en lugar de «¿Cuándo puedo retirar?»
 - [x] FAQ del inicio: «¿Cuál es el mínimo para empezar con Bóveda Market?» en lugar de «¿Cuánto cuesta usar Bóveda Market?» (respuesta con mínimo $1, activación $5, bóveda extra $2)
 - [x] FAQ del inicio: nueva pregunta «¿Dónde puedo ver los recibos de cada transacción?»
+- [x] FAQ del inicio: primera pregunta «¿Qué rayos es Bóveda Market?» (antes «¿Cómo el sistema genera las ganancias?», ahora abre la lista)
+- [x] FAQ del inicio: la respuesta empieza con «Bóveda Market es una interfaz inteligente que…»
