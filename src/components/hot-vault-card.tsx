@@ -7,17 +7,13 @@ import { BitcoinBlocks, DctySkyline, TrumpFlag, VaultTitle, vaultSkin } from "@/
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { fetchPoolStats } from "@/lib/pool-stats";
 import { marketPulse, type Pulse } from "@/lib/market-pulse";
-import { poolDiscoveryOptions } from "@/lib/pool-metrics";
+import { bitcoinStatsOptions } from "@/lib/bitcoin-stats";
+import { formatCoinPrice } from "@/lib/format-price";
 import type { Vault } from "@/lib/vaults";
 
 const num = (v: number | null | undefined) => v == null ? "—" : v.toLocaleString("es-MX", { maximumFractionDigits: 0 });
-const usd = (v: number | null | undefined) => v == null ? "—" : `$${v.toLocaleString("es-MX", { maximumFractionDigits: 0 })}`;
-/** Meteora's change vs. the previous 24 h, compact for the card: ▲192% / ▼13%. */
-function CardChange({ change }: { change: number | null | undefined }) {
-  if (change == null || !Number.isFinite(change)) return null;
-  const up = change >= 0;
-  return <span className={`block text-[9px] font-bold leading-tight tabular-nums ${up ? "text-hot-buy" : "text-hot-sell"}`}>{up ? "▲" : "▼"}{Math.abs(change).toLocaleString("en-US", { maximumFractionDigits: Math.abs(change) < 10 ? 1 : 0 })}%</span>;
-}
+/** Compact dollars for the card: $1.6M / $391. */
+const shortUsd = (v: number | null | undefined) => v == null ? "—" : v >= 1e9 ? `$${(v / 1e9).toLocaleString("en-US", { maximumFractionDigits: 2 })}B` : v >= 1e6 ? `$${(v / 1e6).toLocaleString("en-US", { maximumFractionDigits: 1 })}M` : `$${Math.round(v).toLocaleString("en-US")}`;
 
 /** Vice-City-style sunset sky (sun with horizon stripes, no palms; original art, no game logos). */
 export function Sunset() {
@@ -47,11 +43,15 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
   const y = useQuery(poolYieldOptions(vault.pool));
   // Same cache key as PoolYield / pool details, so DexScreener is queried once.
   const s = useQuery({ queryKey: ["dexscreener-pool-stats", vault.pool], queryFn: ({ signal }) => fetchPoolStats(vault.pool, signal), staleTime: 60_000, refetchInterval: 60_000, retry: 1 });
-  const live = useQuery(poolDiscoveryOptions(vault.pool)).data?.pulse ?? null;
+  // Bitcoin's own network stats (same source its pool details use) instead of the wrapped-token holder count.
+  const btc = useQuery({ ...bitcoinStatsOptions(), enabled: vault.id === "btc" });
   const apr = y.data?.apr;
   const buys = s.data?.buys24h ?? null, sells = s.data?.sells24h ?? null;
   const total = buys != null && sells != null ? buys + sells : null;
   const pulse = marketPulse(s.data);
+  const ch = s.data?.change24h ?? null;
+  const up = (ch ?? 0) >= 0;
+  const holders = vault.id === "btc" ? btc.data?.holders : y.data?.holders;
   const steps = [["💵", "Depositas"], ["⚡", "Piloto automático"], ["📈", "Ganancias automáticas"]] as const;
   return <article className={`hot-ring rounded-2xl p-[2px] shadow-[var(--shadow-hot)] ${vaultSkin(vault.id)}`}>
     <div className="relative isolate flex h-full flex-col overflow-hidden rounded-[calc(1rem-2px)] bg-[image:var(--gradient-hot-surface)] text-hot-foreground">
@@ -64,10 +64,10 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
           <p key={apr ?? "x"} className="animate-count-pop bg-[image:var(--gradient-hot)] bg-clip-text font-display text-4xl font-black leading-tight text-transparent tabular-nums">{apr == null ? "—" : `${apr.toLocaleString("es-MX", { maximumFractionDigits: 0 })}%`}</p>
           <p className="text-[10px] font-medium leading-tight text-hot-muted sm:text-[11px]">{y.isPending ? t("Consultando el pool…") : t("APR estimado · intereses 24 h")}</p>
         </div>
-        <dl className="mt-2 grid grid-cols-3 gap-1.5">
-          {([[t("Intereses hoy"), usd(y.data?.fees24h), live?.feesChange], [t("Intercambios hoy"), num(live?.swaps ?? total), live?.swapsChange], [t("Holders"), num(y.data?.holders), null]] as const).map(([k, v, c]) => <div key={k} className="rounded-lg bg-hot-surface/60 px-2 py-1.5">
+        <dl className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+          {([[t("Precio"), <>{s.data?.price != null ? formatCoinPrice(s.data.price) : "—"}{ch != null && <span className={`mt-0.5 block w-fit rounded-full px-1 py-px text-[9px] font-bold tabular-nums ${up ? "bg-hot-buy/15 text-hot-buy" : "bg-hot-sell/15 text-hot-sell"}`}>{up ? "▲ +" : "▼ "}{Math.abs(ch).toFixed(1)}%</span>}</>], [t("Volumen 24 h"), shortUsd(s.data?.volume24h)], [t("Liquidez"), shortUsd(s.data?.liquidityUsd)], [t("Holders"), num(holders)]] as [string, ReactNode][]).map(([k, v]) => <div key={k} className="rounded-lg bg-hot-surface/60 px-2 py-1.5">
             <dt className="truncate text-[9px] font-semibold uppercase tracking-wide text-hot-muted">{k}</dt>
-            <dd className="font-display text-sm font-bold tabular-nums">{v}<CardChange change={c} /></dd>
+            <dd className="font-display text-sm font-bold tabular-nums">{v}</dd>
           </div>)}
         </dl>
         {buys != null && sells != null && total! > 0 && <div className="mt-2 rounded-lg border border-hot-foreground/15 bg-hot-surface/60 px-2 py-1.5">

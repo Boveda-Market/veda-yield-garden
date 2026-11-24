@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { filterQuestions, questions } from "./faq";
 
 describe("FAQ", () => {
-  it("has 7 questions", () => {
-    expect(questions.length).toBe(7);
+  it("has 10 questions", () => {
+    expect(questions.length).toBe(10);
   });
   it("explains Autopilot in vault terms", () => {
     const q = questions.find((x) => x.id === "vaults-autopilot");
