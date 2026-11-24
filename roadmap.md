@@ -51,3 +51,4 @@
 - [x] FAQ del inicio: nueva pregunta «¿Dónde puedo ver los recibos de cada transacción?»
 - [x] FAQ del inicio: primera pregunta «¿Qué rayos es Bóveda Market?» (antes «¿Cómo el sistema genera las ganancias?», ahora abre la lista)
 - [x] FAQ del inicio: la respuesta empieza con «Bóveda Market es una interfaz inteligente que…»
+- [x] FAQ del inicio: «¿Qué rayos es Bóveda Market?» reescrito con la redacción del usuario (interfaz hecha con IA, bóvedas/liquidity pools en Solana, bóveda única, dólares digitales)
