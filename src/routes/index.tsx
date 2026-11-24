@@ -51,7 +51,6 @@ const FAQS = [
   { q: "¿Qué rayos es Bóveda Market?", a: "Bóveda Market es una interfaz hecha con inteligencia artificial que conecta tu dinero con bóvedas (liquidity pools) públicas en la red Solana. Solo depositas dólares digitales y el sistema se encarga de comprar las monedas, armar una bóveda única para ti y mantenerla activa. Cada vez que alguien intercambia monedas digitales en la bóveda se generan intereses y se reparten entre quienes aportan. Las tasas son estimaciones, cambian y existe riesgo de pérdida." },
   { q: "¿Tengo que comprar Bitcoin, Trump u otras monedas para entrar?", a: "No. Solo necesitas dólares en tu cuenta. Abres tu bóveda en un solo toque: el sistema te guía, compra las monedas a precio de mercado y arma todo por ti. Confirmas una vez y tu bóveda empieza a generar intereses." },
   { q: "¿Qué son los dólares digitales?", a: "Son dólares que viven en internet en lugar de en un banco. En Bóveda Market se usa USDC, un dólar digital emitido por la empresa Circle y respaldado por efectivo y bonos del Tesoro de EE. UU.: 1 USDC vale lo mismo que 1 dólar, así que el saldo no sube ni baja como otras monedas. Se envía en segundos a cualquier hora, se recarga con tarjeta o Apple Pay y se puede retirar al banco o a Coinbase. No es un depósito bancario ni está asegurado por el gobierno." },
-  { q: "¿En cuál red opera Bóveda Market?", a: "Opera en Solana, una red pública de alta velocidad con comisiones de fracciones de centavo y confirmaciones en segundos. No es un banco ni un servidor privado: cada movimiento queda registrado en público y cualquiera puede revisarlo. Tu dinero nunca vive dentro de Bóveda Market: está en tu propia cuenta digital y solo tu firma lo mueve." },
   { q: "¿Puedo explorar sin depositar monedas digitales?", a: "Sí, totalmente. Puedes ver las bóvedas y Doble o Nada en vivo sin registrarte. Y si quieres conocer la billetera y el portafolio por dentro, basta con entrar con Google en 1 segundo: no se pide tarjeta ni depósito para explorar la app completa a tu propio ritmo." },
   { q: "¿Puedo retirar en cualquier momento?", a: "Las ganancias se cosechan y las posiciones se cierran en cualquier momento, sin plazos de permanencia. Cada operación se revisa antes de firmar con la wallet." },
   { q: "¿Dónde puedo ver los recibos de cada transacción?", a: "Al terminar cada operación, la app te muestra un comprobante con el detalle y el resultado. Después los encuentras en «Actividad», dentro del menú: allí aparecen tus movimientos recientes con su estado y un enlace al comprobante público en la red. Son las 20 transacciones más recientes que incluyen tu dirección, así que no es un historial completo de todos tus tokens." },
@@ -114,9 +113,6 @@ export function Landing({ variant }: { variant?: number } = {}) {
   const [compact, setCompact] = useState(false);
   const [decided, setDecided] = useState(false);
   useEffect(() => { setCompact(variant === undefined && isReturning() && !isHeroReview()); setDecided(true); void import("@/components/privy-access").catch(() => {}); }, []);
-  const [showReviews, setShowReviews] = useState(true);
-  useEffect(() => { setShowReviews(pickReviewsArm(new URLSearchParams(window.location.search).get("reviews"), (() => { try { return localStorage.getItem(REVIEWS_AB_KEY); } catch { return null; } })(), Math.random())); }, []);
-  useEffect(() => { try { localStorage.setItem(REVIEWS_AB_KEY, showReviews ? "1" : "0"); } catch { /* ignore */ } }, [showReviews]);
   const [heroIdx, setHeroIdx] = useState(variant ?? 0);
   useEffect(() => {
     if (variant !== undefined) return;
@@ -152,10 +148,10 @@ export function Landing({ variant }: { variant?: number } = {}) {
         {trumpHero && <div className="order-1 min-w-0 md:col-span-2"><TrumpHero title={hero.title} sub={hero.sub} /></div>}
         {classicHero && <div className="order-1 min-w-0 md:col-span-2"><ClassicHero title={hero.title} sub={hero.sub} /></div>}
         {calmHero && <div className="order-1 min-w-0 md:col-span-2"><CalmHero title={hero.title} sub={hero.sub} /></div>}
-        {plainHero && <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(hero.title)}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t(hero.sub)}</p>{showReviews && <TrustTicker />}</div>}
+        {plainHero && <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(hero.title)}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t(hero.sub)}</p></div>}
         <div className="order-3 min-w-0 text-center md:order-1 md:text-left">
           {plainHero && <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(hero.title)}</h1>}
-          {plainHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p><div className="hidden md:block">{showReviews && <TrustTicker />}</div></>}
+          {plainHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p></>}
         </div>
         <div id="acceso" className="order-2 min-w-0 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
           <HomeCtas vaultsFirst={gtaHero || calmHero || hero.theme === "trump"} trump={hero.theme === "trump"} />
@@ -219,16 +215,6 @@ export function Landing({ variant }: { variant?: number } = {}) {
         </div>
       </section>
 
-      <section id="opiniones" className="scroll-mt-4 py-12">
-        {showReviews && <><h2 className="font-display text-2xl font-bold">{t("Lo que dice la comunidad")}</h2>
-        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{REVIEWS.map(({ stars, name, text, photo, title, tag }) => <li key={name} className={`relative flex flex-col rounded-2xl border bg-card p-5 ${stars === 5 ? "border-primary/40 bg-gradient-to-br from-primary/10 to-card" : "border-border"}`}>
-          <Quote aria-hidden="true" size={28} className="absolute right-4 top-4 text-primary/15" />
-          <div className="flex items-center gap-3"><img src={photo} alt="" loading="lazy" width={48} height={48} className="h-12 w-12 rounded-full border-2 border-primary/30 object-cover" />
-            <div className="min-w-0"><p className="text-sm font-semibold">{name}</p><span className="mt-1 inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary"><Star size={9} className="fill-current" />{t(tag)}</span></div></div>
-          <div className="mt-3 flex gap-0.5 text-primary" aria-label={`${stars}/5`}>{[1,2,3,4,5].map((n) => <Star key={n} size={15} className={n <= stars ? "fill-current" : "text-muted-foreground/40"} />)}</div>
-          <p className="mt-2 font-display font-semibold leading-snug">{t(title)}</p>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">“{t(text)}”</p></li>)}</ul></>}
-      </section>
 
       <section className="py-12">
         <div className="mb-3 flex items-center justify-between"><h2 className="font-display text-2xl font-bold">{t("Preguntas frecuentes")}</h2><Link to="/faq" className="text-sm text-primary underline">{t("Ver todas")}</Link></div>

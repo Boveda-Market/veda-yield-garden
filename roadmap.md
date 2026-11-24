@@ -52,3 +52,6 @@
 - [x] FAQ del inicio: primera pregunta «¿Qué rayos es Bóveda Market?» (antes «¿Cómo el sistema genera las ganancias?», ahora abre la lista)
 - [x] FAQ del inicio: la respuesta empieza con «Bóveda Market es una interfaz inteligente que…»
 - [x] FAQ del inicio: «¿Qué rayos es Bóveda Market?» reescrito con la redacción del usuario (interfaz hecha con IA, bóvedas/liquidity pools en Solana, bóveda única, dólares digitales)
+- [x] Quitar FAQ «¿En cuál red opera Bóveda Market?» (ES/EN)
+- [x] Quitar sección «Lo que dice la comunidad» y reseñas del inicio
+- [x] /about: reemplazar contacto por admin@bovedamarket.app + grupo de Telegram

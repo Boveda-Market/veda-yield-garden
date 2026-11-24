@@ -43,11 +43,13 @@ export function AboutPage() {
       </div>
     </section>
     <section className="mx-auto max-w-5xl px-5 py-9 sm:px-8 sm:py-12">
-      <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t("Desarrollo de Bóveda Market")}</p>
-      <h2 className="mt-3 break-words font-display text-2xl font-bold">@whalewatcherpro</h2>
-      <p className="mt-2 font-medium">{t("Una identidad pública, un contacto directo.")}</p>
-      <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">{t("Para preguntas sobre el proyecto o ideas para mejorarlo, puedes contactar a su desarrollador por Telegram.")}</p>
-      <Button asChild className="mt-5 h-11"><a href="https://t.me/whalewatcherpro" target="_blank" rel="noopener noreferrer"><MessageCircle />{t("Hablar por Telegram")}<ArrowUpRight /></a></Button>
+      <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t("Contacto oficial")}</p>
+      <h2 className="mt-3 font-display text-2xl font-bold">{t("Escríbenos")}</h2>
+      <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">{t("Para preguntas sobre el proyecto o ideas para mejorarlo, únete al grupo de Telegram o escríbenos por correo.")}</p>
+      <div className="mt-5 flex flex-wrap gap-2">
+        <Button asChild className="h-11"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer"><MessageCircle />{t("Unirme al grupo de Telegram")}<ArrowUpRight /></a></Button>
+        <Button asChild variant="outline" className="h-11"><a href="mailto:admin@bovedamarket.app">admin@bovedamarket.app</a></Button>
+      </div>
     </section>
     <footer className="border-t border-border">
       <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8">

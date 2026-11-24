@@ -406,8 +406,6 @@ export const extra: Record<string, string> = {
   "¿Qué son los dólares digitales?": "What are digital dollars?",
   "Son dólares que viven en internet en lugar de en un banco. En Bóveda Market se usa USDC, un dólar digital emitido por la empresa Circle y respaldado por efectivo y bonos del Tesoro de EE. UU.: 1 USDC vale lo mismo que 1 dólar, así que el saldo no sube ni baja como otras monedas. Se envía en segundos a cualquier hora, se recarga con tarjeta o Apple Pay y se puede retirar al banco o a Coinbase. No es un depósito bancario ni está asegurado por el gobierno.": "They're dollars that live on the internet instead of in a bank. Bóveda Market uses USDC, a digital dollar issued by Circle and backed by cash and short-term US Treasury bonds: 1 USDC is worth the same as 1 dollar, so the balance doesn't swing like other coins. It moves in seconds at any hour, can be topped up with a card or Apple Pay and withdrawn to a bank or Coinbase. It is not a bank deposit and is not government insured.",
   "USDC es una moneda digital diseñada para mantener el mismo valor que el dólar estadounidense: 1 USDC busca valer 1 USD. En Bóveda Market tus saldos, depósitos y intereses se muestran en USDC. No es un depósito bancario ni está asegurado.": "USDC is a digital currency designed to keep the same value as the US dollar: 1 USDC aims to be worth 1 USD. In Bóveda Market your balances, deposits and interest are shown in USDC. It is not a bank deposit and is not insured.",
-  "¿En cuál red opera Bóveda Market?": "Which network does Bóveda Market run on?",
-  "Opera en Solana, una red pública de alta velocidad con comisiones de fracciones de centavo y confirmaciones en segundos. No es un banco ni un servidor privado: cada movimiento queda registrado en público y cualquiera puede revisarlo. Tu dinero nunca vive dentro de Bóveda Market: está en tu propia cuenta digital y solo tu firma lo mueve.": "It runs on Solana, a fast public network with fees of fractions of a cent and confirmations in seconds. It isn't a bank or a private server: every move is recorded publicly and anyone can check it. Your money never lives inside Bóveda Market: it sits in your own digital account and only your signature moves it.",
   "¿Puedo explorar sin depositar monedas digitales?": "Can I explore without depositing digital currencies?",
   "No para empezar. Toca «Probar como invitado» y recibe 1,000 créditos ficticios para explorar sin registro ni wallet. Los créditos no se pueden retirar ni convertir en dinero.": "Not to start. Tap “Try as guest” and get 1,000 fictitious credits to explore with no sign-up or wallet. Credits can't be withdrawn or converted to money.",
   "¿Qué rayos es Bóveda Market?": "What the heck is Bóveda Market?",
@@ -1927,4 +1925,8 @@ export const extra: Record<string, string> = {
   "Añade {x} con Coinbase": "Add {x} with Coinbase",
   "Coinbase se abre con el monto ya puesto. Al volver, te mostramos el precio actualizado y confirmas en un toque.": "Coinbase opens with the amount already filled in. When you come back, we show the updated price and you confirm in one tap.",
   "Continuar a Coinbase ({x})": "Continue to Coinbase ({x})",
+  "Contacto oficial": "Official contact",
+  "Escríbenos": "Get in touch",
+  "Para preguntas sobre el proyecto o ideas para mejorarlo, únete al grupo de Telegram o escríbenos por correo.": "For questions about the project or ideas to improve it, join the Telegram group or email us.",
+  "Unirme al grupo de Telegram": "Join the Telegram group",
 };
