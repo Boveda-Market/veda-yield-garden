@@ -1,6 +1,6 @@
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, ExternalLink } from "lucide-react";
 import { MetricHelpGrid, type MetricTile } from "@/components/metric-help";
-import { CHAIN_POOLS } from "@/lib/solana-data";
+import { CHAIN_POOLS, isDlmmVault } from "@/lib/solana-data";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useT } from "@/lib/i18n";
@@ -93,15 +93,19 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
 
   return <div className="space-y-3">
     <div className="grid grid-cols-3 gap-2">
-      {[[`${t("Precio")} ${symbol}`, stats.data?.price != null ? formatCoinPrice(stats.data.price) : "—", ch != null ? `${ch > 0 ? "+" : ""}${ch.toFixed(1)}% · 24 h` : ""],
+      {[[<>{t("Precio")} <span className="normal-case">{symbol}</span></>, stats.data?.price != null ? formatCoinPrice(stats.data.price) : "—", ch != null ? `${ch > 0 ? "+" : ""}${ch.toFixed(1)}% · 24 h` : ""],
         [t("Liquidez total"), liq ? usdShort(liq.totalUsd) : "—", liq ? t("En {n} mercados", { n: liq.markets }) : t("Todos sus mercados")],
         [t("Intereses totales"), m?.totalFees != null ? `+${usdShort(m.totalFees)}` : "—", feeShare != null ? t("{p} de todo lo operado", { p: pct(feeShare) }) : t("Desde que abrió el pool")]].map(([k, v, s], i) =>
-        <div key={k} className={`min-w-0 rounded-xl p-2.5 ${i >= 1 ? "bg-primary/10" : "bg-muted"}`}><p className="text-[10px] font-semibold uppercase leading-tight tracking-wide text-muted-foreground">{k}</p><p className={`truncate font-display text-base font-bold tabular-nums ${i >= 1 ? "text-primary" : ""}`}>{v}</p><p className={`text-[10px] leading-tight ${i === 0 && ch != null ? (ch >= 0 ? "font-bold text-primary" : "font-bold text-destructive") : "text-muted-foreground"}`}>{i === 0 && ch != null ? (ch >= 0 ? "▲ " : "▼ ") : ""}{s}</p></div>)}
+        <div key={i} className={`min-w-0 rounded-xl p-2.5 ${i >= 1 ? "bg-primary/10" : "bg-muted"}`}><p className="text-[10px] font-semibold uppercase leading-tight tracking-wide text-muted-foreground">{k}</p><p className={`truncate font-display text-base font-bold tabular-nums ${i >= 1 ? "text-primary" : ""}`}>{v}</p><p className={`text-[10px] leading-tight ${i === 0 && ch != null ? (ch >= 0 ? "font-bold text-primary" : "font-bold text-destructive") : "text-muted-foreground"}`}>{i === 0 && ch != null ? (ch >= 0 ? "▲ " : "▼ ") : ""}{s}</p></div>)}
     </div>
     {mint && <button type="button" onClick={() => { void navigator.clipboard.writeText(mint).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {}); }} aria-label={t("Copiar contrato")} className="flex w-full items-center gap-2 rounded-xl border border-border bg-muted/50 px-3 py-2 text-left">
-      <div className="min-w-0 flex-1"><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("Contrato oficial:")} {symbol}</p><p className="break-all font-mono text-[11px] leading-4">{mint}</p></div>
+      <div className="min-w-0 flex-1"><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("Contrato oficial:")} <span className="normal-case">{symbol}</span></p><p className="break-all font-mono text-[11px] leading-4">{mint}</p></div>
       {copied ? <Check size={16} className="shrink-0 text-primary" /> : <Copy size={16} className="shrink-0 text-muted-foreground" />}
     </button>}
+    <a href={`https://app.meteora.ag/${isDlmmVault(vault.id) ? "dlmm" : "dammv2"}/${vault.pool}`} target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-between gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] font-semibold text-muted-foreground transition-colors hover:text-foreground">
+      {t("Ver el pool en Meteora")}
+      <ExternalLink size={13} aria-hidden />
+    </a>
     {f && <div className="rounded-2xl border border-border bg-card p-3">
       <div className="flex items-baseline justify-between gap-2">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("Depósitos netos")}</p>

@@ -38,3 +38,5 @@
 - [ ] Envío de códigos desde bovedamarket.app (requiere habilitar personalización de email Enterprise en Privy y verificar dominio).
 - [x] Tarjeta estilo Bitcoin (gráfico 7 días) en portadas Trump, GTA6 y demás
 - [x] Tarjetas como estaban antes: gráfica de 7 días en portadas e «Intereses hoy»/«Intercambios hoy» en la tarjeta de bóveda
+- [x] Bóveda Bitcoin: la moneda se muestra como «cbBTC» (contrato, precio, estadísticas y diálogos)
+- [x] Ficha de detalles: enlace discreto «Ver el pool en Meteora» junto al contrato oficial

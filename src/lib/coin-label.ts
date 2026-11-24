@@ -1,11 +1,11 @@
 /**
  * User-facing coin names. Markets write some coins under long names that confuse people
- * (Coinbase's wrapped bitcoin shows up as CBBTC), so every screen shows the short name
- * people know. Keys are upper-case market symbols; add one whenever a new vault's market
+ * (Coinbase's bitcoin arrives as all-caps CBBTC), so every screen shows the exact name the
+ * token itself uses. Keys are upper-case market symbols; add one whenever a new vault's market
  * name differs from the name shown to users.
  */
 const COIN_LABELS: Record<string, string> = {
-  CBBTC: "BTC",
+  CBBTC: "cbBTC",
   WBTC: "BTC",
   XBTC: "BTC",
 };

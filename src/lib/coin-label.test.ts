@@ -4,8 +4,11 @@ import { CHAIN_POOLS } from "./solana-data";
 import { VAULTS } from "./vaults";
 
 describe("coinLabel", () => {
-  it("shows Bitcoin as BTC whatever the market calls it", () => {
-    for (const raw of ["CBBTC", "cbBTC", "$CBBTC", "WBTC", " cbbtc "]) {
+  it("shows Coinbase bitcoin by its real name, cbBTC, whatever the market calls it", () => {
+    for (const raw of ["CBBTC", "cbBTC", "$CBBTC", " cbbtc "]) {
+      expect(coinLabel(raw, "BTC")).toBe("cbBTC");
+    }
+    for (const raw of ["WBTC", "XBTC"]) {
       expect(coinLabel(raw, "BTC")).toBe("BTC");
     }
   });

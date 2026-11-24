@@ -98,7 +98,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
         <div className="grid grid-cols-2 rounded-full bg-secondary p-1" role="tablist">{([["perf", t("Rendimiento y Mercado")], ["stats", t("Estadísticas del Pool")]] as const).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={`rounded-full px-2 py-2 text-xs font-bold transition ${tab === k ? "bg-foreground text-background" : "text-muted-foreground"}`}>{l}</button>)}</div>
         {tab === "perf" ? <MarketPerformance vault={vault} /> : <>
         <section aria-label={t("La moneda {s}", { s: sym })} className="grid gap-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("La moneda {s}", { s: sym })}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("La moneda")} <span className="normal-case">{sym}</span></p>
           <MetricHelpGrid tiles={coinTiles} />
         </section>
         <section aria-label={t("Cambio de precio")} className="grid gap-2">

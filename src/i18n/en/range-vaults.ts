@@ -286,6 +286,7 @@ export const rangeVaults: Record<string, string> = {
   "En {n} mercados": "Across {n} markets",
   "Todos sus mercados": "All its markets",
   "La moneda {s}": "The {s} coin",
+  "La moneda": "The coin",
   "Cambio de precio": "Price change",
   "Ahora mismo en el pool": "Right now in the pool",
   "Billeteras que la tienen": "Wallets that hold it",
