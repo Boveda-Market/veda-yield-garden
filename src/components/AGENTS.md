@@ -31,3 +31,4 @@
 - «Balance total» (Billetera and Mi Portafolio) = USDC + vaults + unclaimed fees + network reserve and every other held coin at market price, via shared useWalletExtrasUsd/walletExtrasUsd (wallet-holdings.ts), so both screens match external wallet trackers; coins without a known price are left out.
 
 - Tapping a vault pill in Bóvedas where the user has money opens the same active card as Mi Portafolio (RealPositions, with «Detalles de la bóveda» at the bottom via onDetails); vaults without money open the catalog card (HotVaultCard or the plain card).
+- First-fold rule: money sheets pin their confirm button (`sheet-action` utility or a `data-sheet-actions` sticky footer); ActionSheetContent shows a fade + bouncing arrow only when it scrolls and has no pinned action, so actions never hide below the fold.

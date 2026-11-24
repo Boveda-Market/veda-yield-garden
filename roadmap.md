@@ -26,3 +26,4 @@
 - [x] Portafolio de visitantes: gráfica de Bitcoin 7 días
 - [x] Métricas de las bóvedas con los porcentajes de Meteora (dinero trabajando, volumen, intercambios, personas, posiciones, intereses)
 - [x] Rotación de portada en orden Bitcoin > Trump > GTA6 > resto
+- [x] Botones de acción siempre visibles sin scroll en todas las tarjetas de dinero

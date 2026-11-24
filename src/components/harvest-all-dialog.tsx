@@ -93,7 +93,7 @@ export function HarvestAllDialog({ wallet, targets, onClose }: { wallet: string;
         <dl className="grid gap-2 rounded-xl border border-border p-4 text-sm">{quotes.map((q) => <div key={q.position} className="flex justify-between gap-3"><dt className="text-muted-foreground">{coinLabel(vaultSymbol(q.vaultId))}</dt><dd className="tabular-nums">{q.r.success ? `$${q.r.net}` : t("No disponible")}</dd></div>)}</dl>
       </>}
       {step && <WorkingLine text={step} />}
-      {quotes && ok.length > 0 && canSign && <Button size="lg" disabled={busy} onClick={() => void run()}>{busy ? step : t("Confirmar cosecha de todo")}</Button>}
+      {quotes && ok.length > 0 && canSign && <Button size="lg" className="sheet-action" disabled={busy} onClick={() => void run()}>{busy ? step : t("Confirmar cosecha de todo")}</Button>}
       {quotes && ok.length === 0 && <p className="text-sm text-muted-foreground">{t("No hay ganancias listas para cosechar.")}</p>}
       {error && <SignalErrorCard message={error} />}
     </>}

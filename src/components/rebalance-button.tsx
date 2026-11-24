@@ -136,7 +136,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
       </dl><p className="text-xs leading-5 text-muted-foreground">{t("Tu posición salió del rango y no está generando. Cosechamos tus ganancias, dejamos mitad y mitad al precio actual y la volvemos a centrar.")} {t("Para dejar mitad y mitad se cambia una parte dentro de la misma bóveda, con un límite de precio para protegerte.")}</p></DetailsToggle>}
       {pending && signature && <FlowSteps current={2} />}
       {pending && step && quote?.success && <WorkingLine text={step} />}
-      {quote?.success && <Button size="lg" disabled={pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Crosshair className="mr-2 h-4 w-4" />}{pending && step ? step : t("Rebalancear ahora")}</Button>}
+      {quote?.success && <Button size="lg" className="sheet-action" disabled={pending} onClick={() => void sign()}>{pending ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Crosshair className="mr-2 h-4 w-4" />}{pending && step ? step : t("Rebalancear ahora")}</Button>}
       {message && <SignalErrorCard message={message} />}
       {message && !pending && !quote?.success && <Button onClick={() => void review()}>{t("Intentar de nuevo")}</Button>}
       {message && !pending && <Button variant="outline" onClick={onClose}>{t("Cerrar")}</Button>}

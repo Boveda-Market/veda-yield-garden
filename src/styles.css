@@ -445,3 +445,11 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
 @keyframes loot-pop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
 @keyframes loot-shine{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
 @media (prefers-reduced-motion:reduce){.loot-btn,.loot-btn::after{animation:none}}
+
+/* Main confirm button of a money sheet stays in view at the bottom while details scroll (first-fold rule). */
+@utility sheet-action {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  box-shadow: 0 -12px 16px 4px var(--background), var(--shadow-sm, 0 1px 2px rgb(0 0 0 / 0.1));
+}
