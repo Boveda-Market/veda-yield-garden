@@ -3,7 +3,8 @@ import { langLinks } from "@/lib/seo-lang";
 import sharePreview from "@/assets/share/boveda_gta6_preview_es.jpg.asset.json";
 import shareVideo from "@/assets/share/og-preview-gta6.mp4.asset.json";
 import dobleLogo from "@/assets/doble-o-nada-logo.png";
-import { HERO_VARIANTS, HERO_KEY, pickHeroVariant, isHeroReview } from "@/lib/hero-variants";
+import { HERO_VARIANTS, HERO_KEY, pickHeroVariant, isHeroReview, legacyHeroRedirect } from "@/lib/hero-variants";
+import { BitcoinHero, BitcoinSections } from "@/components/home-bitcoin";
 import { Fingerprint, Landmark } from "lucide-react";
 import reviewCarlos from "@/assets/review-carlos.jpg";
 import reviewValeria from "@/assets/review-valeria.jpg";
@@ -13,7 +14,7 @@ import { Target, DollarSign, Bot, Smartphone } from "lucide-react";
 import { Lock, Gift, Search, Star, Quote, MessageSquare, Send, Activity } from "lucide-react";
 import { useI18n, useT } from "@/lib/i18n";
 import { guideHref, guidesIndexHref } from "@/components/guide-layout";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { ArrowRight, ShieldCheck, Sparkles, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
@@ -31,6 +32,8 @@ function ReturningCover() {
 }
 
 export const Route = createFileRoute("/")({ staticData: { sitemap: true },
+  // Old campaign links (/?v=N) now live at their own address (/gta6, /bitcoin…).
+  beforeLoad: ({ location }) => { const to = legacyHeroRedirect(location.searchStr); if (to) throw redirect({ href: to, statusCode: 301 }); },
   head: () => ({ meta: [
     { title: "Bóveda Market — Cuenta digital para generar intereses con monedas digitales" },
     { name: "description", content: "Crea una cuenta digital con Google, añade saldo y genera intereses con monedas digitales en bóvedas como GTA6 Coin y Trump Coin. Seguridad de Privy y depósitos gratis." },
@@ -102,27 +105,30 @@ const TRUST = [
   { icon: Search, title: "Revisión antes de aprobar", body: "Cada operación se simula primero: entradas, salidas y cargo exactos a la vista." },
 ];
 
-export function Landing() {
+/** Home page. `variant` pins one version (its own address, e.g. /bitcoin); without it "/" rotates them. */
+export function Landing({ variant }: { variant?: number } = {}) {
   const { t, lang } = useI18n();
   const [compact, setCompact] = useState(false);
   const [decided, setDecided] = useState(false);
-  useEffect(() => { setCompact(isReturning() && !isHeroReview()); setDecided(true); void import("@/components/privy-access").catch(() => {}); }, []);
+  useEffect(() => { setCompact(variant === undefined && isReturning() && !isHeroReview()); setDecided(true); void import("@/components/privy-access").catch(() => {}); }, []);
   const [showReviews, setShowReviews] = useState(true);
   useEffect(() => { setShowReviews(pickReviewsArm(new URLSearchParams(window.location.search).get("reviews"), (() => { try { return localStorage.getItem(REVIEWS_AB_KEY); } catch { return null; } })(), Math.random())); }, []);
   useEffect(() => { try { localStorage.setItem(REVIEWS_AB_KEY, showReviews ? "1" : "0"); } catch { /* ignore */ } }, [showReviews]);
-  const [heroIdx, setHeroIdx] = useState(0);
+  const [heroIdx, setHeroIdx] = useState(variant ?? 0);
   useEffect(() => {
+    if (variant !== undefined) return;
     let saved: string | null = null;
     try { saved = localStorage.getItem(HERO_KEY); } catch { /* blocked storage */ }
     const i = pickHeroVariant(new URLSearchParams(window.location.search).get("v"), saved, Math.random());
     setHeroIdx(i);
     try { localStorage.setItem(HERO_KEY, String(i)); } catch { /* blocked storage */ }
-  }, []);
+  }, [variant]);
   const hero = HERO_VARIANTS[heroIdx] ?? HERO_VARIANTS[0]!;
   const gtaHero = hero.theme === "gta6";
   const dobleHero = hero.theme === "doble";
   const calmHero = hero.theme === "calm";
-  const plainHero = !gtaHero && !dobleHero && !calmHero;
+  const btcHero = hero.theme === "bitcoin";
+  const plainHero = !gtaHero && !dobleHero && !calmHero && !btcHero;
   if (decided && compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 pb-10 pt-20 text-foreground sm:py-10">
     <BrandLogo size="lg" />
     <h1 className="mt-4 text-center font-display text-3xl font-bold">{t("Bienvenido de nuevo")}</h1>
@@ -137,6 +143,7 @@ export function Landing() {
       <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">
         {gtaHero && <div className="order-1 min-w-0 md:col-span-2"><Gta6Hero title={hero.title} sub={hero.sub} /></div>}
         {dobleHero && <div className="order-1 min-w-0 md:col-span-2"><DobleHero title={hero.title} sub={hero.sub} /></div>}
+        {btcHero && <div className="order-1 min-w-0 md:col-span-2"><BitcoinHero title={hero.title} sub={hero.sub} /></div>}
         {calmHero && <div className="order-1 min-w-0 md:col-span-2"><CalmHero title={hero.title} sub={hero.sub} /></div>}
         {plainHero && <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(hero.title)}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t(hero.sub)}</p>{showReviews && <TrustTicker />}</div>}
         <div className="order-3 min-w-0 text-center md:order-1 md:text-left">
@@ -149,6 +156,8 @@ export function Landing() {
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span><span aria-hidden="true">·</span><a href="https://www.privy.io/security" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground underline-offset-2 hover:text-primary hover:underline">{t("Conoce más")} ↗</a></p>
         </div>
       </section>
+
+      {btcHero && <BitcoinSections />}
 
       <section aria-label={t("Cómo abrir tu bóveda en 4 pasos")} className="mb-4 py-8">
         <h2 className="font-display text-2xl font-bold">{t("Cómo abrir tu bóveda en 4 pasos")}</h2>

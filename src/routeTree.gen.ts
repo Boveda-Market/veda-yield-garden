@@ -13,8 +13,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActividadRouteImport } from './routes/actividad'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as BitcoinRouteImport } from './routes/bitcoin'
+import { Route as ClasicaRouteImport } from './routes/clasica'
 import { Route as CuentaRouteImport } from './routes/cuenta'
+import { Route as DobleONadaRouteImport } from './routes/doble-o-nada'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as Gta6RouteImport } from './routes/gta6'
 import { Route as InvitaRouteImport } from './routes/invita'
 import { Route as MercadosRouteImport } from './routes/mercados'
 import { Route as NotificacionesRouteImport } from './routes/notificaciones'
@@ -22,11 +26,14 @@ import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as PruebaRouteImport } from './routes/prueba'
 import { Route as SeguridadRouteImport } from './routes/seguridad'
+import { Route as SinAnsiedadRouteImport } from './routes/sin-ansiedad'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as TerminosRouteImport } from './routes/terminos'
+import { Route as TrumpRouteImport } from './routes/trump'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as EnIndexRouteImport } from './routes/en/index'
+import { Route as EnBitcoinRouteImport } from './routes/en/bitcoin'
 import { Route as EnFaqRouteImport } from './routes/en/faq'
 import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
 import { Route as EnStatusRouteImport } from './routes/en/status'
@@ -76,14 +83,34 @@ const AppRoute = AppRouteImport.update({
   path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BitcoinRoute = BitcoinRouteImport.update({
+  id: '/bitcoin',
+  path: '/bitcoin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClasicaRoute = ClasicaRouteImport.update({
+  id: '/clasica',
+  path: '/clasica',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CuentaRoute = CuentaRouteImport.update({
   id: '/cuenta',
   path: '/cuenta',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DobleONadaRoute = DobleONadaRouteImport.update({
+  id: '/doble-o-nada',
+  path: '/doble-o-nada',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Gta6Route = Gta6RouteImport.update({
+  id: '/gta6',
+  path: '/gta6',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InvitaRoute = InvitaRouteImport.update({
@@ -121,6 +148,11 @@ const SeguridadRoute = SeguridadRouteImport.update({
   path: '/seguridad',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SinAnsiedadRoute = SinAnsiedadRouteImport.update({
+  id: '/sin-ansiedad',
+  path: '/sin-ansiedad',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -136,6 +168,11 @@ const TerminosRoute = TerminosRouteImport.update({
   path: '/terminos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrumpRoute = TrumpRouteImport.update({
+  id: '/trump',
+  path: '/trump',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -144,6 +181,11 @@ const WalletRoute = WalletRouteImport.update({
 const EnIndexRoute = EnIndexRouteImport.update({
   id: '/en/',
   path: '/en/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnBitcoinRoute = EnBitcoinRouteImport.update({
+  id: '/en/bitcoin',
+  path: '/en/bitcoin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnFaqRoute = EnFaqRouteImport.update({
@@ -307,8 +349,12 @@ export interface FileRoutesByFullPath {
   '/actividad': typeof ActividadRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
+  '/bitcoin': typeof BitcoinRoute
+  '/clasica': typeof ClasicaRoute
   '/cuenta': typeof CuentaRoute
+  '/doble-o-nada': typeof DobleONadaRoute
   '/faq': typeof FaqRoute
+  '/gta6': typeof Gta6Route
   '/invita': typeof InvitaRoute
   '/mercados': typeof MercadosRoute
   '/notificaciones': typeof NotificacionesRoute
@@ -316,10 +362,13 @@ export interface FileRoutesByFullPath {
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
   '/seguridad': typeof SeguridadRoute
+  '/sin-ansiedad': typeof SinAnsiedadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
+  '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/en/bitcoin': typeof EnBitcoinRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/status': typeof EnStatusRoute
@@ -355,8 +404,12 @@ export interface FileRoutesByTo {
   '/actividad': typeof ActividadRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
+  '/bitcoin': typeof BitcoinRoute
+  '/clasica': typeof ClasicaRoute
   '/cuenta': typeof CuentaRoute
+  '/doble-o-nada': typeof DobleONadaRoute
   '/faq': typeof FaqRoute
+  '/gta6': typeof Gta6Route
   '/invita': typeof InvitaRoute
   '/mercados': typeof MercadosRoute
   '/notificaciones': typeof NotificacionesRoute
@@ -364,10 +417,13 @@ export interface FileRoutesByTo {
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
   '/seguridad': typeof SeguridadRoute
+  '/sin-ansiedad': typeof SinAnsiedadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
+  '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/en/bitcoin': typeof EnBitcoinRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/status': typeof EnStatusRoute
@@ -404,8 +460,12 @@ export interface FileRoutesById {
   '/actividad': typeof ActividadRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
+  '/bitcoin': typeof BitcoinRoute
+  '/clasica': typeof ClasicaRoute
   '/cuenta': typeof CuentaRoute
+  '/doble-o-nada': typeof DobleONadaRoute
   '/faq': typeof FaqRoute
+  '/gta6': typeof Gta6Route
   '/invita': typeof InvitaRoute
   '/mercados': typeof MercadosRoute
   '/notificaciones': typeof NotificacionesRoute
@@ -413,10 +473,13 @@ export interface FileRoutesById {
   '/privacidad': typeof PrivacidadRoute
   '/prueba': typeof PruebaRoute
   '/seguridad': typeof SeguridadRoute
+  '/sin-ansiedad': typeof SinAnsiedadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
+  '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/en/bitcoin': typeof EnBitcoinRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/status': typeof EnStatusRoute
@@ -454,8 +517,12 @@ export interface FileRouteTypes {
     | '/actividad'
     | '/admin'
     | '/app'
+    | '/bitcoin'
+    | '/clasica'
     | '/cuenta'
+    | '/doble-o-nada'
     | '/faq'
+    | '/gta6'
     | '/invita'
     | '/mercados'
     | '/notificaciones'
@@ -463,10 +530,13 @@ export interface FileRouteTypes {
     | '/privacidad'
     | '/prueba'
     | '/seguridad'
+    | '/sin-ansiedad'
     | '/sitemap.xml'
     | '/status'
     | '/terminos'
+    | '/trump'
     | '/wallet'
+    | '/en/bitcoin'
     | '/en/faq'
     | '/en/privacy'
     | '/en/status'
@@ -502,8 +572,12 @@ export interface FileRouteTypes {
     | '/actividad'
     | '/admin'
     | '/app'
+    | '/bitcoin'
+    | '/clasica'
     | '/cuenta'
+    | '/doble-o-nada'
     | '/faq'
+    | '/gta6'
     | '/invita'
     | '/mercados'
     | '/notificaciones'
@@ -511,10 +585,13 @@ export interface FileRouteTypes {
     | '/privacidad'
     | '/prueba'
     | '/seguridad'
+    | '/sin-ansiedad'
     | '/sitemap.xml'
     | '/status'
     | '/terminos'
+    | '/trump'
     | '/wallet'
+    | '/en/bitcoin'
     | '/en/faq'
     | '/en/privacy'
     | '/en/status'
@@ -550,8 +627,12 @@ export interface FileRouteTypes {
     | '/actividad'
     | '/admin'
     | '/app'
+    | '/bitcoin'
+    | '/clasica'
     | '/cuenta'
+    | '/doble-o-nada'
     | '/faq'
+    | '/gta6'
     | '/invita'
     | '/mercados'
     | '/notificaciones'
@@ -559,10 +640,13 @@ export interface FileRouteTypes {
     | '/privacidad'
     | '/prueba'
     | '/seguridad'
+    | '/sin-ansiedad'
     | '/sitemap.xml'
     | '/status'
     | '/terminos'
+    | '/trump'
     | '/wallet'
+    | '/en/bitcoin'
     | '/en/faq'
     | '/en/privacy'
     | '/en/status'
@@ -599,8 +683,12 @@ export interface RootRouteChildren {
   ActividadRoute: typeof ActividadRoute
   AdminRoute: typeof AdminRoute
   AppRoute: typeof AppRoute
+  BitcoinRoute: typeof BitcoinRoute
+  ClasicaRoute: typeof ClasicaRoute
   CuentaRoute: typeof CuentaRoute
+  DobleONadaRoute: typeof DobleONadaRoute
   FaqRoute: typeof FaqRoute
+  Gta6Route: typeof Gta6Route
   InvitaRoute: typeof InvitaRoute
   MercadosRoute: typeof MercadosRoute
   NotificacionesRoute: typeof NotificacionesRoute
@@ -608,10 +696,13 @@ export interface RootRouteChildren {
   PrivacidadRoute: typeof PrivacidadRoute
   PruebaRoute: typeof PruebaRoute
   SeguridadRoute: typeof SeguridadRoute
+  SinAnsiedadRoute: typeof SinAnsiedadRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StatusRoute: typeof StatusRoute
   TerminosRoute: typeof TerminosRoute
+  TrumpRoute: typeof TrumpRoute
   WalletRoute: typeof WalletRoute
+  EnBitcoinRoute: typeof EnBitcoinRoute
   EnFaqRoute: typeof EnFaqRoute
   EnPrivacyRoute: typeof EnPrivacyRoute
   EnStatusRoute: typeof EnStatusRoute
@@ -673,6 +764,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bitcoin': {
+      id: '/bitcoin'
+      path: '/bitcoin'
+      fullPath: '/bitcoin'
+      preLoaderRoute: typeof BitcoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clasica': {
+      id: '/clasica'
+      path: '/clasica'
+      fullPath: '/clasica'
+      preLoaderRoute: typeof ClasicaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cuenta': {
       id: '/cuenta'
       path: '/cuenta'
@@ -680,11 +785,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CuentaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/doble-o-nada': {
+      id: '/doble-o-nada'
+      path: '/doble-o-nada'
+      fullPath: '/doble-o-nada'
+      preLoaderRoute: typeof DobleONadaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/faq': {
       id: '/faq'
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gta6': {
+      id: '/gta6'
+      path: '/gta6'
+      fullPath: '/gta6'
+      preLoaderRoute: typeof Gta6RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invita': {
@@ -736,6 +855,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SeguridadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sin-ansiedad': {
+      id: '/sin-ansiedad'
+      path: '/sin-ansiedad'
+      fullPath: '/sin-ansiedad'
+      preLoaderRoute: typeof SinAnsiedadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -757,6 +883,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TerminosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trump': {
+      id: '/trump'
+      path: '/trump'
+      fullPath: '/trump'
+      preLoaderRoute: typeof TrumpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/wallet': {
       id: '/wallet'
       path: '/wallet'
@@ -769,6 +902,13 @@ declare module '@tanstack/react-router' {
       path: '/en'
       fullPath: '/en/'
       preLoaderRoute: typeof EnIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/bitcoin': {
+      id: '/en/bitcoin'
+      path: '/en/bitcoin'
+      fullPath: '/en/bitcoin'
+      preLoaderRoute: typeof EnBitcoinRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/faq': {
@@ -975,8 +1115,12 @@ const rootRouteChildren: RootRouteChildren = {
   ActividadRoute: ActividadRoute,
   AdminRoute: AdminRoute,
   AppRoute: AppRoute,
+  BitcoinRoute: BitcoinRoute,
+  ClasicaRoute: ClasicaRoute,
   CuentaRoute: CuentaRoute,
+  DobleONadaRoute: DobleONadaRoute,
   FaqRoute: FaqRoute,
+  Gta6Route: Gta6Route,
   InvitaRoute: InvitaRoute,
   MercadosRoute: MercadosRoute,
   NotificacionesRoute: NotificacionesRoute,
@@ -984,10 +1128,13 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadRoute: PrivacidadRoute,
   PruebaRoute: PruebaRoute,
   SeguridadRoute: SeguridadRoute,
+  SinAnsiedadRoute: SinAnsiedadRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StatusRoute: StatusRoute,
   TerminosRoute: TerminosRoute,
+  TrumpRoute: TrumpRoute,
   WalletRoute: WalletRoute,
+  EnBitcoinRoute: EnBitcoinRoute,
   EnFaqRoute: EnFaqRoute,
   EnPrivacyRoute: EnPrivacyRoute,
   EnStatusRoute: EnStatusRoute,
