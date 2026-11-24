@@ -4,6 +4,6 @@ import { homeVariantHead } from "@/lib/home-variant-head";
 import { Landing } from "./index";
 
 export const Route = createFileRoute("/sin-ansiedad")({ staticData: { sitemap: false },
-  head: () => homeVariantHead({ path: "/sin-ansiedad", title: "Abre tu bóveda y olvídate de las gráficas | Bóveda Market", description: "En Bóveda la volatilidad te paga: cada subida y cada bajada deja intereses, y el Piloto Automático se encarga del resto." }),
+  head: () => homeVariantHead({ path: "/sin-ansiedad", title: "Abre tu bóveda y olvídate de las gráficas | Bóveda Market", description: "En Bóveda la volatilidad te paga: cada subida y cada bajada deja intereses, y el Piloto Automático se encarga del resto.", alternates: { es: "/sin-ansiedad", en: "/en/sin-ansiedad" } }),
   component: () => <Landing variant={heroIndex("sin-ansiedad")} />,
 });

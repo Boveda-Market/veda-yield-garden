@@ -36,10 +36,15 @@ import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as EnIndexRouteImport } from './routes/en/index'
 import { Route as EnAboutRouteImport } from './routes/en/about'
 import { Route as EnBitcoinRouteImport } from './routes/en/bitcoin'
+import { Route as EnClasicaRouteImport } from './routes/en/clasica'
+import { Route as EnDobleONadaRouteImport } from './routes/en/doble-o-nada'
 import { Route as EnFaqRouteImport } from './routes/en/faq'
+import { Route as EnGta6RouteImport } from './routes/en/gta6'
 import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
+import { Route as EnSinAnsiedadRouteImport } from './routes/en/sin-ansiedad'
 import { Route as EnStatusRouteImport } from './routes/en/status'
 import { Route as EnTermsRouteImport } from './routes/en/terms'
+import { Route as EnTrumpRouteImport } from './routes/en/trump'
 import { Route as GuiasIndexRouteImport } from './routes/guias/index'
 import { Route as GuiasBovedasAltoRendimientoRouteImport } from './routes/guias/bovedas-alto-rendimiento'
 import { Route as GuiasGanarInteresesBitcoinRouteImport } from './routes/guias/ganar-intereses-bitcoin'
@@ -199,14 +204,34 @@ const EnBitcoinRoute = EnBitcoinRouteImport.update({
   path: '/en/bitcoin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnClasicaRoute = EnClasicaRouteImport.update({
+  id: '/en/clasica',
+  path: '/en/clasica',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnDobleONadaRoute = EnDobleONadaRouteImport.update({
+  id: '/en/doble-o-nada',
+  path: '/en/doble-o-nada',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnFaqRoute = EnFaqRouteImport.update({
   id: '/en/faq',
   path: '/en/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnGta6Route = EnGta6RouteImport.update({
+  id: '/en/gta6',
+  path: '/en/gta6',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnPrivacyRoute = EnPrivacyRouteImport.update({
   id: '/en/privacy',
   path: '/en/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnSinAnsiedadRoute = EnSinAnsiedadRouteImport.update({
+  id: '/en/sin-ansiedad',
+  path: '/en/sin-ansiedad',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnStatusRoute = EnStatusRouteImport.update({
@@ -217,6 +242,11 @@ const EnStatusRoute = EnStatusRouteImport.update({
 const EnTermsRoute = EnTermsRouteImport.update({
   id: '/en/terms',
   path: '/en/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnTrumpRoute = EnTrumpRouteImport.update({
+  id: '/en/trump',
+  path: '/en/trump',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuiasIndexRoute = GuiasIndexRouteImport.update({
@@ -376,10 +406,15 @@ export interface FileRoutesByFullPath {
   '/wallet': typeof WalletRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
+  '/en/clasica': typeof EnClasicaRoute
+  '/en/doble-o-nada': typeof EnDobleONadaRoute
   '/en/faq': typeof EnFaqRoute
+  '/en/gta6': typeof EnGta6Route
   '/en/privacy': typeof EnPrivacyRoute
+  '/en/sin-ansiedad': typeof EnSinAnsiedadRoute
   '/en/status': typeof EnStatusRoute
   '/en/terms': typeof EnTermsRoute
+  '/en/trump': typeof EnTrumpRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/ganar-intereses-bitcoin': typeof GuiasGanarInteresesBitcoinRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
@@ -432,10 +467,15 @@ export interface FileRoutesByTo {
   '/wallet': typeof WalletRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
+  '/en/clasica': typeof EnClasicaRoute
+  '/en/doble-o-nada': typeof EnDobleONadaRoute
   '/en/faq': typeof EnFaqRoute
+  '/en/gta6': typeof EnGta6Route
   '/en/privacy': typeof EnPrivacyRoute
+  '/en/sin-ansiedad': typeof EnSinAnsiedadRoute
   '/en/status': typeof EnStatusRoute
   '/en/terms': typeof EnTermsRoute
+  '/en/trump': typeof EnTrumpRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/ganar-intereses-bitcoin': typeof GuiasGanarInteresesBitcoinRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
@@ -489,10 +529,15 @@ export interface FileRoutesById {
   '/wallet': typeof WalletRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
+  '/en/clasica': typeof EnClasicaRoute
+  '/en/doble-o-nada': typeof EnDobleONadaRoute
   '/en/faq': typeof EnFaqRoute
+  '/en/gta6': typeof EnGta6Route
   '/en/privacy': typeof EnPrivacyRoute
+  '/en/sin-ansiedad': typeof EnSinAnsiedadRoute
   '/en/status': typeof EnStatusRoute
   '/en/terms': typeof EnTermsRoute
+  '/en/trump': typeof EnTrumpRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/ganar-intereses-bitcoin': typeof GuiasGanarInteresesBitcoinRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
@@ -547,10 +592,15 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/en/about'
     | '/en/bitcoin'
+    | '/en/clasica'
+    | '/en/doble-o-nada'
     | '/en/faq'
+    | '/en/gta6'
     | '/en/privacy'
+    | '/en/sin-ansiedad'
     | '/en/status'
     | '/en/terms'
+    | '/en/trump'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/ganar-intereses-bitcoin'
     | '/guias/invertir-sin-estafas'
@@ -603,10 +653,15 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/en/about'
     | '/en/bitcoin'
+    | '/en/clasica'
+    | '/en/doble-o-nada'
     | '/en/faq'
+    | '/en/gta6'
     | '/en/privacy'
+    | '/en/sin-ansiedad'
     | '/en/status'
     | '/en/terms'
+    | '/en/trump'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/ganar-intereses-bitcoin'
     | '/guias/invertir-sin-estafas'
@@ -659,10 +714,15 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/en/about'
     | '/en/bitcoin'
+    | '/en/clasica'
+    | '/en/doble-o-nada'
     | '/en/faq'
+    | '/en/gta6'
     | '/en/privacy'
+    | '/en/sin-ansiedad'
     | '/en/status'
     | '/en/terms'
+    | '/en/trump'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/ganar-intereses-bitcoin'
     | '/guias/invertir-sin-estafas'
@@ -716,10 +776,15 @@ export interface RootRouteChildren {
   WalletRoute: typeof WalletRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBitcoinRoute: typeof EnBitcoinRoute
+  EnClasicaRoute: typeof EnClasicaRoute
+  EnDobleONadaRoute: typeof EnDobleONadaRoute
   EnFaqRoute: typeof EnFaqRoute
+  EnGta6Route: typeof EnGta6Route
   EnPrivacyRoute: typeof EnPrivacyRoute
+  EnSinAnsiedadRoute: typeof EnSinAnsiedadRoute
   EnStatusRoute: typeof EnStatusRoute
   EnTermsRoute: typeof EnTermsRoute
+  EnTrumpRoute: typeof EnTrumpRoute
   GuiasBovedasAltoRendimientoRoute: typeof GuiasBovedasAltoRendimientoRoute
   GuiasGanarInteresesBitcoinRoute: typeof GuiasGanarInteresesBitcoinRoute
   GuiasInvertirSinEstafasRoute: typeof GuiasInvertirSinEstafasRoute
@@ -937,6 +1002,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnBitcoinRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/clasica': {
+      id: '/en/clasica'
+      path: '/en/clasica'
+      fullPath: '/en/clasica'
+      preLoaderRoute: typeof EnClasicaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/doble-o-nada': {
+      id: '/en/doble-o-nada'
+      path: '/en/doble-o-nada'
+      fullPath: '/en/doble-o-nada'
+      preLoaderRoute: typeof EnDobleONadaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/faq': {
       id: '/en/faq'
       path: '/en/faq'
@@ -944,11 +1023,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnFaqRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/gta6': {
+      id: '/en/gta6'
+      path: '/en/gta6'
+      fullPath: '/en/gta6'
+      preLoaderRoute: typeof EnGta6RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/privacy': {
       id: '/en/privacy'
       path: '/en/privacy'
       fullPath: '/en/privacy'
       preLoaderRoute: typeof EnPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/sin-ansiedad': {
+      id: '/en/sin-ansiedad'
+      path: '/en/sin-ansiedad'
+      fullPath: '/en/sin-ansiedad'
+      preLoaderRoute: typeof EnSinAnsiedadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/status': {
@@ -963,6 +1056,13 @@ declare module '@tanstack/react-router' {
       path: '/en/terms'
       fullPath: '/en/terms'
       preLoaderRoute: typeof EnTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/trump': {
+      id: '/en/trump'
+      path: '/en/trump'
+      fullPath: '/en/trump'
+      preLoaderRoute: typeof EnTrumpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guias/': {
@@ -1156,10 +1256,15 @@ const rootRouteChildren: RootRouteChildren = {
   WalletRoute: WalletRoute,
   EnAboutRoute: EnAboutRoute,
   EnBitcoinRoute: EnBitcoinRoute,
+  EnClasicaRoute: EnClasicaRoute,
+  EnDobleONadaRoute: EnDobleONadaRoute,
   EnFaqRoute: EnFaqRoute,
+  EnGta6Route: EnGta6Route,
   EnPrivacyRoute: EnPrivacyRoute,
+  EnSinAnsiedadRoute: EnSinAnsiedadRoute,
   EnStatusRoute: EnStatusRoute,
   EnTermsRoute: EnTermsRoute,
+  EnTrumpRoute: EnTrumpRoute,
   GuiasBovedasAltoRendimientoRoute: GuiasBovedasAltoRendimientoRoute,
   GuiasGanarInteresesBitcoinRoute: GuiasGanarInteresesBitcoinRoute,
   GuiasInvertirSinEstafasRoute: GuiasInvertirSinEstafasRoute,
