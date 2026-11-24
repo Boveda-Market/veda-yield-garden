@@ -104,18 +104,69 @@ export function parsePoolFlow(json: unknown, address: string): PoolFlow | null {
   return { netDeposits: net, totalDeposits: deposits, totalWithdraws: withdraws };
 }
 
-/** Public discovery API: the pool's own deposits vs. withdrawals row. */
-export async function fetchPoolFlow(address: string, signal?: AbortSignal): Promise<PoolFlow | null> {
-  const url = `https://pool-discovery-api.datapi.meteora.ag/pools?page_size=1&category=all&filter_by=${encodeURIComponent(`pool_address=${address}`)}`;
-  const response = await fetch(url, { signal: signal ?? null });
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error("No se pudo consultar la entrada y salida de dinero del pool.");
-  return parsePoolFlow(await response.json(), address);
+const num = z.number().finite().nullish().catch(null);
+const pulseRow = z.object({
+  pool_address: z.string(),
+  active_tvl: num, active_tvl_change_pct: num,
+  volume: num, volume_change_pct: num,
+  volume_active_tvl_ratio: num, volume_active_tvl_ratio_change_pct: num,
+  fee: num, fee_change_pct: num,
+  swap_count: num, swap_count_change_pct: num,
+  unique_traders: num, unique_traders_change_pct: num,
+  open_positions: num, active_positions_pct: num,
+  volatility: num,
+});
+const pulseResponse = z.object({ data: z.array(z.unknown()).nullish().catch(null) });
+
+/** Meteora's own 24 h pool figures, each with the percent it shows next to it (vs. the previous 24 h). */
+export type PoolPulse = {
+  activeTvl: number | null; activeTvlChange: number | null;
+  volume: number | null; volumeChange: number | null;
+  volumeActiveTvl: number | null; volumeActiveTvlChange: number | null;
+  fees: number | null; feesChange: number | null;
+  swaps: number | null; swapsChange: number | null;
+  traders: number | null; tradersChange: number | null;
+  openPositions: number | null; inRangePositions: number | null; inRangePct: number | null;
+  volatility: number | null;
+};
+
+const nonNeg = (v: number | null | undefined) => v != null && v >= 0 ? v : null;
+const pctRange = (v: number | null | undefined) => v != null && v >= 0 && v <= 100 ? v : null;
+
+/** Exact-address row only; a missing or impossible field stays null (shown as «—»), never guessed. */
+export function parsePoolPulse(json: unknown, address: string): PoolPulse | null {
+  const rows = pulseResponse.safeParse(json).data?.data ?? [];
+  const row = rows.map((r) => pulseRow.safeParse(r).data).find((r) => r?.pool_address === address);
+  if (!row) return null;
+  const open = nonNeg(row.open_positions);
+  const inRangePct = open != null ? pctRange(row.active_positions_pct) : null;
+  return {
+    activeTvl: nonNeg(row.active_tvl), activeTvlChange: row.active_tvl_change_pct ?? null,
+    volume: nonNeg(row.volume), volumeChange: row.volume_change_pct ?? null,
+    volumeActiveTvl: nonNeg(row.volume_active_tvl_ratio), volumeActiveTvlChange: row.volume_active_tvl_ratio_change_pct ?? null,
+    fees: nonNeg(row.fee), feesChange: row.fee_change_pct ?? null,
+    swaps: nonNeg(row.swap_count), swapsChange: row.swap_count_change_pct ?? null,
+    traders: nonNeg(row.unique_traders), tradersChange: row.unique_traders_change_pct ?? null,
+    openPositions: open, inRangePct, inRangePositions: open != null && inRangePct != null ? Math.round(open * inRangePct / 100) : null,
+    volatility: nonNeg(row.volatility),
+  };
 }
 
-export const poolFlowOptions = (address: string) => ({
-  queryKey: ["meteora-pool-flow", address],
-  queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolFlow(address, signal),
-  staleTime: 10 * 60_000,
+export type PoolDiscovery = { flow: PoolFlow | null; pulse: PoolPulse | null };
+
+/** Public discovery API (the same one meteora.ag reads): one request gives money in/out and the 24 h figures. */
+export async function fetchPoolDiscovery(address: string, signal?: AbortSignal): Promise<PoolDiscovery> {
+  const url = `https://pool-discovery-api.datapi.meteora.ag/pools?page_size=1&category=all&timeframe=24h&filter_by=${encodeURIComponent(`pool_address=${address}`)}`;
+  const response = await fetch(url, { signal: signal ?? null });
+  if (response.status === 404) return { flow: null, pulse: null };
+  if (!response.ok) throw new Error("No se pudo consultar la actividad del pool.");
+  const json: unknown = await response.json();
+  return { flow: parsePoolFlow(json, address), pulse: parsePoolPulse(json, address) };
+}
+
+export const poolDiscoveryOptions = (address: string) => ({
+  queryKey: ["meteora-pool-discovery", address],
+  queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolDiscovery(address, signal),
+  staleTime: 5 * 60_000,
   retry: 1,
 });

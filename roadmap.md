@@ -24,3 +24,4 @@
 - [x] Bóvedas activas abren la misma tarjeta que las demás en Bóvedas
 - [x] Bóveda Bitcoin: «La moneda» usa estadísticas del Bitcoin regular (personas, valor, circulación); «Ahora mismo en el pool» sigue con cbBTC
 - [x] Portafolio de visitantes: gráfica de Bitcoin 7 días
+- [x] Métricas de las bóvedas con los porcentajes de Meteora (dinero trabajando, volumen, intercambios, personas, posiciones, intereses)

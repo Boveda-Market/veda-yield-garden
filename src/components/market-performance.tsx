@@ -1,12 +1,12 @@
 import { Check, Copy } from "lucide-react";
-import { MetricHelpGrid } from "@/components/metric-help";
+import { MetricHelpGrid, type MetricTile } from "@/components/metric-help";
 import { CHAIN_POOLS } from "@/lib/solana-data";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useT } from "@/lib/i18n";
 import { fetchPoolStats, coinLabel, tokenLiquidityOptions } from "@/lib/pool-stats";
 import { poolYieldOptions } from "@/lib/pool-yield";
-import { poolVolatilityOptions, protocolTvlOptions, poolFlowOptions, tvlSharePct, turnoverPct } from "@/lib/pool-metrics";
+import { protocolTvlOptions, poolDiscoveryOptions, tvlSharePct } from "@/lib/pool-metrics";
 import type { Vault } from "@/lib/vaults";
 import { formatCoinPrice } from "@/lib/format-price";
 
@@ -34,9 +34,12 @@ function poolAge(createdAt: number | null | undefined, t: (s: string, v?: Record
 /** Plain-language «¿Qué significa?» text for each pool metric, shown in a bottom sheet. */
 const METRIC_HELP: Record<string, string> = {
   "Interés anual estimado": "Un cálculo aproximado de cuánto ganarías en un año si la actividad de hoy se mantuviera igual. No es una promesa fija: varía según el movimiento del mercado.",
-  "Volatilidad": "Cuánto se mueve el precio de la moneda hacia arriba o hacia abajo en un día típico. Para la bóveda, el movimiento es bueno: cada vez que el precio sube o baja, la gente compra y vende, y tú cobras comisiones. Ojo: también cambia el valor de lo que tienes depositado, y si el precio se mueve mucho tu bóveda puede salir de su zona activa por un rato.",
+  "Volatilidad": "Cuánto se movió el precio de la moneda hacia arriba o hacia abajo en las últimas 24 horas. Para la bóveda, el movimiento es bueno: cada vez que el precio sube o baja, la gente compra y vende, y tú cobras comisiones. Ojo: también cambia el valor de lo que tienes depositado, y si el precio se mueve mucho tu bóveda puede salir de su zona activa por un rato.",
   "Dinero en el pool": "La cantidad total de dinero que todos los participantes tienen guardado en esta bóveda. Te muestra qué tan grande es el fondo.",
-  "Volumen sobre dinero": "Cuántas veces circuló el dinero durante el día. Mientras más se mueve el dinero, más comisiones genera para los depósitos, incluido el tuyo.",
+  "Dinero trabajando": "La parte del dinero del pool que está justo en la zona de precio donde ocurren los intercambios ahora mismo. Solo ese dinero cobra comisiones en este momento.",
+  "Volumen sobre dinero trabajando": "Cuántas veces circuló el dinero que está trabajando durante las últimas 24 horas. Mientras más alto, más comisiones recibe cada dólar que está en la zona activa.",
+  "Personas que operaron": "Cuántas billeteras distintas compraron o vendieron en esta bóveda en las últimas 24 horas. Más personas significa más actividad y más comisiones.",
+  "Posiciones abiertas": "Cuántos depósitos de todas las personas hay abiertos en este pool. «En zona activa» son los que ahora mismo están cobrando comisiones.",
   "Intercambios · 24 h": "La cantidad de compras y ventas que hicieron otras personas en las últimas 24 horas. Cada operación aporta un pedacito a tus intereses.",
   "Intereses generados": "Lo que esta bóveda generó en intereses para todos sus participantes en las últimas 24 horas.",
   "Intereses totales": "Todas las comisiones que esta bóveda ha generado para sus participantes desde el primer día que abrió.",
@@ -50,10 +53,10 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const locale = useLocale();
   const stats = useQuery({ queryKey: ["dexscreener-pool-stats", vault.pool], queryFn: ({ signal }) => fetchPoolStats(vault.pool, signal), staleTime: 60_000, retry: 1 });
   const pool = useQuery(poolYieldOptions(vault.pool));
-  const volatility = useQuery(poolVolatilityOptions(vault.pool));
   const protocol = useQuery(protocolTvlOptions(vault.pool));
-  const flow = useQuery(poolFlowOptions(vault.pool));
-  const f = flow.data;
+  const discovery = useQuery(poolDiscoveryOptions(vault.pool));
+  const f = discovery.data?.flow ?? null;
+  const live = discovery.data?.pulse ?? null;
   const gross = f != null ? f.totalDeposits + f.totalWithdraws : 0;
   const inShare = f != null && gross > 0 ? f.totalDeposits / gross * 100 : null;
   const m = pool.data;
@@ -65,9 +68,7 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const liquidity = useQuery({ ...tokenLiquidityOptions(mint ?? ""), enabled: !!mint });
   const liq = liquidity.data;
   const ch = stats.data?.change24h ?? null;
-  const vol24h = m?.volume24h ?? stats.data?.volume24h ?? null;
   const share = tvlSharePct(m?.tvl, protocol.data);
-  const turn = turnoverPct(vol24h, m?.tvl);
   const age = poolAge(m?.createdAt, t);
   const buys = stats.data?.buys24h ?? null;
   const sells = stats.data?.sells24h ?? null;
@@ -75,15 +76,19 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const buyShare = swaps && buys != null ? buys / swaps * 100 : null;
   const feeShare = m?.totalFees != null && m.totalVolume != null && m.totalVolume > 0 ? m.totalFees / m.totalVolume * 100 : null;
 
-  const rows: [string, string, string | undefined, string][] = [
-    [t("Interés anual estimado"), m?.apr != null ? pct(m.apr) : "—", t("Según intereses de 24 h"), "Interés anual estimado"],
-    [t("Volatilidad"), volatility.data?.volPct != null ? `±${pct(volatility.data.volPct)}` : "—", t("Movimiento diario típico"), "Volatilidad"],
-    [t("Dinero en el pool"), usdShort(m?.tvl), share != null ? t("{s} de todo el dinero", { s: pct(share) }) : t("Todos los depósitos"), "Dinero en el pool"],
-    [t("Volumen sobre dinero"), pct(turn), turn != null ? t("El dinero se movió {x} veces", { x: (turn / 100).toFixed(1) }) : t("Volumen de 24 h sobre el dinero"), "Volumen sobre dinero"],
-    [t("Intercambios · 24 h"), count(swaps), buyShare != null ? t("{p} compras", { p: pct(buyShare) }) : t("Compras y ventas"), "Intercambios · 24 h"],
-    [t("Intereses generados"), m?.fees24h != null ? `+${usd(m.fees24h)}` : "—", t("Últimas 24 horas"), "Intereses generados"],
-    [t("Antigüedad del pool"), age ?? "—", m?.createdAt ? new Date(m.createdAt).toLocaleDateString(locale, { month: "short", year: "numeric" }) : undefined, "Antigüedad del pool"],
-    [t("Comisión por intercambio"), m?.feePct != null ? pct(m.feePct) : "—", t("Se reparte entre los depósitos"), "Comisión por intercambio"],
+  // Figures and percents as meteora.ag shows them for this exact pool (24 h vs. the previous 24 h).
+  const tiles: MetricTile[] = [
+    { label: t("Interés anual estimado"), value: m?.apr != null ? pct(m.apr) : "—", sub: t("Según intereses de 24 h"), help: "Interés anual estimado", accent: true, wide: true },
+    { label: t("Volatilidad"), value: live?.volatility != null ? `±${pct(live.volatility)}` : "—", sub: t("Últimas 24 horas"), help: "Volatilidad" },
+    { label: t("Dinero en el pool"), value: usdShort(m?.tvl), sub: share != null ? t("{s} de todo el dinero", { s: pct(share) }) : t("Todos los depósitos"), help: "Dinero en el pool" },
+    { label: t("Dinero trabajando"), value: usdShort(live?.activeTvl), sub: t("En la zona activa"), change: live?.activeTvlChange, help: "Dinero trabajando" },
+    { label: t("Volumen sobre dinero trabajando"), value: pct(live?.volumeActiveTvl), sub: live?.volumeActiveTvl != null ? t("El dinero se movió {x} veces", { x: (live.volumeActiveTvl / 100).toFixed(1) }) : t("Últimas 24 horas"), change: live?.volumeActiveTvlChange, help: "Volumen sobre dinero trabajando" },
+    { label: t("Intercambios · 24 h"), value: count(live?.swaps ?? swaps), sub: buyShare != null ? t("{p} compras", { p: pct(buyShare) }) : t("Compras y ventas"), change: live?.swapsChange, help: "Intercambios · 24 h" },
+    { label: t("Personas que operaron"), value: count(live?.traders), sub: t("Últimas 24 horas"), change: live?.tradersChange, help: "Personas que operaron" },
+    { label: t("Posiciones abiertas"), value: count(live?.openPositions), sub: live?.inRangePositions != null && live.inRangePct != null ? t("{n} en zona activa ({p})", { n: live.inRangePositions, p: pct(live.inRangePct) }) : t("De todas las personas"), help: "Posiciones abiertas" },
+    { label: t("Intereses generados"), value: m?.fees24h != null ? `+${usd(m.fees24h)}` : "—", sub: t("Últimas 24 horas"), change: live?.feesChange, help: "Intereses generados", accent: true },
+    { label: t("Antigüedad del pool"), value: age ?? "—", sub: m?.createdAt ? new Date(m.createdAt).toLocaleDateString(locale, { month: "short", year: "numeric" }) : undefined, help: "Antigüedad del pool" },
+    { label: t("Comisión por intercambio"), value: m?.feePct != null ? pct(m.feePct) : "—", sub: t("Se reparte entre los depósitos"), help: "Comisión por intercambio" },
   ];
 
   return <div className="space-y-3">
@@ -107,9 +112,9 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
     </div>}
     <section className="rounded-2xl border border-border bg-card p-3" aria-label={t("Métricas del pool")}>
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("Métricas del pool")}</p>
-      {pool.isPending ? <div role="status" className="mt-3 grid grid-cols-2 gap-2">{Array.from({ length: 8 }, (_, i) => <span key={i} className="h-14 animate-pulse rounded-xl bg-muted" />)}</div>
+      {pool.isPending ? <div role="status" className="mt-3 grid grid-cols-2 gap-2">{Array.from({ length: 10 }, (_, i) => <span key={i} className="h-14 animate-pulse rounded-xl bg-muted" />)}</div>
         : !m ? <p role="status" className="mt-3 text-sm text-muted-foreground">{t("Métricas no disponibles por ahora")}</p>
-        : <div className="mt-3"><MetricHelpGrid tiles={rows.map(([label, value, sub, help], i) => ({ label, value, sub, help: METRIC_HELP[help], accent: i === 0 || i === 4 }))} /></div>}
+        : <div className="mt-3"><MetricHelpGrid tiles={tiles.map((x) => ({ ...x, help: x.help ? METRIC_HELP[x.help] : undefined }))} /></div>}
     </section>
     {m && <p className="-mt-1 text-center text-[10px] text-muted-foreground">{t("Toca una métrica para ver qué significa.")}</p>}
     <p className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs leading-5">💡 {t("El precio de {s} sube y baja con la oferta y la demanda, pero cada intercambio genera intereses en dólares para la bóveda. La volatilidad es el motor que produce tus ganancias.", { s: symbol ?? "" })}</p>
