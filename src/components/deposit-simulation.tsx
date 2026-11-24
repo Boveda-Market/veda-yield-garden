@@ -107,7 +107,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
         {coinPrice != null && <div className="flex justify-between gap-3 text-xs"><dt className="text-muted-foreground">{t("Precio de 1 {c}", { c: coin })}</dt><dd className="tabular-nums">{formatCoinPrice(coinPrice)}</dd></div>}
         <div className="flex justify-between gap-3 text-xs"><dt className="text-muted-foreground">{t("Comisión del cambio (estimada)")}</dt><dd className="tabular-nums">−{usd(quote.swapCost)}</dd></div>
         <p className="text-[11px] leading-4 text-muted-foreground">{t("La bóveda trabaja con dos monedas: mitad dólares digitales y mitad {c}. Por eso compramos {c} por ti en este mismo paso, sin firmas extra.", { c: coin })}</p>
-      </div> : <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Compra de monedas")}</dt><dd className="font-semibold text-primary">{t("No hace falta")}</dd></div>}
+      </div> : null}
       <div className="flex justify-between gap-3 border-t border-border pt-2"><dt className="font-semibold">{t("Sale de tu billetera")}</dt><dd className="tabular-nums font-semibold">{usd(quote.total)}</dd></div>
       <div className="flex justify-between gap-3"><dt className="font-semibold">{t("Llega a tu bóveda")}</dt><dd className="font-display text-lg font-bold tabular-nums text-primary">~{usd(quote.inVault)}</dd></div>
       <p className="text-[11px] leading-4 text-muted-foreground">{quote.onTop ? t("La activación se paga aparte, así tu depósito entra completo. ") : quote.fee > 0n ? t("No alcanza para pagar la activación aparte, así que sale del mismo depósito. ") : ""}{t("Estimado con el precio actual.")}</p>
