@@ -58,7 +58,9 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
     let id: string | null = null;
     try { id = sessionStorage.getItem(PENDING_DEPOSIT); sessionStorage.removeItem(PENDING_DEPOSIT); } catch { /* storage blocked */ }
     const v = VAULTS.find((x) => x.id === id);
-    if (v && isOperableVault(v.id)) setSimulationVault(v);
+    let amt = "";
+    try { amt = sessionStorage.getItem(PENDING_DEPOSIT + ":amount") ?? ""; sessionStorage.removeItem(PENDING_DEPOSIT + ":amount"); } catch { /* storage blocked */ }
+    if (v && isOperableVault(v.id)) { if (/^\d+(\.\d{1,6})?$/.test(amt)) setDepositAmount(amt); setSimulationVault(v); }
   }, [walletAddress]);
   const vaultYields = useQueries({ queries: VAULTS.map((v) => poolYieldOptions(v.pool)) });
   const aprs = Object.fromEntries(VAULTS.map((v, i) => [v.id, vaultYields[i]?.data?.apr ?? null]));
