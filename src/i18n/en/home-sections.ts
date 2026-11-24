@@ -57,4 +57,7 @@ export const homeSections: Record<string, string> = {
   "La ronda se resuelve sola con un precio público.": "The round settles on its own with a public price.",
   "Cobras si aciertas": "You get paid if you're right",
   "El premio queda en tu billetera listo para usar.": "The prize lands in your wallet ready to use.",
+  "Precio de Trump Coin en vivo": "Live Trump Coin price",
+  "Precio de GTA6 Coin en vivo": "Live GTA6 Coin price",
+  "Gráfica de": "Chart of",
 };

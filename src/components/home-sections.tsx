@@ -1,4 +1,5 @@
 import { useT } from "@/lib/i18n";
+import { VisitorBtcChart } from "@/components/visitor-btc-chart";
 
 type Card = { icon: string; title: string; body: string };
 type Flow = { compareTitle: string; compareSub: string; compare: readonly [Card, Card, Card]; howTitle: string; how: readonly (readonly [string, string])[] };
@@ -71,6 +72,7 @@ const FLOWS: Record<string, Flow> = {
 export function ThemeSections({ theme }: { theme?: string | undefined }) {
   const t = useT();
   const f = FLOWS[theme ?? ""] ?? CALM;
+  const chart = theme === "trump" ? { coin: "trump" as const, title: "Precio de Trump Coin en vivo" } : theme === "gta6" ? { coin: "gta6" as const, title: "Precio de GTA6 Coin en vivo" } : { coin: "btc" as const, title: "Precio del Bitcoin en vivo" };
   return <>
     <section aria-label={t(f.compareTitle)} className="mb-4 py-8">
       <h2 className="font-display text-2xl font-bold">{t(f.compareTitle)}</h2>
@@ -80,6 +82,10 @@ export function ThemeSections({ theme }: { theme?: string | undefined }) {
     <section aria-label={t(f.howTitle)} className="mb-4 py-8">
       <h2 className="font-display text-2xl font-bold">{t(f.howTitle)}</h2>
       <ol className="mt-5 grid gap-3 sm:grid-cols-3">{f.how.map(([h, d], i) => <li key={h} className="rounded-2xl border border-border bg-card p-4"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-display text-sm font-bold text-primary-foreground">{i + 1}</span><h3 className="mt-3 font-display font-bold">{t(h)}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ol>
+    </section>
+    <section aria-label={t(chart.title)} className="mb-4 py-8">
+      <h2 className="mb-4 font-display text-2xl font-bold">{t(chart.title)}</h2>
+      <VisitorBtcChart coin={chart.coin} />
     </section>
   </>;
 }
