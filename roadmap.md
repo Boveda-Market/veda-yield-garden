@@ -33,3 +33,6 @@
 - [x] Cancelar cotización/regreso automático después de 30 minutos de espera; no mantenerla abierta durante un registro largo.
 - [x] Página pública Sobre Bóveda Market en español/inglés, oficina ilustrativa, Telegram de desarrollo y enlaces desde portada/menú.
 - [x] Piloto automático: convertir todas las ganancias a dólares disponibles en bajadas; auto-compound en subidas y pruebas de ambas direcciones (preparación sin envío en las cuatro bóvedas).
+- [x] Acceso por email con estilo Bóveda Market y sello Privy; capturas móvil y escritorio.
+- [x] Enviar código de prueba al correo autorizado por el usuario (Privy respondió 200; completar acceso requiere el código del destinatario).
+- [ ] Envío de códigos desde bovedamarket.app (requiere habilitar personalización de email Enterprise en Privy y verificar dominio).

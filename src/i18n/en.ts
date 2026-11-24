@@ -11,6 +11,7 @@ import { rangeVaults } from "./en/range-vaults";
 import { guides } from "./en/guides";
 import { admin } from "./en/admin";
 import { about } from "./en/about";
+import { emailLogin } from "./en/email-login";
 
 /** English dictionary keyed by the original Spanish source text. Each area owns its own file. */
-export const en: Record<string, string> = { ...admin, ...common, ...app, ...realOps, ...account, ...pages, ...legal, ...extra, ...more, ...noTrial, ...rangeVaults, ...guides, ...about };
+export const en: Record<string, string> = { ...admin, ...common, ...app, ...realOps, ...account, ...pages, ...legal, ...extra, ...more, ...noTrial, ...rangeVaults, ...guides, ...about, ...emailLogin };

@@ -5,7 +5,8 @@ import { installPrivyApiFallback } from "@/lib/privy-api-fallback";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { setPrivyTokenGetter } from "@/lib/privy-token";
 import { sessionWalletAddress } from "@/lib/session-wallet";
-import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useLoginWithOAuth, useLoginWithPasskey, useMfaEnrollment, usePrivy, useSigners } from "@privy-io/react-auth";
+import { PrivyProvider, useAddFunds, useLinkAccount, useLogin, useLoginWithEmail, useLoginWithOAuth, useLoginWithPasskey, useMfaEnrollment, usePrivy, useSigners } from "@privy-io/react-auth";
+import { EmailLoginSheet } from "@/components/email-login-sheet";
 import { AUTOPILOT_POLICY_ID, AUTOPILOT_SIGNER_ID } from "@/lib/autopilot";
 import { useUpdateEmail } from "@privy-io/react-auth/ui";
 import { toSolanaWalletConnectors, useExportWallet, useFundWallet, useSignMessage, useSignTransaction, useWallets } from "@privy-io/react-auth/solana";
@@ -55,7 +56,10 @@ function SessionBridge({ children }: { children: ReactNode }) {
     onError: () => setError(t("No se pudo iniciar sesión. Inténtalo de nuevo o prueba con otro método (Google, email o billetera).")),
   });
   const loginFailed = () => setError(t("No se pudo iniciar sesión. Inténtalo de nuevo o prueba con otro método (Google, email o billetera)."));
-  // Google and Face ID / fingerprint open directly (no intermediate Privy screen); email and wallets keep the branded modal.
+  const [emailOpen, setEmailOpen] = useState(false);
+  const { sendCode, loginWithCode } = useLoginWithEmail();
+  useEffect(() => { if (authenticated) setEmailOpen(false); }, [authenticated]);
+  // Email uses the native Bóveda card; wallet linking/MFA retain Privy's secure UI.
   const { initOAuth } = useLoginWithOAuth({ onComplete: () => setError(null), onError: loginFailed });
   // Cancelling the phone sensor is a normal choice (e.g. to switch to Google): stay silent.
   const { loginWithPasskey } = useLoginWithPasskey({ onComplete: () => setError(null), onError: () => setError(null) });
@@ -65,6 +69,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
     try { sessionStorage.setItem("boveda:auth-pending", String(Date.now())); } catch { /* ignore */ }
     if (m === "google") { initOAuth({ provider: "google" }).catch(loginFailed); return; }
     if (m === "passkey") { loginWithPasskey().catch(() => setError(null)); return; }
+    if (m === "email") { setEmailOpen(true); return; }
     login({ loginMethods: [m] });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initOAuth, loginWithPasskey, login]);
@@ -217,7 +222,7 @@ function SessionBridge({ children }: { children: ReactNode }) {
   // Share this single session with every screen (the engine lives in the root and survives navigation).
   useEffect(() => { publishSession(value); });
   useEffect(() => () => publishSession(null), []);
-  return <BovedaSessionContext.Provider value={value}>{children}<IdleLogout active={ready && authenticated} signedOut={ready && !authenticated} onLogout={doLogout} /></BovedaSessionContext.Provider>;
+  return <BovedaSessionContext.Provider value={value}>{children}{emailOpen && <EmailLoginSheet open={emailOpen} onOpenChange={(open) => { setEmailOpen(open); if (!open) { try { sessionStorage.removeItem("boveda:auth-pending"); } catch { /* ignore */ } } }} sendCode={sendCode} loginWithCode={loginWithCode} />}<IdleLogout active={ready && authenticated} signedOut={ready && !authenticated} onLogout={doLogout} /></BovedaSessionContext.Provider>;
 }
 
 export default function PrivyAccess({ children }: { children: ReactNode }) {
