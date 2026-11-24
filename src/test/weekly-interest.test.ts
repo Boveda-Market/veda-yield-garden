@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { weeklyInterest, weekTotalMicro, weeklySummaryText } from "@/lib/weekly-interest";
+import { weeklyInterest, weekTotalMicro } from "@/lib/weekly-interest";
 import { depositAlertText, harvestAlertText, exitAlertText } from "@/lib/telegram-alerts.functions";
 import { autopilotDoneText } from "@/lib/autopilot";
 
@@ -12,7 +12,6 @@ describe("weekly interest", () => {
     expect(d[4]!.micro).toBe(500_000n);
     expect(weekTotalMicro(d)).toBe(2_500_000n);
   });
-  it("summary says no action needed", () => expect(weeklySummaryText({ weekMicro: 18_400_000n, harvests: 3, from: "11", to: "17" })).toContain("+$18.40"));
 });
 describe("alert texts", () => {
   it("deposit shows amount and vault", () => { const s = depositAlertText("150", "GTA6"); expect(s).toContain("$150.00"); expect(s).toContain("GTA6"); expect(s).toContain("No tienes que hacer ninguna acción"); });

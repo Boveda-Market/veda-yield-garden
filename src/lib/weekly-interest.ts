@@ -1,4 +1,3 @@
-import { tgCard, tgRow } from "@/lib/telegram-format";
 
 type HarvestLike = { kind: string; at: number | null; usdcRaw: string; tokenRaw?: string; pool?: string };
 /** Optional: dollar value (integer micro) of a record's harvested vault-token part, e.g. at today's price. */
@@ -25,20 +24,6 @@ export function weeklyInterest(records: readonly HarvestLike[], now: number, off
 export const cumulative = (days: readonly DayBucket[]) => { let s = 0n; return days.map((d) => (s += d.micro)); };
 
 export const weekTotalMicro = (days: readonly DayBucket[]) => days.reduce((s, d) => s + d.micro, 0n);
-const usd = (m: bigint) => `$${(Number(m) / 1e6).toFixed(2)}`;
-
-/** Weekly Telegram summary (Spanish, HTML). Never mentions fees; informational, so it says no action is needed. */
-export function weeklySummaryText(o: { weekMicro: bigint; harvests: number; from: string; to: string }) {
-  return tgCard("📊", "Tu resumen semanal en Bóveda Market", [
-    `<i>Semana del ${o.from} al ${o.to}</i>`,
-    "",
-    tgRow("💰", "Intereses cosechados", `+${usd(o.weekMicro)}`),
-    tgRow("🌾", "Cosechas", String(o.harvests)),
-    "",
-    o.weekMicro > 0n ? "✅ Tu dinero sigue trabajando y generando intereses día y noche." : "🌱 Tus intereses se siguen acumulando en tu bóveda; cósechalos cuando quieras.",
-    "✨ <b>No tienes que hacer ninguna acción.</b>",
-  ]);
-}
 
 export type CapitalDay = { start: number; capitalMicro: bigint; earnedMicro: bigint };
 /** Last `n` local days (oldest first): running capital put into vaults (deposits − withdrawals, never below 0) and running harvested earnings over the window. Loaded records only. */
