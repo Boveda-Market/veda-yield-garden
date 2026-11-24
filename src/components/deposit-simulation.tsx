@@ -63,7 +63,9 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
 
   // Activation on top when the balance covers it; new positions pay the vault market's fee on the swapped half.
   const activationPending = !migrate && isDlmmVault(vault.id) && !!wallet && activationQ.isPending;
-  const quote = typed != null && typed > 0n ? depositQuote(typed, activationQ.data?.charge ?? null, activationQ.data?.fee ?? 0n, { balanceMicro: usdc ?? null, feePct: yieldQ.data?.feePct ?? null, swaps: !position }) : null;
+  // Visitors arriving from the home have no account yet: they will pay the one-time new-account activation. Returning accounts use the live server quote (no charge when already active).
+  const guestCharge = !wallet && !migrate && isDlmmVault(vault.id) ? ACTIVATION_FEE_MICRO : null;
+  const quote = typed != null && typed > 0n ? depositQuote(typed, guestCharge ?? activationQ.data?.charge ?? null, guestCharge ?? activationQ.data?.fee ?? 0n, { balanceMicro: usdc ?? null, feePct: yieldQ.data?.feePct ?? null, swaps: !position }) : null;
   const usd = (m: bigint) => `$${(Number(m) / 1e6).toFixed(2)}`;
   const hot = Boolean(vault.badge) && !migrate;
   const showBanner = hot && !done;
