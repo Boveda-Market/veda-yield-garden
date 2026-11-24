@@ -67,3 +67,4 @@ use the editor.
 - All ["real-solana", wallet] reads go through useRealWallet (src/hooks/use-real-wallet.ts), which keeps the last complete read when a newer one fails or is incomplete, so totals never drop to cash-only.
 
 - Deposit return intents are timestamped browser-only drafts kept for at most 30 minutes, not prices or authorization; restore through the normal live quote and clear on timeout, explicit cancellation or success. Close waiting quotes on timeout but never interrupt signing, submitted operations or receipts.
+- About uses a shared browser-safe page component with public Spanish/English leaf routes, localized metadata and sitemap entries, so it remains accessible without sign-in.

@@ -31,3 +31,4 @@
 - [x] Banner de Bitcoin al compartir en todas las páginas públicas (es/en)
 - [x] «Confirmar» antes de entrar y «Confirmar y depositar» al volver con cotización nueva.
 - [x] Cancelar cotización/regreso automático después de 30 minutos de espera; no mantenerla abierta durante un registro largo.
+- [x] Página pública Sobre Bóveda Market en español/inglés, oficina ilustrativa, Telegram de desarrollo y enlaces desde portada/menú.

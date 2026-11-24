@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as ActividadRouteImport } from './routes/actividad'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/app'
@@ -33,6 +34,7 @@ import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as TrumpRouteImport } from './routes/trump'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as EnIndexRouteImport } from './routes/en/index'
+import { Route as EnAboutRouteImport } from './routes/en/about'
 import { Route as EnBitcoinRouteImport } from './routes/en/bitcoin'
 import { Route as EnFaqRouteImport } from './routes/en/faq'
 import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
@@ -66,6 +68,11 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ActividadRoute = ActividadRouteImport.update({
@@ -181,6 +188,11 @@ const WalletRoute = WalletRouteImport.update({
 const EnIndexRoute = EnIndexRouteImport.update({
   id: '/en/',
   path: '/en/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnAboutRoute = EnAboutRouteImport.update({
+  id: '/en/about',
+  path: '/en/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnBitcoinRoute = EnBitcoinRouteImport.update({
@@ -346,6 +358,7 @@ const LovableEmailTransactionalPreviewRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/actividad': typeof ActividadRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
@@ -368,6 +381,7 @@ export interface FileRoutesByFullPath {
   '/terminos': typeof TerminosRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
@@ -401,6 +415,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/actividad': typeof ActividadRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
@@ -423,6 +438,7 @@ export interface FileRoutesByTo {
   '/terminos': typeof TerminosRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
@@ -457,6 +473,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/actividad': typeof ActividadRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
@@ -479,6 +496,7 @@ export interface FileRoutesById {
   '/terminos': typeof TerminosRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/faq': typeof EnFaqRoute
   '/en/privacy': typeof EnPrivacyRoute
@@ -514,6 +532,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/actividad'
     | '/admin'
     | '/app'
@@ -536,6 +555,7 @@ export interface FileRouteTypes {
     | '/terminos'
     | '/trump'
     | '/wallet'
+    | '/en/about'
     | '/en/bitcoin'
     | '/en/faq'
     | '/en/privacy'
@@ -569,6 +589,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/actividad'
     | '/admin'
     | '/app'
@@ -591,6 +612,7 @@ export interface FileRouteTypes {
     | '/terminos'
     | '/trump'
     | '/wallet'
+    | '/en/about'
     | '/en/bitcoin'
     | '/en/faq'
     | '/en/privacy'
@@ -624,6 +646,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/actividad'
     | '/admin'
     | '/app'
@@ -646,6 +669,7 @@ export interface FileRouteTypes {
     | '/terminos'
     | '/trump'
     | '/wallet'
+    | '/en/about'
     | '/en/bitcoin'
     | '/en/faq'
     | '/en/privacy'
@@ -680,6 +704,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   ActividadRoute: typeof ActividadRoute
   AdminRoute: typeof AdminRoute
   AppRoute: typeof AppRoute
@@ -702,6 +727,7 @@ export interface RootRouteChildren {
   TerminosRoute: typeof TerminosRoute
   TrumpRoute: typeof TrumpRoute
   WalletRoute: typeof WalletRoute
+  EnAboutRoute: typeof EnAboutRoute
   EnBitcoinRoute: typeof EnBitcoinRoute
   EnFaqRoute: typeof EnFaqRoute
   EnPrivacyRoute: typeof EnPrivacyRoute
@@ -741,6 +767,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/actividad': {
@@ -902,6 +935,13 @@ declare module '@tanstack/react-router' {
       path: '/en'
       fullPath: '/en/'
       preLoaderRoute: typeof EnIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/about': {
+      id: '/en/about'
+      path: '/en/about'
+      fullPath: '/en/about'
+      preLoaderRoute: typeof EnAboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/bitcoin': {
@@ -1112,6 +1152,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   ActividadRoute: ActividadRoute,
   AdminRoute: AdminRoute,
   AppRoute: AppRoute,
@@ -1134,6 +1175,7 @@ const rootRouteChildren: RootRouteChildren = {
   TerminosRoute: TerminosRoute,
   TrumpRoute: TrumpRoute,
   WalletRoute: WalletRoute,
+  EnAboutRoute: EnAboutRoute,
   EnBitcoinRoute: EnBitcoinRoute,
   EnFaqRoute: EnFaqRoute,
   EnPrivacyRoute: EnPrivacyRoute,

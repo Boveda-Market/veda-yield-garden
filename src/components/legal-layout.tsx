@@ -13,7 +13,7 @@ export function LegalLayout({ title, children, legal = true, backHash, footer = 
     <h1 className="mt-3 font-display text-3xl font-bold">{title}</h1>
     {legal && <p className="mt-3 text-sm text-muted-foreground">{t("Vigente desde el")} {t("8 de noviembre de 2026")}</p>}
     <article className="mt-8 space-y-8 text-sm leading-7 text-muted-foreground">{children}</article>
-    {footer && <nav className="mt-10 flex flex-wrap gap-5 border-t border-border pt-5 text-sm text-primary"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to="/terminos">{t("Términos y condiciones")}</Link><Link to="/privacidad">{t("Política de privacidad")}</Link></nav>}
+    {footer && <nav className="mt-10 flex flex-wrap gap-5 border-t border-border pt-5 text-sm text-primary"><Link to="/about">{t("Sobre Bóveda Market")}</Link><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to="/terminos">{t("Términos y condiciones")}</Link><Link to="/privacidad">{t("Política de privacidad")}</Link></nav>}
   </main>;
 }
 export function LegalSection({ title, children }: { title: string; children: ReactNode }) {

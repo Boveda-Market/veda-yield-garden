@@ -87,6 +87,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
           <Link to="/terminos" className={row}><FileText size={18} />{t("Términos y condiciones")}</Link>
           <Link to="/privacidad" className={row}><Shield size={18} />{t("Política de privacidad")}</Link>
           <Link to="/faq" className={row}><HelpCircle size={18} />{t("Preguntas frecuentes")}</Link>
+          <Link to="/about" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Sobre Bóveda Market")}</Link>
           <StatusRow className={row} />
           {!guest && <>
             <button type="button" className={`${row} text-left`} onClick={() => { setOpen(false); setIdeas(true); }}><Lightbulb size={18} />{t("Ayúdanos a mejorar")}</button>
