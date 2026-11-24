@@ -25,6 +25,7 @@ import { PredictPromo } from "@/components/predict-promo";
 import { DobleHero, Gta6Hero, HomeCtas } from "@/components/home-gta6";
 import { BootSplash } from "@/components/boot-splash";
 import { CalmHero } from "@/components/home-calm";
+import { ThemeSections } from "@/components/home-sections";
 
 /** Before hydration, returning visitors (flag set by a tiny head script) see the loading screen instead of the full page flashing. */
 function ReturningCover() {
@@ -157,7 +158,7 @@ export function Landing({ variant }: { variant?: number } = {}) {
         </div>
       </section>
 
-      {btcHero && <BitcoinSections />}
+      {btcHero ? <BitcoinSections /> : <ThemeSections theme={hero.theme} />}
 
       <section aria-label={t("Cómo abrir tu bóveda en 4 pasos")} className="mb-4 py-8">
         <h2 className="font-display text-2xl font-bold">{t("Cómo abrir tu bóveda en 4 pasos")}</h2>
