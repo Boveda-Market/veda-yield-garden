@@ -1,7 +1,6 @@
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Check, Copy, Plus } from "lucide-react";
-import { CHAIN_POOLS } from "@/lib/solana-data";
+import { Plus } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { BitcoinBlocks, DctySkyline, TrumpFlag, VaultTitle, vaultSkin } from "@/components/vault-skin";
 import { poolYieldOptions } from "@/lib/pool-yield";
@@ -76,7 +75,6 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
           <div className="mt-1 flex h-1.5 overflow-hidden rounded-full bg-hot-foreground/10"><div className="bg-hot-buy transition-all" style={{ width: `${buys / total! * 100}%` }} /><div className="flex-1 bg-hot-sell" /></div>
         </div>}
         <TokenLinks vault={vault} />
-        <ContractLine vaultId={vault.id} />
         <p className="mt-1.5 text-[10px] leading-snug text-hot-muted">{t("El valor de tu posición cambia con las compras y ventas rápidas del mercado.")}</p>
         {!hasPosition && <ol className="mt-3 hidden flex-wrap gap-1.5">{steps.map(([icon, label]) => <li key={label} className="flex items-center gap-1 rounded-full bg-hot-surface/60 px-2.5 py-1 text-[11px] font-bold">{icon} {t(label)}</li>)}</ol>}
         {ownedLink}
@@ -106,19 +104,4 @@ export function TokenLinks({ vault }: { vault: Vault }) {
     <a href={l.web} target="_blank" rel="noopener noreferrer" className={pill}><span aria-hidden>🌐</span><span className="truncate">{t("Web oficial")}</span><span aria-hidden className="opacity-70">↗</span></a>
     <a href={l.x} target="_blank" rel="noopener noreferrer" className={pill}><span aria-hidden>𝕏</span><span className="truncate">{t("Redes oficiales")}</span><span aria-hidden className="opacity-70">↗</span></a>
   </div>;
-}
-
-/** Discreet one-tap copy of the official token contract, shown on every vault card. */
-export function ContractLine({ vaultId, className = "" }: { vaultId: string; className?: string }) {
-  const t = useT();
-  const [copied, setCopied] = useState(false);
-  const mint = CHAIN_POOLS.find((c) => c.id === vaultId)?.mint;
-  if (!mint) return null;
-  const copy = () => { void navigator.clipboard?.writeText(mint).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }); };
-  return <p className={`mt-1.5 text-center text-[10px] leading-tight opacity-70 ${className}`}>
-    {t("Contrato oficial:")}{" "}
-    <button type="button" onClick={copy} aria-label={t("Copiar contrato")} title={mint} className="inline-flex items-center gap-1 font-mono underline underline-offset-2 hover:opacity-100">
-      {copied ? <><Check size={10} aria-hidden />{t("Copiado")}</> : <>{mint.slice(0, 4)}…{mint.slice(-4)}<Copy size={10} aria-hidden /></>}
-    </button>
-  </p>;
 }

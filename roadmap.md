@@ -39,4 +39,5 @@
 - [x] Tarjeta estilo Bitcoin (gráfico 7 días) en portadas Trump, GTA6 y demás
 - [x] Tarjetas como estaban antes: gráfica de 7 días en portadas e «Intereses hoy»/«Intercambios hoy» en la tarjeta de bóveda
 - [x] Bóveda Bitcoin: la moneda se muestra como «cbBTC» (contrato, precio, estadísticas y diálogos)
-- [x] Ficha de detalles: enlace discreto «Ver el pool en Meteora» junto al contrato oficial
+- [x] Ficha de detalles: enlace «Ver el pool en Meteora» quitado (ya había referencia en Estadísticas del Pool)
+- [x] Tarjetas de bóveda: quitado el número de contrato oficial (está en los detalles del pool)
