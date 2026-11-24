@@ -1919,4 +1919,5 @@ export const extra: Record<string, string> = {
   "Abre Mi Portafolio para ver tu balance, tus ganancias y lo que tienes por cosechar. Sin hojas de cálculo ni cuentas complicadas.": "Open My Portfolio to see your balance, your earnings and what is ready to harvest. No spreadsheets or complicated math.",
   "Tu bóveda ya está generando intereses. Síguela cuando quieras en Mi Portafolio: balance, ganancias y lo que tienes por cosechar.": "Your vault is already earning interest. Follow it anytime in My Portfolio: balance, earnings and what is ready to harvest.",
   "Ver mi bóveda en Mi Portafolio": "See my vault in My Portfolio",
+  "Entra para comenzar en {v}": "Sign in to start with {v}",
 };
