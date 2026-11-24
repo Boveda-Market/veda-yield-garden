@@ -1,7 +1,7 @@
 import { AutopilotDefault } from "@/components/autopilot-toggle";
 import { IN_APP_FLAG, OPEN_MENU_EVENT, OPEN_MENU_FLAG } from "./back-button";
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, Home, History, Send, Bell, Zap } from "lucide-react";
+import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, LogIn, Home, History, Send, Bell, Zap } from "lucide-react";
 import { SUPPORT_URL } from "./safety-notice";
 import { InstallAppButton } from "./install-app";
 import { useEffect, useState } from "react";
@@ -54,26 +54,28 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
   }, []);
   const row = "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-secondary";
   const go = (v: AppView) => { setOpen(false); onSelect(v); };
-  const operator = useContext(BovedaSessionContext)?.walletAddress === AFFILIATE_PAYOUT_WALLET;
+  const session = useContext(BovedaSessionContext);
+  const operator = session?.walletAddress === AFFILIATE_PAYOUT_WALLET;
+  const visitor = !user && !guest;
   useEffect(() => {
-    if (guest) return;
+    if (guest || visitor) return;
     const openMenu = () => setOpen(true);
     try { sessionStorage.setItem(IN_APP_FLAG, "1"); if (sessionStorage.getItem(OPEN_MENU_FLAG) === "1") { sessionStorage.removeItem(OPEN_MENU_FLAG); setOpen(true); } } catch { /* ignore */ }
     window.addEventListener(OPEN_MENU_EVENT, openMenu);
     return () => window.removeEventListener(OPEN_MENU_EVENT, openMenu);
-  }, [guest]);
+  }, [guest, visitor]);
   return <>
-    <span className="inline-flex items-center gap-2"><NewsBell /><AutopilotDefault />
+    <span className="inline-flex items-center gap-2">{!visitor && <NewsBell />}{!visitor && <AutopilotDefault />}
     <button type="button" onClick={() => setOpen(true)} aria-label={t("Abrir menú")} className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-medium hover:bg-secondary"><Menu size={18} />{t("Menú")}</button></span>
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent side="right" className="w-[85%] max-w-sm overflow-y-auto">
-        <SheetTitle className="font-display">{guest ? t("Invitado · Prueba") : t("Mi cuenta")}</SheetTitle>
-        <SheetDescription className="truncate">{user ?? ""}</SheetDescription>
+        <SheetTitle className="font-display">{guest ? t("Invitado · Prueba") : visitor ? t("Menú") : t("Mi cuenta")}</SheetTitle>
+        {user && <SheetDescription className="truncate">{user}</SheetDescription>}
         <div className="mt-6 space-y-1">
           {guest ? <>
             <button type="button" className={row} onClick={() => go("invite")}><Gift size={18} />{t("Invita y gana")}</button>
             <button type="button" className={row} onClick={() => go("account")}><UserRound size={18} />{t("Mi cuenta")}</button>
-          </> : <>
+          </> : visitor ? null : <>
             {operator && <Link to="/admin" className={`${row} border border-primary/40 bg-primary/10 font-semibold text-primary`} onClick={() => setOpen(false)}><ShieldCheck size={18} />{t("Panel de Control")}</Link>}
             <Link to="/wallet" className={row} onClick={() => setOpen(false)}><Home size={18} />{t("Inicio")}</Link>
             <Link to="/portfolio" className={row} onClick={() => setOpen(false)}><PieChart size={18} />{t("Mi Portafolio")}</Link>
@@ -89,7 +91,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
           <Link to="/faq" className={row}><HelpCircle size={18} />{t("Preguntas frecuentes")}</Link>
           <Link to="/about" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Sobre Bóveda Market")}</Link>
           <StatusRow className={row} />
-          {!guest && <>
+          {!guest && !visitor && <>
             <button type="button" className={`${row} text-left`} onClick={() => { setOpen(false); setIdeas(true); }}><Lightbulb size={18} />{t("Ayúdanos a mejorar")}</button>
             <SecurityWhyDialog trigger={(o) => <button type="button" className={`${row} w-full text-left`} onClick={o}><ShieldCheck size={18} />{t("¿Por qué tus fondos están seguros?")}</button>} />
           </>}
@@ -99,6 +101,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
         <div className="mt-3 flex items-center justify-between text-sm"><span>{t("Apariencia")}</span><ThemeToggle /></div>
         <div className="mt-4 border-t border-border pt-4">
           {guest ? <Link to="/" className={row}><Home size={18} />{t("Crear cuenta o entrar")}</Link>
+            : visitor ? <button type="button" className={`${row} font-semibold text-primary`} onClick={() => { setOpen(false); session?.login("google"); }}><LogIn size={18} />{t("Crear cuenta o entrar")}</button>
             : <button type="button" className={`${row} text-destructive`} onClick={() => { setOpen(false); try { sessionStorage.removeItem(IN_APP_FLAG); } catch { /* ignore */ } onLogout(); }}><LogOut size={18} />{t("Cerrar sesión")}</button>}
         </div>
       </SheetContent>

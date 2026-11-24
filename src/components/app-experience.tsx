@@ -151,7 +151,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
         <Link to="/" aria-label={t("Bóveda Market · Ir al inicio")} className="flex items-center gap-2 font-display text-xl font-bold">
           <BrandLogo />
         </Link>
-        {user && <div className="flex items-center gap-2"><ProfileMenu user={user} guest={guest} onSelect={(v) => { if (guest) setGuestView(v as typeof guestView); }} onLogout={signOut} /></div>}{!user && session.ready && <button type="button" onClick={() => session.login("google")} className="inline-flex h-10 items-center rounded-full border border-border bg-card px-4 text-sm font-semibold hover:bg-secondary">{t("Entrar")}</button>}
+        {(user || session.ready) && <div className="flex items-center gap-2"><ProfileMenu user={user} guest={guest} onSelect={(v) => { if (guest) setGuestView(v as typeof guestView); }} onLogout={signOut} /></div>}
       </header>
 
       <main key={activeView} className="view-in mx-auto max-w-5xl px-5 pb-28">
