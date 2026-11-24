@@ -38,6 +38,7 @@ const METRIC_HELP: Record<string, string> = {
   "Dinero en el pool": "La cantidad total de dinero que todos los participantes tienen guardado en esta bóveda. Te muestra qué tan grande es el fondo.",
   "Volumen sobre dinero": "Cuántas veces circuló el dinero durante el día. Mientras más se mueve el dinero, más comisiones genera para los depósitos, incluido el tuyo.",
   "Intercambios · 24 h": "La cantidad de compras y ventas que hicieron otras personas en las últimas 24 horas. Cada operación aporta un pedacito a tus intereses.",
+  "Intereses generados": "Lo que esta bóveda generó en intereses para todos sus participantes en las últimas 24 horas.",
   "Intereses totales": "Todas las comisiones que esta bóveda ha generado para sus participantes desde el primer día que abrió.",
   "Antigüedad del pool": "El tiempo que lleva esta bóveda funcionando de forma pública. Más tiempo significa más historial para revisar.",
   "Comisión por intercambio": "El pequeño porcentaje que paga quien entra a cambiar monedas. Ese cobro no se lo queda un banco: se reparte entre los depósitos como el tuyo.",
@@ -80,7 +81,7 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
     [t("Dinero en el pool"), usdShort(m?.tvl), share != null ? t("{s} de todo el dinero", { s: pct(share) }) : t("Todos los depósitos"), "Dinero en el pool"],
     [t("Volumen sobre dinero"), pct(turn), turn != null ? t("El dinero se movió {x} veces", { x: (turn / 100).toFixed(1) }) : t("Volumen de 24 h sobre el dinero"), "Volumen sobre dinero"],
     [t("Intercambios · 24 h"), count(swaps), buyShare != null ? t("{p} compras", { p: pct(buyShare) }) : t("Compras y ventas"), "Intercambios · 24 h"],
-    [t("Intereses totales"), m?.totalFees != null ? `+${usdShort(m.totalFees)}` : "—", feeShare != null ? t("{p} de todo lo operado", { p: pct(feeShare) }) : t("Desde que abrió el pool"), "Intereses totales"],
+    [t("Intereses generados"), m?.fees24h != null ? `+${usd(m.fees24h)}` : "—", t("Últimas 24 horas"), "Intereses generados"],
     [t("Antigüedad del pool"), age ?? "—", m?.createdAt ? new Date(m.createdAt).toLocaleDateString(locale, { month: "short", year: "numeric" }) : undefined, "Antigüedad del pool"],
     [t("Comisión por intercambio"), m?.feePct != null ? pct(m.feePct) : "—", t("Se reparte entre los depósitos"), "Comisión por intercambio"],
   ];
@@ -89,7 +90,7 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
     <div className="grid grid-cols-3 gap-2">
       {[[`${t("Precio")} ${symbol}`, stats.data?.price != null ? formatCoinPrice(stats.data.price) : "—", ch != null ? `${ch > 0 ? "+" : ""}${ch.toFixed(1)}% · 24 h` : ""],
         [t("Liquidez total"), liq ? usdShort(liq.totalUsd) : "—", liq ? t("En {n} mercados", { n: liq.markets }) : t("Todos sus mercados")],
-        [t("Intereses generados"), m?.fees24h != null ? `+${usd(m.fees24h)}` : "—", "24 h"]].map(([k, v, s], i) =>
+        [t("Intereses totales"), m?.totalFees != null ? `+${usdShort(m.totalFees)}` : "—", feeShare != null ? t("{p} de todo lo operado", { p: pct(feeShare) }) : t("Desde que abrió el pool")]].map(([k, v, s], i) =>
         <div key={k} className={`min-w-0 rounded-xl p-2.5 ${i >= 1 ? "bg-primary/10" : "bg-muted"}`}><p className="text-[10px] font-semibold uppercase leading-tight tracking-wide text-muted-foreground">{k}</p><p className={`truncate font-display text-base font-bold tabular-nums ${i >= 1 ? "text-primary" : ""}`}>{v}</p><p className={`text-[10px] leading-tight ${i === 0 && ch != null ? (ch >= 0 ? "font-bold text-primary" : "font-bold text-destructive") : "text-muted-foreground"}`}>{i === 0 && ch != null ? (ch >= 0 ? "▲ " : "▼ ") : ""}{s}</p></div>)}
     </div>
     {mint && <button type="button" onClick={() => { void navigator.clipboard.writeText(mint).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {}); }} aria-label={t("Copiar contrato")} className="flex w-full items-center gap-2 rounded-xl border border-border bg-muted/50 px-3 py-2 text-left">

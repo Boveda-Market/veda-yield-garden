@@ -242,6 +242,7 @@ export const rangeVaults: Record<string, string> = {
   "Precio de {s} frente a intereses generados": "{s} price vs. interest generated",
   "Precio de mercado": "Market price",
   "Intereses generados": "Interest generated",
+  "Últimas 24 horas": "Last 24 hours",
   "Precio": "Price",
   "Volumen operado": "Volume traded",
   "Gráfica no disponible por ahora": "Chart unavailable right now",
