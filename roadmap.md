@@ -41,3 +41,6 @@
 - [x] Bóveda Bitcoin: la moneda se muestra como «cbBTC» (contrato, precio, estadísticas y diálogos)
 - [x] Ficha de detalles: enlace «Ver el pool en Meteora» quitado (ya había referencia en Estadísticas del Pool)
 - [x] Tarjetas de bóveda: quitado el número de contrato oficial (está en los detalles del pool)
+- [x] Tarjeta de bóveda: «Ver página web» en lugar de «Web oficial» y sin enlace de redes sociales
+- [x] Tarjeta de Bitcoin: mostrar los holders del Bitcoin regular en lugar de los de cbBTC
+- [x] FAQ del inicio: pregunta «¿En cuál red opera Bóveda Market?» (respaldo nombra Solana, por decisión del usuario)

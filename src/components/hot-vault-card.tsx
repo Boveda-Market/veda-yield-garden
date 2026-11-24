@@ -7,6 +7,7 @@ import { poolYieldOptions } from "@/lib/pool-yield";
 import { fetchPoolStats } from "@/lib/pool-stats";
 import { marketPulse, type Pulse } from "@/lib/market-pulse";
 import { poolDiscoveryOptions } from "@/lib/pool-metrics";
+import { bitcoinStatsOptions } from "@/lib/bitcoin-stats";
 import type { Vault } from "@/lib/vaults";
 
 const num = (v: number | null | undefined) => v == null ? "—" : v.toLocaleString("es-MX", { maximumFractionDigits: 0 });
@@ -47,6 +48,8 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
   // Same cache key as PoolYield / pool details, so DexScreener is queried once.
   const s = useQuery({ queryKey: ["dexscreener-pool-stats", vault.pool], queryFn: ({ signal }) => fetchPoolStats(vault.pool, signal), staleTime: 60_000, refetchInterval: 60_000, retry: 1 });
   const live = useQuery(poolDiscoveryOptions(vault.pool)).data?.pulse ?? null;
+  // The Bitcoin card counts the whole Bitcoin network, not just Coinbase's cbBTC wallets.
+  const btcNet = useQuery({ ...bitcoinStatsOptions(), enabled: vault.id === "btc" }).data;
   const apr = y.data?.apr;
   const buys = s.data?.buys24h ?? null, sells = s.data?.sells24h ?? null;
   const total = buys != null && sells != null ? buys + sells : null;
@@ -64,7 +67,7 @@ export function HotVaultCard({ vault, owned, ownedLink, hasPosition, depositDisa
           <p className="text-[10px] font-medium leading-tight text-hot-muted sm:text-[11px]">{y.isPending ? t("Consultando el pool…") : t("APR estimado · intereses 24 h")}</p>
         </div>
         <dl className="mt-2 grid grid-cols-3 gap-1.5">
-          {([[t("Intereses hoy"), usd(y.data?.fees24h), live?.feesChange], [t("Intercambios hoy"), num(live?.swaps ?? total), live?.swapsChange], [t("Holders"), num(y.data?.holders), null]] as const).map(([k, v, c]) => <div key={k} className="rounded-lg bg-hot-surface/60 px-2 py-1.5">
+          {([[t("Intereses hoy"), usd(y.data?.fees24h), live?.feesChange], [t("Intercambios hoy"), num(live?.swaps ?? total), live?.swapsChange], [t("Holders"), num(vault.id === "btc" ? btcNet?.holders ?? null : y.data?.holders), null]] as const).map(([k, v, c]) => <div key={k} className="rounded-lg bg-hot-surface/60 px-2 py-1.5">
             <dt className="truncate text-[9px] font-semibold uppercase tracking-wide text-hot-muted">{k}</dt>
             <dd className="font-display text-sm font-bold tabular-nums">{v}<CardChange change={c} /></dd>
           </div>)}
@@ -94,14 +97,13 @@ function PulseChip({ pulse }: { pulse: Pulse | null }) {
   return <span className={`rounded-full border px-1.5 py-px text-[10px] font-bold ${cls}`}>{t(label)}</span>;
 }
 
-/** Official website and social links for the vault token; open in a new tab. */
+/** Official website link for the vault token; opens in a new tab. */
 export function TokenLinks({ vault }: { vault: Vault }) {
   const t = useT();
   const l = vault.links;
   if (!l) return null;
   const pill = "flex h-9 items-center justify-center gap-1.5 rounded-xl border border-hot-foreground/30 bg-hot-surface/80 px-2 text-xs font-extrabold shadow-sm transition hover:border-hot-foreground/60 hover:bg-hot-surface active:scale-95";
-  return <div className="mt-2 grid grid-cols-2 gap-1.5">
-    <a href={l.web} target="_blank" rel="noopener noreferrer" className={pill}><span aria-hidden>🌐</span><span className="truncate">{t("Web oficial")}</span><span aria-hidden className="opacity-70">↗</span></a>
-    <a href={l.x} target="_blank" rel="noopener noreferrer" className={pill}><span aria-hidden>𝕏</span><span className="truncate">{t("Redes oficiales")}</span><span aria-hidden className="opacity-70">↗</span></a>
+  return <div className="mt-2">
+    <a href={l.web} target="_blank" rel="noopener noreferrer" className={`${pill} w-full`}><span aria-hidden>🌐</span><span className="truncate">{t("Ver página web")}</span><span aria-hidden className="opacity-70">↗</span></a>
   </div>;
 }
