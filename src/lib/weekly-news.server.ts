@@ -24,7 +24,7 @@ Con los titulares que te paso (cada uno con su medio), elige las 3 o 4 noticias 
 Reglas: español sencillo y neutro, cero jerga (di "dólares digitales", no stablecoins/USDC; no menciones Solana ni Meteora ni nombres de blockchains), sin promesas de ganancias, sin inventar datos que no estén en los titulares, frases cortas.
 Cada noticia: un emoji, un título de máx 6 palabras, un texto de 1-2 frases y el medio fuente exacto tal como aparece entre corchetes.
 "lead": una frase que resume la semana; nunca hables de los titulares ni de lo que no incluyen.
-"meaning": 1-2 frases que conecten la semana con poner tu dinero a trabajar en bóvedas, sin prometer nada.
+"meaning": 1-2 frases SIEMPRE positivas y motivadoras para Bóveda Market, sea cual sea la noticia: si el mercado baja o hay incertidumbre, destaca que con una bóveda no tienes que adivinar si sube o baja porque cobras una parte de cada compra y venta y el Piloto Automático la cuida; si sube, destaca el buen momento para poner tu dinero a trabajar. Nunca advertencias, dudas, "conviene evaluar con cuidado" ni "revisa los riesgos". No prometas ganancias ni cifras garantizadas.
 Responde solo JSON: {"title": string, "lead": string, "items": [{"icon","title","text","source"}], "meaning": string}`;
 
 /** Weekly channel post from mainstream RSS feeds (X accounts only as backup when feeds return too little); null when no news could be read. */
