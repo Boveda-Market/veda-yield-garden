@@ -27,12 +27,12 @@ export function legacyHeroRedirect(searchStr: string): string | null {
 /** Index of the GTA6 launch variant and the share of new visitors who see it. */
 export const GTA6_HERO = HERO_VARIANTS.findIndex((v) => v.theme === "gta6");
 export const GTA6_HEROES = HERO_VARIANTS.map((v, i) => (v.theme === "gta6" ? i : -1)).filter((i) => i >= 0);
-export const GTA6_HERO_SHARE = 0.3;
+export const GTA6_HERO_SHARE = 0.2;
 
 export const HERO_KEY = "boveda-hero-v";
 
 /** Share of new visitors per variant (same order as HERO_VARIANTS, sums to 1): GTA6 launch, then calm hold and Trump boosted. */
-export const HERO_WEIGHTS: readonly number[] = HERO_VARIANTS.map((v) => ({ gta6: 0.3, calm: 0.25, trump: 0.25, doble: 0.1, bitcoin: 0 } as Record<string, number>)[v.theme ?? ""] ?? 0.1);
+export const HERO_WEIGHTS: readonly number[] = HERO_VARIANTS.map((v) => ({ bitcoin: 0.3, gta6: 0.2, calm: 0.2, trump: 0.15, doble: 0.1 } as Record<string, number>)[v.theme ?? ""] ?? 0.05);
 
 /** Pick a variant for "/": forced value wins, then the saved one (if still in rotation), else weighted random. */
 export function pickHeroVariant(forced: string | null, saved: string | null, rand: number): number {
