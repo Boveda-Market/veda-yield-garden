@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { authenticateCronRequest } from "@/integrations/supabase/cron-auth";
 
-/** Weekly channel post (Tuesdays): real headlines from the chosen X accounts, rewritten in plain Spanish, sent only to the operator's private chat as a draft; never posts to the channel. Falls back to the market pulse when X news can't be read. */
+/** Weekly channel post (Tuesdays): mainstream RSS headlines (X accounts as backup), rewritten in plain Spanish, sent only to the operator's private chat as a draft; never posts to the channel. Falls back to the market pulse when X news can't be read. */
 export const Route = createFileRoute("/api/public/jobs/market-pulse")({
   staticData: { sitemap: false },
   server: {
