@@ -32,3 +32,4 @@
 
 - Tapping a vault pill in Bóvedas where the user has money opens the same active card as Mi Portafolio (RealPositions, with «Detalles de la bóveda» at the bottom via onDetails); vaults without money open the catalog card (HotVaultCard or the plain card).
 - First-fold rule: money sheets pin their confirm button (`sheet-action` utility or a `data-sheet-actions` sticky footer); ActionSheetContent shows a fade + bouncing arrow only when it scrolls and has no pinned action, so actions never hide below the fold.
+- Wallets with no dollars (new or registered) get FirstDepositSteps (first-deposit-steps.tsx): amount (default from first-deposit.ts) → Coinbase prefilled with deposit + activation → resumed deposit card marked step 3 with a fresh quote; every step has Cancelar.

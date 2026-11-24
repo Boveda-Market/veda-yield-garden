@@ -29,6 +29,8 @@ import { LoginSheet } from "@/components/login-nudge";
 import { depositQuote, QUOTE_PRESETS } from "@/lib/deposit-quote";
 import { fetchPoolStats, coinLabel } from "@/lib/pool-stats";
 import { formatCoinPrice } from "@/lib/format-price";
+import { FirstDepositSteps, StepDots } from "@/components/first-deposit-steps";
+import { FIRST_DEPOSIT_DEFAULT } from "@/lib/first-deposit";
 
 const MAX_MICRO = 5_000_000_000n;
 const microToText = (v: bigint) => { const w = v / 1_000_000n; const f = (v % 1_000_000n).toString().padStart(6, "0").replace(/0+$/, ""); return f ? `${w}.${f}` : `${w}`; };
@@ -92,8 +94,12 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   const hot = Boolean(vault.badge) && !migrate;
   const showBanner = hot && !done;
   const step3 = resumed && !done && usdc != null && usdc > 0n;
+  // Wallet with no dollars (new or registered): guided 3 steps instead of a "not enough balance" card.
+  const firstFund = !!wallet && usdc === 0n && !migrate && !resumed && !done && !busy;
+  useEffect(() => { if (firstFund && !amount) setAmount(FIRST_DEPOSIT_DEFAULT); }, [firstFund]); // eslint-disable-line react-hooks/exhaustive-deps
   return <Dialog open onOpenChange={(open) => { if (open || busy) return; if (step3 && !kept) { clearResumeDeposit(); setKept(true); } else onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")} className={hot && !kept ? `border-hot/40 shadow-[var(--shadow-hot)] ${vaultSkin(vault.id)}` : undefined}>
-    {kept ? <FundsKeptCard amountMicro={usdc} onDone={onClose} /> : <>
+    {kept ? <FundsKeptCard amountMicro={usdc} onDone={onClose} /> : firstFund ? <><DialogTitle>{t("Depositar ·")} {t(vault.name)}</DialogTitle><DialogDescription className="sr-only">{t("Elige cuánto quieres depositar y confirma.")}</DialogDescription><FirstDepositSteps vault={vault} amount={amount} setAmount={setAmount} fee={activationQ.data?.charge ?? ACTIVATION_FEE_MICRO} onClose={onClose} /></> : <>
+    {step3 && <StepDots step={3} />}
     {showBanner && <HotBanner vault={vault} className="-mx-5 -mt-2 rounded-t-3xl pr-14 sm:-mx-6 sm:-mt-6">
       <span className="flex items-center gap-1 rounded-full bg-hot-surface/70 px-2 py-0.5 text-[10px] font-bold uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-live shadow-[0_0_6px_var(--live)] motion-reduce:animate-none" />{t("En vivo")}</span>
     </HotBanner>}

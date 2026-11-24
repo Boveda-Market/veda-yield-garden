@@ -1920,4 +1920,11 @@ export const extra: Record<string, string> = {
   "Tu bóveda ya está generando intereses. Síguela cuando quieras en Mi Portafolio: balance, ganancias y lo que tienes por cosechar.": "Your vault is already earning interest. Follow it anytime in My Portfolio: balance, earnings and what is ready to harvest.",
   "Ver mi bóveda en Mi Portafolio": "See my vault in My Portfolio",
   "Entra para comenzar en {v}": "Sign in to start with {v}",
+  "Paso {n} de 3": "Step {n} of 3",
+  "¿Con cuánto quieres comenzar en {v}?": "How much do you want to start with in {v}?",
+  "Para tu bóveda": "For your vault",
+  "Total a fondear": "Total to add",
+  "Añade {x} con Coinbase": "Add {x} with Coinbase",
+  "Coinbase se abre con el monto ya puesto. Al volver, te mostramos el precio actualizado y confirmas en un toque.": "Coinbase opens with the amount already filled in. When you come back, we show the updated price and you confirm in one tap.",
+  "Continuar a Coinbase ({x})": "Continue to Coinbase ({x})",
 };
