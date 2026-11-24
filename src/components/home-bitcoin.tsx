@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Bot, DollarSign, ShieldCheck, Wallet } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { HomeMarketCard } from "@/components/home-market-card";
+import { VisitorBtcChart } from "@/components/visitor-btc-chart";
 import trumpLogo from "@/assets/trump-logo.png";
 
 const PILLARS = [
@@ -51,9 +51,9 @@ export function BitcoinSections() {
       <h2 className="font-display text-2xl font-bold">{t("¿De dónde salen los intereses?")}</h2>
       <ol className="mt-5 grid gap-3 sm:grid-cols-3">{HOW.map(([h, d], i) => <li key={h} className="rounded-2xl border border-border bg-card p-4"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-display text-sm font-bold text-primary-foreground">{i + 1}</span><h3 className="mt-3 font-display font-bold">{t(h)}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ol>
     </section>
-    <section aria-label={t("Bitcoin en vivo")} className="mb-4 py-8">
-      <h2 className="mb-4 font-display text-2xl font-bold">{t("Bitcoin en vivo")}</h2>
-      <HomeMarketCard />
+    <section aria-label={t("Precio del Bitcoin en vivo")} className="mb-4 py-8">
+      <h2 className="mb-4 font-display text-2xl font-bold">{t("Precio del Bitcoin en vivo")}</h2>
+      <VisitorBtcChart />
     </section>
   </>;
 }

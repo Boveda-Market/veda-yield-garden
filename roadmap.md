@@ -37,3 +37,4 @@
 - [x] Enviar código de prueba al correo autorizado por el usuario (Privy respondió 200; completar acceso requiere el código del destinatario).
 - [ ] Envío de códigos desde bovedamarket.app (requiere habilitar personalización de email Enterprise en Privy y verificar dominio).
 - [x] Tarjeta estilo Bitcoin (gráfico 7 días) en portadas Trump, GTA6 y demás
+- [x] Tarjetas como estaban antes: gráfica de 7 días en portadas e «Intereses hoy»/«Intercambios hoy» en la tarjeta de bóveda

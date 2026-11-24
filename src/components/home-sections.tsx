@@ -1,5 +1,5 @@
 import { useT } from "@/lib/i18n";
-import { HomeMarketCard } from "@/components/home-market-card";
+import { VisitorBtcChart } from "@/components/visitor-btc-chart";
 
 type Card = { icon: string; title: string; body: string };
 type Flow = { compareTitle: string; compareSub: string; compare: readonly [Card, Card, Card]; howTitle: string; how: readonly (readonly [string, string])[] };
@@ -72,7 +72,7 @@ const FLOWS: Record<string, Flow> = {
 export function ThemeSections({ theme }: { theme?: string | undefined }) {
   const t = useT();
   const f = FLOWS[theme ?? ""] ?? CALM;
-  const chart = theme === "trump" ? { coin: "trump" as const, title: "Trump Coin en vivo" } : theme === "gta6" ? { coin: "gta6" as const, title: "GTA6 Coin en vivo" } : { coin: "btc" as const, title: "Bitcoin en vivo" };
+  const chart = theme === "trump" ? { coin: "trump" as const, title: "Precio de Trump Coin en vivo" } : theme === "gta6" ? { coin: "gta6" as const, title: "Precio de GTA6 Coin en vivo" } : { coin: "btc" as const, title: "Precio del Bitcoin en vivo" };
   return <>
     <section aria-label={t(f.compareTitle)} className="mb-4 py-8">
       <h2 className="font-display text-2xl font-bold">{t(f.compareTitle)}</h2>
@@ -85,7 +85,7 @@ export function ThemeSections({ theme }: { theme?: string | undefined }) {
     </section>
     <section aria-label={t(chart.title)} className="mb-4 py-8">
       <h2 className="mb-4 font-display text-2xl font-bold">{t(chart.title)}</h2>
-      <HomeMarketCard coin={chart.coin} />
+      <VisitorBtcChart coin={chart.coin} />
     </section>
   </>;
 }
