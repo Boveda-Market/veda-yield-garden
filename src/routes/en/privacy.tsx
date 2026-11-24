@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { langLinks } from "@/lib/seo-lang";
+import { shareMeta } from "@/lib/share-meta";
 import { Privacy } from "../privacidad";
 
 const TITLE = "Privacy policy — Bóveda Market";
@@ -9,7 +10,7 @@ export const Route = createFileRoute("/en/privacy")({ staticData: { sitemap: tru
     { title: TITLE }, { name: "description", content: DESC },
     { property: "og:title", content: TITLE }, { property: "og:description", content: "Privacy at Bóveda Market: wallets, account data, consent and your rights." },
     { property: "og:locale", content: "en_US" }, { property: "og:locale:alternate", content: "es_ES" },
-    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+    { property: "og:type", content: "website" }, ...shareMeta("en"),
     { property: "og:url", content: "https://bovedamarket.app/en/privacy" },
   ], links: langLinks("en", "/privacidad", "/en/privacy") }),
   component: Privacy,

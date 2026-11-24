@@ -1,4 +1,5 @@
 import { langLinks } from "@/lib/seo-lang";
+import { shareMeta } from "@/lib/share-meta";
 import { useT } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalLayout, LegalSection } from "@/components/legal-layout";
@@ -9,7 +10,7 @@ export const Route = createFileRoute("/privacidad")({ staticData: { sitemap: tru
     { name: "description", content: "Cómo Bóveda Market trata el acceso con Privy, los datos de tu cuenta y la exposición pública en Solana." },
     { property: "og:title", content: "Política de privacidad — Bóveda Market" },
     { property: "og:description", content: "Privacidad en Bóveda Market: wallets, datos de cuenta, consentimiento y derechos." },
-    { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+    { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" }, ...shareMeta("es"),
     { property: "og:url", content: "https://bovedamarket.app/privacidad" },
   ], links: langLinks("es", "/privacidad", "/en/privacy") }), component: Privacy,
 });

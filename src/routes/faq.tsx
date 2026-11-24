@@ -1,4 +1,5 @@
 import { langLinks } from "@/lib/seo-lang";
+import { shareMeta } from "@/lib/share-meta";
 import { useT } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { Faq } from "@/components/faq";
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/faq")({ staticData: { sitemap: true },
     { property: "og:title", content: "Preguntas frecuentes — Bóveda Market" },
     { property: "og:description", content: "Cómo funcionan Doble o Nada, las bóvedas, los intereses y los retiros en Bóveda Market." },
     { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary" },
+    ...shareMeta("es"),
     { property: "og:url", content: "https://bovedamarket.app/faq" },
   ], links: langLinks("es", "/faq", "/en/faq") }),
   component: FaqPage,

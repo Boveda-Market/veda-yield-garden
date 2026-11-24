@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { langLinks } from "@/lib/seo-lang";
+import { shareMeta } from "@/lib/share-meta";
 import { useT } from "@/lib/i18n";
 import { LegalLayout } from "@/components/legal-layout";
 import { SystemStatusView } from "@/components/system-status";
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/en/status")({ staticData: { sitemap: true
     { title: TITLE }, { name: "description", content: DESC },
     { property: "og:title", content: TITLE }, { property: "og:description", content: "Live services, total liquidity and fees paid, refreshed every minute." },
     { property: "og:locale", content: "en_US" }, { property: "og:locale:alternate", content: "es_ES" },
-    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+    { property: "og:type", content: "website" }, ...shareMeta("en"),
     { property: "og:url", content: "https://bovedamarket.app/en/status" },
   ], links: langLinks("en", "/status", "/en/status") }),
   component: StatusPage,

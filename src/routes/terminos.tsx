@@ -1,4 +1,5 @@
 import { langLinks } from "@/lib/seo-lang";
+import { shareMeta } from "@/lib/share-meta";
 import { useT } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalLayout, LegalSection } from "@/components/legal-layout";
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/terminos")({ staticData: { sitemap: true 
     { name: "description", content: "Condiciones de uso de Bóveda Market: acceso, disponibilidad, comisiones progresivas, Doble o Nada y riesgos de Solana y Meteora." },
     { property: "og:title", content: "Términos y condiciones — Bóveda Market" },
     { property: "og:description", content: "Acceso, autorización, cargos operativos y riesgos de Bóveda Market." },
-    { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+    { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" }, ...shareMeta("es"),
     { property: "og:url", content: "https://bovedamarket.app/terminos" },
   ], links: langLinks("es", "/terminos", "/en/terms") }), component: Terms,
 });

@@ -1,4 +1,5 @@
 import { langLinks } from "@/lib/seo-lang";
+import { shareMeta } from "@/lib/share-meta";
 import { createFileRoute } from "@tanstack/react-router";
 import { useT } from "@/lib/i18n";
 import { LegalLayout } from "@/components/legal-layout";
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/status")({ staticData: { sitemap: true },
     { property: "og:title", content: "Estado del sistema — Bóveda Market" },
     { property: "og:description", content: "Servicios en vivo, liquidez total y comisiones pagadas, actualizados cada minuto." },
     { property: "og:locale", content: "es_ES" }, { property: "og:locale:alternate", content: "en_US" }, { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary" },
+    ...shareMeta("es"),
     { property: "og:url", content: "https://bovedamarket.app/status" },
   ], links: langLinks("es", "/status", "/en/status") }),
   component: StatusPage,

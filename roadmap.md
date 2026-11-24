@@ -27,3 +27,5 @@
 - [x] Métricas de las bóvedas con los porcentajes de Meteora (dinero trabajando, volumen, intercambios, personas, posiciones, intereses)
 - [x] Rotación de portada en orden Bitcoin > Trump > GTA6 > resto
 - [x] Botones de acción siempre visibles sin scroll en todas las tarjetas de dinero
+- [x] Botón «Entrar para depositar» → «Confirmar depósito» (y «Entra para confirmar tu depósito» en la tarjeta de acceso)
+- [x] Banner de Bitcoin al compartir en todas las páginas públicas (es/en)
