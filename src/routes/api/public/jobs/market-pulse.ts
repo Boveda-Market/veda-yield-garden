@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { authenticateCronRequest } from "@/integrations/supabase/cron-auth";
 
-/** Weekly market pulse (Tuesdays): builds the post from live public data and sends it only to the operator's private chat as a draft; never posts to the channel. */
+/** Weekly channel post (Tuesdays): real headlines from the chosen X accounts, rewritten in plain Spanish, sent only to the operator's private chat as a draft; never posts to the channel. Falls back to the market pulse when X news can't be read. */
 export const Route = createFileRoute("/api/public/jobs/market-pulse")({
   staticData: { sitemap: false },
   server: {
@@ -9,10 +9,11 @@ export const Route = createFileRoute("/api/public/jobs/market-pulse")({
       POST: async ({ request }) => {
         const fail = await authenticateCronRequest(request);
         if (fail) return fail;
-        const { buildMarketPulse } = await import("@/lib/weekly-pulse.server");
         const tg = await import("@/lib/telegram.server");
         const { PULSE_DRAFT_LABEL } = await import("@/lib/weekly-pulse");
-        const post = await buildMarketPulse();
+        let post: string | null = null;
+        try { post = await (await import("@/lib/weekly-news.server")).buildNewsDigest(); } catch (e) { console.error("weekly news failed:", e); }
+        if (!post) post = await (await import("@/lib/weekly-pulse.server")).buildMarketPulse();
         const ok = await tg.sendPulseDraft(PULSE_DRAFT_LABEL, post);
         return Response.json({ ok });
       },
