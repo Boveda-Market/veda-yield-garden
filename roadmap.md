@@ -44,3 +44,8 @@
 - [x] Tarjeta de bóveda: «Ver página web» en lugar de «Web oficial» y sin enlace de redes sociales
 - [x] Tarjeta de Bitcoin: mostrar los holders del Bitcoin regular en lugar de los de cbBTC
 - [x] FAQ del inicio: pregunta «¿En cuál red opera Bóveda Market?» (respaldo nombra Solana, por decisión del usuario)
+- [x] FAQ del inicio: «¿Qué son los dólares digitales?» en lugar de «¿Qué es el dinero digital?»
+- [x] FAQ del inicio: «¿Cómo el sistema genera las ganancias?» en lugar de «¿Cómo se generan las ganancias?»
+- [x] FAQ del inicio: «¿Puedo retirar en cualquier momento?» en lugar de «¿Cuándo puedo retirar?»
+- [x] FAQ del inicio: «¿Cuál es el mínimo para empezar con Bóveda Market?» en lugar de «¿Cuánto cuesta usar Bóveda Market?» (respuesta con mínimo $1, activación $5, bóveda extra $2)
+- [x] FAQ del inicio: nueva pregunta «¿Dónde puedo ver los recibos de cada transacción?»
