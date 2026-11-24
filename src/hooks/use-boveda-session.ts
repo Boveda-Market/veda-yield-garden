@@ -39,7 +39,7 @@ export type BovedaSession = {
   /** Asks the connected wallet to sign a plain text message (no funds move); resolves to base58. */
   signMessage?: (message: string) => Promise<string>;
   /** Opens the card/exchange purchase flow to receive USDC in the user's wallet. */
-  buyUsdc?: () => Promise<void>;
+  buyUsdc?: (amountUsd?: number) => Promise<void>;
   /** Opens the card purchase flow to receive native SOL for network costs. */
   buySol?: (solAmount?: string) => Promise<void>;
   getAccessToken?: () => Promise<string | null>;

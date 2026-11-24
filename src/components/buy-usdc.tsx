@@ -61,7 +61,7 @@ export function BuyUsdc({ className, auto, hot, needMicro, resume, resumePlay, l
       } else {
         // Card purchases are always USDC priced in US dollars, so a typed "10" can never mean 10 SOL; the network reserve refills from USDC.
         if (!session.buyUsdc) throw new Error("Pago con tarjeta no disponible");
-        await session.buyUsdc();
+        await session.buyUsdc(needMicro && needMicro > 0n ? Number(needMicro) / 1e6 : undefined);
       }
       setWaiting(true);
       // Watch for the purchased USDC to land (up to ~5 min) and show a receipt.
@@ -88,13 +88,14 @@ export function BuyUsdc({ className, auto, hot, needMicro, resume, resumePlay, l
           <span><span className="block font-semibold">Coinbase </span>
           <span className="text-xs text-muted-foreground">{t("Compra directa de USDC (1 USDC ≈ $1). El monto se escribe en dólares.")}</span></span>
         </button>
-        {session.buyUsdc && <button type="button" onClick={() => void pay("card")} className="flex items-start gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:bg-muted">
-          <CreditCard size={24} className="mt-0.5 text-muted-foreground" />
-          <span><span className="block text-sm font-medium">{t("Tarjeta o Apple Pay")} · {t("Mínimo")} ${CARD_MIN_USD}</span>
-          <span className="text-xs text-muted-foreground">{t("Compra rápida de USDC vía MoonPay. El monto se escribe en dólares.")}</span></span>
-        </button>}
+        {session.buyUsdc && <>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("O paga con")}</p>
+          <div className="grid grid-cols-3 gap-2">
+            {[["", "Apple Pay"], ["", "PayPal"], ["", t("Tarjeta")]].map(([, name]) => <button key={name} type="button" onClick={() => void pay("card")} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-border p-2 text-sm font-semibold transition-colors hover:bg-muted"><CreditCard size={18} className="text-muted-foreground" />{name}</button>)}
+          </div>
+          <p className="text-xs text-muted-foreground">{t("Apple Pay, Google Pay, PayPal o tarjeta de débito vía MoonPay · Mínimo")} ${CARD_MIN_USD}. {t("Los métodos disponibles dependen de tu país.")}</p>
+        </>}
       </div>
-      <p className="text-center text-xs text-muted-foreground">{t("Sugerido: $25 · $50 (recomendado para empezar) · $100. Mínimo sugerido $20 para activar tu cuenta y abrir tu primera bóveda sin interrupciones.")}</p>
     </ActionSheetContent></Dialog>
     {receipt && <div role="status" className="mt-3 rounded-xl border border-primary/40 bg-primary/10 p-4 text-sm">
       <p className="flex items-center gap-2 font-semibold"><CheckCircle2 size={16} className="text-primary" />{t("¡Fondos añadidos!")}</p>

@@ -202,10 +202,10 @@ function SessionBridge({ children }: { children: ReactNode }) {
       const { signature } = await signWalletMessage({ message: new TextEncoder().encode(message), wallet });
       return bs58.encode(signature);
     },
-    buyUsdc: async () => {
+    buyUsdc: async (amountUsd?: number) => {
       if (!authenticated || !walletAddress) throw new Error(t("Primero entra a tu cuenta"));
       // Solana mainnet CAIP-2 id and the official USDC mint.
-      await addFunds({ destination: { address: walletAddress, chain: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", asset: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" }, fiat: { defaultAmount: CARD_MIN_USD, source: { defaultAsset: "usd" } } });
+      await addFunds({ destination: { address: walletAddress, chain: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", asset: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" }, fiat: { defaultAmount: String(Math.max(Number(CARD_MIN_USD), Math.ceil(amountUsd ?? 0))), source: { defaultAsset: "usd" } } });
     },
     buySol: async (solAmount?: string) => {
       if (!authenticated || !walletAddress) throw new Error(t("Primero entra a tu cuenta"));

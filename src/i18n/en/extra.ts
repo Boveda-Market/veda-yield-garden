@@ -1929,4 +1929,8 @@ export const extra: Record<string, string> = {
   "Escríbenos": "Get in touch",
   "Para preguntas sobre el proyecto o ideas para mejorarlo, únete al grupo de Telegram o escríbenos por correo.": "For questions about the project or ideas to improve it, join the Telegram group or email us.",
   "Unirme al grupo de Telegram": "Join the Telegram group",
+  "O paga con": "Or pay with",
+  "Tarjeta": "Card",
+  "Apple Pay, Google Pay, PayPal o tarjeta de débito vía MoonPay · Mínimo": "Apple Pay, Google Pay, PayPal or debit card via MoonPay · Minimum",
+  "Los métodos disponibles dependen de tu país.": "Available methods depend on your country.",
 };
