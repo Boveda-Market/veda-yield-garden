@@ -1,5 +1,9 @@
 /** English strings for the homepage, wallet, portfolio, operation dialogs, affiliates and account redesigns. */
 export const extra: Record<string, string> = {
+  "¿Cómo se gana dinero con Bitcoin en Bóveda Market?": "How do you make money with Bitcoin on Bóveda Market?",
+  "Depositas dólares digitales en la Bóveda Bitcoin. Cada vez que otras personas compran o venden Bitcoin en ese mercado pagan una pequeña comisión, y esa comisión se reparte entre los depósitos como el tuyo. Además, tu bóveda sigue el precio del Bitcoin, así que su valor sube y baja con él.": "You deposit digital dollars in the Bitcoin Vault. Every time other people buy or sell Bitcoin in that market they pay a small fee, and that fee is shared among deposits like yours. Your vault also follows the Bitcoin price, so its value goes up and down with it.",
+  "¿Cuánto se gana invirtiendo en Bitcoin aquí?": "How much do you earn investing in Bitcoin here?",
+  "Depende de cuánta actividad tenga el mercado. En los detalles de cada bóveda ves el interés anual estimado, calculado con las últimas 24 horas. Es una estimación que cambia a diario, no una tasa fija ni garantizada. Tus ganancias reales aparecen en Mi Portafolio.": "It depends on how much activity the market has. Each vault's details show the estimated annual interest, calculated from the last 24 hours. It's an estimate that changes daily, not a fixed or guaranteed rate. Your real earnings appear in My Portfolio.",
   "Cuenta digital lista": "Digital account ready",
   "Instala Bóveda Market en tu dispositivo": "Install Bóveda Market on your device",
   "Abre en 1 toque desde tu pantalla de inicio": "Opens in 1 tap from your home screen",

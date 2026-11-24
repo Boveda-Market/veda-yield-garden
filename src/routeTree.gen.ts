@@ -33,6 +33,7 @@ import { Route as EnStatusRouteImport } from './routes/en/status'
 import { Route as EnTermsRouteImport } from './routes/en/terms'
 import { Route as GuiasIndexRouteImport } from './routes/guias/index'
 import { Route as GuiasBovedasAltoRendimientoRouteImport } from './routes/guias/bovedas-alto-rendimiento'
+import { Route as GuiasGanarInteresesBitcoinRouteImport } from './routes/guias/ganar-intereses-bitcoin'
 import { Route as GuiasInvertirSinEstafasRouteImport } from './routes/guias/invertir-sin-estafas'
 import { Route as GuiasMercadosDePrediccionRouteImport } from './routes/guias/mercados-de-prediccion'
 import { Route as GuiasQueEsUsdcRouteImport } from './routes/guias/que-es-usdc'
@@ -41,6 +42,7 @@ import { Route as GuiasRetirarCashAppBitcoinRouteImport } from './routes/guias/r
 import { Route as EnGuidesIndexRouteImport } from './routes/en/guides/index'
 import { Route as EnGuidesAddDollarsWithCoinbaseRouteImport } from './routes/en/guides/add-dollars-with-coinbase'
 import { Route as EnGuidesAvoidInvestmentScamsRouteImport } from './routes/en/guides/avoid-investment-scams'
+import { Route as EnGuidesEarnInterestOnBitcoinRouteImport } from './routes/en/guides/earn-interest-on-bitcoin'
 import { Route as EnGuidesHighYieldVaultsRouteImport } from './routes/en/guides/high-yield-vaults'
 import { Route as EnGuidesPredictionMarketsRouteImport } from './routes/en/guides/prediction-markets'
 import { Route as EnGuidesWhatIsUsdcRouteImport } from './routes/en/guides/what-is-usdc'
@@ -175,6 +177,12 @@ const GuiasBovedasAltoRendimientoRoute =
     path: '/guias/bovedas-alto-rendimiento',
     getParentRoute: () => rootRouteImport,
   } as any)
+const GuiasGanarInteresesBitcoinRoute =
+  GuiasGanarInteresesBitcoinRouteImport.update({
+    id: '/guias/ganar-intereses-bitcoin',
+    path: '/guias/ganar-intereses-bitcoin',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuiasInvertirSinEstafasRoute = GuiasInvertirSinEstafasRouteImport.update({
   id: '/guias/invertir-sin-estafas',
   path: '/guias/invertir-sin-estafas',
@@ -218,6 +226,12 @@ const EnGuidesAvoidInvestmentScamsRoute =
   EnGuidesAvoidInvestmentScamsRouteImport.update({
     id: '/en/guides/avoid-investment-scams',
     path: '/en/guides/avoid-investment-scams',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EnGuidesEarnInterestOnBitcoinRoute =
+  EnGuidesEarnInterestOnBitcoinRouteImport.update({
+    id: '/en/guides/earn-interest-on-bitcoin',
+    path: '/en/guides/earn-interest-on-bitcoin',
     getParentRoute: () => rootRouteImport,
   } as any)
 const EnGuidesHighYieldVaultsRoute = EnGuidesHighYieldVaultsRouteImport.update({
@@ -311,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/en/status': typeof EnStatusRoute
   '/en/terms': typeof EnTermsRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
+  '/guias/ganar-intereses-bitcoin': typeof GuiasGanarInteresesBitcoinRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/mercados-de-prediccion': typeof GuiasMercadosDePrediccionRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
@@ -320,6 +335,7 @@ export interface FileRoutesByFullPath {
   '/guias/': typeof GuiasIndexRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
+  '/en/guides/earn-interest-on-bitcoin': typeof EnGuidesEarnInterestOnBitcoinRoute
   '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
   '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
   '/en/guides/what-is-usdc': typeof EnGuidesWhatIsUsdcRoute
@@ -357,6 +373,7 @@ export interface FileRoutesByTo {
   '/en/status': typeof EnStatusRoute
   '/en/terms': typeof EnTermsRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
+  '/guias/ganar-intereses-bitcoin': typeof GuiasGanarInteresesBitcoinRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/mercados-de-prediccion': typeof GuiasMercadosDePrediccionRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
@@ -366,6 +383,7 @@ export interface FileRoutesByTo {
   '/guias': typeof GuiasIndexRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
+  '/en/guides/earn-interest-on-bitcoin': typeof EnGuidesEarnInterestOnBitcoinRoute
   '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
   '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
   '/en/guides/what-is-usdc': typeof EnGuidesWhatIsUsdcRoute
@@ -404,6 +422,7 @@ export interface FileRoutesById {
   '/en/status': typeof EnStatusRoute
   '/en/terms': typeof EnTermsRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
+  '/guias/ganar-intereses-bitcoin': typeof GuiasGanarInteresesBitcoinRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
   '/guias/mercados-de-prediccion': typeof GuiasMercadosDePrediccionRoute
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
@@ -413,6 +432,7 @@ export interface FileRoutesById {
   '/guias/': typeof GuiasIndexRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
+  '/en/guides/earn-interest-on-bitcoin': typeof EnGuidesEarnInterestOnBitcoinRoute
   '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
   '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
   '/en/guides/what-is-usdc': typeof EnGuidesWhatIsUsdcRoute
@@ -452,6 +472,7 @@ export interface FileRouteTypes {
     | '/en/status'
     | '/en/terms'
     | '/guias/bovedas-alto-rendimiento'
+    | '/guias/ganar-intereses-bitcoin'
     | '/guias/invertir-sin-estafas'
     | '/guias/mercados-de-prediccion'
     | '/guias/que-es-usdc'
@@ -461,6 +482,7 @@ export interface FileRouteTypes {
     | '/guias/'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
+    | '/en/guides/earn-interest-on-bitcoin'
     | '/en/guides/high-yield-vaults'
     | '/en/guides/prediction-markets'
     | '/en/guides/what-is-usdc'
@@ -498,6 +520,7 @@ export interface FileRouteTypes {
     | '/en/status'
     | '/en/terms'
     | '/guias/bovedas-alto-rendimiento'
+    | '/guias/ganar-intereses-bitcoin'
     | '/guias/invertir-sin-estafas'
     | '/guias/mercados-de-prediccion'
     | '/guias/que-es-usdc'
@@ -507,6 +530,7 @@ export interface FileRouteTypes {
     | '/guias'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
+    | '/en/guides/earn-interest-on-bitcoin'
     | '/en/guides/high-yield-vaults'
     | '/en/guides/prediction-markets'
     | '/en/guides/what-is-usdc'
@@ -544,6 +568,7 @@ export interface FileRouteTypes {
     | '/en/status'
     | '/en/terms'
     | '/guias/bovedas-alto-rendimiento'
+    | '/guias/ganar-intereses-bitcoin'
     | '/guias/invertir-sin-estafas'
     | '/guias/mercados-de-prediccion'
     | '/guias/que-es-usdc'
@@ -553,6 +578,7 @@ export interface FileRouteTypes {
     | '/guias/'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
+    | '/en/guides/earn-interest-on-bitcoin'
     | '/en/guides/high-yield-vaults'
     | '/en/guides/prediction-markets'
     | '/en/guides/what-is-usdc'
@@ -591,6 +617,7 @@ export interface RootRouteChildren {
   EnStatusRoute: typeof EnStatusRoute
   EnTermsRoute: typeof EnTermsRoute
   GuiasBovedasAltoRendimientoRoute: typeof GuiasBovedasAltoRendimientoRoute
+  GuiasGanarInteresesBitcoinRoute: typeof GuiasGanarInteresesBitcoinRoute
   GuiasInvertirSinEstafasRoute: typeof GuiasInvertirSinEstafasRoute
   GuiasMercadosDePrediccionRoute: typeof GuiasMercadosDePrediccionRoute
   GuiasQueEsUsdcRoute: typeof GuiasQueEsUsdcRoute
@@ -600,6 +627,7 @@ export interface RootRouteChildren {
   GuiasIndexRoute: typeof GuiasIndexRoute
   EnGuidesAddDollarsWithCoinbaseRoute: typeof EnGuidesAddDollarsWithCoinbaseRoute
   EnGuidesAvoidInvestmentScamsRoute: typeof EnGuidesAvoidInvestmentScamsRoute
+  EnGuidesEarnInterestOnBitcoinRoute: typeof EnGuidesEarnInterestOnBitcoinRoute
   EnGuidesHighYieldVaultsRoute: typeof EnGuidesHighYieldVaultsRoute
   EnGuidesPredictionMarketsRoute: typeof EnGuidesPredictionMarketsRoute
   EnGuidesWhatIsUsdcRoute: typeof EnGuidesWhatIsUsdcRoute
@@ -785,6 +813,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuiasBovedasAltoRendimientoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guias/ganar-intereses-bitcoin': {
+      id: '/guias/ganar-intereses-bitcoin'
+      path: '/guias/ganar-intereses-bitcoin'
+      fullPath: '/guias/ganar-intereses-bitcoin'
+      preLoaderRoute: typeof GuiasGanarInteresesBitcoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guias/invertir-sin-estafas': {
       id: '/guias/invertir-sin-estafas'
       path: '/guias/invertir-sin-estafas'
@@ -839,6 +874,13 @@ declare module '@tanstack/react-router' {
       path: '/en/guides/avoid-investment-scams'
       fullPath: '/en/guides/avoid-investment-scams'
       preLoaderRoute: typeof EnGuidesAvoidInvestmentScamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/guides/earn-interest-on-bitcoin': {
+      id: '/en/guides/earn-interest-on-bitcoin'
+      path: '/en/guides/earn-interest-on-bitcoin'
+      fullPath: '/en/guides/earn-interest-on-bitcoin'
+      preLoaderRoute: typeof EnGuidesEarnInterestOnBitcoinRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/guides/high-yield-vaults': {
@@ -951,6 +993,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnStatusRoute: EnStatusRoute,
   EnTermsRoute: EnTermsRoute,
   GuiasBovedasAltoRendimientoRoute: GuiasBovedasAltoRendimientoRoute,
+  GuiasGanarInteresesBitcoinRoute: GuiasGanarInteresesBitcoinRoute,
   GuiasInvertirSinEstafasRoute: GuiasInvertirSinEstafasRoute,
   GuiasMercadosDePrediccionRoute: GuiasMercadosDePrediccionRoute,
   GuiasQueEsUsdcRoute: GuiasQueEsUsdcRoute,
@@ -960,6 +1003,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuiasIndexRoute: GuiasIndexRoute,
   EnGuidesAddDollarsWithCoinbaseRoute: EnGuidesAddDollarsWithCoinbaseRoute,
   EnGuidesAvoidInvestmentScamsRoute: EnGuidesAvoidInvestmentScamsRoute,
+  EnGuidesEarnInterestOnBitcoinRoute: EnGuidesEarnInterestOnBitcoinRoute,
   EnGuidesHighYieldVaultsRoute: EnGuidesHighYieldVaultsRoute,
   EnGuidesPredictionMarketsRoute: EnGuidesPredictionMarketsRoute,
   EnGuidesWhatIsUsdcRoute: EnGuidesWhatIsUsdcRoute,
