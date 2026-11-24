@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Bot, DollarSign, ShieldCheck, Wallet } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { VisitorBtcChart } from "@/components/visitor-btc-chart";
+import trumpLogo from "@/assets/trump-logo.png";
 
 const PILLARS = [
   { icon: DollarSign, label: "Entras solo con dólares" },
@@ -55,4 +56,41 @@ export function BitcoinSections() {
       <VisitorBtcChart />
     </section>
   </>;
+}
+
+const TRUMP_PILLARS = [
+  { icon: DollarSign, label: "Entras solo con dólares" },
+  { icon: Bot, label: "Piloto Automático 24/7" },
+  { icon: Wallet, label: "Retiras cuando quieras" },
+  { icon: ShieldCheck, label: "Tu dinero en tu billetera" },
+] as const;
+
+/** Trump Coin home version (/trump): same card layout as the Bitcoin hero, in the Trump vault skin. */
+export function TrumpHero({ title, sub }: { title: string; sub: string }) {
+  const t = useT();
+  return <div className="vault-trump overflow-hidden rounded-3xl bg-[image:var(--gradient-hot-surface)] text-hot-foreground shadow-[var(--shadow-hot)]">
+    <div className="px-5 pb-5 pt-5 text-center sm:px-8 sm:pt-7 md:text-left">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-hot/50 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-hot"><img src={trumpLogo} alt="" aria-hidden width={16} height={16} className="h-4 w-4 rounded-full" /> {t("Bóveda Trump Coin")}</span>
+      <h1 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-4xl">{t(title)}</h1>
+      <p className="mt-2 text-sm leading-6 text-hot-muted sm:text-base">{t(sub)}</p>
+      <ul className="mt-4 grid grid-cols-2 gap-2 text-left text-xs font-semibold sm:grid-cols-4">{TRUMP_PILLARS.map(({ icon: Icon, label }) => <li key={label} className="flex items-center gap-2 rounded-xl border border-hot/25 px-2.5 py-2"><Icon size={15} aria-hidden className="shrink-0 text-hot" /><span className="min-w-0 leading-tight">{t(label)}</span></li>)}</ul>
+      <Link to="/app" hash="open-trump" className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[image:var(--gradient-hot)] text-base font-bold text-hot-surface transition-transform active:scale-[0.98] md:max-w-sm">👉 {t("Oprime aquí para ver la bóveda")}<ArrowRight size={18} /></Link>
+      <p className="mt-3 text-[11px] leading-4 text-hot-muted">{t("Intereses estimados que cambian cada día. El valor de tu bóveda sube y baja con el precio de Trump Coin.")}</p>
+    </div>
+  </div>;
+}
+
+/** Classic home version (/clasica): same card layout as the Bitcoin hero, in the brand green. */
+export function ClassicHero({ title, sub }: { title: string; sub: string }) {
+  const t = useT();
+  return <div className="overflow-hidden rounded-3xl border border-primary/30 bg-[image:var(--gradient-hero)] shadow-sm">
+    <div className="px-5 pb-5 pt-5 text-center sm:px-8 sm:pt-7 md:text-left">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-background/70 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary">🏦 {t("Bóvedas")}</span>
+      <h1 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-4xl">{t(title)}</h1>
+      <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">{t(sub)}</p>
+      <ul className="mt-4 grid grid-cols-2 gap-2 text-left text-xs font-semibold sm:grid-cols-4">{PILLARS.map(({ icon: Icon, label }) => <li key={label} className="flex items-center gap-2 rounded-xl border border-border bg-card/80 px-2.5 py-2"><Icon size={15} aria-hidden className="shrink-0 text-primary" /><span className="min-w-0 leading-tight">{t(label)}</span></li>)}</ul>
+      <Link to="/app" className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-base font-bold text-primary-foreground transition-transform active:scale-[0.98] md:max-w-sm">👉 {t("Oprime aquí para ver las bóvedas")}<ArrowRight size={18} /></Link>
+      <p className="mt-3 text-[11px] leading-4 text-muted-foreground">{t("Intereses estimados que cambian cada día. El valor de tu bóveda sube y baja con el precio de sus monedas.")}</p>
+    </div>
+  </div>;
 }

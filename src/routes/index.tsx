@@ -4,7 +4,7 @@ import shareVideo from "@/assets/share/og-preview-bitcoin.mp4.asset.json";
 import { shareMeta } from "@/lib/share-meta";
 import dobleLogo from "@/assets/doble-o-nada-logo.png";
 import { HERO_VARIANTS, HERO_KEY, pickHeroVariant, isHeroReview, legacyHeroRedirect } from "@/lib/hero-variants";
-import { BitcoinHero, BitcoinSections } from "@/components/home-bitcoin";
+import { BitcoinHero, BitcoinSections, ClassicHero, TrumpHero } from "@/components/home-bitcoin";
 import { Fingerprint, Landmark } from "lucide-react";
 import reviewCarlos from "@/assets/review-carlos.jpg";
 import reviewValeria from "@/assets/review-valeria.jpg";
@@ -129,7 +129,9 @@ export function Landing({ variant }: { variant?: number } = {}) {
   const dobleHero = hero.theme === "doble";
   const calmHero = hero.theme === "calm";
   const btcHero = hero.theme === "bitcoin";
-  const plainHero = !gtaHero && !dobleHero && !calmHero && !btcHero;
+  const trumpHero = hero.theme === "trump";
+  const classicHero = !hero.theme;
+  const plainHero = false;
   if (decided && compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 pb-10 pt-20 text-foreground sm:py-10">
     <BrandLogo size="lg" />
     <h1 className="mt-4 text-center font-display text-3xl font-bold">{t("Bienvenido de nuevo")}</h1>
@@ -145,6 +147,8 @@ export function Landing({ variant }: { variant?: number } = {}) {
         {gtaHero && <div className="order-1 min-w-0 md:col-span-2"><Gta6Hero title={hero.title} sub={hero.sub} /></div>}
         {dobleHero && <div className="order-1 min-w-0 md:col-span-2"><DobleHero title={hero.title} sub={hero.sub} /></div>}
         {btcHero && <div className="order-1 min-w-0 md:col-span-2"><BitcoinHero title={hero.title} sub={hero.sub} /></div>}
+        {trumpHero && <div className="order-1 min-w-0 md:col-span-2"><TrumpHero title={hero.title} sub={hero.sub} /></div>}
+        {classicHero && <div className="order-1 min-w-0 md:col-span-2"><ClassicHero title={hero.title} sub={hero.sub} /></div>}
         {calmHero && <div className="order-1 min-w-0 md:col-span-2"><CalmHero title={hero.title} sub={hero.sub} /></div>}
         {plainHero && <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(hero.title)}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t(hero.sub)}</p>{showReviews && <TrustTicker />}</div>}
         <div className="order-3 min-w-0 text-center md:order-1 md:text-left">
