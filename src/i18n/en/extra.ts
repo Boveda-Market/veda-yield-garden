@@ -1,5 +1,15 @@
 /** English strings for the homepage, wallet, portfolio, operation dialogs, affiliates and account redesigns. */
 export const extra: Record<string, string> = {
+  "Activación y reserva": "Activation and reserve",
+  "Calculando…": "Calculating…",
+  "Activación": "Activation",
+  "Cambio de monedas (estimado)": "Coin swap (estimated)",
+  "Sale de tu billetera": "Leaves your wallet",
+  "Llega a tu bóveda": "Reaches your vault",
+  "Para abrir la bóveda, la mitad se cambia a la otra moneda y pagas la comisión normal del mercado. ": "To open the vault, half is swapped into the other coin and you pay the market's normal fee. ",
+  "La activación se paga aparte, así tu depósito entra completo. ": "Activation is paid separately, so your full deposit goes in. ",
+  "No alcanza para pagar la activación aparte, así que sale del mismo depósito. ": "There isn't enough to pay activation separately, so it comes out of the deposit. ",
+  "Estimado con el precio actual.": "Estimated at the current price.",
   "Ya conoces Bitcoin. Ahora haz que te pague intereses.": "You already know Bitcoin. Now make it pay you interest.",
   "Sin comprar monedas raras ni saber de cripto. Empiezas con dólares digitales y el sistema arma tu Bóveda Bitcoin en un toque.": "No weird coins to buy and no crypto knowledge needed. You start with digital dollars and the system sets up your Bitcoin Vault in one tap.",
   "Tu dinero en tu billetera": "Your money in your own wallet",

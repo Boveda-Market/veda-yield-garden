@@ -56,7 +56,9 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   const pick = (pct: bigint) => { if (usdc == null) return; const cap = usdc < MAX_MICRO ? usdc : MAX_MICRO; setAmount(microToText((cap * pct) / 100n)); };
   const clean = (v: string) => { const s = v.replace(/,/g, ".").replace(/[^\d.]/g, ""); const [w, ...rest] = s.split("."); return rest.length ? `${w}.${rest.join("").slice(0, 6)}` : (w ?? ""); };
 
-  const quote = typed != null && typed > 0n ? depositQuote(typed, activationQ.data?.charge ?? null, activationQ.data?.fee ?? 0n) : null;
+  // Activation on top when the balance covers it; new positions pay the vault market's fee on the swapped half.
+  const activationPending = !migrate && isDlmmVault(vault.id) && !!wallet && activationQ.isPending;
+  const quote = typed != null && typed > 0n ? depositQuote(typed, activationQ.data?.charge ?? null, activationQ.data?.fee ?? 0n, { balanceMicro: usdc ?? null, feePct: yieldQ.data?.feePct ?? null, swaps: !position }) : null;
   const usd = (m: bigint) => `$${(Number(m) / 1e6).toFixed(2)}`;
   const hot = Boolean(vault.badge) && !migrate;
   const showBanner = hot && !done;
@@ -86,11 +88,16 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
     </div>
     {breakdown && quote && <dl aria-label={t("Cotización en vivo")} className="grid gap-2 rounded-xl bg-muted p-4 text-sm">
       <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground"><span className={`h-1.5 w-1.5 rounded-full bg-live ${activationQ.isFetching ? "animate-pulse" : ""}`} />{t("Cotización en vivo")}</p>
-      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Importe")}</dt><dd className="tabular-nums">{usd(quote.amount)}</dd></div>
-      {quote.fee > 0n && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Activación de cuenta digital (única vez)")}</dt><dd className="tabular-nums">−{usd(quote.fee)}</dd></div>}
-      {quote.reserve > 0n && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Reserva de operaciones")}</dt><dd className="tabular-nums">−{usd(quote.reserve)}</dd></div>}
-      <div className="flex justify-between gap-3 border-t border-border pt-2"><dt className="font-semibold">{t("Capital neto a la bóveda")}</dt><dd className="font-display text-lg font-bold tabular-nums">~{usd(quote.net)}</dd></div>
-      {quote.fee > 0n && <p className="text-[11px] leading-4 text-muted-foreground">{t("Estimado con el precio actual de la red. La activación se cobra solo en tu primer depósito.")}</p>}
+      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Depósito")}</dt><dd className="tabular-nums">{usd(quote.net)}</dd></div>
+      {activationPending ? <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Activación y reserva")}</dt><dd className="text-muted-foreground">{t("Calculando…")}</dd></div> : <>
+      {quote.fee > 0n && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Activación de cuenta digital (única vez)")}</dt><dd className="tabular-nums">{quote.onTop ? "+" : "−"}{usd(quote.fee)}</dd></div>}
+      {quote.reserve > 0n && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Reserva de operaciones")}</dt><dd className="tabular-nums">{quote.onTop ? "+" : "−"}{usd(quote.reserve)}</dd></div>}
+      {quote.fee === 0n && quote.reserve === 0n && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Activación")}</dt><dd className="font-semibold text-primary">{t("Gratis")}</dd></div>}
+      </>}
+      <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Cambio de monedas (estimado)")}</dt><dd className="tabular-nums">{quote.swapCost > 0n ? `−${usd(quote.swapCost)}` : t("Gratis")}</dd></div>
+      <div className="flex justify-between gap-3 border-t border-border pt-2"><dt className="font-semibold">{t("Sale de tu billetera")}</dt><dd className="tabular-nums font-semibold">{usd(quote.total)}</dd></div>
+      <div className="flex justify-between gap-3"><dt className="font-semibold">{t("Llega a tu bóveda")}</dt><dd className="font-display text-lg font-bold tabular-nums text-primary">~{usd(quote.inVault)}</dd></div>
+      <p className="text-[11px] leading-4 text-muted-foreground">{quote.swapCost > 0n ? t("Para abrir la bóveda, la mitad se cambia a la otra moneda y pagas la comisión normal del mercado. ") : ""}{quote.onTop ? t("La activación se paga aparte, así tu depósito entra completo. ") : quote.fee > 0n ? t("No alcanza para pagar la activación aparte, así que sale del mismo depósito. ") : ""}{t("Estimado con el precio actual.")}</p>
     </dl>}
     {!position && !migrate && <p role="note" className="rounded-xl border border-border p-3 text-xs leading-5 text-muted-foreground">{t("Tu capital se combina con la otra moneda de la bóveda y su valor fluctuará con el precio de mercado, mientras acumulas intereses en cada operación.")} <a href="/faq#vaults-fluctuation" className="underline">{t("¿Por qué cambia mi balance?")}</a></p>}
     </>}

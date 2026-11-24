@@ -184,9 +184,13 @@ export async function simulateDlmmDeposit(connection: Connection, input: Simulat
     const positionAddress = existing ? existing.lb.publicKey : positionKey!.publicKey;
     const strategy = { minBinId, maxBinId, strategyType: sdk.StrategyType.Spot };
     const totalYAmount = new BN((amounts.net - swapIn).toString());
+    // Deposit almost all the swapped coin: 0.2% below the quoted output (never below the swap's protected
+    // minimum) instead of the full 0.5% slippage floor, so less is left over in the wallet. Swap and deposit
+    // share one atomic transaction in the same pool: a bigger move fails the whole thing and no money moves.
+    const depositX = quote ? BN.max(quote.minOutAmount, quote.outAmount.muln(998).divn(1000)) : new BN(0);
     const addTx = existing
-      ? await pool.addLiquidityByStrategy({ positionPubKey: positionAddress, totalXAmount: quote ? quote.minOutAmount : new BN(0), totalYAmount, strategy, user: owner, slippage })
-      : await pool.initializePositionAndAddLiquidityByStrategy({ positionPubKey: positionAddress, totalXAmount: quote!.minOutAmount, totalYAmount, strategy, user: owner, slippage });
+      ? await pool.addLiquidityByStrategy({ positionPubKey: positionAddress, totalXAmount: depositX, totalYAmount, strategy, user: owner, slippage })
+      : await pool.initializePositionAndAddLiquidityByStrategy({ positionPubKey: positionAddress, totalXAmount: depositX, totalYAmount, strategy, user: owner, slippage });
     const feeOwner = new PublicKey(FEE_WALLET), feeAta = getAssociatedTokenAddressSync(usdc, feeOwner);
     const feeBefore = amounts.fee > 0n ? await getAccount(connection, feeAta).then((a) => a.amount).catch(() => null) : null;
     const feeIxs = amounts.fee > 0n ? [
