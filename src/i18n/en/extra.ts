@@ -3,6 +3,8 @@ export const extra: Record<string, string> = {
   "Activación y reserva": "Activation and reserve",
   "Calculando…": "Calculating…",
   "Activación": "Activation",
+  "Entrar para depositar": "Sign in to deposit",
+  "Esta es la cotización de una cuenta nueva. Al entrar te traemos de vuelta aquí.": "This is a new-account quote. After signing in we bring you right back here.",
   "Compra de {c}": "Buying {c}",
   "Se queda en dólares digitales": "Stays in digital dollars",
   "Se usa para comprar {c}": "Used to buy {c}",
