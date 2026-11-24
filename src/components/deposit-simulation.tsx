@@ -1,6 +1,6 @@
 import { useT } from "@/lib/i18n";
 import { useRealWallet } from "@/hooks/use-real-wallet";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,8 @@ import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { openVaultPosition, simulationDisplay } from "@/lib/deposit-simulation";
 import type { Vault } from "@/lib/vaults";
 import { PilotDeposit } from "@/components/pilot-deposit";
-import { clearResumeDeposit } from "@/lib/resume-deposit";
+import { clearResumeDeposit, clearPendingDeposit, peekPendingDeposit, peekResumeDeposit, savePendingDeposit, RESUME_MAX_MS } from "@/lib/resume-deposit";
+import { notify } from "@/lib/notify";
 import { BuyUsdc } from "@/components/buy-usdc";
 import { RangeAlertsGate } from "@/components/range-alerts-gate";
 import { getRealWallet } from "@/lib/solana.functions";
@@ -42,10 +43,29 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   const [done, setDone] = useState(false);
   const [kept, setKept] = useState(false);
   const [login, setLogin] = useState(false);
-  useEffect(() => { if (done) clearResumeDeposit(); }, [done]);
+  const openedAt = useRef(Date.now());
+  useEffect(() => { if (done) { clearResumeDeposit(); clearPendingDeposit(); } }, [done]);
+  useEffect(() => {
+    const pending = peekPendingDeposit();
+    if (pending?.vaultId === vault.id && amount !== pending.amount) savePendingDeposit({ vaultId: vault.id, amount });
+  }, [amount, vault.id]);
+  useEffect(() => {
+    // Expire only an unsubmitted quote, never an approval in flight or a success receipt.
+    if (busy || done || migrate || kept) return;
+    const intent = peekResumeDeposit() ?? peekPendingDeposit();
+    const started = intent?.vaultId === vault.id ? intent.at : openedAt.current;
+    const expire = () => {
+      if (Date.now() - started < RESUME_MAX_MS) return;
+      clearPendingDeposit(); clearResumeDeposit(); onClose();
+      notify("info", t("La cotización venció"), t("Puedes comenzar una nueva cuando estés listo."));
+    };
+    const timer = setTimeout(expire, Math.max(0, RESUME_MAX_MS - (Date.now() - started)));
+    document.addEventListener("visibilitychange", expire);
+    return () => { clearTimeout(timer); document.removeEventListener("visibilitychange", expire); };
+  }, [busy, done, migrate, kept, login, amount, vault.id, onClose, t]);
   const readWallet = useServerFn(getRealWallet);
   const balances = useQuery({ queryKey: ["my-wallet", wallet], enabled: !!wallet, queryFn: async () => {
-    const r = await readWallet({ data: { wallet: wallet! } });
+    const r = await readWallet({ data: { wallet: wallet ?? "" } });
     if (!r.success) throw new Error(r.error);
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   } });
@@ -121,7 +141,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
     {!done && !migrate && isDlmmVault(vault.id) && <RangeAlertsGate />}
     {/* First vault only (first-account activation fee quoted): keep the one-tap promise in view right above the confirm button. */}
     {!done && !busy && !position && !migrate && activationQ.data?.fee === ACTIVATION_FEE_MICRO && <OneTapNote />}
-    <div data-sheet-actions={done ? undefined : ""} className={done ? undefined : "sticky -bottom-5 z-10 -mx-5 -mb-5 grid gap-2 border-t border-border bg-background/95 px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:-bottom-6 sm:-mx-6 sm:-mb-6 sm:px-6 sm:pb-6"}>{wallet ? <PilotDeposit usdc={usdc} autoStart={migrate} vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onAmountFit={setAmount} onClose={onClose} onDoneChange={setDone} /> : <><Button type="button" className="w-full" size="lg" onClick={() => { try { sessionStorage.setItem("boveda:pending-deposit", vault.id); sessionStorage.setItem("boveda:pending-deposit:amount", amount); } catch { /* storage blocked */ } setLogin(true); }}>{t("Confirmar depósito")}</Button><p className="text-center text-xs text-muted-foreground">{t("Esta es la cotización de una cuenta nueva. Al entrar te traemos de vuelta aquí.")}</p><LoginSheet open={login} onOpenChange={setLogin} title={t("Entra para confirmar tu depósito")} body={t("Al entrar te llevamos directo a {v} para depositar.", { v: t(vault.name) })} /></>}</div>
+    <div data-sheet-actions={done ? undefined : ""} className={done ? undefined : "sticky -bottom-5 z-10 -mx-5 -mb-5 grid gap-2 border-t border-border bg-background/95 px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:-bottom-6 sm:-mx-6 sm:-mb-6 sm:px-6 sm:pb-6"}>{wallet ? <PilotDeposit usdc={usdc} autoStart={migrate} vaultId={vault.id} amount={amount} position={position} migrate={migrate} onBusyChange={setBusy} onAmountFit={setAmount} onClose={onClose} onDoneChange={setDone} /> : <><Button type="button" className="w-full" size="lg" disabled={!quote || typed == null || typed < 1_000_000n || typed > MAX_MICRO} onClick={() => { savePendingDeposit({ vaultId: vault.id, amount }); setLogin(true); }}>{t("Confirmar")}</Button><p className="text-center text-xs text-muted-foreground">{t("Esta es la cotización de una cuenta nueva. Al entrar te traemos de vuelta aquí.")}</p><LoginSheet open={login} onOpenChange={setLogin} title={t("Entra para confirmar tu depósito")} body={t("Al entrar te llevamos directo a {v} para depositar.", { v: t(vault.name) })} /></>}</div>
     {step3 && !busy && <Button type="button" variant="ghost" className="w-full" onClick={() => { clearResumeDeposit(); setKept(true); }}>{t("Cancelar")}</Button>}
     </>}
   </ActionSheetContent></Dialog>;

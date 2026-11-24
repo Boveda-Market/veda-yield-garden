@@ -65,3 +65,5 @@ use the editor.
 - Resolve browser theme preferences through src/lib/theme.ts for both pre-paint initialization and the selector, so defaults and storage-failure behavior stay consistent.
 - DLMM SDK: dev SSR loads its CommonJS file through a `\0dlmm-cjs` createRequire wrapper (vite.config.ts, serve-only); builds must bundle its ESM entry (never alias it to CJS: the Worker bundle kept bare require("bn.js") and every vault operation crashed). bigint-buffer is aliased to its pure-JS browser build because its Node entry poisons Error.prepareStackTrace in the Worker. Verify server-side Solana changes in a production build under wrangler, since dev runs on Node.
 - All ["real-solana", wallet] reads go through useRealWallet (src/hooks/use-real-wallet.ts), which keeps the last complete read when a newer one fails or is incomplete, so totals never drop to cash-only.
+
+- Deposit return intents are timestamped browser-only drafts kept for at most 30 minutes, not prices or authorization; restore through the normal live quote and clear on timeout, explicit cancellation or success. Close waiting quotes on timeout but never interrupt signing, submitted operations or receipts.

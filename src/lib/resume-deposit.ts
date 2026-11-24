@@ -4,6 +4,9 @@ import { decimalToUnits, unitsToDecimal } from "@/lib/onboarding";
 export const RESUME_KEY = "boveda:resume-deposit";
 export const RESUME_PLAY_KEY = "boveda:resume-play";
 export const RESUME_MAX_MS = 30 * 60_000;
+/** Short-lived intent only, never a saved price, signature or authorization. */
+export const DEPOSIT_RESUME_MAX_MS = RESUME_MAX_MS;
+export const PENDING_DEPOSIT_KEY = "boveda:pending-deposit:v2";
 /** Same cap as the deposit form ($5,000). */
 export const RESUME_MAX_MICRO = 5_000_000_000n;
 /** `baseline`: dollars (micro-USDC, as text) the wallet had before the purchase, so the flow waits for the NEW dollars. */
@@ -12,7 +15,9 @@ export type ResumeDeposit = { vaultId: string; amount: string; position?: string
 export type ResumePlay = { market: string; window: string; side: "up" | "down"; amount: string; roundId?: string; baseline?: string; at: number };
 
 type Store = Pick<Storage, "getItem" | "setItem" | "removeItem">;
-const ls = (): Store => localStorage;
+const ls = (): Store => {
+  try { return localStorage; } catch { return { getItem: () => null, setItem: () => {}, removeItem: () => {} }; }
+};
 
 function save(key: string, v: object, store: Pick<Storage, "setItem">, now: number) {
   try { store.setItem(key, JSON.stringify({ ...v, at: now })); } catch { /* storage blocked */ }
@@ -20,12 +25,12 @@ function save(key: string, v: object, store: Pick<Storage, "setItem">, now: numb
 function clear(key: string, store: Pick<Storage, "removeItem">) {
   try { store.removeItem(key); } catch { /* ignore */ }
 }
-function peek<T extends { at: number }>(key: string, ok: (r: T) => boolean, store: Pick<Storage, "getItem" | "removeItem">, now: number): T | null {
+function peek<T extends { at: number }>(key: string, ok: (r: T) => boolean, store: Pick<Storage, "getItem" | "removeItem">, now: number, maxMs = RESUME_MAX_MS): T | null {
   try {
     const raw = store.getItem(key);
     if (!raw) return null;
     const r = JSON.parse(raw) as T;
-    if (!r || typeof r.at !== "number" || !ok(r) || now - r.at > RESUME_MAX_MS) { clear(key, store); return null; }
+    if (!r || !Number.isFinite(r.at) || r.at > now || !ok(r) || now - r.at > maxMs) { clear(key, store); return null; }
     return r;
   } catch { clear(key, store); return null; }
 }
@@ -33,9 +38,14 @@ const okBaseline = (b: unknown) => b === undefined || (typeof b === "string" && 
 
 export function saveResumeDeposit(r: Omit<ResumeDeposit, "at">, store: Pick<Storage, "setItem"> = ls(), now = Date.now()) { save(RESUME_KEY, r, store, now); }
 export function clearResumeDeposit(store: Pick<Storage, "removeItem"> = ls()) { clear(RESUME_KEY, store); }
-/** Reads the pending deposit without consuming it; stale (>30 min) or malformed entries are removed and read as none. */
+/** Reads without consuming; after 30 minutes the person starts a new quote. */
 export function peekResumeDeposit(store: Pick<Storage, "getItem" | "removeItem"> = ls(), now = Date.now()): ResumeDeposit | null {
-  return peek<ResumeDeposit>(RESUME_KEY, (r) => typeof r.vaultId === "string" && typeof r.amount === "string" && okBaseline(r.baseline), store, now);
+  return peek<ResumeDeposit>(RESUME_KEY, (r) => typeof r.vaultId === "string" && typeof r.amount === "string" && okBaseline(r.baseline), store, now, DEPOSIT_RESUME_MAX_MS);
+}
+export function savePendingDeposit(r: Pick<ResumeDeposit, "vaultId" | "amount">, store: Pick<Storage, "setItem"> = ls(), now = Date.now()) { save(PENDING_DEPOSIT_KEY, r, store, now); }
+export function clearPendingDeposit(store: Pick<Storage, "removeItem"> = ls()) { clear(PENDING_DEPOSIT_KEY, store); }
+export function peekPendingDeposit(store: Pick<Storage, "getItem" | "removeItem"> = ls(), now = Date.now()): ResumeDeposit | null {
+  return peek<ResumeDeposit>(PENDING_DEPOSIT_KEY, (r) => typeof r.vaultId === "string" && typeof r.amount === "string" && /^\d+(\.\d{1,6})?$/.test(r.amount) && (decimalToUnits(r.amount, 6) ?? 0n) > 0n && (decimalToUnits(r.amount, 6) ?? 0n) <= RESUME_MAX_MICRO, store, now, DEPOSIT_RESUME_MAX_MS);
 }
 /** Reads and clears the pending deposit. */
 export function takeResumeDeposit(store: Pick<Storage, "getItem" | "removeItem"> = ls(), now = Date.now()): ResumeDeposit | null {
@@ -84,6 +94,6 @@ export type ResumeStep =
 export function resumeStep(play: ResumePlay | null, deposit: ResumeDeposit | null, usdcMicro: bigint | undefined): ResumeStep {
   if (play) return newFundsArrived(usdcMicro, play.baseline) ? { kind: "play" } : { kind: "wait", for: "play" };
   if (!deposit) return { kind: "none" };
-  if (!newFundsArrived(usdcMicro, deposit.baseline)) return { kind: "wait", for: "deposit", vaultId: deposit.vaultId };
-  return { kind: "deposit", vaultId: deposit.vaultId, amount: fitResumeAmount(deposit.amount, usdcMicro!), ...(deposit.position ? { position: deposit.position } : {}), ...(deposit.migrate ? { migrate: true } : {}) };
+  if (usdcMicro == null || !newFundsArrived(usdcMicro, deposit.baseline)) return { kind: "wait", for: "deposit", vaultId: deposit.vaultId };
+  return { kind: "deposit", vaultId: deposit.vaultId, amount: fitResumeAmount(deposit.amount, usdcMicro), ...(deposit.position ? { position: deposit.position } : {}), ...(deposit.migrate ? { migrate: true } : {}) };
 }

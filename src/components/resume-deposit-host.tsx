@@ -4,7 +4,7 @@ import { RefreshCw } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { VAULTS, type Vault } from "@/lib/vaults";
 import { isOperableVault } from "@/lib/solana-data";
-import { clearResumeDeposit, peekResumeDeposit, peekResumePlay, resumeStep } from "@/lib/resume-deposit";
+import { clearResumeDeposit, clearPendingDeposit, peekPendingDeposit, peekResumeDeposit, peekResumePlay, resumeStep } from "@/lib/resume-deposit";
 import { DepositSimulation } from "@/components/deposit-simulation";
 
 /**
@@ -20,19 +20,26 @@ export function ResumeDepositHost({ wallet, usdc, checkedAt, onClose, onPoll }: 
   useEffect(() => {
     if (deposit) return;
     let dep = peekResumeDeposit();
-    const v = dep ? VAULTS.find((x) => x.id === dep!.vaultId) : undefined;
+    const v = dep ? VAULTS.find((x) => x.id === dep?.vaultId) : undefined;
     if (dep && (!v || !isOperableVault(v.id))) { clearResumeDeposit(); dep = null; }
-    const step = resumeStep(peekResumePlay(), dep, usdc);
-    if (step.kind === "wait") { setWaitingFor(step.for === "play" ? t("tu jugada") : t(v!.name)); return; }
+    const play = peekResumePlay();
+    // Sign-in can land here too; no funds/authorization assumed from a visitor's saved intent.
+    const pending = !dep && !play ? peekPendingDeposit() : null;
+    const pendingVault = pending ? VAULTS.find((x) => x.id === pending.vaultId) : undefined;
+    if (pending && pendingVault && isOperableVault(pendingVault.id)) {
+      setWaitingFor(null); setDeposit({ vault: pendingVault, amount: pending.amount }); return;
+    }
+    const step = resumeStep(play, dep, usdc);
+    if (step.kind === "wait") { setWaitingFor(step.for === "play" ? t("tu jugada") : t(v?.name ?? "tu bóveda")); return; }
     setWaitingFor(null);
     // The play itself reopens on Doble o Nada, which takes the entry once its ticket is open.
     if (step.kind === "play") { void navigate({ to: "/mercados" }); return; }
-    if (step.kind === "deposit" && v) { clearResumeDeposit(); setDeposit({ vault: v, amount: step.amount, ...(step.position ? { position: step.position } : {}), ...(step.migrate ? { migrate: true } : {}) }); }
+    if (step.kind === "deposit" && v) { setDeposit({ vault: v, amount: step.amount, ...(step.position ? { position: step.position } : {}), ...(step.migrate ? { migrate: true } : {}) }); }
   }, [usdc, checkedAt, deposit]); // eslint-disable-line react-hooks/exhaustive-deps
   // While waiting, check the balance every 4 s instead of the normal 20 s.
   useEffect(() => { if (!waitingFor || !onPoll) return; const id = setInterval(onPoll, 4_000); return () => clearInterval(id); }, [waitingFor, onPoll]);
   return <>
     {waitingFor && !deposit && <p role="status" className="flex items-center gap-2 rounded-2xl border border-primary/40 bg-primary/10 p-4 text-sm font-medium"><RefreshCw size={16} className="shrink-0 animate-spin text-primary motion-reduce:animate-none" />{t("Esperando tus dólares para {v}. Cuando lleguen, seguimos donde ibas.", { v: waitingFor })}</p>}
-    {deposit && <DepositSimulation key={`${deposit.vault.id}-${deposit.position ?? "new"}`} vault={deposit.vault} wallet={wallet} {...(deposit.position ? { position: deposit.position } : {})} initialAmount={deposit.amount} migrate={Boolean(deposit.migrate)} resumed onClose={() => { setDeposit(null); onClose(); }} />}
+    {deposit && <DepositSimulation key={`${deposit.vault.id}-${deposit.position ?? "new"}`} vault={deposit.vault} wallet={wallet} {...(deposit.position ? { position: deposit.position } : {})} initialAmount={deposit.amount} migrate={Boolean(deposit.migrate)} resumed onClose={() => { clearResumeDeposit(); clearPendingDeposit(); setDeposit(null); onClose(); }} />}
   </>;
 }

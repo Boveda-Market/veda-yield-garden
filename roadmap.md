@@ -29,3 +29,5 @@
 - [x] Botones de acción siempre visibles sin scroll en todas las tarjetas de dinero
 - [x] Botón «Entrar para depositar» → «Confirmar depósito» (y «Entra para confirmar tu depósito» en la tarjeta de acceso)
 - [x] Banner de Bitcoin al compartir en todas las páginas públicas (es/en)
+- [x] «Confirmar» antes de entrar y «Confirmar y depositar» al volver con cotización nueva.
+- [x] Cancelar cotización/regreso automático después de 30 minutos de espera; no mantenerla abierta durante un registro largo.

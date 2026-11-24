@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resumeStep, clearResumePlay, fitResumeAmount, newFundsArrived, peekResumeDeposit, peekResumePlay, RESUME_KEY, RESUME_PLAY_KEY, saveResumeDeposit, saveResumePlay, takeResumeDeposit } from "./resume-deposit";
+import { resumeStep, clearResumePlay, fitResumeAmount, newFundsArrived, peekResumeDeposit, peekResumePlay, RESUME_KEY, RESUME_PLAY_KEY, saveResumeDeposit, saveResumePlay, takeResumeDeposit, savePendingDeposit, peekPendingDeposit, clearPendingDeposit } from "./resume-deposit";
 
 function memory() { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), removeItem: (k: string) => void m.delete(k), has: (k: string) => m.has(k) }; }
 
@@ -11,10 +11,29 @@ describe("resume after topping up", () => {
     expect(takeResumeDeposit(s, 2000)?.amount).toBe("20");
     expect(s.has(RESUME_KEY)).toBe(false);
   });
-  it("expires after 30 minutes and removes the stale entry", () => {
+  it("cancels the Coinbase return intent after 30 minutes, not after days of KYC", () => {
     const s = memory(); saveResumeDeposit({ vaultId: "gta6", amount: "20" }, s, 0);
+    expect(peekResumeDeposit(s, 29 * 60_000)).toMatchObject({ vaultId: "gta6", amount: "20", at: 0 });
     expect(peekResumeDeposit(s, 30 * 60_000 + 1)).toBeNull();
     expect(s.has(RESUME_KEY)).toBe(false);
+  });
+  it("keeps the pre-login vault and amount for 30 minutes, without consuming on reload", () => {
+    const s = memory(); savePendingDeposit({ vaultId: "btc", amount: "100" }, s, 0);
+    expect(peekPendingDeposit(s, 29 * 60_000)).toEqual({ vaultId: "btc", amount: "100", at: 0 });
+    expect(peekPendingDeposit(s, 30 * 60_000)?.amount).toBe("100");
+    expect(peekPendingDeposit(s, 30 * 60_000 + 1)).toBeNull();
+  });
+  it("explicit cancellation clears the pre-login intent", () => {
+    const s = memory(); savePendingDeposit({ vaultId: "btc", amount: "100" }, s, 0);
+    clearPendingDeposit(s);
+    expect(peekPendingDeposit(s, 1000)).toBeNull();
+  });
+  it("rejects malformed and out-of-range pre-login amounts", () => {
+    const s = memory();
+    for (const amount of ["", "NaN", "-1", "5001"]) {
+      savePendingDeposit({ vaultId: "btc", amount }, s, 0);
+      expect(peekPendingDeposit(s, 1000)).toBeNull();
+    }
   });
   it("waits for the NEW dollars when the wallet already had some ($3 before)", () => {
     expect(newFundsArrived(3_000_000n, "3000000")).toBe(false);
