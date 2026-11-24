@@ -59,6 +59,28 @@ describe("autopilot fees go in as dollars", () => {
 });
 
 import { feesToTokenSwapPlan } from "./dlmm";
+import { fallingRebalancePlan, fallingRebalanceAllocation } from "./dlmm";
+describe("downward exits sell earnings without compounding them", () => {
+  it("sells all 20 fee coins and keeps their proceeds plus $10 cash earnings outside the principal", () => {
+    const plan = fallingRebalancePlan(200_000_000n, 0n, 20_000_000n, 1);
+    expect(plan.amountIn).toBe(119_500_000n);
+    expect(plan.gainsX).toBe(20_000_000n);
+    expect(fallingRebalanceAllocation(plan, 119_500_000n, 10_000_000n)).toEqual({ depositX: 98_505_000n, depositY: 98_505_000n, gainsKept: 30_000_000n });
+  });
+  it("keeps net dollar earnings and allocates swap costs to coin earnings proportionally", () => {
+    const plan = fallingRebalancePlan(200_000_000n, 0n, 20_000_000n, 1);
+    expect(fallingRebalanceAllocation(plan, 107_550_000n, 9_700_000n).gainsKept).toBe(27_700_000n);
+  });
+  it("does not skip selling tiny fee-token amounts", () => {
+    const plan = fallingRebalancePlan(200n, 199n, 1n, 1);
+    expect(plan.amountIn).toBe(2n);
+    expect(fallingRebalanceAllocation(plan, 2n, 0n).gainsKept).toBe(1n);
+  });
+  it("rejects invalid prices and a dollar-heavy downward snapshot", () => {
+    expect(() => fallingRebalancePlan(100n, 0n, 1n, NaN)).toThrow();
+    expect(() => fallingRebalancePlan(0n, 100n, 1n, 1)).toThrow();
+  });
+});
 describe("autopilot fees go in as token when price rose", () => {
   it("buys token with fee dollars beyond half the base", () => {
     // base all USDC 200; fees 10 Y → keep 100 USDC, buy token with 110

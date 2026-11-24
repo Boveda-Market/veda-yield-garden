@@ -15,7 +15,7 @@ import { ledgerSwapToUsdc, freshIntermediates, closeIntermediates } from "@/lib/
 import { rebalanceGainsUsd } from "@/lib/autopilot";
 import { compoundSpendValid, type CompoundInput, type CompoundResult } from "@/lib/compound";
 import type { RebalanceResult } from "@/lib/dlmm";
-import { dlmmRange, dlmmSlippagePct, binsMoved, rebalanceSwapPlan, feesToUsdcSwapPlan, feesToTokenSwapPlan, DLMM_MIN_SOL_LAMPORTS, DLMM_MAX_SWAP_IMPACT_PCT, DLMM_EXIT_MIN_PCT } from "@/lib/dlmm";
+import { dlmmRange, dlmmSlippagePct, binsMoved, rebalanceSwapPlan, fallingRebalancePlan, fallingRebalanceAllocation, feesToTokenSwapPlan, DLMM_MIN_SOL_LAMPORTS, DLMM_MAX_SWAP_IMPACT_PCT, DLMM_EXIT_MIN_PCT } from "@/lib/dlmm";
 
 type Sdk = Awaited<ReturnType<typeof loadDlmmSdk>>;
 type Pool = Awaited<ReturnType<Sdk["DLMM"]["create"]>>;
@@ -485,7 +485,8 @@ export type { RebalanceResult } from "@/lib/dlmm";
 /**
  * One-signature 50/50 rebalance of an owner-verified range position: claim fees, remove all liquidity,
  * swap half the excess side inside the same pool, then re-centre the same position on the current price
- * with everything (capital + fees). Tiered harvest fee on the claimed USDC only (same tiers as harvest) goes to the fee ATA; only the owner signs; the wallet never loses prior balances.
+ * with principal only on downward exits (all net earnings stay as USDC), or principal + earnings on upward exits.
+ * Tiered harvest fee on claimed USDC only goes to the fee ATA; prior wallet balances are protected.
  */
 export async function simulateDlmmRebalance(connection: Connection, input: WithdrawalInput, options: { prepare?: boolean; maxImpactPct?: number; memo?: string; absorbWalletToken?: boolean; absorbUsdc?: bigint } = {}): Promise<RebalanceResult> {
   const startedAt = Date.now();
@@ -522,7 +523,7 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     // Price fell below the range: harvested/leftover USDC stays free in the wallet; only the base capital re-centres.
     const fellBelow = active < data.lowerBinId;
     const absorbedY = !fellBelow && options.absorbUsdc && options.absorbUsdc > 0n ? (options.absorbUsdc < usdcBefore ? options.absorbUsdc : usdcBefore) : 0n;
-    const x = xAll + absorbedX, y = fellBelow ? rawFloor(data.totalYAmount) : yAll - bovedaFee + absorbedY;
+    const x = xAll + absorbedX, y = yAll - bovedaFee + absorbedY;
     if (await connection.getBalance(owner) < 10_000_000) return fail("Necesitas un poco más de reserva de operaciones para rebalancear.");
 
     stage = "Preparación del rebalanceo";
@@ -530,10 +531,10 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     const removals = await pool.removeLiquidity({ user: owner, position, fromBinId: data.lowerBinId, toBinId: data.upperBinId, bps: new BN(10_000), shouldClaimAndClose: false });
     if (claims.length > 1 || removals.length !== 1) return fail("Este rebalanceo necesitaría varias firmas; no se preparó.");
     // Withdrawn amounts are SDK estimates; keep a small margin so the swap never touches prior wallet balances.
-    // Base capital re-centres 50/50; harvested fees and absorbed leftovers all go in as dollars (single-side).
+    // Margin applies to principal only on downward exits: fee tokens must ALL be sold, never re-deposited.
     const baseX = rawFloor(data.totalXAmount), baseY = rawFloor(data.totalYAmount);
-    // Price rose above the range: gains go in as the vault token (single-side token); otherwise as dollars.
-    const plan = (active > data.upperBinId ? feesToTokenSwapPlan : feesToUsdcSwapPlan)(x * 995n / 1000n, y * 995n / 1000n, baseX * 995n / 1000n, baseY * 995n / 1000n, price);
+    const falling = fellBelow ? fallingRebalancePlan(baseX, baseY, BigInt(data.feeX.toString()) + absorbedX, price) : null;
+    const plan = falling ?? feesToTokenSwapPlan(x * 995n / 1000n, y * 995n / 1000n, baseX * 995n / 1000n, baseY * 995n / 1000n, price);
     let swapIxs: TransactionInstruction[] = [], outMin = 0n;
     if (plan.amountIn > 0n) {
       stage = "Cotización del intercambio";
@@ -546,8 +547,9 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
       const swapTx = await pool.swap({ inToken, outToken, inAmount: new BN(plan.amountIn.toString()), minOutAmount: quote.minOutAmount, lbPair: pool.pubkey, user: owner, binArraysPubkey: quote.binArraysPubkey });
       swapIxs = stripBudget(swapTx.instructions);
     }
-    const depX = (plan.swapForY ? x - plan.amountIn : x + outMin) * 99n / 100n;
-    const depY = (plan.swapForY ? y + outMin : y - plan.amountIn) * 99n / 100n;
+    const allocation = falling ? fallingRebalanceAllocation(falling, outMin, BigInt(data.feeY.toString()) - bovedaFee) : null;
+    const depX = allocation?.depositX ?? (plan.swapForY ? x - plan.amountIn : x + outMin) * 99n / 100n;
+    const depY = allocation?.depositY ?? (plan.swapForY ? y + outMin : y - plan.amountIn) * 99n / 100n;
     if (depX <= 0n && depY <= 0n) return fail("El saldo es demasiado pequeño para rebalancear.");
     stage = "Nuevo rango centrado";
     // Snapshot of the same position after the removal: no liquidity and no fees left.
@@ -559,7 +561,9 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     const feeIxs = bovedaFee > 0n ? [createTransferCheckedInstruction(usdcAta, usdc, feeAta, owner, bovedaFee, 6)] : [];
     // Both wallet token accounts already exist: drop their idempotent re-creation so Token-2022 vaults fit in 1232 bytes.
     const existingAtas = new Set([before[0] ? usdcAta.toBase58() : "", before[1] ? tokenX.toBase58() : ""].filter(Boolean));
-    const core = dropExistingAtaCreates(stripBudget([...(claims[0]?.instructions ?? []), ...removals[0]!.instructions, ...feeIxs, ...swapIxs, ...rebalance.rebalancePositionInstruction]), existingAtas);
+    const removal = removals[0];
+    if (!removal) return fail("No se pudo preparar el rebalanceo.");
+    const core = dropExistingAtaCreates(stripBudget([...(claims[0]?.instructions ?? []), ...removal.instructions, ...feeIxs, ...swapIxs, ...rebalance.rebalancePositionInstruction]), existingAtas);
     const block = await connection.getLatestBlockhash();
     // Optional on-chain tag (Autopilot) so activity can name it; dropped when it would exceed the size limit.
     const memoIx = options.memo ? new TransactionInstruction({ programId: new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"), keys: [], data: Buffer.from(options.memo) }) : null;
@@ -586,19 +590,20 @@ export async function simulateDlmmRebalance(connection: Connection, input: Withd
     const solSpent = BigInt(before[3]?.lamports ?? 0) - BigInt(final.accounts[3]?.lamports ?? 0);
     const newAtaRent = [0, 1].reduce((sum, i) => sum + BigInt(before[i] ? 0 : final.accounts[i]?.lamports ?? 0), 0n);
     const feeDelta = before[4] ? tokenBalance(final.accounts[4], usdc, new PublicKey(FEE_WALLET)) - tokenBalance(asSim(before[4]), usdc, new PublicKey(FEE_WALLET)) : 0n;
-    const checks = { range: rangeOk, fee: feeDelta === bovedaFee, balances: usdcLeft >= 0n && tokenLeft >= 0n, budget: solSpent <= final.networkFee + newAtaRent + 2_000_000n };
+    const checks = { range: rangeOk, fee: feeDelta === bovedaFee, balances: usdcLeft >= 0n && tokenLeft >= 0n, earnings: !allocation || usdcLeft >= allocation.gainsKept, budget: solSpent <= final.networkFee + newAtaRent + 2_000_000n };
     const success = Object.values(checks).every(Boolean);
     if (!success) { log("rebalance", "checks", JSON.stringify({ ...checks, solSpent: solSpent.toString() })); return fail("El rebalanceo no superó todas las comprobaciones. No se pidió ninguna firma."); }
     if (options.prepare && Date.now() - startedAt > 45_000) return fail("La preparación tardó demasiado. Repite la revisión.");
-    const valueUsd = (Number(x) * price + Number(y)) / 1e6;
-    const gainsAddedUsd = rebalanceGainsUsd(BigInt(data.feeX.toString()), BigInt(data.feeY.toString()), absorbedX, price, bovedaFee) + Number(absorbedY) / 1e6;
+    const valueUsd = (Number(depX) * price + Number(depY)) / 1e6;
+    const gainsAddedUsd = fellBelow ? 0 : rebalanceGainsUsd(BigInt(data.feeX.toString()), BigInt(data.feeY.toString()), absorbedX, price, bovedaFee) + Number(absorbedY) / 1e6;
     return {
       success: true, tokenSymbol: config.symbol, valueUsd: valueUsd.toFixed(2),
       feesUsdc: tokenAmount(data.feeY.toString(), 6), feesToken: tokenAmount(data.feeX.toString(), config.decimals),
       usdcLeft: tokenAmount(usdcLeft.toString(), 6), tokenLeft: tokenAmount(tokenLeft.toString(), config.decimals),
       swapped: plan.amountIn === 0n ? "none" : plan.swapForY ? "token" : "usdc",
       bovedaFeeUsdc: tokenAmount(bovedaFee.toString(), 6), gainsAddedUsd: gainsAddedUsd.toFixed(2),
-      message: "Rebalanceo verificado en simulación: tus ganancias se suman y tu posición vuelve a quedar centrada en el precio actual. Solo tu wallet puede firmar.",
+      ...(allocation ? { gainsKeptUsd: tokenAmount(allocation.gainsKept.toString(), 6) } : {}),
+      message: fellBelow ? "Rebalanceo verificado: tus intereses se convierten a dólares digitales disponibles en tu billetera y tu posición vuelve a quedar centrada." : "Rebalanceo verificado: tus intereses se reinvierten y tu posición vuelve a quedar centrada.",
       ...(options.prepare ? { prepared: { transaction: Buffer.from(final.tx.serialize()).toString("base64"), expiresAt: startedAt + 45_000, lastValidBlockHeight: block.lastValidBlockHeight, wallet: input.wallet, position: input.position } } : {}),
     };
   } catch (error) {

@@ -88,6 +88,24 @@ export function feesToTokenSwapPlan(x: bigint, y: bigint, baseX: bigint, baseY: 
   return { swapForY: true, amountIn: inX > x ? x : inX };
 }
 
+/** Downward exit: one sale includes ALL fee tokens; only conservative principal is re-deposited. */
+export function fallingRebalancePlan(baseX: bigint, baseY: bigint, gainsX: bigint, price: number) {
+  if (!(price > 0) || !Number.isFinite(price) || baseX < 0n || baseY < 0n || gainsX < 0n) throw new Error("Invalid falling rebalance amounts");
+  const safeX = baseX * 995n / 1000n, safeY = baseY * 995n / 1000n;
+  // Below the entire range, principal is token-heavy. Fail closed if a stale read says otherwise.
+  if (Number(safeX) * price < Number(safeY)) throw new Error("Falling position is not token-heavy");
+  const targetX = BigInt(Math.floor((Number(safeX) * price + Number(safeY)) / 2 / price));
+  const soldBaseX = safeX - targetX;
+  return { swapForY: true as const, amountIn: soldBaseX + gainsX, soldBaseX, gainsX, depositX: targetX, baseY: safeY };
+}
+
+/** Allocate the protected sale proceeds proportionally, keeping earnings OUT of the new position. */
+export function fallingRebalanceAllocation(plan: ReturnType<typeof fallingRebalancePlan>, outMin: bigint, netFeeY: bigint) {
+  if (outMin < 0n || netFeeY < 0n) throw new Error("Invalid falling rebalance proceeds");
+  const gainProceeds = plan.amountIn > 0n ? outMin * plan.gainsX / plan.amountIn : 0n;
+  return { depositX: plan.depositX * 99n / 100n, depositY: (plan.baseY + outMin - gainProceeds) * 99n / 100n, gainsKept: netFeeY + gainProceeds };
+}
+
 /** Personal alert text when a range position has been out of range for 10 minutes. */
 export function rangeAlertText(vaultName: string, above: boolean) {
   return tgCard("🚨", `Tu ${vaultName} dejó de generar ganancias`, [
@@ -119,5 +137,7 @@ export type RebalanceResult = {
   bovedaFeeUsdc?: string;
   /** Earnings (both tokens, after Bóveda Market's fee) folded into the new range, in dollars at the active price. */
   gainsAddedUsd?: string;
+  /** Protected net earnings delivered as available USDC on a downward range exit. */
+  gainsKeptUsd?: string;
   prepared?: { transaction: string; expiresAt: number; lastValidBlockHeight: number; wallet: string; position: string };
 };

@@ -68,3 +68,4 @@ use the editor.
 
 - Deposit return intents are timestamped browser-only drafts kept for at most 30 minutes, not prices or authorization; restore through the normal live quote and clear on timeout, explicit cancellation or success. Close waiting quotes on timeout but never interrupt signing, submitted operations or receipts.
 - About uses a shared browser-safe page component with public Spanish/English leaf routes, localized metadata and sitemap entries, so it remains accessible without sign-in.
+- Range-rebalance earnings allocation is shared pure logic in dlmm.ts with integer tests; final simulation enforces the reserved cash floor, and result destination metadata survives delayed confirmation so receipts never mislabel available earnings as reinvested.

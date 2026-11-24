@@ -1,7 +1,7 @@
 import type { Connection } from "@solana/web3.js";
 import type { MonitorRow } from "@/lib/status-monitor";
 import { AUTOPILOT_POLICY_ID, AUTOPILOT_PROGRAMS, AUTOPILOT_SIGNER_ID, PRIVY_APP_ID, privyWalletRpc } from "@/lib/privy-signer";
-import { AUTOPILOT_MEMO, AUTOPILOT_FEE_ATA, AUTOPILOT_MAX_IMPACT_PCT, AUTOPILOT_MAX_PER_RUN, autopilotDecision, autopilotDoneText, vaultTag, vaultFromResult, onlyAllowedPrograms, privyLimitError, PRIVY_LIMIT_ALERT_MS, withFailure, type AutopilotRow } from "@/lib/autopilot";
+import { AUTOPILOT_MEMO, AUTOPILOT_FEE_ATA, AUTOPILOT_MAX_IMPACT_PCT, AUTOPILOT_MAX_PER_RUN, autopilotDecision, autopilotDoneText, vaultTag, vaultFromResult, gainsDestinationFromResult, onlyAllowedPrograms, privyLimitError, PRIVY_LIMIT_ALERT_MS, withFailure, type AutopilotRow } from "@/lib/autopilot";
 
 type Db = { from: (t: string) => any };
 type Enrollment = AutopilotRow & { last_result?: string | null; wallet: string; privy_user_id: string; wallet_id: string };
@@ -54,9 +54,10 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
       if (st && !st.err && (st.confirmationStatus === "confirmed" || st.confirmationStatus === "finalized")) {
         const pendingGains = (e as { last_gains_usd?: number | null }).last_gains_usd ?? null;
         const vid = vaultFromResult(e.last_result) ?? "gta6";
-        await save(e.wallet, { last_rebalance_at: iso, last_result: "Rebalanceada" + vaultTag(vid) });
-        e.last_rebalance_at = iso; e.last_result = "Rebalanceada" + vaultTag(vid);
-        await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName(vid), undefined, pendingGains != null ? Number(pendingGains) : null), { text: "👀 Ver Mi Billetera", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
+        const destination = gainsDestinationFromResult(e.last_result);
+        await save(e.wallet, { last_rebalance_at: iso, last_result: "Rebalanceada" + vaultTag(vid) + ` ·g=${destination}` });
+        e.last_rebalance_at = iso; e.last_result = "Rebalanceada" + vaultTag(vid) + ` ·g=${destination}`;
+        await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName(vid), undefined, pendingGains != null ? Number(pendingGains) : null, destination), { text: "👀 Ver Mi Billetera", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
         done++;
         continue;
       }
@@ -100,9 +101,12 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
       let signature: string;
       try { signature = await connection.sendRawTransaction(Buffer.from(signed, "base64"), { skipPreflight: false, maxRetries: 3 }); }
       catch { await fail(e, "La red rechazó el envío; se reintentará."); continue; }
-      const gains = quote.gainsAddedUsd != null ? Number(quote.gainsAddedUsd) : null;
+      const destination = quote.gainsKeptUsd !== undefined ? "wallet" : "vault";
+      const gainsText = quote.gainsKeptUsd ?? quote.gainsAddedUsd;
+      const gains = gainsText != null ? Number(gainsText) : null;
+      const resultTag = vaultTag(p.vaultId) + ` ·g=${destination}`;
       // Persist the sent signature before waiting, so a slow confirmation or an interrupted run is reconciled (record + alert) next cycle.
-      await save(e.wallet, { last_signature: signature, last_gains_usd: gains, last_result: `${e.last_result?.startsWith("[") ? e.last_result.split("]")[0] + "] " : ""}Enviada; confirmando…${vaultTag(p.vaultId)}` });
+      await save(e.wallet, { last_signature: signature, last_gains_usd: gains, last_result: `${e.last_result?.startsWith("[") ? e.last_result.split("]")[0] + "] " : ""}Enviada; confirmando…${resultTag}` });
       let ok = false;
       for (let i = 0; i < 12 && !ok; i++) {
         await new Promise((r) => setTimeout(r, 2500));
@@ -110,12 +114,12 @@ export async function runAutopilot(opts: { db: Db; connection: Connection; rows:
         if (st?.err) break;
         ok = st?.confirmationStatus === "confirmed" || st?.confirmationStatus === "finalized";
       }
-      if (!ok) { await fail(e, "Sin confirmación; se revisará en el próximo ciclo."); continue; }
-      await save(e.wallet, { last_rebalance_at: iso, last_signature: signature, last_result: "Rebalanceada" + vaultTag(p.vaultId), last_gains_usd: gains });
+      if (!ok) { await fail(e, "Sin confirmación; se revisará en el próximo ciclo." + resultTag); continue; }
+      await save(e.wallet, { last_rebalance_at: iso, last_signature: signature, last_result: "Rebalanceada" + resultTag, last_gains_usd: gains });
       e.last_rebalance_at = iso;
       await db.from("system_service_status").delete().eq("service", k);
       opts.rows.delete(k);
-      await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName(p.vaultId), quote.valueUsd, gains), { text: "👀 Ver Mi Billetera", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
+      await opts.alert(e.privy_user_id, autopilotDoneText(opts.vaultName(p.vaultId), quote.valueUsd, gains, destination), { text: "👀 Ver Mi Billetera", url: "https://bovedamarket.app/wallet" }).catch(() => undefined);
       done++;
       break; // one rebalance per wallet per pass
     }

@@ -1,5 +1,8 @@
 /** Range-based (GTA6) vault texts. */
 export const rangeVaults: Record<string, string> = {
+  "Tus intereses quedaron en dólares digitales disponibles en tu billetera. Tu bóveda quedó centrada y vuelve a generar.": "Your interest is now available as digital dollars in your wallet. Your vault was re-centered and is earning again.",
+  "Intereses a tu billetera": "Interest to your wallet",
+  "El precio bajó y tus intereses quedaron en dólares digitales disponibles en tu billetera. No se reinvirtieron. Tu bóveda vuelve a generar; no tienes que hacer ninguna acción.": "The price fell and your interest is now available as digital dollars in your wallet. It was not reinvested. Your vault is earning again; no action is needed.",
   "Toca una bóveda para ver todo y depositar.": "Tap a vault to see everything and deposit.",
   "Tienes capital": "You have funds",
   "Tu bóveda": "Your vault",

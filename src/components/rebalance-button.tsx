@@ -120,7 +120,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
   const symbol = coinLabel(quote?.tokenSymbol ?? position.symbol, position.symbol);
   return <Dialog open onOpenChange={(o) => { if (o || pending) return; if (quote?.success && !signature && !done && !kept) setKept(true); else onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")}>
     {kept ? <FundsKeptCard where="vault" onDone={onClose} /> : <>
-    {done ? <ActionSuccess title={t("¡Posición rebalanceada!")} body={t("Tus ganancias se sumaron y tu posición quedó centrada en el precio actual. Ya vuelve a generar.")} signature={signature} onClose={onClose}
+    {done ? <ActionSuccess title={t("¡Posición rebalanceada!")} body={quote?.gainsKeptUsd !== undefined ? t("Tus intereses quedaron en dólares digitales disponibles en tu billetera. Tu bóveda quedó centrada y vuelve a generar.") : t("Tus ganancias se sumaron y tu posición quedó centrada en el precio actual. Ya vuelve a generar.")} signature={signature} onClose={onClose}
       amount={quote?.valueUsd ? { value: `$${quote.valueUsd}`, unit: "" } : undefined}
       details={[]} /> : <>
       <DialogTitle>{t("Rebalancear posición")} · {symbol}</DialogTitle>
@@ -129,7 +129,7 @@ function RebalanceSheet({ position, onClose }: { position: ChainPosition; onClos
       {pending && !quote && <WorkingLine text={t("Preparando tu rebalanceo…")} />}
       {quote?.success && !pending && <DetailsToggle><dl className="grid gap-2 rounded-xl border border-border p-4 text-sm">
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Se recoloca")}</dt><dd className="font-semibold">≈ ${quote.valueUsd}</dd></div>
-        <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Ganancias que se suman")}</dt><dd>${quote.feesUsdc} + {quote.feesToken} {symbol}</dd></div>
+        <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{quote.gainsKeptUsd !== undefined ? t("Intereses a tu billetera") : t("Ganancias que se suman")}</dt><dd>${quote.gainsKeptUsd ?? quote.gainsAddedUsd ?? "0"}</dd></div>
         {quote.bovedaFeeUsdc && Number(quote.bovedaFeeUsdc) > 0 && <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Comisión")}</dt><dd>−${quote.bovedaFeeUsdc}</dd></div>}
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Nuevo reparto")}</dt><dd>{t("Mitad {s} · mitad dólares", { s: symbol })}</dd></div>
         <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{t("Pequeño sobrante a tu billetera")}</dt><dd>${quote.usdcLeft} · {quote.tokenLeft} {symbol}</dd></div>

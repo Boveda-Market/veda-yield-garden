@@ -57,15 +57,15 @@ export const gainsWorthQuoting = (gainsUsd: number | null | undefined): gainsUsd
  * Personal Telegram card after an automatic rebalance. The rebalance also folds the pending earnings into the vault,
  * so the card says how much was added (or, for cents, that the counter restarts) and nobody thinks earnings vanished.
  */
-export function autopilotDoneText(vaultName: string, valueUsd: string | undefined, gainsUsd?: number | null) {
+export function autopilotDoneText(vaultName: string, valueUsd: string | undefined, gainsUsd?: number | null, destination: "wallet" | "vault" = "vault") {
   const value = valueUsd && Number.isFinite(Number(valueUsd)) && Number(valueUsd) > 0 ? `$${Number(valueUsd).toFixed(2)}` : null;
   return tgCard("🤖", `Piloto automático rebalanceó ${vaultName}`, [
     tgRow("🏦", "Bóveda", vaultName),
-    gainsWorthQuoting(gainsUsd) ? tgRow("💵", "Ganancias sumadas", `+$${gainsUsd.toFixed(2)}`) : "💵 Ganancias: centavos acumulados sumados",
+    gainsWorthQuoting(gainsUsd) ? tgRow("💵", destination === "wallet" ? "Intereses disponibles" : "Intereses reinvertidos", `+$${gainsUsd.toFixed(2)}`) : destination === "wallet" ? "💵 Intereses convertidos a dólares digitales disponibles" : "💵 Intereses acumulados reinvertidos",
     value ? tgRow("📊", "Posición activa", value) : null,
     tgRow("🎯", "Estado", "Centrada en el precio actual"),
     "",
-    "✅ Tu contador de ganancias empieza desde cero porque esos dólares ya están rindiendo.",
+    destination === "wallet" ? "✅ Tus intereses quedan en dólares digitales disponibles en tu billetera; no se reinvirtieron." : "✅ Tu contador de ganancias empieza desde cero porque esos dólares ya están rindiendo.",
     "✨ <b>No tienes que hacer ninguna acción.</b>",
   ]);
 }
@@ -73,6 +73,8 @@ export function autopilotDoneText(vaultName: string, valueUsd: string | undefine
 /** Vault id tagged on autopilot_enrollments.last_result as " ·v=<id>" so bell and reconcile name the right vault. */
 export const vaultTag = (id: string) => ` ·v=${id}`;
 export const vaultFromResult = (r: string | null | undefined) => /·v=([a-z0-9]+)/.exec(r ?? "")?.[1] ?? null;
+/** Persist destination beside the existing result, so delayed confirmations keep the same receipt. */
+export const gainsDestinationFromResult = (r: string | null | undefined): "wallet" | "vault" => /·g=wallet\b/.test(r ?? "") ? "wallet" : "vault";
 
 /** Range vaults (GTA6) run on Autopilot by default: turn it on only for wallets that never had a choice recorded; a wallet that switched it off stays off. */
 export function shouldAutoEnableAutopilot(opts: { hasRangePosition: boolean; enabled: boolean | null }) {
@@ -80,10 +82,10 @@ export function shouldAutoEnableAutopilot(opts: { hasRangePosition: boolean; ena
 }
 
 /** Informational bell/Telegram notice: the newest Autopilot event worth telling (rebalance first, then activation) within 7 days. */
-export function autopilotNotice(s: { enabled: boolean; enabledAt: string | null; lastRebalanceAt: string | null; lastGainsUsd?: number | null; lastVaultId?: string | null } | null, now: number): { id: string; kind: "rebalanced" | "on"; at: string; gainsUsd: number | null; vaultId: string | null } | null {
+export function autopilotNotice(s: { enabled: boolean; enabledAt: string | null; lastRebalanceAt: string | null; lastGainsUsd?: number | null; lastVaultId?: string | null; lastGainsDestination?: "wallet" | "vault" } | null, now: number): { id: string; kind: "rebalanced" | "on"; at: string; gainsUsd: number | null; vaultId: string | null; gainsDestination: "wallet" | "vault" } | null {
   if (!s) return null;
   const fresh = (iso: string | null) => !!iso && now - Date.parse(iso) < 7 * 86_400_000;
-  if (fresh(s.lastRebalanceAt)) return { id: `autopilot:rb:${s.lastRebalanceAt}`, kind: "rebalanced", at: s.lastRebalanceAt!, gainsUsd: gainsWorthQuoting(s.lastGainsUsd) ? s.lastGainsUsd : null, vaultId: s.lastVaultId ?? null };
+  if (fresh(s.lastRebalanceAt) && s.lastRebalanceAt) return { id: `autopilot:rb:${s.lastRebalanceAt}`, kind: "rebalanced", at: s.lastRebalanceAt, gainsUsd: gainsWorthQuoting(s.lastGainsUsd) ? s.lastGainsUsd : null, vaultId: s.lastVaultId ?? null, gainsDestination: s.lastGainsDestination ?? "vault" };
   return null;
 }
 
