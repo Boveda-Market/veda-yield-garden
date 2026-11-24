@@ -32,7 +32,7 @@ export const GTA6_HERO_SHARE = 0.2;
 export const HERO_KEY = "boveda-hero-v";
 
 /** Share of new visitors per variant (same order as HERO_VARIANTS, sums to 1): GTA6 launch, then calm hold and Trump boosted. */
-export const HERO_WEIGHTS: readonly number[] = HERO_VARIANTS.map((v) => ({ bitcoin: 0.3, gta6: 0.2, calm: 0.2, trump: 0.15, doble: 0.1 } as Record<string, number>)[v.theme ?? ""] ?? 0.05);
+export const HERO_WEIGHTS: readonly number[] = HERO_VARIANTS.map((v) => ({ bitcoin: 0.35, trump: 0.25, gta6: 0.2, calm: 0.1, doble: 0.05 } as Record<string, number>)[v.theme ?? ""] ?? 0.05);
 
 /** Pick a variant for "/": forced value wins, then the saved one (if still in rotation), else weighted random. */
 export function pickHeroVariant(forced: string | null, saved: string | null, rand: number): number {
