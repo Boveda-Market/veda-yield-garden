@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Bot, Check, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { GITHUB_URL, GithubMark } from "@/components/github-link";
 
 const ROWS: [string, string][] = [
   ["Calcular rangos de precio y curvas de liquidez a mano.", "Depositas dólares y el sistema fija el rango en un toque."],
@@ -31,6 +32,11 @@ export function SmartSections() {
     <ul className="mt-5 grid gap-3">{ROWS.map(([manual, smart]) => <li key={manual} className="grid gap-2 rounded-2xl border border-border bg-card p-4 sm:grid-cols-2">
       <p className="flex gap-2 text-sm leading-6 text-muted-foreground"><X size={16} aria-hidden className="mt-1 shrink-0 text-destructive" /><span><span className="sr-only">{t("A mano")}: </span>{t(manual)}</span></p>
       <p className="flex gap-2 text-sm font-semibold leading-6"><Check size={16} aria-hidden className="mt-1 shrink-0 text-primary" /><span><span className="sr-only">{t("Bóveda inteligente")}: </span>{t(smart)}</span></p>
-    </li>)}</ul>
+    </li>)}
+      <li className="grid gap-2 rounded-2xl border border-border bg-card p-4 sm:grid-cols-2">
+        <p className="flex gap-2 text-sm leading-6 text-muted-foreground"><X size={16} aria-hidden className="mt-1 shrink-0 text-destructive" /><span><span className="sr-only">{t("A mano")}: </span>{t("Sistemas cerrados o contratos sin verificación pública.")}</span></p>
+        <p className="flex gap-2 text-sm font-semibold leading-6"><Check size={16} aria-hidden className="mt-1 shrink-0 text-primary" /><span><span className="sr-only">{t("Bóveda inteligente")}: </span>{t("Código abierto y transparente en GitHub.")} <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary underline"><GithubMark size={13} />{t("Ver en GitHub")}</a></span></p>
+      </li>
+    </ul>
   </section>;
 }
