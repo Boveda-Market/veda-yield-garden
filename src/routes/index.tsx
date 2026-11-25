@@ -29,6 +29,7 @@ import { BootSplash } from "@/components/boot-splash";
 import { CalmHero } from "@/components/home-calm";
 import { ThemeSections } from "@/components/home-sections";
 import { SmartHero, SmartSections } from "@/components/home-smart";
+import { CompoundHero, CompoundSimulator, CompoundSections } from "@/components/home-compound";
 
 /** Before hydration, returning visitors (flag set by a tiny head script) see the loading screen instead of the full page flashing. */
 function ReturningCover() {
@@ -134,6 +135,7 @@ export function Landing({ variant }: { variant?: number } = {}) {
   const btcHero = hero.theme === "bitcoin";
   const trumpHero = hero.theme === "trump";
   const smartHero = hero.theme === "smart" || hero.theme === "own";
+  const compoundHero = hero.theme === "compound";
   const classicHero = !hero.theme;
   const plainHero = false;
   if (decided && compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 pb-10 pt-20 text-foreground sm:py-10">
@@ -147,7 +149,8 @@ export function Landing({ variant }: { variant?: number } = {}) {
     {!decided && <ReturningCover />}
     <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 pb-4 pt-14 sm:px-6 sm:py-6"><Link to="/" className="flex min-w-0 shrink-0 items-center gap-2 font-display text-lg font-bold sm:gap-3"><BrandLogo /></Link><div className="flex min-w-0 items-center gap-1.5 sm:gap-2"></div></header>
     <main className="mx-auto max-w-5xl px-6">
-      <section className="grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 md:pt-12">
+      <section className={`grid items-center gap-6 pb-12 pt-2 md:grid-cols-2 md:gap-10 ${compoundHero ? "md:pt-4" : "md:pt-12"}`}>
+        {compoundHero && <div className="order-1 min-w-0 md:col-span-2"><CompoundHero title={hero.title} sub={hero.sub} /></div>}
         {gtaHero && <div className="order-1 min-w-0 md:col-span-2"><Gta6Hero title={hero.title} sub={hero.sub} /></div>}
         {dobleHero && <div className="order-1 min-w-0 md:col-span-2"><DobleHero title={hero.title} sub={hero.sub} /></div>}
         {btcHero && <div className="order-1 min-w-0 md:col-span-2"><BitcoinHero title={hero.title} sub={hero.sub} /></div>}
@@ -156,32 +159,33 @@ export function Landing({ variant }: { variant?: number } = {}) {
         {smartHero && <div className="order-1 min-w-0 md:col-span-2"><SmartHero title={hero.title} sub={hero.sub} /></div>}
         {calmHero && <div className="order-1 min-w-0 md:col-span-2"><CalmHero title={hero.title} sub={hero.sub} /></div>}
         {plainHero && <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(hero.title)}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t(hero.sub)}</p></div>}
-        <div className="order-3 min-w-0 text-center md:order-1 md:text-left">
+        <div className={`order-3 min-w-0 text-center md:order-1 md:text-left ${compoundHero ? "hidden" : ""}`}>
           {plainHero && <h1 className="hidden font-display text-4xl font-bold leading-tight sm:text-5xl md:block">{t(hero.title)}</h1>}
           {plainHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p></>}
         </div>
-        <div id="acceso" className="order-2 min-w-0 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
+        <div id="acceso" className={`order-2 min-w-0 scroll-mt-4 flex flex-col items-center ${compoundHero ? "md:order-3" : "rounded-3xl border border-border bg-card p-6 shadow-sm"} [&>div]:mt-0`}>
           <HomeCtas />
           <Link to="/app" className="mt-2 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-lg font-bold text-primary-foreground shadow-sm transition-transform active:scale-[0.98]">{t("Continuar a la app")}<ArrowRight size={18} /></Link>
           <p className="mt-2 text-center text-xs text-muted-foreground">{t("Explora sin cuenta; solo te pedimos entrar al depositar.")}</p>
           {showLogin ? <div className="mt-4 w-full border-t border-border pt-2 [&>div]:mt-0"><EntryAccess /></div> : <button type="button" onClick={() => setShowLogin(true)} className="mt-4 text-sm text-primary underline underline-offset-4">{t("¿Ya tienes cuenta? Inicia sesión")}</button>}
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span><span aria-hidden="true">·</span><a href="https://www.privy.io/security" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground underline-offset-2 hover:text-primary hover:underline">{t("Conoce más")} ↗</a></p>
         </div>
+        {compoundHero && <div className="order-3 min-w-0 md:order-2"><CompoundSimulator /></div>}
       </section>
 
-      {btcHero ? <BitcoinSections /> : <>{smartHero && <><SmartSections /><VerifySection /></>}<ThemeSections theme={hero.theme} /></>}
+      {compoundHero ? <><CompoundSections /><VerifySection /></> : btcHero ? <BitcoinSections /> : <>{smartHero && <><SmartSections /><VerifySection /></>}<ThemeSections theme={hero.theme} /></>}
 
       <section aria-label={t("Cómo abrir tu bóveda en 4 pasos")} className="mb-4 py-8">
         <h2 className="font-display text-2xl font-bold">{t("Cómo abrir tu bóveda en 4 pasos")}</h2>
         <ol className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{STEPS.map(([h, d], i) => <li key={h} className="rounded-2xl border border-border bg-card p-5"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-display font-bold text-primary-foreground">{i + 1}</span><p className="mt-4 font-display font-semibold">{t(h)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(d)}</p></li>)}</ol>
       </section>
 
-      <section aria-label={t("Abre tu bóveda y olvídate de las gráficas")} className="mb-4 py-8">
+      {!compoundHero && <section aria-label={t("Abre tu bóveda y olvídate de las gráficas")} className="mb-4 py-8">
         <h2 className="font-display text-2xl font-bold">{t("Abre tu bóveda y olvídate de las gráficas")}</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("En el cripto tradicional comprar y holdear da ansiedad. En Bóveda Market, la volatilidad te paga intereses en cada subida y cada bajada.")}</p>
         <ul className="mt-5 grid gap-3 sm:grid-cols-2">{CALM_HOLD.map(({ icon: Icon, title, body }) => <li key={title} className="rounded-2xl sm:last:odd:col-span-2 border border-border bg-card p-4"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon size={18} aria-hidden="true" /></span><p className="mt-3 font-display font-semibold">{t(title)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t(body)}</p></li>)}</ul>
         <p className="mt-4 rounded-2xl border border-primary/30 bg-primary/5 p-4 text-center font-display text-sm font-semibold leading-6">{t("El hold tradicional es esperar y rezar para que el precio suba. Holdear en Bóveda es cobrar comisiones mientras duermes, pase lo que pase con el precio.")}</p>
-      </section>
+      </section>}
 
       <section aria-label={t("Doble o Nada")} className="mb-4 grid items-center gap-6 py-8 md:grid-cols-2">
         <div className="text-center md:text-left"><img src={dobleLogo} alt={t("Doble o Nada")} width={900} height={286} loading="lazy" className="mx-auto h-16 w-auto md:mx-0 sm:h-20" /><p className="mt-1 text-xs font-bold uppercase tracking-widest text-primary">{t("Rondas relámpago")}</p><h2 className="mt-2 font-display text-3xl font-bold">{t("Mercados de predicción en tiempo real.")}</h2><p className="mt-3 text-muted-foreground">{t("Rondas de 5 min, 15 min y 4 h sobre Bitcoin, Ethereum y Solana. Se participa en dólares, sin comprar la moneda, y cada ronda se resuelve automáticamente.")}</p><Link to={guideHref("/guias/mercados-de-prediccion", lang)} className="mt-3 inline-block text-sm font-semibold text-primary underline underline-offset-4">{t("¿Cómo funciona? Lee la guía")} →</Link></div>

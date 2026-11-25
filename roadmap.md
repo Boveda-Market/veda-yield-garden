@@ -70,3 +70,5 @@
 - [x] Portada: «Continuar a la app» en lugar de la ventana de inicio
 - [x] Quitar el botón grande de cada portada (Entrar a la Bóveda GTA6 / Oprime aquí / Abrir mi bóveda / Ver bóvedas inteligentes); sigue «Continuar a la app»
 - [x] Estilizar la tarjeta de verificación de pools: filas completas, dirección legible, enlaces sin saltos de línea
+- [x] Portada de interés compuesto ES/EN: simulador educativo, regla de subidas/bajadas y acceso a la app; verificada en móvil/escritorio y 18 pruebas de cálculos/rotación.
+- [x] Aclarar en la portada y verificación que Bóveda Market solo conecta y automatiza; los pools generan intereses y no custodiamos fondos.

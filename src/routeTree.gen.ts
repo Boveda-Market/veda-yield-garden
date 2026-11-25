@@ -21,6 +21,7 @@ import { Route as CuentaRouteImport } from './routes/cuenta'
 import { Route as DobleONadaRouteImport } from './routes/doble-o-nada'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as Gta6RouteImport } from './routes/gta6'
+import { Route as InteresCompuestoRouteImport } from './routes/interes-compuesto'
 import { Route as InvitaRouteImport } from './routes/invita'
 import { Route as MercadosRouteImport } from './routes/mercados'
 import { Route as NotificacionesRouteImport } from './routes/notificaciones'
@@ -40,6 +41,7 @@ import { Route as EnAboutRouteImport } from './routes/en/about'
 import { Route as EnBitcoinRouteImport } from './routes/en/bitcoin'
 import { Route as EnBringYourCoinsRouteImport } from './routes/en/bring-your-coins'
 import { Route as EnClasicaRouteImport } from './routes/en/clasica'
+import { Route as EnCompoundInterestRouteImport } from './routes/en/compound-interest'
 import { Route as EnDobleONadaRouteImport } from './routes/en/doble-o-nada'
 import { Route as EnFaqRouteImport } from './routes/en/faq'
 import { Route as EnGta6RouteImport } from './routes/en/gta6'
@@ -135,6 +137,11 @@ const Gta6Route = Gta6RouteImport.update({
   path: '/gta6',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InteresCompuestoRoute = InteresCompuestoRouteImport.update({
+  id: '/interes-compuesto',
+  path: '/interes-compuesto',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InvitaRoute = InvitaRouteImport.update({
   id: '/invita',
   path: '/invita',
@@ -228,6 +235,11 @@ const EnBringYourCoinsRoute = EnBringYourCoinsRouteImport.update({
 const EnClasicaRoute = EnClasicaRouteImport.update({
   id: '/en/clasica',
   path: '/en/clasica',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnCompoundInterestRoute = EnCompoundInterestRouteImport.update({
+  id: '/en/compound-interest',
+  path: '/en/compound-interest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnDobleONadaRoute = EnDobleONadaRouteImport.update({
@@ -429,6 +441,7 @@ export interface FileRoutesByFullPath {
   '/doble-o-nada': typeof DobleONadaRoute
   '/faq': typeof FaqRoute
   '/gta6': typeof Gta6Route
+  '/interes-compuesto': typeof InteresCompuestoRoute
   '/invita': typeof InvitaRoute
   '/mercados': typeof MercadosRoute
   '/notificaciones': typeof NotificacionesRoute
@@ -447,6 +460,7 @@ export interface FileRoutesByFullPath {
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
   '/en/clasica': typeof EnClasicaRoute
+  '/en/compound-interest': typeof EnCompoundInterestRoute
   '/en/doble-o-nada': typeof EnDobleONadaRoute
   '/en/faq': typeof EnFaqRoute
   '/en/gta6': typeof EnGta6Route
@@ -496,6 +510,7 @@ export interface FileRoutesByTo {
   '/doble-o-nada': typeof DobleONadaRoute
   '/faq': typeof FaqRoute
   '/gta6': typeof Gta6Route
+  '/interes-compuesto': typeof InteresCompuestoRoute
   '/invita': typeof InvitaRoute
   '/mercados': typeof MercadosRoute
   '/notificaciones': typeof NotificacionesRoute
@@ -514,6 +529,7 @@ export interface FileRoutesByTo {
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
   '/en/clasica': typeof EnClasicaRoute
+  '/en/compound-interest': typeof EnCompoundInterestRoute
   '/en/doble-o-nada': typeof EnDobleONadaRoute
   '/en/faq': typeof EnFaqRoute
   '/en/gta6': typeof EnGta6Route
@@ -564,6 +580,7 @@ export interface FileRoutesById {
   '/doble-o-nada': typeof DobleONadaRoute
   '/faq': typeof FaqRoute
   '/gta6': typeof Gta6Route
+  '/interes-compuesto': typeof InteresCompuestoRoute
   '/invita': typeof InvitaRoute
   '/mercados': typeof MercadosRoute
   '/notificaciones': typeof NotificacionesRoute
@@ -582,6 +599,7 @@ export interface FileRoutesById {
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
   '/en/clasica': typeof EnClasicaRoute
+  '/en/compound-interest': typeof EnCompoundInterestRoute
   '/en/doble-o-nada': typeof EnDobleONadaRoute
   '/en/faq': typeof EnFaqRoute
   '/en/gta6': typeof EnGta6Route
@@ -633,6 +651,7 @@ export interface FileRouteTypes {
     | '/doble-o-nada'
     | '/faq'
     | '/gta6'
+    | '/interes-compuesto'
     | '/invita'
     | '/mercados'
     | '/notificaciones'
@@ -651,6 +670,7 @@ export interface FileRouteTypes {
     | '/en/bitcoin'
     | '/en/bring-your-coins'
     | '/en/clasica'
+    | '/en/compound-interest'
     | '/en/doble-o-nada'
     | '/en/faq'
     | '/en/gta6'
@@ -700,6 +720,7 @@ export interface FileRouteTypes {
     | '/doble-o-nada'
     | '/faq'
     | '/gta6'
+    | '/interes-compuesto'
     | '/invita'
     | '/mercados'
     | '/notificaciones'
@@ -718,6 +739,7 @@ export interface FileRouteTypes {
     | '/en/bitcoin'
     | '/en/bring-your-coins'
     | '/en/clasica'
+    | '/en/compound-interest'
     | '/en/doble-o-nada'
     | '/en/faq'
     | '/en/gta6'
@@ -767,6 +789,7 @@ export interface FileRouteTypes {
     | '/doble-o-nada'
     | '/faq'
     | '/gta6'
+    | '/interes-compuesto'
     | '/invita'
     | '/mercados'
     | '/notificaciones'
@@ -785,6 +808,7 @@ export interface FileRouteTypes {
     | '/en/bitcoin'
     | '/en/bring-your-coins'
     | '/en/clasica'
+    | '/en/compound-interest'
     | '/en/doble-o-nada'
     | '/en/faq'
     | '/en/gta6'
@@ -835,6 +859,7 @@ export interface RootRouteChildren {
   DobleONadaRoute: typeof DobleONadaRoute
   FaqRoute: typeof FaqRoute
   Gta6Route: typeof Gta6Route
+  InteresCompuestoRoute: typeof InteresCompuestoRoute
   InvitaRoute: typeof InvitaRoute
   MercadosRoute: typeof MercadosRoute
   NotificacionesRoute: typeof NotificacionesRoute
@@ -853,6 +878,7 @@ export interface RootRouteChildren {
   EnBitcoinRoute: typeof EnBitcoinRoute
   EnBringYourCoinsRoute: typeof EnBringYourCoinsRoute
   EnClasicaRoute: typeof EnClasicaRoute
+  EnCompoundInterestRoute: typeof EnCompoundInterestRoute
   EnDobleONadaRoute: typeof EnDobleONadaRoute
   EnFaqRoute: typeof EnFaqRoute
   EnGta6Route: typeof EnGta6Route
@@ -974,6 +1000,13 @@ declare module '@tanstack/react-router' {
       path: '/gta6'
       fullPath: '/gta6'
       preLoaderRoute: typeof Gta6RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interes-compuesto': {
+      id: '/interes-compuesto'
+      path: '/interes-compuesto'
+      fullPath: '/interes-compuesto'
+      preLoaderRoute: typeof InteresCompuestoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invita': {
@@ -1107,6 +1140,13 @@ declare module '@tanstack/react-router' {
       path: '/en/clasica'
       fullPath: '/en/clasica'
       preLoaderRoute: typeof EnClasicaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/compound-interest': {
+      id: '/en/compound-interest'
+      path: '/en/compound-interest'
+      fullPath: '/en/compound-interest'
+      preLoaderRoute: typeof EnCompoundInterestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/doble-o-nada': {
@@ -1363,6 +1403,7 @@ const rootRouteChildren: RootRouteChildren = {
   DobleONadaRoute: DobleONadaRoute,
   FaqRoute: FaqRoute,
   Gta6Route: Gta6Route,
+  InteresCompuestoRoute: InteresCompuestoRoute,
   InvitaRoute: InvitaRoute,
   MercadosRoute: MercadosRoute,
   NotificacionesRoute: NotificacionesRoute,
@@ -1381,6 +1422,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnBitcoinRoute: EnBitcoinRoute,
   EnBringYourCoinsRoute: EnBringYourCoinsRoute,
   EnClasicaRoute: EnClasicaRoute,
+  EnCompoundInterestRoute: EnCompoundInterestRoute,
   EnDobleONadaRoute: EnDobleONadaRoute,
   EnFaqRoute: EnFaqRoute,
   EnGta6Route: EnGta6Route,

@@ -1,5 +1,5 @@
 /** Home headlines. "/" rotates them by weight; each one also has its own address (HERO_SLUGS) for campaigns. */
-export const HERO_VARIANTS: readonly { title: string; sub: string; theme?: "gta6" | "doble" | "trump" | "calm" | "bitcoin" | "smart" | "own" }[] = [
+export const HERO_VARIANTS: readonly { title: string; sub: string; theme?: "gta6" | "doble" | "trump" | "calm" | "bitcoin" | "smart" | "own" | "compound" }[] = [
   { title: "Gana en las subidas y en las bajadas, sin la ansiedad de holdear.", sub: "Deposita dólares en una bóveda y cobra intereses de cada compra y venta del mercado. Sin comprar monedas una por una ni vigilar gráficas: el Piloto Automático se encarga. $0 por depositar y retiras cuando quieras." },
   { title: "Bóveda GTA6 Coin: intereses generados por el volumen del mercado.", sub: "Suba o baje GTA6 Coin, cada compra y venta te deja intereses. Sin holdear con ansiedad: el Piloto Automático ajusta tu bóveda y te avisa por Telegram.", theme: "gta6" },
   { title: "Bóveda Trump Coin: liquidez en uno de los mercados más activos.", sub: "Trump Coin mueve volumen las 24 horas. Suba o baje, la bóveda convierte esa actividad en intereses estimados en dólares, con retiro en cualquier momento.", theme: "trump" },
@@ -8,10 +8,11 @@ export const HERO_VARIANTS: readonly { title: string; sub: string; theme?: "gta6
   { title: "Ya conoces Bitcoin. Ahora haz que te pague intereses.", sub: "Sin comprar monedas raras ni saber de cripto. Empiezas con dólares digitales y el sistema arma tu Bóveda Bitcoin en un toque.", theme: "bitcoin" },
   { title: "Olvídate de calcular rangos y rebalancear a mano en Meteora u Orca.", sub: "Pon tus dólares digitales a aportar liquidez en bóvedas públicas de alto volumen. Bóveda Market arma tu bóveda inteligente en un toque y el Piloto Automático rebalancea y cobra tus comisiones 24/7.", theme: "smart" },
   { title: "¿Tus monedas están paradas en tu billetera? Pon el Piloto Automático a trabajar.", sub: "Trae tu propio SOL, dólares o monedas desde cualquier billetera o exchange. Bóveda Market las conecta con la liquidez de bóvedas públicas y el Piloto Automático rebalancea y cobra comisiones por ti 24/7.", theme: "own" },
+  { title: "Haz que tus intereses generen más intereses.", sub: "Los intereses nacen de los intercambios en pools públicos. Bóveda Market es solo la interfaz que te conecta y automatiza la reinversión con el Piloto Automático.", theme: "compound" },
 ];
 
 /** Own address of each home version (same order as HERO_VARIANTS). */
-export const HERO_SLUGS = ["clasica", "gta6", "trump", "doble-o-nada", "sin-ansiedad", "bitcoin", "bovedas-inteligentes", "trae-tus-monedas"] as const;
+export const HERO_SLUGS = ["clasica", "gta6", "trump", "doble-o-nada", "sin-ansiedad", "bitcoin", "bovedas-inteligentes", "trae-tus-monedas", "interes-compuesto"] as const;
 export type HeroSlug = (typeof HERO_SLUGS)[number];
 export const heroIndex = (slug: HeroSlug) => HERO_SLUGS.indexOf(slug);
 
@@ -33,8 +34,8 @@ export const GTA6_HERO_SHARE = 0.2;
 
 export const HERO_KEY = "boveda-hero-v";
 
-/** Share of new visitors per variant (same order as HERO_VARIANTS, sums to 1): GTA6 launch, then calm hold and Trump boosted. */
-export const HERO_WEIGHTS: readonly number[] = HERO_VARIANTS.map((v) => ({ bitcoin: 0.3, trump: 0.2, smart: 0.2, gta6: 0.15, calm: 0.05, doble: 0.05, own: 0 } as Record<string, number>)[v.theme ?? ""] ?? 0.05);
+/** Compound gets 10%; existing campaigns retain their relative shares of the remaining 90%. */
+export const HERO_WEIGHTS: readonly number[] = HERO_VARIANTS.map((v) => v.theme === "compound" ? 0.1 : 0.9 * (({ bitcoin: 0.3, trump: 0.2, smart: 0.2, gta6: 0.15, calm: 0.05, doble: 0.05, own: 0 } as Record<string, number>)[v.theme ?? ""] ?? 0.05));
 
 /** Pick a variant for "/": forced value wins, then the saved one (if still in rotation), else weighted random. */
 export function pickHeroVariant(forced: string | null, saved: string | null, rand: number): number {
