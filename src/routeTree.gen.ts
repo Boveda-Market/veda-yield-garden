@@ -32,11 +32,13 @@ import { Route as SinAnsiedadRouteImport } from './routes/sin-ansiedad'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as TerminosRouteImport } from './routes/terminos'
+import { Route as TraeTusMonedasRouteImport } from './routes/trae-tus-monedas'
 import { Route as TrumpRouteImport } from './routes/trump'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as EnIndexRouteImport } from './routes/en/index'
 import { Route as EnAboutRouteImport } from './routes/en/about'
 import { Route as EnBitcoinRouteImport } from './routes/en/bitcoin'
+import { Route as EnBringYourCoinsRouteImport } from './routes/en/bring-your-coins'
 import { Route as EnClasicaRouteImport } from './routes/en/clasica'
 import { Route as EnDobleONadaRouteImport } from './routes/en/doble-o-nada'
 import { Route as EnFaqRouteImport } from './routes/en/faq'
@@ -55,9 +57,11 @@ import { Route as GuiasMercadosDePrediccionRouteImport } from './routes/guias/me
 import { Route as GuiasQueEsUsdcRouteImport } from './routes/guias/que-es-usdc'
 import { Route as GuiasRecargarConCoinbaseRouteImport } from './routes/guias/recargar-con-coinbase'
 import { Route as GuiasRetirarCashAppBitcoinRouteImport } from './routes/guias/retirar-cash-app-bitcoin'
+import { Route as GuiasTraeTusMonedasRouteImport } from './routes/guias/trae-tus-monedas'
 import { Route as EnGuidesIndexRouteImport } from './routes/en/guides/index'
 import { Route as EnGuidesAddDollarsWithCoinbaseRouteImport } from './routes/en/guides/add-dollars-with-coinbase'
 import { Route as EnGuidesAvoidInvestmentScamsRouteImport } from './routes/en/guides/avoid-investment-scams'
+import { Route as EnGuidesBringYourOwnCoinsRouteImport } from './routes/en/guides/bring-your-own-coins'
 import { Route as EnGuidesEarnInterestOnBitcoinRouteImport } from './routes/en/guides/earn-interest-on-bitcoin'
 import { Route as EnGuidesHighYieldVaultsRouteImport } from './routes/en/guides/high-yield-vaults'
 import { Route as EnGuidesPredictionMarketsRouteImport } from './routes/en/guides/prediction-markets'
@@ -186,6 +190,11 @@ const TerminosRoute = TerminosRouteImport.update({
   path: '/terminos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TraeTusMonedasRoute = TraeTusMonedasRouteImport.update({
+  id: '/trae-tus-monedas',
+  path: '/trae-tus-monedas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrumpRoute = TrumpRouteImport.update({
   id: '/trump',
   path: '/trump',
@@ -209,6 +218,11 @@ const EnAboutRoute = EnAboutRouteImport.update({
 const EnBitcoinRoute = EnBitcoinRouteImport.update({
   id: '/en/bitcoin',
   path: '/en/bitcoin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnBringYourCoinsRoute = EnBringYourCoinsRouteImport.update({
+  id: '/en/bring-your-coins',
+  path: '/en/bring-your-coins',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnClasicaRoute = EnClasicaRouteImport.update({
@@ -306,6 +320,11 @@ const GuiasRetirarCashAppBitcoinRoute =
     path: '/guias/retirar-cash-app-bitcoin',
     getParentRoute: () => rootRouteImport,
   } as any)
+const GuiasTraeTusMonedasRoute = GuiasTraeTusMonedasRouteImport.update({
+  id: '/guias/trae-tus-monedas',
+  path: '/guias/trae-tus-monedas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnGuidesIndexRoute = EnGuidesIndexRouteImport.update({
   id: '/en/guides/',
   path: '/en/guides/',
@@ -321,6 +340,12 @@ const EnGuidesAvoidInvestmentScamsRoute =
   EnGuidesAvoidInvestmentScamsRouteImport.update({
     id: '/en/guides/avoid-investment-scams',
     path: '/en/guides/avoid-investment-scams',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EnGuidesBringYourOwnCoinsRoute =
+  EnGuidesBringYourOwnCoinsRouteImport.update({
+    id: '/en/guides/bring-your-own-coins',
+    path: '/en/guides/bring-your-own-coins',
     getParentRoute: () => rootRouteImport,
   } as any)
 const EnGuidesEarnInterestOnBitcoinRoute =
@@ -415,10 +440,12 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
+  '/trae-tus-monedas': typeof TraeTusMonedasRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
+  '/en/bring-your-coins': typeof EnBringYourCoinsRoute
   '/en/clasica': typeof EnClasicaRoute
   '/en/doble-o-nada': typeof EnDobleONadaRoute
   '/en/faq': typeof EnFaqRoute
@@ -436,10 +463,12 @@ export interface FileRoutesByFullPath {
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
+  '/guias/trae-tus-monedas': typeof GuiasTraeTusMonedasRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
+  '/en/guides/bring-your-own-coins': typeof EnGuidesBringYourOwnCoinsRoute
   '/en/guides/earn-interest-on-bitcoin': typeof EnGuidesEarnInterestOnBitcoinRoute
   '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
   '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
@@ -478,10 +507,12 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
+  '/trae-tus-monedas': typeof TraeTusMonedasRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
+  '/en/bring-your-coins': typeof EnBringYourCoinsRoute
   '/en/clasica': typeof EnClasicaRoute
   '/en/doble-o-nada': typeof EnDobleONadaRoute
   '/en/faq': typeof EnFaqRoute
@@ -499,10 +530,12 @@ export interface FileRoutesByTo {
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
+  '/guias/trae-tus-monedas': typeof GuiasTraeTusMonedasRoute
   '/en': typeof EnIndexRoute
   '/guias': typeof GuiasIndexRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
+  '/en/guides/bring-your-own-coins': typeof EnGuidesBringYourOwnCoinsRoute
   '/en/guides/earn-interest-on-bitcoin': typeof EnGuidesEarnInterestOnBitcoinRoute
   '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
   '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
@@ -542,10 +575,12 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
   '/terminos': typeof TerminosRoute
+  '/trae-tus-monedas': typeof TraeTusMonedasRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
+  '/en/bring-your-coins': typeof EnBringYourCoinsRoute
   '/en/clasica': typeof EnClasicaRoute
   '/en/doble-o-nada': typeof EnDobleONadaRoute
   '/en/faq': typeof EnFaqRoute
@@ -563,10 +598,12 @@ export interface FileRoutesById {
   '/guias/que-es-usdc': typeof GuiasQueEsUsdcRoute
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
+  '/guias/trae-tus-monedas': typeof GuiasTraeTusMonedasRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
+  '/en/guides/bring-your-own-coins': typeof EnGuidesBringYourOwnCoinsRoute
   '/en/guides/earn-interest-on-bitcoin': typeof EnGuidesEarnInterestOnBitcoinRoute
   '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
   '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
@@ -607,10 +644,12 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/status'
     | '/terminos'
+    | '/trae-tus-monedas'
     | '/trump'
     | '/wallet'
     | '/en/about'
     | '/en/bitcoin'
+    | '/en/bring-your-coins'
     | '/en/clasica'
     | '/en/doble-o-nada'
     | '/en/faq'
@@ -628,10 +667,12 @@ export interface FileRouteTypes {
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
+    | '/guias/trae-tus-monedas'
     | '/en/'
     | '/guias/'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
+    | '/en/guides/bring-your-own-coins'
     | '/en/guides/earn-interest-on-bitcoin'
     | '/en/guides/high-yield-vaults'
     | '/en/guides/prediction-markets'
@@ -670,10 +711,12 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/status'
     | '/terminos'
+    | '/trae-tus-monedas'
     | '/trump'
     | '/wallet'
     | '/en/about'
     | '/en/bitcoin'
+    | '/en/bring-your-coins'
     | '/en/clasica'
     | '/en/doble-o-nada'
     | '/en/faq'
@@ -691,10 +734,12 @@ export interface FileRouteTypes {
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
+    | '/guias/trae-tus-monedas'
     | '/en'
     | '/guias'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
+    | '/en/guides/bring-your-own-coins'
     | '/en/guides/earn-interest-on-bitcoin'
     | '/en/guides/high-yield-vaults'
     | '/en/guides/prediction-markets'
@@ -733,10 +778,12 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/status'
     | '/terminos'
+    | '/trae-tus-monedas'
     | '/trump'
     | '/wallet'
     | '/en/about'
     | '/en/bitcoin'
+    | '/en/bring-your-coins'
     | '/en/clasica'
     | '/en/doble-o-nada'
     | '/en/faq'
@@ -754,10 +801,12 @@ export interface FileRouteTypes {
     | '/guias/que-es-usdc'
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
+    | '/guias/trae-tus-monedas'
     | '/en/'
     | '/guias/'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
+    | '/en/guides/bring-your-own-coins'
     | '/en/guides/earn-interest-on-bitcoin'
     | '/en/guides/high-yield-vaults'
     | '/en/guides/prediction-markets'
@@ -797,10 +846,12 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StatusRoute: typeof StatusRoute
   TerminosRoute: typeof TerminosRoute
+  TraeTusMonedasRoute: typeof TraeTusMonedasRoute
   TrumpRoute: typeof TrumpRoute
   WalletRoute: typeof WalletRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBitcoinRoute: typeof EnBitcoinRoute
+  EnBringYourCoinsRoute: typeof EnBringYourCoinsRoute
   EnClasicaRoute: typeof EnClasicaRoute
   EnDobleONadaRoute: typeof EnDobleONadaRoute
   EnFaqRoute: typeof EnFaqRoute
@@ -818,10 +869,12 @@ export interface RootRouteChildren {
   GuiasQueEsUsdcRoute: typeof GuiasQueEsUsdcRoute
   GuiasRecargarConCoinbaseRoute: typeof GuiasRecargarConCoinbaseRoute
   GuiasRetirarCashAppBitcoinRoute: typeof GuiasRetirarCashAppBitcoinRoute
+  GuiasTraeTusMonedasRoute: typeof GuiasTraeTusMonedasRoute
   EnIndexRoute: typeof EnIndexRoute
   GuiasIndexRoute: typeof GuiasIndexRoute
   EnGuidesAddDollarsWithCoinbaseRoute: typeof EnGuidesAddDollarsWithCoinbaseRoute
   EnGuidesAvoidInvestmentScamsRoute: typeof EnGuidesAvoidInvestmentScamsRoute
+  EnGuidesBringYourOwnCoinsRoute: typeof EnGuidesBringYourOwnCoinsRoute
   EnGuidesEarnInterestOnBitcoinRoute: typeof EnGuidesEarnInterestOnBitcoinRoute
   EnGuidesHighYieldVaultsRoute: typeof EnGuidesHighYieldVaultsRoute
   EnGuidesPredictionMarketsRoute: typeof EnGuidesPredictionMarketsRoute
@@ -1000,6 +1053,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TerminosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trae-tus-monedas': {
+      id: '/trae-tus-monedas'
+      path: '/trae-tus-monedas'
+      fullPath: '/trae-tus-monedas'
+      preLoaderRoute: typeof TraeTusMonedasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trump': {
       id: '/trump'
       path: '/trump'
@@ -1033,6 +1093,13 @@ declare module '@tanstack/react-router' {
       path: '/en/bitcoin'
       fullPath: '/en/bitcoin'
       preLoaderRoute: typeof EnBitcoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/bring-your-coins': {
+      id: '/en/bring-your-coins'
+      path: '/en/bring-your-coins'
+      fullPath: '/en/bring-your-coins'
+      preLoaderRoute: typeof EnBringYourCoinsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/clasica': {
@@ -1161,6 +1228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuiasRetirarCashAppBitcoinRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guias/trae-tus-monedas': {
+      id: '/guias/trae-tus-monedas'
+      path: '/guias/trae-tus-monedas'
+      fullPath: '/guias/trae-tus-monedas'
+      preLoaderRoute: typeof GuiasTraeTusMonedasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/guides/': {
       id: '/en/guides/'
       path: '/en/guides'
@@ -1180,6 +1254,13 @@ declare module '@tanstack/react-router' {
       path: '/en/guides/avoid-investment-scams'
       fullPath: '/en/guides/avoid-investment-scams'
       preLoaderRoute: typeof EnGuidesAvoidInvestmentScamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/guides/bring-your-own-coins': {
+      id: '/en/guides/bring-your-own-coins'
+      path: '/en/guides/bring-your-own-coins'
+      fullPath: '/en/guides/bring-your-own-coins'
+      preLoaderRoute: typeof EnGuidesBringYourOwnCoinsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/guides/earn-interest-on-bitcoin': {
@@ -1293,10 +1374,12 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StatusRoute: StatusRoute,
   TerminosRoute: TerminosRoute,
+  TraeTusMonedasRoute: TraeTusMonedasRoute,
   TrumpRoute: TrumpRoute,
   WalletRoute: WalletRoute,
   EnAboutRoute: EnAboutRoute,
   EnBitcoinRoute: EnBitcoinRoute,
+  EnBringYourCoinsRoute: EnBringYourCoinsRoute,
   EnClasicaRoute: EnClasicaRoute,
   EnDobleONadaRoute: EnDobleONadaRoute,
   EnFaqRoute: EnFaqRoute,
@@ -1314,10 +1397,12 @@ const rootRouteChildren: RootRouteChildren = {
   GuiasQueEsUsdcRoute: GuiasQueEsUsdcRoute,
   GuiasRecargarConCoinbaseRoute: GuiasRecargarConCoinbaseRoute,
   GuiasRetirarCashAppBitcoinRoute: GuiasRetirarCashAppBitcoinRoute,
+  GuiasTraeTusMonedasRoute: GuiasTraeTusMonedasRoute,
   EnIndexRoute: EnIndexRoute,
   GuiasIndexRoute: GuiasIndexRoute,
   EnGuidesAddDollarsWithCoinbaseRoute: EnGuidesAddDollarsWithCoinbaseRoute,
   EnGuidesAvoidInvestmentScamsRoute: EnGuidesAvoidInvestmentScamsRoute,
+  EnGuidesBringYourOwnCoinsRoute: EnGuidesBringYourOwnCoinsRoute,
   EnGuidesEarnInterestOnBitcoinRoute: EnGuidesEarnInterestOnBitcoinRoute,
   EnGuidesHighYieldVaultsRoute: EnGuidesHighYieldVaultsRoute,
   EnGuidesPredictionMarketsRoute: EnGuidesPredictionMarketsRoute,

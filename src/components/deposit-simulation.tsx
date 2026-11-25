@@ -30,6 +30,7 @@ import { depositQuote, QUOTE_PRESETS } from "@/lib/deposit-quote";
 import { fetchPoolStats, coinLabel } from "@/lib/pool-stats";
 import { formatCoinPrice } from "@/lib/format-price";
 import { FirstDepositSteps, StepDots } from "@/components/first-deposit-steps";
+import { hasOwnFunds } from "@/lib/explore-state";
 import { FIRST_DEPOSIT_DEFAULT } from "@/lib/first-deposit";
 
 const MAX_MICRO = 5_000_000_000n;
@@ -95,7 +96,8 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
   const showBanner = hot && !done;
   const step3 = resumed && !done && usdc != null && usdc > 0n;
   // Wallet with no dollars (new or registered): guided 3 steps instead of a "not enough balance" card.
-  const firstFund = !!wallet && usdc === 0n && !migrate && !resumed && !done && !busy;
+  const ownFunds = hasOwnFunds(balances.data?.sol);
+  const firstFund = !!wallet && usdc === 0n && !ownFunds && !migrate && !resumed && !done && !busy;
   useEffect(() => { if (firstFund && !amount) setAmount(FIRST_DEPOSIT_DEFAULT); }, [firstFund]); // eslint-disable-line react-hooks/exhaustive-deps
   return <Dialog open onOpenChange={(open) => { if (open || busy) return; if (step3 && !kept) { clearResumeDeposit(); setKept(true); } else onClose(); }}><ActionSheetContent closeLabel={t("Cerrar")} className={hot && !kept ? `border-hot/40 shadow-[var(--shadow-hot)] ${vaultSkin(vault.id)}` : undefined}>
     {kept ? <FundsKeptCard amountMicro={usdc} onDone={onClose} /> : firstFund ? <><DialogTitle>{t("Depositar ·")} {t(vault.name)}</DialogTitle><DialogDescription className="sr-only">{t("Elige cuánto quieres depositar y confirma.")}</DialogDescription><FirstDepositSteps vault={vault} amount={amount} setAmount={setAmount} fee={activationQ.data?.charge ?? ACTIVATION_FEE_MICRO} onClose={onClose} /></> : <>
@@ -117,6 +119,7 @@ export function DepositSimulation({ vault, wallet, onClose, initialAmount = "", 
       <span className="text-xs text-muted-foreground">{t("Cantidad ($)")}</span>
       <TapAmount label={t("Cantidad ($)")} prefix="$" value={amount} disabled={busy} onChange={(v) => setAmount(clean(v))} />
       {usdc === 0n || !wallet ? <div className="grid grid-cols-4 gap-2">{QUOTE_PRESETS.map((v) => <Button key={v} type="button" size="sm" variant={amount === v ? "default" : "secondary"} disabled={busy} onClick={() => setAmount(v)}>${v}</Button>)}</div> : <div className="grid grid-cols-4 gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={p.toString()} type="button" size="sm" variant="secondary" disabled={busy || !usdc} onClick={() => pick(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>}
+      {wallet && usdc === 0n && ownFunds && <a href="/wallet?swap=SOL" className="text-xs font-semibold text-primary underline underline-offset-2">{t("Trajiste tus propias monedas: cámbialas a dólares en Billetera en un toque")}</a>}
       <p className="text-xs text-muted-foreground">{migrate ? t("Traslado entre bóvedas: el detalle aparece antes de confirmar.") : t("Entre $1 y $5,000.")}</p>
       {overBalance && <p role="alert" className="text-xs text-muted-foreground">{t("No tienes suficientes dólares para esta cantidad.")}</p>}
       {!busy && wallet && (overBalance || usdc === 0n) && <div className={hot ? "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-hot/40 bg-hot/10 p-3 text-xs" : "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs"}><span>{hot ? t("Estás a un paso de comenzar. Deposita dólares para entrar a la {v}.", { v: t(vault.name) }) : t("Estás a un paso de comenzar. Añade dólares y sigue aquí mismo.")}</span><BuyUsdc className="w-full" hot={hot} resume={{ vaultId: vault.id, amount: typed != null ? amount : "", ...(position ? { position } : {}), ...(migrate ? { migrate: true } : {}) }} needMicro={overBalance && typed != null && usdc != null ? typed - usdc : undefined} label={t("Continuar para depositar")} /></div>}

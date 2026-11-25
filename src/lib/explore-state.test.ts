@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isEmptyPortfolio, isExploringAccount } from "@/lib/explore-state";
+import { hasOwnFunds, isEmptyPortfolio, isExploringAccount } from "@/lib/explore-state";
 
 describe("Explorar primero (cuentas nuevas en $0)", () => {
   it("Billetera: $0 and no vaults explores first", () => {
@@ -23,4 +23,10 @@ describe("Explorar primero (cuentas nuevas en $0)", () => {
   it("Portafolio: a vault keeps the chart even at $0 cash", () => {
     expect(isEmptyPortfolio("0", "0", 1)).toBe(false);
   });
+});
+
+describe("hasOwnFunds", () => {
+  it("own SOL above 0.01 counts as brought funds", () => { expect(hasOwnFunds(20_000_000n)).toBe(true); expect(hasOwnFunds(10_000_000n)).toBe(false); });
+  it("any other coin counts", () => expect(hasOwnFunds(0n, { cbBTC: 5n })).toBe(true));
+  it("empty wallet keeps the new-user guides", () => expect(hasOwnFunds(0n, { USDC: 0n, TRUMP: 0n })).toBe(false));
 });

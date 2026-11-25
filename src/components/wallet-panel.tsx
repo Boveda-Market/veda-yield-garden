@@ -37,7 +37,7 @@ import { solanaAddressSchema } from "@/lib/solana-data";
 import { decimalToUnits, PAYOUT_MOVE_MIN_USD } from "@/lib/onboarding";
 import { StartGuide } from "@/components/start-guide";
 import { ExploreCards } from "@/components/explore-cards";
-import { isExploringAccount } from "@/lib/explore-state";
+import { hasOwnFunds, isExploringAccount } from "@/lib/explore-state";
 import { VisitorWallet } from "@/components/visitor-views";
 import { ResumeDepositHost } from "@/components/resume-deposit-host";
 import { DobleShortcut, WalletHeroShortcuts } from "@/components/wallet-hero-shortcuts";
@@ -102,9 +102,10 @@ export function WalletPanel() {
     if (!r.success) throw new Error(r.error);
     return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
   } });
-  const exploring = isExploringAccount(balances.data?.usdc, vaultPositions.length, vaults.isLoading);
   const extraTokens = EXTRA_TOKENS;
   const extra = useWalletTokens(address);
+  // Wallets that brought their own SOL or coins skip the new-user layout and use the app right away.
+  const exploring = isExploringAccount(balances.data?.usdc, vaultPositions.length, vaults.isLoading) && !hasOwnFunds(balances.data?.sol, extra.data ?? {});
   const swapBalances: Record<string, bigint | undefined> = { SOL: balances.data?.sol, USDC: balances.data?.usdc, ...(extra.data ?? {}) };
   const [swapFrom, setSwapFrom] = useState({ key: 0, from: "USDC", amount: "" });
   const [tab, setTab] = useState<"send" | "swap">("swap");

@@ -130,7 +130,7 @@ export function Landing({ variant }: { variant?: number } = {}) {
   const calmHero = hero.theme === "calm";
   const btcHero = hero.theme === "bitcoin";
   const trumpHero = hero.theme === "trump";
-  const smartHero = hero.theme === "smart";
+  const smartHero = hero.theme === "smart" || hero.theme === "own";
   const classicHero = !hero.theme;
   const plainHero = false;
   if (decided && compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 pb-10 pt-20 text-foreground sm:py-10">

@@ -15,6 +15,7 @@ export const GUIDES = [
   { to: "/guias/que-es-usdc", toEn: "/en/guides/what-is-usdc", titleEn: "What is USDC and how do you buy it with a card?", title: "¿Qué es USDC y cómo comprarlo con tarjeta?", descEn: "What USDC is, why it's always worth 1 dollar and how to buy it with a card in minutes without mixing it up with other cryptocurrencies." },
   { to: "/guias/retirar-cash-app-bitcoin", toEn: "/en/guides/withdraw-to-cash-app-bitcoin", titleEn: "How to withdraw your digital dollars to Cash App or Bitcoin", title: "Cómo retirar tus dólares digitales a Cash App o Bitcoin", descEn: "Step by step to convert your USDC and receive it in Cash App as Bitcoin, or withdraw it to your bank, approving everything with your fingerprint." },
   { to: "/guias/invertir-sin-estafas", toEn: "/en/guides/avoid-investment-scams", titleEn: "How to grow your money without falling for scams", title: "Cómo hacer rendir tu dinero sin caer en estafas", descEn: "Lessons from Celsius, FTX and apps that froze withdrawals: red flags and how to protect your dollars with self-custody." },
+  { to: "/guias/trae-tus-monedas", toEn: "/en/guides/bring-your-own-coins", titleEn: "How to bring your own coins to Bóveda Market", title: "Cómo traer tus propias monedas a Bóveda Market", descEn: "Send your SOL, digital dollars or coins from another wallet or exchange and put them to work with Autopilot, with no beginner steps." },
 ] as const;
 
 type Guide = (typeof GUIDES)[number];
