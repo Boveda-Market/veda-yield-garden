@@ -44,8 +44,7 @@ export function Gta6Hero({ title, sub }: { title: string; sub: string }) {
         <h1 className="font-display text-[1.7rem] font-black leading-tight sm:text-4xl">{t(title)}</h1>
         <p className="mt-2 text-sm leading-6 text-hot-muted sm:text-base">{t(sub)}</p>
         <ol className="mt-4 grid grid-cols-3 gap-2 text-[11px] font-bold sm:text-xs">{steps.map(([i, l]) => <li key={l} className="flex flex-col items-center gap-1 rounded-xl bg-hot-surface/70 px-2 py-2"><span aria-hidden className="text-xl">{i}</span>{t(l)}</li>)}</ol>
-        <Link to="/app" hash="open-gta6" className="hot-cta mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-lg font-black text-hot-surface shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98] md:max-w-sm">🎰 {t("Entrar a la Bóveda GTA6")}<ArrowRight size={18} /></Link>
-        <p className="mt-3 text-[11px] leading-4 text-hot-muted">{t("APR estimado de las últimas 24 h, cambia cada día. Moneda muy volátil, sin vínculo con Rockstar Games.")}</p>
+        <p className="mt-4 text-[11px] leading-4 text-hot-muted">{t("APR estimado de las últimas 24 h, cambia cada día. Moneda muy volátil, sin vínculo con Rockstar Games.")}</p>
       </div>
     </div>
   </div>;

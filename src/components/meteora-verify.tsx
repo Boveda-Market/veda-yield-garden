@@ -20,19 +20,23 @@ function PoolCard({ p }: { p: (typeof VERIFY_POOLS)[number] }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => { try { await navigator.clipboard.writeText(p.pool); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { /* blocked clipboard */ } };
   return <li className="min-w-0 rounded-2xl border border-border bg-card p-4">
-    <p className="font-display font-semibold">{t(p.name)} <span className="text-xs font-normal text-muted-foreground">· {p.pair}</span></p>
-    <button type="button" onClick={copy} className="mt-2 flex w-full items-center gap-2 rounded-xl bg-secondary px-3 py-2 text-left font-mono text-[11px] text-muted-foreground" aria-label={t("Copiar dirección del pool")}>
-      <span className="min-w-0 flex-1 truncate">{p.pool}</span>{copied ? <Check size={14} className="shrink-0 text-primary" /> : <Copy size={14} className="shrink-0" />}
-    </button>
-    <div className="mt-2 grid grid-cols-2 gap-2 text-xs font-semibold">
-      <a href={p.meteora} target="_blank" rel="noopener noreferrer" className="flex h-10 items-center justify-center gap-1 rounded-xl border border-primary/40 text-primary">{t("Ver en Meteora")}<ExternalLink size={12} /></a>
-      <a href={p.solscan} target="_blank" rel="noopener noreferrer" className="flex h-10 items-center justify-center gap-1 rounded-xl border border-border text-foreground">{t("Ver en Solscan")}<ExternalLink size={12} /></a>
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <p className="whitespace-nowrap font-display text-base font-semibold">{t(p.name)}</p>
+      <span className="whitespace-nowrap rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">{p.pair}</span>
+      <span className="ml-auto flex shrink-0 items-center gap-2 text-xs font-semibold">
+        <a href={p.meteora} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center gap-1 whitespace-nowrap rounded-xl border border-primary/40 px-3 text-primary transition-colors hover:bg-primary/10">{t("Ver en Meteora")}<ExternalLink size={12} aria-hidden /></a>
+        <a href={p.solscan} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center gap-1 whitespace-nowrap rounded-xl border border-border px-3 text-foreground transition-colors hover:bg-secondary">{t("Ver en Solscan")}<ExternalLink size={12} aria-hidden /></a>
+      </span>
     </div>
+    <button type="button" onClick={copy} title={p.pool} className="mt-3 flex w-full items-center gap-2 rounded-xl bg-secondary px-3 py-2 text-left font-mono text-[11px] text-foreground/80" aria-label={t("Copiar dirección del pool")}>
+      <span className="min-w-0 flex-1 break-all leading-5">{p.pool}</span>
+      <span className="flex shrink-0 items-center gap-1 font-sans text-[11px] font-semibold text-muted-foreground">{copied ? <><Check size={13} className="text-primary" aria-hidden />{t("Copiada")}</> : <><Copy size={13} aria-hidden />{t("Copiar")}</>}</span>
+    </button>
   </li>;
 }
 
 export function VerifyPoolList() {
-  return <ul className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3">{VERIFY_POOLS.map((p) => <PoolCard key={p.id} p={p} />)}</ul>;
+  return <ul className="grid min-w-0 grid-cols-1 gap-3">{VERIFY_POOLS.map((p) => <PoolCard key={p.id} p={p} />)}</ul>;
 }
 
 function VerifyBody() {

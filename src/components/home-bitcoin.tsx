@@ -1,5 +1,4 @@
-import { Link } from "@tanstack/react-router";
-import { ArrowRight, Bot, DollarSign, ShieldCheck, Wallet } from "lucide-react";
+import { Bot, DollarSign, ShieldCheck, Wallet } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { VisitorBtcChart } from "@/components/visitor-btc-chart";
 import trumpLogo from "@/assets/trump-logo.png";
@@ -20,8 +19,7 @@ export function BitcoinHero({ title, sub }: { title: string; sub: string }) {
       <h1 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-4xl">{t(title)}</h1>
       <p className="mt-2 text-sm leading-6 text-hot-muted sm:text-base">{t(sub)}</p>
       <ul className="mt-4 grid grid-cols-2 gap-2 text-left text-xs font-semibold sm:grid-cols-4">{PILLARS.map(({ icon: Icon, label }) => <li key={label} className="flex items-center gap-2 rounded-xl border border-hot/25 px-2.5 py-2"><Icon size={15} aria-hidden className="shrink-0 text-hot" /><span className="min-w-0 leading-tight">{t(label)}</span></li>)}</ul>
-      <Link to="/app" hash="open-btc" className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[image:var(--gradient-hot)] text-base font-bold text-hot-surface transition-transform active:scale-[0.98] md:max-w-sm">👉 {t("Oprime aquí para ver la bóveda")}<ArrowRight size={18} /></Link>
-      <p className="mt-3 text-[11px] leading-4 text-hot-muted">{t("Intereses estimados que cambian cada día. El valor de tu bóveda sube y baja con el precio del Bitcoin.")}</p>
+      <p className="mt-4 text-[11px] leading-4 text-hot-muted">{t("Intereses estimados que cambian cada día. El valor de tu bóveda sube y baja con el precio del Bitcoin.")}</p>
     </div>
   </div>;
 }
@@ -74,8 +72,7 @@ export function TrumpHero({ title, sub }: { title: string; sub: string }) {
       <h1 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-4xl">{t(title)}</h1>
       <p className="mt-2 text-sm leading-6 text-hot-muted sm:text-base">{t(sub)}</p>
       <ul className="mt-4 grid grid-cols-2 gap-2 text-left text-xs font-semibold sm:grid-cols-4">{TRUMP_PILLARS.map(({ icon: Icon, label }) => <li key={label} className="flex items-center gap-2 rounded-xl border border-hot/25 px-2.5 py-2"><Icon size={15} aria-hidden className="shrink-0 text-hot" /><span className="min-w-0 leading-tight">{t(label)}</span></li>)}</ul>
-      <Link to="/app" hash="open-trump" className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[image:var(--gradient-hot)] text-base font-bold text-hot-surface transition-transform active:scale-[0.98] md:max-w-sm">👉 {t("Oprime aquí para ver la bóveda")}<ArrowRight size={18} /></Link>
-      <p className="mt-3 text-[11px] leading-4 text-hot-muted">{t("Intereses estimados que cambian cada día. El valor de tu bóveda sube y baja con el precio de Trump Coin.")}</p>
+      <p className="mt-4 text-[11px] leading-4 text-hot-muted">{t("Intereses estimados que cambian cada día. El valor de tu bóveda sube y baja con el precio de Trump Coin.")}</p>
     </div>
   </div>;
 }
@@ -89,8 +86,7 @@ export function ClassicHero({ title, sub }: { title: string; sub: string }) {
       <h1 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-4xl">{t(title)}</h1>
       <p className="mt-2 text-sm leading-6 text-[var(--mt-muted)] sm:text-base">{t(sub)}</p>
       <ul className="mt-4 grid grid-cols-2 gap-2 text-left text-xs font-semibold sm:grid-cols-4">{PILLARS.map(({ icon: Icon, label }) => <li key={label} className="flex items-center gap-2 rounded-xl border border-[var(--mt-border)] bg-[var(--mt-bg)]/60 px-2.5 py-2"><Icon size={15} aria-hidden className="shrink-0 text-[var(--mt-accent)]" /><span className="min-w-0 leading-tight">{t(label)}</span></li>)}</ul>
-      <Link to="/app" className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-base font-bold text-[var(--mt-accent)]-foreground transition-transform active:scale-[0.98] md:max-w-sm">👉 {t("Oprime aquí para ver las bóvedas")}<ArrowRight size={18} /></Link>
-      <p className="mt-3 text-[11px] leading-4 text-[var(--mt-muted)]">{t("Intereses estimados que cambian cada día. El valor de tu bóveda sube y baja con el precio de sus monedas.")}</p>
+      <p className="mt-4 text-[11px] leading-4 text-[var(--mt-muted)]">{t("Intereses estimados que cambian cada día. El valor de tu bóveda sube y baja con el precio de sus monedas.")}</p>
     </div>
   </div>;
 }

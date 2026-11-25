@@ -1,5 +1,4 @@
-import { Link } from "@tanstack/react-router";
-import { ArrowRight, Bot, DollarSign, ShieldCheck, Target } from "lucide-react";
+import { Bot, DollarSign, ShieldCheck, Target } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 /** Price path with its peaks and troughs: each turn drops a fee into the vault, so volatility reads as income, not fear. */
@@ -36,8 +35,7 @@ export function CalmHero({ title, sub }: { title: string; sub: string }) {
       <h1 className="font-display text-[1.7rem] font-bold leading-tight sm:text-4xl">{t(title)}</h1>
       <p className="mt-2 text-sm leading-6 text-[var(--mt-muted)] sm:text-base">{t(sub)}</p>
       <ul className="mt-4 grid grid-cols-2 gap-2 text-left text-xs font-semibold sm:grid-cols-4">{PILLARS.map(({ icon: Icon, label }) => <li key={label} className="flex items-center gap-2 rounded-xl border border-[var(--mt-border)] bg-[var(--mt-bg)]/60 px-2.5 py-2"><Icon size={15} aria-hidden className="shrink-0 text-[var(--mt-accent)]" /><span className="min-w-0 leading-tight">{t(label)}</span></li>)}</ul>
-      <Link to="/app" className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--mt-accent)] text-lg font-bold text-[var(--mt-accent-fg)] shadow-[0_0_24px_-6px_var(--mt-accent)] transition-transform active:scale-[0.98] md:max-w-sm">{t("Abrir mi bóveda")}<ArrowRight size={18} /></Link>
-      <p className="mt-3 font-display text-sm font-semibold leading-5">{t("El hold tradicional es esperar y rezar. Holdear en Bóveda es cobrar mientras duermes.")}</p>
+      <p className="mt-4 font-display text-sm font-semibold leading-5">{t("El hold tradicional es esperar y rezar. Holdear en Bóveda es cobrar mientras duermes.")}</p>
       <p className="mt-2 text-[11px] leading-4 text-[var(--mt-muted)]">{t("Intereses estimados que cambian cada día. Las monedas digitales son volátiles y existe riesgo de pérdida.")}</p>
     </div>
   </div>;

@@ -68,3 +68,5 @@
 - [x] GitHub: pie de portada y fila de código abierto enlazan directo al repositorio público
 - [x] Repositorio público: README en inglés, licencia MIT y aviso de riesgo
 - [x] Portada: «Continuar a la app» en lugar de la ventana de inicio
+- [x] Quitar el botón grande de cada portada (Entrar a la Bóveda GTA6 / Oprime aquí / Abrir mi bóveda / Ver bóvedas inteligentes); sigue «Continuar a la app»
+- [x] Estilizar la tarjeta de verificación de pools: filas completas, dirección legible, enlaces sin saltos de línea

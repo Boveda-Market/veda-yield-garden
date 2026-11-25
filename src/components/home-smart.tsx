@@ -1,5 +1,4 @@
-import { Link } from "@tanstack/react-router";
-import { ArrowRight, Bot, Check, X } from "lucide-react";
+import { Bot, Check, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { VerifySection } from "@/components/meteora-verify";
 import { GITHUB_REPO_URL, GithubMark } from "@/components/github-link";
@@ -19,7 +18,6 @@ export function SmartHero({ title, sub }: { title: string; sub: string }) {
       <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--mt-border)] bg-[var(--mt-bg)]/70 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--mt-accent)]"><Bot size={12} aria-hidden />{t("Bóvedas inteligentes · Liquidez automatizada")}</span>
       <h1 className="mt-3 font-display text-[1.7rem] font-bold leading-tight sm:text-4xl">{t(title)}</h1>
       <p className="mt-2 text-sm leading-6 sm:text-base text-[var(--mt-muted)]">{t(sub)}</p>
-      <Link to="/app" className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--mt-accent)] text-lg font-bold text-[var(--mt-accent-fg)] shadow-[0_0_24px_-6px_var(--mt-accent)] transition-transform active:scale-[0.98] md:max-w-sm">{t("Ver bóvedas inteligentes")}<ArrowRight size={18} /></Link>
     </div>
   </div>;
 }
