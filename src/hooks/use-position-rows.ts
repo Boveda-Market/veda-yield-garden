@@ -1,5 +1,5 @@
 import { useQueries } from "@tanstack/react-query";
-import { fetchPoolStats, vaultTokenPrice } from "@/lib/pool-stats";
+import { fetchPoolStats, meteoraPoolPriceOptions, vaultTokenPrice } from "@/lib/pool-stats";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { estimateUsd, change24hUsd } from "@/lib/position-value";
 import { isOperableVault, type ChainPosition } from "@/lib/solana-data";
@@ -15,9 +15,12 @@ export function usePositionRows(positions: ChainPosition[]) {
     // A missing price retries on its own every 10 s, so the total fills in without the person reloading.
     refetchInterval: (q: { state: { data?: unknown } }) => (q.state.data ? 60_000 : 10_000) })) });
   const yields = useQueries({ queries: pools.map((pool) => ({ ...poolYieldOptions(pool ?? ""), enabled: Boolean(pool) })) });
+  const listedPrices = positions.map((p, i) => vaultTokenPrice(stats[i]?.data, p.vaultId));
+  // Pools the market listing does not carry (e.g. GTA6) fall back to the official Meteora pool price.
+  const fallbacks = useQueries({ queries: positions.map((p, i) => ({ ...meteoraPoolPriceOptions(p.vaultId), enabled: Boolean(pools[i]) && listedPrices[i] == null && Boolean(stats[i]?.isSuccess || stats[i]?.isError) })) });
   const rows = positions.map((p, i) => {
     const s = stats[i]?.data;
-    const price = vaultTokenPrice(s, p.vaultId);
+    const price = listedPrices[i] ?? fallbacks[i]?.data ?? null;
     return { p, value: estimateUsd(p.tokenAmount, p.usdcAmount, price), fees: estimateUsd(p.feeTokenAmount, p.feeUsdcAmount, price), apr: yields[i]?.data?.apr ?? null, price, pool: pools[i] ?? null, change24h: change24hUsd(p.tokenAmount, price, s?.change24h ?? null) };
   });
   const loading = stats.some((s) => s?.isLoading);

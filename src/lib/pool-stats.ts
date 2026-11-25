@@ -71,6 +71,39 @@ export function vaultTokenPrice(stats: { baseSymbol: string; baseAddress?: strin
   return same ? stats.price : null;
 }
 
+const meteoraPoolSchema = z.object({
+  address: z.string(),
+  token_x: z.object({ address: z.string(), price: z.number().finite().positive().nullish() }).nullish(),
+});
+
+/**
+ * Official Meteora price of a vault's token, matched by exact pool address and exact coin address.
+ * Fallback for pools the market listing does not carry (e.g. GTA6); without it, history totals stay unavailable.
+ */
+export function parseMeteoraPoolPrice(data: unknown, poolAddress: string, mint: string) {
+  const parsed = meteoraPoolSchema.safeParse(data);
+  if (!parsed.success || parsed.data.address !== poolAddress || parsed.data.token_x?.address !== mint) return null;
+  return parsed.data.token_x.price ?? null;
+}
+
+export async function fetchMeteoraPoolPrice(vaultId: string, signal?: AbortSignal) {
+  const cfg = CHAIN_POOLS.find((c) => c.id === vaultId);
+  if (!cfg) return null;
+  const host = cfg.kind === "dlmm" ? "dlmm.datapi.meteora.ag" : "damm-v2.datapi.meteora.ag";
+  const response = await fetch(`https://${host}/pools/${encodeURIComponent(cfg.pool)}`, { signal: signal ?? null });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error("No se pudo consultar el precio del pool.");
+  return parseMeteoraPoolPrice(await response.json(), cfg.pool, cfg.mint);
+}
+
+/** Official Meteora pool price; enable it only when the market listing has no price for the vault. */
+export const meteoraPoolPriceOptions = (vaultId: string) => ({
+  queryKey: ["meteora-pool-price", vaultId],
+  queryFn: ({ signal }: { signal: AbortSignal }) => fetchMeteoraPoolPrice(vaultId, signal),
+  staleTime: 60_000,
+  retry: 1,
+});
+
 const marketSchema = z.object({
   chainId: z.string(),
   pairAddress: z.string(),

@@ -56,3 +56,5 @@
 - [x] Quitar sección «Lo que dice la comunidad» y reseñas del inicio
 - [x] /about: reemplazar contacto por admin@bovedamarket.app + grupo de Telegram
 - [x] Cerrar varias bóvedas a la vez con casillas (Opción B)
+- [x] Gráfica de Mi Portafolio: volver a dejar solo la línea del mercado (confirmado por el usuario)
+- [x] Portafolio: restaurar las cantidades de «Total depositado» e «Intereses pagados» (precio oficial de Meteora como respaldo cuando DexScreener no lista el pool, p. ej. GTA6)
