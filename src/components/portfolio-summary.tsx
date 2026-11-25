@@ -15,6 +15,7 @@ import { useMeteoraHistory } from "@/hooks/use-meteora-history";
 import { usePositionRows } from "@/hooks/use-position-rows";
 import { MASK, useHideBalances } from "@/lib/preferences";
 import { formatUsd } from "@/lib/position-value";
+import { formatCoinPrice } from "@/lib/format-price";
 import { canHarvest } from "@/lib/harvest";
 import { VAULTS } from "@/lib/vaults";
 import { totalEarned } from "@/lib/total-earned";
@@ -195,14 +196,12 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const closes = open.map((_, i) => closesForDays(candleQ[i]?.data ?? [], starts));
   const curIdx = cur ? open.indexOf(cur) : -1;
   const isPrice = curIdx >= 0;
-  // Vault tabs: the line follows the official daily price; the headline shows the live market cap only.
+  // Vault tabs: the line and headline follow the coin's price; Global keeps the combined market cap.
   const caps = open.map((_, i) => statsQ[i]?.data?.marketCap ?? null);
-  const liveCap = isPrice ? caps[curIdx] ?? null : (caps.length && caps.every((c) => c) ? caps.reduce<number>((a, c) => a + (c ?? 0), 0) : null);
-  // Line scale = market cap: price × circulating supply (live cap / latest price); Global sums each vault's cap.
   const lastPx = (i: number) => { const c = introQ[i]?.data; return c?.length ? c[c.length - 1]!.c : (closes[i]?.filter((v) => v != null).pop() ?? null); };
-  const supply = (i: number) => { const c = caps[i], p = lastPx(i); return c && p ? c / p : null; };
+  const liveCap = isPrice ? lastPx(curIdx) : (caps.length && caps.every((c) => c) ? caps.reduce<number>((a, c) => a + (c ?? 0), 0) : null);
   const capW = open.map((v, i) => caps[i] ?? v.value);
-  const rawMarket = isPrice ? closes[curIdx]!.map((v) => v != null && supply(curIdx) ? v * supply(curIdx)! : v) : globalMarket(open.map((v, i) => ({ value: capW[i]!, closes: closes[i]! })), dn);
+  const rawMarket = isPrice ? closes[curIdx]! : globalMarket(open.map((v, i) => ({ value: capW[i]!, closes: closes[i]! })), dn);
   const firstKnown = rawMarket.find((v) => v != null) ?? 0;
   const mk = rawMarket.map((v) => v ?? firstKnown) as number[];
   const earn = days.map((d) => Number(d.earnedMicro) / 1e6);
@@ -229,7 +228,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   // Market line: 1-minute (1 h), 5-minute (24 h), 1-hour (7 d) or 4-hour (30 d) closes placed by time with straight segments, so every real spike and drop shows; Global sums each vault moved by its own price.
   const now = Date.now(), wBase = n === 0 ? now - 5 * 3_600_000 : n === 1 ? now - 86_400_000 : n === 9999 ? 0 : days[0]!.start;
   const inWin = (i: number) => (introQ[i]?.data ?? []).filter((c) => c.t >= wBase);
-  const mSeries = isPrice ? inWin(curIdx).map((c) => ({ t: c.t, v: c.c * (supply(curIdx) ?? 1) })) : intradayGlobal(open.map((v, i) => ({ value: capW[i]!, candles: inWin(i) })));
+  const mSeries = isPrice ? inWin(curIdx).map((c) => ({ t: c.t, v: c.c })) : intradayGlobal(open.map((v, i) => ({ value: capW[i]!, candles: inWin(i) })));
   const live = mSeries.length >= 2;
   const drawing = !live && introQ.some((q) => q.isPending || q.isFetching);
   // Young tokens: stretch the line edge to edge from their first candle instead of leaving the left side empty.
@@ -252,7 +251,8 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const day = new Date(days[shown]!.start).toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" });
   const loading = candleQ.some((q) => q.isPending) || statsQ.some((q) => q?.isPending);
   const cap = (v: number) => `$${new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 2 }).format(v)}`;
-  const mText = liveCap ? cap(liveCap) : "—";
+  const mFmt = isPrice ? formatCoinPrice : cap;
+  const mText = liveCap ? mFmt(liveCap) : "—";
   const pct = ms[0] ? ((ms[ms.length - 1] ?? 0) / ms[0]! - 1) * 100 : 0;
   const [copied, setCopied] = useState(false);
   const chain = cur ? CHAIN_POOLS.find((c) => c.id === cur.id) : undefined;
@@ -280,7 +280,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
         <button type="button" onClick={copyMint} aria-label={t("Copiar contrato")} className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-background/70 px-2 py-0.5 font-mono text-[11px] text-muted-foreground hover:text-foreground">{copied ? <><Check size={11} className="text-primary" />{t("Copiado")}</> : <><Copy size={11} />{chain.mint.slice(0, 4)}…{chain.mint.slice(-4)}</>}</button></div>
     </div>}
     <div className="relative mt-1">
-      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Market cap {s}", { s: sym }) : t("Market cap global")}{!isPrice && <HelpTip label={t("¿Qué es el Mercado global?")}><p className="font-medium text-foreground">{t("Capitalización agregada en posiciones activas")}</p><p>{t("Representa la capitalización de mercado (Market Cap) combinada de los tokens subyacentes con liquidez activa en mis bóvedas.")}</p><p>{t("Refleja la valoración total en tiempo real de los activos en los que se encuentra desplegado el capital.")}</p><p className="font-medium text-foreground">{t("En resumen: una gráfica del rendimiento de todas mis bóvedas abiertas a la misma vez.")}</p></HelpTip>}</p><p className="flex items-center gap-2"><span className={`font-display text-xl font-extrabold tabular-nums sm:text-2xl ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !liveCap ? "…" : mText}</span>{(ms[0] ?? 0) > 0 && <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${pct >= 0 ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{pct >= 0 ? "▲ +" : "▼ "}{pct.toFixed(1)}%</span>}</p></div>
+      <div><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: theme.b, boxShadow: `0 0 6px ${theme.b}` }} />{isPrice ? t("Precio {s}", { s: sym }) : t("Market cap global")}{!isPrice && <HelpTip label={t("¿Qué es el Mercado global?")}><p className="font-medium text-foreground">{t("Capitalización agregada en posiciones activas")}</p><p>{t("Representa la capitalización de mercado (Market Cap) combinada de los tokens subyacentes con liquidez activa en mis bóvedas.")}</p><p>{t("Refleja la valoración total en tiempo real de los activos en los que se encuentra desplegado el capital.")}</p><p className="font-medium text-foreground">{t("En resumen: una gráfica del rendimiento de todas mis bóvedas abiertas a la misma vez.")}</p></HelpTip>}</p><p className="flex items-center gap-2"><span className={`font-display text-xl font-extrabold tabular-nums sm:text-2xl ${theme.text}`} style={theme.text ? undefined : { color: theme.b }}>{loading && !liveCap ? "…" : mText}</span>{(ms[0] ?? 0) > 0 && <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${pct >= 0 ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>{pct >= 0 ? "▲ +" : "▼ "}{pct.toFixed(1)}%</span>}</p></div>
     </div>
     <div className="relative mt-2 touch-pan-y overflow-hidden" onPointerDown={pDown} onPointerMove={pMove} onPointerUp={pUp} onPointerCancel={pUp} onPointerLeave={pUp}>
     <div style={{ transform: `translateX(${pan}px) scaleX(${zoom})`, transformOrigin: `${origin * 100}% 50%` }}>
@@ -289,7 +289,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
         <linearGradient id={`h${gid}`} x1="0" x2="1"><stop offset="0%" stopColor={theme.a} /><stop offset="100%" stopColor={theme.b} /></linearGradient>
         <linearGradient id={`a${gid}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" /><stop offset="100%" stopColor="var(--primary)" stopOpacity="0" /></linearGradient>
       </defs>
-      {cmax > cmin && <><line x1={L} x2={R} y1={my(cmax)} y2={my(cmax)} stroke="var(--muted-foreground)" strokeOpacity="0.25" strokeDasharray="2 4" /><line x1={L} x2={R} y1={my(cmin)} y2={my(cmin)} stroke="var(--muted-foreground)" strokeOpacity="0.25" strokeDasharray="2 4" /><text x={R - 2} y={my(cmax) - 5} textAnchor="end" fontSize="13" fontWeight="800" fill="#10B981" stroke="var(--card)" strokeWidth="4" paintOrder="stroke" className="tabular-nums">▲ {cap(cmax)}</text><text x={R - 2} y={my(cmin) + 16} textAnchor="end" fontSize="13" fontWeight="800" fill="#EF4444" stroke="var(--card)" strokeWidth="4" paintOrder="stroke" className="tabular-nums">▼ {cap(cmin)}</text></>}
+      {cmax > cmin && <><line x1={L} x2={R} y1={my(cmax)} y2={my(cmax)} stroke="var(--muted-foreground)" strokeOpacity="0.25" strokeDasharray="2 4" /><line x1={L} x2={R} y1={my(cmin)} y2={my(cmin)} stroke="var(--muted-foreground)" strokeOpacity="0.25" strokeDasharray="2 4" /><text x={R - 2} y={my(cmax) - 5} textAnchor="end" fontSize="13" fontWeight="800" fill="#10B981" stroke="var(--card)" strokeWidth="4" paintOrder="stroke" className="tabular-nums">▲ {mFmt(cmax)}</text><text x={R - 2} y={my(cmin) + 16} textAnchor="end" fontSize="13" fontWeight="800" fill="#EF4444" stroke="var(--card)" strokeWidth="4" paintOrder="stroke" className="tabular-nums">▼ {mFmt(cmin)}</text></>}
       {!drawing && (live || n > 1) && cPts.length >= 2 && (() => {
         // GMGN look: green above the window's opening level, red below, soft area fill, dashed current-level line with badge.
         const refY = cPts[0]!.y, off = Math.min(1, Math.max(0, (refY - CT) / Math.max(CB - CT, 1))), up = cEnd.y <= refY, endC = up ? "#10B981" : "#EF4444";
