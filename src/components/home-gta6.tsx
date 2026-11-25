@@ -8,6 +8,7 @@ import { useI18n, useT } from "@/lib/i18n";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { VAULTS } from "@/lib/vaults";
 import { Sunset } from "./hot-vault-card";
+import { PoweredBy } from "./powered-by";
 import titleEs from "@/assets/gta6-vault-title.png";
 import titleEn from "@/assets/gta6-vault-title-en.png";
 import dobleLogo from "@/assets/doble-o-nada-logo.png";
@@ -67,6 +68,7 @@ export function HomeCtas() {
         <span className="sr-only">{t("Ver bóveda inteligente")}</span>
       </span>
     </Link>)}</div>
+    <PoweredBy brand="meteora" asLink className="mt-2" />
   </div>;
 }
 
