@@ -11,7 +11,6 @@ import { Sunset } from "./hot-vault-card";
 import titleEs from "@/assets/gta6-vault-title.png";
 import titleEn from "@/assets/gta6-vault-title-en.png";
 import dobleLogo from "@/assets/doble-o-nada-logo.png";
-import trumpLogo from "@/assets/trump-logo.png";
 
 const gta6 = VAULTS.find((v) => v.id === "gta6");
 
@@ -50,32 +49,25 @@ export function Gta6Hero({ title, sub }: { title: string; sub: string }) {
   </div>;
 }
 
-/** The two main home buttons, styled to pop in every hero variant. Vaults goes first in the GTA6 variant. */
-export function HomeCtas({ vaultsFirst = false, trump = false }: { vaultsFirst?: boolean; trump?: boolean }) {
+/** First-fold shortcuts to the smart vaults (Bitcoin, Trump, DCTY): one compact row so the sign-in button stays in view on phones. */
+export function HomeCtas() {
   const t = useT();
-  const { lang } = useI18n();
-  const V = lang === "en" ? "Vault" : "Bóveda";
-  const predict = <Link key="p" to="/mercados" className="group relative block min-w-0 rounded-2xl bg-primary p-[2px] shadow-[0_0_28px_-6px_var(--primary)] transition-transform active:scale-[0.98]">
-    <span className="relative isolate flex h-16 items-center justify-between gap-2 overflow-hidden rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-3 text-hot-foreground">
-      <DuelLines />
-      <span className="flex min-w-0 flex-col items-start gap-0.5"><img src={dobleLogo} alt="" aria-hidden className="h-8 w-auto shrink-0 drop-shadow-[0_0_10px_var(--primary)] sm:h-9" /><LightningBadge /><span className="sr-only">{t("Ver Doble o Nada")}</span></span>
-      <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary-foreground opacity-75 motion-reduce:animate-none" /><span className="relative inline-flex size-2 rounded-full bg-primary-foreground" /></span>{t("En vivo")}</span>
-    </span>
-  </Link>;
-  const vaults = <Link key="v" to="/app" hash={trump ? "open-trump" : "open-gta6"} className={`${trump ? "vault-trump " : ""}hot-ring group relative block min-w-0 rounded-2xl p-[2px] shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98]`}>
-    <span className={`relative isolate flex h-[4.5rem] items-center justify-between gap-2 overflow-hidden rounded-[14px] px-3 text-hot-foreground ${trump ? "bg-[image:var(--gradient-hot-surface)]" : "bg-[image:var(--gradient-hot)]"}`}>
-      {!trump && <Sunset />}
-      <span aria-hidden className="cta-shimmer pointer-events-none absolute inset-y-0 left-0 z-10 w-1/4 bg-gradient-to-r from-transparent via-hot-foreground/30 to-transparent" />
-      {trump
-        ? <span className="relative flex min-w-0 items-center gap-2 whitespace-nowrap"><img src={trumpLogo} alt="" aria-hidden width={160} height={160} className="h-8 w-8 shrink-0 rounded-full ring-2 ring-hot-2 drop-shadow-[0_0_10px_var(--hot-2)] min-[380px]:h-9 min-[380px]:w-9 sm:h-10 sm:w-10" /><span className="flex flex-col items-start leading-none"><span className="flex items-center gap-1.5"><span className="text-[10px] font-bold uppercase tracking-[0.25em] text-hot-muted">{V}</span><span className="rounded-sm bg-[color:var(--trump-blue)] px-1 py-px text-[8px] font-bold tracking-[0.2em] text-[color:var(--trump-gold)] ring-1 ring-[color:var(--trump-gold)]/60">{lang === "en" ? "OFFICIAL" : "OFICIAL"}</span></span><span className="trump-gold -rotate-2 font-display text-[0.95rem] min-[380px]:text-[1.05rem] min-[420px]:text-[1.2rem] font-black italic uppercase tracking-tight sm:text-2xl">TRUMP COIN</span></span></span>
-        : <span className="relative flex min-w-0 flex-col items-start whitespace-nowrap leading-none"><span className="flex items-center gap-1.5"><span className="text-[10px] font-bold uppercase tracking-[0.25em] text-hot-foreground/80">{V}</span><span className="rounded-sm bg-hot-surface px-1 py-px text-[8px] font-bold tracking-[0.2em] text-hot-foreground ring-1 ring-hot-foreground/40">VICE CITY</span></span><span className="-rotate-2 font-display text-[1.15rem] font-black italic uppercase tracking-tight text-hot-foreground min-[380px]:text-[1.4rem] [text-shadow:0_2px_0_var(--hot-surface),0_0_14px_var(--hot)] sm:text-[1.8rem]">GTA6 <span className="text-hot-surface [text-shadow:0_0_10px_var(--hot-foreground)]">COIN</span></span></span>}
-      <span className="sr-only">{t("Explorar Bóvedas")}</span>
-      {trump
-        ? <span className="relative flex shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl bg-[color:var(--trump-blue)] px-2 py-1.5 min-[380px]:px-3 leading-none ring-1 ring-[color:var(--trump-gold)] shadow-[0_0_16px_-4px_var(--trump-gold)]"><span aria-hidden className="text-[8px] tracking-[0.3em] text-[color:var(--trump-gold)]">★ ★ ★</span><span className="trump-gold flex items-center gap-1 font-display text-xs min-[380px]:text-sm font-black uppercase">{t("Entrar")}<ArrowRight size={14} className="text-[color:var(--trump-gold)] transition-transform group-hover:translate-x-0.5" /></span></span>
-        : <span className="hot-cta relative flex shrink-0 items-center gap-1 rounded-xl px-2 py-2 font-display text-xs font-black uppercase text-hot-surface min-[380px]:px-3 min-[380px]:text-sm shadow-[0_0_18px_-2px_var(--hot)]"><Flame size={14} aria-hidden className="flame-flicker" />{t("Entrar")}<ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" /></span>}
-    </span>
-  </Link>;
-  return <div className="mb-4 grid w-full min-w-0 grid-cols-1 gap-2.5">{vaultsFirst ? [vaults, predict] : [predict, vaults]}</div>;
+  const tiles = [
+    { id: "btc", skin: "vault-btc", icon: "₿", name: "Bitcoin" },
+    { id: "trump", skin: "vault-trump", icon: "🇺🇸", name: "Trump" },
+    { id: "dcty", skin: "vault-dcty", icon: "🏙️", name: "DCTY" },
+  ] as const;
+  return <div className="mb-4 w-full min-w-0">
+    <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-widest text-primary">{t("Bóvedas inteligentes")}</p>
+    <div className="grid grid-cols-3 gap-2">{tiles.map((v) => <Link key={v.id} to="/app" hash={`open-${v.id}`} className={`${v.skin} hot-ring group block min-w-0 rounded-2xl p-[2px] shadow-[var(--shadow-hot)] transition-transform active:scale-[0.98]`}>
+      <span className="relative isolate flex h-16 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-[14px] bg-[image:var(--gradient-hot-surface)] px-1 text-hot-foreground">
+        <span aria-hidden className="cta-shimmer pointer-events-none absolute inset-y-0 left-0 z-10 w-1/3 bg-gradient-to-r from-transparent via-hot-foreground/30 to-transparent" />
+        <span aria-hidden className="text-xl leading-none">{v.icon}</span>
+        <span className="flex items-center gap-0.5 font-display text-xs font-black uppercase">{v.name}<ArrowRight size={12} aria-hidden /></span>
+        <span className="sr-only">{t("Ver bóveda inteligente")}</span>
+      </span>
+    </Link>)}</div>
+  </div>;
 }
 
 /** Decorative Sube/Baja duel: green and red lines keep crossing a dashed target line, looping behind the logo. */

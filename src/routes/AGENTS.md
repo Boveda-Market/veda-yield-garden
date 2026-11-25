@@ -3,3 +3,4 @@
 - /admin "Vista previa" tab (card-preview-admin.tsx, notice-gallery-admin.tsx) renders real cards for any wallet and every notice with sample data inside `inert` wrappers, so the operator can inspect UI without signing or moving money.
 - English twins of public pages live in en/ reusing the Spanish component; langLinks (seo-lang.ts) sets self-canonical + hreflang, and /en paths force English so Google indexes each language.
 - Home versions live at their own addresses (HERO_SLUGS in hero-variants.ts, one thin route per slug rendering Landing with a pinned variant); "/" keeps the weighted rotation and 301-redirects legacy ?v=N links so old campaign links keep working.
+- Home footer legal notes (HomeDisclaimers in index.tsx) render on every home version so purpose, non-affiliation and risk text stay in one place.

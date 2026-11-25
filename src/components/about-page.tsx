@@ -30,6 +30,8 @@ export function AboutPage() {
     <section className="mx-auto max-w-5xl px-5 py-9 sm:px-8 sm:py-12">
       <h2 className="font-display text-2xl font-semibold">{t("Por qué existe Bóveda Market")}</h2>
       <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">{t("Bóveda Market nace para acercar las bóvedas digitales a personas que quieren empezar sin sentirse perdidas entre términos complicados.")}</p>
+      <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">{t("Bóveda Market es solo la interfaz que conecta al usuario con la liquidez de las bóvedas públicas en Meteora. No es un DEX, ni un banco, ni un protocolo propio: las bóvedas son públicas y tu dinero se queda en tu propia billetera.")}</p>
+      <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">{t("Nuestra misión es que cualquier persona pueda aportar liquidez nueva a la blockchain y cobrar intereses por mantener sus bóvedas inteligentes abiertas, mientras el Piloto Automático se encarga de la parte técnica.")}</p>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">{t("Puedes conocer las bóvedas, entender cómo trabajan y revisar lo que vas a hacer antes de decidir.")}</p>
     </section>
     <section className="border-y border-border bg-muted/40">

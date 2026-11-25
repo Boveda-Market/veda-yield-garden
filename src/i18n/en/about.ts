@@ -19,4 +19,6 @@ export const about: Record<string, string> = {
   "Hablar por Telegram": "Chat on Telegram",
   "Antes de empezar": "Before you start",
   "Las bóvedas no son depósitos bancarios. Su valor puede subir o bajar y existe riesgo de pérdida. Los intereses estimados no son una promesa de ganancias.": "Vaults are not bank deposits. Their value can rise or fall and there is a risk of loss. Estimated interest is not a promise of earnings.",
+  "Bóveda Market es solo la interfaz que conecta al usuario con la liquidez de las bóvedas públicas en Meteora. No es un DEX, ni un banco, ni un protocolo propio: las bóvedas son públicas y tu dinero se queda en tu propia billetera.": "Bóveda Market is only the interface that connects users to the liquidity of public vaults on Meteora. It is not a DEX, a bank or its own protocol: the vaults are public and your money stays in your own wallet.",
+  "Nuestra misión es que cualquier persona pueda aportar liquidez nueva a la blockchain y cobrar intereses por mantener sus bóvedas inteligentes abiertas, mientras el Piloto Automático se encarga de la parte técnica.": "Our mission is to let anyone provide fresh liquidity to the blockchain and earn interest for keeping their smart vaults open, while Autopilot handles the technical side.",
 };

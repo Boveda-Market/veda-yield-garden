@@ -26,6 +26,7 @@ import { DobleHero, Gta6Hero, HomeCtas } from "@/components/home-gta6";
 import { BootSplash } from "@/components/boot-splash";
 import { CalmHero } from "@/components/home-calm";
 import { ThemeSections } from "@/components/home-sections";
+import { SmartHero, SmartSections } from "@/components/home-smart";
 
 /** Before hydration, returning visitors (flag set by a tiny head script) see the loading screen instead of the full page flashing. */
 function ReturningCover() {
@@ -48,7 +49,8 @@ export const Route = createFileRoute("/")({ staticData: { sitemap: true },
 });
 
 const FAQS = [
-  { q: "¿Qué rayos es Bóveda Market?", a: "Bóveda Market es una interfaz hecha con inteligencia artificial que conecta tu dinero con bóvedas (liquidity pools) públicas en la red Solana. Solo depositas dólares digitales y el sistema se encarga de comprar las monedas, armar una bóveda única para ti y mantenerla activa. Cada vez que alguien intercambia monedas digitales en la bóveda se generan intereses y se reparten entre quienes aportan. Las tasas son estimaciones, cambian y existe riesgo de pérdida." },
+  { q: "¿Qué rayos es Bóveda Market?", a: "Bóveda Market es una interfaz hecha con inteligencia artificial que conecta tu dinero con bóvedas (liquidity pools) públicas en la red Solana. Solo depositas dólares digitales y el sistema se encarga de comprar las monedas, armar una bóveda inteligente única para ti y mantenerla activa con el Piloto Automático. Cada vez que alguien intercambia monedas digitales en la bóveda se generan intereses y se reparten entre quienes aportan liquidez. Las tasas son estimaciones, cambian y existe riesgo de pérdida." },
+  { q: "¿Qué es una bóveda inteligente?", a: "Configurar rangos de precios y curvas de liquidez a mano en protocolos descentralizados como Meteora u Orca es técnico, complicado y consume mucho tiempo. Una bóveda inteligente elimina toda esa fricción: es una posición automatizada que conecta tus dólares digitales directamente con esas piscinas públicas de liquidez (liquidity pools) en la red Solana. Al abrirla, aportas el capital que hace posibles los intercambios de miles de personas las 24 horas del día y cobras una parte de cada comisión generada. La llamamos «inteligente» porque el sistema calcula la estrategia por ti en un solo toque, y el Piloto Automático vigila el mercado para mantenerla activa y cosechar tus ganancias automáticamente." },
   { q: "¿Tengo que comprar Bitcoin, Trump u otras monedas para entrar?", a: "No. Solo necesitas dólares en tu cuenta. Abres tu bóveda en un solo toque: el sistema te guía, compra las monedas a precio de mercado y arma todo por ti. Confirmas una vez y tu bóveda empieza a generar intereses." },
   { q: "¿Qué son los dólares digitales?", a: "Son dólares que viven en internet en lugar de en un banco. En Bóveda Market se usa USDC, un dólar digital emitido por la empresa Circle y respaldado por efectivo y bonos del Tesoro de EE. UU.: 1 USDC vale lo mismo que 1 dólar, así que el saldo no sube ni baja como otras monedas. Se envía en segundos a cualquier hora, se recarga con tarjeta o Apple Pay y se puede retirar al banco o a Coinbase. No es un depósito bancario ni está asegurado por el gobierno." },
   { q: "¿Puedo explorar sin depositar monedas digitales?", a: "Sí, totalmente. Puedes ver las bóvedas y Doble o Nada en vivo sin registrarte. Y si quieres conocer la billetera y el portafolio por dentro, basta con entrar con Google en 1 segundo: no se pide tarjeta ni depósito para explorar la app completa a tu propio ritmo." },
@@ -128,6 +130,7 @@ export function Landing({ variant }: { variant?: number } = {}) {
   const calmHero = hero.theme === "calm";
   const btcHero = hero.theme === "bitcoin";
   const trumpHero = hero.theme === "trump";
+  const smartHero = hero.theme === "smart";
   const classicHero = !hero.theme;
   const plainHero = false;
   if (decided && compact) return <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 pb-10 pt-20 text-foreground sm:py-10">
@@ -147,6 +150,7 @@ export function Landing({ variant }: { variant?: number } = {}) {
         {btcHero && <div className="order-1 min-w-0 md:col-span-2"><BitcoinHero title={hero.title} sub={hero.sub} /></div>}
         {trumpHero && <div className="order-1 min-w-0 md:col-span-2"><TrumpHero title={hero.title} sub={hero.sub} /></div>}
         {classicHero && <div className="order-1 min-w-0 md:col-span-2"><ClassicHero title={hero.title} sub={hero.sub} /></div>}
+        {smartHero && <div className="order-1 min-w-0 md:col-span-2"><SmartHero title={hero.title} sub={hero.sub} /></div>}
         {calmHero && <div className="order-1 min-w-0 md:col-span-2"><CalmHero title={hero.title} sub={hero.sub} /></div>}
         {plainHero && <div className="order-1 min-w-0 text-center md:hidden"><h1 className="font-display text-3xl font-bold leading-tight">{t(hero.title)}</h1><p className="mt-2 font-display text-base font-semibold text-primary">{t(hero.sub)}</p></div>}
         <div className="order-3 min-w-0 text-center md:order-1 md:text-left">
@@ -154,13 +158,13 @@ export function Landing({ variant }: { variant?: number } = {}) {
           {plainHero && <><p className="mt-3 hidden font-display text-xl font-semibold text-primary md:block">{t(hero.sub)}</p></>}
         </div>
         <div id="acceso" className="order-2 min-w-0 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
-          <HomeCtas vaultsFirst={gtaHero || calmHero || hero.theme === "trump"} trump={hero.theme === "trump"} />
+          <HomeCtas />
           <EntryAccess />
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span><span aria-hidden="true">·</span><a href="https://www.privy.io/security" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground underline-offset-2 hover:text-primary hover:underline">{t("Conoce más")} ↗</a></p>
         </div>
       </section>
 
-      {btcHero ? <BitcoinSections /> : <ThemeSections theme={hero.theme} />}
+      {btcHero ? <BitcoinSections /> : <>{smartHero && <SmartSections />}<ThemeSections theme={hero.theme} /></>}
 
       <section aria-label={t("Cómo abrir tu bóveda en 4 pasos")} className="mb-4 py-8">
         <h2 className="font-display text-2xl font-bold">{t("Cómo abrir tu bóveda en 4 pasos")}</h2>
@@ -224,6 +228,21 @@ export function Landing({ variant }: { variant?: number } = {}) {
         </details>)}
       </section>
     </main>
-    <footer className="mx-auto max-w-5xl border-t border-border px-6 py-6 text-xs leading-5 text-muted-foreground"><nav className="flex flex-wrap justify-center gap-5"><Link to={lang === "en" ? "/en/about" : "/about"}>{t("Sobre Bóveda Market")}</Link><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to={guidesIndexHref(lang)}>{t("Guías")}</Link><Link to="/status">{t("Estado del sistema")}</Link><Link to="/terminos">{t("Términos")}</Link><Link to="/privacidad">{t("Privacidad")}</Link><AdvancedAccess /></nav><p className="mt-4 text-center"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer" className="text-primary underline">{t("Soporte en Telegram")}</a>{" · "}<a href="mailto:admin@bovedamarket.app" className="text-primary underline">admin@bovedamarket.app</a></p><p className="mt-2 text-center">© {new Date().getFullYear()} Boveda Technologies</p></footer>
+    <footer className="mx-auto max-w-5xl border-t border-border px-6 py-6 text-xs leading-5 text-muted-foreground"><nav className="flex flex-wrap justify-center gap-5"><Link to={lang === "en" ? "/en/about" : "/about"}>{t("Sobre Bóveda Market")}</Link><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to={guidesIndexHref(lang)}>{t("Guías")}</Link><Link to="/status">{t("Estado del sistema")}</Link><Link to="/terminos">{t("Términos")}</Link><Link to="/privacidad">{t("Privacidad")}</Link><AdvancedAccess /></nav><HomeDisclaimers /><p className="mt-4 text-center"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer" className="text-primary underline">{t("Soporte en Telegram")}</a>{" · "}<a href="mailto:admin@bovedamarket.app" className="text-primary underline">admin@bovedamarket.app</a></p><p className="mt-2 text-center">© {new Date().getFullYear()} Boveda Technologies</p></footer>
+  </div>;
+}
+
+const DISCLAIMERS: [string, string][] = [
+  ["Propósito de la plataforma", "Bóveda Market es una interfaz tecnológica creada para que cualquier persona pueda convertirse en proveedor de liquidez en la red Solana de manera simple y automatizada. En lugar de mantener monedas inactivas («holdear» sin generar nada), una bóveda inteligente le da un propósito productivo a tu capital: ponerlo a trabajar facilitando transacciones en el mercado y cobrando microcomisiones las 24 horas del día."],
+  ["Lo que aporta tu liquidez", "A la red: fortaleces la descentralización con piscinas de intercambio públicas, abiertas 24/7 y sin intermediarios bancarios. A los traders: permites compras y ventas inmediatas, con menor deslizamiento de precio y tarifas más justas. A la moneda: le das profundidad de mercado y estabilidad, ayudando a absorber compras y ventas sin caídas abruptas. Tú haces posible ese comercio, y por eso recibes las comisiones de cada intercambio."],
+  ["Descargo de no afiliación", "Bóveda Market es una herramienta independiente y no está afiliada, asociada, patrocinada ni respaldada por ninguna de las marcas, empresas, desarrolladores ni figuras públicas relacionadas con las monedas o temáticas de las bóvedas (incluyendo, entre otros, Rockstar Games, Take-Two Interactive, Donald J. Trump, The Trump Organization, Coinbase ni los creadores de tokens como GTA6 Coin o DCTY). Todos los nombres y marcas pertenecen a sus respectivos dueños y se mencionan solo para identificar mercados públicos."],
+  ["Aviso de riesgo", "Bóveda Market no es un banco, exchange ni asesor financiero, y no custodia tus fondos: permanecen bajo el control exclusivo de tu billetera y operan en protocolos descentralizados públicos como Meteora. Las tasas estimadas (APR) son proyecciones variables basadas en el volumen reciente, no rendimientos garantizados. Aportar liquidez conlleva riesgo de mercado, fluctuación de precios y pérdida de capital."],
+];
+
+/** Legal notes under the home footer links: purpose, liquidity benefits, non-affiliation and risk. */
+function HomeDisclaimers() {
+  const t = useT();
+  return <div className="mx-auto mt-6 max-w-3xl space-y-3 text-[11px] leading-relaxed text-muted-foreground">
+    {DISCLAIMERS.map(([h, b]) => <p key={h}><strong className="font-semibold text-foreground">{t(h)}:</strong> {t(b)}</p>)}
   </div>;
 }

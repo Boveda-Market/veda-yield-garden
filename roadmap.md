@@ -58,3 +58,8 @@
 - [x] Cerrar varias bóvedas a la vez con casillas (Opción B)
 - [x] Gráfica de Mi Portafolio: volver a dejar solo la línea del mercado (confirmado por el usuario)
 - [x] Portafolio: restaurar las cantidades de «Total depositado» e «Intereses pagados» (precio oficial de Meteora como respaldo cuando DexScreener no lista el pool, p. ej. GTA6)
+- [x] Llamar a las bóvedas «bóvedas inteligentes»; FAQ «¿Qué es una bóveda inteligente?» y término en «¿Qué rayos es Bóveda Market?»
+- [x] Primer pliegue: Bitcoin, Trump y DCTY en una fila compacta (sin Doble o Nada)
+- [x] Nueva portada /bovedas-inteligentes (+ /en/smart-vaults) con el hook de rangos manuales y el Piloto Automático, en la rotación
+- [x] Footer del inicio con propósito, beneficios de la liquidez, no afiliación y aviso de riesgo
+- [x] Guía de Bitcoin y Acerca de: Bóveda Market como interfaz que conecta con la liquidez pública de Meteora

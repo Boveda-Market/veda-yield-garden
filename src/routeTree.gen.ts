@@ -15,6 +15,7 @@ import { Route as ActividadRouteImport } from './routes/actividad'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as BitcoinRouteImport } from './routes/bitcoin'
+import { Route as BovedasInteligentesRouteImport } from './routes/bovedas-inteligentes'
 import { Route as ClasicaRouteImport } from './routes/clasica'
 import { Route as CuentaRouteImport } from './routes/cuenta'
 import { Route as DobleONadaRouteImport } from './routes/doble-o-nada'
@@ -42,6 +43,7 @@ import { Route as EnFaqRouteImport } from './routes/en/faq'
 import { Route as EnGta6RouteImport } from './routes/en/gta6'
 import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
 import { Route as EnSinAnsiedadRouteImport } from './routes/en/sin-ansiedad'
+import { Route as EnSmartVaultsRouteImport } from './routes/en/smart-vaults'
 import { Route as EnStatusRouteImport } from './routes/en/status'
 import { Route as EnTermsRouteImport } from './routes/en/terms'
 import { Route as EnTrumpRouteImport } from './routes/en/trump'
@@ -97,6 +99,11 @@ const AppRoute = AppRouteImport.update({
 const BitcoinRoute = BitcoinRouteImport.update({
   id: '/bitcoin',
   path: '/bitcoin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BovedasInteligentesRoute = BovedasInteligentesRouteImport.update({
+  id: '/bovedas-inteligentes',
+  path: '/bovedas-inteligentes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClasicaRoute = ClasicaRouteImport.update({
@@ -232,6 +239,11 @@ const EnPrivacyRoute = EnPrivacyRouteImport.update({
 const EnSinAnsiedadRoute = EnSinAnsiedadRouteImport.update({
   id: '/en/sin-ansiedad',
   path: '/en/sin-ansiedad',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnSmartVaultsRoute = EnSmartVaultsRouteImport.update({
+  id: '/en/smart-vaults',
+  path: '/en/smart-vaults',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnStatusRoute = EnStatusRouteImport.update({
@@ -386,6 +398,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
   '/bitcoin': typeof BitcoinRoute
+  '/bovedas-inteligentes': typeof BovedasInteligentesRoute
   '/clasica': typeof ClasicaRoute
   '/cuenta': typeof CuentaRoute
   '/doble-o-nada': typeof DobleONadaRoute
@@ -412,6 +425,7 @@ export interface FileRoutesByFullPath {
   '/en/gta6': typeof EnGta6Route
   '/en/privacy': typeof EnPrivacyRoute
   '/en/sin-ansiedad': typeof EnSinAnsiedadRoute
+  '/en/smart-vaults': typeof EnSmartVaultsRoute
   '/en/status': typeof EnStatusRoute
   '/en/terms': typeof EnTermsRoute
   '/en/trump': typeof EnTrumpRoute
@@ -447,6 +461,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
   '/bitcoin': typeof BitcoinRoute
+  '/bovedas-inteligentes': typeof BovedasInteligentesRoute
   '/clasica': typeof ClasicaRoute
   '/cuenta': typeof CuentaRoute
   '/doble-o-nada': typeof DobleONadaRoute
@@ -473,6 +488,7 @@ export interface FileRoutesByTo {
   '/en/gta6': typeof EnGta6Route
   '/en/privacy': typeof EnPrivacyRoute
   '/en/sin-ansiedad': typeof EnSinAnsiedadRoute
+  '/en/smart-vaults': typeof EnSmartVaultsRoute
   '/en/status': typeof EnStatusRoute
   '/en/terms': typeof EnTermsRoute
   '/en/trump': typeof EnTrumpRoute
@@ -509,6 +525,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
   '/bitcoin': typeof BitcoinRoute
+  '/bovedas-inteligentes': typeof BovedasInteligentesRoute
   '/clasica': typeof ClasicaRoute
   '/cuenta': typeof CuentaRoute
   '/doble-o-nada': typeof DobleONadaRoute
@@ -535,6 +552,7 @@ export interface FileRoutesById {
   '/en/gta6': typeof EnGta6Route
   '/en/privacy': typeof EnPrivacyRoute
   '/en/sin-ansiedad': typeof EnSinAnsiedadRoute
+  '/en/smart-vaults': typeof EnSmartVaultsRoute
   '/en/status': typeof EnStatusRoute
   '/en/terms': typeof EnTermsRoute
   '/en/trump': typeof EnTrumpRoute
@@ -572,6 +590,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/bitcoin'
+    | '/bovedas-inteligentes'
     | '/clasica'
     | '/cuenta'
     | '/doble-o-nada'
@@ -598,6 +617,7 @@ export interface FileRouteTypes {
     | '/en/gta6'
     | '/en/privacy'
     | '/en/sin-ansiedad'
+    | '/en/smart-vaults'
     | '/en/status'
     | '/en/terms'
     | '/en/trump'
@@ -633,6 +653,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/bitcoin'
+    | '/bovedas-inteligentes'
     | '/clasica'
     | '/cuenta'
     | '/doble-o-nada'
@@ -659,6 +680,7 @@ export interface FileRouteTypes {
     | '/en/gta6'
     | '/en/privacy'
     | '/en/sin-ansiedad'
+    | '/en/smart-vaults'
     | '/en/status'
     | '/en/terms'
     | '/en/trump'
@@ -694,6 +716,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/bitcoin'
+    | '/bovedas-inteligentes'
     | '/clasica'
     | '/cuenta'
     | '/doble-o-nada'
@@ -720,6 +743,7 @@ export interface FileRouteTypes {
     | '/en/gta6'
     | '/en/privacy'
     | '/en/sin-ansiedad'
+    | '/en/smart-vaults'
     | '/en/status'
     | '/en/terms'
     | '/en/trump'
@@ -756,6 +780,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AppRoute: typeof AppRoute
   BitcoinRoute: typeof BitcoinRoute
+  BovedasInteligentesRoute: typeof BovedasInteligentesRoute
   ClasicaRoute: typeof ClasicaRoute
   CuentaRoute: typeof CuentaRoute
   DobleONadaRoute: typeof DobleONadaRoute
@@ -782,6 +807,7 @@ export interface RootRouteChildren {
   EnGta6Route: typeof EnGta6Route
   EnPrivacyRoute: typeof EnPrivacyRoute
   EnSinAnsiedadRoute: typeof EnSinAnsiedadRoute
+  EnSmartVaultsRoute: typeof EnSmartVaultsRoute
   EnStatusRoute: typeof EnStatusRoute
   EnTermsRoute: typeof EnTermsRoute
   EnTrumpRoute: typeof EnTrumpRoute
@@ -853,6 +879,13 @@ declare module '@tanstack/react-router' {
       path: '/bitcoin'
       fullPath: '/bitcoin'
       preLoaderRoute: typeof BitcoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bovedas-inteligentes': {
+      id: '/bovedas-inteligentes'
+      path: '/bovedas-inteligentes'
+      fullPath: '/bovedas-inteligentes'
+      preLoaderRoute: typeof BovedasInteligentesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clasica': {
@@ -1042,6 +1075,13 @@ declare module '@tanstack/react-router' {
       path: '/en/sin-ansiedad'
       fullPath: '/en/sin-ansiedad'
       preLoaderRoute: typeof EnSinAnsiedadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/smart-vaults': {
+      id: '/en/smart-vaults'
+      path: '/en/smart-vaults'
+      fullPath: '/en/smart-vaults'
+      preLoaderRoute: typeof EnSmartVaultsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/status': {
@@ -1236,6 +1276,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AppRoute: AppRoute,
   BitcoinRoute: BitcoinRoute,
+  BovedasInteligentesRoute: BovedasInteligentesRoute,
   ClasicaRoute: ClasicaRoute,
   CuentaRoute: CuentaRoute,
   DobleONadaRoute: DobleONadaRoute,
@@ -1262,6 +1303,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnGta6Route: EnGta6Route,
   EnPrivacyRoute: EnPrivacyRoute,
   EnSinAnsiedadRoute: EnSinAnsiedadRoute,
+  EnSmartVaultsRoute: EnSmartVaultsRoute,
   EnStatusRoute: EnStatusRoute,
   EnTermsRoute: EnTermsRoute,
   EnTrumpRoute: EnTrumpRoute,
