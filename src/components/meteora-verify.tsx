@@ -42,7 +42,8 @@ export function VerifyPoolList() {
 function VerifyBody() {
   const t = useT();
   return <div className="grid min-w-0 gap-4">
-    <p className="text-sm leading-6 text-muted-foreground">{t("Meteora es un protocolo público de liquidez en Solana: ahí viven las bóvedas y se cobran las comisiones de cada intercambio. Bóveda Market es solo la interfaz: entras con dólares y el Piloto Automático ajusta el rango y cobra por ti 24/7.")}</p>
+    <p className="text-sm leading-6 text-muted-foreground">{t("Meteora es un protocolo público de liquidez: ahí viven las bóvedas inteligentes y se generan intereses con cada intercambio. Bóveda Market es la interfaz: entras con dólares y el Piloto Automático ajusta tu bóveda por ti.")}</p>
+    <p className="text-sm leading-6 text-muted-foreground">{t("Cuando el precio sale del rango por arriba, el Piloto Automático reinvierte tus ganancias en la misma bóveda: tus intereses también pueden generar intereses. Eso es interés compuesto. Si sale por abajo, deja las ganancias en dólares disponibles. Actúa cuando se cumplen sus controles; las ganancias no están garantizadas.")}</p>
     <VerifyPoolList />
     <p className="flex items-start gap-2 rounded-xl border border-border bg-secondary/50 p-3 text-xs leading-5 text-muted-foreground"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-primary" /><span>{t("Tus fondos quedan en tu propia billetera dentro de esos pools públicos; Bóveda Market no los custodia.")} <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary underline"><GithubMark size={12} />{t("Código abierto en GitHub")}</a></span></p>
   </div>;
