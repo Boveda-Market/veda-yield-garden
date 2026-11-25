@@ -67,4 +67,4 @@
 - [x] Insignia «Powered by Meteora» en la portada, debajo de los botones Bitcoin/Trump/DCTY; enlace a meteora.ag solo ahí, texto plano en el resto
 - [x] GitHub: pie de portada y fila de código abierto enlazan directo al repositorio público
 - [x] Repositorio público: README en inglés, licencia MIT y aviso de riesgo
-- [ ] Sugerir: quitar ventana de inicio de sesión del homepage y usar «Continuar a la app» (pendiente de decisión del usuario)
+- [x] Portada: «Continuar a la app» en lugar de la ventana de inicio

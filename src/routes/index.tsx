@@ -126,6 +126,7 @@ export function Landing({ variant }: { variant?: number } = {}) {
     setHeroIdx(i);
     try { localStorage.setItem(HERO_KEY, String(i)); } catch { /* blocked storage */ }
   }, [variant]);
+  const [showLogin, setShowLogin] = useState(false);
   const hero = HERO_VARIANTS[heroIdx] ?? HERO_VARIANTS[0]!;
   const gtaHero = hero.theme === "gta6";
   const dobleHero = hero.theme === "doble";
@@ -161,7 +162,9 @@ export function Landing({ variant }: { variant?: number } = {}) {
         </div>
         <div id="acceso" className="order-2 min-w-0 scroll-mt-4 flex flex-col items-center rounded-3xl border border-border bg-card p-6 shadow-sm [&>div]:mt-0">
           <HomeCtas />
-          <EntryAccess />
+          <Link to="/app" className="mt-2 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-lg font-bold text-primary-foreground shadow-sm transition-transform active:scale-[0.98]">{t("Continuar a la app")}<ArrowRight size={18} /></Link>
+          <p className="mt-2 text-center text-xs text-muted-foreground">{t("Explora sin cuenta; solo te pedimos entrar al depositar.")}</p>
+          {showLogin ? <div className="mt-4 w-full border-t border-border pt-2 [&>div]:mt-0"><EntryAccess /></div> : <button type="button" onClick={() => setShowLogin(true)} className="mt-4 text-sm text-primary underline underline-offset-4">{t("¿Ya tienes cuenta? Inicia sesión")}</button>}
           <p className="mt-5 flex w-full items-center justify-center gap-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground"><Lock size={11} aria-hidden="true" /><span>Secured by</span><img src="/brands/privy-mark.png" alt="" className="h-4 w-4 rounded-full" loading="lazy" /><span className="font-semibold text-foreground">Privy</span><span aria-hidden="true">·</span><a href="https://www.privy.io/security" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground underline-offset-2 hover:text-primary hover:underline">{t("Conoce más")} ↗</a></p>
         </div>
       </section>

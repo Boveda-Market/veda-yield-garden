@@ -2003,4 +2003,7 @@ export const extra: Record<string, string> = {
   "El valor es el Piloto Automático": "The value is the Autopilot",
   "En Meteora directo calculas rangos y rebalanceas a mano. Aquí el Piloto Automático lo hace por ti 24/7.": "On Meteora directly you calculate ranges and rebalance by hand. Here the Autopilot does it for you 24/7.",
   "No tienes que confiar en nuestra palabra: cada bóveda es un pool público que puedes abrir en Meteora y en el explorador de Solana.": "You don't have to take our word for it: each vault is a public pool you can open on Meteora and on the Solana explorer.",
+  "Continuar a la app": "Continue to the app",
+  "Explora sin cuenta; solo te pedimos entrar al depositar.": "Explore without an account; we only ask you to sign in when you deposit.",
+  "¿Ya tienes cuenta? Inicia sesión": "Already have an account? Sign in",
 };
