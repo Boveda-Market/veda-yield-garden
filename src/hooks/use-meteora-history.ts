@@ -19,9 +19,9 @@ export function useMeteoraHistory(wallet: string | null, full = false) {
   const priced = metrics.totals;
   const priceQueries = useQueries({ queries: priced.map((p) => ({ queryKey: ["dexscreener-pool-stats", p.pool], queryFn: ({ signal }: { signal: AbortSignal }) => fetchPoolStats(p.pool, signal), staleTime: 60_000, retry: 1 })) });
   const listedPrices = priced.map((p, i) => vaultTokenPrice(priceQueries[i]?.data, p.id));
-  // Pools the market listing does not carry (e.g. GTA6) fall back to the official Meteora pool price.
-  const fallbackQueries = useQueries({ queries: priced.map((p, i) => ({ ...meteoraPoolPriceOptions(p.id), enabled: listedPrices[i] == null && Boolean(priceQueries[i]?.isSuccess || priceQueries[i]?.isError) })) });
-  const prices = Object.fromEntries(priced.map((p, i) => [p.id, listedPrices[i] ?? fallbackQueries[i]?.data ?? null]));
+  // Official Meteora pool price first (the vaults live there); DexScreener only as backup.
+  const official = useQueries({ queries: priced.map((p) => meteoraPoolPriceOptions(p.id)) });
+  const prices = Object.fromEntries(priced.map((p, i) => [p.id, official[i]?.data ?? listedPrices[i] ?? null]));
   /** Today's price per pool address (for valuing harvested vault tokens). */
   const poolPrices: Record<string, number | null> = Object.fromEntries(priced.map((p, i) => [p.pool, prices[p.id] ?? null]));
   const ready = pages.length > 0;

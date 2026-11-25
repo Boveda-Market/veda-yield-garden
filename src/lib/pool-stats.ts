@@ -78,7 +78,7 @@ const meteoraPoolSchema = z.object({
 
 /**
  * Official Meteora price of a vault's token, matched by exact pool address and exact coin address.
- * Fallback for pools the market listing does not carry (e.g. GTA6); without it, history totals stay unavailable.
+ * Primary price source; DexScreener is used only when this is unavailable.
  */
 export function parseMeteoraPoolPrice(data: unknown, poolAddress: string, mint: string) {
   const parsed = meteoraPoolSchema.safeParse(data);
@@ -96,7 +96,7 @@ export async function fetchMeteoraPoolPrice(vaultId: string, signal?: AbortSigna
   return parseMeteoraPoolPrice(await response.json(), cfg.pool, cfg.mint);
 }
 
-/** Official Meteora pool price; enable it only when the market listing has no price for the vault. */
+/** Official Meteora pool price: primary source for vault token prices; DexScreener is the backup. */
 export const meteoraPoolPriceOptions = (vaultId: string) => ({
   queryKey: ["meteora-pool-price", vaultId],
   queryFn: ({ signal }: { signal: AbortSignal }) => fetchMeteoraPoolPrice(vaultId, signal),

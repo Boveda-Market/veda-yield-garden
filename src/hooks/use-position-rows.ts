@@ -16,14 +16,14 @@ export function usePositionRows(positions: ChainPosition[]) {
     refetchInterval: (q: { state: { data?: unknown } }) => (q.state.data ? 60_000 : 10_000) })) });
   const yields = useQueries({ queries: pools.map((pool) => ({ ...poolYieldOptions(pool ?? ""), enabled: Boolean(pool) })) });
   const listedPrices = positions.map((p, i) => vaultTokenPrice(stats[i]?.data, p.vaultId));
-  // Pools the market listing does not carry (e.g. GTA6) fall back to the official Meteora pool price.
-  const fallbacks = useQueries({ queries: positions.map((p, i) => ({ ...meteoraPoolPriceOptions(p.vaultId), enabled: Boolean(pools[i]) && listedPrices[i] == null && Boolean(stats[i]?.isSuccess || stats[i]?.isError) })) });
+  // Official Meteora pool price first (the vaults live there); DexScreener only as backup.
+  const official = useQueries({ queries: positions.map((p, i) => ({ ...meteoraPoolPriceOptions(p.vaultId), enabled: Boolean(pools[i]) })) });
   const rows = positions.map((p, i) => {
     const s = stats[i]?.data;
-    const price = listedPrices[i] ?? fallbacks[i]?.data ?? null;
+    const price = official[i]?.data ?? listedPrices[i] ?? null;
     return { p, value: estimateUsd(p.tokenAmount, p.usdcAmount, price), fees: estimateUsd(p.feeTokenAmount, p.feeUsdcAmount, price), apr: yields[i]?.data?.apr ?? null, price, pool: pools[i] ?? null, change24h: change24hUsd(p.tokenAmount, price, s?.change24h ?? null) };
   });
-  const loading = stats.some((s) => s?.isLoading);
+  const loading = stats.some((s) => s?.isLoading) && official.some((q) => q?.isLoading);
   const ready = rows.filter((r) => r.fees !== null && r.fees > 0 && operable(r.p));
   const totalFees = ready.reduce((sum, r) => sum + (r.fees ?? 0), 0);
   const top = [...ready].filter((r) => canHarvest(r.fees)).sort((a, b) => (b.fees ?? 0) - (a.fees ?? 0))[0] ?? null;
