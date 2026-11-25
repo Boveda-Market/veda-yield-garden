@@ -63,3 +63,4 @@
 - [x] Nueva portada /bovedas-inteligentes (+ /en/smart-vaults) con el hook de rangos manuales y el Piloto Automático, en la rotación
 - [x] Footer del inicio con propósito, beneficios de la liquidez, no afiliación y aviso de riesgo
 - [x] Guía de Bitcoin y Acerca de: Bóveda Market como interfaz que conecta con la liquidez pública de Meteora
+- [x] Guía de Bitcoin: explicar cbBTC (Bitcoin de Coinbase) y por qué no se usa Bitcoin regular
