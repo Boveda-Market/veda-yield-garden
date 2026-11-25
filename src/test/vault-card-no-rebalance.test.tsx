@@ -30,6 +30,7 @@ vi.mock("@/hooks/use-real-wallet", () => ({
 }));
 vi.mock("@/components/harvest-dialog", () => ({ HarvestDialog: () => null }));
 vi.mock("@/components/withdrawal-simulation", () => ({ WithdrawalSimulation: () => null }));
+vi.mock("@/components/multi-close-sheet", () => ({ MultiCloseSheet: () => null }));
 vi.mock("@/components/deposit-simulation", () => ({ DepositSimulation: () => null }));
 
 import { RealPositions } from "@/components/real-positions";

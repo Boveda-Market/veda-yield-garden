@@ -55,3 +55,4 @@
 - [x] Quitar FAQ «¿En cuál red opera Bóveda Market?» (ES/EN)
 - [x] Quitar sección «Lo que dice la comunidad» y reseñas del inicio
 - [x] /about: reemplazar contacto por admin@bovedamarket.app + grupo de Telegram
+- [x] Cerrar varias bóvedas a la vez con casillas (Opción B)

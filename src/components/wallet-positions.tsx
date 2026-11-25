@@ -17,6 +17,7 @@ import { TokenIcon, hasTokenLogo } from "@/components/token-icon";
 import { LiveEarnings } from "@/components/live-earnings";
 import { HarvestDialog } from "@/components/harvest-dialog";
 import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
+import { MultiCloseSheet } from "@/components/multi-close-sheet";
 import { DepositSimulation } from "@/components/deposit-simulation";
 import { PoweredBy } from "@/components/powered-by";
 import { RebalanceButton } from "@/components/rebalance-button";
@@ -65,10 +66,13 @@ export function WalletPositions({ wallet, only, bare }: { wallet: string; only?:
   const [harvest, setHarvest] = useState<{ position: string; vaultId: Supported; compound?: boolean } | null>(null);
   const [exit, setExit] = useState<{ position: string; vaultId: Supported } | null>(null);
   const [addTo, setAddTo] = useState<{ position: string; vaultId: Supported } | null>(null);
+  const [multi, setMulti] = useState(false);
+  const closable = positions.filter((p) => supported(p.vaultId) && !p.locked).map((p) => ({ position: p.address, vaultId: p.vaultId as Supported }));
   if (positions.length === 0) return null;
   const addVault = addTo ? VAULTS.find((v) => v.id === addTo.vaultId) : undefined;
   return <section aria-label={t("Tus posiciones abiertas")} className={bare ? "" : "rounded-2xl border border-border bg-card p-4"}>
     {!bare && <div className="flex items-center justify-between gap-2"><h3 className="font-display text-base font-semibold">{t("Tus posiciones abiertas")} · {positions.length}</h3><Link to="/portfolio" className="text-xs font-medium text-primary">{t("Ver en portafolio")}</Link></div>}
+    {closable.length >= 2 && <Button variant="outline" size="sm" className={bare ? "mb-3 w-full" : "mt-3 w-full"} onClick={() => setMulti(true)}><ArrowDownToLine size={14} />{t("Cerrar varias")}</Button>}
     <ul className={bare ? "space-y-3" : "mt-3 space-y-3"}>{positions.map((p, i) => {
       const s = stats[i]?.data;
       const price = vaultTokenPrice(s, p.vaultId);
@@ -98,6 +102,7 @@ export function WalletPositions({ wallet, only, bare }: { wallet: string; only?:
     {!bare && <p className="mt-3 text-[11px] leading-4 text-muted-foreground">{t("PNL = ganancias por cosechar, estimadas al precio actual. APR estimado con las últimas 24h.")}</p>}
     {harvest && <HarvestDialog wallet={wallet} position={harvest.position} vaultId={harvest.vaultId} compound={harvest.compound} onClose={() => { setHarvest(null); void query.refetch(); }} />}
     {exit && <WithdrawalSimulation wallet={wallet} {...exit} onClose={() => { setExit(null); void query.refetch(); }} />}
+    {multi && <MultiCloseSheet wallet={wallet} positions={closable} onClose={() => { setMulti(false); void query.refetch(); }} />}
     {addVault && addTo && <DepositSimulation key={addTo.position} vault={addVault} wallet={wallet} position={addTo.position} onClose={() => { setAddTo(null); void query.refetch(); }} />}
   </section>;
 }
