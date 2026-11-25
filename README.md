@@ -1,30 +1,127 @@
-# BÓVEDA
+# Bóveda Market
 
-Solana pool interface with independent **Real** and **Prueba** modes.
+**Live app:** <https://bovedamarket.app> · **Telegram:** <https://t.me/bovedamarket> · **Contact:** [admin@bovedamarket.app](mailto:admin@bovedamarket.app)
 
-## Current availability
+Bóveda Market is an open-source web interface that connects a wallet to public liquidity
+pools on Solana. It handles the parts people usually do by hand — buying the coin,
+choosing a price range, opening the position, rebalancing it when the market moves, and
+turning it back into dollars — so the owner only has to approve each step.
 
-- Privy handles email, Google, Phantom and Jupiter Wallet access.
-- Prueba starts a new user with 1,000 fictitious credits. One credit simulates one USDC and has no monetary value. Local positions are isolated by Privy user ID.
-- Real reads live SOL, canonical USDC and wallet-owned Meteora position NFTs through a server-only Helius connection. Failed or incomplete queries stay unavailable rather than becoming zero. Unvalidated Token-2022 amount estimates are omitted. Financial operations remain disabled: it does not sign or transfer funds or fees. Never fund the app to use this version.
-- Pool details use exact-address DexScreener queries. Meteora URLs are copy-only.
-- Entry/deposits have a 0% operational fee; exit/harvest and liquidation retain 1%. Prueba uses the same structure on fictitious credits. The authorized SOL liquidation pilot calculates 1% on the protected USDC minimum, excluding refunded SOL rent.
-- Email interest is stored privately with versioned explicit consent, independently of Privy.
+The interface never holds funds. A position is a wallet-owned position NFT, and every
+money-moving transaction is signed by the user's own wallet.
 
-## Real release prerequisites
+## What this is
 
-Helius is configured through the private `HELIUS_API_KEY` secret. Read-only mainnet validation confirmed all three pool addresses and their token mints. Never expose this URL or provider exceptions to browsers. The public server function accepts only a wallet address and returns public chain data; it does not establish ownership or grant Cloud access.
+- A front end for public liquidity pools (Meteora DLMM pools on Solana).
+- An automation layer: the **Autopilot** watches a position and recenters it when it
+  leaves range, sells accrued gains into available dollars when the price drops, and
+  re-invests them when the price climbs.
+- A reporting layer: portfolio value, harvested interest, per-transaction receipts and
+  market context, in Spanish and English, built for phones first.
 
-Integrate conversion services and official Meteora / Privy transaction flows, then verify the full deposit / harvest / exit lifecycle with the specified USDC fee recipient. SDK reads are implemented; transaction composition, signing, conversions and fee collection are not. A fixed SPL transfer cannot charge 1% of unknown conversion proceeds dynamically: validate a staged reviewed workflow or an audited atomic wrapper before claiming exact fee collection. SPCX uses Token-2022 and needs extension-aware validation. Never promote locally simulated positions into chain assets. Obtain explicit wallet authorization before testing an operation with actual money. Keep Real unavailable until verification is complete.
+## What this is not
 
-Operator legal address, privacy contact and jurisdiction are still required for legal review. Domain authorization and a real wallet approval are required for complete Privy sign-in checks.
+- Not a DEX, AMM, lending protocol or market maker of its own.
+- Not a custodian: Bóveda Market never holds, moves or signs for user funds.
+- Not affiliated with, endorsed by, or sponsored by Meteora, Orca, Rockstar Games,
+  Coinbase, Trump coin, DacityCoin, or any other token issuer or protocol named in the
+  app. Names and artwork are used descriptively only.
+- Not a bank, not an investment firm, and not a regulated financial service.
 
-## Development
+## How it works
 
-## Devnet validation
+1. **Pick a vault.** Each vault maps to one public pool with an exact, verifiable address.
+2. **Fund it.** Bring your own coins, or buy dollars in-app through an on-ramp. The app
+   quotes the cost before anything is confirmed.
+3. **The position is built for you.** The system converts, opens one position per vault
+   and keeps it active.
+4. **Autopilot maintains it.** Recentering, harvesting and range adjustments happen
+   without manual math.
+5. **Cash out when you want.** Harvest interest or close the vault back into dollars.
+   Every action ends on a receipt that does not disappear on its own.
 
-Run `bun scripts/validate-devnet.ts` locally. The isolated harness checks devnet genesis, requires devnet SOL, creates six-decimal test mints and two Meteora pools, then composes a direct Meteora swap and a new-position deposit into one v0 message with no operational entry fee or fee account setup. Two pools avoid quoting a deposit against a pool changed by the preceding swap. Jupiter is mainnet-only; this test does not validate Jupiter routing or the three production pools. Private test-wallet files live only under `/tmp`, never in the repository.
+## Features
 
-The first execution stopped before mint/pool creation because both devnet faucets failed and the test wallet had no SOL. Composition unit tests do not prove chain execution. Devnet simulation, confirmation, final balance/position assertions and a forced-failure rollback test must all pass before considering this flow validated. Mainnet remains disabled.
+- Vault lineup with per-vault themes, live prices, pool metrics and yield estimates.
+- Autopilot enrollment with per-vault controls and exclusion of balance you do not want
+  committed.
+- Multi-select close: pick several open vaults and convert them to dollars in one flow.
+- Portfolio view with total deposited, harvested interest and a market chart.
+- Transaction receipts, system status page and Telegram alert opt-in.
+- Two-tier affiliate program (50% / 10%) credited after a fee-bearing operation confirms.
+- Guest browsing of public screens; money actions require a verified session.
+- Installable, mobile-first UI with day/night themes.
 
-TanStack Start, React, TypeScript and Tailwind CSS. Use `bun install`, `bun run dev` and `bun run test` for local development.
+## Tech stack
+
+| Layer | Used |
+| --- | --- |
+| Framework | TanStack Start v1 (React 19, Vite 7, SSR/SSG) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4, semantic design tokens |
+| Auth & wallets | Privy (email, Google, passkeys, Phantom, Jupiter Wallet) |
+| Chain access | Solana RPC through a private server-side connection (Helius), Meteora DLMM SDK, Jupiter routing |
+| Backend | Lovable Cloud (Postgres + Row Level Security), Drizzle migrations in `drizzle/migrations` |
+| Market data | Meteora Data API first, DexScreener as fallback |
+| Tests | Vitest |
+
+## Getting started
+
+```bash
+bun install
+bun run dev      # local dev server
+bun run test     # unit tests
+bun run build    # production build
+```
+
+The browser needs the backend URL and its publishable key (already in `.env`). Private
+credentials — the RPC provider key and any fee wallet — are **never** stored in this
+repository; they are injected as server-side secrets at deploy time and are read only
+inside server functions.
+
+## Repository layout
+
+```
+src/routes          file-based routes, one per public address (ES) and en/ twins
+src/components      UI, sheets, vault cards
+src/lib             pure logic: vaults, quotes, autopilot rules, formatters
+src/hooks           data reads
+src/i18n            English copy
+src/integrations    generated backend clients
+drizzle/migrations  schema history
+scripts             validation harnesses (devnet)
+```
+
+## Security notes
+
+- Private keys and provider credentials are server-only; nothing secret is bundled for
+  the browser.
+- Private tables are protected by Row Level Security and keyed by the verified auth
+  subject, not by a client-supplied identifier.
+- Ownership of a position is re-checked against live chain state (mint, owner, amount,
+  program) before any action is composed.
+- The app returns signable bytes for review; the user's wallet is the only signer. The
+  single opt-in exception is the Autopilot range vault, which the user enrolls
+  explicitly.
+- Every money move is simulated on the server first, and the quote shown before
+  confirmation is the one the transaction must match.
+
+## Fees
+
+Fees are displayed in the app before each confirmation and are governed by the terms
+page (<https://bovedamarket.app/terminos>). They are not fixed in this file on purpose,
+so this document can never contradict what the app actually charges.
+
+## Risk disclaimer
+
+Digital assets are volatile. Providing liquidity can result in partial or total loss of
+principal, including through price movement outside a chosen range. Yield and APR
+figures shown in the app are **estimates** derived from recent public pool activity, not
+guarantees, not annual percentage yield, and not a projection of personal return.
+Nothing in this repository or in the app is financial, legal or tax advice.
+
+## License
+
+Released under the [MIT License](LICENSE). You may use, modify and redistribute this
+code, including commercially, as long as the copyright and permission notice stay with
+it. The software is provided as-is, with no warranty of any kind.

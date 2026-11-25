@@ -65,3 +65,5 @@
 - [x] Guía de Bitcoin y Acerca de: Bóveda Market como interfaz que conecta con la liquidez pública de Meteora
 - [x] Guía de Bitcoin: explicar cbBTC (Bitcoin de Coinbase) y por qué no se usa Bitcoin regular
 - [x] Insignia «Powered by Meteora» en la portada, debajo de los botones Bitcoin/Trump/DCTY; enlace a meteora.ag solo ahí, texto plano en el resto
+- [x] GitHub: pie de portada y fila de código abierto enlazan directo al repositorio público
+- [x] Repositorio público: README en inglés, licencia MIT y aviso de riesgo
