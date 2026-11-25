@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Bot, Check, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { VerifySection } from "@/components/meteora-verify";
 import { GITHUB_REPO_URL, GithubMark } from "@/components/github-link";
 
 const ROWS: [string, string][] = [
@@ -40,3 +41,4 @@ export function SmartSections() {
     </ul>
   </section>;
 }
+

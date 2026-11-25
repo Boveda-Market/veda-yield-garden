@@ -9,6 +9,7 @@ import { poolYieldOptions } from "@/lib/pool-yield";
 import { VAULTS } from "@/lib/vaults";
 import { Sunset } from "./hot-vault-card";
 import { PoweredBy } from "./powered-by";
+import { VerifyPoolsLink } from "./meteora-verify";
 import titleEs from "@/assets/gta6-vault-title.png";
 import titleEn from "@/assets/gta6-vault-title-en.png";
 import dobleLogo from "@/assets/doble-o-nada-logo.png";
@@ -68,7 +69,7 @@ export function HomeCtas() {
         <span className="sr-only">{t("Ver bóveda inteligente")}</span>
       </span>
     </Link>)}</div>
-    <PoweredBy brand="meteora" asLink className="mt-2" />
+    <div className="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1"><PoweredBy brand="meteora" asLink /><span aria-hidden className="text-[11px] text-muted-foreground">·</span><VerifyPoolsLink /></div>
   </div>;
 }
 

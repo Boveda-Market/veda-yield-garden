@@ -23,6 +23,7 @@ import { pickReviewsArm, REVIEWS_AB_KEY } from "@/lib/reviews-ab";
 import { isReturning } from "@/lib/preferences";
 import { AdvancedAccess, EntryAccess } from "@/components/entry-access";
 import { PredictPromo } from "@/components/predict-promo";
+import { VerifySection } from "@/components/meteora-verify";
 import { DobleHero, Gta6Hero, HomeCtas } from "@/components/home-gta6";
 import { BootSplash } from "@/components/boot-splash";
 import { CalmHero } from "@/components/home-calm";
@@ -165,7 +166,7 @@ export function Landing({ variant }: { variant?: number } = {}) {
         </div>
       </section>
 
-      {btcHero ? <BitcoinSections /> : <>{smartHero && <SmartSections />}<ThemeSections theme={hero.theme} /></>}
+      {btcHero ? <BitcoinSections /> : <>{smartHero && <><SmartSections /><VerifySection /></>}<ThemeSections theme={hero.theme} /></>}
 
       <section aria-label={t("Cómo abrir tu bóveda en 4 pasos")} className="mb-4 py-8">
         <h2 className="font-display text-2xl font-bold">{t("Cómo abrir tu bóveda en 4 pasos")}</h2>
