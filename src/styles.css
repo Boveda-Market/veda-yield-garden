@@ -453,3 +453,16 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
   z-index: 10;
   box-shadow: 0 -12px 16px 4px var(--background), var(--shadow-sm, 0 1px 2px rgb(0 0 0 / 0.1));
 }
+
+/* Meteora palette for the smart-vaults home hero (same in both themes) */
+.meteora-skin {
+  --mt-bg: #12121c;
+  --mt-accent: #f54b00;
+  --mt-accent-fg: #f7f5ff;
+  --mt-violet: #7b3fe4;
+  --mt-text: #f7f5ff;
+  --mt-muted: #a9a6c2;
+  --mt-border: rgba(245, 75, 0, 0.35);
+  --mt-gradient: radial-gradient(120% 90% at 0% 0%, rgba(245, 75, 0, 0.28), transparent 55%), radial-gradient(90% 80% at 100% 100%, rgba(123, 63, 228, 0.25), transparent 60%), #12121c;
+}
+.meteora-skin { background: var(--mt-gradient); }

@@ -12,12 +12,12 @@ const ROWS: [string, string][] = [
 /** "Smart vaults" home version: the pain of manual ranges/rebalances on public pools, and Autopilot as the fix. */
 export function SmartHero({ title, sub }: { title: string; sub: string }) {
   const t = useT();
-  return <div className="overflow-hidden rounded-3xl border border-primary/30 bg-[image:var(--gradient-hero)] shadow-sm">
+  return <div className="overflow-hidden meteora-skin rounded-3xl border border-[var(--mt-border)] text-[var(--mt-text)] shadow-sm">
     <div className="px-5 pb-5 pt-5 text-center sm:px-8 sm:pt-7 md:text-left">
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-background/70 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary"><Bot size={12} aria-hidden />{t("Bóvedas inteligentes · Liquidez automatizada")}</span>
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--mt-border)] bg-[var(--mt-bg)]/70 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--mt-accent)]"><Bot size={12} aria-hidden />{t("Bóvedas inteligentes · Liquidez automatizada")}</span>
       <h1 className="mt-3 font-display text-[1.7rem] font-bold leading-tight sm:text-4xl">{t(title)}</h1>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">{t(sub)}</p>
-      <Link to="/app" className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-lg font-bold text-primary-foreground shadow-[0_0_24px_-6px_var(--primary)] transition-transform active:scale-[0.98] md:max-w-sm">{t("Ver bóvedas inteligentes")}<ArrowRight size={18} /></Link>
+      <p className="mt-2 text-sm leading-6 sm:text-base text-[var(--mt-muted)]">{t(sub)}</p>
+      <Link to="/app" className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--mt-accent)] text-lg font-bold text-[var(--mt-accent-fg)] shadow-[0_0_24px_-6px_var(--mt-accent)] transition-transform active:scale-[0.98] md:max-w-sm">{t("Ver bóvedas inteligentes")}<ArrowRight size={18} /></Link>
     </div>
   </div>;
 }
