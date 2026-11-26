@@ -99,6 +99,7 @@ export const rangeVaults: Record<string, string> = {
   "El precio de {s} puede subir o bajar; tus ganancias cosechadas solo suman.": "The {s} price can go up or down; your harvested earnings only add up.",
   "Semanal": "Weekly", "Mensual": "Monthly", "Anual": "Yearly", "Histórico completo": "Full history", "Período": "Period",
   "Mercado global": "Global market",
+  "Pulso de tus bóvedas": "Your vaults’ market pulse",
   "Market cap global": "Global market cap",
   "Mercado global frente a ganancias cosechadas": "Global market vs. harvested earnings",
   "El mercado global puede subir o bajar; tus ganancias cosechadas solo suman.": "The global market can go up or down; your harvested earnings only add up.",

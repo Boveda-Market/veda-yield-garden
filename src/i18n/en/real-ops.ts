@@ -315,7 +315,7 @@ export const realOps: Record<string, string> = {
   "Rendimiento de tu portafolio": "Your portfolio performance",
   "Tu rendimiento": "Your performance",
   "Mi rendimiento": "My performance",
-  "¿Qué es el Mercado global?": "What is the Global market?",
+  "¿Qué es el Pulso de tus bóvedas?": "What is your vaults’ market pulse?",
   "Es la suma total del market cap (capitalización de mercado) de los tokens de todas tus bóvedas activas en este momento.": "It is the total combined market cap (market capitalization) of the tokens in all your currently active vaults.",
   "No representa tu saldo ni tus ganancias.": "It does not represent your balance or earnings.",
   "Cosechar todo": "Harvest all",
