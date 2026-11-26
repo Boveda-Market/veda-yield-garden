@@ -38,6 +38,8 @@ import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as TraeTusMonedasRouteImport } from './routes/trae-tus-monedas'
 import { Route as TrumpRouteImport } from './routes/trump'
 import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as BlogDolaresDigitalesEnElCelularRouteImport } from './routes/blog/dolares-digitales-en-el-celular'
 import { Route as EnIndexRouteImport } from './routes/en/index'
 import { Route as EnAboutRouteImport } from './routes/en/about'
 import { Route as EnBitcoinRouteImport } from './routes/en/bitcoin'
@@ -64,6 +66,8 @@ import { Route as GuiasQueEsUsdcRouteImport } from './routes/guias/que-es-usdc'
 import { Route as GuiasRecargarConCoinbaseRouteImport } from './routes/guias/recargar-con-coinbase'
 import { Route as GuiasRetirarCashAppBitcoinRouteImport } from './routes/guias/retirar-cash-app-bitcoin'
 import { Route as GuiasTraeTusMonedasRouteImport } from './routes/guias/trae-tus-monedas'
+import { Route as EnBlogIndexRouteImport } from './routes/en/blog/index'
+import { Route as EnBlogDigitalDollarsOnYourPhoneRouteImport } from './routes/en/blog/digital-dollars-on-your-phone'
 import { Route as EnGuidesIndexRouteImport } from './routes/en/guides/index'
 import { Route as EnGuidesAddDollarsWithCoinbaseRouteImport } from './routes/en/guides/add-dollars-with-coinbase'
 import { Route as EnGuidesAvoidInvestmentScamsRouteImport } from './routes/en/guides/avoid-investment-scams'
@@ -226,6 +230,17 @@ const WalletRoute = WalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogDolaresDigitalesEnElCelularRoute =
+  BlogDolaresDigitalesEnElCelularRouteImport.update({
+    id: '/blog/dolares-digitales-en-el-celular',
+    path: '/blog/dolares-digitales-en-el-celular',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EnIndexRoute = EnIndexRouteImport.update({
   id: '/en/',
   path: '/en/',
@@ -361,6 +376,17 @@ const GuiasTraeTusMonedasRoute = GuiasTraeTusMonedasRouteImport.update({
   path: '/guias/trae-tus-monedas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnBlogIndexRoute = EnBlogIndexRouteImport.update({
+  id: '/en/blog/',
+  path: '/en/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnBlogDigitalDollarsOnYourPhoneRoute =
+  EnBlogDigitalDollarsOnYourPhoneRouteImport.update({
+    id: '/en/blog/digital-dollars-on-your-phone',
+    path: '/en/blog/digital-dollars-on-your-phone',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EnGuidesIndexRoute = EnGuidesIndexRouteImport.update({
   id: '/en/guides/',
   path: '/en/guides/',
@@ -482,6 +508,7 @@ export interface FileRoutesByFullPath {
   '/trae-tus-monedas': typeof TraeTusMonedasRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -506,8 +533,10 @@ export interface FileRoutesByFullPath {
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/guias/trae-tus-monedas': typeof GuiasTraeTusMonedasRoute
+  '/blog/': typeof BlogIndexRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
+  '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
   '/en/guides/bring-your-own-coins': typeof EnGuidesBringYourOwnCoinsRoute
@@ -516,6 +545,7 @@ export interface FileRoutesByFullPath {
   '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
   '/en/guides/what-is-usdc': typeof EnGuidesWhatIsUsdcRoute
   '/en/guides/withdraw-to-cash-app-bitcoin': typeof EnGuidesWithdrawToCashAppBitcoinRoute
+  '/en/blog/': typeof EnBlogIndexRoute
   '/en/guides/': typeof EnGuidesIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/jobs/market-pulse': typeof ApiPublicJobsMarketPulseRoute
@@ -555,6 +585,7 @@ export interface FileRoutesByTo {
   '/trae-tus-monedas': typeof TraeTusMonedasRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -579,8 +610,10 @@ export interface FileRoutesByTo {
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/guias/trae-tus-monedas': typeof GuiasTraeTusMonedasRoute
+  '/blog': typeof BlogIndexRoute
   '/en': typeof EnIndexRoute
   '/guias': typeof GuiasIndexRoute
+  '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
   '/en/guides/bring-your-own-coins': typeof EnGuidesBringYourOwnCoinsRoute
@@ -589,6 +622,7 @@ export interface FileRoutesByTo {
   '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
   '/en/guides/what-is-usdc': typeof EnGuidesWhatIsUsdcRoute
   '/en/guides/withdraw-to-cash-app-bitcoin': typeof EnGuidesWithdrawToCashAppBitcoinRoute
+  '/en/blog': typeof EnBlogIndexRoute
   '/en/guides': typeof EnGuidesIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/jobs/market-pulse': typeof ApiPublicJobsMarketPulseRoute
@@ -629,6 +663,7 @@ export interface FileRoutesById {
   '/trae-tus-monedas': typeof TraeTusMonedasRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -653,8 +688,10 @@ export interface FileRoutesById {
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/guias/trae-tus-monedas': typeof GuiasTraeTusMonedasRoute
+  '/blog/': typeof BlogIndexRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
+  '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
   '/en/guides/bring-your-own-coins': typeof EnGuidesBringYourOwnCoinsRoute
@@ -663,6 +700,7 @@ export interface FileRoutesById {
   '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
   '/en/guides/what-is-usdc': typeof EnGuidesWhatIsUsdcRoute
   '/en/guides/withdraw-to-cash-app-bitcoin': typeof EnGuidesWithdrawToCashAppBitcoinRoute
+  '/en/blog/': typeof EnBlogIndexRoute
   '/en/guides/': typeof EnGuidesIndexRoute
   '/api/public/jobs/check-system-status': typeof ApiPublicJobsCheckSystemStatusRoute
   '/api/public/jobs/market-pulse': typeof ApiPublicJobsMarketPulseRoute
@@ -704,6 +742,7 @@ export interface FileRouteTypes {
     | '/trae-tus-monedas'
     | '/trump'
     | '/wallet'
+    | '/blog/dolares-digitales-en-el-celular'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -728,8 +767,10 @@ export interface FileRouteTypes {
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
     | '/guias/trae-tus-monedas'
+    | '/blog/'
     | '/en/'
     | '/guias/'
+    | '/en/blog/digital-dollars-on-your-phone'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
     | '/en/guides/bring-your-own-coins'
@@ -738,6 +779,7 @@ export interface FileRouteTypes {
     | '/en/guides/prediction-markets'
     | '/en/guides/what-is-usdc'
     | '/en/guides/withdraw-to-cash-app-bitcoin'
+    | '/en/blog/'
     | '/en/guides/'
     | '/api/public/jobs/check-system-status'
     | '/api/public/jobs/market-pulse'
@@ -777,6 +819,7 @@ export interface FileRouteTypes {
     | '/trae-tus-monedas'
     | '/trump'
     | '/wallet'
+    | '/blog/dolares-digitales-en-el-celular'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -801,8 +844,10 @@ export interface FileRouteTypes {
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
     | '/guias/trae-tus-monedas'
+    | '/blog'
     | '/en'
     | '/guias'
+    | '/en/blog/digital-dollars-on-your-phone'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
     | '/en/guides/bring-your-own-coins'
@@ -811,6 +856,7 @@ export interface FileRouteTypes {
     | '/en/guides/prediction-markets'
     | '/en/guides/what-is-usdc'
     | '/en/guides/withdraw-to-cash-app-bitcoin'
+    | '/en/blog'
     | '/en/guides'
     | '/api/public/jobs/check-system-status'
     | '/api/public/jobs/market-pulse'
@@ -850,6 +896,7 @@ export interface FileRouteTypes {
     | '/trae-tus-monedas'
     | '/trump'
     | '/wallet'
+    | '/blog/dolares-digitales-en-el-celular'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -874,8 +921,10 @@ export interface FileRouteTypes {
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
     | '/guias/trae-tus-monedas'
+    | '/blog/'
     | '/en/'
     | '/guias/'
+    | '/en/blog/digital-dollars-on-your-phone'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
     | '/en/guides/bring-your-own-coins'
@@ -884,6 +933,7 @@ export interface FileRouteTypes {
     | '/en/guides/prediction-markets'
     | '/en/guides/what-is-usdc'
     | '/en/guides/withdraw-to-cash-app-bitcoin'
+    | '/en/blog/'
     | '/en/guides/'
     | '/api/public/jobs/check-system-status'
     | '/api/public/jobs/market-pulse'
@@ -924,6 +974,7 @@ export interface RootRouteChildren {
   TraeTusMonedasRoute: typeof TraeTusMonedasRoute
   TrumpRoute: typeof TrumpRoute
   WalletRoute: typeof WalletRoute
+  BlogDolaresDigitalesEnElCelularRoute: typeof BlogDolaresDigitalesEnElCelularRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBitcoinRoute: typeof EnBitcoinRoute
   EnBringYourCoinsRoute: typeof EnBringYourCoinsRoute
@@ -948,8 +999,10 @@ export interface RootRouteChildren {
   GuiasRecargarConCoinbaseRoute: typeof GuiasRecargarConCoinbaseRoute
   GuiasRetirarCashAppBitcoinRoute: typeof GuiasRetirarCashAppBitcoinRoute
   GuiasTraeTusMonedasRoute: typeof GuiasTraeTusMonedasRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   EnIndexRoute: typeof EnIndexRoute
   GuiasIndexRoute: typeof GuiasIndexRoute
+  EnBlogDigitalDollarsOnYourPhoneRoute: typeof EnBlogDigitalDollarsOnYourPhoneRoute
   EnGuidesAddDollarsWithCoinbaseRoute: typeof EnGuidesAddDollarsWithCoinbaseRoute
   EnGuidesAvoidInvestmentScamsRoute: typeof EnGuidesAvoidInvestmentScamsRoute
   EnGuidesBringYourOwnCoinsRoute: typeof EnGuidesBringYourOwnCoinsRoute
@@ -958,6 +1011,7 @@ export interface RootRouteChildren {
   EnGuidesPredictionMarketsRoute: typeof EnGuidesPredictionMarketsRoute
   EnGuidesWhatIsUsdcRoute: typeof EnGuidesWhatIsUsdcRoute
   EnGuidesWithdrawToCashAppBitcoinRoute: typeof EnGuidesWithdrawToCashAppBitcoinRoute
+  EnBlogIndexRoute: typeof EnBlogIndexRoute
   EnGuidesIndexRoute: typeof EnGuidesIndexRoute
   ApiPublicJobsCheckSystemStatusRoute: typeof ApiPublicJobsCheckSystemStatusRoute
   ApiPublicJobsMarketPulseRoute: typeof ApiPublicJobsMarketPulseRoute
@@ -1173,6 +1227,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WalletRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/dolares-digitales-en-el-celular': {
+      id: '/blog/dolares-digitales-en-el-celular'
+      path: '/blog/dolares-digitales-en-el-celular'
+      fullPath: '/blog/dolares-digitales-en-el-celular'
+      preLoaderRoute: typeof BlogDolaresDigitalesEnElCelularRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/': {
       id: '/en/'
       path: '/en'
@@ -1355,6 +1423,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuiasTraeTusMonedasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/blog/': {
+      id: '/en/blog/'
+      path: '/en/blog'
+      fullPath: '/en/blog/'
+      preLoaderRoute: typeof EnBlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/blog/digital-dollars-on-your-phone': {
+      id: '/en/blog/digital-dollars-on-your-phone'
+      path: '/en/blog/digital-dollars-on-your-phone'
+      fullPath: '/en/blog/digital-dollars-on-your-phone'
+      preLoaderRoute: typeof EnBlogDigitalDollarsOnYourPhoneRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/guides/': {
       id: '/en/guides/'
       path: '/en/guides'
@@ -1500,6 +1582,7 @@ const rootRouteChildren: RootRouteChildren = {
   TraeTusMonedasRoute: TraeTusMonedasRoute,
   TrumpRoute: TrumpRoute,
   WalletRoute: WalletRoute,
+  BlogDolaresDigitalesEnElCelularRoute: BlogDolaresDigitalesEnElCelularRoute,
   EnAboutRoute: EnAboutRoute,
   EnBitcoinRoute: EnBitcoinRoute,
   EnBringYourCoinsRoute: EnBringYourCoinsRoute,
@@ -1524,8 +1607,10 @@ const rootRouteChildren: RootRouteChildren = {
   GuiasRecargarConCoinbaseRoute: GuiasRecargarConCoinbaseRoute,
   GuiasRetirarCashAppBitcoinRoute: GuiasRetirarCashAppBitcoinRoute,
   GuiasTraeTusMonedasRoute: GuiasTraeTusMonedasRoute,
+  BlogIndexRoute: BlogIndexRoute,
   EnIndexRoute: EnIndexRoute,
   GuiasIndexRoute: GuiasIndexRoute,
+  EnBlogDigitalDollarsOnYourPhoneRoute: EnBlogDigitalDollarsOnYourPhoneRoute,
   EnGuidesAddDollarsWithCoinbaseRoute: EnGuidesAddDollarsWithCoinbaseRoute,
   EnGuidesAvoidInvestmentScamsRoute: EnGuidesAvoidInvestmentScamsRoute,
   EnGuidesBringYourOwnCoinsRoute: EnGuidesBringYourOwnCoinsRoute,
@@ -1534,6 +1619,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnGuidesPredictionMarketsRoute: EnGuidesPredictionMarketsRoute,
   EnGuidesWhatIsUsdcRoute: EnGuidesWhatIsUsdcRoute,
   EnGuidesWithdrawToCashAppBitcoinRoute: EnGuidesWithdrawToCashAppBitcoinRoute,
+  EnBlogIndexRoute: EnBlogIndexRoute,
   EnGuidesIndexRoute: EnGuidesIndexRoute,
   ApiPublicJobsCheckSystemStatusRoute: ApiPublicJobsCheckSystemStatusRoute,
   ApiPublicJobsMarketPulseRoute: ApiPublicJobsMarketPulseRoute,

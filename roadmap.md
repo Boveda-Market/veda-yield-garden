@@ -90,3 +90,4 @@
 - [x] Guía «Trae tus propias monedas»: sección «Comprueba todo tú mismo» con las direcciones de cada moneda y cada bóveda (ES/EN)
 - [x] Quitado el botón de copiar huérfano dentro de «Ver detalles» (la dirección ya se ve en Solscan desde la cabecera)
 - [x] «Ver detalles» de las tarjetas de bóveda: enlace «Guías →» al índice de guías (ES/EN)
+- Blog (/blog, /en/blog) con primer artículo de dólares digitales
