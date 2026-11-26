@@ -530,3 +530,28 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
 .sofia-fab { background-image: var(--gradient-sofia); box-shadow: var(--shadow-sofia); }
 .sofia-fab:disabled { opacity: 0.5; }
 @media (prefers-reduced-motion: reduce) { .sofia-dot { animation: none; opacity: 0.8; } }
+
+/* App tour: Bitcoin orange, Meteora violet/pink and Trump gold accents (same in both themes). */
+:root {
+  --tour-btc: oklch(0.74 0.17 55);
+  --tour-met: oklch(0.62 0.22 320);
+  --tour-trump: oklch(0.8 0.14 85);
+  --tour-up: oklch(0.7 0.17 152);
+  --tour-down: oklch(0.62 0.21 25);
+  --tour-on: oklch(0.18 0.02 265);
+}
+.tour-card { border: 1px solid color-mix(in oklab, var(--tour-accent) 45%, transparent); background: linear-gradient(140deg, color-mix(in oklab, var(--tour-btc) 16%, var(--card)), color-mix(in oklab, var(--tour-met) 16%, var(--card)) 55%, color-mix(in oklab, var(--tour-trump) 18%, var(--card))); box-shadow: 0 12px 30px -16px color-mix(in oklab, var(--tour-accent) 60%, transparent); }
+.tour-btc { --tour-accent: var(--tour-btc); }
+.tour-met { --tour-accent: var(--tour-met); }
+.tour-trump { --tour-accent: var(--tour-trump); }
+.tour-ink { color: color-mix(in oklab, var(--tour-accent, var(--tour-met)) 75%, var(--foreground)); }
+.tour-mock { background: var(--card); border: 1px solid var(--border); }
+.tour-cell { background: color-mix(in oklab, var(--tour-accent) 10%, var(--background)); }
+.tour-tag { background: var(--tour-accent); color: var(--tour-on); }
+.tour-cta { background: linear-gradient(90deg, var(--tour-btc), var(--tour-trump)); color: var(--tour-on); }
+.tour-up { background: var(--tour-up); color: var(--tour-on); }
+.tour-down { background: var(--tour-down); color: var(--tour-on); }
+.tour-line { stroke: var(--tour-met); }
+.tour-bar-btc { background: var(--tour-btc); }
+.tour-bar-met { background: var(--tour-met); }
+.tour-bar-trump { background: var(--tour-trump); }
