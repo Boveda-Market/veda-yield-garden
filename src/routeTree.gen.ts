@@ -40,6 +40,7 @@ import { Route as TrumpRouteImport } from './routes/trump'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogDolaresDigitalesEnElCelularRouteImport } from './routes/blog/dolares-digitales-en-el-celular'
+import { Route as BlogLiquidezConcentradaRouteImport } from './routes/blog/liquidez-concentrada'
 import { Route as EnIndexRouteImport } from './routes/en/index'
 import { Route as EnAboutRouteImport } from './routes/en/about'
 import { Route as EnBitcoinRouteImport } from './routes/en/bitcoin'
@@ -67,6 +68,7 @@ import { Route as GuiasRecargarConCoinbaseRouteImport } from './routes/guias/rec
 import { Route as GuiasRetirarCashAppBitcoinRouteImport } from './routes/guias/retirar-cash-app-bitcoin'
 import { Route as GuiasTraeTusMonedasRouteImport } from './routes/guias/trae-tus-monedas'
 import { Route as EnBlogIndexRouteImport } from './routes/en/blog/index'
+import { Route as EnBlogConcentratedLiquidityRouteImport } from './routes/en/blog/concentrated-liquidity'
 import { Route as EnBlogDigitalDollarsOnYourPhoneRouteImport } from './routes/en/blog/digital-dollars-on-your-phone'
 import { Route as EnGuidesIndexRouteImport } from './routes/en/guides/index'
 import { Route as EnGuidesAddDollarsWithCoinbaseRouteImport } from './routes/en/guides/add-dollars-with-coinbase'
@@ -241,6 +243,11 @@ const BlogDolaresDigitalesEnElCelularRoute =
     path: '/blog/dolares-digitales-en-el-celular',
     getParentRoute: () => rootRouteImport,
   } as any)
+const BlogLiquidezConcentradaRoute = BlogLiquidezConcentradaRouteImport.update({
+  id: '/blog/liquidez-concentrada',
+  path: '/blog/liquidez-concentrada',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnIndexRoute = EnIndexRouteImport.update({
   id: '/en/',
   path: '/en/',
@@ -381,6 +388,12 @@ const EnBlogIndexRoute = EnBlogIndexRouteImport.update({
   path: '/en/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnBlogConcentratedLiquidityRoute =
+  EnBlogConcentratedLiquidityRouteImport.update({
+    id: '/en/blog/concentrated-liquidity',
+    path: '/en/blog/concentrated-liquidity',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EnBlogDigitalDollarsOnYourPhoneRoute =
   EnBlogDigitalDollarsOnYourPhoneRouteImport.update({
     id: '/en/blog/digital-dollars-on-your-phone',
@@ -509,6 +522,7 @@ export interface FileRoutesByFullPath {
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
+  '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -536,6 +550,7 @@ export interface FileRoutesByFullPath {
   '/blog/': typeof BlogIndexRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
+  '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
@@ -586,6 +601,7 @@ export interface FileRoutesByTo {
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
+  '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -613,6 +629,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogIndexRoute
   '/en': typeof EnIndexRoute
   '/guias': typeof GuiasIndexRoute
+  '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
@@ -664,6 +681,7 @@ export interface FileRoutesById {
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
+  '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -691,6 +709,7 @@ export interface FileRoutesById {
   '/blog/': typeof BlogIndexRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
+  '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
@@ -743,6 +762,7 @@ export interface FileRouteTypes {
     | '/trump'
     | '/wallet'
     | '/blog/dolares-digitales-en-el-celular'
+    | '/blog/liquidez-concentrada'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -770,6 +790,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/en/'
     | '/guias/'
+    | '/en/blog/concentrated-liquidity'
     | '/en/blog/digital-dollars-on-your-phone'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
@@ -820,6 +841,7 @@ export interface FileRouteTypes {
     | '/trump'
     | '/wallet'
     | '/blog/dolares-digitales-en-el-celular'
+    | '/blog/liquidez-concentrada'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -847,6 +869,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/en'
     | '/guias'
+    | '/en/blog/concentrated-liquidity'
     | '/en/blog/digital-dollars-on-your-phone'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
@@ -897,6 +920,7 @@ export interface FileRouteTypes {
     | '/trump'
     | '/wallet'
     | '/blog/dolares-digitales-en-el-celular'
+    | '/blog/liquidez-concentrada'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -924,6 +948,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/en/'
     | '/guias/'
+    | '/en/blog/concentrated-liquidity'
     | '/en/blog/digital-dollars-on-your-phone'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
@@ -975,6 +1000,7 @@ export interface RootRouteChildren {
   TrumpRoute: typeof TrumpRoute
   WalletRoute: typeof WalletRoute
   BlogDolaresDigitalesEnElCelularRoute: typeof BlogDolaresDigitalesEnElCelularRoute
+  BlogLiquidezConcentradaRoute: typeof BlogLiquidezConcentradaRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBitcoinRoute: typeof EnBitcoinRoute
   EnBringYourCoinsRoute: typeof EnBringYourCoinsRoute
@@ -1002,6 +1028,7 @@ export interface RootRouteChildren {
   BlogIndexRoute: typeof BlogIndexRoute
   EnIndexRoute: typeof EnIndexRoute
   GuiasIndexRoute: typeof GuiasIndexRoute
+  EnBlogConcentratedLiquidityRoute: typeof EnBlogConcentratedLiquidityRoute
   EnBlogDigitalDollarsOnYourPhoneRoute: typeof EnBlogDigitalDollarsOnYourPhoneRoute
   EnGuidesAddDollarsWithCoinbaseRoute: typeof EnGuidesAddDollarsWithCoinbaseRoute
   EnGuidesAvoidInvestmentScamsRoute: typeof EnGuidesAvoidInvestmentScamsRoute
@@ -1241,6 +1268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogDolaresDigitalesEnElCelularRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/liquidez-concentrada': {
+      id: '/blog/liquidez-concentrada'
+      path: '/blog/liquidez-concentrada'
+      fullPath: '/blog/liquidez-concentrada'
+      preLoaderRoute: typeof BlogLiquidezConcentradaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/': {
       id: '/en/'
       path: '/en'
@@ -1430,6 +1464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnBlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/blog/concentrated-liquidity': {
+      id: '/en/blog/concentrated-liquidity'
+      path: '/en/blog/concentrated-liquidity'
+      fullPath: '/en/blog/concentrated-liquidity'
+      preLoaderRoute: typeof EnBlogConcentratedLiquidityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/blog/digital-dollars-on-your-phone': {
       id: '/en/blog/digital-dollars-on-your-phone'
       path: '/en/blog/digital-dollars-on-your-phone'
@@ -1583,6 +1624,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrumpRoute: TrumpRoute,
   WalletRoute: WalletRoute,
   BlogDolaresDigitalesEnElCelularRoute: BlogDolaresDigitalesEnElCelularRoute,
+  BlogLiquidezConcentradaRoute: BlogLiquidezConcentradaRoute,
   EnAboutRoute: EnAboutRoute,
   EnBitcoinRoute: EnBitcoinRoute,
   EnBringYourCoinsRoute: EnBringYourCoinsRoute,
@@ -1610,6 +1652,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogIndexRoute: BlogIndexRoute,
   EnIndexRoute: EnIndexRoute,
   GuiasIndexRoute: GuiasIndexRoute,
+  EnBlogConcentratedLiquidityRoute: EnBlogConcentratedLiquidityRoute,
   EnBlogDigitalDollarsOnYourPhoneRoute: EnBlogDigitalDollarsOnYourPhoneRoute,
   EnGuidesAddDollarsWithCoinbaseRoute: EnGuidesAddDollarsWithCoinbaseRoute,
   EnGuidesAvoidInvestmentScamsRoute: EnGuidesAvoidInvestmentScamsRoute,

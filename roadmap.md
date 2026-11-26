@@ -93,3 +93,4 @@
 - Blog (/blog, /en/blog) con primer artículo de dólares digitales
 - [x] Portada: la siguiente sección asoma en el primer pliegue del teléfono (título, subtítulo y parte de las tarjetas) para sugerir que se puede seguir bajando
 - Blog: componentes visuales (foto, cifras, gráfica, comparación) en el primer artículo
+- Blog: dos autores (Investigación DeFi / Redacción Bóveda) y artículo técnico de liquidez concentrada

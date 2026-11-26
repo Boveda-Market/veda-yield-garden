@@ -4,10 +4,25 @@ import { BackButton } from "@/components/back-button";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { SITE_URL, langLinks } from "@/lib/seo-lang";
 
+/** Two editorial voices: technical research and everyday/news. */
+export const AUTHORS = {
+  research: { name: "Investigación DeFi", nameEn: "DeFi Research", role: "Mercados y protocolos, en profundidad", roleEn: "Markets and protocols, in depth", initials: "ID" },
+  editorial: { name: "Redacción Bóveda", nameEn: "Bóveda Editorial", role: "Ahorro, adopción y noticias del día a día", roleEn: "Savings, adoption and everyday news", initials: "RB" },
+} as const;
+export type AuthorId = keyof typeof AUTHORS;
+
 /** Blog posts: friendly, conversational trend articles (guides stay evergreen how-tos). */
 export const POSTS = [
   {
-    to: "/blog/dolares-digitales-en-el-celular", toEn: "/en/blog/digital-dollars-on-your-phone", date: "2026-11-26", minutes: 4,
+    to: "/blog/liquidez-concentrada", toEn: "/en/blog/concentrated-liquidity", date: "2026-11-26", minutes: 7, author: "research",
+    category: "Investigación y protocolos", categoryEn: "Research & protocols",
+    title: "Por qué la liquidez es el motor de la blockchain (y cómo los proveedores capturan el valor de los creadores de mercado)",
+    titleEn: "Why liquidity is the engine of the blockchain (and how providers capture market-maker value)",
+    desc: "Del libro de órdenes al AMM y a la liquidez concentrada: eficiencia de capital, comisiones, pérdida no permanente y por qué aportar liquidez nueva puede ser justo y remunerado.",
+    descEn: "From order books to AMMs and concentrated liquidity: capital efficiency, fees, impermanent loss and why adding new liquidity can be fair and paid.",
+  },
+  {
+    to: "/blog/dolares-digitales-en-el-celular", toEn: "/en/blog/digital-dollars-on-your-phone", date: "2026-11-26", minutes: 4, author: "editorial",
     category: "Adopción y ahorro", categoryEn: "Adoption & savings",
     title: "Por qué cada vez más personas guardan dólares en el celular",
     titleEn: "Why more and more people keep dollars on their phone",
@@ -51,7 +66,7 @@ export function postHead(lang: Lang, path: PostPath) {
     ],
     links: langLinks(lang, p.to, p.toEn),
     scripts: [{ type: "application/ld+json", children: JSON.stringify([
-      { "@context": "https://schema.org", "@type": "BlogPosting", headline: title, description: d, inLanguage: lang, datePublished: p.date, mainEntityOfPage: url, author: { "@type": "Organization", name: "Bóveda Market" }, publisher: { "@type": "Organization", name: "Boveda Technologies", logo: { "@type": "ImageObject", url: `${SITE_URL}/icon-512.png` } } },
+      { "@context": "https://schema.org", "@type": "BlogPosting", headline: title, description: d, inLanguage: lang, datePublished: p.date, mainEntityOfPage: url, author: { "@type": "Organization", name: en ? AUTHORS[p.author].nameEn : AUTHORS[p.author].name }, publisher: { "@type": "Organization", name: "Boveda Technologies", logo: { "@type": "ImageObject", url: `${SITE_URL}/icon-512.png` } } },
       { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
         { "@type": "ListItem", position: 1, name: en ? "Home" : "Inicio", item: `${SITE_URL}${en ? "/en" : "/"}` },
         { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}${en ? "/en/blog" : "/blog"}` },
@@ -73,7 +88,7 @@ export function BlogIndex() {
       <p className="text-xs font-semibold uppercase tracking-wide text-primary">{en ? p.categoryEn : p.category}</p>
       <h2 className="mt-1 font-display text-lg font-semibold leading-snug">{en ? p.titleEn : p.title}</h2>
       <p className="mt-2 text-sm text-muted-foreground">{en ? p.descEn : p.desc}</p>
-      <p className="mt-3 text-xs text-muted-foreground">{fmt(p.date, lang)} · {en ? `${p.minutes} min read` : `${p.minutes} min de lectura`}</p>
+      <p className="mt-3 text-xs text-muted-foreground">{fmt(p.date, lang)} · {en ? `${p.minutes} min read` : `${p.minutes} min de lectura`} · {en ? AUTHORS[p.author].nameEn : AUTHORS[p.author].name}</p>
     </Link></li>)}</ul>
   </main>;
 }
@@ -85,7 +100,7 @@ export function PostLayout({ path, es, enBody }: { path: PostPath; es: ReactNode
     <nav aria-label={en ? "Breadcrumb" : "Migas de pan"} className="mt-8 text-xs text-muted-foreground"><Link to={en ? "/en" : "/"} className="hover:text-primary">{en ? "Home" : "Inicio"}</Link> / <Link to={blogIndexHref(lang)} className="hover:text-primary">Blog</Link></nav>
     <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-primary">{en ? p.categoryEn : p.category}</p>
     <h1 className="mt-1 font-display text-3xl font-bold leading-tight">{en ? p.titleEn : p.title}</h1>
-    <p className="mt-2 text-xs text-muted-foreground">{fmt(p.date, lang)} · {en ? `${p.minutes} min read · Bóveda Market team` : `${p.minutes} min de lectura · Equipo de Bóveda Market`}</p>
+    <AuthorLine id={p.author} date={fmt(p.date, lang)} minutes={p.minutes} en={en} />
     <article className="mt-8 space-y-6 text-base leading-8 text-foreground/90 [&_h2]:mb-2 [&_h2]:mt-2 [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-foreground [&_strong]:text-foreground [&_a]:text-primary [&_a]:underline">{en ? enBody : es}</article>
     <section className="mt-10 rounded-2xl border border-primary/30 bg-primary/10 p-6">
       <h2 className="font-display text-lg font-semibold">{en ? "Try it at your own pace" : "Pruébalo a tu ritmo"}</h2>
@@ -94,4 +109,12 @@ export function PostLayout({ path, es, enBody }: { path: PostPath; es: ReactNode
     </section>
     <p className="mt-8 text-xs text-muted-foreground">{en ? "Educational content, not financial advice. Vaults can lose capital and there are no guaranteed earnings." : "Contenido educativo, no es asesoría financiera. Las bóvedas pueden perder capital y no hay ganancias garantizadas."}</p>
   </main>;
+}
+
+function AuthorLine({ id, date, minutes, en }: { id: AuthorId; date: string; minutes: number; en: boolean }) {
+  const a = AUTHORS[id];
+  return <div className="mt-4 flex items-center gap-3">
+    <span aria-hidden className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">{a.initials}</span>
+    <div className="text-xs leading-5 text-muted-foreground"><p className="font-semibold text-foreground">{en ? a.nameEn : a.name} <span className="font-normal text-muted-foreground">· {en ? a.roleEn : a.role}</span></p><p>{date} · {en ? `${minutes} min read` : `${minutes} min de lectura`}</p></div>
+  </div>;
 }
