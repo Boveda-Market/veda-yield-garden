@@ -3,7 +3,7 @@ import { ActionSuccess } from "@/components/action-success";
 import { TokenIcon } from "@/components/token-icon";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpDown, RefreshCw } from "lucide-react";
+import { ArrowDown, ChevronDown, RefreshCw, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { quoteSwap, SWAP_TOKENS, swapSpendable, swapToken, toTokenUnits, type SwapQuote } from "@/lib/wallet-actions";
@@ -101,31 +101,43 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
 
   if (done) return <div className="mt-4"><ActionSuccess destination={null} title={t("Cambio enviado")} amount={{ value: format(done.outAmount, done.to), unit: done.to, label: "≈" }} body={`${t("Cambiaste {a} por aproximadamente {b}.", { a: `${format(done.amount, done.from)} ${done.from}`, b: `${format(done.outAmount, done.to)} ${done.to}` })} ${t("Tu saldo se actualizará en unos segundos.")}`} details={[{ label: t("Operación"), value: t("Cambio de moneda") }, { label: t("Pagaste"), value: `${format(done.amount, done.from)} ${done.from}` }, { label: t("Destino"), value: t("Tu billetera") }]} signature={null} doneLabel={t("Hacer otro cambio")} onClose={() => setDone(null)} /></div>;
 
-  const select = (side: "from" | "to", value: string) => <div className="flex shrink-0 items-center gap-1.5"><TokenIcon symbol={value} size={compact ? 22 : 28} /><select aria-label={side === "from" ? t("Moneda que pagas") : t("Moneda que recibes")} value={value} disabled={busy}
-    onChange={(e) => pick(side, e.target.value)} className={`${compact ? "h-8 px-2 text-sm" : "h-10 px-3"} rounded-full border border-border bg-background font-semibold`}>
-    {SWAP_TOKENS.map((x) => <option key={x.symbol} value={x.symbol}>{x.symbol}</option>)}
-  </select></div>;
+  /** Jupiter-style token pill: icon + symbol + chevron, with the native select layered on top for accessibility. */
+  const select = (side: "from" | "to", value: string) => <div className="relative flex shrink-0 items-center gap-1.5 rounded-full bg-background/70 py-1 pl-1 pr-2.5 ring-1 ring-border transition-colors hover:bg-background">
+    <TokenIcon symbol={value} size={compact ? 22 : 26} />
+    <span className={`font-semibold ${compact ? "text-sm" : "text-base"}`}>{value}</span>
+    <ChevronDown className="size-4 text-muted-foreground" />
+    <select aria-label={side === "from" ? t("Moneda que pagas") : t("Moneda que recibes")} value={value} disabled={busy}
+      onChange={(e) => pick(side, e.target.value)} className="absolute inset-0 cursor-pointer opacity-0">
+      {SWAP_TOKENS.map((x) => <option key={x.symbol} value={x.symbol}>{x.symbol}</option>)}
+    </select>
+  </div>;
+  const pad = compact ? "p-3" : "p-4";
 
   return <div className={compact ? "space-y-2" : sheet ? "space-y-3" : "mt-4 space-y-3"} aria-busy={busy}>
     {!compact && !sheet && <h3 className="font-display text-lg">{t("Cambiar monedas")}</h3>}
-    <div className="relative space-y-1">
-      <div className={`rounded-2xl bg-muted ${compact ? "p-3" : "p-4"}`}>
-        <div className="flex items-center justify-between text-sm text-muted-foreground"><label htmlFor="swap-amount">{t("Pagas")}</label><span>{t("Disponible")}: {max === undefined ? "—" : format(max, from)}</span></div>
-        <div className={`${compact ? "mt-1" : "mt-2"} flex items-center gap-2`}>
-          <input id="swap-amount" size={1} inputMode="decimal" placeholder="0.00" value={amount} disabled={busy} onChange={(e) => setAmount(sanitize(e.target.value))} className={`min-w-0 flex-1 bg-transparent font-display ${compact ? "text-2xl" : "text-3xl"} outline-none`} />
+    <div className="relative">
+      <div className={`rounded-2xl border border-border bg-muted ${pad}`}>
+        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+          <label htmlFor="swap-amount" className="font-medium">{t("Pagas")}</label>
+          <div className="flex items-center gap-1.5">
+            <Wallet className="size-3.5" /><span>{max === undefined ? "—" : format(max, from)} {from}</span>
+            {([50n, 100n] as const).map((p) => <button key={String(p)} type="button" className="rounded-md border border-border px-1.5 py-0.5 text-[10px] font-semibold uppercase hover:border-primary hover:text-primary disabled:opacity-50" disabled={busy || max === undefined || max <= 0n} onClick={() => setPercent(p)}>{p === 100n ? t("Máx") : "50%"}</button>)}
+          </div>
+        </div>
+        <div className={`${compact ? "mt-2" : "mt-3"} flex items-center gap-3`}>
           {select("from", from)}
+          <input id="swap-amount" size={1} inputMode="decimal" placeholder="0.00" value={amount} disabled={busy} onChange={(e) => setAmount(sanitize(e.target.value))} className={`min-w-0 flex-1 bg-transparent text-right font-display ${compact ? "text-2xl" : "text-3xl"} outline-none`} />
         </div>
-        <p className="mt-1 h-4 text-xs text-muted-foreground">{current && !loading ? `≈ ${usd(current.usdcValue)}` : ""}</p>
-        <div className="mt-2 flex gap-2">{([25n, 50n, 75n, 100n] as const).map((p) => <Button key={String(p)} size="sm" variant="outline" className="h-7 flex-1 rounded-full px-2 text-xs" disabled={busy || max === undefined || max <= 0n} onClick={() => setPercent(p)}>{p === 100n ? t("Máx") : `${p}%`}</Button>)}</div>
+        <p className="mt-1 h-4 text-right text-xs text-muted-foreground">{current && !loading ? usd(current.usdcValue) : ""}</p>
       </div>
-      <div className="flex justify-center"><Button size="icon" variant="secondary" className="-my-4 z-10 rounded-full border-4 border-card" disabled={busy} aria-label={t("Invertir cambio")} title={t("Invertir cambio")} onClick={() => { setFrom(to); setTo(from); clear(); }}><ArrowUpDown /></Button></div>
-      <div className={`rounded-2xl bg-muted ${compact ? "p-3" : "p-4"}`} aria-live="polite">
-        <div className="text-sm text-muted-foreground">{t("Recibes aproximadamente")}</div>
-        <div className={`${compact ? "mt-1" : "mt-2"} flex items-center gap-2`}>
-          <p className={`min-w-0 flex-1 truncate font-display ${compact ? "text-2xl" : "text-3xl"} text-primary`}>{loading ? t("Cotizando…") : current ? format(current.outAmount, to) : "0.00"}</p>
+      <div className="relative z-10 -my-3 flex justify-center"><button type="button" className="grid size-9 place-items-center rounded-full border-4 border-card bg-muted text-muted-foreground transition-colors hover:text-primary disabled:opacity-50" disabled={busy} aria-label={t("Invertir cambio")} title={t("Invertir cambio")} onClick={() => { setFrom(to); setTo(from); clear(); }}><ArrowDown className="size-4" /></button></div>
+      <div className={`rounded-2xl border border-border bg-background ${pad}`} aria-live="polite">
+        <div className="text-xs font-medium text-muted-foreground">{t("Recibes aproximadamente")}</div>
+        <div className={`${compact ? "mt-2" : "mt-3"} flex items-center gap-3`}>
           {select("to", to)}
+          <p className={`min-w-0 flex-1 truncate text-right font-display ${compact ? "text-2xl" : "text-3xl"} ${loading ? "text-muted-foreground" : ""}`}>{loading ? t("Cotizando…") : current ? format(current.outAmount, to) : "0.00"}</p>
         </div>
-        <p className="mt-1 h-4 text-xs text-muted-foreground">{current && !loading ? (from !== "USDC" && to !== "USDC" ? t("Comisión aparte en USDC") : t("Comisión ya descontada")) : ""}</p>
+        <p className="mt-1 h-4 text-right text-xs text-muted-foreground">{current && !loading ? (from !== "USDC" && to !== "USDC" ? t("Comisión aparte en USDC") : t("Comisión ya descontada")) : ""}</p>
       </div>
     </div>
 
