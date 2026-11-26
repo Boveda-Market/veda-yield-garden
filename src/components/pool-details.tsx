@@ -35,8 +35,8 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
   const yieldQ = useQuery(poolYieldOptions(vault.pool));
   const y = yieldQ.data;
   const sym = `$${coinLabel(stats?.baseSymbol ?? y?.symbolX, vault.pair.split("/")[0] ?? "")}`;
-  const buys1h = stats?.buys1h ?? null, sells1h = stats?.sells1h ?? null;
-  const trades1h = buys1h != null && sells1h != null ? buys1h + sells1h : null;
+  const buys24 = stats?.buys24h ?? null, sells24 = stats?.sells24h ?? null;
+  const trades24 = buys24 != null && sells24 != null ? buys24 + sells24 : null;
   const isBtc = vault.id === "btc";
   const btcQ = useQuery({ ...bitcoinStatsOptions(), enabled: isBtc });
   const btc = btcQ.data;
@@ -47,7 +47,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
     : { value: usdShort(v), sub: fallbackSub };
   const btcCap = capParts(btc?.marketCap, t("Todo el bitcoin del mundo"));
   const coinCap = capParts(y?.tokenMarketCap ?? stats?.marketCap, t("Precio × monedas en circulación"));
-  // Coin facts and right-now pool activity; whole-day figures (price, APR, TVL, volume, fees, trades) live in «Rendimiento y Mercado».
+  // Coin facts and pool activity of the last 24 hours; price, APR and whole-pool metrics live in «Rendimiento y Mercado».
   // Bóveda Bitcoin: coin facts describe Bitcoin itself (network stats), issuer freeze powers are disclosed in Términos, not as tiles.
   const btcTiles: MetricTile[] = [
     { label: t("Personas con {s}", { s: sym }), value: compact(btc?.holders), sub: t("Direcciones con bitcoin"), help: "Cuántas direcciones de Bitcoin en el mundo tienen saldo hoy. Una persona puede tener varias, así que es una idea aproximada de cuánta gente tiene bitcoin.", accent: true },
@@ -62,8 +62,8 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
     { label: t("Verificación pública"), value: y?.tokenVerified == null ? "—" : y.tokenVerified ? t("✓ Verificada") : t("Sin verificar"), sub: t("Listas públicas de monedas"), help: "Indica si esta moneda aparece verificada en listas públicas de monedas. Ayuda a evitar copias falsas con el mismo nombre, pero no garantiza que su precio suba." },
   ];
   const poolTiles: MetricTile[] = [
-    { label: t("Volumen · última hora"), value: usdShort(stats?.volume1h ?? y?.volume1h), sub: t("Dinero intercambiado"), help: "Cuánto dinero se intercambió en la última hora. Te muestra si la bóveda está activa en este momento.", accent: true },
-    { label: t("Intercambios · última hora"), value: number(trades1h, 0), sub: trades1h ? t("{p} compras", { p: `${Math.round((buys1h ?? 0) / trades1h * 100)}%` }) : t("Compras y ventas"), help: "Compras y ventas que hicieron otras personas en la última hora. Cada una paga una pequeña comisión que se reparte entre los depósitos." },
+    { label: t("Volumen · 24 h"), value: usdShort(stats?.volume24h ?? y?.volume24h), sub: t("Dinero intercambiado"), help: "Cuánto dinero se intercambió en las últimas 24 horas. Te muestra qué tan activa está la bóveda.", accent: true },
+    { label: t("Intercambios · 24 h"), value: number(trades24, 0), sub: trades24 ? t("{p} compras", { p: `${Math.round((buys24 ?? 0) / trades24 * 100)}%` }) : t("Compras y ventas"), help: "Compras y ventas que hicieron otras personas en las últimas 24 horas. Cada una paga una pequeña comisión que se reparte entre los depósitos." },
     { label: t("{s} en el pool", { s: sym }), value: number(stats?.baseLocked ?? y?.amountX, 4), sub: t("Cantidad de monedas"), help: "Cuántas monedas hay guardadas en el pool ahora mismo. Cambia todo el tiempo: cuando alguien compra, sale moneda y entran dólares digitales, y al revés." },
     { label: t("Dólares digitales en el pool"), value: number(stats?.quoteLocked ?? y?.amountY, 2), sub: t("Cantidad de monedas"), help: "Cuántos dólares digitales hay guardados en el pool ahora mismo. Suben cuando la gente vende la moneda y bajan cuando la compra." },
     { label: t("Para los depósitos"), value: y?.depositorFeeShare == null ? "—" : `${number(y.depositorFeeShare, 1)}%`, sub: t("De cada comisión"), help: "De cada comisión que pagan quienes cambian monedas, esta parte se reparte entre los depósitos como el tuyo. El resto es la tarifa de la plataforma del pool." },
