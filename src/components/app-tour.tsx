@@ -99,7 +99,7 @@ const STATIONS: Station[] = [
   { target: "[data-tour='wallet']", tone: "btc", area: "Billetera", text: "Tus dólares listos para usar: añade fondos con tarjeta o banco y retira a tu cuenta sin plazos." },
   { target: null, tone: "trump", area: "Seguridad", text: "Solo tú autorizas movimientos con tu huella o Face ID. Si tienes dudas mientras exploras, tócame aquí abajo." },
 ];
-const ORB = 48;
+const ORB = 60;
 
 /** Sofía flies like a fairy guide between real screen areas and speaks one short sentence per station. */
 export function SofiaTour({ open, onClose, signedIn = false }: { open: boolean; onClose: () => void; signedIn?: boolean }) {
@@ -142,11 +142,14 @@ export function SofiaTour({ open, onClose, signedIn = false }: { open: boolean; 
   useEffect(() => { if (!open) return; const k = (e: KeyboardEvent) => { if (e.key === "Escape") close(); if (e.key === "ArrowRight") go(1); if (e.key === "ArrowLeft") go(-1); }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); });
   if (!open || typeof document === "undefined" || !vp.w || !st) return null;
   const pad = 12;
-  const orbX = rect ? Math.min(vp.w - ORB - 8, Math.max(8, rect.left + rect.width / 2 - ORB / 2)) : vp.w - ORB - 16;
+  // Keep the orb far enough from the edges that its expanding beacon rings never get clipped.
+  const orbX = rect ? Math.min(vp.w - ORB - 26, Math.max(26, rect.left + rect.width / 2 - ORB / 2)) : vp.w - ORB - 26;
   const lower = rect ? rect.top + rect.height / 2 > vp.h / 2 : true;
   const orbY = rect ? (lower ? rect.top - ORB - 10 : rect.bottom + 10) : vp.h - ORB - 96;
   const cardW = Math.min(320, vp.w - pad * 2);
   const cardX = Math.min(vp.w - cardW - pad, Math.max(pad, orbX + ORB / 2 - cardW / 2));
+  // Sofía's name tag flips to the left when the orb sits near the right edge.
+  const nameFlip = orbX + ORB + 62 > vp.w - pad;
   const cardStyle: React.CSSProperties = lower ? { left: cardX, width: cardW, bottom: Math.max(pad, vp.h - orbY + 10) } : { left: cardX, width: cardW, top: orbY + ORB + 10 };
   const words = t(st.text).split(" ");
   return createPortal(<>
@@ -156,10 +159,13 @@ export function SofiaTour({ open, onClose, signedIn = false }: { open: boolean; 
       <div className="absolute inset-0 bg-background/70 backdrop-blur-[1px]" onClick={() => close()} />
       {rect && <div className="sofia-spot pointer-events-none absolute rounded-2xl transition-all duration-500" style={{ left: rect.left - 6, top: rect.top - 6, width: rect.width + 12, height: rect.height + 12 }} />}
       <div className="sofia-orb pointer-events-none absolute" style={{ left: orbX, top: orbY, width: ORB, height: ORB }} aria-hidden>
-        <span className="sofia-halo absolute inset-[-10px] rounded-full" />
-        <span className="sofia-orbit absolute inset-[-8px]"><i /><i /><i /></span>
+        <span className="sofia-halo absolute inset-[-16px] rounded-full" />
+        <span className="sofia-beacon" />
+        <span className="sofia-beacon" />
+        <span className="sofia-orbit absolute inset-[-12px]"><i /><i /><i /></span>
         <span key={`b${i}`} className="sofia-burst absolute inset-0">{[0, 1, 2, 3, 4, 5, 6, 7].map((n) => <i key={n} style={{ "--a": `${n * 45}deg` } as React.CSSProperties} />)}</span>
-        <span key={`s${i}`} className={`sofia-fab sofia-body grid size-full place-items-center rounded-full text-sofia-foreground ring-2 ring-sofia-glow ${flying ? "sofia-spin" : ""}`}><Headset size={22} /></span>
+        <span key={`s${i}`} className={`sofia-fab sofia-core sofia-body grid size-full place-items-center rounded-full text-sofia-foreground ${flying ? "sofia-spin" : ""}`}><Headset size={28} /></span>
+        <span className={`sofia-name rounded-full px-2 py-0.5 text-[10px] font-bold text-sofia-foreground ${nameFlip ? "sofia-name-flip" : ""}`}>Sofía</span>
       </div>
       {!flying && <div key={i} className="sofia-bubble absolute rounded-3xl border border-sofia-text/30 bg-card p-3 shadow-xl" style={cardStyle}>
         <div className="flex items-center gap-2">
