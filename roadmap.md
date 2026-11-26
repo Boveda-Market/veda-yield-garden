@@ -86,3 +86,5 @@
 - [x] Guía «Trae tus propias monedas»: paso 4 describe el cambio con el botón «Cambiar» de Billetera (ES/EN)
 - [x] Hoja de cambio con estilo Jupiter (moneda a la izquierda, monto a la derecha, 50%/Máx, flecha para invertir)
 - [x] Logo oficial de Jupiter en la hoja de cambio: insignia «Powered by Jupiter» con enlace a jup.ag
+- [x] Enlace al explorador (Solscan) en las tarjetas de bóveda: cuadrito junto a «Powered by Meteora», fuera del «Ver detalles»
+- [x] Guía «Trae tus propias monedas»: sección «Comprueba todo tú mismo» con las direcciones de cada moneda y cada bóveda (ES/EN)

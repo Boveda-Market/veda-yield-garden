@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQueries } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowDownToLine, Plus, Repeat, Sprout } from "lucide-react";
+import { ArrowDownToLine, ExternalLink, Plus, Repeat, Sprout } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { fetchPoolStats, vaultTokenPrice } from "@/lib/pool-stats";
 import { coinLabel } from "@/lib/coin-label";
@@ -83,7 +83,7 @@ export function WalletPositions({ wallet, only, bare }: { wallet: string; only?:
       const ok = supported(p.vaultId);
       const hot = Boolean(v?.badge);
       return <li key={p.address} className={hot ? `hot-ring rounded-xl p-[2px] shadow-[var(--shadow-hot)] ${vaultSkin(p.vaultId)}` : "rounded-xl border border-border bg-background/40 p-3"}><div className={hot ? "relative overflow-hidden rounded-[calc(0.75rem-2px)] bg-card p-3" : ""}>{hot && <div className="pointer-events-none absolute inset-0 opacity-40" aria-hidden>{p.vaultId === "dcty" ? <DctySkyline /> : p.vaultId === "trump" ? <TrumpFlag /> : null}</div>}<div className="relative">
-        <div className="flex items-center gap-2">{hasTokenLogo(p.symbol) && <TokenIcon symbol={p.symbol} size={28} />}<div className="min-w-0 flex-1">{hot && v ? <VaultTitle vault={v} className="h-6" /> : <p className="truncate text-sm font-semibold">{v ? t(v.name) : `${coinLabel(p.symbol, p.symbol)}/USDC`}</p>}{p.locked && <p className="text-xs text-muted-foreground">{t("Con liquidez bloqueada")}</p>}<PoweredBy brand="meteora" className="mt-0.5 !justify-start" /></div></div>
+        <div className="flex items-center gap-2">{hasTokenLogo(p.symbol) && <TokenIcon symbol={p.symbol} size={28} />}<div className="min-w-0 flex-1">{hot && v ? <VaultTitle vault={v} className="h-6" /> : <p className="truncate text-sm font-semibold">{v ? t(v.name) : `${coinLabel(p.symbol, p.symbol)}/USDC`}</p>}{p.locked && <p className="text-xs text-muted-foreground">{t("Con liquidez bloqueada")}</p>}<div className="mt-0.5 flex items-center gap-0.5"><PoweredBy brand="meteora" className="!justify-start" /><Button asChild size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label={t("Ver en el explorador")} title={t("Ver en el explorador")}><a href={`https://solscan.io/account/${p.address}`} target="_blank" rel="noopener noreferrer"><ExternalLink size={13} /></a></Button></div></div></div>
         <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
           <div className="rounded-lg bg-muted/50 p-2"><dt className="text-muted-foreground">{t("Valor")}</dt><dd className="mt-0.5 font-display text-sm font-semibold tabular-nums">{value === null ? "—" : `≈ ${formatUsd(value)}`}</dd></div>
           <div className="rounded-lg bg-muted/50 p-2"><dt className="text-muted-foreground">{t("Rendimiento")}</dt><dd className="mt-0.5 font-display text-sm font-semibold tabular-nums text-primary">{apr === null ? "—" : `${apr.toFixed(1)}% APR`}</dd></div>

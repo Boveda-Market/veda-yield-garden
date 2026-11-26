@@ -1,5 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GuideLayout, guideHead, type GuideEn } from "@/components/guide-layout";
+import { CHAIN_POOLS, USDC_MINT } from "@/lib/solana-data";
+
+/** Public addresses, in plain sight for people who like to check before sending. */
+const COINS = [...CHAIN_POOLS, { symbol: "USDC", mint: USDC_MINT }];
+const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
+function AuditRow({ label, items }: { label: string; items: { label: string; href: string; title: string }[] }) {
+  return <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs"><span className="font-semibold text-foreground">{label}</span>{items.map((i) => <a key={i.href} href={i.href} target="_blank" rel="noopener noreferrer" title={i.title} className="font-mono text-[11px] text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground">{i.label}</a>)}</p>;
+}
 
 const P = "/guias/trae-tus-monedas";
 const T = "Cómo traer tus propias monedas a Bóveda Market";
@@ -13,6 +21,10 @@ export function Page() {
     <section><h2>3. El sistema te reconoce</h2><p>Cuando llegan tus fondos, Bóveda Market detecta que trajiste tus propias monedas y <strong>quita las guías para usuarios nuevos</strong>: sin pasos de compra con tarjeta ni Coinbase. Vas directo a tu billetera y tus bóvedas.</p></section>
     <section><h2>4. Abre tu bóveda inteligente</h2><p>Si tienes dólares, toca <strong>Depositar</strong> y confirma. Si trajiste SOL u otras monedas, toca <strong>Cambiar</strong> en <strong>Billetera</strong>, elige la moneda y el monto, y confirma: se convierten a dólares sin comisión de Bóveda Market. Después toca <strong>Depositar</strong>. El sistema arma la posición en las bóvedas públicas de Meteora.</p></section>
     <section><h2>5. Deja que el Piloto Automático trabaje</h2><p>Olvídate de calcular rangos y rebalancear a mano. El Piloto Automático vigila el precio 24/7, recentra tu bóveda cuando sale de rango y cobra las comisiones por ti. Las tasas son estimaciones, cambian y existe riesgo de pérdida. El piloto automático solo funciona con cuentas registradas.</p></section>
+    <section><h2>6. Comprueba todo tú mismo</h2><p>Si prefieres verificar antes de enviar, aquí están las direcciones públicas de cada moneda y de cada bóveda en el explorador de la red. Ábrelas, compara y envía solo lo que reconozcas.</p>
+      <AuditRow label="Monedas" items={COINS.map((c) => ({ label: `${c.symbol} ${short(c.mint)}`, href: `https://solscan.io/token/${c.mint}`, title: c.mint }))} />
+      <AuditRow label="Bóvedas" items={CHAIN_POOLS.map((p) => ({ label: `${p.symbol} ${short(p.pool)}`, href: `https://solscan.io/account/${p.pool}`, title: p.pool }))} />
+    </section>
   </GuideLayout>;
 }
 
@@ -22,4 +34,8 @@ const EN: GuideEn = { title: "How to bring your own coins to Bóveda Market", in
     <section><h2>3. The system recognizes you</h2><p>When your funds arrive, Bóveda Market detects you brought your own coins and <strong>removes the new-user guides</strong>: no card or Coinbase purchase steps. You go straight to your wallet and vaults.</p></section>
     <section><h2>4. Open your smart vault</h2><p>If you have dollars, tap <strong>Deposit</strong> and confirm. If you brought SOL or other coins, tap <strong>Swap</strong> in <strong>Wallet</strong>, choose the coin and the amount, and confirm: they turn into dollars with no Bóveda Market fee. Then tap <strong>Deposit</strong>. The system builds the position in Meteora's public vaults.</p></section>
     <section><h2>5. Let Autopilot do the work</h2><p>Forget calculating ranges and rebalancing by hand. Autopilot watches the price 24/7, recenters your vault when it leaves its range and collects the fees for you. Rates are estimates, they change and there is risk of loss.</p></section>
+    <section><h2>6. Check it yourself</h2><p>If you prefer to verify before sending, here are the public addresses of every coin and every vault in the network explorer. Open them, compare, and send only what you recognize.</p>
+      <AuditRow label="Coins" items={COINS.map((c) => ({ label: `${c.symbol} ${short(c.mint)}`, href: `https://solscan.io/token/${c.mint}`, title: c.mint }))} />
+      <AuditRow label="Vaults" items={CHAIN_POOLS.map((p) => ({ label: `${p.symbol} ${short(p.pool)}`, href: `https://solscan.io/account/${p.pool}`, title: p.pool }))} />
+    </section>
 </> };
