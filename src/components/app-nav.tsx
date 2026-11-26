@@ -38,7 +38,7 @@ export function BottomNav({ active, guest, onSelect }: { active: AppView; guest:
         const on = active === key;
         const cls = `flex w-full flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${on ? "text-primary" : "text-muted-foreground"}`;
         const body = <><Icon size={20} aria-hidden />{t(label)}</>;
-        return <li key={key} className="flex-1">{guest ? <button type="button" aria-current={on ? "page" : undefined} className={cls} onClick={() => onSelect(key)}>{body}</button> : <Link to={to} aria-current={on ? "page" : undefined} className={cls}>{body}</Link>}</li>;
+        return <li key={key} data-tour={key} className="flex-1">{guest ? <button type="button" aria-current={on ? "page" : undefined} className={cls} onClick={() => onSelect(key)}>{body}</button> : <Link to={to} aria-current={on ? "page" : undefined} className={cls}>{body}</Link>}</li>;
       })}
     </ul>
   </nav>;

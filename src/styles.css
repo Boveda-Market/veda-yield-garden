@@ -555,3 +555,8 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
 .tour-bar-btc { background: var(--tour-btc); }
 .tour-bar-met { background: var(--tour-met); }
 .tour-bar-trump { background: var(--tour-trump); }
+
+.sofia-orb { transition: left 650ms cubic-bezier(0.34, 1.4, 0.64, 1), top 650ms cubic-bezier(0.34, 1.4, 0.64, 1); animation: sofia-float 2.4s ease-in-out infinite; }
+@keyframes sofia-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -5px; } }
+.sofia-spot { box-shadow: 0 0 0 3px var(--sofia-glow), 0 0 24px 4px color-mix(in oklab, var(--sofia-glow) 55%, transparent); }
+@media (prefers-reduced-motion: reduce) { .sofia-orb { animation: none; transition: none; } }
