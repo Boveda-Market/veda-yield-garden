@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 import { pickReviewsArm, REVIEWS_AB_KEY } from "@/lib/reviews-ab";
 import { isReturning } from "@/lib/preferences";
 import { AdvancedAccess, EntryAccess } from "@/components/entry-access";
+import { SofiaRestore } from "@/components/support-chat";
 import { PredictPromo } from "@/components/predict-promo";
 import { VerifySection } from "@/components/meteora-verify";
 import { BootSplash } from "@/components/boot-splash";
@@ -207,7 +208,7 @@ export function Landing({ variant }: { variant?: number } = {}) {
         </details>)}
       </section>
     </main>
-    <footer className="mx-auto max-w-5xl border-t border-border px-6 py-6 text-xs leading-5 text-muted-foreground"><nav className="flex flex-wrap justify-center gap-5"><Link to={lang === "en" ? "/en/about" : "/about"}>{t("Sobre Bóveda Market")}</Link><Link to={lang === "en" ? "/en/faq" : "/faq"}>{t("Preguntas frecuentes")}</Link><Link to={guidesIndexHref(lang)}>{t("Guías")}</Link><Link to={lang === "en" ? "/en/blog" : "/blog"}>Blog</Link><Link to="/status">{t("Estado del sistema")}</Link><Link to="/terminos">{t("Términos")}</Link><Link to="/privacidad">{t("Privacidad")}</Link><AdvancedAccess /></nav><HomeDisclaimers /><p className="mt-4 text-center"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer" className="text-primary underline">{t("Soporte en Telegram")}</a>{" · "}<a href="mailto:admin@bovedamarket.app" className="text-primary underline">admin@bovedamarket.app</a>{" · "}<a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary underline"><GithubMark size={12} />{t("Código abierto en GitHub")}</a></p><p className="mt-2 text-center">© {new Date().getFullYear()} Boveda Technologies</p></footer>
+    <footer className="mx-auto max-w-5xl border-t border-border px-6 py-6 text-xs leading-5 text-muted-foreground"><nav className="flex flex-wrap justify-center gap-5"><Link to={lang === "en" ? "/en/about" : "/about"}>{t("Sobre Bóveda Market")}</Link><Link to={lang === "en" ? "/en/faq" : "/faq"}>{t("Preguntas frecuentes")}</Link><Link to={guidesIndexHref(lang)}>{t("Guías")}</Link><Link to={lang === "en" ? "/en/blog" : "/blog"}>Blog</Link><Link to="/status">{t("Estado del sistema")}</Link><Link to="/terminos">{t("Términos")}</Link><Link to="/privacidad">{t("Privacidad")}</Link><AdvancedAccess /><SofiaRestore /></nav><HomeDisclaimers /><p className="mt-4 text-center"><a href="https://t.me/bovedamarket" target="_blank" rel="noopener noreferrer" className="text-primary underline">{t("Soporte en Telegram")}</a>{" · "}<a href="mailto:admin@bovedamarket.app" className="text-primary underline">admin@bovedamarket.app</a>{" · "}<a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary underline"><GithubMark size={12} />{t("Código abierto en GitHub")}</a></p><p className="mt-2 text-center">© {new Date().getFullYear()} Boveda Technologies</p></footer>
   </div>;
 }
 

@@ -1,7 +1,7 @@
 import { AutopilotDefault } from "@/components/autopilot-toggle";
 import { IN_APP_FLAG, OPEN_MENU_EVENT, OPEN_MENU_FLAG } from "./back-button";
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, LogIn, Home, History, Send, Bell, Zap, BookOpen } from "lucide-react";
+import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, LogIn, Home, History, Send, Bell, Zap, BookOpen, Headset } from "lucide-react";
 import { SUPPORT_URL } from "./safety-notice";
 import { InstallAppButton } from "./install-app";
 import { useEffect, useState } from "react";
@@ -19,6 +19,7 @@ import { Lightbulb } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { SuggestionBox } from "./suggestion-box";
 import { StatusDot, useSystemState } from "./system-status";
+import { useHideSofia } from "@/lib/preferences";
 import { Activity } from "lucide-react";
 
 export type AppView = "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets" | "admin";
@@ -50,6 +51,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
   const { lang } = useI18n();
   const [open, setOpen] = useState(false);
   const [ideas, setIdeas] = useState(false);
+  const [sofiaHidden, setSofiaHidden] = useHideSofia();
   useEffect(() => {
     try { if (sessionStorage.getItem("boveda:open-ideas")) { sessionStorage.removeItem("boveda:open-ideas"); setIdeas(true); } } catch { /* ignore */ }
   }, []);
@@ -96,6 +98,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
             <button type="button" className={`${row} text-left`} onClick={() => { setOpen(false); setIdeas(true); }}><Lightbulb size={18} />{t("Ayúdanos a mejorar")}</button>
           </>}
           <Link to={blogIndexHref(lang)} className={row} onClick={() => setOpen(false)}><BookOpen size={18} />Blog</Link>
+          {sofiaHidden && <button type="button" className={row} onClick={() => { setOpen(false); setSofiaHidden(false); }}><Headset size={18} />{t("Mostrar a Sofía")}</button>}
           <InstallAppButton className={row} />
         </div>
         <div className="mt-6 flex items-center justify-between border-t border-border pt-4 text-sm"><span>{t("Idioma")}</span><LanguageMenu /></div>

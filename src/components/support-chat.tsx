@@ -1,21 +1,33 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { Headset, SendHorizontal } from "lucide-react";
+import { EyeOff, Headset, SendHorizontal } from "lucide-react";
 import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { useHideSofia } from "@/lib/preferences";
 import { askSofia } from "@/lib/support-chat.functions";
 import { CHAT_MAX_CHARS, chatWait } from "@/lib/support-chat";
 
 type Turn = { role: "user" | "assistant"; text: string };
 
 const COPY = {
-  es: { open: "Hablar con Sofía", title: "Sofía", sub: "Tu guía en Bóveda Market", tag: "Guía oficial", hello: "¡Hola! Soy Sofía, tu guía en Bóveda Market. Estoy aquí para ayudarte a entender tus bóvedas, cómo mover tus dólares o resolver cualquier duda. ¿En qué te puedo orientar hoy?", ph: "Escribe tu pregunta…", send: "Enviar", typing: "Sofía está escribiendo…", wait: "Has enviado varios mensajes seguidos. Por favor espera {s} segundos antes de tu siguiente consulta para mantener el servicio disponible para todos.", err: "Uy, no pude responder ahora. Inténtalo de nuevo en un momento o escríbenos en el canal oficial de Telegram.", note: "Sofía es una asistente con IA: orienta, no da consejos financieros ni puede hacer cambios en tu cuenta. Nunca compartas tus claves.", chips: ["¿Cómo retiro mis dólares?", "¿Qué es el Piloto Automático?", "¿Dónde está guardado mi dinero?", "¿Por qué hay una comisión al activar?"] },
-  en: { open: "Chat with Sophia", title: "Sophia", sub: "Your Bóveda Market guide", tag: "Official guide", hello: "Hi! I'm Sophia, your Bóveda Market guide. I'm here to help you understand your vaults, move your dollars or answer any question. How can I help you today?", ph: "Type your question…", send: "Send", typing: "Sophia is typing…", wait: "You've sent several messages in a row. Please wait {s} seconds before your next question so the service stays available for everyone.", err: "Oops, I couldn't answer right now. Try again in a moment or reach us on the official Telegram channel.", note: "Sophia is an AI assistant: she guides you, doesn't give financial advice and can't change your account. Never share your keys.", chips: ["How do I withdraw my dollars?", "What is Autopilot?", "Where is my money kept?", "Why is there an activation fee?"] },
+  es: { open: "Hablar con Sofía", show: "Mostrar a Sofía", title: "Sofía", sub: "Tu guía en Bóveda Market", tag: "Guía oficial", hello: "¡Hola! Soy Sofía, tu guía en Bóveda Market. Estoy aquí para ayudarte a entender tus bóvedas, cómo mover tus dólares o resolver cualquier duda. ¿En qué te puedo orientar hoy?", ph: "Escribe tu pregunta…", send: "Enviar", typing: "Sofía está escribiendo…", wait: "Has enviado varios mensajes seguidos. Por favor espera {s} segundos antes de tu siguiente consulta para mantener el servicio disponible para todos.", err: "Uy, no pude responder ahora. Inténtalo de nuevo en un momento o escríbenos en el canal oficial de Telegram.", note: "Sofía es una asistente con IA: orienta, no da consejos financieros ni puede hacer cambios en tu cuenta. Nunca compartas tus claves.", hide: "Ocultar a Sofía", hideNote: "Podrás volver a mostrarla en el pie de la portada, en el menú o en Tu cuenta.", chips: ["¿Cómo retiro mis dólares?", "¿Qué es el Piloto Automático?", "¿Dónde está guardado mi dinero?", "¿Por qué hay una comisión al activar?"] },
+  en: { open: "Chat with Sophia", show: "Show Sophia", title: "Sophia", sub: "Your Bóveda Market guide", tag: "Official guide", hello: "Hi! I'm Sophia, your Bóveda Market guide. I'm here to help you understand your vaults, move your dollars or answer any question. How can I help you today?", ph: "Type your question…", send: "Send", typing: "Sophia is typing…", wait: "You've sent several messages in a row. Please wait {s} seconds before your next question so the service stays available for everyone.", err: "Oops, I couldn't answer right now. Try again in a moment or reach us on the official Telegram channel.", note: "Sophia is an AI assistant: she guides you, doesn't give financial advice and can't change your account. Never share your keys.", hide: "Hide Sophia", hideNote: "You can bring her back from the home page footer, the menu or Your account.", chips: ["How do I withdraw my dollars?", "What is Autopilot?", "Where is my money kept?", "Why is there an activation fee?"] },
 } as const;
 
 const HIDDEN = ["/admin"];
+
+/** While Sofía is hidden, the home footer keeps one quiet way to bring her back — no account needed. */
+export function SofiaRestore() {
+  const { lang } = useI18n();
+  const c = COPY[lang === "en" ? "en" : "es"];
+  const [hidden, setHidden] = useHideSofia();
+  if (!hidden) return null;
+  return <button type="button" onClick={() => setHidden(false)} className="inline-flex items-center gap-1.5 text-primary underline underline-offset-4">
+    <Headset size={12} aria-hidden />{c.show}
+  </button>;
+}
 
 export function SupportChat() {
   const { lang } = useI18n();
@@ -28,8 +40,9 @@ export function SupportChat() {
   const [notice, setNotice] = useState("");
   const stamps = useRef<number[]>([]);
   const end = useRef<HTMLDivElement>(null);
+  const [hidden, setHidden] = useHideSofia();
   useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [msgs, busy, notice]);
-  if (HIDDEN.some((p) => pathname.startsWith(p))) return null;
+  if (hidden || HIDDEN.some((p) => pathname.startsWith(p))) return null;
 
   const send = async (q: string) => {
     const question = q.trim().slice(0, CHAT_MAX_CHARS);
@@ -98,6 +111,12 @@ export function SupportChat() {
           </button>
         </form>
         <p className="text-[11px] leading-snug text-muted-foreground">{c.note}</p>
+        {/* Hiding is a device display preference: she stays one tap away in Tu cuenta or the menu. */}
+        <button type="button" onClick={() => { setOpen(false); setHidden(true); }}
+          className="inline-flex items-center gap-1.5 self-start rounded-full px-1 py-1.5 text-[11px] text-muted-foreground transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sofia-text">
+          <EyeOff className="size-3.5" aria-hidden />{c.hide}
+        </button>
+        <p className="-mt-1 text-[11px] leading-snug text-muted-foreground">{c.hideNote}</p>
       </ActionSheetContent>
     </Dialog>
   </>;

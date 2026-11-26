@@ -264,4 +264,6 @@ export const account: Record<string, string> = {
   "Hazla tuya. Tu nombre, foto y avatar son opcionales.": "Make it yours. Your name, photo and avatar are optional.",
   "Tu foto y avatar no verifican tu identidad ni autorizan movimientos. Nunca te pediremos tu frase semilla.": "Your photo and avatar don't verify your identity or authorize transactions. We will never ask for your seed phrase.",
   "Volver al menú": "Back to menu",
+  "Ocultar a Sofía": "Hide Sophia",
+  "Esconde el botón de ayuda de Sofía. Puedes volver a mostrarla aquí o en el menú.": "Hides Sophia's help button. You can bring her back here or from the menu.",
 };

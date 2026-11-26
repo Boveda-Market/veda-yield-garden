@@ -224,5 +224,6 @@ export const app: Record<string, string> = {
   "Repartidas a proveedores de liquidez": "Paid to liquidity providers",
   "Desde el lanzamiento": "Since launch",
   "Últimas 24 horas": "Last 24 hours",
-  "Estado del sistema": "System status"
+  "Estado del sistema": "System status",
+  "Mostrar a Sofía": "Show Sophia"
 };

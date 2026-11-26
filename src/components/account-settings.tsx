@@ -6,7 +6,7 @@ import { Leaf, Sun, Gem, Waves, Vault, Shield, Zap, Flame, Star, Diamond, Crown,
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { Button } from "./ui/button";
 import { PHOTO_MAX_CHARS, defaultProfile, profileSchema, type AccountProfile } from "@/lib/account-profile";
-import { HOME_OPTIONS, useContacts, useHideBalances, useHomePath, validContact, type HomePath } from "@/lib/preferences";
+import { HOME_OPTIONS, useContacts, useHideBalances, useHideSofia, useHomePath, validContact, type HomePath } from "@/lib/preferences";
 import { getAccountProfile, saveAccountProfile } from "@/lib/account-profile.functions";
 import { LanguageMenu } from "./language-menu";
 import { ThemeToggle } from "./theme-toggle";
@@ -63,6 +63,7 @@ export function AccountSettings() {
   const AvatarIcon = avatars.find(a => a.id === profile.avatar)?.Icon ?? UserRound;
   const wallet = session.walletAddress;
   const [hidden, setHidden] = useHideBalances();
+  const [sofiaHidden, setSofiaHidden] = useHideSofia();
   const [home, setHome] = useHomePath();
   const [contacts, setContacts] = useContacts();
   const [contact, setContact] = useState({ name: "", address: "" });
@@ -121,6 +122,8 @@ export function AccountSettings() {
       <p className="mt-1 text-xs text-muted-foreground">{t("Se guardan en este dispositivo.")}</p>
       <div className="mt-4 flex items-center justify-between gap-3 text-sm"><span className="flex items-center gap-2">{hidden ? <EyeOff size={16} /> : <Eye size={16} />}{t("Ocultar saldos")}</span><button type="button" role="switch" aria-checked={hidden} aria-label={t("Ocultar saldos")} onClick={() => setHidden(!hidden)} className={`relative h-6 w-11 rounded-full transition-colors ${hidden ? "bg-primary" : "bg-muted"}`}><span className={`absolute top-0.5 size-5 rounded-full bg-background shadow transition-all ${hidden ? "left-[22px]" : "left-0.5"}`} /></button></div>
       <p className="mt-1 text-xs text-muted-foreground">{t("Muestra $•••• en lugar de tus montos, ideal en lugares públicos.")}</p>
+      <div className="mt-4 flex items-center justify-between gap-3 text-sm"><span className="flex items-center gap-2">{sofiaHidden ? <EyeOff size={16} /> : <Eye size={16} />}{t("Ocultar a Sofía")}</span><button type="button" role="switch" aria-checked={sofiaHidden} aria-label={t("Ocultar a Sofía")} onClick={() => setSofiaHidden(!sofiaHidden)} className={`relative h-6 w-11 rounded-full transition-colors ${sofiaHidden ? "bg-primary" : "bg-muted"}`}><span className={`absolute top-0.5 size-5 rounded-full bg-background shadow transition-all ${sofiaHidden ? "left-[22px]" : "left-0.5"}`} /></button></div>
+      <p className="mt-1 text-xs text-muted-foreground">{t("Esconde el botón de ayuda de Sofía. Puedes volver a mostrarla aquí o en el menú.")}</p>
       <div className="mt-4 text-sm"><p>{t("Pantalla al entrar")}</p><div className="mt-2 grid grid-cols-3 gap-2">{HOME_OPTIONS.map((h) => <Button key={h} type="button" size="sm" variant={home === h ? "default" : "outline"} aria-pressed={home === h} onClick={() => setHome(h)}>{t(homeLabels[h])}</Button>)}</div></div>
     </div>
 
