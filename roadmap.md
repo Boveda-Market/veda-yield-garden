@@ -91,3 +91,4 @@
 - [x] Quitado el botón de copiar huérfano dentro de «Ver detalles» (la dirección ya se ve en Solscan desde la cabecera)
 - [x] «Ver detalles» de las tarjetas de bóveda: enlace «Guías →» al índice de guías (ES/EN)
 - Blog (/blog, /en/blog) con primer artículo de dólares digitales
+- [x] Portada: la siguiente sección asoma en el primer pliegue del teléfono (título, subtítulo y parte de las tarjetas) para sugerir que se puede seguir bajando
