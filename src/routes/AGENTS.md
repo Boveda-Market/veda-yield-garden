@@ -5,3 +5,4 @@
 - Home versions live at their own addresses (HERO_SLUGS in hero-variants.ts, one thin route per slug rendering Landing with a pinned variant); "/" keeps the weighted rotation and 301-redirects legacy ?v=N links so old campaign links keep working.
 - Home footer legal notes (HomeDisclaimers in index.tsx) render on every home version so purpose, non-affiliation and risk text stay in one place.
 - Home «Continuar» leads to the public explanation (/empezar, /en/get-started), then account access (/acceso, /en/sign-in); returning users can skip the explanation, while EntryAccess preserves the single secure session engine.
+- The pre-access screen explains the registration itself in 3 numbered steps (account with Google or email → a new digital wallet linked to it → open your vault or explore), so the person knows what signing up does before reaching /acceso.

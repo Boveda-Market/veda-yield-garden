@@ -79,3 +79,5 @@
 - [x] Nota de recarga en el acceso: «Puedes recargar con Apple Pay, tarjeta o» con el logo de Coinbase, en una línea.
 - [x] Quitar «Crea tu cuenta o entra de forma segura.» de la pantalla de acceso.
 - [x] Quitar el indicador de pasos «1 Descubre · 2 Cómo funciona · 3 Tu cuenta» del recorrido.
+
+- [x] Pantalla previa al acceso: explica el registro en 3 pasos (cuenta con Google o email, billetera digital nueva enlazada, abrir bóveda o explorar)

@@ -5,10 +5,10 @@ import { langLinks } from "@/lib/seo-lang";
 export const Route = createFileRoute("/empezar")({
   staticData: { sitemap: true },
   head: () => ({ meta: [
-    { title: "Cómo empezar y cómo funciona | Bóveda Market" },
-    { name: "description", content: "Conoce las bóvedas inteligentes, el Piloto Automático y los riesgos antes de crear tu cuenta en Bóveda Market." },
-    { property: "og:title", content: "Cómo empezar y cómo funciona | Bóveda Market" },
-    { property: "og:description", content: "Descubre cómo se reinvierten los intereses y verifica los pools públicos antes de entrar." },
+    { title: "Crea tu cuenta en 3 pasos | Bóveda Market" },
+    { name: "description", content: "Crea tu cuenta con Google o email, se abre una billetera digital nueva enlazada a tu cuenta y luego abres tu bóveda o exploras la app." },
+    { property: "og:title", content: "Crea tu cuenta en 3 pasos | Bóveda Market" },
+    { property: "og:description", content: "Mira cómo se crean tu cuenta y tu billetera antes de continuar. Verifica los pools públicos cuando quieras." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ], links: langLinks("es", "/empezar", "/en/get-started") }),
