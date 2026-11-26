@@ -24,6 +24,7 @@ import { ThemeToggle } from "../components/theme-toggle";
 import { THEME_BOOT } from "../lib/theme";
 import { GoogleAnalytics } from "../components/google-analytics";
 import { Toaster } from "../components/ui/sonner";
+import { SupportChat } from "../components/support-chat";
 import { SessionEngineHost } from "../components/session-host";
 import { PresenceBeacon } from "../components/presence-beacon";
 import { REF_STORAGE_KEY, normalizeCode } from "../lib/affiliate";
@@ -177,6 +178,7 @@ function RootComponent() {
         <GoogleAnalytics />
         <PresenceBeacon />
         <Toaster />
+        <SupportChat />
         {/* Top-right corner, scrolls with the page, so it never covers buttons such as Doble o Nada. */}
         {!APP_PATHS.includes(pathname) && (
           <div className="absolute right-3 top-3 z-40 flex items-center gap-2 sm:right-6 sm:top-[1.6rem]">
