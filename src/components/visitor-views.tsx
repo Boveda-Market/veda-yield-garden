@@ -27,7 +27,6 @@ export function VisitorWallet() {
       <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("Así se ve tu cuenta digital. Entra con Google para activarla y ver tu saldo real.")}</p>
       <div className="mt-5 grid grid-cols-5 gap-1 sm:gap-2">{quick.map((q) => <button key={q.label} type="button" onClick={() => setLogin(true)} className="flex flex-col items-center gap-1.5 text-center text-xs"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"><q.icon size={20} /></span>{q.label}</button>)}</div>
       {session.ready && <GoogleButton className="mt-5 h-12 w-full" onClick={() => session.login("google")}>{t("Continuar con Google")}</GoogleButton>}
-      <p className="mt-2 text-center text-[11px] text-muted-foreground">{t("Gratis, sin tarjeta y sin depósito para explorar.")}</p>
     </section>
     <LoginSheet open={login} onOpenChange={setLogin} title={t("Entra para usar tu Billetera")} />
   </div>;

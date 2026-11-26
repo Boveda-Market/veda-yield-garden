@@ -75,3 +75,4 @@
 - [x] Recorrido de tres pasos ES/EN: portada compacta → explicación y verificación → acceso seguro; botones verificados en 360×640, 390×844 y escritorio, sin cambiar el acceso existente.
 - [x] Unificar hooks con acentos naranja/fucsia, enlaces legales y aviso corto en el primer pliegue.
 - [x] Añadir Guías junto a los enlaces legales sin ocultar Continuar ni el aviso; verificado ES/EN, Día/Noche y 360×640.
+- [x] Quitar «Gratis, sin tarjeta y sin depósito para explorar.» de la pantalla de acceso y de la Billetera de visitante.

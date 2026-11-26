@@ -1909,7 +1909,6 @@ export const extra: Record<string, string> = {
   "Sin plazos de permanencia. Salida libre de predicciones y bóvedas en cualquier momento.": "No lock-up periods. Exit predictions and vaults freely at any time.",
   "USDC es una moneda digital diseñada para mantener el mismo valor que el dólar estadounidense: 1 USDC busca valer 1 USD. En Bóveda Market los saldos, depósitos e intereses se muestran en USDC. No es un depósito bancario ni está asegurado.": "USDC is a digital currency designed to hold the same value as the US dollar: 1 USDC aims to equal 1 USD. In Bóveda Market, balances, deposits and interest are shown in USDC. It is not a bank deposit and is not insured.",
   "Sí, totalmente. Puedes ver las bóvedas y Doble o Nada en vivo sin registrarte. Y si quieres conocer la billetera y el portafolio por dentro, basta con entrar con Google en 1 segundo: no se pide tarjeta ni depósito para explorar la app completa a tu propio ritmo.": "Yes, absolutely. You can browse the vaults and Double or Nothing live without signing up. To see the wallet and portfolio from the inside, just sign in with Google in 1 second: no card or deposit is needed to explore the whole app at your own pace.",
-  "Gratis, sin tarjeta y sin depósito para explorar.": "Free, no card and no deposit needed to explore.",
   "Explorar bóvedas": "Explore vaults",
   "Rendimiento en vivo de $GTA6, $DCTY y $TRUMP.": "Live performance of $GTA6, $DCTY and $TRUMP.",
   "Ver Doble o Nada": "See Double or Nothing",
