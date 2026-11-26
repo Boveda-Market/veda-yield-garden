@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { useHideSofia } from "@/lib/preferences";
 import { askSofia } from "@/lib/support-chat.functions";
 import { CHAT_MAX_CHARS, chatWait } from "@/lib/support-chat";
+import { HERO_SLUGS } from "@/lib/hero-variants";
 
 type Turn = { role: "user" | "assistant"; text: string };
 
@@ -18,6 +19,9 @@ const COPY = {
 } as const;
 
 const HIDDEN = ["/admin"];
+/** Home versions (ES + EN) and the sign-in screens show no assistant (user request). */
+const NO_SOFIA = new Set(["/", "/en", "/acceso", "/en/sign-in", ...HERO_SLUGS.map((s) => `/${s}`),
+  ...["clasica", "gta6", "trump", "doble-o-nada", "sin-ansiedad", "bitcoin", "smart-vaults", "bring-your-coins", "compound-interest"].map((s) => `/en/${s}`)]);
 
 /** While Sofía is hidden, the home footer keeps one quiet way to bring her back — no account needed. */
 export function SofiaRestore() {
@@ -55,7 +59,7 @@ export function SupportChat() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
   useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [msgs, busy, notice]);
-  if (hidden || HIDDEN.some((p) => pathname.startsWith(p))) return null;
+  if (hidden || NO_SOFIA.has(pathname.replace(/\/$/, "") || "/") || HIDDEN.some((p) => pathname.startsWith(p))) return null;
 
   const send = async (q: string) => {
     const question = q.trim().slice(0, CHAT_MAX_CHARS);
