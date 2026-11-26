@@ -12,6 +12,21 @@ function files(dir: string): string[] {
 }
 
 describe("English coverage", () => {
+  it("covers FAQ data keys as well as literal translation calls", () => {
+    const missing: string[] = [];
+    for (const path of ["src/components/faq.tsx", "src/routes/index.tsx"]) {
+      const source = readFileSync(path, "utf8");
+      const data = path.endsWith("index.tsx") ? source.split("const FAQS = [")[1]?.split("\n];")[0] : source;
+      expect(data).toBeTruthy();
+      const keys = [...(data ?? "").matchAll(/\b(?:question|answer|q|a):\s*"((?:\\.|[^"\\])*)"/g)];
+      expect(keys.length).toBeGreaterThan(0);
+      for (const match of keys) {
+        const key = JSON.parse(`"${match[1]}"`) as string;
+        if (!en[key]?.trim()) missing.push(`${path}: ${key}`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
   it("every literal t() text has an English translation", () => {
     const re = /\bt\(\s*"((?:\\.|[^"\\])*)"\s*[,)]/g;
     const missing: string[] = [];

@@ -103,3 +103,4 @@
 
 - [x] Sofía: paleta lavanda/amatista, icono de auricular de soporte, halo y avatar con anillo degradado
 - [x] Sofía: mejorar contraste de etiquetas, preguntas rápidas y campo de escritura en Día/Noche.
+- [x] FAQ: completar las respuestas inglesas de la portada, corregir tildes y mantener «Ver todas» en inglés; revisar cobertura de preguntas y respuestas.

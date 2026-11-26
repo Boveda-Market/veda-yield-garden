@@ -45,7 +45,7 @@ export function Faq({ preview = false }: { preview?: boolean }) {
 
   if (preview) {
     return <section aria-label={t("Preguntas frecuentes")} className="mt-12 border-t border-border pt-8">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><h2 className="font-display text-xl font-semibold">{t("Preguntas frecuentes")}</h2><Link to="/faq" className="text-sm text-primary underline">{t("Ver todas")}</Link></div>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><h2 className="font-display text-xl font-semibold">{t("Preguntas frecuentes")}</h2><Link to={lang === "en" ? "/en/faq" : "/faq"} className="text-sm text-primary underline">{t("Ver todas")}</Link></div>
       {questions.filter((q) => FEATURED.includes(q.id)).map((q) => <Item key={q.id} q={q} t={t} />)}
     </section>;
   }
