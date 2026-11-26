@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { EyeOff, Headset, SendHorizontal } from "lucide-react";
+import { EyeOff, Headset, SendHorizontal, X } from "lucide-react";
 import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -64,14 +65,23 @@ export function SupportChat() {
 
   return <>
     {/* Headset icon: the universal "someone here to help you" sign, in Sofía's own lavender so it never reads as a money button. */}
-    <button type="button" aria-label={c.open} onClick={() => setOpen(true)}
-      className="sofia-fab fixed bottom-24 right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full text-sofia-foreground ring-1 ring-sofia-glow/50 transition hover:scale-105 active:scale-95 sm:bottom-6 sm:right-6">
+    <div className="fixed bottom-24 right-4 z-30 h-12 w-12 sm:bottom-6 sm:right-6">
+      <Button type="button" variant="ghost" size="icon" aria-label={c.hide} title={c.hide}
+        onClick={() => { setOpen(false); setHidden(true); }}
+        className="absolute bottom-full right-0 mb-1 h-11 w-11 rounded-full hover:bg-transparent focus-visible:ring-sofia-text">
+        <span className="grid size-7 place-items-center rounded-full border border-sofia-text/40 bg-sofia-surface text-sofia-text shadow-sm">
+          <X className="size-4" aria-hidden />
+        </span>
+      </Button>
+    <Button type="button" variant="ghost" size="icon" aria-label={c.open} onClick={() => setOpen(true)}
+      className="sofia-fab relative flex h-12 w-12 items-center justify-center rounded-full text-sofia-foreground ring-1 ring-sofia-glow/50 transition hover:scale-105 active:scale-95 [&_svg]:size-6">
       <Headset className="h-6 w-6" aria-hidden />
       <span className="absolute -right-0.5 -top-0.5 flex size-3.5 items-center justify-center rounded-full bg-background">
         <span className="size-2 rounded-full bg-live" />
         <span className="absolute size-2 animate-ping rounded-full bg-live/60 motion-reduce:animate-none" />
       </span>
-    </button>
+    </Button>
+    </div>
     <Dialog open={open} onOpenChange={setOpen}>
       <ActionSheetContent closeLabel={lang === "en" ? "Close" : "Cerrar"} className="flex max-h-[85dvh] flex-col sm:max-w-md" onOpenAutoFocus={(e) => e.preventDefault()}>
         <div className="flex items-center gap-3 pr-8">
