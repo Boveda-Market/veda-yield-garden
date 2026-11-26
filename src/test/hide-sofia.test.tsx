@@ -2,7 +2,7 @@ import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { useHideSofia } from "@/lib/preferences";
 
-const KEY = "boveda:hide-sofia";
+const KEY = "boveda:hide-sofia-session";
 
 function Toggle() {
   const [hidden, setHidden] = useHideSofia();
@@ -10,24 +10,36 @@ function Toggle() {
 }
 
 describe("hiding Sofía's help button", () => {
-  afterEach(() => { cleanup(); localStorage.removeItem(KEY); });
+  afterEach(() => { cleanup(); sessionStorage.removeItem(KEY); localStorage.removeItem("boveda:hide-sofia"); });
 
-  it("starts visible and remembers the choice on this device", () => {
+  it("hides only in session storage, never permanently", () => {
     render(<Toggle />);
     expect(screen.getByRole("button")).toHaveTextContent("visible");
     fireEvent.click(screen.getByRole("button"));
-    expect(localStorage.getItem(KEY)).toBe("1");
+    expect(sessionStorage.getItem(KEY)).toBe("1");
+    expect(localStorage.getItem(KEY)).toBeNull();
     expect(screen.getByRole("button")).toHaveTextContent("oculta");
   });
 
   it("stays hidden after a reload and comes back when shown again", () => {
-    localStorage.setItem(KEY, "1");
+    sessionStorage.setItem(KEY, "1");
     render(<Toggle />);
     expect(screen.getByRole("button")).toHaveTextContent("oculta");
     fireEvent.click(screen.getByRole("button"));
-    expect(localStorage.getItem(KEY)).toBe("0");
+    expect(sessionStorage.getItem(KEY)).toBeNull();
     cleanup();
     render(<Toggle />);
     expect(screen.getByRole("button")).toHaveTextContent("visible");
+  });
+
+  it("returns in a new session even if the old permanent flag was set", () => {
+    localStorage.setItem("boveda:hide-sofia", "1");
+    sessionStorage.setItem(KEY, "1");
+    render(<Toggle />);
+    expect(screen.getByRole("button")).toHaveAttribute("aria-pressed", "true");
+    cleanup();
+    sessionStorage.clear();
+    render(<Toggle />);
+    expect(screen.getByRole("button")).toHaveAttribute("aria-pressed", "false");
   });
 });

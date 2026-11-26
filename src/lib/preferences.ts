@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 
 /** Device-local display preferences (never security or money settings). */
-const KEYS = { privacy: "boveda:hide-balances", home: "boveda:home", contacts: "boveda:contacts", sofia: "boveda:hide-sofia" } as const;
+const KEYS = { privacy: "boveda:hide-balances", home: "boveda:home", contacts: "boveda:contacts" } as const;
 export const HOME_OPTIONS = ["/wallet", "/portfolio", "/app"] as const;
 export type HomePath = (typeof HOME_OPTIONS)[number];
 export type Contact = { name: string; address: string };
@@ -17,10 +17,20 @@ export function useHideBalances() {
   return [hidden, (v: boolean) => write(KEYS.privacy, v ? "1" : "0")] as const;
 }
 export function parseHome(v: string | null): HomePath { return (HOME_OPTIONS as readonly string[]).includes(v ?? "") ? (v as HomePath) : "/wallet"; }
-/** Sofía's floating help button: hidden per device (display only, never security or money). */
+/** Closing Sofía lasts only for this tab's session, not a permanent opt-out. */
+const SOFIA_SESSION_KEY = "boveda:hide-sofia-session";
+let sofiaFallback = false;
+const readSofiaHidden = () => { try { return sessionStorage.getItem(SOFIA_SESSION_KEY) === "1"; } catch { return sofiaFallback; } };
 export function useHideSofia() {
-  const hidden = useSyncExternalStore(subscribe, () => read(KEYS.sofia) === "1", () => false);
-  return [hidden, (v: boolean) => write(KEYS.sofia, v ? "1" : "0")] as const;
+  const hidden = useSyncExternalStore(subscribe, readSofiaHidden, () => false);
+  return [hidden, (v: boolean) => {
+    sofiaFallback = v;
+    try {
+      if (v) sessionStorage.setItem(SOFIA_SESSION_KEY, "1");
+      else sessionStorage.removeItem(SOFIA_SESSION_KEY);
+    } catch { /* In-memory fallback for browsers that block storage. */ }
+    emit();
+  }] as const;
 }
 export function useHomePath() {
   const home = useSyncExternalStore(subscribe, () => parseHome(read(KEYS.home)), () => "/wallet" as HomePath);
