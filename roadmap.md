@@ -96,4 +96,5 @@
 - Blog: dos autores (Investigación DeFi / Redacción Bóveda) y artículo técnico de liquidez concentrada
 - [x] Blog: historia y funcionamiento de Meteora, analogía inicial, visuales y valor para traders y proveedores de liquidez (ES/EN).
 - [x] Menú principal: reemplazar «Por qué tus fondos están seguros» por «Blog» (ES/EN).
+- [x] Blog de Meteora: analogía de la casa de cambio en tres viñetas de pizarra, en español e inglés.
 - [x] Portafolio: corregir la explicación de capitalización conjunta y sugerir un índice de mercado para las bóvedas activas, separado del saldo y las ganancias.

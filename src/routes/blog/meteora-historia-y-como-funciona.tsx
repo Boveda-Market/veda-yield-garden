@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PostLayout, postHead } from "@/components/blog-layout";
 import { CompareTable } from "@/components/blog-visuals";
+import { LiquidityStoryboard } from "@/components/blog-storyboard";
 
 const PATH = "/blog/meteora-historia-y-como-funciona";
 const LAUNCH = "https://meteoraag.medium.com/meteora-platform-launch-7defbc562f18";
@@ -17,27 +18,6 @@ export const Route = createFileRoute("/blog/meteora-historia-y-como-funciona")({
 
 export function Page() {
   return <PostLayout path={PATH} es={<Body en={false} />} enBody={<Body en />} />;
-}
-
-function LiquidityDiagram({ en }: { en: boolean }) {
-  return <figure className="border-y border-border py-6">
-    <div className="flex items-center gap-3">
-      <img src="/brands/meteora.svg" alt="Meteora" className="h-9 w-9 shrink-0" />
-      <figcaption className="text-sm font-semibold">{en ? "One market, two complementary roles" : "Un mercado, dos papeles que se complementan"}</figcaption>
-    </div>
-    <ol className="mt-5 grid gap-3 sm:grid-cols-3">
-      {[
-        [en ? "Providers" : "Proveedores", en ? "Supply the two assets" : "Aportan los dos activos"],
-        [en ? "Liquidity pool" : "Pool de liquidez", en ? "Makes capital available for swaps" : "Deja capital disponible para intercambiar"],
-        [en ? "Traders" : "Traders", en ? "Swap assets and pay a trading fee" : "Cambian activos y pagan una comisión"],
-      ].map(([title, detail], i) => <li key={title} className="rounded-lg border border-border bg-card p-4">
-        <span className="text-xs font-semibold text-primary">0{i + 1}</span>
-        <p className="mt-1 text-sm font-semibold">{title}</p><p className="text-xs leading-5 text-muted-foreground">{detail}</p>
-      </li>)}
-    </ol>
-    <p className="mt-3 text-sm leading-6 text-primary">{en ? "A share of trading fees flows back to the providers whose liquidity is used." : "Una parte de las comisiones vuelve a los proveedores cuya liquidez se utiliza."}</p>
-    <p className="mt-2 text-xs leading-5 text-muted-foreground">{en ? "Conceptual diagram, not live data. The split depends on the product and pool configuration." : "Diagrama conceptual, no son datos en vivo. El reparto depende del producto y la configuración del pool."}</p>
-  </figure>;
 }
 
 function BinDiagram({ en }: { en: boolean }) {
@@ -74,7 +54,7 @@ function Body({ en }: { en: boolean }) {
   return en ? <>
     <p>Imagine a busy currency exchange. One customer wants dollars, another wants to sell them. The signs can show attractive rates, but if the counter has no cash, neither can trade. <strong>Liquidity is the money ready on that counter.</strong></p>
     <p>Now imagine that, instead of a single business supplying that money, many people contribute to a shared reserve and receive part of what customers pay to use it. That is a useful starting point for understanding a liquidity pool. The analogy has limits: there is no cashier, prices follow programmed rules, and contributors can lose money.</p>
-    <LiquidityDiagram en />
+    <LiquidityStoryboard en />
     <section><h2>1. What is Meteora?</h2><p><strong>Meteora is a liquidity protocol on Solana</strong>: a set of on-chain programs and tools for creating markets where tokens can be exchanged. It is not the blockchain itself, nor is it a savings account. Its pools bring together people who need to trade and people willing to supply the assets for those trades. <a href={DLMM} target="_blank" rel="noreferrer">[1]</a></p></section>
     <section><h2>2. From Mercurial to Meteora</h2><p>The roots are in <strong>Mercurial Finance</strong>, a project focused on liquidity for stablecoins and pegged assets. After the collapse of FTX and Alameda in 2022, the team proposed a new platform and a reset of its economic model. Meteora officially announced its platform launch on <strong>February 9, 2023</strong>. <a href={LAUNCH} target="_blank" rel="noreferrer">[2]</a></p><p>A December 2023 update describes the transition from Mercurial and the new DLMM initiative. It is a record of that period, not evidence that its historical token-distribution plans remain current. <a href={UPDATE} target="_blank" rel="noreferrer">[3]</a></p><p>In the team's later retrospective, the story is also about moving beyond reliance on short-term incentives and building a community of liquidity providers, known as the <strong>LP Army</strong>. That account describes the subsequent development of DLMM, DAMM v2 and DBC. This is the team's own account, not an independent audit of its results. <a href={HISTORY} target="_blank" rel="noreferrer">[4]</a></p></section>
     <Timeline en />
@@ -98,7 +78,7 @@ function Body({ en }: { en: boolean }) {
   </> : <>
     <p>Imagina una casa de cambio llena de clientes. Uno quiere comprar dólares; otro quiere venderlos. El letrero puede mostrar una tasa atractiva, pero si no hay dinero en la caja, ninguno puede cambiar. <strong>La liquidez es ese dinero listo en el mostrador.</strong></p>
     <p>Ahora imagina que, en vez de ponerlo una sola empresa, muchas personas aportan a una reserva compartida y reciben parte de lo que los clientes pagan por utilizarla. Esa es una buena puerta de entrada para entender un pool de liquidez. La analogía tiene límites: no hay cajero, los precios siguen reglas programadas y quienes aportan pueden perder dinero.</p>
-    <LiquidityDiagram en={false} />
+    <LiquidityStoryboard en={false} />
     <section><h2>1. ¿Qué es Meteora?</h2><p><strong>Meteora es un protocolo de liquidez en Solana</strong>: un conjunto de programas y herramientas que permiten crear mercados para intercambiar tokens en la blockchain. No es la blockchain misma ni una cuenta de ahorro. Sus pools conectan a quienes necesitan comprar o vender con quienes están dispuestos a aportar los activos para esas operaciones. <a href={DLMM} target="_blank" rel="noreferrer">[1]</a></p></section>
     <section><h2>2. De Mercurial a Meteora</h2><p>Sus raíces están en <strong>Mercurial Finance</strong>, un proyecto centrado en la liquidez de monedas estables y activos vinculados. Después de la caída de FTX y Alameda en 2022, el equipo propuso una nueva plataforma y un replanteamiento de su modelo económico. Meteora anunció oficialmente su lanzamiento el <strong>9 de febrero de 2023</strong>. <a href={LAUNCH} target="_blank" rel="noreferrer">[2]</a></p><p>Una actualización de diciembre de 2023 describe la transición desde Mercurial y el nuevo rumbo con DLMM. Es un registro de esa etapa, no una prueba de que los planes históricos de distribución de tokens sigan vigentes hoy. <a href={UPDATE} target="_blank" rel="noreferrer">[3]</a></p><p>En la retrospectiva posterior del equipo, la historia también trata de dejar atrás la dependencia de incentivos de corto plazo y construir una comunidad de proveedores de liquidez, conocida como <strong>LP Army</strong>. Ese relato describe el desarrollo posterior de DLMM, DAMM v2 y DBC. Es la versión del propio equipo, no una auditoría independiente de sus resultados. <a href={HISTORY} target="_blank" rel="noreferrer">[4]</a></p></section>
     <Timeline en={false} />
