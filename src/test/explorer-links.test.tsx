@@ -7,7 +7,7 @@ import { WITHDRAWAL_PILOT } from "@/lib/withdrawal";
 // in the guide for people who bring their own coins.
 const mocks = vi.hoisted(() => ({ positions: [] as object[] }));
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ children }: { children: unknown }) => children,
+  Link: ({ children, to }: { children?: import("react").ReactNode; to?: string }) => <a href={to}>{children}</a>,
   useRouter: () => null,
   createFileRoute: () => (opts: unknown) => opts,
 }));
@@ -56,6 +56,13 @@ it("shows the explorer link on the open position card without unfolding anything
 it("drops the orphan copy-address button from the folded details", () => {
   const card = openCard();
   expect(card.queryByRole("button", { name: "Copiar identificador" })).toBeNull();
+});
+
+it("links the guides index from inside the folded details", () => {
+  const card = openCard();
+  const link = card.getByRole("link", { name: /Guías/ });
+  expect(link).toHaveAttribute("href", "/guias");
+  expect(link.closest("details")).not.toBeNull();
 });
 
 it("lists every coin and vault address in the bring-your-own-coins guide", () => {

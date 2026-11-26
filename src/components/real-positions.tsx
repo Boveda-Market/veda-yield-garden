@@ -4,7 +4,7 @@ import { useQueries } from "@tanstack/react-query";
 import { isDlmmVault, isOperableVault } from "@/lib/solana-data";
 import { Link } from "@tanstack/react-router";
 import { ArrowDownToLine, Plus, Repeat, ExternalLink, Sprout, Vault as VaultIcon } from "lucide-react";
-import { useT } from "@/lib/i18n";
+import { useI18n, useT } from "@/lib/i18n";
 import { VAULTS } from "@/lib/vaults";
 import { formatUsd } from "@/lib/position-value";
 import { coinLabel } from "@/lib/coin-label";
@@ -16,6 +16,7 @@ import { poolYieldOptions } from "@/lib/pool-yield";
 import { earningRatePerMs } from "@/lib/live-earnings";
 import { LiveEarnings } from "./live-earnings";
 import { PoweredBy } from "./powered-by";
+import { guidesIndexHref } from "@/components/guide-layout";
 import type { Vault } from "@/lib/vaults";
 import { MigrateOffer } from "./migrate-banner";
 import { MigratePicker } from "./migrate-picker";
@@ -35,6 +36,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
     return () => timers.forEach((id) => window.clearTimeout(id));
   }, [positions.length]);
   const t = useT();
+  const { lang } = useI18n();
   const manualCompound = showManualCompound(useAutopilot().status?.failures);
   const { rows, totalFees, top } = usePositionRows(positions);
   const vaultYields = useQueries({ queries: VAULTS.map((v) => poolYieldOptions(v.pool)) });
@@ -62,6 +64,7 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
         {/* Long explanations stay available but folded, so the card fits one phone screen. */}
         <details className="mt-3 text-xs text-muted-foreground"><summary className="cursor-pointer text-center underline-offset-2 hover:underline">{t("Ver detalles")}</summary><div className="mt-2 space-y-1">
           {onDetails && vault && <button type="button" className="mx-auto block text-xs font-semibold text-primary underline-offset-2 hover:underline" onClick={() => onDetails(vault)}>{t("Detalles de la bóveda")} →</button>}
+          <Link to={guidesIndexHref(lang)} className="mx-auto block text-xs font-semibold text-primary underline-offset-2 hover:underline">{t("Guías")} →</Link>
         </div></details>
         {!isOperableVault(p.vaultId) && <p className="mt-3 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
       </>;
