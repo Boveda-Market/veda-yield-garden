@@ -81,3 +81,4 @@
 - [x] Quitar el indicador de pasos «1 Descubre · 2 Cómo funciona · 3 Tu cuenta» del recorrido.
 
 - [x] Pantalla previa al acceso: explica el registro en 3 pasos (cuenta con Google o email, billetera digital nueva enlazada, abrir bóveda o explorar)
+- [x] FAQ del inicio: «¿Cuál es el mínimo para empezar…?» sustituida por «¿Puedo retirar las monedas directamente (Bitcoin, Trump, etc.) o solo dólares?» (ES/EN)
