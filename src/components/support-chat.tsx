@@ -68,21 +68,21 @@ export function SupportChat() {
           <div className="min-w-0">
             <DialogTitle className="text-base">{c.title}</DialogTitle>
             <DialogDescription className="text-xs">{c.sub}</DialogDescription>
-            <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-sofia-surface px-2 py-0.5 text-[10px] font-medium text-sofia">
+            <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-sofia-surface px-2 py-0.5 text-[10px] font-medium text-sofia-text">
               <span className="size-1.5 rounded-full bg-live" aria-hidden />{c.tag}
             </span>
           </div>
         </div>
         <div className="flex min-h-[200px] flex-1 flex-col gap-2 overflow-y-auto text-sm" aria-live="polite">
           <Bubble who="assistant">{c.hello}</Bubble>
-          {!msgs.length && <div className="flex flex-wrap gap-2 pt-1">{c.chips.map((q) => <button key={q} type="button" onClick={() => send(q)} className="rounded-full border border-sofia/30 bg-sofia-surface px-3 py-1.5 text-xs text-sofia transition hover:bg-sofia/20">{q}</button>)}</div>}
+          {!msgs.length && <div className="flex flex-wrap gap-2 pt-1">{c.chips.map((q) => <button key={q} type="button" onClick={() => send(q)} className="rounded-full border border-sofia-text/40 bg-sofia-surface px-3 py-1.5 text-xs text-sofia-text transition hover:border-sofia-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sofia-text">{q}</button>)}</div>}
           {msgs.map((m, i) => <Bubble key={i} who={m.role}>{m.text}</Bubble>)}
           {busy && (
             <div className="mr-8 flex items-center gap-2 self-start rounded-2xl rounded-bl-md bg-sofia-surface px-3 py-2.5">
               <span className="flex items-end gap-1" aria-hidden>
-                <span className="sofia-dot size-1.5 rounded-full bg-sofia" style={{ animationDelay: "0s" }} />
-                <span className="sofia-dot size-1.5 rounded-full bg-sofia" style={{ animationDelay: "0.18s" }} />
-                <span className="sofia-dot size-1.5 rounded-full bg-sofia" style={{ animationDelay: "0.36s" }} />
+                <span className="sofia-dot size-1.5 rounded-full bg-sofia-text" style={{ animationDelay: "0s" }} />
+                <span className="sofia-dot size-1.5 rounded-full bg-sofia-text" style={{ animationDelay: "0.18s" }} />
+                <span className="sofia-dot size-1.5 rounded-full bg-sofia-text" style={{ animationDelay: "0.36s" }} />
               </span>
               <span className="text-xs text-muted-foreground">{c.typing}</span>
             </div>
@@ -92,7 +92,7 @@ export function SupportChat() {
         </div>
         <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); void send(text); }}>
           <input value={text} onChange={(e) => setText(e.target.value)} maxLength={CHAT_MAX_CHARS} placeholder={c.ph} aria-label={c.ph}
-            className="min-w-0 flex-1 rounded-full border border-input bg-background px-4 py-2.5 text-base sm:text-sm outline-none focus:ring-2 focus:ring-sofia/60" />
+            className="min-w-0 flex-1 rounded-full border border-input bg-background px-4 py-2.5 text-base text-foreground placeholder:text-muted-foreground sm:text-sm outline-none focus:ring-2 focus:ring-sofia-text" />
           <button type="submit" disabled={busy || !text.trim()} aria-label={c.send} className="sofia-fab flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sofia-foreground ring-1 ring-sofia-glow/50 disabled:opacity-50">
             <SendHorizontal className="h-5 w-5" aria-hidden />
           </button>
@@ -109,7 +109,7 @@ function Bubble({ who, children }: { who: Turn["role"]; children: React.ReactNod
       ? "ml-8 self-end rounded-2xl rounded-br-md bg-primary px-3 py-2 text-primary-foreground"
       : "mr-8 self-start whitespace-pre-line rounded-2xl rounded-bl-md bg-sofia-surface px-3 py-2 text-foreground",
   )}>
-    {who === "assistant" && <span className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold text-sofia"><Headset className="size-3" aria-hidden />Sofía</span>}
+    {who === "assistant" && <span className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold text-sofia-text"><Headset className="size-3" aria-hidden />Sofía</span>}
     {children}
   </div>;
 }

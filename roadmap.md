@@ -102,3 +102,4 @@
 - [ ] Verificar registro completo, primera recarga y primer depósito con una sesión Privy autorizada (requiere completar Google o el código del titular; no mover fondos durante la auditoría).
 
 - [x] Sofía: paleta lavanda/amatista, icono de auricular de soporte, halo y avatar con anillo degradado
+- [x] Sofía: mejorar contraste de etiquetas, preguntas rápidas y campo de escritura en Día/Noche.

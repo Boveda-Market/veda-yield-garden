@@ -86,6 +86,7 @@
   --color-hot-sell: var(--hot-sell);
   --color-invite: var(--invite);
   --color-sofia: var(--sofia);
+  --color-sofia-text: var(--sofia-text);
   --color-sofia-glow: var(--sofia-glow);
   --color-sofia-foreground: var(--sofia-foreground);
   --color-sofia-surface: var(--sofia-surface);
@@ -145,13 +146,14 @@
   /* Explorar Bóvedas: electric blue + violet, identical in both themes so it stands apart from invite/duel. */
   --explore: oklch(0.72 0.19 250);
   --explore-2: oklch(0.72 0.22 300);
-  /* Sofía (support assistant): warm lavender/amethyst palette, identical in Día and Noche so she always reads as the guide, not as a money button. */
+  /* Sofía: fixed amethyst buttons; theme-aware ink and opaque surfaces for readable support text. */
   --sofia: oklch(0.58 0.19 295);
+  --sofia-text: oklch(0.84 0.09 295);
   --sofia-glow: oklch(0.78 0.13 292);
   --sofia-foreground: oklch(0.99 0.01 300);
   --gradient-sofia: linear-gradient(135deg, oklch(0.66 0.19 296), var(--sofia) 45%, oklch(0.48 0.2 310));
   --shadow-sofia: 0 12px 32px -10px oklch(0.58 0.19 295 / 0.6);
-  --sofia-surface: oklch(0.58 0.19 295 / 0.12);
+  --sofia-surface: oklch(0.25 0.035 295);
   /* Opaque lavender disc for the avatar's inner circle: the semi-transparent surface would blend into the gradient ring. */
   --sofia-disc: oklch(0.95 0.025 295);
   --explore-surface: oklch(0.18 0.05 265);
@@ -205,6 +207,8 @@
 
 /* Day mode (toggled by ThemeToggle via html.light). Night stays the :root default. */
 :root.light {
+  --sofia-text: oklch(0.45 0.17 295);
+  --sofia-surface: oklch(0.94 0.025 295);
   --background: oklch(0.984 0.003 248);
   --foreground: oklch(0.21 0.04 266);
   --card: oklch(1 0 0);

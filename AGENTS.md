@@ -29,6 +29,8 @@ use the editor.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
 
+- Support chat accent text uses a separate theme-aware ink token from fixed button branding and opaque surfaces, so small lavender labels meet contrast requirements in both themes.
+
 - Pool details live in a shared dialog backed by browser-side public DexScreener queries; validate exact Solana pool addresses, distinguish USD metrics from token amounts, and leave missing statistics unavailable to avoid misleading financial data.
 - Real yield displays use a shared browser-side Meteora Data API query validated by exact pool address; annualize reported 24h fees / current TVL × 365 × 100 as estimated simple APR, never APY, personal net yield or trial rates, (no verified compounding/LP allocation). DexScreener supplies price, volume and liquidity; reuse its cache.
 - All demo financial actions use a shared integer-micro-USDC fee breakdown, deduct fees from gross proceeds and require review; no demo state may be represented as an on-chain transfer.
