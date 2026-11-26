@@ -82,3 +82,4 @@
 
 - [x] Pantalla previa al acceso: explica el registro en 3 pasos (cuenta con Google o email, billetera digital nueva enlazada, abrir bóveda o explorar)
 - [x] FAQ del inicio: «¿Cuál es el mínimo para empezar…?» sustituida por «¿Puedo retirar las monedas directamente (Bitcoin, Trump, etc.) o solo dólares?» (ES/EN)
+- [x] FAQ del inicio: quitada la pregunta aparte «¿Puedo retirar las monedas directamente…?» (la respuesta unificada de «¿Tengo que comprar Bitcoin…?» ya cubre la salida en dólares)
