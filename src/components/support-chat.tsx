@@ -42,6 +42,18 @@ export function SupportChat() {
   const stamps = useRef<number[]>([]);
   const end = useRef<HTMLDivElement>(null);
   const [hidden, setHidden] = useHideSofia();
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const drag = useRef<{ id: number; x: number; y: number; left: number; top: number; moved: boolean } | null>(null);
+  const suppressClick = useRef(false);
+  const keepOnScreen = (x: number, y: number) => ({
+    x: Math.max(12, Math.min(x, window.innerWidth - 60)),
+    y: Math.max(60, Math.min(y, window.innerHeight - 60)),
+  });
+  useEffect(() => {
+    const onResize = () => setPosition((p) => p ? keepOnScreen(p.x, p.y) : p);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
   useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [msgs, busy, notice]);
   if (hidden || HIDDEN.some((p) => pathname.startsWith(p))) return null;
 
@@ -65,7 +77,8 @@ export function SupportChat() {
 
   return <>
     {/* Headset icon: the universal "someone here to help you" sign, in Sofía's own lavender so it never reads as a money button. */}
-    <div className="fixed bottom-24 right-4 z-30 h-12 w-12 sm:bottom-6 sm:right-6">
+    <div className="fixed bottom-24 right-4 z-30 h-12 w-12 sm:bottom-6 sm:right-6"
+      style={position ? { left: position.x, top: position.y, right: "auto", bottom: "auto" } : undefined}>
       <Button type="button" variant="ghost" size="icon" aria-label={c.hide} title={c.hide}
         onClick={() => { setOpen(false); setHidden(true); }}
         className="absolute bottom-full right-0 mb-1 h-11 w-11 rounded-full hover:bg-transparent focus-visible:ring-sofia-text">
@@ -73,8 +86,36 @@ export function SupportChat() {
           <X className="size-4" aria-hidden />
         </span>
       </Button>
-    <Button type="button" variant="ghost" size="icon" aria-label={c.open} onClick={() => setOpen(true)}
-      className="sofia-fab relative flex h-12 w-12 items-center justify-center rounded-full text-sofia-foreground ring-1 ring-sofia-glow/50 transition hover:scale-105 active:scale-95 [&_svg]:size-6">
+    <Button type="button" variant="ghost" size="icon" aria-label={c.open}
+      onPointerDown={(e) => {
+        if (!e.isPrimary || e.button !== 0) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        suppressClick.current = false;
+        drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY, left: rect.left, top: rect.top, moved: false };
+        e.currentTarget.setPointerCapture(e.pointerId);
+      }}
+      onPointerMove={(e) => {
+        const d = drag.current;
+        if (!d || d.id !== e.pointerId) return;
+        const dx = e.clientX - d.x;
+        const dy = e.clientY - d.y;
+        if (!d.moved && Math.hypot(dx, dy) < 6) return;
+        d.moved = true;
+        suppressClick.current = true;
+        setPosition(keepOnScreen(d.left + dx, d.top + dy));
+      }}
+      onPointerUp={(e) => {
+        if (drag.current?.id !== e.pointerId) return;
+        drag.current = null;
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+      }}
+      onPointerCancel={() => { drag.current = null; suppressClick.current = true; }}
+      onLostPointerCapture={() => { drag.current = null; }}
+      onClick={(e) => {
+        if (suppressClick.current && e.detail !== 0) { suppressClick.current = false; return; }
+        setOpen(true);
+      }}
+      className="sofia-fab relative flex h-12 w-12 touch-none select-none cursor-grab items-center justify-center rounded-full text-sofia-foreground ring-1 ring-sofia-glow/50 active:cursor-grabbing [&_svg]:size-6">
       <Headset className="h-6 w-6" aria-hidden />
       <span className="absolute -right-0.5 -top-0.5 flex size-3.5 items-center justify-center rounded-full bg-background">
         <span className="size-2 rounded-full bg-live" />
