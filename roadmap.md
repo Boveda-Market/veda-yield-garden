@@ -76,3 +76,6 @@
 - [x] Unificar hooks con acentos naranja/fucsia, enlaces legales y aviso corto en el primer pliegue.
 - [x] Añadir Guías junto a los enlaces legales sin ocultar Continuar ni el aviso; verificado ES/EN, Día/Noche y 360×640.
 - [x] Quitar «Gratis, sin tarjeta y sin depósito para explorar.» de la pantalla de acceso y de la Billetera de visitante.
+- [x] Nota de recarga en el acceso: «Puedes recargar con Apple Pay, tarjeta o» con el logo de Coinbase, en una línea.
+- [x] Quitar «Crea tu cuenta o entra de forma segura.» de la pantalla de acceso.
+- [x] Quitar el indicador de pasos «1 Descubre · 2 Cómo funciona · 3 Tu cuenta» del recorrido.

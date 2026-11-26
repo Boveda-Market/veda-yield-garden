@@ -20,11 +20,14 @@ export function CoinbaseWordmark() {
 }
 
 /** Sign-in sheet line: enter with Google and top up with Coinbase. */
-export function CoinbaseNote({ className }: { className?: string }) {
+export function CoinbaseNote({ className, compact }: { className?: string; compact?: boolean }) {
   const { t, lang } = useI18n();
   const [open, setOpen] = useState(false);
+  const brand = <a href="https://www.coinbase.com" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} aria-label="Coinbase" className="inline-flex align-middle hover:opacity-80"><CoinbaseWordmark /></a>;
+  const mark = <a href="https://www.coinbase.com" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} aria-label="Coinbase" className="inline-flex align-middle hover:opacity-80"><CoinbaseLogo size={14} /></a>;
+  const more = <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }} className="whitespace-nowrap font-medium text-primary underline underline-offset-2">{t("Más información")}</button>;
   return <span className={cn("block text-sm", className)}>
-    {t("Entra con tu cuenta de Google en 1 segundo y recarga con")} <a href="https://www.coinbase.com" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} aria-label="Coinbase" className="inline-flex align-middle hover:opacity-80"><CoinbaseWordmark /></a> {t("usando tu tarjeta. Sin contraseñas.")} <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }} className="whitespace-nowrap font-medium text-primary underline underline-offset-2">{t("Más información")}</button>
+    {compact ? <>{t("Puedes recargar con Apple Pay, tarjeta o")} {mark} <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }} className="whitespace-nowrap font-medium text-primary underline underline-offset-2">{t("Más info")}</button></> : <>{t("Entra con tu cuenta de Google en 1 segundo y recarga con")} {brand} {t("usando tu tarjeta. Sin contraseñas.")} {more}</>}
     <Dialog open={open} onOpenChange={setOpen}><ActionSheetContent closeLabel={t("Cerrar")}>
       <DialogTitle className="flex items-center gap-2">{t("Así recargas con")} <a href="https://www.coinbase.com" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} aria-label="Coinbase" className="inline-flex align-middle hover:opacity-80"><CoinbaseWordmark /></a></DialogTitle>
       <DialogDescription className="sr-only">{t("Tres pasos para entrar y recargar dólares.")}</DialogDescription>
