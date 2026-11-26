@@ -8,6 +8,12 @@ import { useT } from "@/lib/i18n";
 import { SWAP_TOKENS, swapToken } from "@/lib/wallet-actions";
 import { coinLabel } from "@/lib/coin-label";
 
+/** Keep held coins first as live balance reads arrive, without hiding coins available to receive. */
+export function walletTokenOptions(balances: Record<string, bigint | undefined>, search = "") {
+  return SWAP_TOKENS.filter((x) => `${coinLabel(x.symbol)} ${x.mint}`.toLowerCase().includes(search.trim().toLowerCase()))
+    .sort((a, b) => Number((balances[b.symbol] ?? 0n) > 0n) - Number((balances[a.symbol] ?? 0n) > 0n));
+}
+
 /** One allowlisted coin menu for both swapping and sending; balances never become authorizations. */
 export function WalletTokenPicker({ value, balances, onChange, label, disabled = false }: {
   value: string;
@@ -24,8 +30,7 @@ export function WalletTokenPicker({ value, balances, onChange, label, disabled =
     if (raw === undefined) return "—";
     return (Number(raw) / 10 ** swapToken(symbol).decimals).toLocaleString("en-US", { maximumFractionDigits: 6 });
   };
-  const tokens = SWAP_TOKENS.filter((x) => `${coinLabel(x.symbol)} ${x.mint}`.toLowerCase().includes(search.trim().toLowerCase()))
-    .sort((a, b) => Number((balances[b.symbol] ?? 0n) > 0n) - Number((balances[a.symbol] ?? 0n) > 0n));
+  const tokens = walletTokenOptions(balances, search);
   return <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) setSearch(""); }}>
     <PopoverTrigger asChild>
       <Button variant="outline" disabled={disabled} aria-label={label} className="h-11 shrink-0 gap-1.5 rounded-full border-border bg-background px-2 font-semibold">

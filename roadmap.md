@@ -109,8 +109,7 @@
 - [x] Menú vertical compacto: controles y accesos sin scroll en 320×568, 360×640, 393×852 y escritorio (ES/EN); vista aislada sin usar sesión autenticada del titular.
 - [x] Proponer aparición contextual de Sofía: botón tras 25 segundos o 30% de scroll, una vez por sesión, sin abrir el chat ni aparecer durante pagos o tras la ✕; propuesta sin implementar.
 - [x] Retirar «Ocultar a Sofía» y su explicación dentro del chat (ES/EN), conservando la ✕ exterior y el aviso de seguridad.
-- [x] Logos, búsqueda y saldos para las monedas compatibles en Enviar; envío preciso, lista verificada y simulación. Cambiar usa ahora el catálogo propio del complemento oficial de Jupiter, por elección del usuario.
+- [x] Logos, búsqueda y saldos para las monedas compatibles en Cambiar y Enviar; lista verificada y monedas presentes en la billetera primero.
 - [x] Menú vertical con Guías: duplicados retirados; Términos, Privacidad, FAQ, About, Estado e Instalar en el pie de la app, sin tocar el pie público de la portada.
-- [x] Verificar Jupiter oficial: conexión de billetera existente, catálogo completo, sin comisión añadida por Bóveda; costos de Jupiter diferenciados. Su interfaz original conserva inglés.
-- [x] Integrar Jupiter oficial en la tarjeta de cambio: carga diferida, guardias de sesión/cuenta/firma, catálogo y búsqueda verificados en Día/Noche y 320–393 px, recibo y actualización tras éxito.
-- [ ] Validar cambio Jupiter y envío ampliado con sesión Privy real y comprobar saldo posterior; requiere acceso autorizado del titular, no se firmaron ni movieron fondos en estas pruebas.
+- [x] Restaurar el cambio propio anterior con logos y monedas presentes en la billetera primero: actualización de orden verificada en ES/EN y móvil/escritorio; no se carga el complemento oficial de Jupiter.
+- [ ] Validar cambio propio y envío ampliado con sesión Privy real y comprobar saldo posterior; requiere acceso autorizado del titular, no se firmaron ni movieron fondos en estas pruebas.
