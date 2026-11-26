@@ -34,8 +34,8 @@ export const GTA6_HERO_SHARE = 0.2;
 
 export const HERO_KEY = "boveda-hero-v";
 
-/** Compound gets 10%; existing campaigns retain their relative shares of the remaining 90%. */
-export const HERO_WEIGHTS: readonly number[] = HERO_VARIANTS.map((v) => v.theme === "compound" ? 0.1 : 0.9 * (({ bitcoin: 0.3, trump: 0.2, smart: 0.2, gta6: 0.15, calm: 0.05, doble: 0.05, own: 0 } as Record<string, number>)[v.theme ?? ""] ?? 0.05));
+/** Only Bitcoin and Trump rotate for now; other campaigns stay available at their own addresses. */
+export const HERO_WEIGHTS: readonly number[] = HERO_VARIANTS.map((v) => v.theme === "bitcoin" || v.theme === "trump" ? 0.5 : 0);
 
 /** Pick a variant for "/": forced value wins, then the saved one (if still in rotation), else weighted random. */
 export function pickHeroVariant(forced: string | null, saved: string | null, rand: number): number {
@@ -45,7 +45,7 @@ export function pickHeroVariant(forced: string | null, saved: string | null, ran
   if (ok(saved) && (HERO_WEIGHTS[Number(saved)] ?? 0) > 0) return Number(saved);
   let acc = 0;
   for (let i = 0; i < n; i++) { acc += HERO_WEIGHTS[i] ?? 0; if (rand < acc) return i; }
-  return n - 1;
+  return heroIndex("bitcoin");
 }
 
 /** Preview host or a forced link: show the full landing (no returning-user shortcut) so variants can be reviewed. */
