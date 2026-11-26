@@ -211,9 +211,9 @@ export function VisitorTourBanner() {
     <Button variant="ghost" size="icon" className="absolute right-1 top-1 size-11 text-sofia-text" aria-label={t("Cerrar bienvenida de Sofía")} onClick={dismiss}><X size={18} /></Button>
     <div className="flex items-start gap-3 pr-7">
       <span className="sofia-fab grid size-11 shrink-0 place-items-center rounded-full text-sofia-foreground ring-1 ring-sofia-glow/50" aria-hidden><Headset size={20} /></span>
-      <div className="min-w-0"><p className="font-display font-bold">{t("¡Hola! Soy Sofía")}</p><p className="mt-0.5 text-sm text-muted-foreground">{t("¿Te muestro en 1 minuto cómo funciona Bóveda Market? Puedes explorar sin cuenta.")}</p></div>
+      <div className="min-w-0"><p className="font-display font-bold">{t("¡Hola! Soy Sofía")}</p><p className="mt-0.5 text-sm text-muted-foreground">{t("Soy tu asistente en Bóveda Market. Me alegra verte por aquí. ¿Te acompaño a conocer tus bóvedas, tu portafolio y tu billetera? Puedes explorar sin cuenta.")}</p></div>
     </div>
-    <div className="mt-3 grid grid-cols-[1fr_auto] gap-2"><Button className="sofia-fab font-bold text-sofia-foreground" onClick={() => setOpen(true)}><Compass size={16} />{t("Hacer el tour con Sofía")}</Button><Button variant="outline" onClick={() => setLogin(true)}>{t("Crear cuenta")}</Button></div>
+    <div className="mt-3 grid grid-cols-1 gap-2 min-[400px]:grid-cols-[minmax(0,1fr)_auto]"><Button className="sofia-fab min-w-0 font-bold text-sofia-foreground" onClick={() => setOpen(true)}><Compass size={16} />{t("Hacer el tour con Sofía")}</Button><Button variant="outline" onClick={() => setLogin(true)}>{t("Crear cuenta")}</Button></div>
     <SofiaTour open={open} onClose={() => setOpen(false)} />
     <LoginSheet open={login} onOpenChange={setLogin} />
   </section>;

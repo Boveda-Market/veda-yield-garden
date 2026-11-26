@@ -114,3 +114,5 @@
 - [x] Restaurar el cambio propio anterior con logos y monedas presentes en la billetera primero: actualización de orden verificada en ES/EN y móvil/escritorio; no se carga el complemento oficial de Jupiter.
 - [ ] Validar cambio propio y envío ampliado con sesión Privy real y comprobar saldo posterior; requiere acceso autorizado del titular, no se firmaron ni movieron fondos en estas pruebas.
 - [x] Sofía: «Pregúntale a Sofía», tour permanente en menú, aviso solo al primer cierre, acceso discreto en pie de app, bienvenida descartable y descanso tras cierres repetidos; verificado ES/EN en móvil/escritorio.
+- [x] Explicar el aviso de operador según la billetera conectada, limitar su presentación a sesiones abiertas y corregir el destino al Panel de Control del menú.
+- [x] Bienvenida de Sofía más cercana y en primera persona como asistente de Bóveda Market, en la tarjeta y el chat ES/EN.
