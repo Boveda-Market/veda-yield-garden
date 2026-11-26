@@ -2,9 +2,8 @@ import { SyncBar } from "@/components/ui/sync-bar";
 import { useEffect, useRef } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { isDlmmVault, isOperableVault } from "@/lib/solana-data";
-import { notify } from "@/lib/notify";
 import { Link } from "@tanstack/react-router";
-import { ArrowDownToLine, Plus, Repeat, Copy, ExternalLink, Sprout, Vault as VaultIcon } from "lucide-react";
+import { ArrowDownToLine, Plus, Repeat, ExternalLink, Sprout, Vault as VaultIcon } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { VAULTS } from "@/lib/vaults";
 import { formatUsd } from "@/lib/position-value";
@@ -41,7 +40,6 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
   const vaultYields = useQueries({ queries: VAULTS.map((v) => poolYieldOptions(v.pool)) });
   const aprs = Object.fromEntries(VAULTS.map((v, i) => [v.id, vaultYields[i]?.data?.apr ?? null]));
   const since = useMemo(() => Date.now(), [positions]);
-  const copy = (address: string) => { void navigator.clipboard?.writeText(address).then(() => notify("success", t("Identificador copiado"))); };
   return <section aria-label={t("Posiciones reales")} className={bare ? "" : "border-b border-border py-8"}>
     {showHarvestBanner && top && totalFees >= 0.5 && <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-primary/40 bg-primary/10 p-5"><div><p className="text-sm text-muted-foreground">{t("Ganancias listas para cosechar")}</p><p className="mt-1 font-display text-2xl font-semibold text-primary">≈ {formatUsd(totalFees)}</p><p className="mt-1 text-xs text-muted-foreground">{t("Envíalas a tu wallet sin tocar tu depósito.")}</p></div><Button onClick={() => onAction(top.p, "harvest")}><Sprout size={16} />{t("Cosechar ahora")}</Button></div>}
     {!bare && <h2 className="font-display text-lg font-semibold">{t("Mis posiciones")}</h2>}
@@ -64,7 +62,6 @@ export function RealPositions({ positions, onAction, onDeposit, onMigrate, onRot
         {/* Long explanations stay available but folded, so the card fits one phone screen. */}
         <details className="mt-3 text-xs text-muted-foreground"><summary className="cursor-pointer text-center underline-offset-2 hover:underline">{t("Ver detalles")}</summary><div className="mt-2 space-y-1">
           {onDetails && vault && <button type="button" className="mx-auto block text-xs font-semibold text-primary underline-offset-2 hover:underline" onClick={() => onDetails(vault)}>{t("Detalles de la bóveda")} →</button>}
-          <div className="flex justify-center gap-1"><Button size="icon" variant="ghost" aria-label={t("Copiar identificador")} title={t("Copiar identificador")} onClick={() => copy(p.address)}><Copy size={14} /></Button></div>
         </div></details>
         {!isOperableVault(p.vaultId) && <p className="mt-3 text-xs text-muted-foreground">{t("Cosechas y retiros todavía no disponibles para esta posición.")}</p>}
       </>;

@@ -53,9 +53,9 @@ it("shows the explorer link on the open position card without unfolding anything
   expect(card.getAllByRole("link", { name: "Ver en el explorador" })).toHaveLength(1);
 });
 
-it("keeps the copy-address button inside the folded details", () => {
+it("drops the orphan copy-address button from the folded details", () => {
   const card = openCard();
-  expect(card.getByRole("button", { name: "Copiar identificador" }).closest("details")).not.toBeNull();
+  expect(card.queryByRole("button", { name: "Copiar identificador" })).toBeNull();
 });
 
 it("lists every coin and vault address in the bring-your-own-coins guide", () => {
