@@ -41,6 +41,7 @@ import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogDolaresDigitalesEnElCelularRouteImport } from './routes/blog/dolares-digitales-en-el-celular'
 import { Route as BlogLiquidezConcentradaRouteImport } from './routes/blog/liquidez-concentrada'
+import { Route as BlogMeteoraHistoriaYComoFuncionaRouteImport } from './routes/blog/meteora-historia-y-como-funciona'
 import { Route as EnIndexRouteImport } from './routes/en/index'
 import { Route as EnAboutRouteImport } from './routes/en/about'
 import { Route as EnBitcoinRouteImport } from './routes/en/bitcoin'
@@ -70,6 +71,7 @@ import { Route as GuiasTraeTusMonedasRouteImport } from './routes/guias/trae-tus
 import { Route as EnBlogIndexRouteImport } from './routes/en/blog/index'
 import { Route as EnBlogConcentratedLiquidityRouteImport } from './routes/en/blog/concentrated-liquidity'
 import { Route as EnBlogDigitalDollarsOnYourPhoneRouteImport } from './routes/en/blog/digital-dollars-on-your-phone'
+import { Route as EnBlogMeteoraHistoryAndHowItWorksRouteImport } from './routes/en/blog/meteora-history-and-how-it-works'
 import { Route as EnGuidesIndexRouteImport } from './routes/en/guides/index'
 import { Route as EnGuidesAddDollarsWithCoinbaseRouteImport } from './routes/en/guides/add-dollars-with-coinbase'
 import { Route as EnGuidesAvoidInvestmentScamsRouteImport } from './routes/en/guides/avoid-investment-scams'
@@ -248,6 +250,12 @@ const BlogLiquidezConcentradaRoute = BlogLiquidezConcentradaRouteImport.update({
   path: '/blog/liquidez-concentrada',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogMeteoraHistoriaYComoFuncionaRoute =
+  BlogMeteoraHistoriaYComoFuncionaRouteImport.update({
+    id: '/blog/meteora-historia-y-como-funciona',
+    path: '/blog/meteora-historia-y-como-funciona',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EnIndexRoute = EnIndexRouteImport.update({
   id: '/en/',
   path: '/en/',
@@ -400,6 +408,12 @@ const EnBlogDigitalDollarsOnYourPhoneRoute =
     path: '/en/blog/digital-dollars-on-your-phone',
     getParentRoute: () => rootRouteImport,
   } as any)
+const EnBlogMeteoraHistoryAndHowItWorksRoute =
+  EnBlogMeteoraHistoryAndHowItWorksRouteImport.update({
+    id: '/en/blog/meteora-history-and-how-it-works',
+    path: '/en/blog/meteora-history-and-how-it-works',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EnGuidesIndexRoute = EnGuidesIndexRouteImport.update({
   id: '/en/guides/',
   path: '/en/guides/',
@@ -523,6 +537,7 @@ export interface FileRoutesByFullPath {
   '/wallet': typeof WalletRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
+  '/blog/meteora-historia-y-como-funciona': typeof BlogMeteoraHistoriaYComoFuncionaRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -552,6 +567,7 @@ export interface FileRoutesByFullPath {
   '/guias/': typeof GuiasIndexRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
+  '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
   '/en/guides/bring-your-own-coins': typeof EnGuidesBringYourOwnCoinsRoute
@@ -602,6 +618,7 @@ export interface FileRoutesByTo {
   '/wallet': typeof WalletRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
+  '/blog/meteora-historia-y-como-funciona': typeof BlogMeteoraHistoriaYComoFuncionaRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -631,6 +648,7 @@ export interface FileRoutesByTo {
   '/guias': typeof GuiasIndexRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
+  '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
   '/en/guides/bring-your-own-coins': typeof EnGuidesBringYourOwnCoinsRoute
@@ -682,6 +700,7 @@ export interface FileRoutesById {
   '/wallet': typeof WalletRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
+  '/blog/meteora-historia-y-como-funciona': typeof BlogMeteoraHistoriaYComoFuncionaRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -711,6 +730,7 @@ export interface FileRoutesById {
   '/guias/': typeof GuiasIndexRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
+  '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
   '/en/guides/bring-your-own-coins': typeof EnGuidesBringYourOwnCoinsRoute
@@ -763,6 +783,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/blog/dolares-digitales-en-el-celular'
     | '/blog/liquidez-concentrada'
+    | '/blog/meteora-historia-y-como-funciona'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -792,6 +813,7 @@ export interface FileRouteTypes {
     | '/guias/'
     | '/en/blog/concentrated-liquidity'
     | '/en/blog/digital-dollars-on-your-phone'
+    | '/en/blog/meteora-history-and-how-it-works'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
     | '/en/guides/bring-your-own-coins'
@@ -842,6 +864,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/blog/dolares-digitales-en-el-celular'
     | '/blog/liquidez-concentrada'
+    | '/blog/meteora-historia-y-como-funciona'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -871,6 +894,7 @@ export interface FileRouteTypes {
     | '/guias'
     | '/en/blog/concentrated-liquidity'
     | '/en/blog/digital-dollars-on-your-phone'
+    | '/en/blog/meteora-history-and-how-it-works'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
     | '/en/guides/bring-your-own-coins'
@@ -921,6 +945,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/blog/dolares-digitales-en-el-celular'
     | '/blog/liquidez-concentrada'
+    | '/blog/meteora-historia-y-como-funciona'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -950,6 +975,7 @@ export interface FileRouteTypes {
     | '/guias/'
     | '/en/blog/concentrated-liquidity'
     | '/en/blog/digital-dollars-on-your-phone'
+    | '/en/blog/meteora-history-and-how-it-works'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
     | '/en/guides/bring-your-own-coins'
@@ -1001,6 +1027,7 @@ export interface RootRouteChildren {
   WalletRoute: typeof WalletRoute
   BlogDolaresDigitalesEnElCelularRoute: typeof BlogDolaresDigitalesEnElCelularRoute
   BlogLiquidezConcentradaRoute: typeof BlogLiquidezConcentradaRoute
+  BlogMeteoraHistoriaYComoFuncionaRoute: typeof BlogMeteoraHistoriaYComoFuncionaRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBitcoinRoute: typeof EnBitcoinRoute
   EnBringYourCoinsRoute: typeof EnBringYourCoinsRoute
@@ -1030,6 +1057,7 @@ export interface RootRouteChildren {
   GuiasIndexRoute: typeof GuiasIndexRoute
   EnBlogConcentratedLiquidityRoute: typeof EnBlogConcentratedLiquidityRoute
   EnBlogDigitalDollarsOnYourPhoneRoute: typeof EnBlogDigitalDollarsOnYourPhoneRoute
+  EnBlogMeteoraHistoryAndHowItWorksRoute: typeof EnBlogMeteoraHistoryAndHowItWorksRoute
   EnGuidesAddDollarsWithCoinbaseRoute: typeof EnGuidesAddDollarsWithCoinbaseRoute
   EnGuidesAvoidInvestmentScamsRoute: typeof EnGuidesAvoidInvestmentScamsRoute
   EnGuidesBringYourOwnCoinsRoute: typeof EnGuidesBringYourOwnCoinsRoute
@@ -1275,6 +1303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogLiquidezConcentradaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/meteora-historia-y-como-funciona': {
+      id: '/blog/meteora-historia-y-como-funciona'
+      path: '/blog/meteora-historia-y-como-funciona'
+      fullPath: '/blog/meteora-historia-y-como-funciona'
+      preLoaderRoute: typeof BlogMeteoraHistoriaYComoFuncionaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/': {
       id: '/en/'
       path: '/en'
@@ -1478,6 +1513,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnBlogDigitalDollarsOnYourPhoneRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/blog/meteora-history-and-how-it-works': {
+      id: '/en/blog/meteora-history-and-how-it-works'
+      path: '/en/blog/meteora-history-and-how-it-works'
+      fullPath: '/en/blog/meteora-history-and-how-it-works'
+      preLoaderRoute: typeof EnBlogMeteoraHistoryAndHowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/guides/': {
       id: '/en/guides/'
       path: '/en/guides'
@@ -1625,6 +1667,7 @@ const rootRouteChildren: RootRouteChildren = {
   WalletRoute: WalletRoute,
   BlogDolaresDigitalesEnElCelularRoute: BlogDolaresDigitalesEnElCelularRoute,
   BlogLiquidezConcentradaRoute: BlogLiquidezConcentradaRoute,
+  BlogMeteoraHistoriaYComoFuncionaRoute: BlogMeteoraHistoriaYComoFuncionaRoute,
   EnAboutRoute: EnAboutRoute,
   EnBitcoinRoute: EnBitcoinRoute,
   EnBringYourCoinsRoute: EnBringYourCoinsRoute,
@@ -1654,6 +1697,8 @@ const rootRouteChildren: RootRouteChildren = {
   GuiasIndexRoute: GuiasIndexRoute,
   EnBlogConcentratedLiquidityRoute: EnBlogConcentratedLiquidityRoute,
   EnBlogDigitalDollarsOnYourPhoneRoute: EnBlogDigitalDollarsOnYourPhoneRoute,
+  EnBlogMeteoraHistoryAndHowItWorksRoute:
+    EnBlogMeteoraHistoryAndHowItWorksRoute,
   EnGuidesAddDollarsWithCoinbaseRoute: EnGuidesAddDollarsWithCoinbaseRoute,
   EnGuidesAvoidInvestmentScamsRoute: EnGuidesAvoidInvestmentScamsRoute,
   EnGuidesBringYourOwnCoinsRoute: EnGuidesBringYourOwnCoinsRoute,
