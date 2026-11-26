@@ -1,4 +1,5 @@
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import { nextSofiaRest, parseSofiaRest, SOFIA_REST_KEY } from "./sofia-controls";
 
 /** Device-local display preferences (never security or money settings). */
 const KEYS = { privacy: "boveda:hide-balances", home: "boveda:home", contacts: "boveda:contacts" } as const;
@@ -17,20 +18,40 @@ export function useHideBalances() {
   return [hidden, (v: boolean) => write(KEYS.privacy, v ? "1" : "0")] as const;
 }
 export function parseHome(v: string | null): HomePath { return (HOME_OPTIONS as readonly string[]).includes(v ?? "") ? (v as HomePath) : "/wallet"; }
-/** Closing Sofía lasts only for this tab's session, not a permanent opt-out. */
+/** One close hides this session; repeated floating-button closes allow a temporary rest. */
 const SOFIA_SESSION_KEY = "boveda:hide-sofia-session";
 let sofiaFallback = false;
-const readSofiaHidden = () => { try { return sessionStorage.getItem(SOFIA_SESSION_KEY) === "1"; } catch { return sofiaFallback; } };
+const readSofiaHidden = () => {
+  const resting = parseSofiaRest(read(SOFIA_REST_KEY)).until > Date.now();
+  try { return resting || sessionStorage.getItem(SOFIA_SESSION_KEY) === "1"; } catch { return resting || sofiaFallback; }
+};
+export function dismissFloatingSofia() {
+  write(SOFIA_REST_KEY, JSON.stringify(nextSofiaRest(parseSofiaRest(read(SOFIA_REST_KEY)), Date.now())));
+  sofiaFallback = true;
+  try { sessionStorage.setItem(SOFIA_SESSION_KEY, "1"); } catch { /* Session fallback. */ }
+  emit();
+}
 export function useHideSofia() {
   const hidden = useSyncExternalStore(subscribe, readSofiaHidden, () => false);
+  useEffect(() => {
+    const until = parseSofiaRest(read(SOFIA_REST_KEY)).until;
+    if (until <= Date.now()) return;
+    const id = window.setTimeout(emit, until - Date.now() + 1);
+    return () => window.clearTimeout(id);
+  }, [hidden]);
   return [hidden, (v: boolean) => {
     sofiaFallback = v;
     try {
       if (v) sessionStorage.setItem(SOFIA_SESSION_KEY, "1");
-      else sessionStorage.removeItem(SOFIA_SESSION_KEY);
+      else { sessionStorage.removeItem(SOFIA_SESSION_KEY); write(SOFIA_REST_KEY, JSON.stringify({ closes: 0, until: 0 })); }
     } catch { /* In-memory fallback for browsers that block storage. */ }
     emit();
   }] as const;
+}
+export function useTourBannerDismissed() {
+  const key = "boveda:tour-banner-dismissed";
+  const hidden = useSyncExternalStore(subscribe, () => read(key) === "1", () => false);
+  return [hidden, () => write(key, "1")] as const;
 }
 export function useHomePath() {
   const home = useSyncExternalStore(subscribe, () => parseHome(read(KEYS.home)), () => "/wallet" as HomePath);

@@ -113,3 +113,4 @@
 - [x] Menú vertical con Guías: duplicados retirados; Términos, Privacidad, FAQ, About, Estado e Instalar en el pie de la app, sin tocar el pie público de la portada.
 - [x] Restaurar el cambio propio anterior con logos y monedas presentes en la billetera primero: actualización de orden verificada en ES/EN y móvil/escritorio; no se carga el complemento oficial de Jupiter.
 - [ ] Validar cambio propio y envío ampliado con sesión Privy real y comprobar saldo posterior; requiere acceso autorizado del titular, no se firmaron ni movieron fondos en estas pruebas.
+- [x] Sofía: «Pregúntale a Sofía», tour permanente en menú, aviso solo al primer cierre, acceso discreto en pie de app, bienvenida descartable y descanso tras cierres repetidos; verificado ES/EN en móvil/escritorio.

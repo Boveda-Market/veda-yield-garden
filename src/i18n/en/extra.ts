@@ -2108,4 +2108,9 @@ export const extra: Record<string, string> = {
   "Estás explorando Bóveda Market": "You're exploring Bóveda Market",
   "Mira todo sin registrarte. Te pedimos cuenta solo cuando quieras mover dinero.": "Look around without signing up. We only ask for an account when you want to move money.",
   "¿Listo? Crea tu cuenta": "Ready? Create your account",
+  "Pregúntale a Sofía": "Ask Sophia",
+  "Tomar tour": "Take tour",
+  "Tour cerrado": "Tour closed",
+  "Puedes tomarlo desde el menú: Tomar tour.": "Find it in the menu: Take tour.",
+  "Cerrar bienvenida de Sofía": "Dismiss Sophia's welcome",
 };

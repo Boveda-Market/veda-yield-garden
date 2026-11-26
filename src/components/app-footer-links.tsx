@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n";
 import { InstallAppButton } from "@/components/install-app";
+import { Headset } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { askSofiaFromMenu } from "@/lib/sofia-controls";
 
 /** App-shell footer only; public home variants keep their separate footer. */
 export function AppFooterLinks() {
@@ -14,6 +17,7 @@ export function AppFooterLinks() {
     <Link to={lang === "en" ? "/en/terms" : "/terminos"} className={link}>{t("Términos y condiciones")}</Link>
     <Link to={lang === "en" ? "/en/privacy" : "/privacidad"} className={link}>{t("Política de privacidad")}</Link>
     <InstallAppButton className={link} />
+    <Button variant="ghost" onClick={askSofiaFromMenu} className="min-h-11 px-0 font-normal text-sofia-text"><Headset size={16} />{t("Pregúntale a Sofía")}</Button>
     <a href="mailto:admin@bovedamarket.app" className={link}>admin@bovedamarket.app</a>
   </nav>;
 }

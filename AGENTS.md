@@ -76,3 +76,4 @@ use the editor.
 - Public onboarding shares WelcomeFold and ES/EN explanation/access pages; keep campaign URLs and the existing EntryAccess authentication engine so the three-step funnel changes presentation, not authorization.
 - Protocol-history blog articles reuse PostLayout/postHead with bilingual leaf routes and cite primary sources; educational diagrams must not imply live pool data.
 - Blog whiteboard analogies use browser-safe SVG scenes with localized captions and theme tokens in blog-storyboard.tsx, keeping illustrations light and readable without video downloads.
+- Share Sofía controls to avoid extra hosts.

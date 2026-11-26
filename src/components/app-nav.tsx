@@ -1,7 +1,7 @@
 import { AutopilotDefault } from "@/components/autopilot-toggle";
 import { IN_APP_FLAG, OPEN_MENU_EVENT, OPEN_MENU_FLAG } from "./back-button";
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, PieChart, Wallet, Menu, Gift, UserRound, LogOut, LogIn, Home, History, Send, Zap, BookOpen, Headset, Library } from "lucide-react";
+import { LayoutDashboard, PieChart, Wallet, Menu, Gift, UserRound, LogOut, LogIn, Home, History, Send, Zap, BookOpen, Headset, Library, Compass } from "lucide-react";
 import { SUPPORT_URL } from "./safety-notice";
 import { useEffect, useState } from "react";
 import { useT, useI18n } from "@/lib/i18n";
@@ -17,7 +17,8 @@ import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
 import { Lightbulb } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { SuggestionBox } from "./suggestion-box";
-import { useHideSofia } from "@/lib/preferences";
+import { askSofiaFromMenu } from "@/lib/sofia-controls";
+import { SofiaTour } from "./app-tour";
 import { Button } from "@/components/ui/button";
 
 export type AppView = "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets" | "admin";
@@ -49,7 +50,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
   const { lang } = useI18n();
   const [open, setOpen] = useState(false);
   const [ideas, setIdeas] = useState(false);
-  const [sofiaHidden, setSofiaHidden] = useHideSofia();
+  const [tour, setTour] = useState(false);
   useEffect(() => {
     try { if (sessionStorage.getItem("boveda:open-ideas")) { sessionStorage.removeItem("boveda:open-ideas"); setIdeas(true); } } catch { /* ignore */ }
   }, []);
@@ -92,7 +93,8 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
           </>}
           <Link to={blogIndexHref(lang)} className={row} onClick={() => setOpen(false)}><BookOpen size={18} />Blog</Link>
           <Link to={lang === "en" ? "/en/guides" : "/guias"} className={row} onClick={() => setOpen(false)}><Library size={18} />{t("Guías")}</Link>
-          {sofiaHidden && <Button variant="ghost" className={row} onClick={() => { setOpen(false); setSofiaHidden(false); }}><Headset size={18} />{t("Mostrar a Sofía")}</Button>}
+          <Button variant="ghost" className={row} onClick={() => { setOpen(false); window.setTimeout(askSofiaFromMenu, 250); }}><Headset size={18} className="text-sofia-text" />{t("Pregúntale a Sofía")}</Button>
+          <Button variant="ghost" className={row} onClick={() => { setOpen(false); window.setTimeout(() => setTour(true), 250); }}><Compass size={18} className="text-sofia-text" />{t("Tomar tour")}</Button>
         </div>
         </div>
         <div className="mt-1 shrink-0 border-t border-border pt-1">
@@ -111,5 +113,6 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
     <Dialog open={ideas} onOpenChange={setIdeas}>
       <DialogContent className="max-w-md"><DialogTitle className="sr-only">{t("Ayúdanos a mejorar")}</DialogTitle><SuggestionBox className="" /></DialogContent>
     </Dialog>
+    <SofiaTour open={tour} onClose={() => setTour(false)} signedIn={!visitor && !guest} />
   </>;
 }
