@@ -2,13 +2,14 @@ import { describe, it, expect } from "vitest";
 import { filterQuestions, questions } from "./faq";
 
 describe("FAQ", () => {
-  it("has 11 questions", () => {
-    expect(questions.length).toBe(11);
+  it("has 10 questions", () => {
+    expect(questions.length).toBe(10);
   });
-  it("explains that only dollars are withdrawn, never vault coins", () => {
-    const q = questions.find((x) => x.id === "vaults-coins-out");
+  it("explains that you only go in and out in dollars, never vault coins", () => {
+    const q = questions.find((x) => x.id === "vaults-buy-coins");
     expect(q?.cat).toBe("vaults");
-    expect(q?.answer).toMatch(/Solo dólares/);
+    expect(q?.answer).toMatch(/Solo necesitas dólares/);
+    expect(q?.answer).toMatch(/entras y sales exclusivamente en dólares/);
     expect(q?.answer).toMatch(/reconvierte automáticamente/);
   });
   it("explains Autopilot in vault terms", () => {
