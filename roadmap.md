@@ -94,4 +94,6 @@
 - [x] Portada: la siguiente sección asoma en el primer pliegue del teléfono (título, subtítulo y parte de las tarjetas) para sugerir que se puede seguir bajando
 - Blog: componentes visuales (foto, cifras, gráfica, comparación) en el primer artículo
 - Blog: dos autores (Investigación DeFi / Redacción Bóveda) y artículo técnico de liquidez concentrada
+- [x] Blog: historia y funcionamiento de Meteora, analogía inicial, visuales y valor para traders y proveedores de liquidez (ES/EN).
+- [x] Menú principal: reemplazar «Por qué tus fondos están seguros» por «Blog» (ES/EN).
 - [x] Portafolio: corregir la explicación de capitalización conjunta y sugerir un índice de mercado para las bóvedas activas, separado del saldo y las ganancias.

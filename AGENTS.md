@@ -72,3 +72,4 @@ use the editor.
 - Range-rebalance earnings allocation is shared pure logic in dlmm.ts with integer tests; final simulation enforces the reserved cash floor, and result destination metadata survives delayed confirmation so receipts never mislabel available earnings as reinvested.
 - Compound-interest home variants reuse Landing; their browser-safe educational model stays separate from live yield/account queries and includes uninvested earnings in the simple total, so hypothetical growth cannot be mistaken for a vault quote.
 - Public onboarding shares WelcomeFold and ES/EN explanation/access pages; keep campaign URLs and the existing EntryAccess authentication engine so the three-step funnel changes presentation, not authorization.
+- Protocol-history blog articles reuse PostLayout/postHead with bilingual leaf routes and cite primary sources; educational diagrams must not imply live pool data.

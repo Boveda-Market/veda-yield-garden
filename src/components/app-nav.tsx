@@ -1,16 +1,16 @@
 import { AutopilotDefault } from "@/components/autopilot-toggle";
 import { IN_APP_FLAG, OPEN_MENU_EVENT, OPEN_MENU_FLAG } from "./back-button";
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, LogIn, Home, History, Send, Bell, Zap } from "lucide-react";
+import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, LogIn, Home, History, Send, Bell, Zap, BookOpen } from "lucide-react";
 import { SUPPORT_URL } from "./safety-notice";
 import { InstallAppButton } from "./install-app";
 import { useEffect, useState } from "react";
-import { useT } from "@/lib/i18n";
+import { useT, useI18n } from "@/lib/i18n";
+import { blogIndexHref } from "./blog-layout";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { LanguageMenu } from "./language-menu";
 import { ThemeToggle } from "./theme-toggle";
 import { NewsBell } from "./news-bell";
-import { SecurityWhyDialog } from "./security-why";
 import { useContext } from "react";
 import { ShieldCheck } from "lucide-react";
 import { BovedaSessionContext } from "@/hooks/use-boveda-session";
@@ -47,6 +47,7 @@ export function BottomNav({ active, guest, onSelect }: { active: AppView; guest:
 
 export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string | null; guest: boolean; onSelect: (v: AppView) => void; onLogout: () => void }) {
   const t = useT();
+  const { lang } = useI18n();
   const [open, setOpen] = useState(false);
   const [ideas, setIdeas] = useState(false);
   useEffect(() => {
@@ -93,8 +94,8 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
           <StatusRow className={row} />
           {!guest && !visitor && <>
             <button type="button" className={`${row} text-left`} onClick={() => { setOpen(false); setIdeas(true); }}><Lightbulb size={18} />{t("Ayúdanos a mejorar")}</button>
-            <SecurityWhyDialog trigger={(o) => <button type="button" className={`${row} w-full text-left`} onClick={o}><ShieldCheck size={18} />{t("¿Por qué tus fondos están seguros?")}</button>} />
           </>}
+          <Link to={blogIndexHref(lang)} className={row} onClick={() => setOpen(false)}><BookOpen size={18} />Blog</Link>
           <InstallAppButton className={row} />
         </div>
         <div className="mt-6 flex items-center justify-between border-t border-border pt-4 text-sm"><span>{t("Idioma")}</span><LanguageMenu /></div>

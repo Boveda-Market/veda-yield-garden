@@ -14,6 +14,14 @@ export type AuthorId = keyof typeof AUTHORS;
 /** Blog posts: friendly, conversational trend articles (guides stay evergreen how-tos). */
 export const POSTS = [
   {
+    to: "/blog/meteora-historia-y-como-funciona", toEn: "/en/blog/meteora-history-and-how-it-works", date: "2026-11-26", minutes: 8, author: "research",
+    category: "Investigación y protocolos", categoryEn: "Research & protocols",
+    title: "Meteora: la historia y el motor detrás de la liquidez",
+    titleEn: "Meteora: the history and engine behind liquidity",
+    desc: "Una casa de cambio explica la idea. De Mercurial a Meteora: cómo funcionan sus pools, qué aportan a los traders y cómo los proveedores de liquidez cobran por asumir riesgo.",
+    descEn: "A currency exchange explains the idea. From Mercurial to Meteora: how its pools work, what traders gain and how liquidity providers earn for taking risk.",
+  },
+  {
     to: "/blog/liquidez-concentrada", toEn: "/en/blog/concentrated-liquidity", date: "2026-11-26", minutes: 7, author: "research",
     category: "Investigación y protocolos", categoryEn: "Research & protocols",
     title: "Por qué la liquidez es el motor de la blockchain (y cómo los proveedores capturan el valor de los creadores de mercado)",

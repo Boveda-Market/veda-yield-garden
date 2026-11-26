@@ -1,0 +1,123 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { PostLayout, postHead } from "@/components/blog-layout";
+import { CompareTable } from "@/components/blog-visuals";
+
+const PATH = "/blog/meteora-historia-y-como-funciona";
+const LAUNCH = "https://meteoraag.medium.com/meteora-platform-launch-7defbc562f18";
+const HISTORY = "https://meteoraag.medium.com/from-mercurial-to-meteora-my-story-caafd372a577";
+const UPDATE = "https://meteoraag.medium.com/update-for-mercurial-stakeholders-as-of-feb-2023-2bf091627e52";
+const DLMM = "https://docs.meteora.ag/core-products/dlmm/what-is-dlmm";
+const DAMM = "https://docs.meteora.ag/core-products/damm-v2/what-is-damm-v2";
+const DBC = "https://docs.meteora.ag/core-products/dbc/what-is-dbc";
+const FEES = "https://docs.meteora.ag/core-products/damm-v2/fees/overview";
+
+export const Route = createFileRoute("/blog/meteora-historia-y-como-funciona")({
+  staticData: { sitemap: true }, head: () => postHead("es", PATH), component: Page,
+});
+
+export function Page() {
+  return <PostLayout path={PATH} es={<Body en={false} />} enBody={<Body en />} />;
+}
+
+function LiquidityDiagram({ en }: { en: boolean }) {
+  return <figure className="border-y border-border py-6">
+    <div className="flex items-center gap-3">
+      <img src="/brands/meteora.svg" alt="Meteora" className="h-9 w-9 shrink-0" />
+      <figcaption className="text-sm font-semibold">{en ? "One market, two complementary roles" : "Un mercado, dos papeles que se complementan"}</figcaption>
+    </div>
+    <ol className="mt-5 grid gap-3 sm:grid-cols-3">
+      {[
+        [en ? "Providers" : "Proveedores", en ? "Supply the two assets" : "Aportan los dos activos"],
+        [en ? "Liquidity pool" : "Pool de liquidez", en ? "Makes capital available for swaps" : "Deja capital disponible para intercambiar"],
+        [en ? "Traders" : "Traders", en ? "Swap assets and pay a trading fee" : "Cambian activos y pagan una comisión"],
+      ].map(([title, detail], i) => <li key={title} className="rounded-lg border border-border bg-card p-4">
+        <span className="text-xs font-semibold text-primary">0{i + 1}</span>
+        <p className="mt-1 text-sm font-semibold">{title}</p><p className="text-xs leading-5 text-muted-foreground">{detail}</p>
+      </li>)}
+    </ol>
+    <p className="mt-3 text-sm leading-6 text-primary">{en ? "A share of trading fees flows back to the providers whose liquidity is used." : "Una parte de las comisiones vuelve a los proveedores cuya liquidez se utiliza."}</p>
+    <p className="mt-2 text-xs leading-5 text-muted-foreground">{en ? "Conceptual diagram, not live data. The split depends on the product and pool configuration." : "Diagrama conceptual, no son datos en vivo. El reparto depende del producto y la configuración del pool."}</p>
+  </figure>;
+}
+
+function BinDiagram({ en }: { en: boolean }) {
+  return <figure className="rounded-lg border border-border bg-card p-4">
+    <figcaption className="text-sm font-semibold">{en ? "DLMM: liquidity arranged by price" : "DLMM: liquidez organizada por precio"}</figcaption>
+    <div className="mt-5 grid grid-cols-5 gap-1.5" role="img" aria-label={en ? "Five price bins; the center bin is active. Conceptual diagram." : "Cinco tramos de precio; el central está activo. Diagrama conceptual."}>
+      {[0, 1, 2, 3, 4].map((bin) => <div key={bin} className={`flex h-20 items-center justify-center rounded border text-xs font-semibold ${bin === 2 ? "border-primary bg-primary/15 text-primary" : "border-border bg-muted text-muted-foreground"}`}>
+        {bin === 2 ? (en ? "Active" : "Activo") : (en ? "Bin" : "Tramo")}
+      </div>)}
+    </div>
+    <div className="mt-2 flex justify-between text-xs text-muted-foreground"><span>{en ? "Lower price" : "Menor precio"}</span><span>{en ? "Higher price →" : "Mayor precio →"}</span></div>
+    <p className="mt-3 text-xs leading-5 text-muted-foreground">{en ? "Illustrative, not a quote: when available liquidity in the active bin is consumed, a swap can move through other bins at different prices." : "Ilustrativo, no es una cotización: cuando se consume la liquidez disponible del tramo activo, un intercambio puede recorrer otros tramos con precios distintos."}</p>
+  </figure>;
+}
+
+function Timeline({ en }: { en: boolean }) {
+  const events = en ? [
+    ["Mercurial", "The roots: liquidity for stablecoins and pegged assets."],
+    ["February 2023", "The Meteora platform launches following the upheaval of 2022."],
+    ["December 2023", "A stakeholder update documents the new DLMM direction."],
+    ["Later evolution", "The product family expands to DLMM, DAMM v2 and DBC."],
+  ] : [
+    ["Mercurial", "El origen: liquidez para monedas estables y activos vinculados."],
+    ["Febrero de 2023", "Nace la plataforma Meteora tras la crisis de 2022."],
+    ["Diciembre de 2023", "Una actualización para participantes documenta el nuevo rumbo con DLMM."],
+    ["Evolución posterior", "La familia de productos se amplía con DLMM, DAMM v2 y DBC."],
+  ];
+  return <ol className="space-y-4 border-l-2 border-primary/40 pl-5">{events.map(([date, text]) => <li key={date}>
+    <p className="text-sm font-semibold text-primary">{date}</p><p className="text-sm leading-6 text-muted-foreground">{text}</p>
+  </li>)}</ol>;
+}
+
+function Body({ en }: { en: boolean }) {
+  return en ? <>
+    <p>Imagine a busy currency exchange. One customer wants dollars, another wants to sell them. The signs can show attractive rates, but if the counter has no cash, neither can trade. <strong>Liquidity is the money ready on that counter.</strong></p>
+    <p>Now imagine that, instead of a single business supplying that money, many people contribute to a shared reserve and receive part of what customers pay to use it. That is a useful starting point for understanding a liquidity pool. The analogy has limits: there is no cashier, prices follow programmed rules, and contributors can lose money.</p>
+    <LiquidityDiagram en />
+    <section><h2>1. What is Meteora?</h2><p><strong>Meteora is a liquidity protocol on Solana</strong>: a set of on-chain programs and tools for creating markets where tokens can be exchanged. It is not the blockchain itself, nor is it a savings account. Its pools bring together people who need to trade and people willing to supply the assets for those trades. <a href={DLMM} target="_blank" rel="noreferrer">[1]</a></p></section>
+    <section><h2>2. From Mercurial to Meteora</h2><p>The roots are in <strong>Mercurial Finance</strong>, a project focused on liquidity for stablecoins and pegged assets. After the collapse of FTX and Alameda in 2022, the team proposed a new platform and a reset of its economic model. Meteora officially announced its platform launch on <strong>February 9, 2023</strong>. <a href={LAUNCH} target="_blank" rel="noreferrer">[2]</a></p><p>A December 2023 update describes the transition from Mercurial and the new DLMM initiative. It is a record of that period, not evidence that its historical token-distribution plans remain current. <a href={UPDATE} target="_blank" rel="noreferrer">[3]</a></p><p>In the team's later retrospective, the story is also about moving beyond reliance on short-term incentives and building a community of liquidity providers, known as the <strong>LP Army</strong>. That account describes the subsequent development of DLMM, DAMM v2 and DBC. This is the team's own account, not an independent audit of its results. <a href={HISTORY} target="_blank" rel="noreferrer">[4]</a></p></section>
+    <Timeline en />
+    <section><h2>3. How does a swap actually work?</h2><p>A pool holds assets for a token pair. A trader sends one asset and receives the other according to the pool's rules and available liquidity. The reserves change, and the transaction records the result on-chain.</p><p>Liquidity providers, or <strong>LPs</strong>, supply those reserves and hold a position that represents their participation. When their liquidity is used, they can earn a share of trading fees. Not every fee goes to LPs: the protocol can retain a share, and collection or compounding rules depend on the product. DAMM v2, for example, documents separate protocol, LP and optional referral fee components. <a href={FEES} target="_blank" rel="noreferrer">[5]</a></p></section>
+    <section><h2>4. Why DLMM organizes liquidity into bins</h2><p>DLMM means <em>Dynamic Liquidity Market Maker</em>. Instead of spreading capital over every possible price, it organizes liquidity into discrete price bins. LPs choose where and how to distribute their capital. The active bin is the one where trading takes place at that moment.</p><p>Within a bin, trades use its fixed price; that does <strong>not</strong> mean every swap has zero price impact. A larger trade can consume the available liquidity and cross into other bins. Fees can also adjust with volatility. Concentrating capital can improve its usefulness near the current price, but it adds management needs and exposure to price movements. These mechanics are described in the <a href={DLMM} target="_blank" rel="noreferrer">official DLMM documentation</a>.</p></section>
+    <BinDiagram en />
+    <section><h2>5. Meteora is more than one pool design</h2><p><strong>DLMM</strong> provides control over price ranges and liquidity shapes. <strong>DAMM v2</strong> offers configurable constant-product pools, with concentrated or full-range compounding models, position ownership and optional liquidity locks. It is a different design, not simply another name for DLMM. <a href={DAMM} target="_blank" rel="noreferrer">[6]</a></p><p><strong>DBC</strong>, or Dynamic Bonding Curve, serves token launches: trading begins on a configurable curve, and the market can graduate into a DAMM pool after meeting its configured threshold. This helps connect initial price discovery with later liquidity; it does not validate the token or guarantee a successful launch. <a href={DBC} target="_blank" rel="noreferrer">[7]</a></p></section>
+    <section><h2>6. What traders and LPs get out of it</h2><p>The roles complement each other, but their goals and risks differ.</p></section>
+    <CompareTable cols={["Trader", "Liquidity provider"]} rows={[
+      { label: "Goal", cells: ["Buy or sell an asset", "Make capital available for trading"] },
+      { label: "Value", cells: ["More depth can reduce price impact", "Earn a share of fees when liquidity is used"] },
+      { label: "What matters", cells: ["Execution price, fees and available depth", "Trading volume, range, fees and asset quality"] },
+      { label: "Risk", cells: ["Price changes, execution and token risk", "Inventory changes, impermanent loss and contract risk"] },
+      { label: "Trade-off", cells: ["Pays for execution", "Commits capital and takes market risk"] },
+    ]} />
+    <p>A deeper market can let traders execute larger orders with less price impact, all else equal. For LPs, the opportunity is to be compensated for supplying useful capital. But more trading volume does not automatically mean more net profit: costs and changes in the assets' value still matter.</p>
+    <section><h2>7. Fee income is not guaranteed interest</h2><p>This is not a bank promising a fixed rate. An LP's income depends on trading activity, fees, competition from other liquidity and whether the position participates in the prices being traded. A narrow range can stop earning trading fees when price leaves it.</p><p><strong>Impermanent loss</strong> describes underperformance relative to simply holding the assets. It can become realized when you exit. A position may collect fees and still lose value overall. Smart-contract bugs, risky tokens, liquidity locks and transaction costs add further risks.</p><p>A headline APR is an estimate, not a personal return or a promise. Ask how it was calculated, over what period, and whether it accounts for changes in the value of the position.</p></section>
+    <section><h2>8. Where Bóveda Market fits</h2><p>Meteora provides the public liquidity infrastructure. <strong>Bóveda Market is an independent interface</strong> that connects users with selected public pools and helps automate management through smart vaults. It does not own those pools or custody the deposits: assets are committed to the pool, with the position controlled by the user's wallet.</p><p>Not every Meteora product or configuration is available through Bóveda Market. Automation can reduce manual work, but it cannot eliminate market losses or make a poor-quality token safe. This article is educational, not an endorsement of every token traded on Meteora.</p></section>
+    <section><h2>The idea to take away</h2><p><strong>A market needs more than buyers and sellers: it needs capital ready to connect them.</strong> Meteora builds tools for making that capital useful. Traders get access to liquidity; providers can earn fees for supplying it. The opportunity comes with a responsibility: understand the assets, the pool and the risks before putting money on the counter.</p></section>
+    <p className="text-xs leading-5 text-muted-foreground">Sources: Meteora's launch announcement, stakeholder update, team retrospective and official product documentation linked above. Reviewed November 26, 2026. No live market statistics or guaranteed returns are presented.</p>
+  </> : <>
+    <p>Imagina una casa de cambio llena de clientes. Uno quiere comprar dólares; otro quiere venderlos. El letrero puede mostrar una tasa atractiva, pero si no hay dinero en la caja, ninguno puede cambiar. <strong>La liquidez es ese dinero listo en el mostrador.</strong></p>
+    <p>Ahora imagina que, en vez de ponerlo una sola empresa, muchas personas aportan a una reserva compartida y reciben parte de lo que los clientes pagan por utilizarla. Esa es una buena puerta de entrada para entender un pool de liquidez. La analogía tiene límites: no hay cajero, los precios siguen reglas programadas y quienes aportan pueden perder dinero.</p>
+    <LiquidityDiagram en={false} />
+    <section><h2>1. ¿Qué es Meteora?</h2><p><strong>Meteora es un protocolo de liquidez en Solana</strong>: un conjunto de programas y herramientas que permiten crear mercados para intercambiar tokens en la blockchain. No es la blockchain misma ni una cuenta de ahorro. Sus pools conectan a quienes necesitan comprar o vender con quienes están dispuestos a aportar los activos para esas operaciones. <a href={DLMM} target="_blank" rel="noreferrer">[1]</a></p></section>
+    <section><h2>2. De Mercurial a Meteora</h2><p>Sus raíces están en <strong>Mercurial Finance</strong>, un proyecto centrado en la liquidez de monedas estables y activos vinculados. Después de la caída de FTX y Alameda en 2022, el equipo propuso una nueva plataforma y un replanteamiento de su modelo económico. Meteora anunció oficialmente su lanzamiento el <strong>9 de febrero de 2023</strong>. <a href={LAUNCH} target="_blank" rel="noreferrer">[2]</a></p><p>Una actualización de diciembre de 2023 describe la transición desde Mercurial y el nuevo rumbo con DLMM. Es un registro de esa etapa, no una prueba de que los planes históricos de distribución de tokens sigan vigentes hoy. <a href={UPDATE} target="_blank" rel="noreferrer">[3]</a></p><p>En la retrospectiva posterior del equipo, la historia también trata de dejar atrás la dependencia de incentivos de corto plazo y construir una comunidad de proveedores de liquidez, conocida como <strong>LP Army</strong>. Ese relato describe el desarrollo posterior de DLMM, DAMM v2 y DBC. Es la versión del propio equipo, no una auditoría independiente de sus resultados. <a href={HISTORY} target="_blank" rel="noreferrer">[4]</a></p></section>
+    <Timeline en={false} />
+    <section><h2>3. ¿Cómo funciona un intercambio?</h2><p>Un pool mantiene activos de un par de tokens. Un trader entrega uno y recibe el otro según las reglas del pool y la liquidez disponible. Las reservas cambian y la operación queda registrada en la blockchain.</p><p>Los proveedores de liquidez, o <strong>LP</strong>, aportan esas reservas y tienen una posición que representa su participación. Cuando se utiliza su liquidez, pueden cobrar una parte de las comisiones de los intercambios. No toda la comisión va necesariamente a los LP: el protocolo puede retener una parte y las reglas de cobro o reinversión dependen del producto. DAMM v2, por ejemplo, documenta componentes separados para el protocolo, los LP y los referidos opcionales. <a href={FEES} target="_blank" rel="noreferrer">[5]</a></p></section>
+    <section><h2>4. Por qué DLMM organiza la liquidez en tramos</h2><p>DLMM significa <em>Dynamic Liquidity Market Maker</em>. En vez de repartir el capital entre todos los precios posibles, organiza la liquidez en tramos discretos llamados <em>bins</em>. Los LP eligen dónde y cómo distribuir su capital. El tramo activo es aquel en el que se está operando en ese momento.</p><p>Dentro de un tramo, los intercambios utilizan su precio fijo; eso <strong>no</strong> significa que cualquier operación tenga impacto de precio cero. Una operación grande puede consumir la liquidez disponible y recorrer otros tramos. Las comisiones también pueden ajustarse con la volatilidad. Concentrar capital puede hacerlo más útil cerca del precio actual, pero exige gestión y mantiene la exposición a los cambios de precio. Estas mecánicas se explican en la <a href={DLMM} target="_blank" rel="noreferrer">documentación oficial de DLMM</a>.</p></section>
+    <BinDiagram en={false} />
+    <section><h2>5. Meteora no es un único tipo de pool</h2><p><strong>DLMM</strong> ofrece control sobre los rangos de precio y la distribución de liquidez. <strong>DAMM v2</strong> ofrece pools configurables de producto constante, con modelos concentrados o de rango completo con reinversión, propiedad de posiciones y bloqueos opcionales de liquidez. Es otro diseño, no simplemente otro nombre para DLMM. <a href={DAMM} target="_blank" rel="noreferrer">[6]</a></p><p><strong>DBC</strong>, o Dynamic Bonding Curve, sirve para lanzar tokens: las compras y ventas comienzan sobre una curva configurable y el mercado puede pasar a un pool DAMM al alcanzar el umbral definido. Ayuda a conectar la formación inicial del precio con la liquidez posterior; no certifica el token ni garantiza un lanzamiento exitoso. <a href={DBC} target="_blank" rel="noreferrer">[7]</a></p></section>
+    <section><h2>6. Qué ganan los traders y los proveedores</h2><p>Los dos papeles se complementan, pero sus objetivos y riesgos son distintos.</p></section>
+    <CompareTable cols={["Trader", "Proveedor de liquidez"]} rows={[
+      { label: "Objetivo", cells: ["Comprar o vender un activo", "Dejar capital disponible para intercambiar"] },
+      { label: "Valor", cells: ["Más profundidad puede reducir el impacto de precio", "Cobrar parte de las comisiones cuando se usa su liquidez"] },
+      { label: "Qué importa", cells: ["Precio final, comisiones y profundidad disponible", "Volumen, rango, comisiones y calidad de los activos"] },
+      { label: "Riesgo", cells: ["Cambios de precio, ejecución y riesgo del token", "Cambio de inventario, pérdida no permanente y contratos"] },
+      { label: "A cambio", cells: ["Paga por ejecutar la operación", "Compromete capital y asume riesgo de mercado"] },
+    ]} />
+    <p>Un mercado más profundo puede permitir operaciones mayores con menos impacto de precio, si las demás condiciones son iguales. Para el LP, la oportunidad consiste en cobrar por aportar capital útil. Pero más volumen no significa automáticamente más beneficio neto: también cuentan los costos y el cambio de valor de los activos.</p>
+    <section><h2>7. Cobrar comisiones no es tener intereses garantizados</h2><p>Esto no es un banco que promete una tasa fija. Los ingresos del LP dependen de la actividad, las comisiones, la competencia de otras posiciones y de si su liquidez participa en los precios donde se opera. Un rango estrecho puede dejar de cobrar comisiones de intercambio cuando el precio sale de él.</p><p>La <strong>pérdida no permanente</strong> describe un resultado peor que simplemente conservar los activos. Puede hacerse efectiva al salir. Una posición puede cobrar comisiones y, aun así, perder valor en total. Los errores de contratos, los tokens riesgosos, los bloqueos de liquidez y los costos de las operaciones añaden otros riesgos.</p><p>Un APR destacado es una estimación, no tu ganancia personal ni una promesa. Conviene preguntar cómo se calculó, qué período utiliza y si contempla los cambios de valor de la posición.</p></section>
+    <section><h2>8. Dónde encaja Bóveda Market</h2><p>Meteora aporta la infraestructura pública de liquidez. <strong>Bóveda Market es una interfaz independiente</strong> que conecta a los usuarios con determinados pools públicos y ayuda a automatizar su gestión mediante bóvedas inteligentes. No es dueña de esos pools ni custodia los depósitos: los activos se aportan al pool y la billetera del usuario controla su posición.</p><p>No todos los productos o configuraciones de Meteora están disponibles en Bóveda Market. Automatizar puede reducir el trabajo manual, pero no evita las pérdidas de mercado ni convierte un token de mala calidad en uno seguro. Este artículo es educativo, no un respaldo a cada moneda que se intercambia en Meteora.</p></section>
+    <section><h2>La idea que vale la pena recordar</h2><p><strong>Un mercado no necesita solo compradores y vendedores: necesita capital listo para conectarlos.</strong> Meteora construye herramientas para que ese capital sea útil. Los traders acceden a liquidez; los proveedores pueden cobrar por aportarla. La oportunidad viene con una responsabilidad: entender los activos, el pool y los riesgos antes de poner dinero en el mostrador.</p></section>
+    <p className="text-xs leading-5 text-muted-foreground">Fuentes: anuncio de lanzamiento de Meteora, actualización para participantes, retrospectiva del equipo y documentación oficial enlazados arriba. Revisión: 26 de noviembre de 2026. No se presentan estadísticas de mercado en vivo ni ganancias garantizadas.</p>
+  </>;
+}
