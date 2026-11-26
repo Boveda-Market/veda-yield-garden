@@ -15,7 +15,7 @@ import gtaTitleEn from "@/assets/gta6-vault-title-en.png";
 import dobleLogo from "@/assets/doble-o-nada-logo.png";
 
 function TrustLine() {
-  return <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center"><PoweredBy brand="meteora" asLink /><a href="https://www.privy.io/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><img src="/brands/privy-mark.png" alt="" className="h-4 w-4" />Secured by <span className="font-semibold text-foreground">Privy</span></a></div>;
+  return <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center"><PoweredBy brand="meteora" asLink /><PoweredBy brand="privy" asLink label="Secured by" /></div>;
 }
 
 /** Campaign identity stays on the first screen; explanations and authentication are separate steps. */
