@@ -85,6 +85,11 @@
   --color-hot-buy: var(--hot-buy);
   --color-hot-sell: var(--hot-sell);
   --color-invite: var(--invite);
+  --color-sofia: var(--sofia);
+  --color-sofia-glow: var(--sofia-glow);
+  --color-sofia-foreground: var(--sofia-foreground);
+  --color-sofia-surface: var(--sofia-surface);
+  --color-sofia-disc: var(--sofia-disc);
   --color-whatsapp: var(--whatsapp);
   --color-telegram: var(--telegram);
   --color-brand-foreground: var(--brand-foreground);
@@ -140,6 +145,15 @@
   /* Explorar Bóvedas: electric blue + violet, identical in both themes so it stands apart from invite/duel. */
   --explore: oklch(0.72 0.19 250);
   --explore-2: oklch(0.72 0.22 300);
+  /* Sofía (support assistant): warm lavender/amethyst palette, identical in Día and Noche so she always reads as the guide, not as a money button. */
+  --sofia: oklch(0.58 0.19 295);
+  --sofia-glow: oklch(0.78 0.13 292);
+  --sofia-foreground: oklch(0.99 0.01 300);
+  --gradient-sofia: linear-gradient(135deg, oklch(0.66 0.19 296), var(--sofia) 45%, oklch(0.48 0.2 310));
+  --shadow-sofia: 0 12px 32px -10px oklch(0.58 0.19 295 / 0.6);
+  --sofia-surface: oklch(0.58 0.19 295 / 0.12);
+  /* Opaque lavender disc for the avatar's inner circle: the semi-transparent surface would blend into the gradient ring. */
+  --sofia-disc: oklch(0.95 0.025 295);
   --explore-surface: oklch(0.18 0.05 265);
   --explore-foreground: oklch(0.98 0.01 260);
   --explore-muted: oklch(0.82 0.05 260);
@@ -485,3 +499,10 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
   color: var(--welcome-ink);
 }
 .welcome-cta:hover { filter: brightness(1.06); }
+
+/* Sofía (support assistant): typing dots for the «escribiendo» state; the floating button keeps its own halo. */
+@keyframes sofia-dot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.35; } 30% { transform: translateY(-4px); opacity: 1; } }
+.sofia-dot { animation: sofia-dot 1.1s ease-in-out infinite; }
+.sofia-fab { background-image: var(--gradient-sofia); box-shadow: var(--shadow-sofia); }
+.sofia-fab:disabled { opacity: 0.5; }
+@media (prefers-reduced-motion: reduce) { .sofia-dot { animation: none; opacity: 0.8; } }

@@ -100,3 +100,5 @@
 - [x] Portafolio: corregir la explicación de capitalización conjunta y sugerir un índice de mercado para las bóvedas activas, separado del saldo y las ganancias.
 - [x] Auditar recorridos de usuarios nuevos ES/EN y navegación móvil/escritorio: portadas, explicación, acceso Google/email, exploración, depósitos/jugadas de visitantes y destinos privados; corregidos acceso desde páginas privadas, reapertura sin sesión y traducciones. 724 pruebas aprobadas.
 - [ ] Verificar registro completo, primera recarga y primer depósito con una sesión Privy autorizada (requiere completar Google o el código del titular; no mover fondos durante la auditoría).
+
+- [x] Sofía: paleta lavanda/amatista, icono de auricular de soporte, halo y avatar con anillo degradado
