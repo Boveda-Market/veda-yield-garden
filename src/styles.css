@@ -117,6 +117,13 @@
 }
 
 :root {
+  /* Official plugin requires comma-separated RGB channels rather than CSS colors. */
+  --jupiter-plugin-primary: 106, 224, 150;
+  --jupiter-plugin-background: 23, 27, 33;
+  --jupiter-plugin-primary-text: 245, 246, 248;
+  --jupiter-plugin-warning: 238, 183, 84;
+  --jupiter-plugin-interactive: 39, 44, 52;
+  --jupiter-plugin-module: 30, 35, 42;
   /* High-octane (GTA6) vault: neon night palette, identical in Día and Noche so the card always pops. */
   --hot: oklch(0.68 0.26 355);
   --hot-2: oklch(0.8 0.17 60);
@@ -207,6 +214,12 @@
 
 /* Day mode (toggled by ThemeToggle via html.light). Night stays the :root default. */
 :root.light {
+  --jupiter-plugin-primary: 27, 157, 86;
+  --jupiter-plugin-background: 250, 251, 252;
+  --jupiter-plugin-primary-text: 25, 33, 47;
+  --jupiter-plugin-warning: 158, 101, 24;
+  --jupiter-plugin-interactive: 233, 236, 240;
+  --jupiter-plugin-module: 242, 244, 246;
   --sofia-text: oklch(0.45 0.17 295);
   --sofia-surface: oklch(0.94 0.025 295);
   --background: oklch(0.984 0.003 248);
@@ -236,6 +249,13 @@
   color-scheme: light;
 }
 :root.light .bg-card { box-shadow: 0 1px 2px oklch(0.21 0.04 266 / 6%), 0 4px 14px oklch(0.21 0.04 266 / 5%); }
+
+.jupiter-swap-host {
+  --boveda-jupiter-height: max(300px, min(450px, calc(92dvh - 200px)));
+  width: 100%;
+  height: var(--boveda-jupiter-height);
+  min-height: 300px;
+}
 
 .dark {
   --background: oklch(0.129 0.042 264.695);

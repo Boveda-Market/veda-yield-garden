@@ -1,9 +1,8 @@
 import { AutopilotDefault } from "@/components/autopilot-toggle";
 import { IN_APP_FLAG, OPEN_MENU_EVENT, OPEN_MENU_FLAG } from "./back-button";
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, PieChart, TrendingUp, Wallet, Menu, Gift, UserRound, HelpCircle, FileText, Shield, LogOut, LogIn, Home, History, Send, Bell, Zap, BookOpen, Headset } from "lucide-react";
+import { LayoutDashboard, PieChart, Wallet, Menu, Gift, UserRound, LogOut, LogIn, Home, History, Send, Zap, BookOpen, Headset, Library } from "lucide-react";
 import { SUPPORT_URL } from "./safety-notice";
-import { InstallAppButton } from "./install-app";
 import { useEffect, useState } from "react";
 import { useT, useI18n } from "@/lib/i18n";
 import { blogIndexHref } from "./blog-layout";
@@ -18,9 +17,7 @@ import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
 import { Lightbulb } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { SuggestionBox } from "./suggestion-box";
-import { StatusDot, useSystemState } from "./system-status";
 import { useHideSofia } from "@/lib/preferences";
-import { Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export type AppView = "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets" | "admin";
@@ -78,32 +75,24 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
           {user && <SheetDescription className="truncate text-xs">{user}</SheetDescription>}
         </div>
         <div className="min-h-0 overflow-y-auto overscroll-contain">
-        <div className="grid grid-cols-2 gap-x-1">
+        <div className="flex flex-col">
           {guest ? <>
             <Button variant="ghost" className={row} onClick={() => go("invite")}><Gift size={18} />{t("Invita y gana")}</Button>
             <Button variant="ghost" className={row} onClick={() => go("account")}><UserRound size={18} />{t("Mi cuenta")}</Button>
           </> : visitor ? null : <>
             {operator && <Link to="/admin" className={`${row} border border-primary/40 bg-primary/10 font-semibold text-primary`} onClick={() => setOpen(false)}><ShieldCheck size={18} />{t("Panel de Control")}</Link>}
-            <Link to="/wallet" className={row} onClick={() => setOpen(false)}><Home size={18} />{t("Inicio")}</Link>
-            <Link to="/portfolio" className={row} onClick={() => setOpen(false)}><PieChart size={18} />{t("Mi Portafolio")}</Link>
-            <Link to="/notificaciones" className={row} onClick={() => setOpen(false)}><Bell size={18} />{t("Notificaciones")}</Link>
             <Link to="/cuenta" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Mi cuenta")}</Link>
             <Link to="/seguridad" className={row} onClick={() => setOpen(false)}><ShieldCheck size={18} />{t("Seguridad")}</Link>
             <Link to="/actividad" className={row} onClick={() => setOpen(false)}><History size={18} />{t("Actividad")}</Link>
             <Link to="/invita" className={row} onClick={() => setOpen(false)}><Gift size={18} />{t("Invita y gana")}</Link>
           </>}
           <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className={row}><Send size={18} />{t("Canal oficial de Telegram")}</a>
-          <StatusRow className={row} />
           {!guest && !visitor && <>
             <Button variant="ghost" className={row} onClick={() => { setOpen(false); setIdeas(true); }}><Lightbulb size={18} />{t("Ayúdanos a mejorar")}</Button>
           </>}
           <Link to={blogIndexHref(lang)} className={row} onClick={() => setOpen(false)}><BookOpen size={18} />Blog</Link>
+          <Link to={lang === "en" ? "/en/guides" : "/guias"} className={row} onClick={() => setOpen(false)}><Library size={18} />{t("Guías")}</Link>
           {sofiaHidden && <Button variant="ghost" className={row} onClick={() => { setOpen(false); setSofiaHidden(false); }}><Headset size={18} />{t("Mostrar a Sofía")}</Button>}
-          <InstallAppButton className={row} />
-          <Link to="/faq" className={row} onClick={() => setOpen(false)}><HelpCircle size={18} />{t("Preguntas frecuentes")}</Link>
-          <Link to="/about" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Sobre Bóveda Market")}</Link>
-          <Link to="/terminos" className={row} onClick={() => setOpen(false)}><FileText size={18} />{t("Términos y condiciones")}</Link>
-          <Link to="/privacidad" className={row} onClick={() => setOpen(false)}><Shield size={18} />{t("Política de privacidad")}</Link>
         </div>
         </div>
         <div className="mt-1 shrink-0 border-t border-border pt-1">
@@ -123,10 +112,4 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
       <DialogContent className="max-w-md"><DialogTitle className="sr-only">{t("Ayúdanos a mejorar")}</DialogTitle><SuggestionBox className="" /></DialogContent>
     </Dialog>
   </>;
-}
-
-function StatusRow({ className }: { className: string }) {
-  const t = useT();
-  const state = useSystemState();
-  return <Link to="/status" className={className}><Activity size={18} /><span className="flex-1">{t("Estado del sistema")}</span><StatusDot state={state} /></Link>;
 }

@@ -1,10 +1,10 @@
 import { PoweredBy } from "@/components/powered-by";
 import { ServiceFeeLabel } from "@/components/service-fee-label";
 import { ActionSuccess } from "@/components/action-success";
-import { TokenIcon } from "@/components/token-icon";
+import { WalletTokenPicker } from "@/components/wallet-token-picker";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDown, ChevronDown, RefreshCw, Wallet } from "lucide-react";
+import { ArrowDown, RefreshCw, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { quoteSwap, SWAP_TOKENS, swapSpendable, swapToken, toTokenUnits, type SwapQuote } from "@/lib/wallet-actions";
@@ -102,16 +102,8 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
 
   if (done) return <div className="mt-4"><ActionSuccess destination={null} title={t("Cambio enviado")} amount={{ value: format(done.outAmount, done.to), unit: done.to, label: "≈" }} body={`${t("Cambiaste {a} por aproximadamente {b}.", { a: `${format(done.amount, done.from)} ${done.from}`, b: `${format(done.outAmount, done.to)} ${done.to}` })} ${t("Tu saldo se actualizará en unos segundos.")}`} details={[{ label: t("Operación"), value: t("Cambio de moneda") }, { label: t("Pagaste"), value: `${format(done.amount, done.from)} ${done.from}` }, { label: t("Destino"), value: t("Tu billetera") }]} signature={null} doneLabel={t("Hacer otro cambio")} onClose={() => setDone(null)} /></div>;
 
-  /** Jupiter-style token pill: icon + symbol + chevron, with the native select layered on top for accessibility. */
-  const select = (side: "from" | "to", value: string) => <div className="relative flex shrink-0 items-center gap-1.5 rounded-full bg-background/70 py-1 pl-1 pr-2.5 ring-1 ring-border transition-colors hover:bg-background">
-    <TokenIcon symbol={value} size={compact ? 22 : 26} />
-    <span className={`font-semibold ${compact ? "text-sm" : "text-base"}`}>{value}</span>
-    <ChevronDown className="size-4 text-muted-foreground" />
-    <select aria-label={side === "from" ? t("Moneda que pagas") : t("Moneda que recibes")} value={value} disabled={busy}
-      onChange={(e) => pick(side, e.target.value)} className="absolute inset-0 cursor-pointer opacity-0">
-      {SWAP_TOKENS.map((x) => <option key={x.symbol} value={x.symbol}>{x.symbol}</option>)}
-    </select>
-  </div>;
+  const select = (side: "from" | "to", value: string) => <WalletTokenPicker value={value} balances={balances} disabled={busy}
+    label={side === "from" ? t("Moneda que pagas") : t("Moneda que recibes")} onChange={(symbol) => pick(side, symbol)} />;
   const pad = compact ? "p-3" : "p-4";
 
   return <div className={compact ? "space-y-2" : sheet ? "space-y-3" : "mt-4 space-y-3"} aria-busy={busy}>

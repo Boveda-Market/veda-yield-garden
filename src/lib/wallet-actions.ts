@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CHAIN_POOLS, solanaAddressSchema } from "@/lib/solana-data";
+import { prepareTokenTransfer } from "@/lib/token-transfer.functions";
 
 export const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 /** Stable dollar in which prediction payouts arrive; converted to USDC after claiming. */
@@ -8,13 +9,12 @@ export const SOL_MINT = "So11111111111111111111111111111111111111112";
 /** SOL kept aside so the wallet can always pay network costs. */
 export const SOL_RESERVE_LAMPORTS = 10_000_000n;
 
-export type WalletAsset = "SOL" | "USDC";
-const DECIMALS: Record<WalletAsset, number> = { SOL: 9, USDC: 6 };
+export type WalletAsset = string;
 
 /** Parses a decimal amount into integer base units; null if invalid or too precise. */
 export function toBaseUnits(value: string, asset: WalletAsset): bigint | null {
   const v = value.trim().replace(",", ".");
-  const d = DECIMALS[asset];
+  const d = transferToken(asset).decimals;
   if (!new RegExp(`^\\d+(\\.\\d{1,${d}})?$`).test(v)) return null;
   const [whole, frac = ""] = v.split(".");
   const units = BigInt(whole ?? "0") * 10n ** BigInt(d) + BigInt(frac.padEnd(d, "0"));
@@ -23,17 +23,22 @@ export function toBaseUnits(value: string, asset: WalletAsset): bigint | null {
 
 /** Maximum spendable amount; SOL keeps a reserve for network costs. */
 export function spendable(balance: bigint, asset: WalletAsset) {
-  if (asset === "USDC") return balance;
+  if (asset !== "SOL") return balance;
   return balance > SOL_RESERVE_LAMPORTS ? balance - SOL_RESERVE_LAMPORTS : 0n;
 }
 
-export const sendInput = z.object({ from: solanaAddressSchema, to: solanaAddressSchema, asset: z.enum(["SOL", "USDC"]), amount: z.bigint().positive(), fee: z.bigint().nonnegative().optional() })
+export const sendInput = z.object({ from: solanaAddressSchema, to: solanaAddressSchema, asset: z.string().refine((s) => SWAP_TOKENS.some((x) => x.symbol === s)), amount: z.bigint().positive().max(18_446_744_073_709_551_615n), fee: z.bigint().nonnegative().optional() })
   .refine((v) => v.from !== v.to, { message: "La dirección de destino es tu propia wallet." });
 
 /** Builds an unsigned SOL or USDC transfer; the connected wallet signs and sends it. */
 export async function buildTransfer(input: z.infer<typeof sendInput>): Promise<Uint8Array> {
   const { from, to, asset, amount, fee } = sendInput.parse(input);
   if (fee && asset !== "USDC") throw new Error("Comisión solo en USDC");
+  if (asset !== "SOL" && asset !== "USDC") {
+    const result = await prepareTokenTransfer({ data: { from, to, asset, amount: amount.toString() } });
+    if (!result.success) throw new Error(result.error);
+    return Uint8Array.from(result.transaction);
+  }
   // Built with @solana/kit only: the legacy web3.js/spl-token path needs Node's Buffer and crashed in browsers.
   const kit = await import("@solana/kit");
   const { address, AccountRole, pipe, createTransactionMessage, setTransactionMessageFeePayer, setTransactionMessageLifetimeUsingBlockhash, appendTransactionMessageInstructions, compileTransaction, getTransactionEncoder, blockhash: toBlockhash } = kit;
@@ -92,6 +97,13 @@ export function swapToken(symbol: string) {
   const token = SWAP_TOKENS.find((t) => t.symbol === symbol);
   if (!token) throw new Error("Moneda no disponible para cambiar.");
   return token;
+}
+export type TransferToken = SwapToken & { token2022: boolean };
+/** Sending uses the exact same fixed mint list as swapping, including the validated Token-2022 vault. */
+export function transferToken(symbol: string): TransferToken {
+  const token = swapToken(symbol);
+  const pool = CHAIN_POOLS.find((p) => p.mint === token.mint);
+  return { ...token, token2022: Boolean(pool && "tokenProgram" in pool && pool.tokenProgram === "token2022") };
 }
 /** Parses an amount for any swappable token. */
 export function toTokenUnits(value: string, symbol: string): bigint | null {

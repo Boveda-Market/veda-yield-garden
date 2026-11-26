@@ -34,6 +34,7 @@ import { MarketsPanel } from "./markets-panel";
 import { PendingClaims } from "./pending-claims";
 import { VaultSteps } from "./vault-steps";
 import { BottomNav, ProfileMenu } from "./app-nav";
+import { AppFooterLinks } from "./app-footer-links";
 import { ScrollHint } from "./scroll-hint";
 import { BackButton } from "./back-button";
 import { HostedSession } from "./session-host";
@@ -204,7 +205,7 @@ function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeC
       <footer className="border-t border-border pb-20">
         <div className="mx-auto max-w-5xl px-5 py-8 text-xs leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">© {new Date().getFullYear()} Boveda Technologies</p>
-          <nav className="mt-4 flex flex-wrap gap-5 text-primary"><Link to="/faq">{t("Preguntas frecuentes")}</Link><Link to="/terminos">{t("Términos y condiciones")}</Link><Link to="/privacidad">{t("Política de privacidad")}</Link><a href="mailto:admin@bovedamarket.app">admin@bovedamarket.app</a></nav>
+          <AppFooterLinks />
         </div>
       </footer>
 

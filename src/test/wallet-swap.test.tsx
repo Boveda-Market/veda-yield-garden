@@ -23,10 +23,12 @@ describe("wallet swap review", () => {
   });
   it("allows pairs without USDC", () => {
     mount();
-    fireEvent.change(screen.getByLabelText("Moneda que pagas"), { target: { value: "MET" } });
-    fireEvent.change(screen.getByLabelText("Moneda que recibes"), { target: { value: "SOL" } });
-    expect(screen.getByLabelText("Moneda que pagas")).toHaveValue("MET");
-    expect(screen.getByLabelText("Moneda que recibes")).toHaveValue("SOL");
+    fireEvent.click(screen.getByRole("button", { name: "Moneda que pagas" }));
+    fireEvent.click(screen.getByRole("option", { name: /^MET/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Moneda que recibes" }));
+    fireEvent.click(screen.getByRole("option", { name: /^SOL/ }));
+    expect(screen.getByRole("button", { name: "Moneda que pagas" })).toHaveTextContent("MET");
+    expect(screen.getByRole("button", { name: "Moneda que recibes" })).toHaveTextContent("SOL");
   });
   it("quotes automatically with no swap fee and only signs on confirmation", async () => {
     const { fetcher, confirm } = mount();

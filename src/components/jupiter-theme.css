@@ -1,0 +1,4 @@
+/* Official plugin's legacy black/white surfaces need theme-aware overrides inside its shadow root. */
+#portal-container .bg-black { background-color: rgb(var(--jupiter-plugin-background)); }
+#portal-container .text-white { color: rgb(var(--jupiter-plugin-primary-text)); }
+#portal-container .boveda-jupiter-shell { height: var(--boveda-jupiter-height) !important; }

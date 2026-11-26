@@ -9,8 +9,9 @@ import { BalanceLoading } from "@/components/ui/balance-loading";
 import { SyncPill } from "@/components/ui/sync-bar";
 import { ShieldCheck, Eye, EyeOff, LifeBuoy, Gift } from "lucide-react";
 import { AFFILIATE_PAYOUT_WALLET } from "@/lib/affiliate";
-import { TokenIcon } from "@/components/token-icon";
-import { useCallback, useEffect, useState, useRef } from "react";
+import { Suspense, useCallback, useEffect, useState, useRef } from "react";
+import { ClientOnly } from "@tanstack/react-router";
+import { lazyWithReload } from "@/lib/lazy-reload";
 import { Dialog, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
 import { ActionSuccess } from "@/components/action-success";
@@ -29,8 +30,9 @@ import { getRealWallet } from "@/lib/solana.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MASK, useContacts, useHideBalances } from "@/lib/preferences";
-import { buildSwap, buildTransfer, spendable, toBaseUnits, type SwapQuote, type WalletAsset } from "@/lib/wallet-actions";
-import { WalletSwap } from "@/components/wallet-swap";
+import { buildTransfer, spendable, toBaseUnits, type WalletAsset } from "@/lib/wallet-actions";
+import { WalletTokenPicker } from "@/components/wallet-token-picker";
+import { swapToken } from "@/lib/wallet-actions";
 import { EXTRA_TOKENS, useWalletPrices, useWalletTokens } from "@/hooks/use-wallet-extras";
 import { walletExtrasUsd } from "@/lib/wallet-holdings";
 import { solanaAddressSchema } from "@/lib/solana-data";
@@ -55,6 +57,8 @@ import { ReportProblem } from "@/components/report-problem";
 import { usePredictRefunds } from "@/lib/predict-refunds-query";
 import { usePredictPositions } from "@/lib/predict-positions-query";
 import { positionWon } from "@/lib/predict";
+
+const JupiterSwap = lazyWithReload(() => import("@/components/jupiter-swap"));
 
 
 export function WalletPanel() {
@@ -152,7 +156,7 @@ export function WalletPanel() {
   if (!session.authenticated) return <VisitorWallet />;
   if (!address) return <p className="text-muted-foreground">{t("Todavía no hay una wallet conectada a tu cuenta.")}</p>;
 
-  const balance = asset === "SOL" ? balances.data?.sol : balances.data?.usdc;
+  const balance = swapBalances[asset];
   const units = toBaseUnits(amount, asset);
   const max = balance === undefined ? 0n : spendable(balance, asset);
   const amountError = amount && (!units ? t("Monto no válido") : units > max ? t("Saldo insuficiente") : null);
@@ -169,18 +173,6 @@ export function WalletPanel() {
       const sig = await session.signAndSend(await buildTransfer({ from: address, to, asset, amount: units }));
       setSent({ amount, asset, to, sig }); reset(); refresh();
     } catch (e) { fail(e); } finally { setBusy(false); }
-  }
-  async function swap(quote: SwapQuote) {
-    if (!address) return;
-    setBusy(true); setMessage(null);
-    try {
-      let bytes: Uint8Array;
-      try { bytes = await buildSwap(address, quote); } catch (e) {
-        console.error("[Bóveda Market] swap preparation failed", e);
-        throw new Error(`${t("No se pudo preparar el cambio")}: ${e instanceof Error ? e.message : String(e)}`);
-      }
-      await session.signAndSend(bytes); refresh();
-    } catch (e) { fail(e); throw e; } finally { setBusy(false); }
   }
 
   // One tap: every extra coin (prize/refund dollars, vault leftovers) → USDC, no Bóveda Market fee. SOL is the network reserve and is never sold.
@@ -207,8 +199,13 @@ export function WalletPanel() {
   const fmt = (v: number, d = 2) => v.toLocaleString("en-US", { useGrouping: false, maximumFractionDigits: d });
   const openSwap = (from: string, amount = "") => { setTab("swap"); setSent(null); setMessage(null); setSwapFrom((v) => ({ key: v.key + 1, from, amount })); setSheet(true); };
   const openSend = (a: WalletAsset) => { setTab("send"); setSent(null); setMessage(null); setAsset(a); setSheet(true); };
-  const decimals = asset === "SOL" ? 9 : 6;
-  const setPct = (pct: bigint) => setAmount((Number((max * pct) / 100n) / 10 ** decimals).toString());
+  const decimals = swapToken(asset).decimals;
+  const setPct = (pct: bigint) => {
+    const value = max * pct / 100n;
+    const scale = 10n ** BigInt(decimals);
+    const fraction = (value % scale).toString().padStart(decimals, "0").replace(/0+$/, "");
+    setAmount(`${value / scale}${fraction ? `.${fraction}` : ""}`);
+  };
   const quick = [
     { icon: CreditCard, label: t("Depositar dólares"), on: () => setBuyOpen((v) => v + 1) },
     { icon: ArrowLeftRight, label: t("Cambiar"), on: () => openSwap("USDC") },
@@ -294,11 +291,14 @@ export function WalletPanel() {
     <Dialog open={sheet} onOpenChange={(o) => { if (!o && busy) return; if (!o && !kept && !sent && (tab === "swap" ? swapReady : Boolean(units && !amountError && to && !toError))) { setKept(true); return; } setSheet(o); if (!o) { setSent(null); setMessage(null); setKept(false); } }}>
       <ActionSheetContent closeLabel={t("Cerrar")} onInteractOutside={(e) => { if (busy) e.preventDefault(); }}>
       {kept ? <FundsKeptCard where="wallet" onDone={() => { setKept(false); setSheet(false); setSent(null); setMessage(null); }} /> : <>
-      <DialogHeader className="pr-10 text-left"><DialogTitle className="font-display text-xl">{tab === "swap" ? t("Cambiar") : t("Enviar")}</DialogTitle><DialogDescription className="hidden sm:block">{tab === "swap" ? t("Cambia entre tus monedas sin comisión de Bóveda Market.") : t("Envía USDC o SOL a otra billetera.")}</DialogDescription></DialogHeader>
+      <DialogHeader className="pr-10 text-left"><DialogTitle className="font-display text-xl">{tab === "swap" ? t("Cambiar") : t("Enviar")}</DialogTitle><DialogDescription className="hidden sm:block">{tab === "swap" ? t("Cambia entre tus monedas sin comisión de Bóveda Market.") : t("Envía tus monedas compatibles a otra billetera.")}</DialogDescription></DialogHeader>
       {!sent && <div role="tablist" className="grid grid-cols-2 gap-1 rounded-full bg-muted p-1">{([["swap", ArrowLeftRight, t("Cambiar")], ["send", Send, t("Enviar")]] as const).map(([k, Icon, label]) => <button key={k} type="button" role="tab" aria-selected={tab === k} disabled={busy} onClick={() => { setTab(k); setMessage(null); }} className={`flex items-center justify-center gap-1.5 rounded-full py-2 text-sm font-medium transition-colors ${tab === k ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}><Icon size={15} />{label}</button>)}</div>}
       {sent ? <ActionSuccess destination={null} title={t("Envío realizado")} amount={{ value: sent.amount, unit: sent.asset }} body={t("Tu saldo se actualizará en unos segundos.")} details={[{ label: t("Operación"), value: t("Envío") }, { label: t("Destino"), value: `${sent.to.slice(0, 4)}…${sent.to.slice(-4)}` }, { label: t("Servicio Bóveda Market"), value: "0" }]} signature={sent.sig} onClose={() => { setSent(null); setSheet(false); }} />
-      : tab === "swap" ? <WalletSwap key={swapFrom.key} balances={swapBalances} initialFrom={swapFrom.from} initialAmount={swapFrom.amount} busy={busy} onConfirm={swap} sheet onReadyChange={setSwapReady} /> : <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-2">{(["USDC", "SOL"] as const).map((a) => { const b = a === "SOL" ? balances.data?.sol : balances.data?.usdc; return <button key={a} type="button" onClick={() => setAsset(a)} className={`rounded-xl border p-3 text-left ${asset === a ? "border-primary bg-primary/10" : "border-border"}`}><p className="flex items-center gap-2 font-medium"><TokenIcon symbol={a} size={20} />{a}</p><p className="text-xs text-muted-foreground">{t("Disponible")}: {b !== undefined ? fmt(Number(spendable(b, a)) / 10 ** (a === "SOL" ? 9 : 6), 4) : "—"}</p></button>; })}</div>
+      : tab === "swap" ? <ClientOnly><Suspense fallback={<p role="status" className="text-sm text-muted-foreground">{t("Cargando Jupiter…")}</p>}><JupiterSwap key={swapFrom.key} initialFrom={swapFrom.from} initialAmount={swapFrom.amount} onBusyChange={setBusy} onReadyChange={setSwapReady} onSuccess={() => { refresh(); void queryClient.invalidateQueries({ queryKey: ["real-solana", address] }); void queryClient.invalidateQueries({ queryKey: ["wallet-activity", address] }); }} /></Suspense></ClientOnly> : <div className="space-y-4">
+        <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+          <WalletTokenPicker value={asset} balances={swapBalances} disabled={busy} label={t("Moneda que envías")} onChange={(a) => { setAsset(a); setAmount(""); }} />
+          <p className="min-w-0 break-words text-right text-xs text-muted-foreground">{t("Disponible")}: {balance !== undefined ? fmt(Number(max) / 10 ** decimals, 6) : "—"}</p>
+        </div>
         <div><label className="text-xs text-muted-foreground">{t("Dirección de destino")}</label><Input className="mt-1" placeholder={t("Pega la dirección aquí")} value={to} onChange={(e) => setTo(e.target.value.trim())} />
           {contacts.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{contacts.map((c) => <button key={c.address} type="button" onClick={() => setTo(c.address)} className={`rounded-full border px-3 py-1 text-xs ${to === c.address ? "border-primary bg-primary/10" : "border-border"}`}>{c.name} · {c.address.slice(0, 4)}…{c.address.slice(-4)}</button>)}</div>}
           {toError ? <p className="mt-1 text-sm text-destructive">{toError}</p> : to && <p className="mt-1 flex items-center gap-1 text-xs text-primary"><CheckCircle2 size={12} />{t("Dirección válida")}: {to.slice(0, 4)}…{to.slice(-4)}</p>}
