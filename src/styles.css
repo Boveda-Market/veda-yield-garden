@@ -523,6 +523,9 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
   color: var(--welcome-ink);
 }
 .welcome-cta:hover { filter: brightness(1.06); }
+/* Tour CTA keeps Sofía's lavender identity so the guide reads as hers on every campaign palette. */
+.welcome-sofia { background-image: var(--gradient-sofia); color: var(--sofia-foreground); box-shadow: var(--shadow-sofia); }
+.welcome-sofia:hover { filter: brightness(1.08); }
 
 /* Sofía (support assistant): typing dots for the «escribiendo» state; the floating button keeps its own halo. */
 @keyframes sofia-dot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.35; } 30% { transform: translateY(-4px); opacity: 1; } }

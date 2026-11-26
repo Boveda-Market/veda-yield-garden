@@ -116,3 +116,5 @@
 - [x] Sofía: «Pregúntale a Sofía», tour permanente en menú, aviso solo al primer cierre, acceso discreto en pie de app, bienvenida descartable y descanso tras cierres repetidos; verificado ES/EN en móvil/escritorio.
 - [x] Explicar el aviso de operador según la billetera conectada, limitar su presentación a sesiones abiertas y corregir el destino al Panel de Control del menú.
 - [x] Bienvenida de Sofía más cercana y en primera persona como asistente de Bóveda Market, en la tarjeta y el chat ES/EN.
+- [x] Botón «Tomar tour» de la portada con la identidad de Sofía: degradado lavanda e ícono de auricular; verificado ES/EN, Día/Noche y 390×844.
+- [x] Botón «Tomar tour»: ícono retirado por el usuario; se conserva solo el color lavanda de Sofía.
