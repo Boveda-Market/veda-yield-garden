@@ -108,6 +108,7 @@ export function SofiaTour({ open, onClose, signedIn = false }: { open: boolean; 
   const [login, setLogin] = useState(false);
   const [flying, setFlying] = useState(true);
   const [rect, setRect] = useState<DOMRect | null>(null);
+  const [navRect, setNavRect] = useState<DOMRect | null>(null);
   const [vp, setVp] = useState({ w: 0, h: 0 });
   const x0 = useRef<number | null>(null);
   const st = STATIONS[i] ?? STATIONS[0];
@@ -131,6 +132,7 @@ export function SofiaTour({ open, onClose, signedIn = false }: { open: boolean; 
       setVp({ w: window.innerWidth, h: window.innerHeight });
       const el = st?.target ? document.querySelector(st.target) ?? document.querySelector("[data-tour='vaults']") : null;
       setRect(el ? el.getBoundingClientRect() : null);
+      setNavRect(document.querySelector("[data-tour='vaults']")?.closest("nav")?.getBoundingClientRect() ?? null);
     };
     const el = st?.target ? document.querySelector(st.target) : null;
     if (el && i === 0) el.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -152,11 +154,25 @@ export function SofiaTour({ open, onClose, signedIn = false }: { open: boolean; 
   const nameFlip = orbX + ORB + 62 > vp.w - pad;
   const cardStyle: React.CSSProperties = lower ? { left: cardX, width: cardW, bottom: Math.max(pad, vp.h - orbY + 10) } : { left: cardX, width: cardW, top: orbY + ORB + 10 };
   const words = t(st.text).split(" ");
+  // Leave every area icon unobscured; the spotlight alone identifies the current station.
+  const holes = [navRect, rect && (!navRect || rect.bottom < navRect.top) ? rect : null];
+  const dimPath = `M0 0H${vp.w}V${vp.h}H0Z` + holes.map((hole) => {
+    if (!hole) return "";
+    const left = Math.max(0, hole.left);
+    const top = Math.max(0, hole.top);
+    const right = Math.min(vp.w, hole.right);
+    const bottom = Math.min(vp.h, hole.bottom);
+    return `M${left} ${top}H${right}V${bottom}H${left}Z`;
+  }).join("");
   return createPortal(<>
     <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label={t("Tour con Sofía")}
       onTouchStart={(e) => { x0.current = e.touches[0]?.clientX ?? null; }}
       onTouchEnd={(e) => { const x = e.changedTouches[0]?.clientX; if (x0.current != null && x != null && Math.abs(x - x0.current) > 50) go(x < x0.current ? 1 : -1); x0.current = null; }}>
-      <div className="absolute inset-0 bg-background/70 backdrop-blur-[1px]" onClick={() => close()} />
+      <div className="absolute inset-0" onClick={() => close()}>
+        <svg className="sofia-dimmer size-full" viewBox={`0 0 ${vp.w} ${vp.h}`} preserveAspectRatio="none" aria-hidden>
+          <path d={dimPath} fillRule="evenodd" />
+        </svg>
+      </div>
       {rect && <div className="sofia-spot pointer-events-none absolute rounded-2xl transition-all duration-500" style={{ left: rect.left - 6, top: rect.top - 6, width: rect.width + 12, height: rect.height + 12 }} />}
       <div className="sofia-orb pointer-events-none absolute" style={{ left: orbX, top: orbY, width: ORB, height: ORB }} aria-hidden>
         <span className="sofia-halo absolute inset-[-16px] rounded-full" />

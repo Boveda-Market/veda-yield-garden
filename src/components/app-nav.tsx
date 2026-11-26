@@ -37,8 +37,8 @@ export function BottomNav({ active, guest, onSelect }: { active: AppView; guest:
     <ul className="mx-auto flex max-w-lg">
       {items.map(({ key, label, icon: Icon, to }) => {
         const on = active === key;
-        const cls = `flex w-full flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${on ? "text-primary" : "text-muted-foreground"}`;
-        const body = <><Icon size={20} aria-hidden />{t(label)}</>;
+        const cls = `flex w-full flex-col items-center gap-1 py-2.5 text-[11px] font-semibold ${on ? "text-primary" : "text-foreground"}`;
+        const body = <><Icon size={22} strokeWidth={2.4} aria-hidden />{t(label)}</>;
         return <li key={key} data-tour={key} className="flex-1">{guest ? <button type="button" aria-current={on ? "page" : undefined} className={cls} onClick={() => onSelect(key)}>{body}</button> : <Link to={to} aria-current={on ? "page" : undefined} className={cls}>{body}</Link>}</li>;
       })}
     </ul>
