@@ -84,3 +84,5 @@
 - [x] FAQ del inicio: «¿Cuál es el mínimo para empezar…?» sustituida por «¿Puedo retirar las monedas directamente (Bitcoin, Trump, etc.) o solo dólares?» (ES/EN)
 - [x] FAQ del inicio: quitada la pregunta aparte «¿Puedo retirar las monedas directamente…?» (la respuesta unificada de «¿Tengo que comprar Bitcoin…?» ya cubre la salida en dólares)
 - [x] Guía «Trae tus propias monedas»: paso 4 describe el cambio con el botón «Cambiar» de Billetera (ES/EN)
+- [x] Hoja de cambio con estilo Jupiter (moneda a la izquierda, monto a la derecha, 50%/Máx, flecha para invertir)
+- [x] Logo oficial de Jupiter en la hoja de cambio: insignia «Powered by Jupiter» con enlace a jup.ag

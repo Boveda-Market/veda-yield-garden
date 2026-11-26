@@ -1,3 +1,4 @@
+import { PoweredBy } from "@/components/powered-by";
 import { ServiceFeeLabel } from "@/components/service-fee-label";
 import { ActionSuccess } from "@/components/action-success";
 import { TokenIcon } from "@/components/token-icon";
@@ -166,5 +167,6 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
       void onConfirm(current).then(() => { setDone(current); clear(); }).catch(() => {});
     }}>{busy ? t("Procesando…") : t("Confirmar y firmar cambio")}</Button>
     {!compact && <p className="text-xs text-muted-foreground">{t("La cotización no mueve tus fondos. El costo de red se paga aparte en SOL y lo verás en tu wallet antes de firmar.")}</p>}
+    {!compact && <PoweredBy brand="jupiter" asLink label="Powered by" className="pt-1" />}
   </div>;
 }

@@ -5,6 +5,7 @@ const BRANDS = {
   coinbase: { src: "/brands/coinbase.svg", name: "Coinbase", wide: false, square: false },
   meteora: { src: "/brands/meteora.svg", name: "Meteora", wide: false, square: false, site: "https://meteora.ag" },
   privy: { src: "/brands/privy-mark.png", name: "Privy", wide: false, square: true, site: "https://www.privy.io/" },
+  jupiter: { src: "/brands/jupiter.svg", name: "Jupiter", wide: false, square: true, site: "https://jup.ag" },
 } as const;
 
 /** Small provider attribution with the official logo. Plain text by default; `asLink` turns it into a link to the provider's site. */
