@@ -7,7 +7,7 @@ import { Dismissible } from "@/components/dismissible";
 import { PoweredBy } from "@/components/powered-by";
 import { TokenIcon } from "@/components/token-icon";
 import { LiveEarnings } from "./live-earnings";
-import { useT, useLocale } from "@/lib/i18n";
+import { useT, useLocale, useI18n } from "@/lib/i18n";
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
 import { Suspense, useEffect, useState } from "react";
 import { lazyWithReload } from "@/lib/lazy-reload";
@@ -50,10 +50,11 @@ function AccessLoading() { return <BootSplash />; }
 /** Signed-out visit to a private screen: go straight to sign-in (no intermediate button) and come back here after. */
 function ToSignIn() {
   const navigate = useNavigate();
+  const { lang } = useI18n();
   useEffect(() => {
     try { sessionStorage.setItem("boveda:after-login", window.location.pathname + window.location.search); } catch { /* ignore */ }
-    void navigate({ to: "/", hash: "acceso", replace: true });
-  }, [navigate]);
+    void navigate({ to: lang === "en" ? "/en/sign-in" : "/acceso", replace: true });
+  }, [navigate, lang]);
   return <BootSplash />;
 }
 

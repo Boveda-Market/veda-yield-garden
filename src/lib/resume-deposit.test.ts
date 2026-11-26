@@ -1,9 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { resumeStep, clearResumePlay, fitResumeAmount, newFundsArrived, peekResumeDeposit, peekResumePlay, RESUME_KEY, RESUME_PLAY_KEY, saveResumeDeposit, saveResumePlay, takeResumeDeposit, savePendingDeposit, peekPendingDeposit, clearPendingDeposit } from "./resume-deposit";
+import { resumeStep, clearResumePlay, fitResumeAmount, newFundsArrived, peekResumeDeposit, peekResumePlay, RESUME_KEY, RESUME_PLAY_KEY, saveResumeDeposit, saveResumePlay, takeResumeDeposit, savePendingDeposit, peekPendingDeposit, peekSessionPendingDeposit, clearPendingDeposit } from "./resume-deposit";
 
 function memory() { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), removeItem: (k: string) => void m.delete(k), has: (k: string) => m.has(k) }; }
 
 describe("resume after topping up", () => {
+  it("does not reopen a visitor draft on reload before verified sign-in", () => {
+    const s = memory(); savePendingDeposit({ vaultId: "btc", amount: "20" }, s, 1000);
+    expect(peekSessionPendingDeposit(false, null, s, 2000)).toBeNull();
+    expect(peekSessionPendingDeposit(false, "wallet", s, 2000)).toBeNull();
+    expect(peekPendingDeposit(s, 2000)?.amount).toBe("20");
+  });
+  it("waits for the wallet after sign-in, then restores the original draft", () => {
+    const s = memory(); savePendingDeposit({ vaultId: "btc", amount: "20" }, s, 1000);
+    expect(peekSessionPendingDeposit(true, null, s, 2000)).toBeNull();
+    expect(peekSessionPendingDeposit(true, "wallet", s, 2000)).toEqual({ vaultId: "btc", amount: "20", at: 1000 });
+  });
   it("peek keeps the pending deposit until the dollars arrive", () => {
     const s = memory(); saveResumeDeposit({ vaultId: "trump", amount: "20" }, s, 1000);
     expect(peekResumeDeposit(s, 2000)?.vaultId).toBe("trump");

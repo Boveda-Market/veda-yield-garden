@@ -98,3 +98,5 @@
 - [x] Menú principal: reemplazar «Por qué tus fondos están seguros» por «Blog» (ES/EN).
 - [x] Blog de Meteora: analogía de la casa de cambio en tres viñetas de pizarra, en español e inglés.
 - [x] Portafolio: corregir la explicación de capitalización conjunta y sugerir un índice de mercado para las bóvedas activas, separado del saldo y las ganancias.
+- [x] Auditar recorridos de usuarios nuevos ES/EN y navegación móvil/escritorio: portadas, explicación, acceso Google/email, exploración, depósitos/jugadas de visitantes y destinos privados; corregidos acceso desde páginas privadas, reapertura sin sesión y traducciones. 724 pruebas aprobadas.
+- [ ] Verificar registro completo, primera recarga y primer depósito con una sesión Privy autorizada (requiere completar Google o el código del titular; no mover fondos durante la auditoría).

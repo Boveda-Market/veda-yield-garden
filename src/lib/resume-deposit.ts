@@ -47,6 +47,10 @@ export function clearPendingDeposit(store: Pick<Storage, "removeItem"> = ls()) {
 export function peekPendingDeposit(store: Pick<Storage, "getItem" | "removeItem"> = ls(), now = Date.now()): ResumeDeposit | null {
   return peek<ResumeDeposit>(PENDING_DEPOSIT_KEY, (r) => typeof r.vaultId === "string" && typeof r.amount === "string" && /^\d+(\.\d{1,6})?$/.test(r.amount) && (decimalToUnits(r.amount, 6) ?? 0n) > 0n && (decimalToUnits(r.amount, 6) ?? 0n) <= RESUME_MAX_MICRO, store, now, DEPOSIT_RESUME_MAX_MS);
 }
+/** A saved visitor draft is not a session: reopen only after verified access and wallet readiness. */
+export function peekSessionPendingDeposit(authenticated: boolean, wallet: string | null | undefined, store: Pick<Storage, "getItem" | "removeItem"> = ls(), now = Date.now()): ResumeDeposit | null {
+  return authenticated && wallet ? peekPendingDeposit(store, now) : null;
+}
 /** Reads and clears the pending deposit. */
 export function takeResumeDeposit(store: Pick<Storage, "getItem" | "removeItem"> = ls(), now = Date.now()): ResumeDeposit | null {
   const r = peekResumeDeposit(store, now);

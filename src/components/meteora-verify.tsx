@@ -53,7 +53,7 @@ function VerifyBody() {
 export function VerifyPoolsLink() {
   const t = useT();
   return <Dialog>
-    <DialogTrigger className="text-[11px] font-semibold text-primary underline underline-offset-2">{t("Verifica las bovedas oficiales aquí ↗")}</DialogTrigger>
+    <DialogTrigger className="text-[11px] font-semibold text-primary underline underline-offset-2">{t("Verifica las bóvedas oficiales aquí ↗")}</DialogTrigger>
     <ActionSheetContent>
       <DialogTitle className="pr-10 font-display text-xl">{t("Verifica las bóvedas en Meteora")}</DialogTitle>
       <DialogDescription className="sr-only">{t("Direcciones públicas de cada pool y enlaces oficiales para comprobarlas.")}</DialogDescription>

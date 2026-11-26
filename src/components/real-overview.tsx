@@ -22,7 +22,7 @@ import { NeonLoader, Skeleton } from "@/components/neon-loader";
 import { VAULTS, type Vault } from "@/lib/vaults";
 import { Suspense, useEffect, useState } from "react";
 
-import { peekPendingDeposit, savePendingDeposit, clearPendingDeposit, clearResumeDeposit } from "@/lib/resume-deposit";
+import { peekSessionPendingDeposit, savePendingDeposit, clearPendingDeposit, clearResumeDeposit } from "@/lib/resume-deposit";
 import { lazyWithReload } from "@/lib/lazy-reload";
 import { DepositSimulation } from "@/components/deposit-simulation";
 import { WithdrawalSimulation } from "@/components/withdrawal-simulation";
@@ -54,10 +54,10 @@ export function RealOverview({ walletAddress, onDetails, portfolioOnly = false }
   const [loginFor, setLoginFor] = useState<Vault | null>(null);
   // Restore the intent, not an old quote or permission; also survives a closed ordinary tab.
   useEffect(() => {
-    const pending = peekPendingDeposit();
+    const pending = peekSessionPendingDeposit(session.authenticated, walletAddress);
     const v = VAULTS.find((x) => x.id === pending?.vaultId);
     if (pending && v && isOperableVault(v.id)) { setDepositAmount(pending.amount); setSimulationVault(v); }
-  }, [walletAddress]);
+  }, [walletAddress, session.authenticated]);
   const vaultYields = useQueries({ queries: VAULTS.map((v) => poolYieldOptions(v.pool)) });
   const aprs = Object.fromEntries(VAULTS.map((v, i) => [v.id, vaultYields[i]?.data?.apr ?? null]));
   const migrate = (p: import("@/lib/solana-data").ChainPosition, target: Vault, rotate = false) => { if (walletAddress && isOperableVault(p.vaultId) && isOperableVault(target.id) && target.id !== p.vaultId && !p.locked) setWithdrawal({ position: p.address, vaultId: p.vaultId, migrateTo: target, ...(rotate ? { rotate: true } : {}) }); };
