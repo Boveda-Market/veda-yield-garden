@@ -1,5 +1,13 @@
 /** English strings for the homepage, wallet, portfolio, operation dialogs, affiliates and account redesigns. */
 export const extra: Record<string, string> = {
+  "Dale una nueva función a tus monedas": "Give your coins a new purpose",
+  "Deja la gestión al Piloto Automático": "Let Autopilot handle the management",
+  "Reinvertir puede aumentar los intereses futuros con el tiempo.": "Reinvesting can increase future interest over time.",
+  "Conecta tus monedas con la liquidez de pools públicos.": "Connect your coins to public pool liquidity.",
+  "La actividad del mercado genera intereses variables. El Piloto Automático gestiona la reinversión.": "Market activity generates variable interest. Autopilot manages reinvestment.",
+  "Bóvedas inteligentes y reinversión automática, sin vigilar gráficas.": "Smart vaults and automatic reinvestment, without watching charts.",
+  "Información legal": "Legal information",
+  "Bóveda Market solo conecta y automatiza; no custodia tus fondos. Los intereses son variables y puedes perder capital.": "Bóveda Market only connects and automates; it does not hold your funds. Interest is variable and you can lose capital.",
   "Tu inicio en Bóveda Market": "Getting started with Bóveda Market",
   "Descubre": "Discover",
   "Tu cuenta": "Your account",

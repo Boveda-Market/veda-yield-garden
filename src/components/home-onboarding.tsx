@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, Bot, CircleDollarSign, ShieldCheck } from "lucid
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/brand-logo";
+import { guidesIndexHref } from "@/components/guide-layout";
 import { EntryAccess } from "@/components/entry-access";
 import { PoweredBy } from "@/components/powered-by";
 import { VerifyPoolsLink } from "@/components/meteora-verify";
@@ -21,22 +22,21 @@ function Journey({ step }: { step: number }) {
 }
 
 function TrustLine() {
-  const { t } = useI18n();
-  return <div className="space-y-3 text-center"><div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2"><PoweredBy brand="meteora" asLink /><span className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><img src="/brands/privy-mark.png" alt="" className="h-4 w-4" />Secured by <span className="font-semibold text-foreground">Privy</span></span></div><p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck size={14} className="text-primary" />{t("Bóveda Market no custodia tus fondos.")}</p></div>;
+  return <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center"><PoweredBy brand="meteora" asLink /><span className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><img src="/brands/privy-mark.png" alt="" className="h-4 w-4" />Secured by <span className="font-semibold text-foreground">Privy</span></span></div>;
 }
 
 /** Campaign identity stays on the first screen; explanations and authentication are separate steps. */
 export function WelcomeFold({ hero }: { hero: (typeof HERO_VARIANTS)[number] }) {
   const { t, lang } = useI18n();
-  const image = hero.theme === "trump" ? trumpLogo : hero.theme === "gta6" ? (lang === "en" ? gtaTitleEn : gtaTitle) : hero.theme === "doble" ? dobleLogo : "/tokens/btc.svg";
-  const alt = hero.theme === "trump" ? "Trump Coin" : hero.theme === "gta6" ? "GTA6 Coin" : hero.theme === "doble" ? t("Doble o Nada") : "Bitcoin";
-  const title = hero.theme === "trump" ? "Bóveda Trump Coin" : hero.theme === "gta6" ? "Bóveda GTA6 Coin" : hero.theme === "bitcoin" ? "Bitcoin con intereses" : hero.theme === "doble" ? "Doble o Nada" : hero.theme === "compound" ? hero.title : hero.theme === "own" ? "Trae tus monedas" : "Bóvedas inteligentes";
-  const sub = hero.theme === "doble" ? "Predicciones en dólares. Conoce cómo funcionan antes de participar." : hero.theme === "own" ? "Conecta tus monedas con bóvedas inteligentes y deja que el Piloto Automático gestione la reinversión." : "Bóvedas inteligentes y reinversión automática. Descubre cómo funciona antes de abrir tu cuenta.";
-  return <section className="mx-auto flex min-h-[calc(100svh-112px)] max-w-xl flex-col items-center justify-center gap-5 pb-6 pt-2 text-center sm:min-h-[calc(100svh-120px)] sm:gap-6" aria-label={t("Descubre Bóveda Market")}>
+  const image = hero.theme === "trump" ? trumpLogo : hero.theme === "gta6" ? (lang === "en" ? gtaTitleEn : gtaTitle) : hero.theme === "doble" ? dobleLogo : hero.theme === "bitcoin" ? "/tokens/btc.svg" : "/favicon.png";
+  const alt = hero.theme === "trump" ? "Trump Coin" : hero.theme === "gta6" ? "GTA6 Coin" : hero.theme === "doble" ? t("Doble o Nada") : hero.theme === "bitcoin" ? "Bitcoin" : "Bóveda Market";
+  const title = hero.theme === "trump" ? "Bóveda Trump Coin" : hero.theme === "gta6" ? "Bóveda GTA6 Coin" : hero.theme === "bitcoin" ? "Bitcoin con intereses" : hero.theme === "doble" ? "Doble o Nada" : hero.theme === "compound" ? hero.title : hero.theme === "own" ? "Dale una nueva función a tus monedas" : hero.theme === "calm" ? "Deja la gestión al Piloto Automático" : "Bóvedas inteligentes";
+  const sub = hero.theme === "doble" ? "Predicciones en dólares. Conoce cómo funcionan antes de participar." : hero.theme === "compound" ? "Reinvertir puede aumentar los intereses futuros con el tiempo." : hero.theme === "own" ? "Conecta tus monedas con la liquidez de pools públicos." : hero.theme === "trump" || hero.theme === "gta6" || hero.theme === "bitcoin" ? "La actividad del mercado genera intereses variables. El Piloto Automático gestiona la reinversión." : "Bóvedas inteligentes y reinversión automática, sin vigilar gráficas.";
+  return <section className="welcome-palette mx-auto flex min-h-[calc(100svh-132px)] max-w-xl flex-col items-center justify-center gap-3 pb-5 pt-2 text-center sm:gap-5" aria-label={t("Descubre Bóveda Market")}>
     <Journey step={1} />
-    <img src={image} alt={alt} className={hero.theme === "gta6" || hero.theme === "doble" ? "h-16 w-auto max-w-[220px] object-contain sm:h-20" : "h-16 w-16 object-contain sm:h-20 sm:w-20"} />
-    <div><h1 className="font-display text-3xl font-bold leading-tight sm:text-4xl">{t(title)}</h1><p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">{t(sub)}</p></div>
-    <div className="w-full max-w-sm space-y-4"><Button asChild className="h-14 w-full text-base font-bold"><Link to={lang === "en" ? "/en/get-started" : "/empezar"}>{t("Continuar")}<ArrowRight size={18} /></Link></Button><TrustLine /><Button asChild variant="link" className="h-11 text-sm"><Link to={lang === "en" ? "/en/sign-in" : "/acceso"}>{t("¿Ya tienes cuenta? Inicia sesión")}</Link></Button></div>
+    <img src={image} alt={alt} className={hero.theme === "gta6" || hero.theme === "doble" ? "h-12 w-auto max-w-[220px] object-contain sm:h-20" : "h-12 w-12 object-contain sm:h-20 sm:w-20"} />
+    <div><h1 className="font-display text-2xl font-bold leading-tight sm:text-4xl">{t(title)}</h1><p className="mx-auto mt-2 max-w-md text-sm leading-5 text-muted-foreground">{t(sub)}</p></div>
+    <div className="w-full max-w-sm"><Button asChild className="welcome-cta h-13 w-full text-base font-bold"><Link to={lang === "en" ? "/en/get-started" : "/empezar"}>{t("Continuar")}<ArrowRight size={18} /></Link></Button><div className="mt-3"><TrustLine /></div><Button asChild variant="link" className="mt-1 h-11 text-sm"><Link to={lang === "en" ? "/en/sign-in" : "/acceso"}>{t("¿Ya tienes cuenta? Inicia sesión")}</Link></Button><nav aria-label={t("Información legal")} className="flex flex-wrap items-center justify-center gap-1"><Button asChild variant="link" className="h-11 px-1 text-xs text-muted-foreground"><Link to={guidesIndexHref(lang)}>{t("Guías")}</Link></Button><span aria-hidden className="text-muted-foreground">·</span><Button asChild variant="link" className="h-11 px-1 text-xs text-muted-foreground"><Link to="/terminos">{t("Términos y condiciones")}</Link></Button><span aria-hidden className="text-muted-foreground">·</span><Button asChild variant="link" className="h-11 px-1 text-xs text-muted-foreground"><Link to="/privacidad">{t("Privacidad")}</Link></Button></nav><p data-welcome-disclaimer className="text-[11px] leading-4 text-muted-foreground">{t("Bóveda Market solo conecta y automatiza; no custodia tus fondos. Los intereses son variables y puedes perder capital.")}</p></div>
   </section>;
 }
 

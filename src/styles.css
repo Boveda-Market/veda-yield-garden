@@ -466,3 +466,22 @@ html.boveda-returning .boveda-returning-cover { display: contents; }
   --mt-gradient: radial-gradient(120% 90% at 0% 0%, rgba(245, 75, 0, 0.28), transparent 55%), radial-gradient(90% 80% at 100% 100%, rgba(123, 63, 228, 0.25), transparent 60%), #12121c;
 }
 .meteora-skin { background: var(--mt-gradient); }
+
+/* Shared public campaign accents; account and transaction themes remain unchanged. */
+.welcome-palette {
+  --welcome-orange: oklch(0.73 0.19 43);
+  --welcome-pink: oklch(0.74 0.18 350);
+  --welcome-ink: oklch(0.16 0.02 320);
+  --primary: oklch(0.78 0.15 43);
+  --primary-foreground: var(--welcome-ink);
+  --ring: var(--primary);
+  --welcome-gradient: linear-gradient(105deg, var(--welcome-orange), var(--welcome-pink));
+}
+:root.light .welcome-palette {
+  --primary: oklch(0.49 0.18 350);
+}
+.welcome-cta {
+  background-image: var(--welcome-gradient);
+  color: var(--welcome-ink);
+}
+.welcome-cta:hover { filter: brightness(1.06); }
