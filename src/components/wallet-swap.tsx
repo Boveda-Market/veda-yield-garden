@@ -158,7 +158,6 @@ export function WalletSwap({ balances, initialFrom = "USDC", initialAmount = "",
       if (!current || Date.now() - quote.dataUpdatedAt >= QUOTE_TTL || insufficient || busy) return;
       void onConfirm(current).then(() => { setDone(current); clear(); }).catch(() => {});
     }}>{busy ? t("Procesando…") : t("Confirmar y firmar cambio")}</Button>
-    {!compact && <p className="text-xs text-muted-foreground">{t("La cotización no mueve tus fondos. El costo de red se paga aparte en SOL y lo verás en tu wallet antes de firmar.")}</p>}
     {!compact && <PoweredBy brand="jupiter" asLink label="Powered by" className="pt-1" />}
   </div>;
 }

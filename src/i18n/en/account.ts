@@ -39,7 +39,6 @@ export const account: Record<string, string> = {
   "Protección de precio": "Price protection",
   "Actualiza la cotización antes de confirmar.": "Refresh the quote before confirming.",
   "Actualizar cotización": "Refresh quote",
-  "La cotización no mueve tus fondos. El costo de red se paga aparte en SOL y lo verás en tu wallet antes de firmar.": "Getting a quote does not move your funds. Network costs are paid separately in SOL and shown in your wallet before signing.",
   "Hoja": "Leaf",
   "Sol": "Sun",
   "Gema": "Gem",
