@@ -41,7 +41,7 @@ export function GettingStarted() {
   const { t, lang } = useI18n();
   // The screen before sign-in: show exactly what the registration does, in order.
   const signupSteps = [
-    { title: "Creas tu cuenta", body: "Con Google o con email, en un toque." },
+    { title: "Creas tu cuenta", body: "Con Google (recomendado) o con email, en un toque." },
     { title: "Se crea tu billetera digital", body: "El sistema abre una billetera nueva enlazada a tu cuenta." },
     { title: "Abres tu bóveda o exploras", body: "Sigue los pasos para abrir tu nueva bóveda, o explora la app para conocer más." },
   ];
