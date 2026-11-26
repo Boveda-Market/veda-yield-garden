@@ -4,4 +4,4 @@
 - English twins of public pages live in en/ reusing the Spanish component; langLinks (seo-lang.ts) sets self-canonical + hreflang, and /en paths force English so Google indexes each language.
 - Home versions live at their own addresses (HERO_SLUGS in hero-variants.ts, one thin route per slug rendering Landing with a pinned variant); "/" keeps the weighted rotation and 301-redirects legacy ?v=N links so old campaign links keep working.
 - Home footer legal notes (HomeDisclaimers in index.tsx) render on every home version so purpose, non-affiliation and risk text stay in one place.
-- Home access card leads with «Continuar a la app» (visitor browsing); the full sign-in (EntryAccess) opens inline only from «¿Ya tienes cuenta? Inicia sesión», so explanation and pool proof come before sign-up.
+- Home «Continuar» leads to the public explanation (/empezar, /en/get-started), then account access (/acceso, /en/sign-in); returning users can skip the explanation, while EntryAccess preserves the single secure session engine.

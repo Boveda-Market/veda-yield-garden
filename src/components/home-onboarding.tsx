@@ -1,0 +1,61 @@
+import type { ReactNode } from "react";
+import { ArrowLeft, ArrowRight, Bot, CircleDollarSign, ShieldCheck } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/brand-logo";
+import { EntryAccess } from "@/components/entry-access";
+import { PoweredBy } from "@/components/powered-by";
+import { VerifyPoolsLink } from "@/components/meteora-verify";
+import { useI18n } from "@/lib/i18n";
+import type { HERO_VARIANTS } from "@/lib/hero-variants";
+import trumpLogo from "@/assets/trump-logo.png";
+import gtaTitle from "@/assets/gta6-vault-title.png";
+import gtaTitleEn from "@/assets/gta6-vault-title-en.png";
+import dobleLogo from "@/assets/doble-o-nada-logo.png";
+
+function Journey({ step }: { step: number }) {
+  const { t } = useI18n();
+  return <ol aria-label={t("Tu inicio en Bóveda Market")} className="mx-auto flex max-w-sm items-center justify-center gap-3 text-[11px]">
+    {["Descubre", "Cómo funciona", "Tu cuenta"].map((label, index) => <li key={label} aria-current={step === index + 1 ? "step" : undefined} className={`flex items-center gap-1.5 ${step === index + 1 ? "font-semibold text-primary" : "text-muted-foreground"}`}><span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${step === index + 1 ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>{index + 1}</span>{t(label)}</li>)}
+  </ol>;
+}
+
+function TrustLine() {
+  const { t } = useI18n();
+  return <div className="space-y-3 text-center"><div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2"><PoweredBy brand="meteora" asLink /><span className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><img src="/brands/privy-mark.png" alt="" className="h-4 w-4" />Secured by <span className="font-semibold text-foreground">Privy</span></span></div><p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck size={14} className="text-primary" />{t("Bóveda Market no custodia tus fondos.")}</p></div>;
+}
+
+/** Campaign identity stays on the first screen; explanations and authentication are separate steps. */
+export function WelcomeFold({ hero }: { hero: (typeof HERO_VARIANTS)[number] }) {
+  const { t, lang } = useI18n();
+  const image = hero.theme === "trump" ? trumpLogo : hero.theme === "gta6" ? (lang === "en" ? gtaTitleEn : gtaTitle) : hero.theme === "doble" ? dobleLogo : "/tokens/btc.svg";
+  const alt = hero.theme === "trump" ? "Trump Coin" : hero.theme === "gta6" ? "GTA6 Coin" : hero.theme === "doble" ? t("Doble o Nada") : "Bitcoin";
+  const title = hero.theme === "trump" ? "Bóveda Trump Coin" : hero.theme === "gta6" ? "Bóveda GTA6 Coin" : hero.theme === "bitcoin" ? "Bitcoin con intereses" : hero.theme === "doble" ? "Doble o Nada" : hero.theme === "compound" ? hero.title : hero.theme === "own" ? "Trae tus monedas" : "Bóvedas inteligentes";
+  const sub = hero.theme === "doble" ? "Predicciones en dólares. Conoce cómo funcionan antes de participar." : hero.theme === "own" ? "Conecta tus monedas con bóvedas inteligentes y deja que el Piloto Automático gestione la reinversión." : "Bóvedas inteligentes y reinversión automática. Descubre cómo funciona antes de abrir tu cuenta.";
+  return <section className="mx-auto flex min-h-[calc(100svh-112px)] max-w-xl flex-col items-center justify-center gap-5 pb-6 pt-2 text-center sm:min-h-[calc(100svh-120px)] sm:gap-6" aria-label={t("Descubre Bóveda Market")}>
+    <Journey step={1} />
+    <img src={image} alt={alt} className={hero.theme === "gta6" || hero.theme === "doble" ? "h-16 w-auto max-w-[220px] object-contain sm:h-20" : "h-16 w-16 object-contain sm:h-20 sm:w-20"} />
+    <div><h1 className="font-display text-3xl font-bold leading-tight sm:text-4xl">{t(title)}</h1><p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">{t(sub)}</p></div>
+    <div className="w-full max-w-sm space-y-4"><Button asChild className="h-14 w-full text-base font-bold"><Link to={lang === "en" ? "/en/get-started" : "/empezar"}>{t("Continuar")}<ArrowRight size={18} /></Link></Button><TrustLine /><Button asChild variant="link" className="h-11 text-sm"><Link to={lang === "en" ? "/en/sign-in" : "/acceso"}>{t("¿Ya tienes cuenta? Inicia sesión")}</Link></Button></div>
+  </section>;
+}
+
+function IntroShell({ step, children }: { step: number; children: ReactNode }) {
+  const { t, lang } = useI18n();
+  return <div className="min-h-svh bg-background text-foreground"><header className="mx-auto flex max-w-xl items-center justify-between px-5 pb-4 pt-14 sm:pt-16"><Button asChild variant="ghost" size="icon" className="h-11 w-11" aria-label={t("Atrás")}><Link to={step === 3 ? (lang === "en" ? "/en/get-started" : "/empezar") : (lang === "en" ? "/en" : "/")}><ArrowLeft size={20} /></Link></Button><BrandLogo /><span className="w-11" aria-hidden /></header><main className="mx-auto flex min-h-[calc(100svh-116px)] max-w-xl flex-col px-5"><Journey step={step} />{children}</main></div>;
+}
+
+export function GettingStarted() {
+  const { t, lang } = useI18n();
+  const points = [
+    { icon: CircleDollarSign, title: "Empiezas con dólares", body: "Añades dólares y eliges una bóveda inteligente." },
+    { icon: Bot, title: "El Piloto Automático reinvierte", body: "Fuera del rango: arriba reinvierte ganancias; abajo las deja en dólares disponibles." },
+    { icon: ShieldCheck, title: "Tú mantienes el control", body: "Bóveda Market solo conecta y automatiza; no custodia tus depósitos." },
+  ];
+  return <IntroShell step={2}><div className="pb-4 pt-4"><h1 className="text-center font-display text-2xl font-bold">{t("Así funciona")}</h1><ol className="mt-4 divide-y divide-border">{points.map(({ icon: Icon, title, body }) => <li key={title} className="flex gap-3 py-2.5 first:pt-0"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary text-primary"><Icon size={21} /></span><div className="min-w-0"><h2 className="font-display text-base font-semibold">{t(title)}</h2><p className="mt-1 text-sm leading-5 text-muted-foreground">{t(body)}</p></div></li>)}</ol><div className="mt-1 flex justify-center"><VerifyPoolsLink /></div><p className="mt-2 text-center text-xs leading-5 text-muted-foreground">{t("Los intercambios del pool generan intereses variables. Reinvertir no garantiza ganancias; puedes perder capital.")}</p><details className="mt-3 border-t border-border pt-3 text-sm"><summary className="cursor-pointer font-semibold text-primary">{t("Antes de depositar")}</summary><p className="pt-2 text-sm leading-6 text-muted-foreground">{t("Tu depósito aporta liquidez a un pool público. El Piloto Automático no actúa en cada fluctuación y puedes desactivarlo. Revisas los importes y condiciones antes de autorizar. El cierre depende de la liquidez y del mercado. Los dólares digitales no son un depósito bancario asegurado.")}</p><div className="mt-2 flex gap-4"><Link to="/terminos" className="text-primary underline">{t("Términos")}</Link><Link to="/privacidad" className="text-primary underline">{t("Privacidad")}</Link></div></details></div><div className="sticky bottom-0 mt-auto border-t border-border bg-background pb-5 pt-3"><Button asChild className="h-14 w-full text-base font-bold"><Link to={lang === "en" ? "/en/sign-in" : "/acceso"}>{t("Continuar a mi cuenta")}<ArrowRight size={18} /></Link></Button></div></IntroShell>;
+}
+
+export function AccountAccess() {
+  const { t } = useI18n();
+  return <IntroShell step={3}><div className="mx-auto w-full max-w-sm pb-8 pt-6"><h1 className="text-center font-display text-2xl font-bold">{t("Bienvenido a Bóveda Market")}</h1><p className="mt-2 text-center text-sm text-muted-foreground">{t("Crea tu cuenta o entra de forma segura.")}</p><div className="mt-5 [&>div]:mt-0"><EntryAccess /></div></div></IntroShell>;
+}

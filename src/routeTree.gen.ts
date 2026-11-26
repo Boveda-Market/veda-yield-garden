@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AccesoRouteImport } from './routes/acceso'
 import { Route as ActividadRouteImport } from './routes/actividad'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/app'
@@ -19,6 +20,7 @@ import { Route as BovedasInteligentesRouteImport } from './routes/bovedas-inteli
 import { Route as ClasicaRouteImport } from './routes/clasica'
 import { Route as CuentaRouteImport } from './routes/cuenta'
 import { Route as DobleONadaRouteImport } from './routes/doble-o-nada'
+import { Route as EmpezarRouteImport } from './routes/empezar'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as Gta6RouteImport } from './routes/gta6'
 import { Route as InteresCompuestoRouteImport } from './routes/interes-compuesto'
@@ -44,8 +46,10 @@ import { Route as EnClasicaRouteImport } from './routes/en/clasica'
 import { Route as EnCompoundInterestRouteImport } from './routes/en/compound-interest'
 import { Route as EnDobleONadaRouteImport } from './routes/en/doble-o-nada'
 import { Route as EnFaqRouteImport } from './routes/en/faq'
+import { Route as EnGetStartedRouteImport } from './routes/en/get-started'
 import { Route as EnGta6RouteImport } from './routes/en/gta6'
 import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
+import { Route as EnSignInRouteImport } from './routes/en/sign-in'
 import { Route as EnSinAnsiedadRouteImport } from './routes/en/sin-ansiedad'
 import { Route as EnSmartVaultsRouteImport } from './routes/en/smart-vaults'
 import { Route as EnStatusRouteImport } from './routes/en/status'
@@ -87,6 +91,11 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccesoRoute = AccesoRouteImport.update({
+  id: '/acceso',
+  path: '/acceso',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ActividadRoute = ActividadRouteImport.update({
   id: '/actividad',
   path: '/actividad',
@@ -125,6 +134,11 @@ const CuentaRoute = CuentaRouteImport.update({
 const DobleONadaRoute = DobleONadaRouteImport.update({
   id: '/doble-o-nada',
   path: '/doble-o-nada',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmpezarRoute = EmpezarRouteImport.update({
+  id: '/empezar',
+  path: '/empezar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -252,6 +266,11 @@ const EnFaqRoute = EnFaqRouteImport.update({
   path: '/en/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnGetStartedRoute = EnGetStartedRouteImport.update({
+  id: '/en/get-started',
+  path: '/en/get-started',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnGta6Route = EnGta6RouteImport.update({
   id: '/en/gta6',
   path: '/en/gta6',
@@ -260,6 +279,11 @@ const EnGta6Route = EnGta6RouteImport.update({
 const EnPrivacyRoute = EnPrivacyRouteImport.update({
   id: '/en/privacy',
   path: '/en/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnSignInRoute = EnSignInRouteImport.update({
+  id: '/en/sign-in',
+  path: '/en/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnSinAnsiedadRoute = EnSinAnsiedadRouteImport.update({
@@ -431,6 +455,7 @@ const LovableEmailTransactionalPreviewRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/acceso': typeof AccesoRoute
   '/actividad': typeof ActividadRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
@@ -439,6 +464,7 @@ export interface FileRoutesByFullPath {
   '/clasica': typeof ClasicaRoute
   '/cuenta': typeof CuentaRoute
   '/doble-o-nada': typeof DobleONadaRoute
+  '/empezar': typeof EmpezarRoute
   '/faq': typeof FaqRoute
   '/gta6': typeof Gta6Route
   '/interes-compuesto': typeof InteresCompuestoRoute
@@ -463,8 +489,10 @@ export interface FileRoutesByFullPath {
   '/en/compound-interest': typeof EnCompoundInterestRoute
   '/en/doble-o-nada': typeof EnDobleONadaRoute
   '/en/faq': typeof EnFaqRoute
+  '/en/get-started': typeof EnGetStartedRoute
   '/en/gta6': typeof EnGta6Route
   '/en/privacy': typeof EnPrivacyRoute
+  '/en/sign-in': typeof EnSignInRoute
   '/en/sin-ansiedad': typeof EnSinAnsiedadRoute
   '/en/smart-vaults': typeof EnSmartVaultsRoute
   '/en/status': typeof EnStatusRoute
@@ -500,6 +528,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/acceso': typeof AccesoRoute
   '/actividad': typeof ActividadRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
@@ -508,6 +537,7 @@ export interface FileRoutesByTo {
   '/clasica': typeof ClasicaRoute
   '/cuenta': typeof CuentaRoute
   '/doble-o-nada': typeof DobleONadaRoute
+  '/empezar': typeof EmpezarRoute
   '/faq': typeof FaqRoute
   '/gta6': typeof Gta6Route
   '/interes-compuesto': typeof InteresCompuestoRoute
@@ -532,8 +562,10 @@ export interface FileRoutesByTo {
   '/en/compound-interest': typeof EnCompoundInterestRoute
   '/en/doble-o-nada': typeof EnDobleONadaRoute
   '/en/faq': typeof EnFaqRoute
+  '/en/get-started': typeof EnGetStartedRoute
   '/en/gta6': typeof EnGta6Route
   '/en/privacy': typeof EnPrivacyRoute
+  '/en/sign-in': typeof EnSignInRoute
   '/en/sin-ansiedad': typeof EnSinAnsiedadRoute
   '/en/smart-vaults': typeof EnSmartVaultsRoute
   '/en/status': typeof EnStatusRoute
@@ -570,6 +602,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/acceso': typeof AccesoRoute
   '/actividad': typeof ActividadRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
@@ -578,6 +611,7 @@ export interface FileRoutesById {
   '/clasica': typeof ClasicaRoute
   '/cuenta': typeof CuentaRoute
   '/doble-o-nada': typeof DobleONadaRoute
+  '/empezar': typeof EmpezarRoute
   '/faq': typeof FaqRoute
   '/gta6': typeof Gta6Route
   '/interes-compuesto': typeof InteresCompuestoRoute
@@ -602,8 +636,10 @@ export interface FileRoutesById {
   '/en/compound-interest': typeof EnCompoundInterestRoute
   '/en/doble-o-nada': typeof EnDobleONadaRoute
   '/en/faq': typeof EnFaqRoute
+  '/en/get-started': typeof EnGetStartedRoute
   '/en/gta6': typeof EnGta6Route
   '/en/privacy': typeof EnPrivacyRoute
+  '/en/sign-in': typeof EnSignInRoute
   '/en/sin-ansiedad': typeof EnSinAnsiedadRoute
   '/en/smart-vaults': typeof EnSmartVaultsRoute
   '/en/status': typeof EnStatusRoute
@@ -641,6 +677,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/acceso'
     | '/actividad'
     | '/admin'
     | '/app'
@@ -649,6 +686,7 @@ export interface FileRouteTypes {
     | '/clasica'
     | '/cuenta'
     | '/doble-o-nada'
+    | '/empezar'
     | '/faq'
     | '/gta6'
     | '/interes-compuesto'
@@ -673,8 +711,10 @@ export interface FileRouteTypes {
     | '/en/compound-interest'
     | '/en/doble-o-nada'
     | '/en/faq'
+    | '/en/get-started'
     | '/en/gta6'
     | '/en/privacy'
+    | '/en/sign-in'
     | '/en/sin-ansiedad'
     | '/en/smart-vaults'
     | '/en/status'
@@ -710,6 +750,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/acceso'
     | '/actividad'
     | '/admin'
     | '/app'
@@ -718,6 +759,7 @@ export interface FileRouteTypes {
     | '/clasica'
     | '/cuenta'
     | '/doble-o-nada'
+    | '/empezar'
     | '/faq'
     | '/gta6'
     | '/interes-compuesto'
@@ -742,8 +784,10 @@ export interface FileRouteTypes {
     | '/en/compound-interest'
     | '/en/doble-o-nada'
     | '/en/faq'
+    | '/en/get-started'
     | '/en/gta6'
     | '/en/privacy'
+    | '/en/sign-in'
     | '/en/sin-ansiedad'
     | '/en/smart-vaults'
     | '/en/status'
@@ -779,6 +823,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/acceso'
     | '/actividad'
     | '/admin'
     | '/app'
@@ -787,6 +832,7 @@ export interface FileRouteTypes {
     | '/clasica'
     | '/cuenta'
     | '/doble-o-nada'
+    | '/empezar'
     | '/faq'
     | '/gta6'
     | '/interes-compuesto'
@@ -811,8 +857,10 @@ export interface FileRouteTypes {
     | '/en/compound-interest'
     | '/en/doble-o-nada'
     | '/en/faq'
+    | '/en/get-started'
     | '/en/gta6'
     | '/en/privacy'
+    | '/en/sign-in'
     | '/en/sin-ansiedad'
     | '/en/smart-vaults'
     | '/en/status'
@@ -849,6 +897,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AccesoRoute: typeof AccesoRoute
   ActividadRoute: typeof ActividadRoute
   AdminRoute: typeof AdminRoute
   AppRoute: typeof AppRoute
@@ -857,6 +906,7 @@ export interface RootRouteChildren {
   ClasicaRoute: typeof ClasicaRoute
   CuentaRoute: typeof CuentaRoute
   DobleONadaRoute: typeof DobleONadaRoute
+  EmpezarRoute: typeof EmpezarRoute
   FaqRoute: typeof FaqRoute
   Gta6Route: typeof Gta6Route
   InteresCompuestoRoute: typeof InteresCompuestoRoute
@@ -881,8 +931,10 @@ export interface RootRouteChildren {
   EnCompoundInterestRoute: typeof EnCompoundInterestRoute
   EnDobleONadaRoute: typeof EnDobleONadaRoute
   EnFaqRoute: typeof EnFaqRoute
+  EnGetStartedRoute: typeof EnGetStartedRoute
   EnGta6Route: typeof EnGta6Route
   EnPrivacyRoute: typeof EnPrivacyRoute
+  EnSignInRoute: typeof EnSignInRoute
   EnSinAnsiedadRoute: typeof EnSinAnsiedadRoute
   EnSmartVaultsRoute: typeof EnSmartVaultsRoute
   EnStatusRoute: typeof EnStatusRoute
@@ -930,6 +982,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/acceso': {
+      id: '/acceso'
+      path: '/acceso'
+      fullPath: '/acceso'
+      preLoaderRoute: typeof AccesoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/actividad': {
@@ -986,6 +1045,13 @@ declare module '@tanstack/react-router' {
       path: '/doble-o-nada'
       fullPath: '/doble-o-nada'
       preLoaderRoute: typeof DobleONadaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/empezar': {
+      id: '/empezar'
+      path: '/empezar'
+      fullPath: '/empezar'
+      preLoaderRoute: typeof EmpezarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -1163,6 +1229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnFaqRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/get-started': {
+      id: '/en/get-started'
+      path: '/en/get-started'
+      fullPath: '/en/get-started'
+      preLoaderRoute: typeof EnGetStartedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/gta6': {
       id: '/en/gta6'
       path: '/en/gta6'
@@ -1175,6 +1248,13 @@ declare module '@tanstack/react-router' {
       path: '/en/privacy'
       fullPath: '/en/privacy'
       preLoaderRoute: typeof EnPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/sign-in': {
+      id: '/en/sign-in'
+      path: '/en/sign-in'
+      fullPath: '/en/sign-in'
+      preLoaderRoute: typeof EnSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/sin-ansiedad': {
@@ -1393,6 +1473,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AccesoRoute: AccesoRoute,
   ActividadRoute: ActividadRoute,
   AdminRoute: AdminRoute,
   AppRoute: AppRoute,
@@ -1401,6 +1482,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClasicaRoute: ClasicaRoute,
   CuentaRoute: CuentaRoute,
   DobleONadaRoute: DobleONadaRoute,
+  EmpezarRoute: EmpezarRoute,
   FaqRoute: FaqRoute,
   Gta6Route: Gta6Route,
   InteresCompuestoRoute: InteresCompuestoRoute,
@@ -1425,8 +1507,10 @@ const rootRouteChildren: RootRouteChildren = {
   EnCompoundInterestRoute: EnCompoundInterestRoute,
   EnDobleONadaRoute: EnDobleONadaRoute,
   EnFaqRoute: EnFaqRoute,
+  EnGetStartedRoute: EnGetStartedRoute,
   EnGta6Route: EnGta6Route,
   EnPrivacyRoute: EnPrivacyRoute,
+  EnSignInRoute: EnSignInRoute,
   EnSinAnsiedadRoute: EnSinAnsiedadRoute,
   EnSmartVaultsRoute: EnSmartVaultsRoute,
   EnStatusRoute: EnStatusRoute,

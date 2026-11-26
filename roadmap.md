@@ -72,3 +72,4 @@
 - [x] Estilizar la tarjeta de verificación de pools: filas completas, dirección legible, enlaces sin saltos de línea
 - [x] Portada de interés compuesto ES/EN: simulador educativo, regla de subidas/bajadas y acceso a la app; verificada en móvil/escritorio y 18 pruebas de cálculos/rotación.
 - [x] Aclarar en la portada y verificación que Bóveda Market solo conecta y automatiza; los pools generan intereses y no custodiamos fondos.
+- [x] Recorrido de tres pasos ES/EN: portada compacta → explicación y verificación → acceso seguro; botones verificados en 360×640, 390×844 y escritorio, sin cambiar el acceso existente.
