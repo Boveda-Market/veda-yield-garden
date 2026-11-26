@@ -88,26 +88,30 @@ export function AppTour({ open, onOpenChange }: { open: boolean; onOpenChange: (
   </>;
 }
 
-type Station = { target: string | null; mock: () => React.ReactNode; tone: "btc" | "met" | "trump"; area: string; text: string };
+type Station = { target: string | null; tone: "btc" | "met" | "trump"; area: string; text: string };
 const STATIONS: Station[] = [
-  { target: "#sofia-tour-banner + *", mock: VaultMock, tone: "btc", area: "Bóvedas", text: "Aquí tus dólares trabajan en mercados públicos y generan comisiones 24/7. El Piloto Automático vigila tu posición por ti." },
-  { target: "[data-tour='markets']", mock: PredictMock, tone: "trump", area: "Doble o Nada", text: "Rondas de 15 minutos: eliges si Bitcoin, Ethereum o Solana sube o baja, siempre en dólares." },
-  { target: "[data-tour='portfolio']", mock: PortfolioMock, tone: "met", area: "Mi Portafolio", text: "Tu panel: ves cuánto depositaste, cuánto has ganado y cosechas tus intereses cuando quieras." },
-  { target: "[data-tour='wallet']", mock: WalletMock, tone: "btc", area: "Billetera", text: "Tus dólares disponibles. Recargas con tarjeta o banco y retiras cuando quieras, sin plazos." },
-  { target: null, mock: SafetyMock, tone: "trump", area: "Seguridad", text: "Solo tú autorizas cada movimiento con tu huella o Face ID. Si tienes dudas mientras exploras, tócame aquí abajo." },
+  { target: "#sofia-tour-banner + *", tone: "btc", area: "Bóvedas", text: "Aquí tus dólares trabajan en mercados públicos y generan comisiones 24/7 de forma automática." },
+  { target: "[data-tour='markets']", tone: "trump", area: "Doble o Nada", text: "Rondas de 15 minutos en dólares: pronosticas si el precio sube o baja y cobras tu premio si aciertas." },
+  { target: "[data-tour='portfolio']", tone: "met", area: "Mi Portafolio", text: "Tu centro de control: mira cuánto has ganado y cosecha tus intereses cuando quieras en un solo toque." },
+  { target: "[data-tour='wallet']", tone: "btc", area: "Billetera", text: "Tus dólares listos para usar: añade fondos con tarjeta o banco y retira a tu cuenta sin plazos." },
+  { target: null, tone: "trump", area: "Seguridad", text: "Solo tú autorizas movimientos con tu huella o Face ID. Si tienes dudas mientras exploras, tócame aquí abajo." },
 ];
 const ORB = 48;
 
-/** Sofía flies between real screen areas and opens a compact preview card at each station. */
+/** Sofía flies like a fairy guide between real screen areas and speaks one short sentence per station. */
 export function SofiaTour({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useT();
   const [i, setI] = useState(0);
   const [login, setLogin] = useState(false);
+  const [flying, setFlying] = useState(true);
   const [rect, setRect] = useState<DOMRect | null>(null);
   const [vp, setVp] = useState({ w: 0, h: 0 });
+  const x0 = useRef<number | null>(null);
   const st = STATIONS[i] ?? STATIONS[0]!;
   const last = i === STATIONS.length - 1;
   const close = () => { setI(0); onClose(); };
+  const go = (d: number) => setI((n) => Math.min(STATIONS.length - 1, Math.max(0, n + d)));
+  useEffect(() => { if (!open) return; setFlying(true); const id = window.setTimeout(() => setFlying(false), 620); return () => window.clearTimeout(id); }, [open, i]);
   useLayoutEffect(() => {
     if (!open) return;
     const measure = () => {
@@ -122,32 +126,40 @@ export function SofiaTour({ open, onClose }: { open: boolean; onClose: () => voi
     window.addEventListener("resize", measure); window.addEventListener("scroll", measure, true);
     return () => { window.clearTimeout(id); window.removeEventListener("resize", measure); window.removeEventListener("scroll", measure, true); };
   }, [open, i, st.target]);
-  useEffect(() => { if (!open) return; const k = (e: KeyboardEvent) => { if (e.key === "Escape") close(); }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); });
+  useEffect(() => { if (!open) return; const k = (e: KeyboardEvent) => { if (e.key === "Escape") close(); if (e.key === "ArrowRight") go(1); if (e.key === "ArrowLeft") go(-1); }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); });
   if (!open || typeof document === "undefined" || !vp.w) return null;
   const pad = 12;
   const orbX = rect ? Math.min(vp.w - ORB - 8, Math.max(8, rect.left + rect.width / 2 - ORB / 2)) : vp.w - ORB - 16;
   const lower = rect ? rect.top + rect.height / 2 > vp.h / 2 : true;
-  const orbY = rect ? (lower ? rect.top - ORB - 8 : rect.bottom + 8) : vp.h - ORB - 96;
-  const cardW = Math.min(360, vp.w - pad * 2);
+  const orbY = rect ? (lower ? rect.top - ORB - 10 : rect.bottom + 10) : vp.h - ORB - 96;
+  const cardW = Math.min(320, vp.w - pad * 2);
   const cardX = Math.min(vp.w - cardW - pad, Math.max(pad, orbX + ORB / 2 - cardW / 2));
-  const cardStyle: React.CSSProperties = lower ? { left: cardX, width: cardW, bottom: Math.max(pad, vp.h - orbY + 8) } : { left: cardX, width: cardW, top: orbY + ORB + 8 };
-  const Mock = st.mock;
+  const cardStyle: React.CSSProperties = lower ? { left: cardX, width: cardW, bottom: Math.max(pad, vp.h - orbY + 10) } : { left: cardX, width: cardW, top: orbY + ORB + 10 };
+  const words = t(st.text).split(" ");
   return createPortal(<>
-    <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label={t("Tour con Sofía")}>
+    <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label={t("Tour con Sofía")}
+      onTouchStart={(e) => { x0.current = e.touches[0]?.clientX ?? null; }}
+      onTouchEnd={(e) => { const x = e.changedTouches[0]?.clientX; if (x0.current != null && x != null && Math.abs(x - x0.current) > 50) go(x < x0.current ? 1 : -1); x0.current = null; }}>
       <div className="absolute inset-0 bg-background/70 backdrop-blur-[1px]" onClick={close} />
       {rect && <div className="sofia-spot pointer-events-none absolute rounded-2xl transition-all duration-500" style={{ left: rect.left - 6, top: rect.top - 6, width: rect.width + 12, height: rect.height + 12 }} />}
-      <div className="sofia-fab sofia-orb absolute grid place-items-center rounded-full text-sofia-foreground ring-2 ring-sofia-glow" style={{ left: orbX, top: orbY, width: ORB, height: ORB }} aria-hidden><Headset size={22} /></div>
-      <div key={i} className="absolute max-h-[70dvh] overflow-y-auto rounded-3xl border border-sofia-text/30 bg-card p-3 shadow-xl animate-in fade-in zoom-in-95 duration-300" style={cardStyle}>
-        <div className="flex items-center gap-2">
-          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[image:var(--gradient-sofia)] p-[2px]"><span className="grid size-full place-items-center rounded-full bg-sofia-disc text-sm font-semibold text-sofia">S</span></span>
-          <p className="min-w-0 flex-1 text-xs"><span className="font-semibold text-sofia-text">Sofía</span> <span className="text-muted-foreground">· {t(st.area)} · {i + 1}/{STATIONS.length}</span></p>
-          <button type="button" onClick={close} aria-label={t("Saltar tour")} className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted"><X size={16} /></button>
-        </div>
-        <div className={`tour-card tour-${st.tone} mt-2 rounded-2xl p-2.5`}><div className="tour-mock rounded-xl p-2.5 text-sm"><Mock /></div><p className="mt-1.5 text-center text-[10px] text-muted-foreground">{t("Ejemplo ilustrativo, no son datos reales")}</p></div>
-        <p className="mt-2 text-sm leading-5">{t(st.text)}</p>
-        {last ? <div className="mt-3 grid grid-cols-2 gap-2"><Button className="font-bold" onClick={() => setLogin(true)}><Sparkles size={16} />{t("Crear cuenta")}</Button><Button variant="outline" onClick={close}><Compass size={16} />{t("Explorar")}</Button></div>
-          : <div className="mt-3 grid grid-cols-[auto_1fr] gap-2"><Button variant="outline" disabled={i === 0} onClick={() => setI(i - 1)} aria-label={t("Atrás")}><ArrowLeft size={16} /></Button><Button className="font-bold" onClick={() => setI(i + 1)}>{t("Siguiente")}<ArrowRight size={16} /></Button></div>}
+      <div className="sofia-orb pointer-events-none absolute" style={{ left: orbX, top: orbY, width: ORB, height: ORB }} aria-hidden>
+        <span className="sofia-halo absolute inset-[-10px] rounded-full" />
+        <span className="sofia-orbit absolute inset-[-8px]"><i /><i /><i /></span>
+        <span key={`b${i}`} className="sofia-burst absolute inset-0">{[0, 1, 2, 3, 4, 5, 6, 7].map((n) => <i key={n} style={{ "--a": `${n * 45}deg` } as React.CSSProperties} />)}</span>
+        <span key={`s${i}`} className={`sofia-fab sofia-body grid size-full place-items-center rounded-full text-sofia-foreground ring-2 ring-sofia-glow ${flying ? "sofia-spin" : ""}`}><Headset size={22} /></span>
       </div>
+      {!flying && <div key={i} className="sofia-bubble absolute rounded-3xl border border-sofia-text/30 bg-card p-3 shadow-xl" style={cardStyle}>
+        <div className="flex items-center gap-2">
+          <p className="min-w-0 flex-1 text-xs"><span className="font-semibold text-sofia-text">Sofía</span> <span className="text-muted-foreground">· {t(st.area)}</span></p>
+          <button type="button" onClick={close} aria-label={t("Saltar tour")} className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-muted"><X size={16} /></button>
+        </div>
+        <p className="mt-1 text-[15px] font-medium leading-6" aria-live="polite">{words.map((w, n) => <span key={n} className="sofia-word" style={{ animationDelay: `${n * 45}ms` }}>{w} </span>)}</p>
+        <div className="mt-3 flex items-center gap-2">
+          <div className="flex flex-1 gap-1" aria-label={`${i + 1}/${STATIONS.length}`}>{STATIONS.map((s, n) => <span key={s.area} className={`h-1.5 rounded-full transition-all duration-300 ${n === i ? "w-5 bg-sofia-text" : "w-1.5 bg-muted-foreground/30"}`} />)}</div>
+          {last ? <><Button size="sm" variant="outline" onClick={close}><Compass size={14} />{t("Explorar")}</Button><Button size="sm" className="font-bold" onClick={() => setLogin(true)}><Sparkles size={14} />{t("Crear cuenta")}</Button></>
+            : <>{i > 0 && <Button size="sm" variant="ghost" onClick={() => go(-1)} aria-label={t("Atrás")}><ArrowLeft size={14} /></Button>}<Button size="sm" className="font-bold" onClick={() => go(1)}>{t("Siguiente")}<ArrowRight size={14} /></Button></>}
+        </div>
+      </div>}
     </div>
     <LoginSheet open={login} onOpenChange={(o) => { setLogin(o); if (o) close(); }} />
   </>, document.body);
