@@ -106,3 +106,6 @@
 - [x] FAQ: completar las respuestas inglesas de la portada, corregir tildes y mantener «Ver todas» en inglés; revisar cobertura de preguntas y respuestas.
 
 - [x] Sofía: poder ocultar su botón desde el propio chat y volver a mostrarla (pie de portada, menú o Mi cuenta)
+- [x] Compactar el menú en dos columnas: distribución de cuenta y controles verificados sin scroll en 320×568, 360×640, 393×852 y escritorio (ES/EN, Día/Noche); sin usar sesión autenticada del titular.
+- [x] Proponer aparición contextual de Sofía: botón tras 25 segundos o 30% de scroll, una vez por sesión, sin abrir el chat ni aparecer durante pagos o tras la ✕; propuesta sin implementar.
+- [x] Retirar «Ocultar a Sofía» y su explicación dentro del chat (ES/EN), conservando la ✕ exterior y el aviso de seguridad.

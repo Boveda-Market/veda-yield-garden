@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { EyeOff, Headset, SendHorizontal, X } from "lucide-react";
+import { Headset, SendHorizontal, X } from "lucide-react";
 import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
@@ -162,12 +162,6 @@ export function SupportChat() {
           </button>
         </form>
         <p className="text-[11px] leading-snug text-muted-foreground">{c.note}</p>
-        {/* Hiding is a device display preference: she stays one tap away in Tu cuenta or the menu. */}
-        <button type="button" onClick={() => { setOpen(false); setHidden(true); }}
-          className="inline-flex items-center gap-1.5 self-start rounded-full px-1 py-1.5 text-[11px] text-muted-foreground transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sofia-text">
-          <EyeOff className="size-3.5" aria-hidden />{c.hide}
-        </button>
-        <p className="-mt-1 text-[11px] leading-snug text-muted-foreground">{c.hideNote}</p>
       </ActionSheetContent>
     </Dialog>
   </>;

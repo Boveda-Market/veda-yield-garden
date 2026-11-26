@@ -21,6 +21,7 @@ import { SuggestionBox } from "./suggestion-box";
 import { StatusDot, useSystemState } from "./system-status";
 import { useHideSofia } from "@/lib/preferences";
 import { Activity } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export type AppView = "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets" | "admin";
 
@@ -55,7 +56,7 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
   useEffect(() => {
     try { if (sessionStorage.getItem("boveda:open-ideas")) { sessionStorage.removeItem("boveda:open-ideas"); setIdeas(true); } } catch { /* ignore */ }
   }, []);
-  const row = "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-secondary";
+  const row = "flex min-h-11 w-full min-w-0 items-center justify-start gap-2 whitespace-normal rounded-md px-2 py-1.5 text-left text-[13px] font-normal leading-4 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&_svg]:shrink-0";
   const go = (v: AppView) => { setOpen(false); onSelect(v); };
   const session = useContext(BovedaSessionContext);
   const operator = session?.walletAddress === AFFILIATE_PAYOUT_WALLET;
@@ -69,15 +70,18 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
   }, [guest, visitor]);
   return <>
     <span className="inline-flex items-center gap-2">{!visitor && <NewsBell />}{!visitor && <AutopilotDefault />}
-    <button type="button" onClick={() => setOpen(true)} aria-label={t("Abrir menú")} className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-medium hover:bg-secondary"><Menu size={18} />{t("Menú")}</button></span>
+    <Button variant="outline" onClick={() => setOpen(true)} aria-label={t("Abrir menú")} className="h-10 gap-2 rounded-full border-border bg-card px-4 font-medium hover:bg-secondary"><Menu size={18} />{t("Menú")}</Button></span>
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="right" className="w-[85%] max-w-sm overflow-y-auto">
-        <SheetTitle className="font-display">{guest ? t("Invitado · Prueba") : visitor ? t("Menú") : t("Mi cuenta")}</SheetTitle>
-        {user && <SheetDescription className="truncate">{user}</SheetDescription>}
-        <div className="mt-6 space-y-1">
+      <SheetContent side="right" className="flex h-dvh w-full max-w-sm flex-col gap-0 overflow-hidden px-3 pb-[max(8px,env(safe-area-inset-bottom))] pt-[max(8px,env(safe-area-inset-top))] sm:max-w-md sm:px-4 [&>button]:size-11">
+        <div className="min-w-0 shrink-0 pb-2 pl-2 pr-12">
+          <SheetTitle className="font-display">{guest ? t("Invitado · Prueba") : visitor ? t("Menú") : t("Mi cuenta")}</SheetTitle>
+          {user && <SheetDescription className="truncate text-xs">{user}</SheetDescription>}
+        </div>
+        <div className="min-h-0 overflow-y-auto overscroll-contain">
+        <div className="grid grid-cols-2 gap-x-1">
           {guest ? <>
-            <button type="button" className={row} onClick={() => go("invite")}><Gift size={18} />{t("Invita y gana")}</button>
-            <button type="button" className={row} onClick={() => go("account")}><UserRound size={18} />{t("Mi cuenta")}</button>
+            <Button variant="ghost" className={row} onClick={() => go("invite")}><Gift size={18} />{t("Invita y gana")}</Button>
+            <Button variant="ghost" className={row} onClick={() => go("account")}><UserRound size={18} />{t("Mi cuenta")}</Button>
           </> : visitor ? null : <>
             {operator && <Link to="/admin" className={`${row} border border-primary/40 bg-primary/10 font-semibold text-primary`} onClick={() => setOpen(false)}><ShieldCheck size={18} />{t("Panel de Control")}</Link>}
             <Link to="/wallet" className={row} onClick={() => setOpen(false)}><Home size={18} />{t("Inicio")}</Link>
@@ -89,24 +93,29 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
             <Link to="/invita" className={row} onClick={() => setOpen(false)}><Gift size={18} />{t("Invita y gana")}</Link>
           </>}
           <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className={row}><Send size={18} />{t("Canal oficial de Telegram")}</a>
-          <Link to="/terminos" className={row}><FileText size={18} />{t("Términos y condiciones")}</Link>
-          <Link to="/privacidad" className={row}><Shield size={18} />{t("Política de privacidad")}</Link>
-          <Link to="/faq" className={row}><HelpCircle size={18} />{t("Preguntas frecuentes")}</Link>
-          <Link to="/about" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Sobre Bóveda Market")}</Link>
           <StatusRow className={row} />
           {!guest && !visitor && <>
-            <button type="button" className={`${row} text-left`} onClick={() => { setOpen(false); setIdeas(true); }}><Lightbulb size={18} />{t("Ayúdanos a mejorar")}</button>
+            <Button variant="ghost" className={row} onClick={() => { setOpen(false); setIdeas(true); }}><Lightbulb size={18} />{t("Ayúdanos a mejorar")}</Button>
           </>}
           <Link to={blogIndexHref(lang)} className={row} onClick={() => setOpen(false)}><BookOpen size={18} />Blog</Link>
-          {sofiaHidden && <button type="button" className={row} onClick={() => { setOpen(false); setSofiaHidden(false); }}><Headset size={18} />{t("Mostrar a Sofía")}</button>}
+          {sofiaHidden && <Button variant="ghost" className={row} onClick={() => { setOpen(false); setSofiaHidden(false); }}><Headset size={18} />{t("Mostrar a Sofía")}</Button>}
           <InstallAppButton className={row} />
+          <Link to="/faq" className={row} onClick={() => setOpen(false)}><HelpCircle size={18} />{t("Preguntas frecuentes")}</Link>
+          <Link to="/about" className={row} onClick={() => setOpen(false)}><UserRound size={18} />{t("Sobre Bóveda Market")}</Link>
+          <Link to="/terminos" className={row} onClick={() => setOpen(false)}><FileText size={18} />{t("Términos y condiciones")}</Link>
+          <Link to="/privacidad" className={row} onClick={() => setOpen(false)}><Shield size={18} />{t("Política de privacidad")}</Link>
         </div>
-        <div className="mt-6 flex items-center justify-between border-t border-border pt-4 text-sm"><span>{t("Idioma")}</span><LanguageMenu /></div>
-        <div className="mt-3 flex items-center justify-between text-sm"><span>{t("Apariencia")}</span><ThemeToggle /></div>
-        <div className="mt-4 border-t border-border pt-4">
+        </div>
+        <div className="mt-1 shrink-0 border-t border-border pt-1">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+            <LanguageMenu className="min-h-11 w-fit max-w-full" />
+            <ThemeToggle className="min-h-11 shrink-0" />
+          </div>
+          <div className="mt-1">
           {guest ? <Link to="/" className={row}><Home size={18} />{t("Crear cuenta o entrar")}</Link>
-            : visitor ? <button type="button" className={`${row} font-semibold text-primary`} onClick={() => { setOpen(false); session?.login("google"); }}><LogIn size={18} />{t("Crear cuenta o entrar")}</button>
-            : <button type="button" className={`${row} text-destructive`} onClick={() => { setOpen(false); try { sessionStorage.removeItem(IN_APP_FLAG); } catch { /* ignore */ } onLogout(); }}><LogOut size={18} />{t("Cerrar sesión")}</button>}
+            : visitor ? <Button variant="ghost" className={`${row} font-semibold text-primary`} onClick={() => { setOpen(false); session?.login("google"); }}><LogIn size={18} />{t("Crear cuenta o entrar")}</Button>
+            : <Button variant="ghost" className={`${row} text-destructive`} onClick={() => { setOpen(false); try { sessionStorage.removeItem(IN_APP_FLAG); } catch { /* ignore */ } onLogout(); }}><LogOut size={18} />{t("Cerrar sesión")}</Button>}
+          </div>
         </div>
       </SheetContent>
     </Sheet>
