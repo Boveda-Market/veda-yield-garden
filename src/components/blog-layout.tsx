@@ -130,7 +130,7 @@ export function BlogIndex() {
     <header className="mt-5 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
       <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-full bg-[image:var(--gradient-sofia)] p-[2px]"><span className="grid size-full place-items-center rounded-full bg-sofia-disc"><Headset className="size-5 text-sofia" strokeWidth={2.2} /></span></span>
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-wide text-sofia-text">{en ? "Sofía's column" : "La columna de Sofía"}</p>
+        <p className="font-display text-2xl font-bold uppercase tracking-tight text-sofia-text">{en ? "Sofía's column" : "La columna de Sofía"}</p>
         <h1 className="font-display text-2xl font-bold leading-tight">{"\n"}</h1>
       </div>
     </header>
