@@ -131,7 +131,7 @@ export function BlogIndex() {
       <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-full bg-[image:var(--gradient-sofia)] p-[2px]"><span className="grid size-full place-items-center rounded-full bg-sofia-disc"><Headset className="size-5 text-sofia" strokeWidth={2.2} /></span></span>
       <div className="min-w-0">
         <p className="text-xs font-semibold uppercase tracking-wide text-sofia-text">{en ? "Sofía's column" : "La columna de Sofía"}</p>
-        <h1 className="font-display text-2xl font-bold leading-tight">Blog</h1>
+        <h1 className="font-display text-2xl font-bold leading-tight">{"\n"}</h1>
       </div>
     </header>
     <p className="mt-3 border-l-2 border-sofia-text/50 pl-3 text-sm italic leading-6 text-muted-foreground">{en ? "“News, opinion and trends, explained like a conversation between friends.” — Sofía Holdd" : "«Noticias, opinión y tendencias, explicadas como una conversación entre amigos.» — Sofía Holdd"}</p>
