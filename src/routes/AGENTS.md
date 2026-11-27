@@ -8,3 +8,4 @@
 - The pre-access screen explains the registration itself in 3 numbered steps (account with Google or email → a new digital wallet linked to it → open your vault or explore), so the person knows what signing up does before reaching /acceso.
 - Blog posts live in blog-layout.tsx (POSTS list with an AUTHORS id per post + PostLayout/postHead); each post is a /blog route with an /en/blog twin reusing its Page, separate from evergreen guides.
 - Blog visuals (photo, stat cards, bar/donut charts, comparison table) live in blog-visuals.tsx using theme tokens; charts show only sourced or clearly labeled illustrative numbers.
+- Blog authors: AUTHORS in blog-layout.tsx includes «sofia» (Sofía Holdd), the persona voice for adoption/savings posts; adoption posts contrast Yahoo Finance headlines with Google Trends searches, citing each source.

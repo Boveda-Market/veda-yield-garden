@@ -7,12 +7,21 @@ import { SITE_URL, langLinks } from "@/lib/seo-lang";
 /** Two editorial voices: technical research and everyday/news. */
 export const AUTHORS = {
   research: { name: "Investigación DeFi", nameEn: "DeFi Research", role: "Mercados y protocolos, en profundidad", roleEn: "Markets and protocols, in depth", initials: "ID" },
+  sofia: { name: "Sofía Holdd", nameEn: "Sofía Holdd", role: "Ahorro y bóvedas inteligentes", roleEn: "Savings and smart vaults", initials: "SH" },
   editorial: { name: "Redacción Bóveda", nameEn: "Bóveda Editorial", role: "Ahorro, adopción y noticias del día a día", roleEn: "Savings, adoption and everyday news", initials: "RB" },
 } as const;
 export type AuthorId = keyof typeof AUTHORS;
 
 /** Blog posts: friendly, conversational trend articles (guides stay evergreen how-tos). */
 export const POSTS = [
+  {
+    to: "/blog/miedo-caida-bitcoin-holdear", toEn: "/en/blog/bitcoin-fear-and-holding", date: "2026-11-27", minutes: 6, author: "sofia",
+    category: "Adopción y ahorro", categoryEn: "Adoption & savings",
+    title: "Bitcoin cae, Google se llena de miedo: por qué holdear a la antigua es el verdadero problema",
+    titleEn: "Bitcoin drops, Google fills with fear: why old-school holding is the real problem",
+    desc: "Yahoo Finanzas habla del peor mes desde 2022 y Google se llena de «¿Bitcoin se va a cero?». Qué puede pasar si sube o baja, y por qué esperar con el dinero quieto desgasta tanto.",
+    descEn: "Yahoo Finance calls it the worst month since 2022 and Google fills with “Is Bitcoin going to zero?”. What can happen if it rises or falls, and why waiting with idle money wears you down.",
+  },
   {
     to: "/blog/meteora-historia-y-como-funciona", toEn: "/en/blog/meteora-history-and-how-it-works", date: "2026-11-26", minutes: 8, author: "research",
     category: "Investigación y protocolos", categoryEn: "Research & protocols",

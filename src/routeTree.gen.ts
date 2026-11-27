@@ -42,6 +42,7 @@ import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogDolaresDigitalesEnElCelularRouteImport } from './routes/blog/dolares-digitales-en-el-celular'
 import { Route as BlogLiquidezConcentradaRouteImport } from './routes/blog/liquidez-concentrada'
 import { Route as BlogMeteoraHistoriaYComoFuncionaRouteImport } from './routes/blog/meteora-historia-y-como-funciona'
+import { Route as BlogMiedoCaidaBitcoinHoldearRouteImport } from './routes/blog/miedo-caida-bitcoin-holdear'
 import { Route as EnIndexRouteImport } from './routes/en/index'
 import { Route as EnAboutRouteImport } from './routes/en/about'
 import { Route as EnBitcoinRouteImport } from './routes/en/bitcoin'
@@ -70,6 +71,7 @@ import { Route as GuiasRecargarConCoinbaseRouteImport } from './routes/guias/rec
 import { Route as GuiasRetirarCashAppBitcoinRouteImport } from './routes/guias/retirar-cash-app-bitcoin'
 import { Route as GuiasTraeTusMonedasRouteImport } from './routes/guias/trae-tus-monedas'
 import { Route as EnBlogIndexRouteImport } from './routes/en/blog/index'
+import { Route as EnBlogBitcoinFearAndHoldingRouteImport } from './routes/en/blog/bitcoin-fear-and-holding'
 import { Route as EnBlogConcentratedLiquidityRouteImport } from './routes/en/blog/concentrated-liquidity'
 import { Route as EnBlogDigitalDollarsOnYourPhoneRouteImport } from './routes/en/blog/digital-dollars-on-your-phone'
 import { Route as EnBlogMeteoraHistoryAndHowItWorksRouteImport } from './routes/en/blog/meteora-history-and-how-it-works'
@@ -258,6 +260,12 @@ const BlogMeteoraHistoriaYComoFuncionaRoute =
     path: '/blog/meteora-historia-y-como-funciona',
     getParentRoute: () => rootRouteImport,
   } as any)
+const BlogMiedoCaidaBitcoinHoldearRoute =
+  BlogMiedoCaidaBitcoinHoldearRouteImport.update({
+    id: '/blog/miedo-caida-bitcoin-holdear',
+    path: '/blog/miedo-caida-bitcoin-holdear',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EnIndexRoute = EnIndexRouteImport.update({
   id: '/en/',
   path: '/en/',
@@ -404,6 +412,12 @@ const EnBlogIndexRoute = EnBlogIndexRouteImport.update({
   path: '/en/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnBlogBitcoinFearAndHoldingRoute =
+  EnBlogBitcoinFearAndHoldingRouteImport.update({
+    id: '/en/blog/bitcoin-fear-and-holding',
+    path: '/en/blog/bitcoin-fear-and-holding',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EnBlogConcentratedLiquidityRoute =
   EnBlogConcentratedLiquidityRouteImport.update({
     id: '/en/blog/concentrated-liquidity',
@@ -552,6 +566,7 @@ export interface FileRoutesByFullPath {
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
   '/blog/meteora-historia-y-como-funciona': typeof BlogMeteoraHistoriaYComoFuncionaRoute
+  '/blog/miedo-caida-bitcoin-holdear': typeof BlogMiedoCaidaBitcoinHoldearRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -580,6 +595,7 @@ export interface FileRoutesByFullPath {
   '/blog/': typeof BlogIndexRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
+  '/en/blog/bitcoin-fear-and-holding': typeof EnBlogBitcoinFearAndHoldingRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
@@ -635,6 +651,7 @@ export interface FileRoutesByTo {
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
   '/blog/meteora-historia-y-como-funciona': typeof BlogMeteoraHistoriaYComoFuncionaRoute
+  '/blog/miedo-caida-bitcoin-holdear': typeof BlogMiedoCaidaBitcoinHoldearRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -663,6 +680,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogIndexRoute
   '/en': typeof EnIndexRoute
   '/guias': typeof GuiasIndexRoute
+  '/en/blog/bitcoin-fear-and-holding': typeof EnBlogBitcoinFearAndHoldingRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
@@ -719,6 +737,7 @@ export interface FileRoutesById {
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
   '/blog/meteora-historia-y-como-funciona': typeof BlogMeteoraHistoriaYComoFuncionaRoute
+  '/blog/miedo-caida-bitcoin-holdear': typeof BlogMiedoCaidaBitcoinHoldearRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -747,6 +766,7 @@ export interface FileRoutesById {
   '/blog/': typeof BlogIndexRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
+  '/en/blog/bitcoin-fear-and-holding': typeof EnBlogBitcoinFearAndHoldingRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
@@ -804,6 +824,7 @@ export interface FileRouteTypes {
     | '/blog/dolares-digitales-en-el-celular'
     | '/blog/liquidez-concentrada'
     | '/blog/meteora-historia-y-como-funciona'
+    | '/blog/miedo-caida-bitcoin-holdear'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -832,6 +853,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/en/'
     | '/guias/'
+    | '/en/blog/bitcoin-fear-and-holding'
     | '/en/blog/concentrated-liquidity'
     | '/en/blog/digital-dollars-on-your-phone'
     | '/en/blog/meteora-history-and-how-it-works'
@@ -887,6 +909,7 @@ export interface FileRouteTypes {
     | '/blog/dolares-digitales-en-el-celular'
     | '/blog/liquidez-concentrada'
     | '/blog/meteora-historia-y-como-funciona'
+    | '/blog/miedo-caida-bitcoin-holdear'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -915,6 +938,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/en'
     | '/guias'
+    | '/en/blog/bitcoin-fear-and-holding'
     | '/en/blog/concentrated-liquidity'
     | '/en/blog/digital-dollars-on-your-phone'
     | '/en/blog/meteora-history-and-how-it-works'
@@ -970,6 +994,7 @@ export interface FileRouteTypes {
     | '/blog/dolares-digitales-en-el-celular'
     | '/blog/liquidez-concentrada'
     | '/blog/meteora-historia-y-como-funciona'
+    | '/blog/miedo-caida-bitcoin-holdear'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -998,6 +1023,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/en/'
     | '/guias/'
+    | '/en/blog/bitcoin-fear-and-holding'
     | '/en/blog/concentrated-liquidity'
     | '/en/blog/digital-dollars-on-your-phone'
     | '/en/blog/meteora-history-and-how-it-works'
@@ -1054,6 +1080,7 @@ export interface RootRouteChildren {
   BlogDolaresDigitalesEnElCelularRoute: typeof BlogDolaresDigitalesEnElCelularRoute
   BlogLiquidezConcentradaRoute: typeof BlogLiquidezConcentradaRoute
   BlogMeteoraHistoriaYComoFuncionaRoute: typeof BlogMeteoraHistoriaYComoFuncionaRoute
+  BlogMiedoCaidaBitcoinHoldearRoute: typeof BlogMiedoCaidaBitcoinHoldearRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBitcoinRoute: typeof EnBitcoinRoute
   EnBringYourCoinsRoute: typeof EnBringYourCoinsRoute
@@ -1082,6 +1109,7 @@ export interface RootRouteChildren {
   BlogIndexRoute: typeof BlogIndexRoute
   EnIndexRoute: typeof EnIndexRoute
   GuiasIndexRoute: typeof GuiasIndexRoute
+  EnBlogBitcoinFearAndHoldingRoute: typeof EnBlogBitcoinFearAndHoldingRoute
   EnBlogConcentratedLiquidityRoute: typeof EnBlogConcentratedLiquidityRoute
   EnBlogDigitalDollarsOnYourPhoneRoute: typeof EnBlogDigitalDollarsOnYourPhoneRoute
   EnBlogMeteoraHistoryAndHowItWorksRoute: typeof EnBlogMeteoraHistoryAndHowItWorksRoute
@@ -1338,6 +1366,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogMeteoraHistoriaYComoFuncionaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/miedo-caida-bitcoin-holdear': {
+      id: '/blog/miedo-caida-bitcoin-holdear'
+      path: '/blog/miedo-caida-bitcoin-holdear'
+      fullPath: '/blog/miedo-caida-bitcoin-holdear'
+      preLoaderRoute: typeof BlogMiedoCaidaBitcoinHoldearRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/': {
       id: '/en/'
       path: '/en'
@@ -1534,6 +1569,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnBlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/blog/bitcoin-fear-and-holding': {
+      id: '/en/blog/bitcoin-fear-and-holding'
+      path: '/en/blog/bitcoin-fear-and-holding'
+      fullPath: '/en/blog/bitcoin-fear-and-holding'
+      preLoaderRoute: typeof EnBlogBitcoinFearAndHoldingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/blog/concentrated-liquidity': {
       id: '/en/blog/concentrated-liquidity'
       path: '/en/blog/concentrated-liquidity'
@@ -1710,6 +1752,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogDolaresDigitalesEnElCelularRoute: BlogDolaresDigitalesEnElCelularRoute,
   BlogLiquidezConcentradaRoute: BlogLiquidezConcentradaRoute,
   BlogMeteoraHistoriaYComoFuncionaRoute: BlogMeteoraHistoriaYComoFuncionaRoute,
+  BlogMiedoCaidaBitcoinHoldearRoute: BlogMiedoCaidaBitcoinHoldearRoute,
   EnAboutRoute: EnAboutRoute,
   EnBitcoinRoute: EnBitcoinRoute,
   EnBringYourCoinsRoute: EnBringYourCoinsRoute,
@@ -1738,6 +1781,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogIndexRoute: BlogIndexRoute,
   EnIndexRoute: EnIndexRoute,
   GuiasIndexRoute: GuiasIndexRoute,
+  EnBlogBitcoinFearAndHoldingRoute: EnBlogBitcoinFearAndHoldingRoute,
   EnBlogConcentratedLiquidityRoute: EnBlogConcentratedLiquidityRoute,
   EnBlogDigitalDollarsOnYourPhoneRoute: EnBlogDigitalDollarsOnYourPhoneRoute,
   EnBlogMeteoraHistoryAndHowItWorksRoute:
