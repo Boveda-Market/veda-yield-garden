@@ -16,7 +16,7 @@ import { ActionSuccess } from "@/components/action-success";
 import { notify } from "@/lib/notify";
 import { useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
 import { fetchDailyCloses } from "@/lib/pool-candles";
-import { changeSinceUsd } from "@/lib/position-value";
+import { changeOverDaysUsd } from "@/lib/position-value";
 import { useServerFn } from "@tanstack/react-start";
 import { Copy, KeyRound, Send, ArrowLeft, ArrowLeftRight, RefreshCw, CreditCard, QrCode, CheckCircle2, ShieldAlert, ChevronDown, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -72,14 +72,16 @@ export function WalletPanel() {
   const [periodOpen, setPeriodOpen] = useState(false);
   useEffect(() => { try { const v = Number(localStorage.getItem("boveda:move-period")); if (v === 7 || v === 30) setMovePeriodRaw(v); } catch { /* ignore */ } }, []);
   const setMovePeriod = (v: 1 | 7 | 30) => { setMovePeriodRaw(v); try { localStorage.setItem("boveda:move-period", String(v)); } catch { /* ignore */ } };
-  const dailyQ = useQueries({ queries: vaultRows.map((r) => ({ queryKey: ["pool-daily", r.pool, 30], queryFn: ({ signal }: { signal: AbortSignal }) => fetchDailyCloses(r.pool ?? "", 31, signal), enabled: movePeriod > 1 && Boolean(r.pool), staleTime: 10 * 60_000, retry: 1 })) });
+  // Include today's unfinished candle plus the completed close before the 30-day cutoff.
+  const dailyQ = useQueries({ queries: vaultRows.map((r) => ({ queryKey: ["pool-daily", r.pool, 32], queryFn: ({ signal }: { signal: AbortSignal }) => fetchDailyCloses(r.pool ?? "", 32, signal), enabled: movePeriod > 1 && Boolean(r.pool), staleTime: 10 * 60_000, retry: 1 })) });
   const changeN = movePeriod === 1 ? change24h : (() => {
-    const cutoff = Date.now() - movePeriod * 86_400_000;
+    const now = Date.now();
     let sum = 0;
     for (let i = 0; i < vaultRows.length; i++) {
-      const c = dailyQ[i]?.data; if (!c?.length) return null;
-      const then = [...c].reverse().find((x) => x.t <= cutoff)?.c ?? c[0]!.c;
-      const v = changeSinceUsd(vaultRows[i]!.p.tokenAmount, vaultRows[i]!.price, then); if (v === null) return null;
+      const row = vaultRows[i];
+      if (!row) return null;
+      const v = changeOverDaysUsd(row.p.tokenAmount, row.price, dailyQ[i]?.data, movePeriod, now);
+      if (v === null) return null;
       sum += v;
     }
     return sum;
@@ -250,7 +252,7 @@ export function WalletPanel() {
         const up = (move ?? 0) >= 0;
         if (move === null && vaultPositions.length === 0) return null;
         return <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs tabular-nums">
-          {move !== null && <span className={`font-medium ${up ? "text-primary" : "text-destructive"}`}>{up ? "+" : "-"}${fmt(Math.abs(move))}{pct !== null && ` (${up ? "+" : "-"}${Math.abs(pct).toFixed(2)}%)`} </span>}
+          {move !== null ? <span className={`font-medium ${up ? "text-primary" : "text-destructive"}`}>{up ? "+" : "-"}${fmt(Math.abs(move))}{pct !== null && ` (${up ? "+" : "-"}${Math.abs(pct).toFixed(2)}%)`} </span> : <span className="text-muted-foreground">—</span>}
           {vaultPositions.length > 0 && <Drawer open={periodOpen} onOpenChange={setPeriodOpen}><DrawerTrigger asChild><button type="button" aria-label={t("Periodo")} className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-semibold">{movePeriod === 1 ? "24 h" : `${movePeriod} d`}<ChevronDown size={12} aria-hidden /></button></DrawerTrigger>
             <DrawerContent><DrawerHeader><DrawerTitle>{t("Periodo")}</DrawerTitle></DrawerHeader><div className="grid gap-2 px-4 pb-6">{([1, 7, 30] as const).map((d) => <button key={d} type="button" aria-pressed={movePeriod === d} onClick={() => { setMovePeriod(d); setPeriodOpen(false); }} className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium ${movePeriod === d ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>{d === 1 ? "24 h" : `${d} d`}{movePeriod === d && <CheckCircle2 size={16} />}</button>)}</div></DrawerContent></Drawer>}
         </div>;

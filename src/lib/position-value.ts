@@ -25,3 +25,28 @@ export function changeSinceUsd(token: string | null, price: number | null, then:
   const t = Number(token); if (!Number.isFinite(t) || t < 0) return null;
   return t * (price - then);
 }
+
+/** Daily candle timestamps mark the opening, not the closing. Use only a
+ * completed close at/before the requested cutoff, within one day's precision.
+ * Never substitute a younger pool's first candle for missing 7/30-day history.
+ * This reprices current holdings; it is not personal historical profit. */
+export function changeOverDaysUsd(
+  token: string | null,
+  price: number | null,
+  candles: readonly { t: number; c: number }[] | undefined,
+  days: 7 | 30,
+  now: number,
+): number | null {
+  const dayMs = 86_400_000;
+  const cutoff = now - days * dayMs;
+  if (!Number.isFinite(cutoff)) return null;
+  let past: { closedAt: number; price: number } | undefined;
+  for (const candle of candles ?? []) {
+    const closedAt = candle.t + dayMs;
+    if (!Number.isFinite(closedAt) || !Number.isFinite(candle.c) || candle.c <= 0) continue;
+    if (closedAt <= cutoff && cutoff - closedAt < dayMs && (!past || closedAt > past.closedAt)) {
+      past = { closedAt, price: candle.c };
+    }
+  }
+  return changeSinceUsd(token, price, past?.price ?? null);
+}
