@@ -16,6 +16,14 @@ export type AuthorId = keyof typeof AUTHORS;
 /** Blog posts: friendly, conversational trend articles (guides stay evergreen how-tos). */
 export const POSTS = [
   {
+    to: "/blog/hackeo-binance-llaves", toEn: "/en/blog/binance-hack-keys", date: "2026-11-27", minutes: 5, author: "sofia",
+    category: "Adopción y ahorro", categoryEn: "Adoption & savings",
+    title: "El hackeo de $1,000M a Binance: por qué darle tus llaves a otro siempre es una trampa",
+    titleEn: "The $1B Binance hack: why handing your keys to someone else is always a trap",
+    desc: "EE. UU. busca recuperar más de mil millones de dólares robados a Binance y Google se llena de «¿mi dinero está seguro?». Cómo una billetera propia cuida tu seguridad y tu privacidad.",
+    descEn: "The US seeks to recover over a billion dollars stolen from Binance and Google fills with “is my money safe?”. How your own wallet protects your security and privacy.",
+  },
+  {
     to: "/blog/privacidad-bitcoin-35-centavos", toEn: "/en/blog/bitcoin-privacy-35-cents", date: "2026-11-27", minutes: 5, author: "sofia",
     category: "Adopción y ahorro", categoryEn: "Adoption & savings",
     title: "Tu dirección de casa por 35 centavos: la falla que expone el holdear a la antigua",

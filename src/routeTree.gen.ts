@@ -40,6 +40,7 @@ import { Route as TrumpRouteImport } from './routes/trump'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogDolaresDigitalesEnElCelularRouteImport } from './routes/blog/dolares-digitales-en-el-celular'
+import { Route as BlogHackeoBinanceLlavesRouteImport } from './routes/blog/hackeo-binance-llaves'
 import { Route as BlogLiquidezConcentradaRouteImport } from './routes/blog/liquidez-concentrada'
 import { Route as BlogMeteoraHistoriaYComoFuncionaRouteImport } from './routes/blog/meteora-historia-y-como-funciona'
 import { Route as BlogMiedoCaidaBitcoinHoldearRouteImport } from './routes/blog/miedo-caida-bitcoin-holdear'
@@ -72,6 +73,7 @@ import { Route as GuiasRecargarConCoinbaseRouteImport } from './routes/guias/rec
 import { Route as GuiasRetirarCashAppBitcoinRouteImport } from './routes/guias/retirar-cash-app-bitcoin'
 import { Route as GuiasTraeTusMonedasRouteImport } from './routes/guias/trae-tus-monedas'
 import { Route as EnBlogIndexRouteImport } from './routes/en/blog/index'
+import { Route as EnBlogBinanceHackKeysRouteImport } from './routes/en/blog/binance-hack-keys'
 import { Route as EnBlogBitcoinFearAndHoldingRouteImport } from './routes/en/blog/bitcoin-fear-and-holding'
 import { Route as EnBlogBitcoinPrivacy35CentsRouteImport } from './routes/en/blog/bitcoin-privacy-35-cents'
 import { Route as EnBlogConcentratedLiquidityRouteImport } from './routes/en/blog/concentrated-liquidity'
@@ -251,6 +253,11 @@ const BlogDolaresDigitalesEnElCelularRoute =
     path: '/blog/dolares-digitales-en-el-celular',
     getParentRoute: () => rootRouteImport,
   } as any)
+const BlogHackeoBinanceLlavesRoute = BlogHackeoBinanceLlavesRouteImport.update({
+  id: '/blog/hackeo-binance-llaves',
+  path: '/blog/hackeo-binance-llaves',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogLiquidezConcentradaRoute = BlogLiquidezConcentradaRouteImport.update({
   id: '/blog/liquidez-concentrada',
   path: '/blog/liquidez-concentrada',
@@ -420,6 +427,11 @@ const EnBlogIndexRoute = EnBlogIndexRouteImport.update({
   path: '/en/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnBlogBinanceHackKeysRoute = EnBlogBinanceHackKeysRouteImport.update({
+  id: '/en/blog/binance-hack-keys',
+  path: '/en/blog/binance-hack-keys',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnBlogBitcoinFearAndHoldingRoute =
   EnBlogBitcoinFearAndHoldingRouteImport.update({
     id: '/en/blog/bitcoin-fear-and-holding',
@@ -578,6 +590,7 @@ export interface FileRoutesByFullPath {
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
+  '/blog/hackeo-binance-llaves': typeof BlogHackeoBinanceLlavesRoute
   '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
   '/blog/meteora-historia-y-como-funciona': typeof BlogMeteoraHistoriaYComoFuncionaRoute
   '/blog/miedo-caida-bitcoin-holdear': typeof BlogMiedoCaidaBitcoinHoldearRoute
@@ -610,6 +623,7 @@ export interface FileRoutesByFullPath {
   '/blog/': typeof BlogIndexRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
+  '/en/blog/binance-hack-keys': typeof EnBlogBinanceHackKeysRoute
   '/en/blog/bitcoin-fear-and-holding': typeof EnBlogBitcoinFearAndHoldingRoute
   '/en/blog/bitcoin-privacy-35-cents': typeof EnBlogBitcoinPrivacy35CentsRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
@@ -665,6 +679,7 @@ export interface FileRoutesByTo {
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
+  '/blog/hackeo-binance-llaves': typeof BlogHackeoBinanceLlavesRoute
   '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
   '/blog/meteora-historia-y-como-funciona': typeof BlogMeteoraHistoriaYComoFuncionaRoute
   '/blog/miedo-caida-bitcoin-holdear': typeof BlogMiedoCaidaBitcoinHoldearRoute
@@ -697,6 +712,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogIndexRoute
   '/en': typeof EnIndexRoute
   '/guias': typeof GuiasIndexRoute
+  '/en/blog/binance-hack-keys': typeof EnBlogBinanceHackKeysRoute
   '/en/blog/bitcoin-fear-and-holding': typeof EnBlogBitcoinFearAndHoldingRoute
   '/en/blog/bitcoin-privacy-35-cents': typeof EnBlogBitcoinPrivacy35CentsRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
@@ -753,6 +769,7 @@ export interface FileRoutesById {
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
+  '/blog/hackeo-binance-llaves': typeof BlogHackeoBinanceLlavesRoute
   '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
   '/blog/meteora-historia-y-como-funciona': typeof BlogMeteoraHistoriaYComoFuncionaRoute
   '/blog/miedo-caida-bitcoin-holdear': typeof BlogMiedoCaidaBitcoinHoldearRoute
@@ -785,6 +802,7 @@ export interface FileRoutesById {
   '/blog/': typeof BlogIndexRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
+  '/en/blog/binance-hack-keys': typeof EnBlogBinanceHackKeysRoute
   '/en/blog/bitcoin-fear-and-holding': typeof EnBlogBitcoinFearAndHoldingRoute
   '/en/blog/bitcoin-privacy-35-cents': typeof EnBlogBitcoinPrivacy35CentsRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
@@ -842,6 +860,7 @@ export interface FileRouteTypes {
     | '/trump'
     | '/wallet'
     | '/blog/dolares-digitales-en-el-celular'
+    | '/blog/hackeo-binance-llaves'
     | '/blog/liquidez-concentrada'
     | '/blog/meteora-historia-y-como-funciona'
     | '/blog/miedo-caida-bitcoin-holdear'
@@ -874,6 +893,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/en/'
     | '/guias/'
+    | '/en/blog/binance-hack-keys'
     | '/en/blog/bitcoin-fear-and-holding'
     | '/en/blog/bitcoin-privacy-35-cents'
     | '/en/blog/concentrated-liquidity'
@@ -929,6 +949,7 @@ export interface FileRouteTypes {
     | '/trump'
     | '/wallet'
     | '/blog/dolares-digitales-en-el-celular'
+    | '/blog/hackeo-binance-llaves'
     | '/blog/liquidez-concentrada'
     | '/blog/meteora-historia-y-como-funciona'
     | '/blog/miedo-caida-bitcoin-holdear'
@@ -961,6 +982,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/en'
     | '/guias'
+    | '/en/blog/binance-hack-keys'
     | '/en/blog/bitcoin-fear-and-holding'
     | '/en/blog/bitcoin-privacy-35-cents'
     | '/en/blog/concentrated-liquidity'
@@ -1016,6 +1038,7 @@ export interface FileRouteTypes {
     | '/trump'
     | '/wallet'
     | '/blog/dolares-digitales-en-el-celular'
+    | '/blog/hackeo-binance-llaves'
     | '/blog/liquidez-concentrada'
     | '/blog/meteora-historia-y-como-funciona'
     | '/blog/miedo-caida-bitcoin-holdear'
@@ -1048,6 +1071,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/en/'
     | '/guias/'
+    | '/en/blog/binance-hack-keys'
     | '/en/blog/bitcoin-fear-and-holding'
     | '/en/blog/bitcoin-privacy-35-cents'
     | '/en/blog/concentrated-liquidity'
@@ -1104,6 +1128,7 @@ export interface RootRouteChildren {
   TrumpRoute: typeof TrumpRoute
   WalletRoute: typeof WalletRoute
   BlogDolaresDigitalesEnElCelularRoute: typeof BlogDolaresDigitalesEnElCelularRoute
+  BlogHackeoBinanceLlavesRoute: typeof BlogHackeoBinanceLlavesRoute
   BlogLiquidezConcentradaRoute: typeof BlogLiquidezConcentradaRoute
   BlogMeteoraHistoriaYComoFuncionaRoute: typeof BlogMeteoraHistoriaYComoFuncionaRoute
   BlogMiedoCaidaBitcoinHoldearRoute: typeof BlogMiedoCaidaBitcoinHoldearRoute
@@ -1136,6 +1161,7 @@ export interface RootRouteChildren {
   BlogIndexRoute: typeof BlogIndexRoute
   EnIndexRoute: typeof EnIndexRoute
   GuiasIndexRoute: typeof GuiasIndexRoute
+  EnBlogBinanceHackKeysRoute: typeof EnBlogBinanceHackKeysRoute
   EnBlogBitcoinFearAndHoldingRoute: typeof EnBlogBitcoinFearAndHoldingRoute
   EnBlogBitcoinPrivacy35CentsRoute: typeof EnBlogBitcoinPrivacy35CentsRoute
   EnBlogConcentratedLiquidityRoute: typeof EnBlogConcentratedLiquidityRoute
@@ -1380,6 +1406,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogDolaresDigitalesEnElCelularRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/hackeo-binance-llaves': {
+      id: '/blog/hackeo-binance-llaves'
+      path: '/blog/hackeo-binance-llaves'
+      fullPath: '/blog/hackeo-binance-llaves'
+      preLoaderRoute: typeof BlogHackeoBinanceLlavesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/liquidez-concentrada': {
       id: '/blog/liquidez-concentrada'
       path: '/blog/liquidez-concentrada'
@@ -1604,6 +1637,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnBlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/blog/binance-hack-keys': {
+      id: '/en/blog/binance-hack-keys'
+      path: '/en/blog/binance-hack-keys'
+      fullPath: '/en/blog/binance-hack-keys'
+      preLoaderRoute: typeof EnBlogBinanceHackKeysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/blog/bitcoin-fear-and-holding': {
       id: '/en/blog/bitcoin-fear-and-holding'
       path: '/en/blog/bitcoin-fear-and-holding'
@@ -1792,6 +1832,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrumpRoute: TrumpRoute,
   WalletRoute: WalletRoute,
   BlogDolaresDigitalesEnElCelularRoute: BlogDolaresDigitalesEnElCelularRoute,
+  BlogHackeoBinanceLlavesRoute: BlogHackeoBinanceLlavesRoute,
   BlogLiquidezConcentradaRoute: BlogLiquidezConcentradaRoute,
   BlogMeteoraHistoriaYComoFuncionaRoute: BlogMeteoraHistoriaYComoFuncionaRoute,
   BlogMiedoCaidaBitcoinHoldearRoute: BlogMiedoCaidaBitcoinHoldearRoute,
@@ -1824,6 +1865,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogIndexRoute: BlogIndexRoute,
   EnIndexRoute: EnIndexRoute,
   GuiasIndexRoute: GuiasIndexRoute,
+  EnBlogBinanceHackKeysRoute: EnBlogBinanceHackKeysRoute,
   EnBlogBitcoinFearAndHoldingRoute: EnBlogBitcoinFearAndHoldingRoute,
   EnBlogBitcoinPrivacy35CentsRoute: EnBlogBitcoinPrivacy35CentsRoute,
   EnBlogConcentratedLiquidityRoute: EnBlogConcentratedLiquidityRoute,

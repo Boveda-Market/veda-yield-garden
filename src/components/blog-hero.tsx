@@ -1,7 +1,8 @@
 /** Animated cover scenes (pure SVG + SMIL, SSR-safe, no downloads) that open each post by picturing its problem. Illustrative only: no live data. */
-type Scene = "privacy" | "fear" | "exchange" | "pool" | "phone";
+type Scene = "privacy" | "fear" | "exchange" | "pool" | "phone" | "keys";
 
 export const HERO_BY_PATH: Record<string, Scene> = {
+  "/blog/hackeo-binance-llaves": "keys",
   "/blog/privacidad-bitcoin-35-centavos": "privacy",
   "/blog/miedo-caida-bitcoin-holdear": "fear",
   "/blog/meteora-historia-y-como-funciona": "exchange",
@@ -14,6 +15,7 @@ const CAP: Record<Scene, [string, string]> = {
   fear: ["El precio cae, llegan las alertas y el Bitcoin sigue quieto.", "Price falls, alerts pile up and the Bitcoin just sits there."],
   exchange: ["Una casa de cambio: unos traen monedas, otros se las llevan.", "An exchange counter: some bring coins, others take them."],
   pool: ["Muchas personas aportan a una reserva compartida.", "Many people add to a shared reserve."],
+  keys: ["Hackean la gran caja fuerte compartida… y quien guarda sus llaves sigue tranquilo.", "The big shared safe gets hacked… while the person who keeps their keys stays calm."],
   phone: ["Dólares digitales que llegan directo al celular.", "Digital dollars arriving straight to the phone."],
 };
 
@@ -38,6 +40,14 @@ const Pulse = ({ children, dur = "1.6s" }: { children: React.ReactNode; dur?: st
 
 function Art({ scene }: { scene: Scene }) {
   switch (scene) {
+    case "keys": return <>
+      <path d="M30 200 V80 L95 50 L160 80 V200 Z" /><path d="M50 200 V110 M75 200 V110 M115 200 V110 M140 200 V110" className="text-muted-foreground" />
+      <Pulse dur="1.1s"><g className="text-destructive"><rect x="80" y="120" width="30" height="24" rx="4" className="fill-destructive/15" /><path d="M86 120 V112 Q95 100 104 108" /><path d="M60 40 L68 52 M130 40 L122 52" /></g></Pulse>
+      <Move path="M70 -10 C60 -30 40 -20 0 0" dur="2.8s"><Coin x={110} y={170} /></Move>
+      <Person x={200} y={130} mood="sneaky" />
+      <Person x={300} y={130} />
+      <g className="text-primary"><rect x="318" y="150" width="20" height="32" rx="4" /><Pulse dur="2.2s"><path d="M328 92 L346 99 V112 Q346 124 328 131 Q310 124 310 112 V99 Z" className="fill-primary/15" /></Pulse><circle cx="328" cy="110" r="4" /><path d="M328 114 V120" /></g>
+    </>;
     case "privacy": return <>
       <path d="M40 150 L80 115 L120 150 V200 H40 Z" /><rect x="70" y="170" width="20" height="30" />
       <Pulse><g className="text-destructive"><path d="M80 70 C66 70 60 82 66 92 L80 110 L94 92 C100 82 94 70 80 70 Z" className="fill-destructive/15" /><circle cx="80" cy="86" r="5" /></g></Pulse>
