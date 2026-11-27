@@ -121,3 +121,4 @@
 - [x] Última parada del tour: «Seguir explorando» cierra sin abrir el acceso; Atrás, ✕ y el botón Atrás del teléfono siguen disponibles.
 
 - [x] Revisar decimales en toda la app: puntos y comas solo para miles.
+- [x] Añadir enlace de GitHub al pie compartido usando solo el logo oficial.

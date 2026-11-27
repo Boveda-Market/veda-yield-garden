@@ -4,6 +4,7 @@ import { InstallAppButton } from "@/components/install-app";
 import { Headset } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { askSofiaFromMenu } from "@/lib/sofia-controls";
+import { GITHUB_REPO_URL, GithubMark } from "@/components/github-link";
 
 /** App-shell footer only; public home variants keep their separate footer. */
 export function AppFooterLinks() {
@@ -19,5 +20,8 @@ export function AppFooterLinks() {
     <InstallAppButton className={link} />
     <Button variant="ghost" onClick={askSofiaFromMenu} className="min-h-11 px-0 font-normal text-sofia-text"><Headset size={16} />{t("Pregúntale a Sofía")}</Button>
     <a href="mailto:admin@bovedamarket.app" className={link}>admin@bovedamarket.app</a>
+    <Button asChild variant="ghost" size="icon" className="size-11 shrink-0 text-primary">
+      <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><GithubMark size={20} /></a>
+    </Button>
   </nav>;
 }
