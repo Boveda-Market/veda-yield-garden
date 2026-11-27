@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import { ChevronRight } from "lucide-react";
 import { BackButton } from "@/components/back-button";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { SITE_URL, langLinks } from "@/lib/seo-lang";
@@ -122,15 +123,32 @@ const fmt = (d: string, lang: Lang) => new Date(`${d}T12:00:00Z`).toLocaleDateSt
 
 export function BlogIndex() {
   const { lang } = useI18n(); const en = lang === "en";
-  return <main className="mx-auto min-h-screen max-w-3xl px-5 py-8 text-foreground">
+  const sofia = AUTHORS.sofia;
+  const [lead, ...rest] = POSTS;
+  const meta = (p: (typeof POSTS)[number]) => `${en ? p.categoryEn : p.category} · ${en ? `${p.minutes} min` : `${p.minutes} min`}`;
+  return <main className="mx-auto min-h-screen max-w-3xl px-5 py-6 text-foreground">
     <BackButton fallback="/" />
-    <h1 className="mt-10 font-display text-3xl font-bold">Blog</h1>
-    <p className="mt-3 text-muted-foreground">{en ? "Crypto trends and digital dollars, explained like a conversation between friends." : "Tendencias cripto y dólares digitales, explicados como una conversación entre amigos."}</p>
-    <ul className="mt-8 space-y-3">{POSTS.map((p) => <li key={p.to}><Link to={en ? p.toEn : p.to} className="block rounded-2xl border border-border bg-card p-5 hover:border-primary">
-      <p className="text-xs font-semibold uppercase tracking-wide text-primary">{en ? p.categoryEn : p.category}</p>
-      <h2 className="mt-1 font-display text-lg font-semibold leading-snug">{en ? p.titleEn : p.title}</h2>
-      <p className="mt-2 text-sm text-muted-foreground">{en ? p.descEn : p.desc}</p>
-      <p className="mt-3 text-xs text-muted-foreground">{fmt(p.date, lang)} · {en ? `${p.minutes} min read` : `${p.minutes} min de lectura`} · {en ? AUTHORS[p.author].nameEn : AUTHORS[p.author].name}</p>
+    <header className="mt-5 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+      <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-full bg-[image:var(--gradient-sofia)] p-[2px]"><span className="grid size-full place-items-center rounded-full bg-sofia-disc text-sm font-bold text-sofia">{sofia.initials}</span></span>
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase tracking-wide text-sofia-text">{en ? "Sofía's column" : "La columna de Sofía"}</p>
+        <h1 className="font-display text-2xl font-bold leading-tight">Blog</h1>
+      </div>
+    </header>
+    <p className="mt-3 border-l-2 border-sofia-text/50 pl-3 text-sm italic leading-6 text-muted-foreground">{en ? "“News, opinion and trends, explained like a conversation between friends.” — Sofía Holdd" : "«Noticias, opinión y tendencias, explicadas como una conversación entre amigos.» — Sofía Holdd"}</p>
+    {lead && <Link to={en ? lead.toEn : lead.to} className="mt-5 block rounded-2xl border border-sofia-text/30 bg-sofia-surface p-4 transition hover:border-sofia-text">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-sofia-text">{en ? "Latest" : "Lo último"} · {meta(lead)}</p>
+      <h2 className="mt-1.5 font-display text-xl font-bold leading-snug">{en ? lead.titleEn : lead.title}</h2>
+      <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{en ? lead.descEn : lead.desc}</p>
+      <p className="mt-2 text-xs text-muted-foreground">{fmt(lead.date, lang)} · {en ? AUTHORS[lead.author].nameEn : AUTHORS[lead.author].name}</p>
+    </Link>}
+    <ul className="mt-2 divide-y divide-border">{rest.map((p) => <li key={p.to}><Link to={en ? p.toEn : p.to} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-3.5">
+      <div className="min-w-0">
+        <p className={`text-[11px] font-semibold uppercase tracking-wide ${p.author === "sofia" ? "text-sofia-text" : "text-muted-foreground"}`}>{meta(p)}</p>
+        <h2 className="mt-0.5 font-display text-[15px] font-semibold leading-snug">{en ? p.titleEn : p.title}</h2>
+        <p className="mt-1 text-xs text-muted-foreground">{fmt(p.date, lang)} · {en ? AUTHORS[p.author].nameEn : AUTHORS[p.author].name}</p>
+      </div>
+      <ChevronRight aria-hidden className="size-5 shrink-0 text-sofia-text" />
     </Link></li>)}</ul>
   </main>;
 }
