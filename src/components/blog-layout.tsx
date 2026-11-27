@@ -15,6 +15,14 @@ export type AuthorId = keyof typeof AUTHORS;
 /** Blog posts: friendly, conversational trend articles (guides stay evergreen how-tos). */
 export const POSTS = [
   {
+    to: "/blog/privacidad-bitcoin-35-centavos", toEn: "/en/blog/bitcoin-privacy-35-cents", date: "2026-11-27", minutes: 5, author: "sofia",
+    category: "Adopción y ahorro", categoryEn: "Adoption & savings",
+    title: "Tu dirección de casa por 35 centavos: la falla que expone el holdear a la antigua",
+    titleEn: "Your home address for 35 cents: the flaw that exposes old-school holding",
+    desc: "Yahoo Finanzas cuenta cómo un pago de centavos podría revelar la conexión de una billetera de Bitcoin, y Google se llena de dudas. Por qué guardar Bitcoin no debería exigirte ser técnico.",
+    descEn: "Yahoo Finance reports how a payment of cents could reveal a Bitcoin wallet's connection, and Google fills with doubts. Why storing Bitcoin shouldn't require being a technician.",
+  },
+  {
     to: "/blog/miedo-caida-bitcoin-holdear", toEn: "/en/blog/bitcoin-fear-and-holding", date: "2026-11-27", minutes: 6, author: "sofia",
     category: "Adopción y ahorro", categoryEn: "Adoption & savings",
     title: "Bitcoin cae, Google se llena de miedo: por qué holdear a la antigua es el verdadero problema",
