@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { Headset, SendHorizontal, X } from "lucide-react";
+import { ChevronRight, Headset, SendHorizontal, X } from "lucide-react";
 import { Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ActionSheetContent } from "@/components/ui/action-sheet";
@@ -15,8 +15,8 @@ import { HERO_SLUGS } from "@/lib/hero-variants";
 type Turn = { role: "user" | "assistant"; text: string };
 
 const COPY = {
-  es: { open: "Pregúntale a Sofía", show: "Pregúntale a Sofía", title: "Sofía", sub: "Tu asistente en Bóveda Market", tag: "Guía oficial", hello: "¡Hola! Soy Sofía, tu asistente en Bóveda Market. Me alegra verte por aquí. Podemos conversar sobre tus bóvedas, tu portafolio o cómo mover tus dólares. Cuéntame, ¿en qué te ayudo hoy?", ph: "Escribe tu pregunta…", send: "Enviar", typing: "Sofía está escribiendo…", wait: "Has enviado varios mensajes seguidos. Por favor espera {s} segundos antes de tu siguiente consulta para mantener el servicio disponible para todos.", err: "Uy, no pude responder ahora. Inténtalo de nuevo en un momento o escríbenos en el canal oficial de Telegram.", note: "Sofía es una asistente con IA: orienta, no da consejos financieros ni puede hacer cambios en tu cuenta. Nunca compartas tus claves.", hide: "Ocultar a Sofía", hideNote: "Podrás volver a mostrarla en el pie de la portada, en el menú o en Tu cuenta.", chips: ["¿Cómo retiro mis dólares?", "¿Qué es el Piloto Automático?", "¿Dónde está guardado mi dinero?", "¿Por qué hay una comisión al activar?"] },
-  en: { open: "Ask Sophia", show: "Ask Sophia", title: "Sophia", sub: "Your Bóveda Market assistant", tag: "Official guide", hello: "Hi! I'm Sophia, your Bóveda Market assistant. It's lovely to see you here. We can chat about your vaults, portfolio or how to move your dollars. Tell me, how can I help you today?", ph: "Type your question…", send: "Send", typing: "Sophia is typing…", wait: "You've sent several messages in a row. Please wait {s} seconds before your next question so the service stays available for everyone.", err: "Oops, I couldn't answer right now. Try again in a moment or reach us on the official Telegram channel.", note: "Sophia is an AI assistant: she guides you, doesn't give financial advice and can't change your account. Never share your keys.", hide: "Hide Sophia", hideNote: "You can bring her back from the home page footer, the menu or Your account.", chips: ["How do I withdraw my dollars?", "What is Autopilot?", "Where is my money kept?", "Why is there an activation fee?"] },
+  es: { open: "Pregúntale a Sofía", show: "Pregúntale a Sofía", title: "Sofía", sub: "Tu asistente en Bóveda Market", tag: "Guía oficial", greet: "Hola", help: "¿Cómo te ayudo?", top: "Preguntas frecuentes", hello: "¡Hola! Soy Sofía, tu asistente en Bóveda Market. Me alegra verte por aquí. Podemos conversar sobre tus bóvedas, tu portafolio o cómo mover tus dólares. Cuéntame, ¿en qué te ayudo hoy?", ph: "Escribe tu pregunta…", send: "Enviar", typing: "Sofía está escribiendo…", wait: "Has enviado varios mensajes seguidos. Por favor espera {s} segundos antes de tu siguiente consulta para mantener el servicio disponible para todos.", err: "Uy, no pude responder ahora. Inténtalo de nuevo en un momento o escríbenos en el canal oficial de Telegram.", note: "Sofía es una asistente con IA: orienta, no da consejos financieros ni puede hacer cambios en tu cuenta. Nunca compartas tus claves.", hide: "Ocultar a Sofía", hideNote: "Podrás volver a mostrarla en el pie de la portada, en el menú o en Tu cuenta.", chips: ["¿Cómo retiro mis dólares?", "¿Qué es el Piloto Automático?", "¿Dónde está guardado mi dinero?", "¿Por qué hay una comisión al activar?"] },
+  en: { open: "Ask Sophia", show: "Ask Sophia", title: "Sophia", sub: "Your Bóveda Market assistant", tag: "Official guide", greet: "Hi there", help: "How can I help?", top: "Popular questions", hello: "Hi! I'm Sophia, your Bóveda Market assistant. It's lovely to see you here. We can chat about your vaults, portfolio or how to move your dollars. Tell me, how can I help you today?", ph: "Type your question…", send: "Send", typing: "Sophia is typing…", wait: "You've sent several messages in a row. Please wait {s} seconds before your next question so the service stays available for everyone.", err: "Oops, I couldn't answer right now. Try again in a moment or reach us on the official Telegram channel.", note: "Sophia is an AI assistant: she guides you, doesn't give financial advice and can't change your account. Never share your keys.", hide: "Hide Sophia", hideNote: "You can bring her back from the home page footer, the menu or Your account.", chips: ["How do I withdraw my dollars?", "What is Autopilot?", "Where is my money kept?", "Why is there an activation fee?"] },
 } as const;
 
 const HIDDEN = ["/admin"];
@@ -137,22 +137,29 @@ export function SupportChat() {
     </Button>
     </div>}
     <Dialog open={open} onOpenChange={setOpen}>
-      <ActionSheetContent closeLabel={lang === "en" ? "Close" : "Cerrar"} className="flex max-h-[85dvh] flex-col sm:max-w-md" onOpenAutoFocus={(e) => e.preventDefault()}>
-        <div className="flex items-center gap-3 pr-8">
-          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[image:var(--gradient-sofia)] p-[2px]" aria-hidden>
-            <span className="grid size-full place-items-center rounded-full bg-sofia-disc text-base font-semibold text-sofia">{c.title[0]}</span>
+      <ActionSheetContent closeLabel={lang === "en" ? "Close" : "Cerrar"} className={cn("sofia-sheet flex max-h-[85dvh] flex-col sm:max-w-md", msgs.length > 0 && "sofia-sheet-chat")} onOpenAutoFocus={(e) => e.preventDefault()}>
+        {/* Welcome band (painted by .sofia-sheet's background so the swipe handle stays on top): greeting first, questions in a floating card. */}
+        <div className="flex items-center gap-3 pr-10 pt-2">
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[image:var(--gradient-sofia)] p-[2px]" aria-hidden>
+            <span className="grid size-full place-items-center rounded-full bg-sofia-disc text-sofia"><Headset className="size-5" /></span>
           </span>
-          <div className="min-w-0">
-            <DialogTitle className="text-base">{c.title}</DialogTitle>
-            <DialogDescription className="text-xs">{c.sub}</DialogDescription>
-            <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-sofia-surface px-2 py-0.5 text-[10px] font-medium text-sofia-text">
-              <span className="size-1.5 rounded-full bg-live" aria-hidden />{c.tag}
-            </span>
+          <div className="min-w-0 text-sofia-foreground">
+            <DialogTitle className="text-base font-semibold">{c.title}</DialogTitle>
+            <DialogDescription className="flex items-center gap-1.5 text-xs text-sofia-foreground/70"><span className="size-1.5 shrink-0 rounded-full bg-live" aria-hidden />{c.tag} · {c.sub}</DialogDescription>
           </div>
         </div>
+        {!msgs.length && <div className="pb-1 pt-6">
+          <p className="font-display text-3xl font-semibold leading-tight text-sofia-foreground/60">{c.greet} <span aria-hidden>👋</span></p>
+          <p className="font-display text-3xl font-bold leading-tight text-sofia-foreground">{c.help}</p>
+        </div>}
         <div className="flex min-h-[200px] flex-1 flex-col gap-2 overflow-y-auto text-sm" aria-live="polite">
-          <Bubble who="assistant">{c.hello}</Bubble>
-          {!msgs.length && <div className="flex flex-wrap gap-2 pt-1">{c.chips.map((q) => <button key={q} type="button" onClick={() => send(q)} className="rounded-full border border-sofia-text/40 bg-sofia-surface px-3 py-1.5 text-xs text-sofia-text transition hover:border-sofia-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sofia-text">{q}</button>)}</div>}
+          {!msgs.length && <div className="rounded-2xl border border-border bg-card p-2 shadow-lg">
+            <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-sofia-text">{c.top}</p>
+            <ul>{c.chips.map((q) => <li key={q}><button type="button" onClick={() => send(q)} className="grid min-h-12 w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[15px] text-card-foreground transition hover:bg-sofia-surface focus-visible:outline-2 focus-visible:outline-sofia-text">
+              <span className="min-w-0">{q}</span><ChevronRight className="size-5 text-sofia-text" aria-hidden />
+            </button></li>)}</ul>
+          </div>}
+          {msgs.length > 0 && <Bubble who="assistant">{c.hello}</Bubble>}
           {msgs.map((m, i) => <Bubble key={i} who={m.role}>{m.text}</Bubble>)}
           {busy && (
             <div className="mr-8 flex items-center gap-2 self-start rounded-2xl rounded-bl-md bg-sofia-surface px-3 py-2.5">
