@@ -124,3 +124,4 @@
 - [x] Añadir enlace de GitHub al pie compartido usando solo el logo oficial.
 
 - [x] Ficha de la bóveda: la dirección del pool se muestra arriba del contrato y es un enlace con botón para copiar
+- [x] Bóvedas: acomodar los botones para que las dos primeras, lado a lado, sean Bitcoin y Trump

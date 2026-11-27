@@ -23,6 +23,17 @@ export const VAULTS: Vault[] = [
   { id: "met", name: "Bóveda MET", pair: "MET/USDC", pool: "BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1", apy: 34.2, risk: "Alto", blurb: "Más intereses por intereses con exposición a MET. Mayor volatilidad y riesgo alto." },
 ];
 
+/**
+ * Display order of the vault buttons: Bitcoin and TRUMP first, side by side,
+ * then the rest. Keep in sync with the vaults below.
+ */
+export const VAULT_DISPLAY_ORDER = ["btc", "trump", "gta6", "dcty", "sol", "met"];
+/** Position of a vault in VAULT_DISPLAY_ORDER; unknown vaults go last. */
+export const vaultRank = (id: string) => {
+  const i = VAULT_DISPLAY_ORDER.indexOf(id);
+  return i < 0 ? VAULT_DISPLAY_ORDER.length : i;
+};
+
 export type Position = { id: string; vaultId: string; principal: number; openedAt: number; claimed: number };
 
 /** Accrued fees in USDC since opening, minus what was already harvested. */

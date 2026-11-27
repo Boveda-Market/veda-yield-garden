@@ -1,6 +1,7 @@
-import { Check, Copy, ExternalLink } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { MetricHelpGrid, type MetricTile } from "@/components/metric-help";
-import { CHAIN_POOLS, isDlmmVault } from "@/lib/solana-data";
+import { CHAIN_POOLS } from "@/lib/solana-data";
+import { PoolAddressRow } from "@/components/pool-address-row";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useT } from "@/lib/i18n";
@@ -65,7 +66,6 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
   const symbol = coin ? `$${coin}` : rawSym;
   const mint = CHAIN_POOLS.find((p) => p.id === vault.id)?.mint;
   const [copied, setCopied] = useState(false);
-  const [copiedPool, setCopiedPool] = useState(false);
   const liquidity = useQuery({ ...tokenLiquidityOptions(mint ?? ""), enabled: !!mint });
   const liq = liquidity.data;
   const ch = stats.data?.change24h ?? null;
@@ -99,15 +99,7 @@ export function MarketPerformance({ vault }: { vault: Vault }) {
         [t("Intereses totales"), m?.totalFees != null ? `+${usdShort(m.totalFees)}` : "—", feeShare != null ? t("{p} de todo lo operado", { p: pct(feeShare) }) : t("Desde que abrió el pool")]].map(([k, v, s], i) =>
         <div key={i} className={`min-w-0 rounded-xl p-2.5 ${i >= 1 ? "bg-primary/10" : "bg-muted"}`}><p className="text-[10px] font-semibold uppercase leading-tight tracking-wide text-muted-foreground">{k}</p><p className={`truncate font-display text-base font-bold tabular-nums ${i >= 1 ? "text-primary" : ""}`}>{v}</p><p className={`text-[10px] leading-tight ${i === 0 && ch != null ? (ch >= 0 ? "font-bold text-primary" : "font-bold text-destructive") : "text-muted-foreground"}`}>{i === 0 && ch != null ? (ch >= 0 ? "▲ " : "▼ ") : ""}{s}</p></div>)}
     </div>
-    <div className="flex items-stretch gap-2">
-      <a href={`https://app.meteora.ag/${isDlmmVault(vault.id) ? "dlmm" : "dammv2"}/${vault.pool}`} target="_blank" rel="noopener noreferrer" aria-label={t("Ver la página del pool")} className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-muted/50 px-3 py-2">
-        <div className="min-w-0 flex-1"><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("Dirección del pool")}</p><p className="break-all font-mono text-[11px] leading-4">{vault.pool}</p></div>
-        <ExternalLink size={16} className="shrink-0 text-muted-foreground" />
-      </a>
-      <button type="button" onClick={() => { void navigator.clipboard.writeText(vault.pool).then(() => { setCopiedPool(true); setTimeout(() => setCopiedPool(false), 2000); }).catch(() => {}); }} aria-label={t("Copiar dirección del pool")} className="flex shrink-0 items-center rounded-xl border border-border bg-muted/50 px-3">
-        {copiedPool ? <Check size={16} className="text-primary" /> : <Copy size={16} className="text-muted-foreground" />}
-      </button>
-    </div>
+    <PoolAddressRow vault={vault} />
     {mint && <button type="button" onClick={() => { void navigator.clipboard.writeText(mint).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {}); }} aria-label={t("Copiar contrato")} className="flex w-full items-center gap-2 rounded-xl border border-border bg-muted/50 px-3 py-2 text-left">
       <div className="min-w-0 flex-1"><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("Contrato oficial:")} <span className="normal-case">{symbol}</span></p><p className="break-all font-mono text-[11px] leading-4">{mint}</p></div>
       {copied ? <Check size={16} className="shrink-0 text-primary" /> : <Copy size={16} className="shrink-0 text-muted-foreground" />}

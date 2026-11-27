@@ -2,14 +2,14 @@ import { useT } from "@/lib/i18n";
 import { formatCoinPrice } from "@/lib/format-price";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Check, Copy, RefreshCw, TrendingDown, TrendingUp } from "lucide-react";
+import { RefreshCw, TrendingDown, TrendingUp } from "lucide-react";
 import { poolYieldOptions } from "@/lib/pool-yield";
 import { bitcoinStatsOptions } from "@/lib/bitcoin-stats";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { fetchPoolStats, coinLabel } from "@/lib/pool-stats";
 import type { Vault } from "@/lib/vaults";
-import { isDlmmVault } from "@/lib/solana-data";
+import { PoolAddressRow } from "@/components/pool-address-row";
 import { MetricHelpGrid, type MetricTile } from "@/components/metric-help";
 import { MarketPerformance } from "@/components/market-performance";
 import { vaultSkin } from "@/components/vault-skin";
@@ -22,8 +22,6 @@ const usdShort = (v: number | null | undefined) => v == null ? "—" : `$${compa
 export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => void }) {
   const t = useT();
   const [tab, setTab] = useState<"perf" | "stats">("perf");
-  const [copied, setCopied] = useState(false);
-  const [copyError, setCopyError] = useState(false);
   const query = useQuery({
     queryKey: ["dexscreener-pool-stats", vault.pool],
     queryFn: ({ signal }) => fetchPoolStats(vault.pool, signal),
@@ -69,17 +67,6 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
     { label: t("Para los depósitos"), value: y?.depositorFeeShare == null ? "—" : `${number(y.depositorFeeShare, 1)}%`, sub: t("De cada comisión"), help: "De cada comisión que pagan quienes cambian monedas, esta parte se reparte entre los depósitos como el tuyo. El resto es la tarifa de la plataforma del pool." },
     { label: t("Riesgo de la bóveda"), value: t(vault.risk), sub: vault.badge ? t(vault.badge) : undefined, help: "Nuestra clasificación sencilla de qué tanto puede subir o bajar el valor de tu depósito. Más riesgo suele venir con más intereses y más altibajos." },
   ];
-  const url = `https://app.meteora.ag/${isDlmmVault(vault.id) ? "dlmm" : "dammv2"}/${vault.pool}`;
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setCopyError(false);
-    } catch {
-      setCopyError(true);
-    }
-  };
-
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-lg bg-card">
@@ -116,13 +103,7 @@ export function PoolDetails({ vault, onClose }: { vault: Vault; onClose: () => v
         </p>
 
         <div className="border-t border-border pt-4">
-          <p className="mb-2 text-xs text-muted-foreground">{t("Referencia del pool")}</p>
-          <div className="flex min-w-0 items-center gap-2">
-            <input aria-label={t("enlace del pool para copiar")} readOnly value={url} onFocus={(event) => event.currentTarget.select()} className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 font-mono text-xs text-muted-foreground" />
-            <Button variant="secondary" size="icon" aria-label={copied ? t("Enlace copiado") : t("Copiar enlace del pool")} title={t("Copiar enlace del pool")} onClick={() => void copy()}>{copied ? <Check /> : <Copy />}</Button>
-          </div>
-          {copied && <p role="status" className="mt-2 text-xs text-primary">{t("URL copiada")}</p>}
-          {copyError && <p role="status" className="mt-2 text-xs text-muted-foreground">{t("No se pudo copiar. Selecciona la URL para copiarla manualmente.")}</p>}
+          <PoolAddressRow vault={vault} />
         </div>
         </>}
         <div className="sticky -bottom-6 -mx-6 -mb-6 border-t border-border bg-card px-6 py-3">
