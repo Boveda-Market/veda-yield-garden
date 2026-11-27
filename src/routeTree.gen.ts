@@ -60,6 +60,7 @@ import { Route as EnStatusRouteImport } from './routes/en/status'
 import { Route as EnTermsRouteImport } from './routes/en/terms'
 import { Route as EnTrumpRouteImport } from './routes/en/trump'
 import { Route as GuiasIndexRouteImport } from './routes/guias/index'
+import { Route as GuiasBitcoinCoinbaseCashAppRouteImport } from './routes/guias/bitcoin-coinbase-cash-app'
 import { Route as GuiasBovedasAltoRendimientoRouteImport } from './routes/guias/bovedas-alto-rendimiento'
 import { Route as GuiasGanarInteresesBitcoinRouteImport } from './routes/guias/ganar-intereses-bitcoin'
 import { Route as GuiasInvertirSinEstafasRouteImport } from './routes/guias/invertir-sin-estafas'
@@ -75,6 +76,7 @@ import { Route as EnBlogMeteoraHistoryAndHowItWorksRouteImport } from './routes/
 import { Route as EnGuidesIndexRouteImport } from './routes/en/guides/index'
 import { Route as EnGuidesAddDollarsWithCoinbaseRouteImport } from './routes/en/guides/add-dollars-with-coinbase'
 import { Route as EnGuidesAvoidInvestmentScamsRouteImport } from './routes/en/guides/avoid-investment-scams'
+import { Route as EnGuidesBitcoinCoinbaseCashAppRouteImport } from './routes/en/guides/bitcoin-coinbase-cash-app'
 import { Route as EnGuidesBringYourOwnCoinsRouteImport } from './routes/en/guides/bring-your-own-coins'
 import { Route as EnGuidesEarnInterestOnBitcoinRouteImport } from './routes/en/guides/earn-interest-on-bitcoin'
 import { Route as EnGuidesHighYieldVaultsRouteImport } from './routes/en/guides/high-yield-vaults'
@@ -346,6 +348,12 @@ const GuiasIndexRoute = GuiasIndexRouteImport.update({
   path: '/guias/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuiasBitcoinCoinbaseCashAppRoute =
+  GuiasBitcoinCoinbaseCashAppRouteImport.update({
+    id: '/guias/bitcoin-coinbase-cash-app',
+    path: '/guias/bitcoin-coinbase-cash-app',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuiasBovedasAltoRendimientoRoute =
   GuiasBovedasAltoRendimientoRouteImport.update({
     id: '/guias/bovedas-alto-rendimiento',
@@ -429,6 +437,12 @@ const EnGuidesAvoidInvestmentScamsRoute =
   EnGuidesAvoidInvestmentScamsRouteImport.update({
     id: '/en/guides/avoid-investment-scams',
     path: '/en/guides/avoid-investment-scams',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EnGuidesBitcoinCoinbaseCashAppRoute =
+  EnGuidesBitcoinCoinbaseCashAppRouteImport.update({
+    id: '/en/guides/bitcoin-coinbase-cash-app',
+    path: '/en/guides/bitcoin-coinbase-cash-app',
     getParentRoute: () => rootRouteImport,
   } as any)
 const EnGuidesBringYourOwnCoinsRoute =
@@ -554,6 +568,7 @@ export interface FileRoutesByFullPath {
   '/en/status': typeof EnStatusRoute
   '/en/terms': typeof EnTermsRoute
   '/en/trump': typeof EnTrumpRoute
+  '/guias/bitcoin-coinbase-cash-app': typeof GuiasBitcoinCoinbaseCashAppRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/ganar-intereses-bitcoin': typeof GuiasGanarInteresesBitcoinRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
@@ -570,6 +585,7 @@ export interface FileRoutesByFullPath {
   '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
+  '/en/guides/bitcoin-coinbase-cash-app': typeof EnGuidesBitcoinCoinbaseCashAppRoute
   '/en/guides/bring-your-own-coins': typeof EnGuidesBringYourOwnCoinsRoute
   '/en/guides/earn-interest-on-bitcoin': typeof EnGuidesEarnInterestOnBitcoinRoute
   '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
@@ -635,6 +651,7 @@ export interface FileRoutesByTo {
   '/en/status': typeof EnStatusRoute
   '/en/terms': typeof EnTermsRoute
   '/en/trump': typeof EnTrumpRoute
+  '/guias/bitcoin-coinbase-cash-app': typeof GuiasBitcoinCoinbaseCashAppRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/ganar-intereses-bitcoin': typeof GuiasGanarInteresesBitcoinRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
@@ -651,6 +668,7 @@ export interface FileRoutesByTo {
   '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
+  '/en/guides/bitcoin-coinbase-cash-app': typeof EnGuidesBitcoinCoinbaseCashAppRoute
   '/en/guides/bring-your-own-coins': typeof EnGuidesBringYourOwnCoinsRoute
   '/en/guides/earn-interest-on-bitcoin': typeof EnGuidesEarnInterestOnBitcoinRoute
   '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
@@ -717,6 +735,7 @@ export interface FileRoutesById {
   '/en/status': typeof EnStatusRoute
   '/en/terms': typeof EnTermsRoute
   '/en/trump': typeof EnTrumpRoute
+  '/guias/bitcoin-coinbase-cash-app': typeof GuiasBitcoinCoinbaseCashAppRoute
   '/guias/bovedas-alto-rendimiento': typeof GuiasBovedasAltoRendimientoRoute
   '/guias/ganar-intereses-bitcoin': typeof GuiasGanarInteresesBitcoinRoute
   '/guias/invertir-sin-estafas': typeof GuiasInvertirSinEstafasRoute
@@ -733,6 +752,7 @@ export interface FileRoutesById {
   '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
+  '/en/guides/bitcoin-coinbase-cash-app': typeof EnGuidesBitcoinCoinbaseCashAppRoute
   '/en/guides/bring-your-own-coins': typeof EnGuidesBringYourOwnCoinsRoute
   '/en/guides/earn-interest-on-bitcoin': typeof EnGuidesEarnInterestOnBitcoinRoute
   '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
@@ -800,6 +820,7 @@ export interface FileRouteTypes {
     | '/en/status'
     | '/en/terms'
     | '/en/trump'
+    | '/guias/bitcoin-coinbase-cash-app'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/ganar-intereses-bitcoin'
     | '/guias/invertir-sin-estafas'
@@ -816,6 +837,7 @@ export interface FileRouteTypes {
     | '/en/blog/meteora-history-and-how-it-works'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
+    | '/en/guides/bitcoin-coinbase-cash-app'
     | '/en/guides/bring-your-own-coins'
     | '/en/guides/earn-interest-on-bitcoin'
     | '/en/guides/high-yield-vaults'
@@ -881,6 +903,7 @@ export interface FileRouteTypes {
     | '/en/status'
     | '/en/terms'
     | '/en/trump'
+    | '/guias/bitcoin-coinbase-cash-app'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/ganar-intereses-bitcoin'
     | '/guias/invertir-sin-estafas'
@@ -897,6 +920,7 @@ export interface FileRouteTypes {
     | '/en/blog/meteora-history-and-how-it-works'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
+    | '/en/guides/bitcoin-coinbase-cash-app'
     | '/en/guides/bring-your-own-coins'
     | '/en/guides/earn-interest-on-bitcoin'
     | '/en/guides/high-yield-vaults'
@@ -962,6 +986,7 @@ export interface FileRouteTypes {
     | '/en/status'
     | '/en/terms'
     | '/en/trump'
+    | '/guias/bitcoin-coinbase-cash-app'
     | '/guias/bovedas-alto-rendimiento'
     | '/guias/ganar-intereses-bitcoin'
     | '/guias/invertir-sin-estafas'
@@ -978,6 +1003,7 @@ export interface FileRouteTypes {
     | '/en/blog/meteora-history-and-how-it-works'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
+    | '/en/guides/bitcoin-coinbase-cash-app'
     | '/en/guides/bring-your-own-coins'
     | '/en/guides/earn-interest-on-bitcoin'
     | '/en/guides/high-yield-vaults'
@@ -1044,6 +1070,7 @@ export interface RootRouteChildren {
   EnStatusRoute: typeof EnStatusRoute
   EnTermsRoute: typeof EnTermsRoute
   EnTrumpRoute: typeof EnTrumpRoute
+  GuiasBitcoinCoinbaseCashAppRoute: typeof GuiasBitcoinCoinbaseCashAppRoute
   GuiasBovedasAltoRendimientoRoute: typeof GuiasBovedasAltoRendimientoRoute
   GuiasGanarInteresesBitcoinRoute: typeof GuiasGanarInteresesBitcoinRoute
   GuiasInvertirSinEstafasRoute: typeof GuiasInvertirSinEstafasRoute
@@ -1060,6 +1087,7 @@ export interface RootRouteChildren {
   EnBlogMeteoraHistoryAndHowItWorksRoute: typeof EnBlogMeteoraHistoryAndHowItWorksRoute
   EnGuidesAddDollarsWithCoinbaseRoute: typeof EnGuidesAddDollarsWithCoinbaseRoute
   EnGuidesAvoidInvestmentScamsRoute: typeof EnGuidesAvoidInvestmentScamsRoute
+  EnGuidesBitcoinCoinbaseCashAppRoute: typeof EnGuidesBitcoinCoinbaseCashAppRoute
   EnGuidesBringYourOwnCoinsRoute: typeof EnGuidesBringYourOwnCoinsRoute
   EnGuidesEarnInterestOnBitcoinRoute: typeof EnGuidesEarnInterestOnBitcoinRoute
   EnGuidesHighYieldVaultsRoute: typeof EnGuidesHighYieldVaultsRoute
@@ -1436,6 +1464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuiasIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guias/bitcoin-coinbase-cash-app': {
+      id: '/guias/bitcoin-coinbase-cash-app'
+      path: '/guias/bitcoin-coinbase-cash-app'
+      fullPath: '/guias/bitcoin-coinbase-cash-app'
+      preLoaderRoute: typeof GuiasBitcoinCoinbaseCashAppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guias/bovedas-alto-rendimiento': {
       id: '/guias/bovedas-alto-rendimiento'
       path: '/guias/bovedas-alto-rendimiento'
@@ -1539,6 +1574,13 @@ declare module '@tanstack/react-router' {
       path: '/en/guides/avoid-investment-scams'
       fullPath: '/en/guides/avoid-investment-scams'
       preLoaderRoute: typeof EnGuidesAvoidInvestmentScamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/guides/bitcoin-coinbase-cash-app': {
+      id: '/en/guides/bitcoin-coinbase-cash-app'
+      path: '/en/guides/bitcoin-coinbase-cash-app'
+      fullPath: '/en/guides/bitcoin-coinbase-cash-app'
+      preLoaderRoute: typeof EnGuidesBitcoinCoinbaseCashAppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/guides/bring-your-own-coins': {
@@ -1684,6 +1726,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnStatusRoute: EnStatusRoute,
   EnTermsRoute: EnTermsRoute,
   EnTrumpRoute: EnTrumpRoute,
+  GuiasBitcoinCoinbaseCashAppRoute: GuiasBitcoinCoinbaseCashAppRoute,
   GuiasBovedasAltoRendimientoRoute: GuiasBovedasAltoRendimientoRoute,
   GuiasGanarInteresesBitcoinRoute: GuiasGanarInteresesBitcoinRoute,
   GuiasInvertirSinEstafasRoute: GuiasInvertirSinEstafasRoute,
@@ -1701,6 +1744,7 @@ const rootRouteChildren: RootRouteChildren = {
     EnBlogMeteoraHistoryAndHowItWorksRoute,
   EnGuidesAddDollarsWithCoinbaseRoute: EnGuidesAddDollarsWithCoinbaseRoute,
   EnGuidesAvoidInvestmentScamsRoute: EnGuidesAvoidInvestmentScamsRoute,
+  EnGuidesBitcoinCoinbaseCashAppRoute: EnGuidesBitcoinCoinbaseCashAppRoute,
   EnGuidesBringYourOwnCoinsRoute: EnGuidesBringYourOwnCoinsRoute,
   EnGuidesEarnInterestOnBitcoinRoute: EnGuidesEarnInterestOnBitcoinRoute,
   EnGuidesHighYieldVaultsRoute: EnGuidesHighYieldVaultsRoute,
