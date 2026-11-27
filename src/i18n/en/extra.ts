@@ -5,7 +5,7 @@ export const extra: Record<string, string> = {
   "Reinvertir puede aumentar los intereses futuros con el tiempo.": "Reinvesting can increase future interest over time.",
   "Conecta tus monedas con la liquidez de pools públicos.": "Connect your coins to public pool liquidity.",
   "La actividad del mercado genera intereses variables. El Piloto Automático gestiona la reinversión.": "Market activity generates variable interest. Autopilot manages reinvestment.",
-  "Abrimos una posición de liquidez concentrada. El Piloto Automático la mantiene en rango y reinvierte cuando conviene.": "We open a concentrated liquidity position. Autopilot keeps it in range and reinvests when it makes sense.",
+  "Abrimos una posición de liquidez concentrada. El Piloto Automático la mantiene en rango, rebalancea y hace auto-compound por ti.": "We open a concentrated liquidity position. Autopilot keeps it in range, rebalances and auto-compounds for you.",
   "Bóvedas inteligentes y reinversión automática, sin vigilar gráficas.": "Smart vaults and automatic reinvestment, without watching charts.",
   "Información legal": "Legal information",
   "Bóveda Market solo conecta y automatiza; no custodia tus fondos. Los intereses son variables y puedes perder capital.": "Bóveda Market only connects and automates; it does not hold your funds. Interest is variable and you can lose capital.",
