@@ -14,6 +14,7 @@ export const extra: Record<string, string> = {
   "Conecta tus monedas con bóvedas inteligentes y deja que el Piloto Automático gestione la reinversión.": "Connect your coins to smart vaults and let Autopilot manage reinvestment.",
   "Bóvedas inteligentes y reinversión automática. Descubre cómo funciona antes de abrir tu cuenta.": "Smart vaults and automatic reinvestment. Learn how it works before opening your account.",
   "Bitcoin con intereses": "Bitcoin with interest",
+  "Hold Bitcoin, gana intereses": "Hold Bitcoin, earn interest",
   "$Trump Coin con intereses": "$Trump Coin with interest",
   "Bóveda GTA6 Coin": "GTA6 Coin Vault",
   "Trae tus monedas": "Bring your coins",
