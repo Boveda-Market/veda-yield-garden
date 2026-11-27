@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { BackButton } from "@/components/back-button";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { SITE_URL, langLinks } from "@/lib/seo-lang";
+import { BlogHero } from "@/components/blog-hero";
 
 /** Two editorial voices: technical research and everyday/news. */
 export const AUTHORS = {
@@ -126,6 +127,7 @@ export function PostLayout({ path, es, enBody }: { path: PostPath; es: ReactNode
     <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-primary">{en ? p.categoryEn : p.category}</p>
     <h1 className="mt-1 font-display text-3xl font-bold leading-tight">{en ? p.titleEn : p.title}</h1>
     <AuthorLine id={p.author} date={fmt(p.date, lang)} minutes={p.minutes} en={en} />
+    <BlogHero path={p.to} en={en} />
     <article className="mt-8 space-y-6 text-base leading-8 text-foreground/90 [&_h2]:mb-2 [&_h2]:mt-2 [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-foreground [&_strong]:text-foreground [&_a]:text-primary [&_a]:underline">{en ? enBody : es}</article>
     <section className="mt-10 rounded-2xl border border-primary/30 bg-primary/10 p-6">
       <h2 className="font-display text-lg font-semibold">{en ? "Try it at your own pace" : "Pruébalo a tu ritmo"}</h2>
