@@ -2096,6 +2096,8 @@ export const extra: Record<string, string> = {
   "Ya me convencí: crear cuenta": "I'm convinced: create account",
   "Tour con Sofía": "Tour with Sofia",
   "Saltar tour": "Skip tour",
+  "Cerrar tour": "Close tour",
+  "Seguir explorando": "Keep exploring",
   "Explorar": "Explore",
   "Sofía, tu asistente": "Sofia, your assistant",
   "¡Hola! Soy Sofía": "Hi! I'm Sofia",

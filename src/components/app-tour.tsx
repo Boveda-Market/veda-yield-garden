@@ -10,6 +10,7 @@ import { useT } from "@/lib/i18n";
 import { useTourBannerDismissed } from "@/lib/preferences";
 import { markOnce, SOFIA_TOUR_ACTIVE, TOUR_CANCEL_KEY } from "@/lib/sofia-controls";
 import { notify } from "@/lib/notify";
+import { BackToClose } from "@/lib/back-close";
 
 type Step = { key: string; icon: typeof Wallet; tone: "btc" | "met" | "trump"; area: string; title: string; body: string; mock: () => React.ReactNode };
 
@@ -102,15 +103,15 @@ const STATIONS: Station[] = [
 const ORB = 60;
 
 /** Sofía flies like a fairy guide between real screen areas and speaks one short sentence per station. */
-export function SofiaTour({ open, onClose, signedIn = false }: { open: boolean; onClose: () => void; signedIn?: boolean }) {
+export function SofiaTour({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useT();
   const [i, setI] = useState(0);
-  const [login, setLogin] = useState(false);
   const [flying, setFlying] = useState(true);
   const [rect, setRect] = useState<DOMRect | null>(null);
   const [navRect, setNavRect] = useState<DOMRect | null>(null);
   const [vp, setVp] = useState({ w: 0, h: 0 });
   const x0 = useRef<number | null>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const st = STATIONS[i] ?? STATIONS[0];
   const last = i === STATIONS.length - 1;
   const close = (completed = false) => {
@@ -168,6 +169,7 @@ export function SofiaTour({ open, onClose, signedIn = false }: { open: boolean; 
     <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label={t("Tour con Sofía")}
       onTouchStart={(e) => { x0.current = e.touches[0]?.clientX ?? null; }}
       onTouchEnd={(e) => { const x = e.changedTouches[0]?.clientX; if (x0.current != null && x != null && Math.abs(x - x0.current) > 50) go(x < x0.current ? 1 : -1); x0.current = null; }}>
+      <BackToClose closeRef={closeRef} />
       <div className="absolute inset-0" onClick={() => close()}>
         <svg className="sofia-dimmer size-full" viewBox={`0 0 ${vp.w} ${vp.h}`} preserveAspectRatio="none" aria-hidden>
           <path d={dimPath} fillRule="evenodd" />
@@ -186,17 +188,18 @@ export function SofiaTour({ open, onClose, signedIn = false }: { open: boolean; 
       {!flying && <div key={i} className="sofia-bubble absolute rounded-3xl border border-sofia-text/30 bg-card p-3 shadow-xl" style={cardStyle}>
         <div className="flex items-center gap-2">
           <p className="min-w-0 flex-1 text-xs"><span className="font-semibold text-sofia-text">Sofía</span> <span className="text-muted-foreground">· {t(st.area)}</span></p>
-          <Button type="button" variant="ghost" size="icon" onClick={() => close()} aria-label={t("Saltar tour")} className="size-11 shrink-0 text-muted-foreground"><X size={16} /></Button>
+          <Button ref={closeRef} type="button" variant="ghost" size="icon" onClick={() => close()} aria-label={t("Cerrar tour")} className="size-11 shrink-0 text-muted-foreground"><X size={18} /></Button>
         </div>
         <p className="mt-1 text-[15px] font-medium leading-6" aria-live="polite">{words.map((w, n) => <span key={n} className="sofia-word" style={{ animationDelay: `${n * 45}ms` }}>{w} </span>)}</p>
         <div className="mt-3 flex items-center gap-2">
           <div className="flex flex-1 gap-1" aria-label={`${i + 1}/${STATIONS.length}`}>{STATIONS.map((s, n) => <span key={s.area} className={`h-1.5 rounded-full transition-all duration-300 ${n === i ? "w-5 bg-sofia-text" : "w-1.5 bg-muted-foreground/30"}`} />)}</div>
-          {last ? <><Button size="sm" variant="outline" onClick={() => close(true)}><Compass size={14} />{t("Explorar")}</Button>{!signedIn && <Button size="sm" className="font-bold" onClick={() => setLogin(true)}><Sparkles size={14} />{t("Crear cuenta")}</Button>}</>
-            : <>{i > 0 && <Button size="sm" variant="ghost" onClick={() => go(-1)} aria-label={t("Atrás")}><ArrowLeft size={14} /></Button>}<Button size="sm" className="font-bold" onClick={() => go(1)}>{t("Siguiente")}<ArrowRight size={14} /></Button></>}
+          {i > 0 && <Button size="sm" variant="ghost" className="min-h-11 min-w-11" onClick={() => go(-1)} aria-label={t("Atrás")}><ArrowLeft size={16} /></Button>}
+          <Button size="sm" className="min-h-11 whitespace-nowrap font-bold" onClick={last ? () => close(true) : () => go(1)}>
+            {last ? <><Compass size={16} />{t("Seguir explorando")}</> : <>{t("Siguiente")}<ArrowRight size={16} /></>}
+          </Button>
         </div>
       </div>}
     </div>
-    <LoginSheet open={login} onOpenChange={(o) => { setLogin(o); if (o) close(true); }} />
   </>, document.body);
 }
 

@@ -113,6 +113,6 @@ export function ProfileMenu({ user, guest, onSelect, onLogout }: { user: string 
     <Dialog open={ideas} onOpenChange={setIdeas}>
       <DialogContent className="max-w-md"><DialogTitle className="sr-only">{t("Ayúdanos a mejorar")}</DialogTitle><SuggestionBox className="" /></DialogContent>
     </Dialog>
-    <SofiaTour open={tour} onClose={() => setTour(false)} signedIn={!visitor && !guest} />
+    <SofiaTour open={tour} onClose={() => setTour(false)} />
   </>;
 }
