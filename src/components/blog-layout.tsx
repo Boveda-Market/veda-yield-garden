@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Headset } from "lucide-react";
 import { BackButton } from "@/components/back-button";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { SITE_URL, langLinks } from "@/lib/seo-lang";
@@ -123,13 +123,12 @@ const fmt = (d: string, lang: Lang) => new Date(`${d}T12:00:00Z`).toLocaleDateSt
 
 export function BlogIndex() {
   const { lang } = useI18n(); const en = lang === "en";
-  const sofia = AUTHORS.sofia;
   const [lead, ...rest] = POSTS;
   const meta = (p: (typeof POSTS)[number]) => `${en ? p.categoryEn : p.category} · ${en ? `${p.minutes} min` : `${p.minutes} min`}`;
   return <main className="mx-auto min-h-screen max-w-3xl px-5 py-6 text-foreground">
     <BackButton fallback="/" />
     <header className="mt-5 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
-      <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-full bg-[image:var(--gradient-sofia)] p-[2px]"><span className="grid size-full place-items-center rounded-full bg-sofia-disc text-sm font-bold text-sofia">{sofia.initials}</span></span>
+      <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-full bg-[image:var(--gradient-sofia)] p-[2px]"><span className="grid size-full place-items-center rounded-full bg-sofia-disc"><Headset className="size-5 text-sofia" strokeWidth={2.2} /></span></span>
       <div className="min-w-0">
         <p className="text-xs font-semibold uppercase tracking-wide text-sofia-text">{en ? "Sofía's column" : "La columna de Sofía"}</p>
         <h1 className="font-display text-2xl font-bold leading-tight">Blog</h1>
