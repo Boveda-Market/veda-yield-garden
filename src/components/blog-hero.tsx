@@ -1,7 +1,8 @@
 /** Animated cover scenes (pure SVG + SMIL, SSR-safe, no downloads) that open each post by picturing its problem. Illustrative only: no live data. */
-type Scene = "privacy" | "fear" | "exchange" | "pool" | "phone" | "keys";
+type Scene = "privacy" | "fear" | "exchange" | "pool" | "phone" | "keys" | "swings";
 
 export const HERO_BY_PATH: Record<string, Scene> = {
+  "/blog/deepfakes-nvidia-swings-masivos": "swings",
   "/blog/hackeo-binance-llaves": "keys",
   "/blog/privacidad-bitcoin-35-centavos": "privacy",
   "/blog/miedo-caida-bitcoin-holdear": "fear",
@@ -16,6 +17,7 @@ const CAP: Record<Scene, [string, string]> = {
   exchange: ["Una casa de cambio: unos traen monedas, otros se las llevan.", "An exchange counter: some bring coins, others take them."],
   pool: ["Muchas personas aportan a una reserva compartida.", "Many people add to a shared reserve."],
   keys: ["Hackean la gran caja fuerte compartida… y quien guarda sus llaves sigue tranquilo.", "The big shared safe gets hacked… while the person who keeps their keys stays calm."],
+  swings: ["Un video falso sacude el precio arriba y abajo… y quien tiene su bóveda en piloto automático sigue tranquilo.", "A fake video shakes the price up and down… while the person with their vault on autopilot stays calm."],
   phone: ["Dólares digitales que llegan directo al celular.", "Digital dollars arriving straight to the phone."],
 };
 
@@ -40,6 +42,14 @@ const Pulse = ({ children, dur = "1.6s" }: { children: React.ReactNode; dur?: st
 
 function Art({ scene }: { scene: Scene }) {
   switch (scene) {
+    case "swings": return <>
+      <rect x="25" y="40" width="190" height="120" rx="8" />
+      <path d="M40 140 L65 70 L85 125 L110 55 L130 135 L155 65 L175 120 L200 75" strokeWidth="4" strokeDasharray="420" strokeDashoffset="420" className="text-destructive"><animate attributeName="stroke-dashoffset" values="420;0;0" dur="3s" repeatCount="indefinite" /></path>
+      <Pulse dur="1.2s"><g className="text-muted-foreground"><rect x="150" y="12" width="56" height="36" rx="5" className="fill-card" /><path d="M172 22 L186 30 L172 38 Z" fill="currentColor" stroke="none" /><text x="210" y="20" fontSize="10" fontWeight="700" fill="currentColor" stroke="none">IA</text></g></Pulse>
+      <Person x={300} y={130} />
+      <g className="text-primary"><rect x="318" y="150" width="20" height="32" rx="4" /><Pulse dur="2.2s"><path d="M328 92 L346 99 V112 Q346 124 328 131 Q310 124 310 112 V99 Z" className="fill-primary/15" /></Pulse><circle cx="328" cy="110" r="4" /><path d="M328 114 V120" /></g>
+      <Move path="M0 0 C30 -10 60 -10 90 0" dur="2.6s"><Coin x={220} y={170} /></Move>
+    </>;
     case "keys": return <>
       <path d="M30 200 V80 L95 50 L160 80 V200 Z" /><path d="M50 200 V110 M75 200 V110 M115 200 V110 M140 200 V110" className="text-muted-foreground" />
       <Pulse dur="1.1s"><g className="text-destructive"><rect x="80" y="120" width="30" height="24" rx="4" className="fill-destructive/15" /><path d="M86 120 V112 Q95 100 104 108" /><path d="M60 40 L68 52 M130 40 L122 52" /></g></Pulse>

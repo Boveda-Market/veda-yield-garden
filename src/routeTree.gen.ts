@@ -39,6 +39,7 @@ import { Route as TraeTusMonedasRouteImport } from './routes/trae-tus-monedas'
 import { Route as TrumpRouteImport } from './routes/trump'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as BlogDeepfakesNvidiaSwingsMasivosRouteImport } from './routes/blog/deepfakes-nvidia-swings-masivos'
 import { Route as BlogDolaresDigitalesEnElCelularRouteImport } from './routes/blog/dolares-digitales-en-el-celular'
 import { Route as BlogHackeoBinanceLlavesRouteImport } from './routes/blog/hackeo-binance-llaves'
 import { Route as BlogLiquidezConcentradaRouteImport } from './routes/blog/liquidez-concentrada'
@@ -77,6 +78,7 @@ import { Route as EnBlogBinanceHackKeysRouteImport } from './routes/en/blog/bina
 import { Route as EnBlogBitcoinFearAndHoldingRouteImport } from './routes/en/blog/bitcoin-fear-and-holding'
 import { Route as EnBlogBitcoinPrivacy35CentsRouteImport } from './routes/en/blog/bitcoin-privacy-35-cents'
 import { Route as EnBlogConcentratedLiquidityRouteImport } from './routes/en/blog/concentrated-liquidity'
+import { Route as EnBlogDeepfakesNvidiaMassiveSwingsRouteImport } from './routes/en/blog/deepfakes-nvidia-massive-swings'
 import { Route as EnBlogDigitalDollarsOnYourPhoneRouteImport } from './routes/en/blog/digital-dollars-on-your-phone'
 import { Route as EnBlogMeteoraHistoryAndHowItWorksRouteImport } from './routes/en/blog/meteora-history-and-how-it-works'
 import { Route as EnGuidesIndexRouteImport } from './routes/en/guides/index'
@@ -247,6 +249,12 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
   path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogDeepfakesNvidiaSwingsMasivosRoute =
+  BlogDeepfakesNvidiaSwingsMasivosRouteImport.update({
+    id: '/blog/deepfakes-nvidia-swings-masivos',
+    path: '/blog/deepfakes-nvidia-swings-masivos',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const BlogDolaresDigitalesEnElCelularRoute =
   BlogDolaresDigitalesEnElCelularRouteImport.update({
     id: '/blog/dolares-digitales-en-el-celular',
@@ -450,6 +458,12 @@ const EnBlogConcentratedLiquidityRoute =
     path: '/en/blog/concentrated-liquidity',
     getParentRoute: () => rootRouteImport,
   } as any)
+const EnBlogDeepfakesNvidiaMassiveSwingsRoute =
+  EnBlogDeepfakesNvidiaMassiveSwingsRouteImport.update({
+    id: '/en/blog/deepfakes-nvidia-massive-swings',
+    path: '/en/blog/deepfakes-nvidia-massive-swings',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EnBlogDigitalDollarsOnYourPhoneRoute =
   EnBlogDigitalDollarsOnYourPhoneRouteImport.update({
     id: '/en/blog/digital-dollars-on-your-phone',
@@ -589,6 +603,7 @@ export interface FileRoutesByFullPath {
   '/trae-tus-monedas': typeof TraeTusMonedasRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/blog/deepfakes-nvidia-swings-masivos': typeof BlogDeepfakesNvidiaSwingsMasivosRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/blog/hackeo-binance-llaves': typeof BlogHackeoBinanceLlavesRoute
   '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
@@ -627,6 +642,7 @@ export interface FileRoutesByFullPath {
   '/en/blog/bitcoin-fear-and-holding': typeof EnBlogBitcoinFearAndHoldingRoute
   '/en/blog/bitcoin-privacy-35-cents': typeof EnBlogBitcoinPrivacy35CentsRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
+  '/en/blog/deepfakes-nvidia-massive-swings': typeof EnBlogDeepfakesNvidiaMassiveSwingsRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
@@ -678,6 +694,7 @@ export interface FileRoutesByTo {
   '/trae-tus-monedas': typeof TraeTusMonedasRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/blog/deepfakes-nvidia-swings-masivos': typeof BlogDeepfakesNvidiaSwingsMasivosRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/blog/hackeo-binance-llaves': typeof BlogHackeoBinanceLlavesRoute
   '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
@@ -716,6 +733,7 @@ export interface FileRoutesByTo {
   '/en/blog/bitcoin-fear-and-holding': typeof EnBlogBitcoinFearAndHoldingRoute
   '/en/blog/bitcoin-privacy-35-cents': typeof EnBlogBitcoinPrivacy35CentsRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
+  '/en/blog/deepfakes-nvidia-massive-swings': typeof EnBlogDeepfakesNvidiaMassiveSwingsRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
@@ -768,6 +786,7 @@ export interface FileRoutesById {
   '/trae-tus-monedas': typeof TraeTusMonedasRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/blog/deepfakes-nvidia-swings-masivos': typeof BlogDeepfakesNvidiaSwingsMasivosRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/blog/hackeo-binance-llaves': typeof BlogHackeoBinanceLlavesRoute
   '/blog/liquidez-concentrada': typeof BlogLiquidezConcentradaRoute
@@ -806,6 +825,7 @@ export interface FileRoutesById {
   '/en/blog/bitcoin-fear-and-holding': typeof EnBlogBitcoinFearAndHoldingRoute
   '/en/blog/bitcoin-privacy-35-cents': typeof EnBlogBitcoinPrivacy35CentsRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
+  '/en/blog/deepfakes-nvidia-massive-swings': typeof EnBlogDeepfakesNvidiaMassiveSwingsRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
@@ -859,6 +879,7 @@ export interface FileRouteTypes {
     | '/trae-tus-monedas'
     | '/trump'
     | '/wallet'
+    | '/blog/deepfakes-nvidia-swings-masivos'
     | '/blog/dolares-digitales-en-el-celular'
     | '/blog/hackeo-binance-llaves'
     | '/blog/liquidez-concentrada'
@@ -897,6 +918,7 @@ export interface FileRouteTypes {
     | '/en/blog/bitcoin-fear-and-holding'
     | '/en/blog/bitcoin-privacy-35-cents'
     | '/en/blog/concentrated-liquidity'
+    | '/en/blog/deepfakes-nvidia-massive-swings'
     | '/en/blog/digital-dollars-on-your-phone'
     | '/en/blog/meteora-history-and-how-it-works'
     | '/en/guides/add-dollars-with-coinbase'
@@ -948,6 +970,7 @@ export interface FileRouteTypes {
     | '/trae-tus-monedas'
     | '/trump'
     | '/wallet'
+    | '/blog/deepfakes-nvidia-swings-masivos'
     | '/blog/dolares-digitales-en-el-celular'
     | '/blog/hackeo-binance-llaves'
     | '/blog/liquidez-concentrada'
@@ -986,6 +1009,7 @@ export interface FileRouteTypes {
     | '/en/blog/bitcoin-fear-and-holding'
     | '/en/blog/bitcoin-privacy-35-cents'
     | '/en/blog/concentrated-liquidity'
+    | '/en/blog/deepfakes-nvidia-massive-swings'
     | '/en/blog/digital-dollars-on-your-phone'
     | '/en/blog/meteora-history-and-how-it-works'
     | '/en/guides/add-dollars-with-coinbase'
@@ -1037,6 +1061,7 @@ export interface FileRouteTypes {
     | '/trae-tus-monedas'
     | '/trump'
     | '/wallet'
+    | '/blog/deepfakes-nvidia-swings-masivos'
     | '/blog/dolares-digitales-en-el-celular'
     | '/blog/hackeo-binance-llaves'
     | '/blog/liquidez-concentrada'
@@ -1075,6 +1100,7 @@ export interface FileRouteTypes {
     | '/en/blog/bitcoin-fear-and-holding'
     | '/en/blog/bitcoin-privacy-35-cents'
     | '/en/blog/concentrated-liquidity'
+    | '/en/blog/deepfakes-nvidia-massive-swings'
     | '/en/blog/digital-dollars-on-your-phone'
     | '/en/blog/meteora-history-and-how-it-works'
     | '/en/guides/add-dollars-with-coinbase'
@@ -1127,6 +1153,7 @@ export interface RootRouteChildren {
   TraeTusMonedasRoute: typeof TraeTusMonedasRoute
   TrumpRoute: typeof TrumpRoute
   WalletRoute: typeof WalletRoute
+  BlogDeepfakesNvidiaSwingsMasivosRoute: typeof BlogDeepfakesNvidiaSwingsMasivosRoute
   BlogDolaresDigitalesEnElCelularRoute: typeof BlogDolaresDigitalesEnElCelularRoute
   BlogHackeoBinanceLlavesRoute: typeof BlogHackeoBinanceLlavesRoute
   BlogLiquidezConcentradaRoute: typeof BlogLiquidezConcentradaRoute
@@ -1165,6 +1192,7 @@ export interface RootRouteChildren {
   EnBlogBitcoinFearAndHoldingRoute: typeof EnBlogBitcoinFearAndHoldingRoute
   EnBlogBitcoinPrivacy35CentsRoute: typeof EnBlogBitcoinPrivacy35CentsRoute
   EnBlogConcentratedLiquidityRoute: typeof EnBlogConcentratedLiquidityRoute
+  EnBlogDeepfakesNvidiaMassiveSwingsRoute: typeof EnBlogDeepfakesNvidiaMassiveSwingsRoute
   EnBlogDigitalDollarsOnYourPhoneRoute: typeof EnBlogDigitalDollarsOnYourPhoneRoute
   EnBlogMeteoraHistoryAndHowItWorksRoute: typeof EnBlogMeteoraHistoryAndHowItWorksRoute
   EnGuidesAddDollarsWithCoinbaseRoute: typeof EnGuidesAddDollarsWithCoinbaseRoute
@@ -1397,6 +1425,13 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog/'
       preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/deepfakes-nvidia-swings-masivos': {
+      id: '/blog/deepfakes-nvidia-swings-masivos'
+      path: '/blog/deepfakes-nvidia-swings-masivos'
+      fullPath: '/blog/deepfakes-nvidia-swings-masivos'
+      preLoaderRoute: typeof BlogDeepfakesNvidiaSwingsMasivosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/dolares-digitales-en-el-celular': {
@@ -1665,6 +1700,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnBlogConcentratedLiquidityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/blog/deepfakes-nvidia-massive-swings': {
+      id: '/en/blog/deepfakes-nvidia-massive-swings'
+      path: '/en/blog/deepfakes-nvidia-massive-swings'
+      fullPath: '/en/blog/deepfakes-nvidia-massive-swings'
+      preLoaderRoute: typeof EnBlogDeepfakesNvidiaMassiveSwingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/blog/digital-dollars-on-your-phone': {
       id: '/en/blog/digital-dollars-on-your-phone'
       path: '/en/blog/digital-dollars-on-your-phone'
@@ -1831,6 +1873,7 @@ const rootRouteChildren: RootRouteChildren = {
   TraeTusMonedasRoute: TraeTusMonedasRoute,
   TrumpRoute: TrumpRoute,
   WalletRoute: WalletRoute,
+  BlogDeepfakesNvidiaSwingsMasivosRoute: BlogDeepfakesNvidiaSwingsMasivosRoute,
   BlogDolaresDigitalesEnElCelularRoute: BlogDolaresDigitalesEnElCelularRoute,
   BlogHackeoBinanceLlavesRoute: BlogHackeoBinanceLlavesRoute,
   BlogLiquidezConcentradaRoute: BlogLiquidezConcentradaRoute,
@@ -1869,6 +1912,8 @@ const rootRouteChildren: RootRouteChildren = {
   EnBlogBitcoinFearAndHoldingRoute: EnBlogBitcoinFearAndHoldingRoute,
   EnBlogBitcoinPrivacy35CentsRoute: EnBlogBitcoinPrivacy35CentsRoute,
   EnBlogConcentratedLiquidityRoute: EnBlogConcentratedLiquidityRoute,
+  EnBlogDeepfakesNvidiaMassiveSwingsRoute:
+    EnBlogDeepfakesNvidiaMassiveSwingsRoute,
   EnBlogDigitalDollarsOnYourPhoneRoute: EnBlogDigitalDollarsOnYourPhoneRoute,
   EnBlogMeteoraHistoryAndHowItWorksRoute:
     EnBlogMeteoraHistoryAndHowItWorksRoute,

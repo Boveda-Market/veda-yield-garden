@@ -16,6 +16,14 @@ export type AuthorId = keyof typeof AUTHORS;
 /** Blog posts: friendly, conversational trend articles (guides stay evergreen how-tos). */
 export const POSTS = [
   {
+    to: "/blog/deepfakes-nvidia-swings-masivos", toEn: "/en/blog/deepfakes-nvidia-massive-swings", date: "2026-11-27", minutes: 5, author: "sofia",
+    category: "Adopción y ahorro", categoryEn: "Adoption & savings",
+    title: "Deepfakes, Nvidia y swings masivos: cómo ganar con la volatilidad sin volverte loco",
+    titleEn: "Deepfakes, Nvidia and massive swings: how to profit from volatility without losing your mind",
+    desc: "Yahoo Finanzas cuenta cómo el regreso de Jensen Huang a Nvidia desató videos falsos con IA, y Google se llena de nervios. Por qué las noticias sacuden los precios y cómo vivir esos sacudones con calma.",
+    descEn: "Yahoo Finance reports how Jensen Huang's return to Nvidia unleashed AI deepfakes, and Google fills with nerves. Why news shakes prices and how to live through those swings calmly.",
+  },
+  {
     to: "/blog/hackeo-binance-llaves", toEn: "/en/blog/binance-hack-keys", date: "2026-11-27", minutes: 5, author: "sofia",
     category: "Adopción y ahorro", categoryEn: "Adoption & savings",
     title: "El hackeo de $1,000M a Binance: por qué darle tus llaves a otro siempre es una trampa",
