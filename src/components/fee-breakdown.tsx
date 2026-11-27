@@ -1,9 +1,8 @@
-import { useT, useLocale } from "@/lib/i18n";
+import { useT } from "@/lib/i18n";
 import { FEE_WALLET, transactionAmounts } from "@/lib/fees";
 export function FeeBreakdown({ amount, deposit = false }: { amount: number; deposit?: boolean }) {
   const t = useT();
-  const locale = useLocale();
-  const fmt = (n: number, d = 2) => n.toLocaleString(locale, { minimumFractionDigits: d, maximumFractionDigits: 6 });
+  const fmt = (n: number, d = 2) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: 6 });
   const values = transactionAmounts(amount, deposit ? "deposit" : "exit");
   return <div className="space-y-2 text-sm">
     <dl className="space-y-2"><div className="flex justify-between gap-3"><dt>{t("Importe bruto")}</dt><dd>{fmt(values.gross)} {t("créditos")}</dd></div><div className="flex justify-between gap-3"><dt>{t("Cargo ficticio ·")} {deposit ? t("entrada") : t("salida")}</dt><dd>{fmt(values.fee)} {t("créditos")}</dd></div><div className="flex justify-between gap-3 font-semibold text-primary"><dt>{deposit ? t("Capital ficticio a invertir") : t("Créditos a recibir")}</dt><dd>{fmt(values.net)} {t("créditos")}</dd></div></dl>

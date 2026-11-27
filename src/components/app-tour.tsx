@@ -22,7 +22,7 @@ function Tag({ children }: { children: React.ReactNode }) {
 function VaultMock() {
   const t = useT();
   return <div className="space-y-2"><div className="flex items-center justify-between"><span className="flex items-center gap-2 font-display font-bold"><Bitcoin size={18} className="tour-ink" />{t("Bóveda Bitcoin")}</span><Tag>{t("Piloto Automático")}</Tag></div>
-    <div className="grid grid-cols-2 gap-2 text-left"><div className="tour-cell rounded-xl p-2"><p className="text-[10px] text-muted-foreground">{t("Rendimiento estimado")}</p><p className="font-display text-lg font-bold tour-ink">18,4%</p></div><div className="tour-cell rounded-xl p-2"><p className="text-[10px] text-muted-foreground">{t("Monedas del pool")}</p><p className="font-display text-lg font-bold">BTC / $</p></div></div>
+    <div className="grid grid-cols-2 gap-2 text-left"><div className="tour-cell rounded-xl p-2"><p className="text-[10px] text-muted-foreground">{t("Rendimiento estimado")}</p><p className="font-display text-lg font-bold tour-ink">18.4%</p></div><div className="tour-cell rounded-xl p-2"><p className="text-[10px] text-muted-foreground">{t("Monedas del pool")}</p><p className="font-display text-lg font-bold">BTC / $</p></div></div>
     <div className="tour-cta rounded-xl py-2 text-center text-sm font-bold">{t("Depositar")}</div></div>;
 }
 function PredictMock() {
@@ -34,12 +34,12 @@ function PredictMock() {
 function PortfolioMock() {
   const t = useT();
   return <div className="space-y-2"><svg viewBox="0 0 200 48" className="h-12 w-full" aria-hidden><polyline points="0,40 30,34 60,36 90,24 120,26 150,14 200,8" fill="none" className="tour-line" strokeWidth="3" strokeLinecap="round" /></svg>
-    <div className="grid grid-cols-2 gap-2 text-left"><div className="tour-cell rounded-xl p-2"><p className="text-[10px] text-muted-foreground">{t("Dinero trabajando")}</p><p className="font-display font-bold">$500,00</p></div><div className="tour-cell rounded-xl p-2"><p className="text-[10px] text-muted-foreground">{t("Ganancias cosechadas")}</p><p className="font-display font-bold tour-ink">+$12,40</p></div></div>
+    <div className="grid grid-cols-2 gap-2 text-left"><div className="tour-cell rounded-xl p-2"><p className="text-[10px] text-muted-foreground">{t("Dinero trabajando")}</p><p className="font-display font-bold">$500.00</p></div><div className="tour-cell rounded-xl p-2"><p className="text-[10px] text-muted-foreground">{t("Ganancias cosechadas")}</p><p className="font-display font-bold tour-ink">+$12.40</p></div></div>
     <div className="tour-cta rounded-xl py-2 text-center text-sm font-bold">{t("Cosechar")}</div></div>;
 }
 function WalletMock() {
   const t = useT();
-  return <div className="space-y-2 text-left"><p className="text-[10px] text-muted-foreground">{t("Dólares disponibles")}</p><p className="font-display text-2xl font-bold">$250,00</p>
+  return <div className="space-y-2 text-left"><p className="text-[10px] text-muted-foreground">{t("Dólares disponibles")}</p><p className="font-display text-2xl font-bold">$250.00</p>
     <div className="grid grid-cols-3 gap-2 text-center text-[11px] font-semibold">{["Añadir fondos", "Cambiar", "Retirar"].map((l) => <div key={l} className="tour-cell rounded-xl py-2">{t(l)}</div>)}</div></div>;
 }
 function SafetyMock() {

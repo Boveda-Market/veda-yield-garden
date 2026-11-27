@@ -119,3 +119,5 @@
 - [x] Botón «Tomar tour» de la portada con la identidad de Sofía: degradado lavanda e ícono de auricular; verificado ES/EN, Día/Noche y 390×844.
 - [x] Botón «Tomar tour»: ícono retirado por el usuario; se conserva solo el color lavanda de Sofía.
 - [x] Última parada del tour: «Seguir explorando» cierra sin abrir el acceso; Atrás, ✕ y el botón Atrás del teléfono siguen disponibles.
+
+- [x] Revisar decimales en toda la app: puntos y comas solo para miles.

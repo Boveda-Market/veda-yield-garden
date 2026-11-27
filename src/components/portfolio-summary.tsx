@@ -250,7 +250,7 @@ function WeeklyChart({ records, poolPrices, money, vaults }: { records: Paramete
   const vtab = (id: string, label: string) => { const th = vaultTheme(id === "global" ? "global" : id); const on = active === id; return <button key={id} type="button" role="tab" aria-selected={on} onClick={() => { setTab(id); setSel(null); }} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition ${on ? (id === "global" ? "border-primary bg-primary text-primary-foreground" : `border-transparent ${th.on}`) : "border-border bg-muted/60 text-muted-foreground hover:text-foreground"}`}>{label}</button>; };
   const day = new Date(days[shown]!.start).toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" });
   const loading = candleQ.some((q) => q.isPending) || statsQ.some((q) => q?.isPending);
-  const cap = (v: number) => `$${new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 2 }).format(v)}`;
+  const cap = (v: number) => `$${new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 2 }).format(v)}`;
   const mFmt = isPrice ? formatCoinPrice : cap;
   const mText = liveCap ? mFmt(liveCap) : "—";
   const pct = ms[0] ? ((ms[ms.length - 1] ?? 0) / ms[0]! - 1) * 100 : 0;

@@ -1,4 +1,4 @@
-import { useT, useLocale } from "@/lib/i18n";
+import { useT } from "@/lib/i18n";
 import { Suspense, useEffect, useState } from "react";
 import { lazyWithReload } from "@/lib/lazy-reload";
 import { ArrowDownToLine, ChartNoAxesCombined, History, PieChart } from "lucide-react";
@@ -15,8 +15,7 @@ function Metric({ label, value, note, loss = false }: { label: string; value: st
 }
 export function PortfolioPanel({ identity, wallet, invested, pending, positions, rows, now }: { identity: string; wallet: number; invested: number; pending: number; positions: Position[]; rows: TrialActivity[]; now: number }) {
   const t = useT();
-  const locale = useLocale();
-  const number = (value: number, decimals = 4) => value.toLocaleString(locale, { maximumFractionDigits: decimals });
+  const number = (value: number, decimals = 4) => value.toLocaleString("en-US", { maximumFractionDigits: decimals });
   const percent = (value: number) => value !== 0 && Math.abs(value) < 0.0001 ? `${value < 0 ? "−" : ""}<0.0001%` : `${number(value)}%`;
   const metrics = trialPortfolioMetrics(wallet, invested, pending, rows);
   const harvested = trialHarvestSummary(rows);

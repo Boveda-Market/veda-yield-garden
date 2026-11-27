@@ -7,7 +7,7 @@ import { Dismissible } from "@/components/dismissible";
 import { PoweredBy } from "@/components/powered-by";
 import { TokenIcon } from "@/components/token-icon";
 import { LiveEarnings } from "./live-earnings";
-import { useT, useLocale, useI18n } from "@/lib/i18n";
+import { useT, useI18n } from "@/lib/i18n";
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
 import { Suspense, useEffect, useState } from "react";
 import { lazyWithReload } from "@/lib/lazy-reload";
@@ -79,8 +79,7 @@ function SessionPage({ guest = false, view }: { guest?: boolean; view: "vaults" 
 
 function Dashboard({ mode, onModeChange, guest, view }: { mode: AppMode; onModeChange: (mode: AppMode) => void; guest: boolean; view: "vaults" | "portfolio" | "activity" | "account" | "security" | "notifications" | "invite" | "wallet" | "markets" | "admin" }) {
   const t = useT();
-  const locale = useLocale();
-  const fmt = (n: number, d = 2) => n.toLocaleString(locale, { minimumFractionDigits: d, maximumFractionDigits: d });
+  const fmt = (n: number, d = 2) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
   const session = useBovedaSession();
   const navigate = useNavigate();
   const signOut = () => void (async () => { try { localStorage.removeItem("boveda.safety.seen"); } catch {} try { sessionStorage.removeItem("boveda:auth-pending"); sessionStorage.removeItem("boveda:passkey-auto"); } catch {} await session.logout(); window.location.replace("/"); })();
@@ -225,8 +224,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 
 function DepositSheet({ vault, max, onClose, onConfirm }: { vault: Vault; max: number; onClose: () => void; onConfirm: (v: Vault, a: number) => void }) {
   const t = useT();
-  const locale = useLocale();
-  const fmt = (n: number, d = 2) => n.toLocaleString(locale, { minimumFractionDigits: d, maximumFractionDigits: d });
+  const fmt = (n: number, d = 2) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
   const [amt, setAmt] = useState("");
   const [accepted, setAccepted] = useState(false);
   const n = Number(amt);
