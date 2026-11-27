@@ -122,3 +122,5 @@
 
 - [x] Revisar decimales en toda la app: puntos y comas solo para miles.
 - [x] Añadir enlace de GitHub al pie compartido usando solo el logo oficial.
+
+- [x] Ficha de la bóveda: la dirección del pool se muestra arriba del contrato y es un enlace con botón para copiar

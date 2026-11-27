@@ -2056,6 +2056,8 @@ export const extra: Record<string, string> = {
   "Aviso de riesgo": "Risk notice",
   "Bóveda Market no es un banco, exchange ni asesor financiero, y no custodia tus fondos: permanecen bajo el control exclusivo de tu billetera y operan en protocolos descentralizados públicos como Meteora. Las tasas estimadas (APR) son proyecciones variables basadas en el volumen reciente, no rendimientos garantizados. Aportar liquidez conlleva riesgo de mercado, fluctuación de precios y pérdida de capital.": "Bóveda Market is not a bank, exchange or financial advisor, and does not hold your funds: they stay under your wallet's sole control and operate on public decentralized protocols such as Meteora. Estimated rates (APR) are variable projections based on recent volume, not guaranteed returns. Providing liquidity carries market risk, price swings and loss of capital.",
   "Copiar dirección del pool": "Copy pool address",
+  "Dirección del pool": "Pool address",
+  "Ver la página del pool": "View the pool page",
   "Copiada": "Copied",
   "Ver en Meteora": "View on Meteora",
   "Ver en Solscan": "View on Solscan",
