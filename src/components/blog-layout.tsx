@@ -17,6 +17,14 @@ export type AuthorId = keyof typeof AUTHORS;
 /** Blog posts: friendly, conversational trend articles (guides stay evergreen how-tos). */
 export const POSTS = [
   {
+    to: "/blog/que-es-gta6-coin", toEn: "/en/blog/what-is-gta6-coin", date: "2026-11-28", minutes: 5, author: "sofia",
+    category: "Adopción y ahorro", categoryEn: "Adoption & savings",
+    title: "¿Qué es GTA6 Coin? Lo que nadie te explica antes de comprar",
+    titleEn: "What is GTA6 Coin? What nobody explains before you buy",
+    desc: "Una moneda comunitaria, sin empresa detrás y fuera de los grandes exchanges, con miles de dueños y subidas y bajadas fuertes. Qué es, sus riesgos y cómo cobrar comisiones con ella en vez de apostar al precio.",
+    descEn: "A community coin with no company behind it and outside the big exchanges, with thousands of holders and sharp ups and downs. What it is, its risks and how to earn fees with it instead of betting on the price.",
+  },
+  {
     to: "/blog/sitios-secretos-dinero-dolares-digitales", toEn: "/en/blog/secret-sites-make-money-digital-dollars", date: "2026-11-28", minutes: 6, author: "sofia",
     category: "Adopción y ahorro", categoryEn: "Adoption & savings",
     title: "Sitios secretos para ganar dinero desde casa con dólares digitales",

@@ -8,10 +8,12 @@ import phoneCover from "@/assets/blog/blog-cover-phone.jpg.asset.json";
 import poolCover from "@/assets/blog/blog-cover-pool.jpg.asset.json";
 import privacyCover from "@/assets/blog/blog-cover-privacy.jpg.asset.json";
 import swingsCover from "@/assets/blog/blog-cover-swings.jpg.asset.json";
+import gta6Cover from "@/assets/blog/blog-cover-gta6.jpg.asset.json";
 
-type Scene = "privacy" | "fear" | "exchange" | "pool" | "phone" | "keys" | "swings" | "atm" | "home";
+type Scene = "privacy" | "fear" | "exchange" | "pool" | "phone" | "keys" | "swings" | "atm" | "home" | "gta6";
 
 export const HERO_BY_PATH: Record<string, Scene> = {
+  "/blog/que-es-gta6-coin": "gta6",
   "/blog/sitios-secretos-dinero-dolares-digitales": "home",
   "/blog/bitcoin-atms-forma-cara-riesgosa": "atm",
   "/blog/deepfakes-nvidia-swings-masivos": "swings",
@@ -26,6 +28,13 @@ export const HERO_BY_PATH: Record<string, Scene> = {
 type Cover = { url: string; altEs: string; altEn: string; capEs: string; capEn: string };
 
 const COVERS: Record<Scene, Cover> = {
+  gta6: {
+    url: gta6Cover.url,
+    altEs: "Joven sentado sobre el cofre de un auto al atardecer, en una avenida de playa con palmeras y letreros de neón, mirando su celular.",
+    altEn: "A young man sitting on the hood of a car at sunset, on a beach avenue with palm trees and neon signs, looking at his phone.",
+    capEs: "Mucha emoción alrededor de una moneda comunitaria: antes de comprar, conviene saber qué es y qué no es.",
+    capEn: "Lots of excitement around a community coin: before buying, it pays to know what it is and what it is not.",
+  },
   home: {
     url: homeCover.url,
     altEs: "Hombre sentado de noche en la mesa de su cocina mirando el celular, con una laptop que muestra gráficas de precios.",
