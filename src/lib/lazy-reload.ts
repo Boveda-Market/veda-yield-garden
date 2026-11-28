@@ -2,6 +2,7 @@ import { lazy, type ComponentType } from "react";
 
 const RELOAD_KEY = "boveda-chunk-reload";
 const RELOAD_WINDOW_MS = 30_000;
+let reloading = false;
 
 /** True when a dynamic import failed because the chunk no longer exists (app was updated). */
 export function isChunkLoadError(error: unknown): boolean {
@@ -17,6 +18,7 @@ export function reloadForNewVersion(): boolean {
     if (Date.now() - last < RELOAD_WINDOW_MS) return false;
     sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
   } catch { /* storage unavailable: still reload once */ }
+  reloading = true;
   window.location.reload();
   return true;
 }
@@ -25,16 +27,28 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** React.lazy that retries a failed chunk once, then reloads the page to fetch the current version. */
 export function lazyWithReload<T extends ComponentType<any>>(factory: () => Promise<{ default: T }>) {
+  const hang = () => new Promise<never>(() => {});
+  // When the root's vite:preloadError handler starts a reload it calls preventDefault, which makes the
+  // dynamic import resolve to undefined; React.lazy would then crash ("'default' in undefined").
+  const load = async () => {
+    const mod = await factory();
+    if (!mod || typeof mod !== "object" || !("default" in mod) || mod.default == null) {
+      throw new Error("Failed to fetch dynamically imported module (empty module)");
+    }
+    return mod;
+  };
   return lazy(async () => {
     try {
-      return await factory();
+      return await load();
     } catch (error) {
-      if (!isChunkLoadError(error)) throw error;
+      if (reloading) return hang();
+      if (!isChunkLoadError(error) && !(error instanceof TypeError)) throw error;
       await wait(600);
       try {
-        return await factory();
+        return await load();
       } catch (retryError) {
-        if (isChunkLoadError(retryError) && reloadForNewVersion()) return new Promise<never>(() => {});
+        if (reloading) return hang();
+        if ((isChunkLoadError(retryError) || retryError instanceof TypeError) && reloadForNewVersion()) return hang();
         throw retryError;
       }
     }
