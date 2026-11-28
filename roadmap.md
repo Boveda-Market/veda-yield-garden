@@ -132,3 +132,5 @@
 - [x] Verificar en Google Search Console sitemap, portada, blog ES/EN, artículos recientes ES/EN y Bitcoin/Trump: sitemap sin errores; Google aún no reconoce /blog ni /trump y Binance EN está descubierto sin indexar; revisión puntual, no inventario completo.
 - [x] Portadas del blog: foto realista generada por IA en lugar de las escenas SVG con palitos (8 escenas, ES/EN)
 - [x] Blog: foto realista siempre como portada + más gráficos y elementos visuales dentro de los artículos para escanear mejor
+- [x] Guía DeFi ES/EN: verificar y gestionar posiciones fuera de Bóveda, con advertencias y acceso desde Avanzado.
+- [x] Aclarar en la guía que importar la llave conserva el Piloto Automático; no se desconecta automáticamente.

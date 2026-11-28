@@ -23,6 +23,8 @@ import { Link } from "@tanstack/react-router";
 import { Banknote, Vault } from "lucide-react";
 import { OfframpButton } from "@/components/offramp-dialog";
 import { useT } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
+import { guideHref } from "@/components/guide-layout";
 import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { getRealWallet } from "@/lib/solana.functions";
 import { Button } from "@/components/ui/button";
@@ -59,6 +61,7 @@ import { positionWon } from "@/lib/predict";
 
 export function WalletPanel() {
   const t = useT();
+  const { lang } = useI18n();
   const session = useBovedaSession();
   const address = session.walletAddress;
   const readWallet = useServerFn(getRealWallet);
@@ -336,6 +339,7 @@ export function WalletPanel() {
         <p className="mt-2 text-sm text-muted-foreground">{t("Puedes ver y copiar tu llave privada para usar esta wallet en otra app. Quien tenga esta llave controla tus fondos: nunca la compartas.")}</p>
         <Button className="mt-3" variant="outline" onClick={() => void session.exportWallet?.().catch(fail)}>{t("Ver mi llave privada")}</Button>
       </> : <p className="mt-2 text-sm text-muted-foreground">{t("Tu wallet externa (Phantom o Jupiter) guarda tu llave. Puedes verla desde esa app.")}</p>}
+      <Link to={guideHref("/guias/verificar-posicion-meteora", lang)} className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm text-primary underline underline-offset-4"><span>{lang === "en" ? "Verify your DeFi position: advanced guide" : "Verifica tu posición en DeFi: guía avanzada"}</span><ChevronRight size={16} className="shrink-0" aria-hidden /></Link>
     </details>
 
     <Dialog open={receiveOpen} onOpenChange={setReceiveOpen}>

@@ -74,6 +74,7 @@ import { Route as GuiasQueEsUsdcRouteImport } from './routes/guias/que-es-usdc'
 import { Route as GuiasRecargarConCoinbaseRouteImport } from './routes/guias/recargar-con-coinbase'
 import { Route as GuiasRetirarCashAppBitcoinRouteImport } from './routes/guias/retirar-cash-app-bitcoin'
 import { Route as GuiasTraeTusMonedasRouteImport } from './routes/guias/trae-tus-monedas'
+import { Route as GuiasVerificarPosicionMeteoraRouteImport } from './routes/guias/verificar-posicion-meteora'
 import { Route as EnBlogIndexRouteImport } from './routes/en/blog/index'
 import { Route as EnBlogBinanceHackKeysRouteImport } from './routes/en/blog/binance-hack-keys'
 import { Route as EnBlogBitcoinAtmsExpensiveRiskyRouteImport } from './routes/en/blog/bitcoin-atms-expensive-risky'
@@ -91,6 +92,7 @@ import { Route as EnGuidesBringYourOwnCoinsRouteImport } from './routes/en/guide
 import { Route as EnGuidesEarnInterestOnBitcoinRouteImport } from './routes/en/guides/earn-interest-on-bitcoin'
 import { Route as EnGuidesHighYieldVaultsRouteImport } from './routes/en/guides/high-yield-vaults'
 import { Route as EnGuidesPredictionMarketsRouteImport } from './routes/en/guides/prediction-markets'
+import { Route as EnGuidesVerifyMeteoraPositionRouteImport } from './routes/en/guides/verify-meteora-position'
 import { Route as EnGuidesWhatIsUsdcRouteImport } from './routes/en/guides/what-is-usdc'
 import { Route as EnGuidesWithdrawToCashAppBitcoinRouteImport } from './routes/en/guides/withdraw-to-cash-app-bitcoin'
 import { Route as ApiPublicJobsCheckSystemStatusRouteImport } from './routes/api/public/jobs/check-system-status'
@@ -438,6 +440,12 @@ const GuiasTraeTusMonedasRoute = GuiasTraeTusMonedasRouteImport.update({
   path: '/guias/trae-tus-monedas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuiasVerificarPosicionMeteoraRoute =
+  GuiasVerificarPosicionMeteoraRouteImport.update({
+    id: '/guias/verificar-posicion-meteora',
+    path: '/guias/verificar-posicion-meteora',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EnBlogIndexRoute = EnBlogIndexRouteImport.update({
   id: '/en/blog/',
   path: '/en/blog/',
@@ -534,6 +542,12 @@ const EnGuidesPredictionMarketsRoute =
   EnGuidesPredictionMarketsRouteImport.update({
     id: '/en/guides/prediction-markets',
     path: '/en/guides/prediction-markets',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EnGuidesVerifyMeteoraPositionRoute =
+  EnGuidesVerifyMeteoraPositionRouteImport.update({
+    id: '/en/guides/verify-meteora-position',
+    path: '/en/guides/verify-meteora-position',
     getParentRoute: () => rootRouteImport,
   } as any)
 const EnGuidesWhatIsUsdcRoute = EnGuidesWhatIsUsdcRouteImport.update({
@@ -650,6 +664,7 @@ export interface FileRoutesByFullPath {
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/guias/trae-tus-monedas': typeof GuiasTraeTusMonedasRoute
+  '/guias/verificar-posicion-meteora': typeof GuiasVerificarPosicionMeteoraRoute
   '/blog/': typeof BlogIndexRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
@@ -668,6 +683,7 @@ export interface FileRoutesByFullPath {
   '/en/guides/earn-interest-on-bitcoin': typeof EnGuidesEarnInterestOnBitcoinRoute
   '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
   '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
+  '/en/guides/verify-meteora-position': typeof EnGuidesVerifyMeteoraPositionRoute
   '/en/guides/what-is-usdc': typeof EnGuidesWhatIsUsdcRoute
   '/en/guides/withdraw-to-cash-app-bitcoin': typeof EnGuidesWithdrawToCashAppBitcoinRoute
   '/en/blog/': typeof EnBlogIndexRoute
@@ -743,6 +759,7 @@ export interface FileRoutesByTo {
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/guias/trae-tus-monedas': typeof GuiasTraeTusMonedasRoute
+  '/guias/verificar-posicion-meteora': typeof GuiasVerificarPosicionMeteoraRoute
   '/blog': typeof BlogIndexRoute
   '/en': typeof EnIndexRoute
   '/guias': typeof GuiasIndexRoute
@@ -761,6 +778,7 @@ export interface FileRoutesByTo {
   '/en/guides/earn-interest-on-bitcoin': typeof EnGuidesEarnInterestOnBitcoinRoute
   '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
   '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
+  '/en/guides/verify-meteora-position': typeof EnGuidesVerifyMeteoraPositionRoute
   '/en/guides/what-is-usdc': typeof EnGuidesWhatIsUsdcRoute
   '/en/guides/withdraw-to-cash-app-bitcoin': typeof EnGuidesWithdrawToCashAppBitcoinRoute
   '/en/blog': typeof EnBlogIndexRoute
@@ -837,6 +855,7 @@ export interface FileRoutesById {
   '/guias/recargar-con-coinbase': typeof GuiasRecargarConCoinbaseRoute
   '/guias/retirar-cash-app-bitcoin': typeof GuiasRetirarCashAppBitcoinRoute
   '/guias/trae-tus-monedas': typeof GuiasTraeTusMonedasRoute
+  '/guias/verificar-posicion-meteora': typeof GuiasVerificarPosicionMeteoraRoute
   '/blog/': typeof BlogIndexRoute
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
@@ -855,6 +874,7 @@ export interface FileRoutesById {
   '/en/guides/earn-interest-on-bitcoin': typeof EnGuidesEarnInterestOnBitcoinRoute
   '/en/guides/high-yield-vaults': typeof EnGuidesHighYieldVaultsRoute
   '/en/guides/prediction-markets': typeof EnGuidesPredictionMarketsRoute
+  '/en/guides/verify-meteora-position': typeof EnGuidesVerifyMeteoraPositionRoute
   '/en/guides/what-is-usdc': typeof EnGuidesWhatIsUsdcRoute
   '/en/guides/withdraw-to-cash-app-bitcoin': typeof EnGuidesWithdrawToCashAppBitcoinRoute
   '/en/blog/': typeof EnBlogIndexRoute
@@ -932,6 +952,7 @@ export interface FileRouteTypes {
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
     | '/guias/trae-tus-monedas'
+    | '/guias/verificar-posicion-meteora'
     | '/blog/'
     | '/en/'
     | '/guias/'
@@ -950,6 +971,7 @@ export interface FileRouteTypes {
     | '/en/guides/earn-interest-on-bitcoin'
     | '/en/guides/high-yield-vaults'
     | '/en/guides/prediction-markets'
+    | '/en/guides/verify-meteora-position'
     | '/en/guides/what-is-usdc'
     | '/en/guides/withdraw-to-cash-app-bitcoin'
     | '/en/blog/'
@@ -1025,6 +1047,7 @@ export interface FileRouteTypes {
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
     | '/guias/trae-tus-monedas'
+    | '/guias/verificar-posicion-meteora'
     | '/blog'
     | '/en'
     | '/guias'
@@ -1043,6 +1066,7 @@ export interface FileRouteTypes {
     | '/en/guides/earn-interest-on-bitcoin'
     | '/en/guides/high-yield-vaults'
     | '/en/guides/prediction-markets'
+    | '/en/guides/verify-meteora-position'
     | '/en/guides/what-is-usdc'
     | '/en/guides/withdraw-to-cash-app-bitcoin'
     | '/en/blog'
@@ -1118,6 +1142,7 @@ export interface FileRouteTypes {
     | '/guias/recargar-con-coinbase'
     | '/guias/retirar-cash-app-bitcoin'
     | '/guias/trae-tus-monedas'
+    | '/guias/verificar-posicion-meteora'
     | '/blog/'
     | '/en/'
     | '/guias/'
@@ -1136,6 +1161,7 @@ export interface FileRouteTypes {
     | '/en/guides/earn-interest-on-bitcoin'
     | '/en/guides/high-yield-vaults'
     | '/en/guides/prediction-markets'
+    | '/en/guides/verify-meteora-position'
     | '/en/guides/what-is-usdc'
     | '/en/guides/withdraw-to-cash-app-bitcoin'
     | '/en/blog/'
@@ -1212,6 +1238,7 @@ export interface RootRouteChildren {
   GuiasRecargarConCoinbaseRoute: typeof GuiasRecargarConCoinbaseRoute
   GuiasRetirarCashAppBitcoinRoute: typeof GuiasRetirarCashAppBitcoinRoute
   GuiasTraeTusMonedasRoute: typeof GuiasTraeTusMonedasRoute
+  GuiasVerificarPosicionMeteoraRoute: typeof GuiasVerificarPosicionMeteoraRoute
   BlogIndexRoute: typeof BlogIndexRoute
   EnIndexRoute: typeof EnIndexRoute
   GuiasIndexRoute: typeof GuiasIndexRoute
@@ -1230,6 +1257,7 @@ export interface RootRouteChildren {
   EnGuidesEarnInterestOnBitcoinRoute: typeof EnGuidesEarnInterestOnBitcoinRoute
   EnGuidesHighYieldVaultsRoute: typeof EnGuidesHighYieldVaultsRoute
   EnGuidesPredictionMarketsRoute: typeof EnGuidesPredictionMarketsRoute
+  EnGuidesVerifyMeteoraPositionRoute: typeof EnGuidesVerifyMeteoraPositionRoute
   EnGuidesWhatIsUsdcRoute: typeof EnGuidesWhatIsUsdcRoute
   EnGuidesWithdrawToCashAppBitcoinRoute: typeof EnGuidesWithdrawToCashAppBitcoinRoute
   EnBlogIndexRoute: typeof EnBlogIndexRoute
@@ -1700,6 +1728,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuiasTraeTusMonedasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guias/verificar-posicion-meteora': {
+      id: '/guias/verificar-posicion-meteora'
+      path: '/guias/verificar-posicion-meteora'
+      fullPath: '/guias/verificar-posicion-meteora'
+      preLoaderRoute: typeof GuiasVerificarPosicionMeteoraRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/blog/': {
       id: '/en/blog/'
       path: '/en/blog'
@@ -1817,6 +1852,13 @@ declare module '@tanstack/react-router' {
       path: '/en/guides/prediction-markets'
       fullPath: '/en/guides/prediction-markets'
       preLoaderRoute: typeof EnGuidesPredictionMarketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/guides/verify-meteora-position': {
+      id: '/en/guides/verify-meteora-position'
+      path: '/en/guides/verify-meteora-position'
+      fullPath: '/en/guides/verify-meteora-position'
+      preLoaderRoute: typeof EnGuidesVerifyMeteoraPositionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/guides/what-is-usdc': {
@@ -1948,6 +1990,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuiasRecargarConCoinbaseRoute: GuiasRecargarConCoinbaseRoute,
   GuiasRetirarCashAppBitcoinRoute: GuiasRetirarCashAppBitcoinRoute,
   GuiasTraeTusMonedasRoute: GuiasTraeTusMonedasRoute,
+  GuiasVerificarPosicionMeteoraRoute: GuiasVerificarPosicionMeteoraRoute,
   BlogIndexRoute: BlogIndexRoute,
   EnIndexRoute: EnIndexRoute,
   GuiasIndexRoute: GuiasIndexRoute,
@@ -1968,6 +2011,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnGuidesEarnInterestOnBitcoinRoute: EnGuidesEarnInterestOnBitcoinRoute,
   EnGuidesHighYieldVaultsRoute: EnGuidesHighYieldVaultsRoute,
   EnGuidesPredictionMarketsRoute: EnGuidesPredictionMarketsRoute,
+  EnGuidesVerifyMeteoraPositionRoute: EnGuidesVerifyMeteoraPositionRoute,
   EnGuidesWhatIsUsdcRoute: EnGuidesWhatIsUsdcRoute,
   EnGuidesWithdrawToCashAppBitcoinRoute: EnGuidesWithdrawToCashAppBitcoinRoute,
   EnBlogIndexRoute: EnBlogIndexRoute,
