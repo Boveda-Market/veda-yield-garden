@@ -190,7 +190,7 @@ export function SofiaTour({ open, onClose }: { open: boolean; onClose: () => voi
           <p className="min-w-0 flex-1 text-xs"><span className="font-semibold text-sofia-text">Sofía</span> <span className="text-muted-foreground">· {t(st.area)}</span></p>
           <Button ref={closeRef} type="button" variant="ghost" size="icon" onClick={() => close()} aria-label={t("Cerrar tour")} className="size-11 shrink-0 text-muted-foreground"><X size={18} /></Button>
         </div>
-        <p className="mt-1 text-[15px] font-medium leading-6" aria-live="polite">{words.map((w, n) => <span key={n} className="sofia-word" style={{ animationDelay: `${n * 45}ms` }}>{w === "y" ? "(KYC) y" : w} </span>)}</p>
+        <p className="mt-1 text-[15px] font-medium leading-6" aria-live="polite">{words.map((w, n) => <span key={n} className="sofia-word" style={{ animationDelay: `${n * 45}ms` }}>{w} </span>)}</p>
         <div className="mt-3 flex items-center gap-2">
           <div className="flex flex-1 gap-1" aria-label={`${i + 1}/${STATIONS.length}`}>{STATIONS.map((s, n) => <span key={s.area} className={`h-1.5 rounded-full transition-all duration-300 ${n === i ? "w-5 bg-sofia-text" : "w-1.5 bg-muted-foreground/30"}`} />)}</div>
           {i > 0 && <Button size="sm" variant="ghost" className="min-h-11 min-w-11" onClick={() => go(-1)} aria-label={t("Atrás")}><ArrowLeft size={16} /></Button>}
