@@ -16,18 +16,41 @@ export function StatCards({ items }: { items: { value: string; label: string }[]
   </div>)}</div>;
 }
 
-export function BarChart({ title, bars, note, unit = "" }: { title: string; bars: { label: string; value: number }[]; note?: ReactNode; unit?: string }) {
-  const max = Math.max(...bars.map((b) => b.value));
-  return <figure className="rounded-2xl border border-border bg-card p-4">
-    <figcaption className="text-sm font-semibold text-foreground">{title}</figcaption>
-    <div className="mt-4 flex h-44 items-end gap-2" role="img" aria-label={title}>
-      {bars.map((b) => <div key={b.label} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
-        <span className="text-[11px] font-semibold text-foreground">{unit}{b.value.toLocaleString("en-US")}</span>
-        <div className="w-full rounded-t-lg bg-primary" style={{ height: `${(b.value / max) * 100}%`, opacity: 0.45 + 0.55 * (b.value / max) }} />
-        <span className="text-[11px] text-muted-foreground">{b.label}</span>
-      </div>)}
+export function BarChart({ title, bars, note, unit = "" }: {
+  title: string;
+  bars: { label: string; value: number; detail?: string; tone?: "default" | "negative" | "highlight" }[];
+  note?: ReactNode;
+  unit?: string;
+}) {
+  const max = Math.max(...bars.map((b) => b.value), 0);
+  const description = bars.map((b) => `${b.label}: ${unit}${b.value.toLocaleString("en-US")}${b.detail ? `, ${b.detail}` : ""}`).join(". ");
+  return <figure className="not-prose rounded-3xl border border-border bg-card p-5">
+    <figcaption className="font-display text-base font-bold leading-6 text-foreground">{title}</figcaption>
+    <div className="mt-6" role="img" aria-label={`${title}. ${description}`}>
+      <div className="flex gap-2">
+        {bars.map((b, i) => <div key={`${b.label}-${i}`} className="min-w-0 flex-1 text-center">
+          <p className={`font-display text-xl font-bold ${b.tone === "highlight" ? "text-primary" : "text-foreground"}`}>{unit}{b.value.toLocaleString("en-US")}</p>
+          <p className={`mt-1 min-h-8 text-[11px] font-semibold leading-4 ${b.tone === "negative" ? "text-destructive" : b.tone === "highlight" ? "text-primary" : "text-muted-foreground"}`}>{b.detail}</p>
+        </div>)}
+      </div>
+      <div className="relative mt-2 h-44 border-b border-border">
+        <div className="absolute inset-0 flex flex-col justify-between" aria-hidden="true">
+          {[0, 1, 2, 3].map((line) => <div key={line} className="border-t border-border/50" />)}
+        </div>
+        <div className="absolute inset-0 flex items-end gap-2 px-1">
+          {bars.map((b, i) => <div key={`${b.label}-${i}`} className="flex h-full min-w-0 flex-1 items-end">
+            <div
+              className={`w-full rounded-t-xl ${b.tone === "negative" ? "bg-destructive/80" : b.tone === "highlight" ? "bg-primary" : "bg-primary/55"}`}
+              style={{ height: `${max > 0 ? (b.value / max) * 100 : 0}%` }}
+            />
+          </div>)}
+        </div>
+      </div>
+      <div className="mt-3 flex gap-2">
+        {bars.map((b, i) => <p key={`${b.label}-${i}`} className="min-w-0 flex-1 text-center text-xs font-medium leading-4 text-muted-foreground">{b.label}</p>)}
+      </div>
     </div>
-    {note && <p className="mt-3 text-xs leading-5 text-muted-foreground">{note}</p>}
+    {note && <p className="mt-5 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">{note}</p>}
   </figure>;
 }
 
