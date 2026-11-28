@@ -23,7 +23,7 @@ describe("pool address row", () => {
     const { vault } = mountTrump();
     const link = screen.getByRole("link", { name: "Ver la página del pool" });
     const contractRow = screen.getByRole("button", { name: "Copiar contrato" });
-    expect(link).toHaveAttribute("href", `https://app.meteora.ag/dlmm/${vault.pool}`);
+    expect(link).toHaveAttribute("href", `https://solscan.io/account/${vault.pool}`);
     expect(screen.getByRole("button", { name: "Copiar dirección del pool" })).toBeInTheDocument();
     expect(contractRow).toHaveTextContent("6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN");
     expect(link.compareDocumentPosition(contractRow) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -35,8 +35,8 @@ describe("pool address row", () => {
     const { vault } = mountTrump();
     openStatsTab();
     const link = screen.getByRole("link", { name: "Ver la página del pool" });
-    expect(link).toHaveAttribute("href", `https://app.meteora.ag/dlmm/${vault.pool}`);
+    expect(link).toHaveAttribute("href", `https://solscan.io/account/${vault.pool}`);
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Copiar dirección del pool" })); });
-    expect(writeText).toHaveBeenCalledWith(`https://app.meteora.ag/dlmm/${vault.pool}`);
+    expect(writeText).toHaveBeenCalledWith(`https://solscan.io/account/${vault.pool}`);
   });
 });

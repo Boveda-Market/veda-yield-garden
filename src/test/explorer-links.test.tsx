@@ -58,11 +58,9 @@ it("drops the orphan copy-address button from the folded details", () => {
   expect(card.queryByRole("button", { name: "Copiar identificador" })).toBeNull();
 });
 
-it("links the guides index from inside the folded details", () => {
+it("keeps the guides link out of the folded details", () => {
   const card = openCard();
-  const link = card.getByRole("link", { name: /Guías/ });
-  expect(link).toHaveAttribute("href", "/guias");
-  expect(link.closest("details")).not.toBeNull();
+  expect(card.queryByRole("link", { name: /Guías/ })).toBeNull();
 });
 
 it("lists every coin and vault address in the bring-your-own-coins guide", () => {

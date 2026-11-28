@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Check, Copy, ExternalLink } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { isDlmmVault } from "@/lib/solana-data";
 import type { Vault } from "@/lib/vaults";
 
 /**
@@ -14,7 +13,7 @@ import type { Vault } from "@/lib/vaults";
 export function PoolAddressRow({ vault }: { vault: Vault }) {
   const t = useT();
   const [copied, setCopied] = useState(false);
-  const url = `https://app.meteora.ag/${isDlmmVault(vault.id) ? "dlmm" : "dammv2"}/${vault.pool}`;
+  const url = `https://solscan.io/account/${vault.pool}`;
 
   return (
     <div className="min-w-0 rounded-lg border border-border bg-muted/50 px-3 pb-3">
