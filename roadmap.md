@@ -129,3 +129,4 @@
 
 - [x] Tarjeta de la bóveda: quita el enlace «Guías» de «Ver detalles» (menú, pie y bienvenida lo conservan)
 - [x] Dirección del pool: la URL visible y los botones apuntan a Solscan en lugar de Meteora
+- [x] Verificar en Google Search Console sitemap, portada, blog ES/EN, artículos recientes ES/EN y Bitcoin/Trump: sitemap sin errores; Google aún no reconoce /blog ni /trump y Binance EN está descubierto sin indexar; revisión puntual, no inventario completo.
