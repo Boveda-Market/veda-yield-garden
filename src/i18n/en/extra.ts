@@ -2116,6 +2116,7 @@ export const extra: Record<string, string> = {
   "Rondas de 15 minutos en dólares: pronosticas si el precio sube o baja y cobras tu premio si aciertas.": "15-minute rounds in dollars: call whether the price goes up or down and collect your prize if you're right.",
   "Tu centro de control: mira cuánto has ganado y cosecha tus intereses cuando quieras en un solo toque.": "Your control center: see what you've earned and harvest your interest anytime in one tap.",
   "Tus dólares listos para usar: añade fondos con tarjeta o banco y retira a tu cuenta sin plazos.": "Your dollars, ready to use: add funds by card or bank and withdraw to your account with no lock-ups.",
+  "Sujeto a verificación de identidad.": "Subject to identity verification.",
   "Solo tú autorizas movimientos con tu huella o Face ID. Si tienes dudas mientras exploras, tócame aquí abajo.": "Only you approve moves with your fingerprint or Face ID. Questions while exploring? Tap me down here.",
   "Estás explorando Bóveda Market": "You're exploring Bóveda Market",
   "Mira todo sin registrarte. Te pedimos cuenta solo cuando quieras mover dinero.": "Look around without signing up. We only ask for an account when you want to move money.",

@@ -12,7 +12,7 @@ import { markOnce, SOFIA_TOUR_ACTIVE, TOUR_CANCEL_KEY } from "@/lib/sofia-contro
 import { notify } from "@/lib/notify";
 import { BackToClose } from "@/lib/back-close";
 
-type Step = { key: string; icon: typeof Wallet; tone: "btc" | "met" | "trump"; area: string; title: string; body: string; mock: () => React.ReactNode };
+type Step = { key: string; icon: typeof Wallet; tone: "btc" | "met" | "trump"; area: string; title: string; body: string; note?: string; mock: () => React.ReactNode };
 
 function Tag({ children }: { children: React.ReactNode }) {
   return <span className="tour-tag rounded-full px-2 py-0.5 text-[10px] font-semibold">{children}</span>;
@@ -52,7 +52,7 @@ const STEPS: Step[] = [
   { key: "vaults", icon: LayoutDashboard, tone: "btc", area: "Bóvedas", title: "Tus dólares trabajan en una bóveda", body: "Aportas dólares a un mercado público donde miles de personas intercambian monedas. Cada intercambio deja una comisión y recibes tu parte. El Piloto Automático la vigila 24/7 y reinvierte por ti.", mock: VaultMock },
   { key: "markets", icon: Zap, tone: "trump", area: "Doble o Nada", title: "¿Sube o baja en 15 minutos?", body: "Rondas relámpago sobre Bitcoin, Ethereum y Solana. Eliges en dólares, sin comprar la moneda, y la ronda se resuelve sola. Si aciertas, cobras tu premio en tu cuenta.", mock: PredictMock },
   { key: "portfolio", icon: PieChart, tone: "met", area: "Mi Portafolio", title: "Tu centro de control", body: "Ves cuánto depositaste, cuánto tienes hoy y cuánto has ganado. Cosechas tus intereses cuando quieras o los dejas crecer.", mock: PortfolioMock },
-  { key: "wallet", icon: Wallet, tone: "btc", area: "Billetera", title: "Entras y sales solo en dólares", body: "1 dólar digital vale 1 dólar. Recargas con tarjeta, Apple Pay o Coinbase, y retiras a tu banco cuando quieras, sin plazos.", mock: WalletMock },
+  { key: "wallet", icon: Wallet, tone: "btc", area: "Billetera", title: "Entras y sales solo en dólares", body: "1 dólar digital vale 1 dólar. Recargas con tarjeta, Apple Pay o Coinbase, y retiras a tu banco cuando quieras, sin plazos.", note: "Sujeto a verificación de identidad.", mock: WalletMock },
   { key: "safety", icon: ShieldCheck, tone: "trump", area: "Seguridad", title: "Tu dinero, bajo tu control", body: "Sin frases secretas en papel. Entras con Google o tu huella, y nadie puede mover un centavo sin tu firma. Los intereses son variables y puedes perder capital.", mock: SafetyMock },
 ];
 
@@ -77,6 +77,7 @@ export function AppTour({ open, onOpenChange }: { open: boolean; onOpenChange: (
         </div>
         <DialogTitle className="mt-3 font-display text-xl">{t(step.title)}</DialogTitle>
         <DialogDescription className="text-sm leading-6">{t(step.body)}</DialogDescription>
+        {step.note && <p className="mt-1.5 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground"><ShieldCheck size={14} className="mt-0.5 shrink-0 tour-ink" />{t(step.note)}</p>}
         {last ? <div className="mt-3 grid gap-2">
           <Button size="lg" className="h-12 w-full text-base font-bold" onClick={() => setLogin(true)}><Sparkles size={18} />{t("Comenzar: crear mi cuenta")}</Button>
           <Button size="lg" variant="outline" className="w-full" onClick={() => onOpenChange(false)}><Compass size={18} />{t("Explorar la app por mi cuenta")}</Button>
@@ -92,12 +93,12 @@ export function AppTour({ open, onOpenChange }: { open: boolean; onOpenChange: (
   </>;
 }
 
-type Station = { target: string | null; tone: "btc" | "met" | "trump"; area: string; text: string };
+type Station = { target: string | null; tone: "btc" | "met" | "trump"; area: string; text: string; note?: string };
 const STATIONS: Station[] = [
   { target: "#sofia-tour-banner + *", tone: "btc", area: "Bóvedas", text: "Aquí tus dólares trabajan en mercados públicos y generan comisiones 24/7 de forma automática." },
   { target: "[data-tour='markets']", tone: "trump", area: "Doble o Nada", text: "Rondas de 15 minutos en dólares: pronosticas si el precio sube o baja y cobras tu premio si aciertas." },
   { target: "[data-tour='portfolio']", tone: "met", area: "Mi Portafolio", text: "Tu centro de control: mira cuánto has ganado y cosecha tus intereses cuando quieras en un solo toque." },
-  { target: "[data-tour='wallet']", tone: "btc", area: "Billetera", text: "Tus dólares listos para usar: añade fondos con tarjeta o banco y retira a tu cuenta sin plazos." },
+  { target: "[data-tour='wallet']", tone: "btc", area: "Billetera", text: "Tus dólares listos para usar: añade fondos con tarjeta o banco y retira a tu cuenta sin plazos.", note: "Sujeto a verificación de identidad." },
   { target: null, tone: "trump", area: "Seguridad", text: "Solo tú autorizas movimientos con tu huella o Face ID. Si tienes dudas mientras exploras, tócame aquí abajo." },
 ];
 const ORB = 60;
@@ -191,6 +192,7 @@ export function SofiaTour({ open, onClose }: { open: boolean; onClose: () => voi
           <Button ref={closeRef} type="button" variant="ghost" size="icon" onClick={() => close()} aria-label={t("Cerrar tour")} className="size-11 shrink-0 text-muted-foreground"><X size={18} /></Button>
         </div>
         <p className="mt-1 text-[15px] font-medium leading-6" aria-live="polite">{words.map((w, n) => <span key={n} className="sofia-word" style={{ animationDelay: `${n * 45}ms` }}>{w} </span>)}</p>
+        {st.note && <p className="mt-1.5 flex items-start gap-1.5 text-[11px] leading-4 text-muted-foreground"><ShieldCheck size={12} className="mt-0.5 shrink-0 text-sofia-text" />{t(st.note)}</p>}
         <div className="mt-3 flex items-center gap-2">
           <div className="flex flex-1 gap-1" aria-label={`${i + 1}/${STATIONS.length}`}>{STATIONS.map((s, n) => <span key={s.area} className={`h-1.5 rounded-full transition-all duration-300 ${n === i ? "w-5 bg-sofia-text" : "w-1.5 bg-muted-foreground/30"}`} />)}</div>
           {i > 0 && <Button size="sm" variant="ghost" className="min-h-11 min-w-11" onClick={() => go(-1)} aria-label={t("Atrás")}><ArrowLeft size={16} /></Button>}
