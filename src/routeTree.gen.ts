@@ -39,6 +39,7 @@ import { Route as TraeTusMonedasRouteImport } from './routes/trae-tus-monedas'
 import { Route as TrumpRouteImport } from './routes/trump'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as BlogBitcoinAtmsFormaCaraRiesgosaRouteImport } from './routes/blog/bitcoin-atms-forma-cara-riesgosa'
 import { Route as BlogDeepfakesNvidiaSwingsMasivosRouteImport } from './routes/blog/deepfakes-nvidia-swings-masivos'
 import { Route as BlogDolaresDigitalesEnElCelularRouteImport } from './routes/blog/dolares-digitales-en-el-celular'
 import { Route as BlogHackeoBinanceLlavesRouteImport } from './routes/blog/hackeo-binance-llaves'
@@ -75,6 +76,7 @@ import { Route as GuiasRetirarCashAppBitcoinRouteImport } from './routes/guias/r
 import { Route as GuiasTraeTusMonedasRouteImport } from './routes/guias/trae-tus-monedas'
 import { Route as EnBlogIndexRouteImport } from './routes/en/blog/index'
 import { Route as EnBlogBinanceHackKeysRouteImport } from './routes/en/blog/binance-hack-keys'
+import { Route as EnBlogBitcoinAtmsExpensiveRiskyRouteImport } from './routes/en/blog/bitcoin-atms-expensive-risky'
 import { Route as EnBlogBitcoinFearAndHoldingRouteImport } from './routes/en/blog/bitcoin-fear-and-holding'
 import { Route as EnBlogBitcoinPrivacy35CentsRouteImport } from './routes/en/blog/bitcoin-privacy-35-cents'
 import { Route as EnBlogConcentratedLiquidityRouteImport } from './routes/en/blog/concentrated-liquidity'
@@ -249,6 +251,12 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
   path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogBitcoinAtmsFormaCaraRiesgosaRoute =
+  BlogBitcoinAtmsFormaCaraRiesgosaRouteImport.update({
+    id: '/blog/bitcoin-atms-forma-cara-riesgosa',
+    path: '/blog/bitcoin-atms-forma-cara-riesgosa',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const BlogDeepfakesNvidiaSwingsMasivosRoute =
   BlogDeepfakesNvidiaSwingsMasivosRouteImport.update({
     id: '/blog/deepfakes-nvidia-swings-masivos',
@@ -440,6 +448,12 @@ const EnBlogBinanceHackKeysRoute = EnBlogBinanceHackKeysRouteImport.update({
   path: '/en/blog/binance-hack-keys',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnBlogBitcoinAtmsExpensiveRiskyRoute =
+  EnBlogBitcoinAtmsExpensiveRiskyRouteImport.update({
+    id: '/en/blog/bitcoin-atms-expensive-risky',
+    path: '/en/blog/bitcoin-atms-expensive-risky',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EnBlogBitcoinFearAndHoldingRoute =
   EnBlogBitcoinFearAndHoldingRouteImport.update({
     id: '/en/blog/bitcoin-fear-and-holding',
@@ -603,6 +617,7 @@ export interface FileRoutesByFullPath {
   '/trae-tus-monedas': typeof TraeTusMonedasRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/blog/bitcoin-atms-forma-cara-riesgosa': typeof BlogBitcoinAtmsFormaCaraRiesgosaRoute
   '/blog/deepfakes-nvidia-swings-masivos': typeof BlogDeepfakesNvidiaSwingsMasivosRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/blog/hackeo-binance-llaves': typeof BlogHackeoBinanceLlavesRoute
@@ -639,6 +654,7 @@ export interface FileRoutesByFullPath {
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
   '/en/blog/binance-hack-keys': typeof EnBlogBinanceHackKeysRoute
+  '/en/blog/bitcoin-atms-expensive-risky': typeof EnBlogBitcoinAtmsExpensiveRiskyRoute
   '/en/blog/bitcoin-fear-and-holding': typeof EnBlogBitcoinFearAndHoldingRoute
   '/en/blog/bitcoin-privacy-35-cents': typeof EnBlogBitcoinPrivacy35CentsRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
@@ -694,6 +710,7 @@ export interface FileRoutesByTo {
   '/trae-tus-monedas': typeof TraeTusMonedasRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/blog/bitcoin-atms-forma-cara-riesgosa': typeof BlogBitcoinAtmsFormaCaraRiesgosaRoute
   '/blog/deepfakes-nvidia-swings-masivos': typeof BlogDeepfakesNvidiaSwingsMasivosRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/blog/hackeo-binance-llaves': typeof BlogHackeoBinanceLlavesRoute
@@ -730,6 +747,7 @@ export interface FileRoutesByTo {
   '/en': typeof EnIndexRoute
   '/guias': typeof GuiasIndexRoute
   '/en/blog/binance-hack-keys': typeof EnBlogBinanceHackKeysRoute
+  '/en/blog/bitcoin-atms-expensive-risky': typeof EnBlogBitcoinAtmsExpensiveRiskyRoute
   '/en/blog/bitcoin-fear-and-holding': typeof EnBlogBitcoinFearAndHoldingRoute
   '/en/blog/bitcoin-privacy-35-cents': typeof EnBlogBitcoinPrivacy35CentsRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
@@ -786,6 +804,7 @@ export interface FileRoutesById {
   '/trae-tus-monedas': typeof TraeTusMonedasRoute
   '/trump': typeof TrumpRoute
   '/wallet': typeof WalletRoute
+  '/blog/bitcoin-atms-forma-cara-riesgosa': typeof BlogBitcoinAtmsFormaCaraRiesgosaRoute
   '/blog/deepfakes-nvidia-swings-masivos': typeof BlogDeepfakesNvidiaSwingsMasivosRoute
   '/blog/dolares-digitales-en-el-celular': typeof BlogDolaresDigitalesEnElCelularRoute
   '/blog/hackeo-binance-llaves': typeof BlogHackeoBinanceLlavesRoute
@@ -822,6 +841,7 @@ export interface FileRoutesById {
   '/en/': typeof EnIndexRoute
   '/guias/': typeof GuiasIndexRoute
   '/en/blog/binance-hack-keys': typeof EnBlogBinanceHackKeysRoute
+  '/en/blog/bitcoin-atms-expensive-risky': typeof EnBlogBitcoinAtmsExpensiveRiskyRoute
   '/en/blog/bitcoin-fear-and-holding': typeof EnBlogBitcoinFearAndHoldingRoute
   '/en/blog/bitcoin-privacy-35-cents': typeof EnBlogBitcoinPrivacy35CentsRoute
   '/en/blog/concentrated-liquidity': typeof EnBlogConcentratedLiquidityRoute
@@ -879,6 +899,7 @@ export interface FileRouteTypes {
     | '/trae-tus-monedas'
     | '/trump'
     | '/wallet'
+    | '/blog/bitcoin-atms-forma-cara-riesgosa'
     | '/blog/deepfakes-nvidia-swings-masivos'
     | '/blog/dolares-digitales-en-el-celular'
     | '/blog/hackeo-binance-llaves'
@@ -915,6 +936,7 @@ export interface FileRouteTypes {
     | '/en/'
     | '/guias/'
     | '/en/blog/binance-hack-keys'
+    | '/en/blog/bitcoin-atms-expensive-risky'
     | '/en/blog/bitcoin-fear-and-holding'
     | '/en/blog/bitcoin-privacy-35-cents'
     | '/en/blog/concentrated-liquidity'
@@ -970,6 +992,7 @@ export interface FileRouteTypes {
     | '/trae-tus-monedas'
     | '/trump'
     | '/wallet'
+    | '/blog/bitcoin-atms-forma-cara-riesgosa'
     | '/blog/deepfakes-nvidia-swings-masivos'
     | '/blog/dolares-digitales-en-el-celular'
     | '/blog/hackeo-binance-llaves'
@@ -1006,6 +1029,7 @@ export interface FileRouteTypes {
     | '/en'
     | '/guias'
     | '/en/blog/binance-hack-keys'
+    | '/en/blog/bitcoin-atms-expensive-risky'
     | '/en/blog/bitcoin-fear-and-holding'
     | '/en/blog/bitcoin-privacy-35-cents'
     | '/en/blog/concentrated-liquidity'
@@ -1061,6 +1085,7 @@ export interface FileRouteTypes {
     | '/trae-tus-monedas'
     | '/trump'
     | '/wallet'
+    | '/blog/bitcoin-atms-forma-cara-riesgosa'
     | '/blog/deepfakes-nvidia-swings-masivos'
     | '/blog/dolares-digitales-en-el-celular'
     | '/blog/hackeo-binance-llaves'
@@ -1097,6 +1122,7 @@ export interface FileRouteTypes {
     | '/en/'
     | '/guias/'
     | '/en/blog/binance-hack-keys'
+    | '/en/blog/bitcoin-atms-expensive-risky'
     | '/en/blog/bitcoin-fear-and-holding'
     | '/en/blog/bitcoin-privacy-35-cents'
     | '/en/blog/concentrated-liquidity'
@@ -1153,6 +1179,7 @@ export interface RootRouteChildren {
   TraeTusMonedasRoute: typeof TraeTusMonedasRoute
   TrumpRoute: typeof TrumpRoute
   WalletRoute: typeof WalletRoute
+  BlogBitcoinAtmsFormaCaraRiesgosaRoute: typeof BlogBitcoinAtmsFormaCaraRiesgosaRoute
   BlogDeepfakesNvidiaSwingsMasivosRoute: typeof BlogDeepfakesNvidiaSwingsMasivosRoute
   BlogDolaresDigitalesEnElCelularRoute: typeof BlogDolaresDigitalesEnElCelularRoute
   BlogHackeoBinanceLlavesRoute: typeof BlogHackeoBinanceLlavesRoute
@@ -1189,6 +1216,7 @@ export interface RootRouteChildren {
   EnIndexRoute: typeof EnIndexRoute
   GuiasIndexRoute: typeof GuiasIndexRoute
   EnBlogBinanceHackKeysRoute: typeof EnBlogBinanceHackKeysRoute
+  EnBlogBitcoinAtmsExpensiveRiskyRoute: typeof EnBlogBitcoinAtmsExpensiveRiskyRoute
   EnBlogBitcoinFearAndHoldingRoute: typeof EnBlogBitcoinFearAndHoldingRoute
   EnBlogBitcoinPrivacy35CentsRoute: typeof EnBlogBitcoinPrivacy35CentsRoute
   EnBlogConcentratedLiquidityRoute: typeof EnBlogConcentratedLiquidityRoute
@@ -1425,6 +1453,13 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog/'
       preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/bitcoin-atms-forma-cara-riesgosa': {
+      id: '/blog/bitcoin-atms-forma-cara-riesgosa'
+      path: '/blog/bitcoin-atms-forma-cara-riesgosa'
+      fullPath: '/blog/bitcoin-atms-forma-cara-riesgosa'
+      preLoaderRoute: typeof BlogBitcoinAtmsFormaCaraRiesgosaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/deepfakes-nvidia-swings-masivos': {
@@ -1679,6 +1714,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnBlogBinanceHackKeysRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/blog/bitcoin-atms-expensive-risky': {
+      id: '/en/blog/bitcoin-atms-expensive-risky'
+      path: '/en/blog/bitcoin-atms-expensive-risky'
+      fullPath: '/en/blog/bitcoin-atms-expensive-risky'
+      preLoaderRoute: typeof EnBlogBitcoinAtmsExpensiveRiskyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/blog/bitcoin-fear-and-holding': {
       id: '/en/blog/bitcoin-fear-and-holding'
       path: '/en/blog/bitcoin-fear-and-holding'
@@ -1873,6 +1915,7 @@ const rootRouteChildren: RootRouteChildren = {
   TraeTusMonedasRoute: TraeTusMonedasRoute,
   TrumpRoute: TrumpRoute,
   WalletRoute: WalletRoute,
+  BlogBitcoinAtmsFormaCaraRiesgosaRoute: BlogBitcoinAtmsFormaCaraRiesgosaRoute,
   BlogDeepfakesNvidiaSwingsMasivosRoute: BlogDeepfakesNvidiaSwingsMasivosRoute,
   BlogDolaresDigitalesEnElCelularRoute: BlogDolaresDigitalesEnElCelularRoute,
   BlogHackeoBinanceLlavesRoute: BlogHackeoBinanceLlavesRoute,
@@ -1909,6 +1952,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnIndexRoute: EnIndexRoute,
   GuiasIndexRoute: GuiasIndexRoute,
   EnBlogBinanceHackKeysRoute: EnBlogBinanceHackKeysRoute,
+  EnBlogBitcoinAtmsExpensiveRiskyRoute: EnBlogBitcoinAtmsExpensiveRiskyRoute,
   EnBlogBitcoinFearAndHoldingRoute: EnBlogBitcoinFearAndHoldingRoute,
   EnBlogBitcoinPrivacy35CentsRoute: EnBlogBitcoinPrivacy35CentsRoute,
   EnBlogConcentratedLiquidityRoute: EnBlogConcentratedLiquidityRoute,

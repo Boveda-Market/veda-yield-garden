@@ -1,7 +1,8 @@
 /** Animated cover scenes (pure SVG + SMIL, SSR-safe, no downloads) that open each post by picturing its problem. Illustrative only: no live data. */
-type Scene = "privacy" | "fear" | "exchange" | "pool" | "phone" | "keys" | "swings";
+type Scene = "privacy" | "fear" | "exchange" | "pool" | "phone" | "keys" | "swings" | "atm";
 
 export const HERO_BY_PATH: Record<string, Scene> = {
+  "/blog/bitcoin-atms-forma-cara-riesgosa": "atm",
   "/blog/deepfakes-nvidia-swings-masivos": "swings",
   "/blog/hackeo-binance-llaves": "keys",
   "/blog/privacidad-bitcoin-35-centavos": "privacy",
@@ -18,6 +19,7 @@ const CAP: Record<Scene, [string, string]> = {
   pool: ["Muchas personas aportan a una reserva compartida.", "Many people add to a shared reserve."],
   keys: ["Hackean la gran caja fuerte compartida… y quien guarda sus llaves sigue tranquilo.", "The big shared safe gets hacked… while the person who keeps their keys stays calm."],
   swings: ["Un video falso sacude el precio arriba y abajo… y quien tiene su bóveda en piloto automático sigue tranquilo.", "A fake video shakes the price up and down… while the person with their vault on autopilot stays calm."],
+  atm: ["Un cajero en la calle cobra de más y un estafador espera cerca… mientras otra persona holdea tranquila desde su sillón.", "A street kiosk overcharges and a scammer waits nearby… while someone else holds calmly from their couch."],
   phone: ["Dólares digitales que llegan directo al celular.", "Digital dollars arriving straight to the phone."],
 };
 
@@ -49,6 +51,16 @@ function Art({ scene }: { scene: Scene }) {
       <Person x={300} y={130} />
       <g className="text-primary"><rect x="318" y="150" width="20" height="32" rx="4" /><Pulse dur="2.2s"><path d="M328 92 L346 99 V112 Q346 124 328 131 Q310 124 310 112 V99 Z" className="fill-primary/15" /></Pulse><circle cx="328" cy="110" r="4" /><path d="M328 114 V120" /></g>
       <Move path="M0 0 C30 -10 60 -10 90 0" dur="2.6s"><Coin x={220} y={170} /></Move>
+    </>;
+    case "atm": return <>
+      <rect x="30" y="50" width="70" height="150" rx="8" /><rect x="42" y="64" width="46" height="34" rx="4" className="fill-primary/10" /><text x="65" y="86" textAnchor="middle" fontSize="13" fontWeight="700" fill="currentColor" stroke="none">₿</text><path d="M48 150 H82 M48 165 H82" />
+      <Pulse dur="1.1s"><g className="text-destructive"><rect x="38" y="18" width="58" height="24" rx="12" className="fill-destructive/10" /><text x="67" y="35" textAnchor="middle" fontSize="12" fontWeight="700" fill="currentColor" stroke="none">+25%</text></g></Pulse>
+      <Person x={130} y={130} mood="worried" />
+      <Move path="M0 0 C-15 -10 -30 -10 -45 0" dur="2.4s"><Coin x={150} y={160} /></Move>
+      <Person x={200} y={130} mood="sneaky" />
+      <path d="M250 200 H385 M262 200 V165 H372 V200 M262 175 H372" className="text-muted-foreground" />
+      <Person x={318} y={108} />
+      <g className="text-primary"><rect x="336" y="128" width="18" height="28" rx="4" /><Pulse dur="2.2s"><path d="M345 74 L361 80 V92 Q361 103 345 109 Q329 103 329 92 V80 Z" className="fill-primary/15" /></Pulse><text x="345" y="96" textAnchor="middle" fontSize="11" fontWeight="700" fill="currentColor" stroke="none">₿</text></g>
     </>;
     case "keys": return <>
       <path d="M30 200 V80 L95 50 L160 80 V200 Z" /><path d="M50 200 V110 M75 200 V110 M115 200 V110 M140 200 V110" className="text-muted-foreground" />

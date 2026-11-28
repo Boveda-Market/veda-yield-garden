@@ -17,6 +17,14 @@ export type AuthorId = keyof typeof AUTHORS;
 /** Blog posts: friendly, conversational trend articles (guides stay evergreen how-tos). */
 export const POSTS = [
   {
+    to: "/blog/bitcoin-atms-forma-cara-riesgosa", toEn: "/en/blog/bitcoin-atms-expensive-risky", date: "2026-11-28", minutes: 5, author: "sofia",
+    category: "Adopción y ahorro", categoryEn: "Adoption & savings",
+    title: "Bitcoin ATM's: la forma más cara y riesgosa de holdear",
+    titleEn: "Bitcoin ATM's: the most expensive and risky way to hold",
+    desc: "Los Bitcoin ATM's aparecen en gasolineras y tiendas, pero cobran sobreprecios de 20% a 30% y son la herramienta favorita de los estafadores. Pros, contras y cómo holdear Bitcoin desde tu celular.",
+    descEn: "Bitcoin ATM's pop up at gas stations and stores, but they charge 20% to 30% markups and are scammers' favorite tool. Pros, cons and how to hold Bitcoin from your phone.",
+  },
+  {
     to: "/blog/deepfakes-nvidia-swings-masivos", toEn: "/en/blog/deepfakes-nvidia-massive-swings", date: "2026-11-27", minutes: 5, author: "sofia",
     category: "Adopción y ahorro", categoryEn: "Adoption & savings",
     title: "Deepfakes, Nvidia y swings masivos: cómo ganar con la volatilidad sin volverte loco",
