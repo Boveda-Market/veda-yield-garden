@@ -67,6 +67,21 @@ export const Route = createFileRoute("/api/public/jobs/check-system-status")({
           }
         } catch { /* best-effort */ }
         try {
+          // Cash App withdrawals: announce Bitcoin delivery or refund on Telegram even while the app is closed.
+          const { sideshiftStatus } = await import("@/lib/btc-offramp.server");
+          const { cashAppOutcome, cashAppTrackExpired, cashAppSettledText, cashAppRefundedText } = await import("@/lib/cashapp-alerts");
+          const { data: pending } = await db.from("cashapp_withdraw_alerts").select("*").eq("done", false).order("created_at").limit(50);
+          for (const w of (pending ?? []) as { shift_id: string; privy_user_id: string; signature: string; btc: string; created_at: string }[]) {
+            const st = await sideshiftStatus(w.shift_id).catch(() => null);
+            const o = st ? cashAppOutcome(st.status) : null;
+            const expired = !o && cashAppTrackExpired(w.created_at, now);
+            if (!o && !expired) { if (st) await db.from("cashapp_withdraw_alerts").update({ status: st.status, updated_at: new Date(now).toISOString() }).eq("shift_id", w.shift_id); continue; }
+            // Mark done first (only if still pending) so overlapping runs never send twice.
+            const { data: claimed } = await db.from("cashapp_withdraw_alerts").update({ done: true, status: st?.status ?? "expired", updated_at: new Date(now).toISOString() }).eq("shift_id", w.shift_id).eq("done", false).select("shift_id");
+            if (o && claimed?.length) await tg.userAlert(w.privy_user_id, o === "settled" ? cashAppSettledText(w.btc) : cashAppRefundedText(), "withdraw", { text: "🧾 Ver comprobante", url: `https://solscan.io/tx/${w.signature}` });
+          }
+        } catch { /* best-effort */ }
+        try {
           // Treasury SOL reserve: sponsored activations fail without it; alert operator once, then on recovery.
           const key = process.env["HELIUS_API_KEY"];
           if (key) {

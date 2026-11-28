@@ -1,6 +1,6 @@
 import { TapAmount } from "@/components/ui/tap-amount";
 import { useEffect, useState } from "react";
-import { Bitcoin, CheckCircle2, LoaderCircle } from "lucide-react";
+import { Bitcoin, BellRing, CheckCircle2, LoaderCircle, Send } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { GasRefillCard } from "@/components/gas-refill-card";
@@ -15,15 +15,19 @@ import { useBovedaSession } from "@/hooks/use-boveda-session";
 import { useAffiliateReport } from "@/hooks/use-affiliate-report";
 import { useT } from "@/lib/i18n";
 import { BTC_OFFRAMP_MAX_USDC, BTC_OFFRAMP_MIN_USDC, amountAllowed, isBtcAddress, providerCost } from "@/lib/btc-offramp";
-import { btcWithdrawStatus, createBtcWithdraw, quoteBtcWithdraw } from "@/lib/btc-offramp.functions";
+import { btcWithdrawStatus, createBtcWithdraw, quoteBtcWithdraw, trackBtcWithdraw } from "@/lib/btc-offramp.functions";
+import { startTelegramLink } from "@/lib/telegram-alerts.functions";
 import { USDC_MINT, buildTransfer, readTokenBalance, toBaseUnits } from "@/lib/wallet-actions";
 
 type Quote = Awaited<ReturnType<typeof quoteBtcWithdraw>>;
 
 /** Cash App: swap USDC to native Bitcoin via provider and deliver to the user's Cash App BTC address. One wallet signature. */
-export function CashAppBtc({ wallet, onReadyChange }: { wallet: string; onReadyChange?: (ready: boolean) => void }) {
+export function CashAppBtc({ wallet, onReadyChange, onClose }: { wallet: string; onReadyChange?: (ready: boolean) => void; onClose?: () => void }) {
   const t = useT();
-  const { signAndSend } = useBovedaSession();
+  const { signAndSend, getAccessToken } = useBovedaSession();
+  const trackFn = useServerFn(trackBtcWithdraw);
+  const linkFn = useServerFn(startTelegramLink);
+  const [telegram, setTelegram] = useState<"unknown" | "linked" | "missing">("unknown");
   const reportAffiliate = useAffiliateReport();
   const quoteFn = useServerFn(quoteBtcWithdraw);
   const createFn = useServerFn(createBtcWithdraw);
@@ -86,8 +90,19 @@ export function CashAppBtc({ wallet, onReadyChange }: { wallet: string; onReadyC
       const sig = await signAndSend(await buildTransfer({ from: wallet, to: shift.depositAddress, asset: "USDC", amount: units, fee: feeUnits }));
       if (feeUnits > 0n) void reportAffiliate(sig, "withdraw");
       setDone({ sig, shiftId: shift.shiftId, btc: shift.settleAmount }); setStatus("waiting");
+      // Telegram follows the withdrawal from here, so the person can close the app.
+      void trackFn({ data: { shiftId: shift.shiftId, signature: sig, btc: shift.settleAmount } }).then((r) => setTelegram(r.linked ? "linked" : "missing")).catch(() => setTelegram("missing"));
     } catch (e) { setError(e instanceof Error ? e.message : t("No se pudo completar la operación.")); }
     finally { setBusy(false); }
+  }
+
+  async function linkTelegram() {
+    const tab = window.open("", "_blank");
+    try {
+      const token = await getAccessToken?.();
+      const r = token ? await linkFn({ data: { token } }) : null;
+      if (r?.success && r.url) { if (tab) tab.location.href = r.url; else window.location.href = r.url; setTelegram("linked"); } else tab?.close();
+    } catch { tab?.close(); }
   }
 
   if (done) {
@@ -96,7 +111,10 @@ export function CashAppBtc({ wallet, onReadyChange }: { wallet: string; onReadyC
       <p className="flex items-center gap-2 font-semibold">{status === "settled" ? <CheckCircle2 size={16} /> : <LoaderCircle size={16} className="animate-spin" />}{label}</p>
       <p className="text-xs">{t("Recibirás")} ≈ {done.btc} BTC</p>
       <a className="text-xs underline" href={`https://solscan.io/tx/${done.sig}`} target="_blank" rel="noopener noreferrer">{t("Ver comprobante")}</a>
-      <Button size="sm" variant="outline" onClick={() => { setDone(null); setAmount(""); setChecked(false); }}>{t("Hacer otro retiro")}</Button>
+      {status !== "settled" && status !== "refunded" && telegram === "linked" && <p className="flex items-start gap-2 rounded-md bg-background/60 p-2 text-xs"><BellRing size={14} className="mt-0.5 shrink-0 text-primary" />{t("Puedes cerrar esta ventana. Te avisaremos por Telegram cuando tu Bitcoin llegue a Cash App.")}</p>}
+      {status !== "settled" && status !== "refunded" && telegram === "missing" && <div className="grid gap-2 rounded-md bg-background/60 p-2 text-xs"><p>{t("Tu retiro sigue en curso aunque cierres la app. Vincula Telegram y te avisamos cuando llegue.")}</p><Button size="sm" variant="outline" onClick={() => void linkTelegram()}><Send size={14} />{t("Avisarme por Telegram")}</Button></div>}
+      {onClose && <Button size="sm" onClick={onClose}>{status === "settled" || status === "refunded" ? t("Cerrar") : t("Entendido, cerrar")}</Button>}
+      <Button size="sm" variant="outline" onClick={() => { setDone(null); setAmount(""); setChecked(false); setTelegram("unknown"); }}>{t("Hacer otro retiro")}</Button>
     </div>;
   }
 

@@ -251,6 +251,39 @@ export type Database = {
         }
         Relationships: []
       }
+      cashapp_withdraw_alerts: {
+        Row: {
+          btc: string
+          created_at: string
+          done: boolean
+          privy_user_id: string
+          shift_id: string
+          signature: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          btc: string
+          created_at?: string
+          done?: boolean
+          privy_user_id: string
+          shift_id: string
+          signature: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          btc?: string
+          created_at?: string
+          done?: boolean
+          privy_user_id?: string
+          shift_id?: string
+          signature?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coinbase_onramps: {
         Row: {
           first_at: string

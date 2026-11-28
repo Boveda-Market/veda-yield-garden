@@ -43,7 +43,7 @@ export function OfframpButton({ wallet, trial, trigger }: { wallet: string | nul
       {provider === "cashapp" && <p className="flex gap-2 rounded-lg border border-border/80 bg-secondary/60 p-3 text-xs"><TriangleAlert size={14} className="mt-0.5 shrink-0 text-primary" />{t("Cash App solo recibe Bitcoin. Convertimos tus USDC por ti; nunca envíes USDC directo a Cash App.")}</p>}
       {trial ? <p role="status" className="text-sm">{t("En Prueba los créditos son ficticios y no se pueden retirar. Cambia a Real para usar esta opción.")}</p>
         : !wallet ? <p role="status" className="text-sm">{t("Conecta tu wallet para retirar.")}</p>
-        : provider === "cashapp" ? <CashAppBtc wallet={wallet} onReadyChange={setReady} />
+        : provider === "cashapp" ? <CashAppBtc wallet={wallet} onReadyChange={setReady} onClose={() => { setReady(false); setKept(false); setOpen(false); }} />
         : <CoinbaseSell wallet={wallet} onReadyChange={setReady} />}
       </>}
     </ActionSheetContent></Dialog>

@@ -2126,4 +2126,8 @@ export const extra: Record<string, string> = {
   "Tour cerrado": "Tour closed",
   "Puedes tomarlo desde el menú: Tomar tour.": "Find it in the menu: Take tour.",
   "Cerrar bienvenida de Sofía": "Dismiss Sophia's welcome",
+  "Puedes cerrar esta ventana. Te avisaremos por Telegram cuando tu Bitcoin llegue a Cash App.": "You can close this window. We'll let you know on Telegram when your Bitcoin reaches Cash App.",
+  "Tu retiro sigue en curso aunque cierres la app. Vincula Telegram y te avisamos cuando llegue.": "Your withdrawal keeps going even if you close the app. Link Telegram and we'll tell you when it arrives.",
+  "Avisarme por Telegram": "Notify me on Telegram",
+  "Entendido, cerrar": "Got it, close",
 };

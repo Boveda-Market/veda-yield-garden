@@ -162,6 +162,13 @@
       "when": 1795388967269,
       "tag": "0022_vault_tx_cache",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1795866448932,
+      "tag": "0023_cashapp_withdraw_alerts",
+      "breakpoints": true
     }
   ]
 }

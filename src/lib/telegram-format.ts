@@ -9,3 +9,5 @@ export function tgCard(icon: string, title: string, lines: Array<string | false 
 }
 /** One "label: value" row with the value in bold. */
 export const tgRow = (icon: string, label: string, value: string) => `${icon} ${label}: <b>${value}</b>`;
+/** Closing line for alerts about something already in progress or finished. */
+export const NO_ACTION_LINE = "✨ <b>No tienes que hacer ninguna acción.</b>";

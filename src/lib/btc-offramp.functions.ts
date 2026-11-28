@@ -30,3 +30,25 @@ export const btcWithdrawStatus = createServerFn({ method: "POST" })
     const { sideshiftStatus } = await import("@/lib/btc-offramp.server");
     return sideshiftStatus(data.shiftId);
   });
+
+/** After the user signs, remember the withdrawal so Telegram announces delivery even if the app is closed; sends the "en camino" alert now. */
+export const trackBtcWithdraw = createServerFn({ method: "POST" })
+  .middleware([requirePrivyAuth])
+  .inputValidator((d) => z.object({ shiftId: z.string().min(4).max(64).regex(/^[\w-]+$/), signature: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,90}$/), btc: z.string().regex(/^\d{1,4}(\.\d{1,8})?$/) }).parse(d))
+  .handler(async ({ data, context }): Promise<{ linked: boolean }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: link } = await supabaseAdmin.from("telegram_links").select("chat_id, alerts_enabled").eq("privy_user_id", context.privyUserId).maybeSingle();
+    const linked = !!link?.chat_id && link.alerts_enabled !== false;
+    try {
+      // The shift must exist at the provider; this also stops made-up ids from being tracked.
+      const { sideshiftStatus } = await import("@/lib/btc-offramp.server");
+      const s = await sideshiftStatus(data.shiftId);
+      const { error } = await supabaseAdmin.from("cashapp_withdraw_alerts").insert({ shift_id: data.shiftId, privy_user_id: context.privyUserId, signature: data.signature, btc: data.btc, status: s.status });
+      if (!error && linked) {
+        const tg = await import("@/lib/telegram.server");
+        const { cashAppSentText } = await import("@/lib/cashapp-alerts");
+        await tg.userAlert(context.privyUserId, cashAppSentText(data.btc), "withdraw", { text: "🧾 Ver comprobante", url: `https://solscan.io/tx/${data.signature}` });
+      }
+    } catch (e) { console.error("trackBtcWithdraw", e); }
+    return { linked };
+  });
