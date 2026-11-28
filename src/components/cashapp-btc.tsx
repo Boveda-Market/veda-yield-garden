@@ -2,6 +2,11 @@ import { TapAmount } from "@/components/ui/tap-amount";
 import { useEffect, useState } from "react";
 import { Bitcoin, CheckCircle2, LoaderCircle } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { GasRefillCard } from "@/components/gas-refill-card";
+import { gasIsLow } from "@/lib/gas-refill";
+import { decimalToUnits } from "@/lib/onboarding";
+import { getRealWallet } from "@/lib/solana.functions";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -33,6 +38,14 @@ export function CashAppBtc({ wallet, onReadyChange }: { wallet: string; onReadyC
   const [done, setDone] = useState<{ sig: string; shiftId: string; btc: string } | null>(null);
   const [status, setStatus] = useState<string>("waiting");
   const [balance, setBalance] = useState<number | null>(null);
+  const readWallet = useServerFn(getRealWallet);
+  // Same key as Billetera, so a reserve refill here refreshes both screens.
+  const chain = useQuery({ queryKey: ["my-wallet", wallet], queryFn: async () => {
+    const r = await readWallet({ data: { wallet } });
+    if (!r.success) throw new Error(r.error);
+    return { sol: decimalToUnits(r.data.sol, 9) ?? 0n, usdc: decimalToUnits(r.data.usdc, 6) ?? 0n };
+  } });
+  const reserveLow = !!chain.data && gasIsLow(chain.data.sol);
   useEffect(() => { onReadyChange?.(!!quote && !done && !busy); }, [quote, done, busy, onReadyChange]);
   useEffect(() => { readTokenBalance(wallet, USDC_MINT).then((b) => setBalance(Number(b) / 1e6)).catch(() => setBalance(null)); }, [wallet, done]);
   const pick = (f: number) => { if (balance == null) return; setAmount((Math.floor(balance * f * 100) / 100).toFixed(2)); };
@@ -60,7 +73,7 @@ export function CashAppBtc({ wallet, onReadyChange }: { wallet: string; onReadyC
   }, [done, status, statusFn]);
 
   const cost = quote ? providerCost(Number(quote.depositAmount), Number(quote.settleAmount), quote.usdcPerBtc) : null;
-  const canSend = !!quote && addrOk && checked && !busy && (balance == null || n <= balance);
+  const canSend = !!quote && addrOk && checked && !busy && !reserveLow && (balance == null || n <= balance);
 
   async function send() {
     if (!quote || !canSend) return;
@@ -107,6 +120,7 @@ export function CashAppBtc({ wallet, onReadyChange }: { wallet: string; onReadyC
     <p className="text-xs text-muted-foreground">{t("En Cash App: Dinero → Bitcoin → Depositar bitcoin. Copia la dirección (no uses Lightning).")}</p>
     {addr && !addrOk && <p className="text-xs text-muted-foreground">{t("Esa no es una dirección de Bitcoin válida.")}</p>}
     <label className="flex items-start gap-2 text-xs leading-5"><Checkbox checked={checked} onCheckedChange={(v) => setChecked(v === true)} disabled={busy} /><span>{t("Revisé que es mi dirección de Bitcoin de Cash App. Si es incorrecta, el dinero no se puede recuperar.")}</span></label>
+    {reserveLow && chain.data && <GasRefillCard sol={chain.data.sol} usdc={chain.data.usdc} force onDone={() => void chain.refetch()} />}
     {error && <p role="alert" className="text-sm text-muted-foreground">{error}</p>}
     <Button disabled={!canSend} onClick={() => void send()}>{busy ? <LoaderCircle className="animate-spin" size={16} /> : <Bitcoin size={16} />}{busy ? t("Firma en tu wallet…") : t("Enviar a Cash App")}</Button>
     <p className="text-xs text-muted-foreground">{t("El cambio a Bitcoin lo hace SideShift, un servicio externo. El mínimo de")} {BTC_OFFRAMP_MIN_USDC} {t("USDC evita que el costo fijo de la red Bitcoin se coma tu retiro.")}</p>

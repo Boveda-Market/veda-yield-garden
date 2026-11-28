@@ -1,4 +1,5 @@
 /** USDC → native Bitcoin (Cash App) withdrawal rules shared by UI, server and tests. */
+import { withdrawFee } from "@/lib/fees";
 export const BTC_OFFRAMP_MIN_USDC = 25;
 export const BTC_OFFRAMP_MAX_USDC = 5000;
 export const BOVEDA_BTC_FEE_PCT = 1;
@@ -15,6 +16,12 @@ export function isBtcAddress(raw: string): boolean {
 
 export function amountAllowed(usdc: number): boolean {
   return Number.isFinite(usdc) && usdc >= BTC_OFFRAMP_MIN_USDC && usdc <= BTC_OFFRAMP_MAX_USDC;
+}
+
+/** Net amount sent to the provider after Bóveda's fee: the gross minimum minus its fee is still allowed. */
+export const BTC_OFFRAMP_MIN_NET_USDC = Number(BigInt(BTC_OFFRAMP_MIN_USDC * 1e6) - withdrawFee(BigInt(BTC_OFFRAMP_MIN_USDC * 1e6))) / 1e6;
+export function netAmountAllowed(usdc: number): boolean {
+  return Number.isFinite(usdc) && usdc >= BTC_OFFRAMP_MIN_NET_USDC && usdc <= BTC_OFFRAMP_MAX_USDC;
 }
 
 /** Provider cost in USDC: what is sent minus the USD value of the BTC that arrives. */

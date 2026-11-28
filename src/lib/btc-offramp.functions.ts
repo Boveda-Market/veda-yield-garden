@@ -1,14 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requirePrivyAuth } from "@/lib/privy-auth.middleware";
-import { amountAllowed, isBtcAddress } from "@/lib/btc-offramp";
+import { isBtcAddress, netAmountAllowed } from "@/lib/btc-offramp";
 import { solanaAddressSchema } from "@/lib/solana-data";
 
 export const quoteBtcWithdraw = createServerFn({ method: "POST" })
   .middleware([requirePrivyAuth])
   .inputValidator((d) => z.object({ amount: z.string().regex(/^\d+(\.\d{1,6})?$/) }).parse(d))
   .handler(async ({ data }) => {
-    if (!amountAllowed(Number(data.amount))) throw new Error("Monto fuera del rango permitido.");
+    if (!netAmountAllowed(Number(data.amount))) throw new Error("Monto fuera del rango permitido.");
     const { sideshiftQuote } = await import("@/lib/btc-offramp.server");
     return sideshiftQuote(data.amount);
   });
