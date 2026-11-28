@@ -136,3 +136,4 @@
 - [x] Aclarar en la guía que importar la llave conserva el Piloto Automático; no se desconecta automáticamente.
 
 - [x] Sumar GTA6 a la rotación de portada con reparto igual y copy técnico al estilo Bitcoin/Trump, ES/EN.
+- [x] Explicar en la portada GTA6 que la moneda es comunitaria, no verificada en grandes exchanges, 100% DeFi, con muchos holders y corridas fuertes, ES/EN.
