@@ -134,3 +134,5 @@
 - [x] Blog: foto realista siempre como portada + más gráficos y elementos visuales dentro de los artículos para escanear mejor
 - [x] Guía DeFi ES/EN: verificar y gestionar posiciones fuera de Bóveda, con advertencias y acceso desde Avanzado.
 - [x] Aclarar en la guía que importar la llave conserva el Piloto Automático; no se desconecta automáticamente.
+
+- [x] Sumar GTA6 a la rotación de portada con reparto igual y copy técnico al estilo Bitcoin/Trump, ES/EN.

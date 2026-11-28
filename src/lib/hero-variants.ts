@@ -1,7 +1,7 @@
 /** Home headlines. "/" rotates them by weight; each one also has its own address (HERO_SLUGS) for campaigns. */
 export const HERO_VARIANTS: readonly { title: string; sub: string; theme?: "gta6" | "doble" | "trump" | "calm" | "bitcoin" | "smart" | "own" | "compound" }[] = [
   { title: "Gana en las subidas y en las bajadas, sin la ansiedad de holdear.", sub: "Deposita dólares en una bóveda y cobra intereses de cada compra y venta del mercado. Sin comprar monedas una por una ni vigilar gráficas: el Piloto Automático se encarga. $0 por depositar y retiras cuando quieras." },
-  { title: "Bóveda GTA6 Coin: intereses generados por el volumen del mercado.", sub: "Suba o baje GTA6 Coin, cada compra y venta te deja intereses. Sin holdear con ansiedad: el Piloto Automático ajusta tu bóveda y te avisa por Telegram.", theme: "gta6" },
+  { title: "Hold GTA6 Coin, gana intereses", sub: "Abrimos una posición de liquidez concentrada. El Piloto Automático la mantiene en rango, rebalancea y hace auto-compound por ti.", theme: "gta6" },
   { title: "Bóveda Trump Coin: liquidez en uno de los mercados más activos.", sub: "Trump Coin mueve volumen las 24 horas. Suba o baje, la bóveda convierte esa actividad en intereses estimados en dólares, con retiro en cualquier momento.", theme: "trump" },
   { title: "Doble o Nada: mercados de predicción en tiempo real.", sub: "Rondas de 5 minutos, 15 minutos y 4 horas sobre Bitcoin, Ethereum y Solana. Se participa en dólares, sin comprar la moneda, y cada ronda se resuelve de forma automática y transparente.", theme: "doble" },
   { title: "Abre tu bóveda y olvídate de las gráficas.", sub: "Comprar y holdear cripto da ansiedad. En Bóveda la volatilidad te paga: cada subida y cada bajada deja intereses, y el Piloto Automático se encarga del resto.", theme: "calm" },
@@ -30,12 +30,12 @@ export function legacyHeroRedirect(searchStr: string): string | null {
 /** Index of the GTA6 launch variant and the share of new visitors who see it. */
 export const GTA6_HERO = HERO_VARIANTS.findIndex((v) => v.theme === "gta6");
 export const GTA6_HEROES = HERO_VARIANTS.map((v, i) => (v.theme === "gta6" ? i : -1)).filter((i) => i >= 0);
-export const GTA6_HERO_SHARE = 0.2;
+export const GTA6_HERO_SHARE = 1 / 3;
 
 export const HERO_KEY = "boveda-hero-v";
 
-/** Only Bitcoin and Trump rotate for now; other campaigns stay available at their own addresses. */
-export const HERO_WEIGHTS: readonly number[] = HERO_VARIANTS.map((v) => v.theme === "bitcoin" || v.theme === "trump" ? 0.5 : 0);
+/** Bitcoin, Trump and GTA6 rotate equally; other campaigns stay available at their own addresses. */
+export const HERO_WEIGHTS: readonly number[] = HERO_VARIANTS.map((v) => v.theme === "bitcoin" || v.theme === "trump" || v.theme === "gta6" ? 1 / 3 : 0);
 
 /** Pick a variant for "/": forced value wins, then the saved one (if still in rotation), else weighted random. */
 export function pickHeroVariant(forced: string | null, saved: string | null, rand: number): number {

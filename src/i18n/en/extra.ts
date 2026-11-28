@@ -18,6 +18,7 @@ export const extra: Record<string, string> = {
   "Hold Bitcoin, gana intereses": "Hold Bitcoin, earn interest",
   "$Trump Coin con intereses": "$Trump Coin with interest",
   "Hold $Trump Coin, gana intereses": "Hold $Trump Coin, earn interest",
+  "Hold GTA6 Coin, gana intereses": "Hold GTA6 Coin, earn interest",
   "Bóveda GTA6 Coin": "GTA6 Coin Vault",
   "Trae tus monedas": "Bring your coins",
   "Tu registro en 3 pasos": "Your account in 3 steps",
