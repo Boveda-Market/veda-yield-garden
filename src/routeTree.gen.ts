@@ -47,6 +47,7 @@ import { Route as BlogLiquidezConcentradaRouteImport } from './routes/blog/liqui
 import { Route as BlogMeteoraHistoriaYComoFuncionaRouteImport } from './routes/blog/meteora-historia-y-como-funciona'
 import { Route as BlogMiedoCaidaBitcoinHoldearRouteImport } from './routes/blog/miedo-caida-bitcoin-holdear'
 import { Route as BlogPrivacidadBitcoin35CentavosRouteImport } from './routes/blog/privacidad-bitcoin-35-centavos'
+import { Route as BlogSitiosSecretosDineroDolaresDigitalesRouteImport } from './routes/blog/sitios-secretos-dinero-dolares-digitales'
 import { Route as EnIndexRouteImport } from './routes/en/index'
 import { Route as EnAboutRouteImport } from './routes/en/about'
 import { Route as EnBitcoinRouteImport } from './routes/en/bitcoin'
@@ -84,6 +85,7 @@ import { Route as EnBlogConcentratedLiquidityRouteImport } from './routes/en/blo
 import { Route as EnBlogDeepfakesNvidiaMassiveSwingsRouteImport } from './routes/en/blog/deepfakes-nvidia-massive-swings'
 import { Route as EnBlogDigitalDollarsOnYourPhoneRouteImport } from './routes/en/blog/digital-dollars-on-your-phone'
 import { Route as EnBlogMeteoraHistoryAndHowItWorksRouteImport } from './routes/en/blog/meteora-history-and-how-it-works'
+import { Route as EnBlogSecretSitesMakeMoneyDigitalDollarsRouteImport } from './routes/en/blog/secret-sites-make-money-digital-dollars'
 import { Route as EnGuidesIndexRouteImport } from './routes/en/guides/index'
 import { Route as EnGuidesAddDollarsWithCoinbaseRouteImport } from './routes/en/guides/add-dollars-with-coinbase'
 import { Route as EnGuidesAvoidInvestmentScamsRouteImport } from './routes/en/guides/avoid-investment-scams'
@@ -299,6 +301,12 @@ const BlogPrivacidadBitcoin35CentavosRoute =
     path: '/blog/privacidad-bitcoin-35-centavos',
     getParentRoute: () => rootRouteImport,
   } as any)
+const BlogSitiosSecretosDineroDolaresDigitalesRoute =
+  BlogSitiosSecretosDineroDolaresDigitalesRouteImport.update({
+    id: '/blog/sitios-secretos-dinero-dolares-digitales',
+    path: '/blog/sitios-secretos-dinero-dolares-digitales',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EnIndexRoute = EnIndexRouteImport.update({
   id: '/en/',
   path: '/en/',
@@ -498,6 +506,12 @@ const EnBlogMeteoraHistoryAndHowItWorksRoute =
     path: '/en/blog/meteora-history-and-how-it-works',
     getParentRoute: () => rootRouteImport,
   } as any)
+const EnBlogSecretSitesMakeMoneyDigitalDollarsRoute =
+  EnBlogSecretSitesMakeMoneyDigitalDollarsRouteImport.update({
+    id: '/en/blog/secret-sites-make-money-digital-dollars',
+    path: '/en/blog/secret-sites-make-money-digital-dollars',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EnGuidesIndexRoute = EnGuidesIndexRouteImport.update({
   id: '/en/guides/',
   path: '/en/guides/',
@@ -639,6 +653,7 @@ export interface FileRoutesByFullPath {
   '/blog/meteora-historia-y-como-funciona': typeof BlogMeteoraHistoriaYComoFuncionaRoute
   '/blog/miedo-caida-bitcoin-holdear': typeof BlogMiedoCaidaBitcoinHoldearRoute
   '/blog/privacidad-bitcoin-35-centavos': typeof BlogPrivacidadBitcoin35CentavosRoute
+  '/blog/sitios-secretos-dinero-dolares-digitales': typeof BlogSitiosSecretosDineroDolaresDigitalesRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -676,6 +691,7 @@ export interface FileRoutesByFullPath {
   '/en/blog/deepfakes-nvidia-massive-swings': typeof EnBlogDeepfakesNvidiaMassiveSwingsRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
+  '/en/blog/secret-sites-make-money-digital-dollars': typeof EnBlogSecretSitesMakeMoneyDigitalDollarsRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
   '/en/guides/bitcoin-coinbase-cash-app': typeof EnGuidesBitcoinCoinbaseCashAppRoute
@@ -734,6 +750,7 @@ export interface FileRoutesByTo {
   '/blog/meteora-historia-y-como-funciona': typeof BlogMeteoraHistoriaYComoFuncionaRoute
   '/blog/miedo-caida-bitcoin-holdear': typeof BlogMiedoCaidaBitcoinHoldearRoute
   '/blog/privacidad-bitcoin-35-centavos': typeof BlogPrivacidadBitcoin35CentavosRoute
+  '/blog/sitios-secretos-dinero-dolares-digitales': typeof BlogSitiosSecretosDineroDolaresDigitalesRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -771,6 +788,7 @@ export interface FileRoutesByTo {
   '/en/blog/deepfakes-nvidia-massive-swings': typeof EnBlogDeepfakesNvidiaMassiveSwingsRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
+  '/en/blog/secret-sites-make-money-digital-dollars': typeof EnBlogSecretSitesMakeMoneyDigitalDollarsRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
   '/en/guides/bitcoin-coinbase-cash-app': typeof EnGuidesBitcoinCoinbaseCashAppRoute
@@ -830,6 +848,7 @@ export interface FileRoutesById {
   '/blog/meteora-historia-y-como-funciona': typeof BlogMeteoraHistoriaYComoFuncionaRoute
   '/blog/miedo-caida-bitcoin-holdear': typeof BlogMiedoCaidaBitcoinHoldearRoute
   '/blog/privacidad-bitcoin-35-centavos': typeof BlogPrivacidadBitcoin35CentavosRoute
+  '/blog/sitios-secretos-dinero-dolares-digitales': typeof BlogSitiosSecretosDineroDolaresDigitalesRoute
   '/en/about': typeof EnAboutRoute
   '/en/bitcoin': typeof EnBitcoinRoute
   '/en/bring-your-coins': typeof EnBringYourCoinsRoute
@@ -867,6 +886,7 @@ export interface FileRoutesById {
   '/en/blog/deepfakes-nvidia-massive-swings': typeof EnBlogDeepfakesNvidiaMassiveSwingsRoute
   '/en/blog/digital-dollars-on-your-phone': typeof EnBlogDigitalDollarsOnYourPhoneRoute
   '/en/blog/meteora-history-and-how-it-works': typeof EnBlogMeteoraHistoryAndHowItWorksRoute
+  '/en/blog/secret-sites-make-money-digital-dollars': typeof EnBlogSecretSitesMakeMoneyDigitalDollarsRoute
   '/en/guides/add-dollars-with-coinbase': typeof EnGuidesAddDollarsWithCoinbaseRoute
   '/en/guides/avoid-investment-scams': typeof EnGuidesAvoidInvestmentScamsRoute
   '/en/guides/bitcoin-coinbase-cash-app': typeof EnGuidesBitcoinCoinbaseCashAppRoute
@@ -927,6 +947,7 @@ export interface FileRouteTypes {
     | '/blog/meteora-historia-y-como-funciona'
     | '/blog/miedo-caida-bitcoin-holdear'
     | '/blog/privacidad-bitcoin-35-centavos'
+    | '/blog/sitios-secretos-dinero-dolares-digitales'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -964,6 +985,7 @@ export interface FileRouteTypes {
     | '/en/blog/deepfakes-nvidia-massive-swings'
     | '/en/blog/digital-dollars-on-your-phone'
     | '/en/blog/meteora-history-and-how-it-works'
+    | '/en/blog/secret-sites-make-money-digital-dollars'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
     | '/en/guides/bitcoin-coinbase-cash-app'
@@ -1022,6 +1044,7 @@ export interface FileRouteTypes {
     | '/blog/meteora-historia-y-como-funciona'
     | '/blog/miedo-caida-bitcoin-holdear'
     | '/blog/privacidad-bitcoin-35-centavos'
+    | '/blog/sitios-secretos-dinero-dolares-digitales'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -1059,6 +1082,7 @@ export interface FileRouteTypes {
     | '/en/blog/deepfakes-nvidia-massive-swings'
     | '/en/blog/digital-dollars-on-your-phone'
     | '/en/blog/meteora-history-and-how-it-works'
+    | '/en/blog/secret-sites-make-money-digital-dollars'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
     | '/en/guides/bitcoin-coinbase-cash-app'
@@ -1117,6 +1141,7 @@ export interface FileRouteTypes {
     | '/blog/meteora-historia-y-como-funciona'
     | '/blog/miedo-caida-bitcoin-holdear'
     | '/blog/privacidad-bitcoin-35-centavos'
+    | '/blog/sitios-secretos-dinero-dolares-digitales'
     | '/en/about'
     | '/en/bitcoin'
     | '/en/bring-your-coins'
@@ -1154,6 +1179,7 @@ export interface FileRouteTypes {
     | '/en/blog/deepfakes-nvidia-massive-swings'
     | '/en/blog/digital-dollars-on-your-phone'
     | '/en/blog/meteora-history-and-how-it-works'
+    | '/en/blog/secret-sites-make-money-digital-dollars'
     | '/en/guides/add-dollars-with-coinbase'
     | '/en/guides/avoid-investment-scams'
     | '/en/guides/bitcoin-coinbase-cash-app'
@@ -1213,6 +1239,7 @@ export interface RootRouteChildren {
   BlogMeteoraHistoriaYComoFuncionaRoute: typeof BlogMeteoraHistoriaYComoFuncionaRoute
   BlogMiedoCaidaBitcoinHoldearRoute: typeof BlogMiedoCaidaBitcoinHoldearRoute
   BlogPrivacidadBitcoin35CentavosRoute: typeof BlogPrivacidadBitcoin35CentavosRoute
+  BlogSitiosSecretosDineroDolaresDigitalesRoute: typeof BlogSitiosSecretosDineroDolaresDigitalesRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBitcoinRoute: typeof EnBitcoinRoute
   EnBringYourCoinsRoute: typeof EnBringYourCoinsRoute
@@ -1250,6 +1277,7 @@ export interface RootRouteChildren {
   EnBlogDeepfakesNvidiaMassiveSwingsRoute: typeof EnBlogDeepfakesNvidiaMassiveSwingsRoute
   EnBlogDigitalDollarsOnYourPhoneRoute: typeof EnBlogDigitalDollarsOnYourPhoneRoute
   EnBlogMeteoraHistoryAndHowItWorksRoute: typeof EnBlogMeteoraHistoryAndHowItWorksRoute
+  EnBlogSecretSitesMakeMoneyDigitalDollarsRoute: typeof EnBlogSecretSitesMakeMoneyDigitalDollarsRoute
   EnGuidesAddDollarsWithCoinbaseRoute: typeof EnGuidesAddDollarsWithCoinbaseRoute
   EnGuidesAvoidInvestmentScamsRoute: typeof EnGuidesAvoidInvestmentScamsRoute
   EnGuidesBitcoinCoinbaseCashAppRoute: typeof EnGuidesBitcoinCoinbaseCashAppRoute
@@ -1539,6 +1567,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogPrivacidadBitcoin35CentavosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/sitios-secretos-dinero-dolares-digitales': {
+      id: '/blog/sitios-secretos-dinero-dolares-digitales'
+      path: '/blog/sitios-secretos-dinero-dolares-digitales'
+      fullPath: '/blog/sitios-secretos-dinero-dolares-digitales'
+      preLoaderRoute: typeof BlogSitiosSecretosDineroDolaresDigitalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/': {
       id: '/en/'
       path: '/en'
@@ -1798,6 +1833,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnBlogMeteoraHistoryAndHowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/blog/secret-sites-make-money-digital-dollars': {
+      id: '/en/blog/secret-sites-make-money-digital-dollars'
+      path: '/en/blog/secret-sites-make-money-digital-dollars'
+      fullPath: '/en/blog/secret-sites-make-money-digital-dollars'
+      preLoaderRoute: typeof EnBlogSecretSitesMakeMoneyDigitalDollarsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/guides/': {
       id: '/en/guides/'
       path: '/en/guides'
@@ -1965,6 +2007,8 @@ const rootRouteChildren: RootRouteChildren = {
   BlogMeteoraHistoriaYComoFuncionaRoute: BlogMeteoraHistoriaYComoFuncionaRoute,
   BlogMiedoCaidaBitcoinHoldearRoute: BlogMiedoCaidaBitcoinHoldearRoute,
   BlogPrivacidadBitcoin35CentavosRoute: BlogPrivacidadBitcoin35CentavosRoute,
+  BlogSitiosSecretosDineroDolaresDigitalesRoute:
+    BlogSitiosSecretosDineroDolaresDigitalesRoute,
   EnAboutRoute: EnAboutRoute,
   EnBitcoinRoute: EnBitcoinRoute,
   EnBringYourCoinsRoute: EnBringYourCoinsRoute,
@@ -2004,6 +2048,8 @@ const rootRouteChildren: RootRouteChildren = {
   EnBlogDigitalDollarsOnYourPhoneRoute: EnBlogDigitalDollarsOnYourPhoneRoute,
   EnBlogMeteoraHistoryAndHowItWorksRoute:
     EnBlogMeteoraHistoryAndHowItWorksRoute,
+  EnBlogSecretSitesMakeMoneyDigitalDollarsRoute:
+    EnBlogSecretSitesMakeMoneyDigitalDollarsRoute,
   EnGuidesAddDollarsWithCoinbaseRoute: EnGuidesAddDollarsWithCoinbaseRoute,
   EnGuidesAvoidInvestmentScamsRoute: EnGuidesAvoidInvestmentScamsRoute,
   EnGuidesBitcoinCoinbaseCashAppRoute: EnGuidesBitcoinCoinbaseCashAppRoute,

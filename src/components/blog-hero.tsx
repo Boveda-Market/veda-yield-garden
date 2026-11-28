@@ -1,6 +1,7 @@
 /** Editorial photo covers (AI-generated, illustrative only: no live data) that open each post by picturing its problem. */
 import atmCover from "@/assets/blog/blog-cover-atm.jpg.asset.json";
 import exchangeCover from "@/assets/blog/blog-cover-exchange.jpg.asset.json";
+import homeCover from "@/assets/blog/blog-cover-home.jpg.asset.json";
 import fearCover from "@/assets/blog/blog-cover-fear.jpg.asset.json";
 import keysCover from "@/assets/blog/blog-cover-keys.jpg.asset.json";
 import phoneCover from "@/assets/blog/blog-cover-phone.jpg.asset.json";
@@ -8,9 +9,10 @@ import poolCover from "@/assets/blog/blog-cover-pool.jpg.asset.json";
 import privacyCover from "@/assets/blog/blog-cover-privacy.jpg.asset.json";
 import swingsCover from "@/assets/blog/blog-cover-swings.jpg.asset.json";
 
-type Scene = "privacy" | "fear" | "exchange" | "pool" | "phone" | "keys" | "swings" | "atm";
+type Scene = "privacy" | "fear" | "exchange" | "pool" | "phone" | "keys" | "swings" | "atm" | "home";
 
 export const HERO_BY_PATH: Record<string, Scene> = {
+  "/blog/sitios-secretos-dinero-dolares-digitales": "home",
   "/blog/bitcoin-atms-forma-cara-riesgosa": "atm",
   "/blog/deepfakes-nvidia-swings-masivos": "swings",
   "/blog/hackeo-binance-llaves": "keys",
@@ -24,6 +26,13 @@ export const HERO_BY_PATH: Record<string, Scene> = {
 type Cover = { url: string; altEs: string; altEn: string; capEs: string; capEn: string };
 
 const COVERS: Record<Scene, Cover> = {
+  home: {
+    url: homeCover.url,
+    altEs: "Hombre sentado de noche en la mesa de su cocina mirando el celular, con una laptop que muestra gráficas de precios.",
+    altEn: "A man sitting at his kitchen table at night looking at his phone, with a laptop showing price charts.",
+    capEs: "Buscar suerte desde casa a medianoche: la pantalla promete mucho y no muestra quién se queda con tu dinero.",
+    capEn: "Chasing luck from home at midnight: the screen promises a lot and hides who ends up with your money.",
+  },
   atm: {
     url: atmCover.url,
     altEs: "Hombre usando un Bitcoin ATM en una acera de noche mientras una figura encapuchada lo observa a lo lejos.",
@@ -98,7 +107,7 @@ export function BlogHero({ path, en }: { path: string; en: boolean }) {
       width={1672}
       height={941}
       decoding="async"
-      className="block h-auto w-full"
+      className="block aspect-[16/9] h-auto w-full object-cover"
     />
     <figcaption className="border-t border-border px-4 py-2 text-xs leading-5 text-muted-foreground">
       {en ? cover.capEn : cover.capEs}

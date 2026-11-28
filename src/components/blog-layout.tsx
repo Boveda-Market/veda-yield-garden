@@ -17,6 +17,14 @@ export type AuthorId = keyof typeof AUTHORS;
 /** Blog posts: friendly, conversational trend articles (guides stay evergreen how-tos). */
 export const POSTS = [
   {
+    to: "/blog/sitios-secretos-dinero-dolares-digitales", toEn: "/en/blog/secret-sites-make-money-digital-dollars", date: "2026-11-28", minutes: 6, author: "sofia",
+    category: "Adopción y ahorro", categoryEn: "Adoption & savings",
+    title: "Sitios secretos para ganar dinero desde casa con dólares digitales",
+    titleEn: "Secret sites to make money from home with digital dollars",
+    desc: "Coinbase, Robinhood, Jupiter, Pump.fun y las bóvedas de liquidez: qué hace cada una, cuánto riesgo tienen y por qué buscar suerte no es lo mismo que cobrar como la casa.",
+    descEn: "Coinbase, Robinhood, Jupiter, Pump.fun and liquidity vaults: what each one does, how risky they are and why chasing luck is not the same as earning like the house.",
+  },
+  {
     to: "/blog/bitcoin-atms-forma-cara-riesgosa", toEn: "/en/blog/bitcoin-atms-expensive-risky", date: "2026-11-28", minutes: 5, author: "sofia",
     category: "Adopción y ahorro", categoryEn: "Adoption & savings",
     title: "Bitcoin ATM's: la forma más cara y riesgosa de holdear",
