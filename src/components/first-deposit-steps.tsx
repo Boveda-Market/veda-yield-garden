@@ -23,7 +23,7 @@ export function FirstDepositSteps({ vault, amount, setAmount, fee, onClose }: { 
   const t = useT();
   const [step, setStep] = useState<1 | 2>(1);
   const typed = decimalToUnits(amount || "0", 6);
-  const valid = typed != null && typed >= 1_000_000n && typed <= 5_000_000_000n;
+  const valid = typed != null && typed >= 500_000n && typed <= 5_000_000_000n;
   const total = valid ? firstDepositTotal(typed, fee) : null;
   const cancel = () => { clearPendingDeposit(); clearResumeDeposit(); onClose(); };
   return <div className="grid gap-4">
@@ -33,7 +33,7 @@ export function FirstDepositSteps({ vault, amount, setAmount, fee, onClose }: { 
       <div className="grid gap-2 rounded-xl border border-border p-4">
         <TapAmount label={t("Cantidad ($)")} prefix="$" value={amount} onChange={(v) => setAmount(v.replace(/,/g, ".").replace(/[^\d.]/g, ""))} />
         <div className="grid grid-cols-4 gap-2">{FIRST_DEPOSIT_PRESETS.map((v) => <Button key={v} type="button" size="sm" variant={amount === v ? "default" : "secondary"} onClick={() => setAmount(v)}>${v}</Button>)}</div>
-        <p className="text-xs text-muted-foreground">{t("Entre $1 y $5,000.")}</p>
+        <p className="text-xs text-muted-foreground">{t("Entre $0.50 y $5,000.")}</p>
       </div>
       {total != null && typed != null && <dl className="grid gap-2 rounded-xl bg-muted p-4 text-sm">
         <div className="flex justify-between"><dt className="text-muted-foreground">{t("Para tu bóveda")}</dt><dd className="tabular-nums">{usd(typed)}</dd></div>

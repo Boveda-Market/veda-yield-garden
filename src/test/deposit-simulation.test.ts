@@ -10,7 +10,9 @@ describe("read-only deposit simulation", () => {
     expect(FEE_WALLET).toBe("93bF1K1dWMJseMuf15WLaNt1diVGACQ9gUFA7szsSbs7");
   });
   it("allows only the selected pilot amounts and exact known vaults", () => {
-    expect(() => simulationAmounts("0.99")).toThrow();
+    expect(() => simulationAmounts("0.49")).toThrow();
+    expect(simulationAmounts("0.5")).toEqual({ gross: 500_000n, fee: 0n, net: 500_000n });
+    expect(simulationAmounts("0.99")).toEqual({ gross: 990_000n, fee: 0n, net: 990_000n });
     expect(() => simulationAmounts("5000.000001")).toThrow();
     expect(simulationInput.safeParse({ wallet: FEE_WALLET, vaultId: "sol", amount: "1" }).success).toBe(true);
     expect(simulationInput.safeParse({ wallet: FEE_WALLET, vaultId: "arbitrary", amount: "1" }).success).toBe(false);

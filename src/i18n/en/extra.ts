@@ -365,7 +365,7 @@ export const extra: Record<string, string> = {
   "Ganancias reinvertidas en tu capital": "Earnings reinvested into your capital",
   "trabajando": "working",
   "Bajo el capó: tu wallet usa criptografía de clave pública. Tu llave privada vive solo en tu dispositivo y firma cada operación; Bóveda Market nunca la ve. Cada movimiento es una transacción atómica: se ejecuta completa o no se ejecuta, sin estados a medias. Todo queda registrado en una red pública verificable por cualquiera, sin servidores centrales que custodien tu dinero y sin puertas traseras.": "Under the hood: your wallet uses public-key cryptography. Your private key lives only on your device and signs every operation; Bóveda Market never sees it. Every move is an atomic transaction: it runs fully or not at all, never halfway. Everything is recorded on a public network anyone can verify, with no central servers holding your money and no backdoors.",
-  "Entre $1 y $5,000.": "Between $1 and $5,000.",
+  "Entre $0.50 y $5,000.": "Between $0.50 and $5,000.",
   "Estás a un paso de comenzar. Deposita dólares para entrar a la Bóveda GTA6.": "You are one step away. Deposit dollars to enter the GTA6 Vault.",
   "Entre 1 y 5,000 USDC. Sin comisión de entrada.": "Between 1 and 5,000 USDC. No entry fee.",
   "No tienes suficientes USDC para este importe.": "You don't have enough USDC for this amount.",
