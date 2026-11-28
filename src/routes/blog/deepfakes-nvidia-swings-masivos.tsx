@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PostLayout, postHead } from "@/components/blog-layout";
-import { CompareTable, StatCards } from "@/components/blog-visuals";
+import { Callout, Checklist, CompareTable, StatCards } from "@/components/blog-visuals";
 
 const P = "/blog/deepfakes-nvidia-swings-masivos";
 export const Route = createFileRoute("/blog/deepfakes-nvidia-swings-masivos")({ staticData: { sitemap: true }, head: () => postHead("es", P), component: Page });
@@ -30,7 +30,7 @@ const ES = <>
     { label: "Si el precio se aleja", cells: ["Decides tú, a contrarreloj", "El Piloto vuelve a centrar la posición"] },
     { label: "Tu tiempo", cells: ["Pegado a la pantalla", "Revisas cuando quieras"] },
   ]} />
-  <section><h2>El consejo de Sofía</h2><p>Antes de reaccionar a un video o titular, respira y verifica la fuente. Los mercados se mueven por emociones, pero tu plan no tiene por qué hacerlo.</p></section>
+  <section><h2>El consejo de Sofía</h2><Checklist title="Antes de compartir o decidir, haz esta revisión" items={["Busca la noticia en la fuente original, no solo en el video", "Mira la fecha: muchos montajes reciclan escenas viejas", "Desconfía de lo que te urge a actuar «ahora mismo»", "Si el monto es importante, duerme una noche antes de moverlo"]} /><Callout>Los mercados se mueven por emociones, pero tu plan no tiene por qué hacerlo.</Callout></section>
 </>;
 
 const EN = <>
@@ -48,5 +48,5 @@ const EN = <>
     { label: "If the price moves away", cells: ["You decide, against the clock", "Autopilot recenters the position"] },
     { label: "Your time", cells: ["Glued to the screen", "Check whenever you want"] },
   ]} />
-  <section><h2>Sofía's advice</h2><p>Before reacting to a video or headline, breathe and check the source. Markets move on emotions, but your plan doesn't have to.</p></section>
+  <section><h2>Sofía's advice</h2><Checklist title="Before you share or decide, run this check" items={["Look for the story in the original source, not just the video", "Check the date: many fakes recycle old footage", "Distrust anything urging you to act “right now”", "If the amount matters, sleep on it before moving it"]} /><Callout>Markets move on emotions, but your plan doesn't have to.</Callout></section>
 </>;

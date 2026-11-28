@@ -9,5 +9,5 @@
 - Blog posts live in blog-layout.tsx (POSTS list with an AUTHORS id per post + PostLayout/postHead); each post is a /blog route with an /en/blog twin reusing its Page, separate from evergreen guides.
 - Blog visuals (photo, stat cards, bar/donut charts, comparison table) live in blog-visuals.tsx using theme tokens; charts show only sourced or clearly labeled illustrative numbers.
 - Blog authors: AUTHORS in blog-layout.tsx includes «sofia» (Sofía Holdd), the persona voice for adoption/savings posts; adoption posts contrast Yahoo Finance headlines with Google Trends searches, citing each source.
-- Every blog post opens with an animated SVG cover (blog-hero.tsx, HERO_BY_PATH keyed by the Spanish path) picturing its problem with characters; new posts must add a scene.
+- Every blog post opens with an AI-generated realistic photo cover (blog-hero.tsx, HERO_BY_PATH keyed by the Spanish path, pointers under src/assets/blog) picturing its problem; new posts must add a cover. Stick-figure SVG scenes were rejected by the user.
 - Blog index (BlogIndex in blog-layout.tsx) is «La columna de Sofía»: Sofía avatar header, lavender lead card for the newest post, then compact title rows, so 4+ titles fit the phone first fold.

@@ -4,7 +4,7 @@ import { ChevronRight, Headset } from "lucide-react";
 import { BackButton } from "@/components/back-button";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { SITE_URL, langLinks } from "@/lib/seo-lang";
-import { BlogHero } from "@/components/blog-hero";
+import { BlogHero, heroCover } from "@/components/blog-hero";
 
 /** Two editorial voices: technical research and everyday/news. */
 export const AUTHORS = {
@@ -107,13 +107,22 @@ export function postHead(lang: Lang, path: PostPath) {
   const p = byPath(path); const en = lang === "en";
   const title = en ? p.titleEn : p.title; const d = en ? p.descEn : p.desc;
   const url = `${SITE_URL}${en ? p.toEn : p.to}`;
+  const cover = heroCover(p.to);
+  const coverMeta = cover ? [
+    { property: "og:image", content: `${SITE_URL}${cover.url}` },
+    { property: "og:image:width", content: "1672" },
+    { property: "og:image:height", content: "941" },
+    { property: "og:image:alt", content: en ? cover.altEn : cover.altEs },
+    { name: "twitter:image", content: `${SITE_URL}${cover.url}` },
+  ] : [];
   return {
     meta: [
       { title: `${title} | Bóveda Market` }, { name: "description", content: d },
       { property: "og:title", content: title }, { property: "og:description", content: d },
       { property: "og:type", content: "article" }, { property: "og:url", content: url },
       { property: "og:locale", content: en ? "en_US" : "es_ES" },
-      { property: "article:published_time", content: p.date }, { name: "twitter:card", content: "summary" },
+      { property: "article:published_time", content: p.date }, { name: "twitter:card", content: cover ? "summary_large_image" : "summary" },
+      ...coverMeta,
     ],
     links: langLinks(lang, p.to, p.toEn),
     scripts: [{ type: "application/ld+json", children: JSON.stringify([

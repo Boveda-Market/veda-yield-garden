@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Check, X } from "lucide-react";
 
 /** Reusable, theme-token visuals for blog posts: photo, stat cards, bar chart, donut and comparison table. */
 export function Figure({ src, alt, caption }: { src: string; alt: string; caption?: ReactNode }) {
@@ -21,7 +22,7 @@ export function BarChart({ title, bars, note, unit = "" }: { title: string; bars
     <figcaption className="text-sm font-semibold text-foreground">{title}</figcaption>
     <div className="mt-4 flex h-44 items-end gap-2" role="img" aria-label={title}>
       {bars.map((b) => <div key={b.label} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
-        <span className="text-[11px] font-semibold text-foreground">{unit}{b.value}</span>
+        <span className="text-[11px] font-semibold text-foreground">{unit}{b.value.toLocaleString("en-US")}</span>
         <div className="w-full rounded-t-lg bg-primary" style={{ height: `${(b.value / max) * 100}%`, opacity: 0.45 + 0.55 * (b.value / max) }} />
         <span className="text-[11px] text-muted-foreground">{b.label}</span>
       </div>)}
@@ -50,5 +51,32 @@ export function CompareTable({ cols, rows, highlight }: { cols: string[]; rows: 
         {r.cells.map((x, i) => <td key={i} className={`p-3 ${i === highlight ? "bg-primary/10 text-foreground" : "text-foreground/80"}`}>{x}</td>)}
       </tr>)}</tbody>
     </table>
+  </div>;
+}
+
+/** Two columns of short bullets: what works in favor and what doesn't. Stacks on phones. */
+export function ProsCons({ prosTitle, consTitle, pros, cons }: { prosTitle: string; consTitle: string; pros: string[]; cons: string[] }) {
+  return <div className="grid gap-3 sm:grid-cols-2">
+    <div className="rounded-2xl border border-border bg-card p-4">
+      <p className="text-sm font-semibold text-primary">{prosTitle}</p>
+      <ul className="mt-3 space-y-2 text-sm leading-5 text-foreground/80">{pros.map((p) => <li key={p} className="flex gap-2"><Check aria-hidden className="mt-0.5 size-4 shrink-0 text-primary" /><span>{p}</span></li>)}</ul>
+    </div>
+    <div className="rounded-2xl border border-border bg-card p-4">
+      <p className="text-sm font-semibold text-destructive">{consTitle}</p>
+      <ul className="mt-3 space-y-2 text-sm leading-5 text-foreground/80">{cons.map((c) => <li key={c} className="flex gap-2"><X aria-hidden className="mt-0.5 size-4 shrink-0 text-destructive" /><span>{c}</span></li>)}</ul>
+    </div>
+  </div>;
+}
+
+/** A short highlighted line for the one thing the reader must not forget. */
+export function Callout({ children }: { children: ReactNode }) {
+  return <p className="rounded-2xl border border-primary/30 bg-primary/10 p-4 text-sm font-medium leading-6 text-foreground">{children}</p>;
+}
+
+/** A short numbered list the reader can run through in seconds. */
+export function Checklist({ title, items }: { title: string; items: string[] }) {
+  return <div className="rounded-2xl border border-border bg-card p-4">
+    <p className="text-sm font-semibold text-foreground">{title}</p>
+    <ol className="mt-3 space-y-2 text-sm leading-5 text-foreground/80">{items.map((it, i) => <li key={it} className="flex gap-3"><span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[11px] font-bold text-primary">{i + 1}</span><span>{it}</span></li>)}</ol>
   </div>;
 }
